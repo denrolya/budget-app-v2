@@ -1,9 +1,9 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import Layout from 'src/components/shared/Layout/Layout.tsx';
-import PrivateRoute from 'src/components/shared/PrivateRoute/PrivateRoute';
-import TransactionList from 'src/components/TransactionList/TransactionList.tsx';
-import LoginPage from 'src/containers/LoginPage/LoginPage';
+import Layout from '@/components/shared/Layout/Layout.tsx';
+import PrivateRoute from '@/components/shared/PrivateRoute/PrivateRoute';
+import TransactionList from '@/components/TransactionList/TransactionList.tsx';
+import LoginPage from '@/containers/LoginPage/LoginPage';
 
 const Routing = () => (
   <Routes>

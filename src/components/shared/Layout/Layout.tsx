@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import AccountBalances from 'src/components/AccountBalances/AccountBalances';
-import Navbar from 'src/components/shared/Navbar/Navbar';
-import Sidebar from 'src/components/shared/Sidebar/Sidebar';
+import AccountBalances from '@/components/AccountBalances/AccountBalances';
+import Navbar from '@/components/shared/Navbar/Navbar';
+import Sidebar from '@/components/shared/Sidebar/Sidebar';
 
 const Layout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);

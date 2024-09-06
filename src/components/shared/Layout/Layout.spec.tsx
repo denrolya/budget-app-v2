@@ -4,11 +4,11 @@ import { vi } from 'vitest';
 
 import Layout from './Layout';
 
-vi.mock('src/components/AccountBalances/AccountBalances', () => ({
+vi.mock('@/components/AccountBalances/AccountBalances', () => ({
   default: () => <div>Account Balances Component</div>,
 }));
 
-vi.mock('src/components/shared/Navbar/Navbar', () => ({
+vi.mock('@/components/shared/Navbar/Navbar', () => ({
   default: ({ toggleSidebar }: { toggleSidebar: () => void }) => (
     <div>
       <button onClick={toggleSidebar}>Toggle Sidebar</button>
@@ -16,7 +16,7 @@ vi.mock('src/components/shared/Navbar/Navbar', () => ({
   ),
 }));
 
-vi.mock('src/components/shared/Sidebar/Sidebar', () => ({
+vi.mock('@/components/shared/Sidebar/Sidebar', () => ({
   default: ({ sidebarOpen }: { sidebarOpen: boolean }) => (
     <div>{sidebarOpen ? 'Sidebar is open' : 'Sidebar is closed'}</div>
   ),
