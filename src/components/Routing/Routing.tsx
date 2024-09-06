@@ -2,8 +2,9 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import Layout from '@/components/shared/Layout/Layout.tsx';
 import PrivateRoute from '@/components/shared/PrivateRoute/PrivateRoute';
-import TransactionList from '@/components/TransactionList/TransactionList.tsx';
-import LoginPage from '@/containers/LoginPage/LoginPage';
+import TransactionList from '@/components/TransactionList/TransactionList';
+import LoginPage from '@/app/login/page';
+import Dashboard from '@/components/dashboard-06'
 
 const Routing = () => (
   <Routes>
@@ -12,10 +13,7 @@ const Routing = () => (
       <Route index element={<Navigate to="/dashboard" replace />} />
       <Route path="dashboard" element={
         <PrivateRoute>
-          <div className="min-h-screen bg-background-light dark:bg-background-dark text-primary-light dark:text-primary-dark">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Content Area</h3>
-            <p className="mt-1 text-gray-500 dark:text-gray-400">Add your main content here.</p>
-          </div>
+          <Dashboard />
         </PrivateRoute>
       } />
       <Route

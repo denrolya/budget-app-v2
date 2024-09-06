@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button.tsx';
+
 interface Account {
   id: number;
   name: string;
@@ -21,7 +23,7 @@ const AccountBalances: React.FC = () => (
               <div className="px-4 py-5 sm:p-6">
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{account.name}</dt>
                 <dd className="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">
-                  ${account.balance.toLocaleString()}
+                  ${account.balance.toLocaleString()} <Button>Button</Button>
                 </dd>
               </div>
             </div>

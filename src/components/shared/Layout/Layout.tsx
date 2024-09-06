@@ -11,18 +11,7 @@ const Layout: React.FC = () => {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
-    <div className="h-screen flex flex-col">
-      <Navbar toggleSidebar={toggleSidebar} />
-      <div className="flex-1 flex overflow-hidden">
-        <Sidebar sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-        <main className="flex-1 overflow-y-auto bg-white dark:bg-gray-800">
-          <AccountBalances />
-          <div className="bg-white dark:bg-gray-800 shadow">
             <Outlet />
-          </div>
-        </main>
-      </div>
-    </div>
   );
 };
 
