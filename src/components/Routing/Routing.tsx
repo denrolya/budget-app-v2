@@ -1,7 +1,8 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import LoginPage from '@/app/login/page';
-import TransactionPage from '@/app/transactions/page';
+import TransactionsPage from '@/app/transactions/page';
+import DebtsPage from '@/app/debts/page';
 import Dashboard from '@/components/dashboard-06';
 import LayoutV1 from '@/components/shared/Layout/Layout';
 import { LayoutV2 } from '@/components/layout-v2';
@@ -23,9 +24,14 @@ const Routing = () => (
         path="transactions"
         element={
           <PrivateRoute>
-            <div className="min-h-screen bg-background-light dark:bg-background-dark text-primary-light dark:text-primary-dark">
-              <TransactionPage />
-            </div>
+            <TransactionsPage />
+          </PrivateRoute>
+        } />
+      <Route
+        path="debts"
+        element={
+          <PrivateRoute>
+            <DebtsPage />
           </PrivateRoute>
         } />
     </Route>

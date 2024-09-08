@@ -140,6 +140,12 @@ export function LayoutV9() {
               Transactions
             </Link>
             <Link
+              to="/debts"
+              className="inline-flex h-8 items-center justify-center rounded-md bg-background px-4 py-2 text-sm transition-colors hover:text-foreground/80 text-foreground/60 focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+            >
+              Debts
+            </Link>
+            <Link
               to="#"
               className="inline-flex h-8 items-center justify-center rounded-md bg-background px-4 py-2 text-sm transition-colors hover:text-foreground/80 text-foreground/60 focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
             >
@@ -316,7 +322,7 @@ export function LayoutV9() {
         </aside>
 
         {/* Main content area */}
-        <main className="flex-1 overflow-auto bg-background p-6">
+        <main className="flex-1 overflow-auto bg-background">
           <Outlet />
         </main>
       </div>
