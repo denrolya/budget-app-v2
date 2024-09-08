@@ -1,16 +1,9 @@
 import { useState } from 'react';
-import { Link } from "react-router-dom";
 
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export const LoginForm = ({ onSubmit }) => {
   const [username, setUsername] = useState('');
@@ -40,19 +33,13 @@ export const LoginForm = ({ onSubmit }) => {
             <div className="flex items-center">
               <Label htmlFor="password">Password</Label>
             </div>
-            <Input id="password" type="password" required onChange={(e) => setPassword(e.target.value)}/>
+            <Input id="password" type="password" required onChange={(e) => setPassword(e.target.value)} />
           </div>
           <Button type="submit" className="w-full" onClick={() => onSubmit(username, password)}>
             Login
           </Button>
         </div>
-        <div className="mt-4 text-center text-sm">
-          Don&apos;t have an account?{" "}
-          <Link href="#" className="underline">
-            Sign up
-          </Link>
-        </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

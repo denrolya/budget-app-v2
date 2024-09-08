@@ -1,17 +1,34 @@
 import { ArrowRightLeft, Eye, MoreHorizontal } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
 
+import Layout from '@/app/transactions/layout.tsx';
+import TransactionForm from '@/components/transaction-form.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet.tsx';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 // Updated mock data to include multiple compensations
@@ -215,53 +232,53 @@ const TransferDetails = ({ transfer }) => (
 );
 
 const TransferItem = ({ transfer }) => (
-    <Card className="my-2 border-l-4 border-l-primary shadow-md hover:shadow-lg transition-shadow">
-      <CardContent className="p-0">
-        <Accordion type="single" collapsible>
-          <AccordionItem value="item-1" className="border-none">
-            <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-accent/50">
-              <div className="flex w-full items-center justify-between">
-                <div className="flex items-center space-x-2 text-sm">
-                  <ArrowRightLeft className="h-4 w-4 text-primary" />
-                  <span className="font-medium font-mono">${transfer.amount.toFixed(2)}</span>
-                  <span className="text-muted-foreground hidden sm:inline">{transfer.from} → {transfer.to}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs text-muted-foreground hidden sm:inline">{transfer.executionDate}</span>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-3xl">
-                      <DialogHeader>
-                        <DialogTitle>Transfer Details</DialogTitle>
-                      </DialogHeader>
-                      <TransferDetails transfer={transfer} />
-                    </DialogContent>
-                  </Dialog>
-                </div>
+  <Card className="my-2 border-l-4 border-l-primary shadow-md hover:shadow-lg transition-shadow">
+    <CardContent className="p-0">
+      <Accordion type="single" collapsible>
+        <AccordionItem value="item-1" className="border-none">
+          <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-accent/50">
+            <div className="flex w-full items-center justify-between">
+              <div className="flex items-center space-x-2 text-sm">
+                <ArrowRightLeft className="h-4 w-4 text-primary" />
+                <span className="font-medium font-mono">${transfer.amount.toFixed(2)}</span>
+                <span className="text-muted-foreground hidden sm:inline">{transfer.from} → {transfer.to}</span>
               </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 py-2">
-              <div className="space-y-2">
-                <div className="text-xs text-muted-foreground grid grid-cols-2 gap-1">
-                  <span>From: {transfer.from}</span>
-                  <span>To: {transfer.to}</span>
-                  <span>Date: {transfer.executionDate}</span>
-                  <span>Exchange Rate: {transfer.exchangeRate}</span>
-                  <span>Fees: ${transfer.fees.toFixed(2)}</span>
-                </div>
-                <TransactionItem transaction={transfer.fromTransaction} allTransactions={[]} />
-                <TransactionItem transaction={transfer.toTransaction} allTransactions={[]} />
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-muted-foreground hidden sm:inline">{transfer.executionDate}</span>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                      <DialogTitle>Transfer Details</DialogTitle>
+                    </DialogHeader>
+                    <TransferDetails transfer={transfer} />
+                  </DialogContent>
+                </Dialog>
               </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </CardContent>
-    </Card>
-  );
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 py-2">
+            <div className="space-y-2">
+              <div className="text-xs text-muted-foreground grid grid-cols-2 gap-1">
+                <span>From: {transfer.from}</span>
+                <span>To: {transfer.to}</span>
+                <span>Date: {transfer.executionDate}</span>
+                <span>Exchange Rate: {transfer.exchangeRate}</span>
+                <span>Fees: ${transfer.fees.toFixed(2)}</span>
+              </div>
+              <TransactionItem transaction={transfer.fromTransaction} allTransactions={[]} />
+              <TransactionItem transaction={transfer.toTransaction} allTransactions={[]} />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </CardContent>
+  </Card>
+);
 
 const TransactionItem = ({ transaction, allTransactions, isCompensationView = false }) => {
   const compensations = transaction.compensationIds
@@ -328,42 +345,83 @@ const TransactionItem = ({ transaction, allTransactions, isCompensationView = fa
 
 export default function Component() {
   const allTransactions = mockData.flatMap(group => group.items);
+  const [isTransactionFormOpen, setIsTransactionFormOpen] = useState(false)
 
   return (
-    <div className="w-full p-2 sm:p-4 bg-background">
-      <Accordion type="single" collapsible className="w-full space-y-2">
-        {mockData.map((dateGroup, index) => (
-          <AccordionItem value={`item-${index}`}
-                         key={index}
-                         className="border rounded-lg overflow-hidden bg-card shadow-sm">
-            <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-accent/50">
-              <div className="flex w-full items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <span className="font-semibold">{dateGroup.date}</span>
-                  <Badge variant="secondary" className="text-xs font-mono">
-                    ${dateGroup.totalSum.toFixed(2)}
-                  </Badge>
+    <Layout>
+      {/* Desktop version - Dialog */}
+      <div className="hidden md:block">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>Add New Transaction</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>New Transaction</DialogTitle>
+              <DialogDescription>
+                Add a new transaction to your finances
+              </DialogDescription>
+            </DialogHeader>
+            <TransactionForm />
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Mobile version - Sheet */}
+      <div className="md:hidden">
+        <Sheet open={isTransactionFormOpen} onOpenChange={setIsTransactionFormOpen}>
+          <SheetTrigger asChild>
+            <Button className="w-full">Add New Transaction</Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>New Transaction</SheetTitle>
+              <SheetDescription>
+                Add a new transaction to your finances
+              </SheetDescription>
+            </SheetHeader>
+            <div className="mt-4">
+              <TransactionForm />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      <div className="w-full bg-background">
+        <Accordion type="single" collapsible className="w-full space-y-2">
+          {mockData.map((dateGroup, index) => (
+            <AccordionItem value={`item-${index}`}
+                           key={index}
+                           className="border rounded-lg overflow-hidden bg-card shadow-sm">
+              <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-accent/50">
+                <div className="flex w-full items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-semibold">{dateGroup.date}</span>
+                    <Badge variant="secondary" className="text-xs font-mono">
+                      ${dateGroup.totalSum.toFixed(2)}
+                    </Badge>
+                  </div>
+                  <div className="flex space-x-2 text-xs text-muted-foreground">
+                    <span>{dateGroup.transactionCount} transactions</span>
+                    <span>{dateGroup.transferCount} transfers</span>
+                  </div>
                 </div>
-                <div className="flex space-x-2 text-xs text-muted-foreground">
-                  <span>{dateGroup.transactionCount} transactions</span>
-                  <span>{dateGroup.transferCount} transfers</span>
-                </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="space-y-2 px-4 py-2">
-              {dateGroup.items.map((item, itemIndex) => (
-                <React.Fragment key={itemIndex}>
-                  {item.type === 'transaction' ? (
-                    <TransactionItem transaction={item} allTransactions={allTransactions} />
-                  ) : (
-                    <TransferItem transfer={item} />
-                  )}
-                </React.Fragment>
-              ))}
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
-    </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-2 px-4 py-2">
+                {dateGroup.items.map((item, itemIndex) => (
+                  <React.Fragment key={itemIndex}>
+                    {item.type === 'transaction' ? (
+                      <TransactionItem transaction={item} allTransactions={allTransactions} />
+                    ) : (
+                      <TransferItem transfer={item} />
+                    )}
+                  </React.Fragment>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </div>
+    </Layout>
   );
 }

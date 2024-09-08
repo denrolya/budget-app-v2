@@ -24,7 +24,7 @@ const Routing = () => (
         path="transactions"
         element={
           <PrivateRoute>
-            <TransactionsPage />
+              <TransactionsPage />
           </PrivateRoute>
         } />
       <Route
