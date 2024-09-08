@@ -1,15 +1,18 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import Layout from '@/components/shared/Layout/Layout.tsx';
-import PrivateRoute from '@/components/shared/PrivateRoute/PrivateRoute';
-import TransactionList from '@/components/TransactionList/TransactionList';
 import LoginPage from '@/app/login/page';
-import Dashboard from '@/components/dashboard-06'
+import TransactionPage from '@/app/transactions/page';
+import Dashboard from '@/components/dashboard-06';
+import LayoutV1 from '@/components/shared/Layout/Layout';
+import { LayoutV2 } from '@/components/layout-v2';
+import { LayoutV3 } from '@/components/layout-v3';
+import { LayoutV9 } from '@/components/layout-v9';
+import PrivateRoute from '@/components/shared/PrivateRoute/PrivateRoute';
 
 const Routing = () => (
   <Routes>
     <Route path="/login" element={<LoginPage />} />
-    <Route path="/" element={<Layout />}>
+    <Route path="/" element={<LayoutV9 />}>
       <Route index element={<Navigate to="/dashboard" replace />} />
       <Route path="dashboard" element={
         <PrivateRoute>
@@ -21,7 +24,7 @@ const Routing = () => (
         element={
           <PrivateRoute>
             <div className="min-h-screen bg-background-light dark:bg-background-dark text-primary-light dark:text-primary-dark">
-              <TransactionList />
+              <TransactionPage />
             </div>
           </PrivateRoute>
         } />
