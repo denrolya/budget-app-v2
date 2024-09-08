@@ -1,9 +1,8 @@
-import { format, parseISO } from 'date-fns';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -46,12 +45,6 @@ export default function TransactionForm() {
   const removeCompensation = (index: number) => {
     const newCompensations = compensations.filter((_, i) => i !== index);
     setCompensations(newCompensations);
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '';
-    const date = parseISO(dateString);
-    return format(date, 'PPP p');
   };
 
   return (
@@ -105,6 +98,7 @@ export default function TransactionForm() {
                 <CommandInput placeholder="Search category..." />
                 <CommandEmpty>No category found.</CommandEmpty>
                 <CommandGroup>
+                  <CommandList>
                   {categories.map((cat) => (
                     <CommandItem key={cat.id} onSelect={() => setCategory(cat.name)}>
                       <Check className={cn(
@@ -116,6 +110,7 @@ export default function TransactionForm() {
                       <span className="ml-auto text-muted-foreground">{cat.rootCategory}</span>
                     </CommandItem>
                   ))}
+                  </CommandList>
                 </CommandGroup>
               </Command>
             </PopoverContent>
@@ -144,6 +139,7 @@ export default function TransactionForm() {
                 <CommandInput placeholder="Search account..." />
                 <CommandEmpty>No account found.</CommandEmpty>
                 <CommandGroup>
+                <CommandList>
                   {accounts.map((acc) => (
                     <CommandItem key={acc.id} onSelect={() => setAccount(acc.name)}>
                       <Check className={cn(
@@ -155,6 +151,7 @@ export default function TransactionForm() {
                       <span className="ml-auto text-muted-foreground">{acc.currency}</span>
                     </CommandItem>
                   ))}
+                </CommandList>
                 </CommandGroup>
               </Command>
             </PopoverContent>
