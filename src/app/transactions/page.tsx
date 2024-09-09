@@ -1,6 +1,7 @@
 import { ArrowRightLeft, Eye, MoreHorizontal } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { DrawerFooter } from '@/components/ui/drawer.tsx';
 import Layout from '@/app/transactions/layout.tsx';
 import TransactionForm from '@/components/transaction-form.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -364,6 +365,9 @@ export default function Component() {
             </DialogHeader>
             <TransactionForm />
           </DialogContent>
+          <DrawerFooter className="absolute bottom-0 left-0 right-0 bg-background">
+            <Button onClick={(v) => console.log(v)} className="w-full">Submit</Button>
+          </DrawerFooter>
         </Dialog>
       </div>
 

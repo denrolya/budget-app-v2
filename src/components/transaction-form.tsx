@@ -1,14 +1,16 @@
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import cn from 'classnames';
+import { ArrowDownCircle, ArrowUpCircle, Check, ChevronsUpDown, X } from 'lucide-react';
+import { useFieldArray, useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandList, CommandItem } from '@/components/ui/command';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
 
 const categories = [
   { id: 1, name: 'Groceries', rootCategory: 'Food', icon: '🍎' },
@@ -24,252 +26,378 @@ const accounts = [
   { id: 3, name: 'Credit Card', currency: 'USD', icon: '💳' },
 ];
 
+const formSchema = z.object({
+  type: z.enum(['expense', 'income']),
+  category: z.string().min(1, 'Category is required'),
+  account: z.string().min(1, 'Account is required'),
+  date: z.string().min(1, 'Date is required'),
+  note: z.string().optional(),
+  compensations: z.array(
+    z.object({
+      amount: z.string().min(1, 'Amount is required'),
+      account: z.string().min(1, 'Account is required'),
+      date: z.string().min(1, 'Date is required'),
+    }),
+  ).optional(),
+});
+
 export default function TransactionForm() {
-  const [type, setType] = useState('expense');
-  const [category, setCategory] = useState('');
-  const [account, setAccount] = useState('');
-  const [date, setDate] = useState('');
-  const [note, setNote] = useState('');
-  const [compensations, setCompensations] = useState([{ amount: '', account: '', date: '' }]);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      type: 'expense',
+      category: '',
+      account: '',
+      date: '',
+      note: '',
+      compensations: [{ amount: '', account: '', date: '' }],
+    },
+  });
 
-  const handleCompensationChange = (index: number, field: string, value: string) => {
-    const newCompensations = [...compensations];
-    newCompensations[index] = { ...newCompensations[index], [field]: value };
-    setCompensations(newCompensations);
-  };
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'compensations',
+  });
 
-  const addCompensation = () => {
-    setCompensations([...compensations, { amount: '', account: '', date: '' }]);
-  };
-
-  const removeCompensation = (index: number) => {
-    const newCompensations = compensations.filter((_, i) => i !== index);
-    setCompensations(newCompensations);
-  };
-  // <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-  //                     {[
-  //                       { value: 'internet', label: 'Internet', icon: CreditCard },
-  //                       { value: 'bank', label: 'Bank', icon: Wallet },
-  //                       { value: 'cash', label: 'Cash', icon: Banknote },
-  //                       { value: 'other', label: 'Other', icon: MoreHorizontal },
-  //                     ].map((option) => (
-  //                       <Button
-  //                         key={option.value}
-  //                         type="button"
-  //                         variant={field.value === option.value ? 'default' : 'outline'}
-  //                         className={cn('h-20', {
-  //                           'ring-2 ring-primary': field.value === option.value,
-  //                         })}
-  //                         onClick={() => {
-  //                           field.onChange(option.value);
-  //                           setAccountType(option.value);
-  //                         }}
-  //                       >
-  //                         <div className="flex flex-col items-center justify-center space-y-2">
-  //                           <option.icon className="w-6 h-6" />
-  //                           <span>{option.label}</span>
-  //                         </div>
-  //                       </Button>
-  //                     ))}
-  //                   </div>
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values);
+  }
 
   return (
-    <div className="w-full max-w-md bg-background text-foreground">
-      <form className="space-y-3">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label htmlFor="transaction-type">Type</Label>
-            <RadioGroup id="transaction-type" value={type} onValueChange={setType} className="flex gap-4">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="expense" id="expense" />
-                <Label htmlFor="expense">Expense</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="income" id="income" />
-                <Label htmlFor="income">Income</Label>
-              </div>
-            </RadioGroup>
-          </div>
-          <div>
-            <Label htmlFor="date-select">Date & Time</Label>
-            <Input
-              id="date-select"
-              type="datetime-local"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full"
-            />
-          </div>
-        </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Transaction Type</FormLabel>
+              <FormControl>
+                <div className="flex space-x-2">
+                  <Button
+                    type="button"
+                    variant={field.value === 'expense' ? 'default' : 'outline'}
+                    className={cn(
+                      "w-full justify-start space-x-2",
+                      field.value === 'expense' && "bg-primary text-primary-foreground"
+                    )}
+                    onClick={() => field.onChange('expense')}
+                  >
+                    <ArrowUpCircle className="h-4 w-4" />
+                    <span>Expense</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={field.value === 'income' ? 'default' : 'outline'}
+                    className={cn(
+                      "w-full justify-start space-x-2",
+                      field.value === 'income' && "bg-primary text-primary-foreground"
+                    )}
+                    onClick={() => field.onChange('income')}
+                  >
+                    <ArrowDownCircle className="h-4 w-4" />
+                    <span>Income</span>
+                  </Button>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-        <div>
-          <Label htmlFor="category-select">Category</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                id="category-select"
-                variant="outline"
-                role="combobox"
-                aria-expanded="false"
-                className="w-full justify-between"
-              >
-                {category
-                  ? categories.find((cat) => cat.name === category)?.name
-                  : 'Select category...'}
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-full p-0">
-              <Command>
-                <CommandInput placeholder="Search category..." />
-                <CommandEmpty>No category found.</CommandEmpty>
-                <CommandGroup>
-                  <CommandList>
-                    {categories.map((cat) => (
-                      <CommandItem key={cat.id} onSelect={() => setCategory(cat.name)}>
-                        <Check className={cn(
-                          'mr-2 h-4 w-4',
-                          category === cat.name ? 'opacity-100' : 'opacity-0',
-                        )} />
-                        <span className="mr-2">{cat.icon}</span>
-                        {cat.name}
-                        <span className="ml-auto text-muted-foreground">{cat.rootCategory}</span>
-                      </CommandItem>
-                    ))}
-                  </CommandList>
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <div>
-          <Label htmlFor="account-select">Account</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                id="account-select"
-                variant="outline"
-                role="combobox"
-                aria-expanded="false"
-                className="w-full justify-between"
-              >
-                {account
-                  ? accounts.find((acc) => acc.name === account)?.name
-                  : 'Select account...'}
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-full p-0">
-              <Command>
-                <CommandInput placeholder="Search account..." />
-                <CommandEmpty>No account found.</CommandEmpty>
-                <CommandGroup>
-                  <CommandList>
-                    {accounts.map((acc) => (
-                      <CommandItem key={acc.id} onSelect={() => setAccount(acc.name)}>
-                        <Check className={cn(
-                          'mr-2 h-4 w-4',
-                          account === acc.name ? 'opacity-100' : 'opacity-0',
-                        )} />
-                        <span className="mr-2">{acc.icon}</span>
-                        {acc.name}
-                        <span className="ml-auto text-muted-foreground">{acc.currency}</span>
-                      </CommandItem>
-                    ))}
-                  </CommandList>
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <div>
-          <Label htmlFor="note">Note</Label>
-          <Textarea
-            id="note"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Add a note..."
-            className="h-20"
+        <div className="flex space-x-4">
+          <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormLabel>Amount</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Enter amount"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        {type === 'expense' && (
-          <div>
-            <Label>Compensations</Label>
-            {compensations.map((comp, index) => (
-              <div key={index} className="flex flex-wrap items-center gap-2 mt-2 p-2 border border-border rounded-md">
-                <Input
-                  type="number"
-                  placeholder="Amount"
-                  value={comp.amount}
-                  onChange={(e) => handleCompensationChange(index, 'amount', e.target.value)}
-                  aria-label={`Compensation ${index + 1} Amount`}
-                  className="w-24 flex-grow"
-                />
+          <FormField
+            control={form.control}
+            name="account"
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormLabel>Account</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded="false"
-                      className="w-32 flex-grow justify-between"
-                    >
-                      {comp.account
-                        ? accounts.find((acc) => acc.name === comp.account)?.name
-                        : 'Account'}
-                      <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className={cn(
+                          "w-full justify-between",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value
+                          ? accounts.find(
+                            (account) => account.name === field.value
+                          )?.name
+                          : "Select account"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-full p-0">
                     <Command>
                       <CommandInput placeholder="Search account..." />
                       <CommandEmpty>No account found.</CommandEmpty>
                       <CommandGroup>
-                        {accounts.map((acc) => (
+                        {accounts.map((account) => (
                           <CommandItem
-                            key={acc.id}
-                            onSelect={() => handleCompensationChange(index, 'account', acc.name)}
+                            value={account.name}
+                            key={account.id}
+                            onSelect={() => {
+                              form.setValue("account", account.name)
+                            }}
                           >
-                            <Check className={cn(
-                              'mr-2 h-4 w-4',
-                              comp.account === acc.name ? 'opacity-100' : 'opacity-0',
-                            )} />
-                            <span className="mr-2">{acc.icon}</span>
-                            {acc.name}
-                            <span className="ml-auto text-muted-foreground">{acc.currency}</span>
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                account.name === field.value
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {account.icon} {account.name}
                           </CommandItem>
                         ))}
                       </CommandGroup>
                     </Command>
                   </PopoverContent>
                 </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date & Time</FormLabel>
+              <FormControl>
                 <Input
                   type="datetime-local"
-                  value={comp.date}
-                  onChange={(e) => handleCompensationChange(index, 'date', e.target.value)}
-                  aria-label={`Compensation ${index + 1} Date & Time`}
-                  className="w-40 flex-grow"
+                  {...field}
+                  className="w-full"
                 />
-                <Button
-                  variant="destructive"
-                  onClick={() => removeCompensation(index)}
-                  className="p-2 h-9 w-9"
-                  aria-label="Remove compensation"
-                >
-                  X
-                </Button>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Category</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className={cn(
+                        "w-full justify-between",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value
+                        ? categories.find(
+                          (category) => category.name === field.value
+                        )?.name
+                        : "Select category"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search category..." />
+                    <CommandEmpty>No category found.</CommandEmpty>
+                    <CommandGroup>
+                      {categories.map((category) => (
+                        <CommandItem
+                          value={category.name}
+                          key={category.id}
+                          onSelect={() => {
+                            form.setValue("category", category.name)
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              category.name === field.value
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {category.icon} {category.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="note"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Note</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Add a note..."
+                  className="h-20"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {form.watch('type') === 'expense' && (
+          <div>
+            <Label>Compensations</Label>
+            {fields.map((field, index) => (
+              <div key={field.id} className="mt-2 p-2 border border-border rounded-md space-y-2">
+                <div className="flex items-center gap-2">
+                  <FormField
+                    control={form.control}
+                    name={`compensations.${index}.amount`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Amount"
+                            {...field}
+                            className="w-full"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`compensations.${index}.account`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "w-full justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value
+                                  ? accounts.find(
+                                    (account) => account.name === field.value
+                                  )?.name
+                                  : "Account"}
+                                <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                            <Command>
+                              <CommandInput placeholder="Search account..." />
+                              <CommandEmpty>No account found.</CommandEmpty>
+                              <CommandGroup>
+                                {accounts.map((account) => (
+                                  <CommandItem
+                                    value={account.name}
+                                    key={account.id}
+                                    onSelect={() => {
+                                      form.setValue(`compensations.${index}.account`, account.name)
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        account.name === field.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                    {account.icon} {account.name}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <FormField
+                    control={form.control}
+                    name={`compensations.${index}.date`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input
+                            type="datetime-local"
+                            {...field}
+                            className="w-full"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => remove(index)}
+                    className="p-2 h-9 w-9"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
-            <Button type="button" onClick={addCompensation} className="mt-2 w-full">
+            <Button
+              type="button"
+              onClick={() => append({ amount: '', account: '', date: '' })}
+              className="mt-2 w-full"
+            >
               Add Compensation
             </Button>
           </div>
         )}
-
-        <Button type="submit" className="w-full">Submit</Button>
       </form>
-    </div>
+    </Form>
   );
 }

@@ -1,11 +1,11 @@
-import { cn } from '@/lib/utils.ts';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Banknote, CreditCard, MoreHorizontal, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import cn from 'classnames';
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ const accountSchema = z.object({
   type: z.enum(['internet', 'bank', 'cash', 'other']),
   cardNumber: z.string().optional(),
   iban: z.string().optional(),
-});
+})
 
 const colorScheme = {
   bank: {
@@ -48,11 +48,19 @@ const colorScheme = {
     huf: '#D2691E',
     btc: '#B57EDC',
   },
-};
+}
+
+const currencyInfo = {
+  eur: { symbol: '€', color: '#0066CC', name: 'Euro' },
+  usd: { symbol: '$', color: '#008000', name: 'US Dollar' },
+  uah: { symbol: '₴', color: '#FFD700', name: 'Ukrainian Hryvnia' },
+  huf: { symbol: 'Ft', color: '#C41E3A', name: 'Hungarian Forint' },
+  btc: { symbol: '₿', color: '#FF9900', name: 'Bitcoin' },
+}
 
 export default function AccountCreationForm() {
-  const [accountType, setAccountType] = useState<string>('internet');
-  const [currency, setCurrency] = useState<string>('eur');
+  const [accountType, setAccountType] = useState<string>('internet')
+  const [currency, setCurrency] = useState<string>('eur')
 
   const form = useForm<z.infer<typeof accountSchema>>({
     resolver: zodResolver(accountSchema),
@@ -62,86 +70,71 @@ export default function AccountCreationForm() {
       initialBalance: 0,
       type: 'internet',
     },
-  });
+  })
 
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === 'currency') {
-        setCurrency(value.currency || 'eur');
+        setCurrency(value.currency || 'eur')
       }
-    });
-    return () => subscription.unsubscribe();
-  }, [form.watch]);
+    })
+    return () => subscription.unsubscribe()
+  }, [form.watch])
 
   function onSubmit(values: z.infer<typeof accountSchema>) {
-    console.log(values);
+    console.log(values)
     // Handle form submission here
   }
 
   const getTypeButtonStyle = (type: string) => {
-    const baseStyle = 'h-20 sm:h-24 transition-colors duration-200';
-    const isSelected = accountType === type;
-    const bgColor = colorScheme[type as keyof typeof colorScheme][currency as keyof (typeof colorScheme)['internet']];
-    const textColor = isSelected ? 'text-primary-foreground' : 'text-primary';
-    return `${baseStyle} ${isSelected ? `bg-[${bgColor}]` : 'bg-background'} ${textColor}`;
-  };
+    const baseStyle = 'h-20 sm:h-24 transition-colors duration-200'
+    const isSelected = accountType === type
+    const bgColor = colorScheme[type as keyof typeof colorScheme][currency as keyof (typeof colorScheme)['internet']]
+    const textColor = isSelected ? 'text-primary-foreground' : 'text-primary'
+    return `${baseStyle} ${isSelected ? `bg-[${bgColor}]` : 'bg-background'} ${textColor}`
+  }
 
   return (
     <div className="w-full max-w-md bg-background text-foreground">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Account Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter account name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="currency"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Currency</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select currency" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="eur">EUR</SelectItem>
-                      <SelectItem value="usd">USD</SelectItem>
-                      <SelectItem value="uah">UAH</SelectItem>
-                      <SelectItem value="huf">HUF</SelectItem>
-                      <SelectItem value="btc">BTC</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
           <FormField
             control={form.control}
-            name="initialBalance"
+            name="currency"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Initial Balance</FormLabel>
+                <FormLabel>Currency</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Enter initial balance"
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                  />
+                  <ToggleGroup
+                    type="single"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    className="flex justify-between w-full"
+                  >
+                    {Object.entries(currencyInfo).map(([value, info]) => (
+                      <ToggleGroupItem
+                        key={value}
+                        value={value}
+                        aria-label={info.name}
+                        className={cn(
+                          "flex-1 h-14 text-sm font-medium",
+                          "border-2 rounded-md transition-all duration-200",
+                          "hover:bg-accent hover:text-accent-foreground",
+                          field.value === value
+                            ? "border-primary bg-primary/10"
+                            : "border-transparent"
+                        )}
+                        style={{
+                          color: field.value === value ? info.color : undefined,
+                        }}
+                      >
+                        <div className="flex flex-col items-center justify-center">
+                          <span className="text-lg">{info.symbol}</span>
+                          <span className="text-xs mt-1">{value.toUpperCase()}</span>
+                        </div>
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -172,8 +165,8 @@ export default function AccountCreationForm() {
                             : undefined,
                         }}
                         onClick={() => {
-                          field.onChange(option.value);
-                          setAccountType(option.value);
+                          field.onChange(option.value)
+                          setAccountType(option.value)
                         }}
                       >
                         <div className="flex flex-col items-center justify-center space-y-2">
@@ -183,6 +176,37 @@ export default function AccountCreationForm() {
                       </Button>
                     ))}
                   </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Account Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter account name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="initialBalance"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Initial Balance</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Enter initial balance"
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -222,5 +246,5 @@ export default function AccountCreationForm() {
         </form>
       </Form>
     </div>
-  );
+  )
 }
