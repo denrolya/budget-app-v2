@@ -29,14 +29,14 @@ const accounts = [
 
 const formSchema = z.object({
   type: z.enum(['expense', 'income']),
-  amount: z.string().min(1, 'Amount is required'),
+  amount: z.number().min(0, 'Amount is required'),
   category: z.string().min(1, 'Category is required'),
   account: z.string().min(1, 'Account is required'),
   date: z.string().min(1, 'Date is required'),
   note: z.string().optional(),
   compensations: z.array(
     z.object({
-      amount: z.string().min(1, 'Amount is required'),
+      amount: z.number().min(1, 'Amount is required'),
       account: z.string().min(1, 'Account is required'),
       date: z.string().min(1, 'Date is required'),
     }),
@@ -124,7 +124,7 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
               <FormItem className="flex-1">
                 <FormLabel>Amount</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="Enter amount" {...field} />
+                  <Input type="number" placeholder="Enter amount" {...field} onChange={e => field.onChange(e.target.valueAsNumber)} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -277,8 +277,9 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
                           <Input
                             type="number"
                             placeholder="Amount"
-                            {...field}
                             className="w-full"
+                            {...field}
+                            onChange={e => field.onChange(e.target.valueAsNumber)}
                           />
                         </FormControl>
                         <FormMessage />
@@ -364,7 +365,7 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
             <Button
               type="button"
               className="mt-2 w-full"
-              onClick={() => append({ amount: '', account: '', date: '' })}
+              onClick={() => append({ amount: 0, account: '', date: '' })}
             >
               Add Compensation
             </Button>

@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
-import MultiSelect from '@/components/ui/multiselect.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -49,12 +48,12 @@ const comparisons = [
 ];
 
 type CardProps = {
-  initialType: 'income' | 'expense'
-  initialCategory: string | null
-  initialPeriod: 'week' | 'month' | 'year'
-  initialComparison: 'previous' | 'same-last-year'
-  amount: number
-  previousAmount: number
+  initialType?: 'income' | 'expense'
+  initialCategory?: string | null
+  initialPeriod?: 'week' | 'month' | 'year'
+  initialComparison?: 'previous' | 'same-last-year'
+  amount?: number
+  previousAmount?: number
 }
 
 export const FinancialCard = ({
@@ -429,4 +428,4 @@ export const FinancialCard = ({
       </CardContent>
     </Card>
   );
-}
+};

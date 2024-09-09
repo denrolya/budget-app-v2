@@ -10,16 +10,15 @@ import {
 } from 'lucide-react';
 import { Link, Outlet } from 'react-router-dom';
 
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
-export function LayoutV3() {
-  return (
+export const LayoutV3 = () => (
     <div className="flex min-h-screen w-full bg-background">
       <div
-        className="inset-y-0 left-0 z-20 flex w-14 flex-col items-center justify-between border-r bg-background transition-all duration-300 hover:w-64 group"
         data-collapsed
+        className="inset-y-0 left-0 z-20 flex w-14 flex-col items-center justify-between border-r bg-background transition-all duration-300 hover:w-64 group"
       >
         <div className="fixed flex flex-col items-center gap-4 py-4">
           <Link
@@ -139,5 +138,4 @@ export function LayoutV3() {
         </main>
       </div>
     </div>
-  )
-}
+  );

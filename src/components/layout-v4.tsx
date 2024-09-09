@@ -1,5 +1,4 @@
 import { LogOut, Moon, Settings, Sun, User } from 'lucide-react';
-import { useTheme } from 'next-themes';
 import { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 
@@ -11,9 +10,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 
-export function LayoutV4({ children }: { children: React.ReactNode }) {
+export const LayoutV4 = () => {
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
-  const { setTheme } = useTheme();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -38,11 +36,11 @@ export function LayoutV4({ children }: { children: React.ReactNode }) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setTheme('light')}>
+            <DropdownMenuItem onClick={() => console.log('light')}>
               <Sun className="mr-2 h-4 w-4" />
               <span>Light</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme('dark')}>
+            <DropdownMenuItem onClick={() => console.log('dark')}>
               <Moon className="mr-2 h-4 w-4" />
               <span>Dark</span>
             </DropdownMenuItem>
@@ -104,4 +102,4 @@ export function LayoutV4({ children }: { children: React.ReactNode }) {
       </div>
     </div>
   );
-}
+};

@@ -1,4 +1,3 @@
-import { CurrencySelector } from '@/components/currency-selector.tsx';
 import cn from 'classnames';
 import {
   ArrowLeftRight,
@@ -18,7 +17,9 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Outlet } from 'react-router-dom';
 
+import { CurrencySelector } from '@/components/currency-selector';
 import { Button } from '@/components/ui/button';
 import {
   Drawer,
@@ -41,7 +42,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Outlet } from 'react-router-dom';
+
 
 // Mock data for different exchange rate sources
 const exchangeRateSources = {
@@ -62,12 +63,12 @@ const exchangeRateSources = {
   },
 };
 
-export function LayoutV8() {
+export const LayoutV8 = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [amount, setAmount] = useState('1');
   const [fromCurrency, setFromCurrency] = useState('USD');
   const [toCurrency, setToCurrency] = useState('EUR');
-  const [baseCurrency, setBaseCurrency] = useState('USD');
+  const [baseCurrency] = useState('USD');
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -369,4 +370,4 @@ export function LayoutV8() {
       </Drawer>
     </div>
   );
-}
+};

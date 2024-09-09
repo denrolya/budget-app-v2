@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 
-export function LayoutV5({ children }: { children: React.ReactNode }) {
+export const LayoutV5 = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
 
   return (
@@ -199,4 +199,4 @@ export function LayoutV5({ children }: { children: React.ReactNode }) {
       </div>
     </div>
   );
-}
+};

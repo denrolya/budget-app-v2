@@ -51,7 +51,7 @@ const exchangeRateSources = {
   },
 };
 
-export function LayoutV6() {
+export const LayoutV6 = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [isConverterVisible, setIsConverterVisible] = useState(false);
   const [isRightSidebarVisible, setIsRightSidebarVisible] = useState(false);
@@ -350,4 +350,4 @@ export function LayoutV6() {
       </div>
     </div>
   );
-}
+};

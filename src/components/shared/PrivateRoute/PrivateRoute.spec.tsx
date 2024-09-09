@@ -20,7 +20,7 @@ describe('PrivateRoute Component', () => {
     // Mock isAuthenticated to return true
     vi.spyOn(Storage.prototype, 'getItem').mockReturnValue('dummy-jwt-token');
 
-    mockedUseLocation.mockReturnValue({ pathname: '/transactions' } as any);
+    mockedUseLocation.mockReturnValue({ pathname: '/transactions' } as never);
 
     render(
       <MemoryRouter initialEntries={['/transactions']}>
@@ -45,7 +45,7 @@ describe('PrivateRoute Component', () => {
     // Mock isAuthenticated to return false
     vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(null);
 
-    mockedUseLocation.mockReturnValue({ pathname: '/transactions' } as any);
+    mockedUseLocation.mockReturnValue({ pathname: '/transactions' } as never);
 
     render(
       <MemoryRouter initialEntries={['/transactions']}>
@@ -72,7 +72,7 @@ describe('PrivateRoute Component', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(null);
 
     const mockLocation = { pathname: '/transactions' };
-    mockedUseLocation.mockReturnValue(mockLocation as any);
+    mockedUseLocation.mockReturnValue(mockLocation as never);
 
     render(
       <MemoryRouter initialEntries={['/transactions']}>

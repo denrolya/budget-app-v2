@@ -9,7 +9,7 @@ const currencies = [
   { code: 'HUF', symbol: 'Ft', icon: Bitcoin }, // Using Bitcoin icon as a placeholder for HUF
 ];
 
-export function CurrencySelector() {
+export const CurrencySelector = () => {
   const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]);
 
   return (
@@ -38,4 +38,4 @@ export function CurrencySelector() {
       </SelectContent>
     </Select>
   );
-}
+};

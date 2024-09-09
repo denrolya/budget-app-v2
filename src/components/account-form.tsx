@@ -17,7 +17,7 @@ const accountSchema = z.object({
   type: z.enum(['internet', 'bank', 'cash', 'other']),
   cardNumber: z.string().optional(),
   iban: z.string().optional(),
-})
+});
 
 const colorScheme = {
   bank: {
@@ -48,7 +48,7 @@ const colorScheme = {
     huf: '#D2691E',
     btc: '#B57EDC',
   },
-}
+};
 
 const currencyInfo = {
   eur: { symbol: '€', color: '#0066CC', name: 'Euro' },
@@ -56,11 +56,11 @@ const currencyInfo = {
   uah: { symbol: '₴', color: '#FFD700', name: 'Ukrainian Hryvnia' },
   huf: { symbol: 'Ft', color: '#C41E3A', name: 'Hungarian Forint' },
   btc: { symbol: '₿', color: '#FF9900', name: 'Bitcoin' },
-}
+};
 
 export default function AccountCreationForm() {
-  const [accountType, setAccountType] = useState<string>('internet')
-  const [currency, setCurrency] = useState<string>('eur')
+  const [accountType, setAccountType] = useState<string>('internet');
+  const [currency, setCurrency] = useState<string>('eur');
 
   const form = useForm<z.infer<typeof accountSchema>>({
     resolver: zodResolver(accountSchema),
@@ -70,29 +70,29 @@ export default function AccountCreationForm() {
       initialBalance: 0,
       type: 'internet',
     },
-  })
+  });
 
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === 'currency') {
-        setCurrency(value.currency || 'eur')
+        setCurrency(value.currency || 'eur');
       }
-    })
-    return () => subscription.unsubscribe()
-  }, [form.watch])
+    });
+    return () => subscription.unsubscribe();
+  }, [form, form.watch]);
 
-  function onSubmit(values: z.infer<typeof accountSchema>) {
-    console.log(values)
+  const onSubmit = (values: z.infer<typeof accountSchema>) => {
+    console.log(values);
     // Handle form submission here
-  }
+  };
 
   const getTypeButtonStyle = (type: string) => {
-    const baseStyle = 'h-20 sm:h-24 transition-colors duration-200'
-    const isSelected = accountType === type
-    const bgColor = colorScheme[type as keyof typeof colorScheme][currency as keyof (typeof colorScheme)['internet']]
-    const textColor = isSelected ? 'text-primary-foreground' : 'text-primary'
-    return `${baseStyle} ${isSelected ? `bg-[${bgColor}]` : 'bg-background'} ${textColor}`
-  }
+    const baseStyle = 'h-20 sm:h-24 transition-colors duration-200';
+    const isSelected = accountType === type;
+    const bgColor = colorScheme[type as keyof typeof colorScheme][currency as keyof (typeof colorScheme)['internet']];
+    const textColor = isSelected ? 'text-primary-foreground' : 'text-primary';
+    return `${baseStyle} ${isSelected ? `bg-[${bgColor}]` : 'bg-background'} ${textColor}`;
+  };
 
   return (
     <div className="w-full max-w-md bg-background text-foreground">
@@ -117,12 +117,12 @@ export default function AccountCreationForm() {
                         value={value}
                         aria-label={info.name}
                         className={cn(
-                          "flex-1 h-14 text-sm font-medium",
-                          "border-2 rounded-md transition-all duration-200",
-                          "hover:bg-accent hover:text-accent-foreground",
+                          'flex-1 h-14 text-sm font-medium',
+                          'border-2 rounded-md transition-all duration-200',
+                          'hover:bg-accent hover:text-accent-foreground',
                           field.value === value
-                            ? "border-primary bg-primary/10"
-                            : "border-transparent"
+                            ? 'border-primary bg-primary/10'
+                            : 'border-transparent'
                         )}
                         style={{
                           color: field.value === value ? info.color : undefined,
@@ -165,8 +165,8 @@ export default function AccountCreationForm() {
                             : undefined,
                         }}
                         onClick={() => {
-                          field.onChange(option.value)
-                          setAccountType(option.value)
+                          field.onChange(option.value);
+                          setAccountType(option.value);
                         }}
                       >
                         <div className="flex flex-col items-center justify-center space-y-2">
@@ -246,5 +246,5 @@ export default function AccountCreationForm() {
         </form>
       </Form>
     </div>
-  )
+  );
 }

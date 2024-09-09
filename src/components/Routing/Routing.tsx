@@ -4,9 +4,6 @@ import LoginPage from '@/app/login/page';
 import TransactionsPage from '@/app/transactions/page';
 import DebtsPage from '@/app/debts/page';
 import Dashboard from '@/components/dashboard-06';
-import LayoutV1 from '@/components/shared/Layout/Layout';
-import { LayoutV2 } from '@/components/layout-v2';
-import { LayoutV3 } from '@/components/layout-v3';
 import { LayoutV9 } from '@/components/layout-v9';
 import PrivateRoute from '@/components/shared/PrivateRoute/PrivateRoute';
 

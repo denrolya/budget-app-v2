@@ -63,12 +63,12 @@ const exchangeRateSources = {
   },
 };
 
-export function LayoutV9() {
+export const LayoutV9 = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [amount, setAmount] = useState('1');
   const [fromCurrency, setFromCurrency] = useState('USD');
   const [toCurrency, setToCurrency] = useState('EUR');
-  const [baseCurrency, setBaseCurrency] = useState('USD');
+  const [baseCurrency] = useState('USD');
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -410,4 +410,4 @@ export function LayoutV9() {
       </Drawer>
     </div>
   );
-}
+};

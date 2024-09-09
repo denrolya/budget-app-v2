@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { LoginForm } from "@/components/login-form"
+import { LoginForm } from '@/components/login-form';
 
 const isAuthenticated = (): boolean => {
   const token = localStorage.getItem('token');
@@ -30,5 +30,5 @@ export default function Page() {
     <div className="flex h-screen w-full items-center justify-center px-4">
       <LoginForm onSubmit={handleLogin} />
     </div>
-  )
+  );
 }

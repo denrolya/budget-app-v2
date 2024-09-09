@@ -1,5 +1,5 @@
 import { ArrowRightLeft, Eye, MoreHorizontal, SlidersHorizontal } from 'lucide-react';
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { Filters } from '@/components/transaction-filters.tsx';
 import TransactionForm from '@/components/transaction-form.tsx';
@@ -8,9 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  Dialog, DialogClose,
+  Dialog,
   DialogContent,
-  DialogDescription, DialogFooter,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -20,7 +21,6 @@ import {
   DrawerClose,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -35,12 +35,54 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Sheet,
   SheetContent,
-  SheetDescription, SheetFooter,
+  SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet.tsx';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
+interface Transaction {
+  id: string;
+  type: 'transaction' | 'transfer';
+  amount: number;
+  account: string;
+  category: string;
+  executionDate: string;
+  description: string;
+  note: string;
+  compensationIds?: string[];
+  compensatedId?: string;
+  from?: string;
+  to?: string;
+  exchangeRate?: number;
+  fees?: number;
+  fromTransaction?: Transaction;
+  toTransaction?: Transaction;
+}
+
+interface Transfer {
+  id: string;
+  type: 'transfer';
+  amount: number;
+  from: string;
+  to: string;
+  executionDate: string;
+  exchangeRate: number;
+  fees: number;
+  fromTransaction: Transaction;
+  toTransaction: Transaction;
+}
+
+interface TransactionDetailsProps {
+  transaction: Transaction;
+  allTransactions: Transaction[];
+}
+
+interface TransferDetailsProps {
+  transfer: Transfer;
+}
 
 // Updated mock data to include multiple compensations
 const mockData = [
@@ -143,7 +185,7 @@ const mockData = [
   },
 ];
 
-const TransactionDetails = ({ transaction, allTransactions }) => {
+const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transaction, allTransactions }) => {
   const compensations = transaction.compensationIds
     ? transaction.compensationIds.map(id => allTransactions.find(t => t.id === id)).filter(Boolean)
     : [];
@@ -174,7 +216,7 @@ const TransactionDetails = ({ transaction, allTransactions }) => {
           <h3 className="font-semibold mb-2">Compensation Transactions:</h3>
           <div className="space-y-2">
             {compensations.map(comp => (
-              <TransactionItem key={comp.id} transaction={comp} allTransactions={allTransactions} isCompensationView />
+              comp && <TransactionItem key={comp.id} transaction={comp} allTransactions={allTransactions} isCompensationView />
             ))}
           </div>
         </div>
@@ -189,7 +231,7 @@ const TransactionDetails = ({ transaction, allTransactions }) => {
   );
 };
 
-const TransferDetails = ({ transfer }) => (
+const TransferDetails: React.FC<TransferDetailsProps> = ({ transfer }) => (
   <div className="space-y-4">
     <Table>
       <TableHeader>
@@ -204,7 +246,7 @@ const TransferDetails = ({ transfer }) => (
             return (
               <TableRow key={key}>
                 <TableCell className="font-medium">{key}</TableCell>
-                <TableCell>{typeof value === 'number' ? value.toFixed(2) : value}</TableCell>
+                <TableCell>{typeof value === 'number' ? (value as number).toFixed(2) : (value as string)}</TableCell>
               </TableRow>
             );
           }
@@ -358,24 +400,24 @@ export default function Component() {
   const allTransactions = mockData.flatMap(group => group.items);
   const [isTransactionFormOpen, setIsTransactionFormOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [isLoading, setIsLoading] = useState(false)
-  const [isFormValid, setIsFormValid] = useState(false)
-  const formRef = useRef<{ submitForm: () => void } | null>(null)
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
+  const formRef = useRef<{ submitForm: () => void } | null>(null);
 
-  const handleSubmit = async (values: any) => {
-    setIsLoading(true)
+  const handleSubmit = async (values: never) => {
+    setIsLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      console.log(values)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log(values);
       // Close the dialog after successful submission
-      document.querySelector<HTMLButtonElement>('[data-dialog-close]')?.click()
+      document.querySelector<HTMLButtonElement>('[data-dialog-close]')?.click();
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="container mx-auto p-4 sm:p-6">
@@ -444,14 +486,14 @@ export default function Component() {
                     onFormStateChange={setIsFormValid}
                   />
                   <DialogFooter>
-                      <Button
-                        type="submit"
-                        onClick={() => formRef.current?.submitForm()}
-                        disabled={isLoading || !isFormValid}
-                        className="w-full"
-                      >
-                        {isLoading ? 'Submitting...' : 'Submit'}
-                      </Button>
+                    <Button
+                      type="submit"
+                      onClick={() => formRef.current?.submitForm()}
+                      disabled={isLoading || !isFormValid}
+                      className="w-full"
+                    >
+                      {isLoading ? 'Submitting...' : 'Submit'}
+                    </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>

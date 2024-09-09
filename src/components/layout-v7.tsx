@@ -58,7 +58,7 @@ const exchangeRateSources = {
   },
 };
 
-export function LayoutV7() {
+export const LayoutV7 = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [amount, setAmount] = useState('1');
   const [fromCurrency, setFromCurrency] = useState('USD');
@@ -337,4 +337,4 @@ export function LayoutV7() {
       </Drawer>
     </div>
   );
-}
+};

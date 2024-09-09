@@ -8,7 +8,7 @@ import importPlugin from 'eslint-plugin-import';
 import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  { ignores: ['dist', 'src/components/ui'] },
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -80,6 +80,10 @@ export default tseslint.config(
       'import/export': 'error',
       'arrow-body-style': ['error', 'as-needed'],
       'object-curly-spacing': ['error', 'always'],
+      'quotes': ['error', 'single'],
+      'semi': ['error', 'always'],
+      'prefer-arrow-callback': ['error'],
+      'func-style': ['error', 'expression'],
     },
   },
 );

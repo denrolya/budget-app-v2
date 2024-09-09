@@ -10,9 +10,9 @@ import { Label } from '@/components/ui/label.tsx';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
 import { Slider } from '@/components/ui/slider.tsx';
 import { Switch } from '@/components/ui/switch.tsx';
-import { cn } from '@/lib/utils.ts';
+import { cn } from '@/lib/utils';
 
-export function Filters() {
+export const Filters = () => {
   const [date, setDate] = useState<Date>();
   const [amountRange, setAmountRange] = useState([0, 1000]);
   const [minAmount, setMinAmount] = useState('0');
@@ -153,4 +153,4 @@ export function Filters() {
       </div>
     </div>
   );
-}
+};
