@@ -46,6 +46,32 @@ export default function TransactionForm() {
     const newCompensations = compensations.filter((_, i) => i !== index);
     setCompensations(newCompensations);
   };
+  // <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+  //                     {[
+  //                       { value: 'internet', label: 'Internet', icon: CreditCard },
+  //                       { value: 'bank', label: 'Bank', icon: Wallet },
+  //                       { value: 'cash', label: 'Cash', icon: Banknote },
+  //                       { value: 'other', label: 'Other', icon: MoreHorizontal },
+  //                     ].map((option) => (
+  //                       <Button
+  //                         key={option.value}
+  //                         type="button"
+  //                         variant={field.value === option.value ? 'default' : 'outline'}
+  //                         className={cn('h-20', {
+  //                           'ring-2 ring-primary': field.value === option.value,
+  //                         })}
+  //                         onClick={() => {
+  //                           field.onChange(option.value);
+  //                           setAccountType(option.value);
+  //                         }}
+  //                       >
+  //                         <div className="flex flex-col items-center justify-center space-y-2">
+  //                           <option.icon className="w-6 h-6" />
+  //                           <span>{option.label}</span>
+  //                         </div>
+  //                       </Button>
+  //                     ))}
+  //                   </div>
 
   return (
     <div className="w-full max-w-md bg-background text-foreground">
@@ -99,17 +125,17 @@ export default function TransactionForm() {
                 <CommandEmpty>No category found.</CommandEmpty>
                 <CommandGroup>
                   <CommandList>
-                  {categories.map((cat) => (
-                    <CommandItem key={cat.id} onSelect={() => setCategory(cat.name)}>
-                      <Check className={cn(
-                        'mr-2 h-4 w-4',
-                        category === cat.name ? 'opacity-100' : 'opacity-0',
-                      )} />
-                      <span className="mr-2">{cat.icon}</span>
-                      {cat.name}
-                      <span className="ml-auto text-muted-foreground">{cat.rootCategory}</span>
-                    </CommandItem>
-                  ))}
+                    {categories.map((cat) => (
+                      <CommandItem key={cat.id} onSelect={() => setCategory(cat.name)}>
+                        <Check className={cn(
+                          'mr-2 h-4 w-4',
+                          category === cat.name ? 'opacity-100' : 'opacity-0',
+                        )} />
+                        <span className="mr-2">{cat.icon}</span>
+                        {cat.name}
+                        <span className="ml-auto text-muted-foreground">{cat.rootCategory}</span>
+                      </CommandItem>
+                    ))}
                   </CommandList>
                 </CommandGroup>
               </Command>
@@ -139,19 +165,19 @@ export default function TransactionForm() {
                 <CommandInput placeholder="Search account..." />
                 <CommandEmpty>No account found.</CommandEmpty>
                 <CommandGroup>
-                <CommandList>
-                  {accounts.map((acc) => (
-                    <CommandItem key={acc.id} onSelect={() => setAccount(acc.name)}>
-                      <Check className={cn(
-                        'mr-2 h-4 w-4',
-                        account === acc.name ? 'opacity-100' : 'opacity-0',
-                      )} />
-                      <span className="mr-2">{acc.icon}</span>
-                      {acc.name}
-                      <span className="ml-auto text-muted-foreground">{acc.currency}</span>
-                    </CommandItem>
-                  ))}
-                </CommandList>
+                  <CommandList>
+                    {accounts.map((acc) => (
+                      <CommandItem key={acc.id} onSelect={() => setAccount(acc.name)}>
+                        <Check className={cn(
+                          'mr-2 h-4 w-4',
+                          account === acc.name ? 'opacity-100' : 'opacity-0',
+                        )} />
+                        <span className="mr-2">{acc.icon}</span>
+                        {acc.name}
+                        <span className="ml-auto text-muted-foreground">{acc.currency}</span>
+                      </CommandItem>
+                    ))}
+                  </CommandList>
                 </CommandGroup>
               </Command>
             </PopoverContent>
