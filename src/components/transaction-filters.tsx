@@ -1,88 +1,18 @@
 import { format } from 'date-fns';
-import { CalendarIcon, SlidersHorizontal } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
 import { useState } from 'react';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge.tsx';
+import { Button } from '@/components/ui/button.tsx';
+import { Calendar } from '@/components/ui/calendar.tsx';
+import { Input } from '@/components/ui/input.tsx';
+import { Label } from '@/components/ui/label.tsx';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
+import { Slider } from '@/components/ui/slider.tsx';
+import { Switch } from '@/components/ui/switch.tsx';
+import { cn } from '@/lib/utils.ts';
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  const [showFilters, setShowFilters] = useState(false);
-
-  return (
-    <div className="container mx-auto p-4 sm:p-6">
-      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
-        {/* Drawer for filters on mobile */}
-        <Drawer open={showFilters} onOpenChange={setShowFilters}>
-          <DrawerTrigger asChild>
-            <Button variant="outline" className="lg:hidden mb-4">
-              <SlidersHorizontal className="mr-2 h-4 w-4" />
-              Filters
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent className="h-[80vh] flex flex-col">
-            <DrawerHeader className="flex-shrink-0">
-              <DrawerTitle>Filters</DrawerTitle>
-              <DrawerDescription>Refine your transaction list</DrawerDescription>
-            </DrawerHeader>
-            <div className="flex-grow overflow-y-auto px-4">
-              <Filters />
-            </div>
-            <div className="p-4 border-t">
-              <DrawerClose asChild>
-                <Button className="w-full">Apply Filters</Button>
-              </DrawerClose>
-            </div>
-          </DrawerContent>
-        </Drawer>
-
-        {/* Sidebar for filters on desktop */}
-        <aside className="hidden lg:block w-64 space-y-6">
-          <Filters />
-        </aside>
-
-        {/* Main content area */}
-        <main className="flex-1 space-y-4 sm:space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-xl sm:text-2xl font-semibold">Your Transactions</h2>
-            <Select>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="date-desc">Date (Newest First)</SelectItem>
-                <SelectItem value="date-asc">Date (Oldest First)</SelectItem>
-                <SelectItem value="amount-desc">Amount (High to Low)</SelectItem>
-                <SelectItem value="amount-asc">Amount (Low to High)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Render children components */}
-          {children}
-        </main>
-      </div>
-    </div>
-  );
-}
-
-function Filters() {
+export function Filters() {
   const [date, setDate] = useState<Date>();
   const [amountRange, setAmountRange] = useState([0, 1000]);
   const [minAmount, setMinAmount] = useState('0');

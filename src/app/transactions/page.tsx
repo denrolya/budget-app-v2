@@ -1,31 +1,41 @@
-import { ArrowRightLeft, Eye, MoreHorizontal } from 'lucide-react';
-import React, { useState } from 'react';
+import { ArrowRightLeft, Eye, MoreHorizontal, SlidersHorizontal } from 'lucide-react';
+import React, { useState, useRef } from 'react';
 
-import { DrawerFooter } from '@/components/ui/drawer.tsx';
-import Layout from '@/app/transactions/layout.tsx';
+import { Filters } from '@/components/transaction-filters.tsx';
 import TransactionForm from '@/components/transaction-form.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  Dialog,
+  Dialog, DialogClose,
   DialogContent,
-  DialogDescription,
+  DialogDescription, DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer.tsx';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
+  SheetDescription, SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -346,86 +356,179 @@ const TransactionItem = ({ transaction, allTransactions, isCompensationView = fa
 
 export default function Component() {
   const allTransactions = mockData.flatMap(group => group.items);
-  const [isTransactionFormOpen, setIsTransactionFormOpen] = useState(false)
+  const [isTransactionFormOpen, setIsTransactionFormOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
+  const [isFormValid, setIsFormValid] = useState(false)
+  const formRef = useRef<{ submitForm: () => void } | null>(null)
+
+  const handleSubmit = async (values: any) => {
+    setIsLoading(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      console.log(values)
+      // Close the dialog after successful submission
+      document.querySelector<HTMLButtonElement>('[data-dialog-close]')?.click()
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
-    <Layout>
-      {/* Desktop version - Dialog */}
-      <div className="hidden md:block">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>Add New Transaction</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>New Transaction</DialogTitle>
-              <DialogDescription>
-                Add a new transaction to your finances
-              </DialogDescription>
-            </DialogHeader>
-            <TransactionForm />
-          </DialogContent>
-          <DrawerFooter className="absolute bottom-0 left-0 right-0 bg-background">
-            <Button onClick={(v) => console.log(v)} className="w-full">Submit</Button>
-          </DrawerFooter>
-        </Dialog>
-      </div>
-
-      {/* Mobile version - Sheet */}
-      <div className="md:hidden">
-        <Sheet open={isTransactionFormOpen} onOpenChange={setIsTransactionFormOpen}>
-          <SheetTrigger asChild>
-            <Button className="w-full">Add New Transaction</Button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>New Transaction</SheetTitle>
-              <SheetDescription>
-                Add a new transaction to your finances
-              </SheetDescription>
-            </SheetHeader>
-            <div className="mt-4">
-              <TransactionForm />
+    <div className="container mx-auto p-4 sm:p-6">
+      <h2 className="text-xl sm:text-2xl font-semibold">Your Transactions</h2>
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+        {/* Drawer for filters on mobile */}
+        <Drawer open={showFilters} onOpenChange={setShowFilters}>
+          <DrawerTrigger asChild>
+            <Button variant="outline" className="lg:hidden mb-4">
+              <SlidersHorizontal className="mr-2 h-4 w-4" />
+              Filters
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent className="h-[80vh] flex flex-col">
+            <DrawerHeader className="flex-shrink-0">
+              <DrawerTitle>Filters</DrawerTitle>
+              <DrawerDescription>Refine your transaction list</DrawerDescription>
+            </DrawerHeader>
+            <div className="flex-grow overflow-y-auto px-4">
+              <Filters />
             </div>
-          </SheetContent>
-        </Sheet>
-      </div>
+            <div className="p-4 border-t">
+              <DrawerClose asChild>
+                <Button className="w-full">Apply Filters</Button>
+              </DrawerClose>
+            </div>
+          </DrawerContent>
+        </Drawer>
 
-      <div className="w-full bg-background">
-        <Accordion type="single" collapsible className="w-full space-y-2">
-          {mockData.map((dateGroup, index) => (
-            <AccordionItem value={`item-${index}`}
-                           key={index}
-                           className="border rounded-lg overflow-hidden bg-card shadow-sm">
-              <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-accent/50">
-                <div className="flex w-full items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-semibold">{dateGroup.date}</span>
-                    <Badge variant="secondary" className="text-xs font-mono">
-                      ${dateGroup.totalSum.toFixed(2)}
-                    </Badge>
+        {/* Sidebar for filters on desktop */}
+        <aside className="hidden lg:block w-64 space-y-6">
+          <Filters />
+        </aside>
+
+        {/* Main content area */}
+        <main className="flex-1 space-y-4 sm:space-y-6">
+          <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4">
+            <Select>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date-desc">Date (Newest First)</SelectItem>
+                <SelectItem value="date-asc">Date (Oldest First)</SelectItem>
+                <SelectItem value="amount-desc">Amount (High to Low)</SelectItem>
+                <SelectItem value="amount-asc">Amount (Low to High)</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Desktop version - Dialog */}
+            <div className="hidden md:block">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button>Add New Transaction</Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>New Transaction</DialogTitle>
+                    <DialogDescription>
+                      Add a new transaction to your finances
+                    </DialogDescription>
+                  </DialogHeader>
+                  <TransactionForm
+                    ref={formRef}
+                    onSubmit={handleSubmit}
+                    onFormStateChange={setIsFormValid}
+                  />
+                  <DialogFooter>
+                      <Button
+                        type="submit"
+                        onClick={() => formRef.current?.submitForm()}
+                        disabled={isLoading || !isFormValid}
+                        className="w-full"
+                      >
+                        {isLoading ? 'Submitting...' : 'Submit'}
+                      </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            {/* Mobile version - Sheet */}
+            <div className="md:hidden">
+              <Sheet open={isTransactionFormOpen} onOpenChange={setIsTransactionFormOpen}>
+                <SheetTrigger asChild>
+                  <Button className="w-full">Add New Transaction</Button>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>New Transaction</SheetTitle>
+                    <SheetDescription>
+                      Add a new transaction to your finances
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-4">
+                    <TransactionForm
+                      ref={formRef}
+                      onSubmit={handleSubmit}
+                      onFormStateChange={setIsFormValid}
+                    />
                   </div>
-                  <div className="flex space-x-2 text-xs text-muted-foreground">
-                    <span>{dateGroup.transactionCount} transactions</span>
-                    <span>{dateGroup.transferCount} transfers</span>
-                  </div>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="space-y-2 px-4 py-2">
-                {dateGroup.items.map((item, itemIndex) => (
-                  <React.Fragment key={itemIndex}>
-                    {item.type === 'transaction' ? (
-                      <TransactionItem transaction={item} allTransactions={allTransactions} />
-                    ) : (
-                      <TransferItem transfer={item} />
-                    )}
-                  </React.Fragment>
-                ))}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+                  <SheetFooter>
+                    <Button
+                      type="submit"
+                      onClick={() => formRef.current?.submitForm()}
+                      disabled={isLoading || !isFormValid}
+                      className="w-full"
+                    >
+                      {isLoading ? 'Submitting...' : 'Submit'}
+                    </Button>
+                  </SheetFooter>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
+
+          <div className="w-full bg-background">
+            <Accordion type="single" collapsible className="w-full space-y-2">
+              {mockData.map((dateGroup, index) => (
+                <AccordionItem value={`item-${index}`}
+                               key={index}
+                               className="border rounded-lg overflow-hidden bg-card shadow-sm">
+                  <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-accent/50">
+                    <div className="flex w-full items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-semibold">{dateGroup.date}</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                        <span>{dateGroup.transactionCount} transactions</span>
+                        <span>{dateGroup.transferCount} transfers</span>
+                        <Badge variant="secondary" className="text-xs font-mono">
+                          ${dateGroup.totalSum.toFixed(2)}
+                        </Badge>
+                      </div>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-2 px-4 py-2">
+                    {dateGroup.items.map((item, itemIndex) => (
+                      <React.Fragment key={itemIndex}>
+                        {item.type === 'transaction' ? (
+                          <TransactionItem transaction={item} allTransactions={allTransactions} />
+                        ) : (
+                          <TransferItem transfer={item} />
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </main>
       </div>
-    </Layout>
+    </div>
   );
 }

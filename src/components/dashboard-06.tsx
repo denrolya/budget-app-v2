@@ -1,3 +1,6 @@
+import { File, ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
+import React, { useState } from 'react';
+
 import AccountForm from '@/components/account-form.tsx';
 import TransactionForm from '@/components/transaction-form.tsx';
 import {
@@ -16,8 +19,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet.tsx';
-import { File, ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
-
 import { FinancialCard } from '@/components/financial-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,7 +34,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import React, { useState } from 'react';
+
 
 export default function Dashboard() {
   const [isAccountFormOpen, setIsAccountFormOpen] = useState(false);

@@ -126,46 +126,46 @@ export function LayoutV9() {
           <Button variant="ghost" size="icon" onClick={toggleSidebar} className="md:hidden">
             {isSidebarExpanded ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
-          <div className="hidden md:flex space-x-2">
+          <nav className="hidden md:flex space-x-4">
             <Link
               to="/dashboard"
-              className="inline-flex h-8 items-center justify-center rounded-md bg-background px-4 py-2 text-sm transition-colors hover:text-foreground/80 text-foreground focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+              className="text-sm transition-colors hover:text-foreground/80 text-foreground focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:text-primary"
             >
               Dashboard
             </Link>
             <Link
               to="/transactions"
-              className="inline-flex h-8 items-center justify-center rounded-md bg-background px-4 py-2 text-sm transition-colors hover:text-foreground/80 text-foreground/60 focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+              className="text-sm transition-colors hover:text-foreground/80 text-foreground/60 focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:text-primary"
             >
               Transactions
             </Link>
             <Link
               to="/debts"
-              className="inline-flex h-8 items-center justify-center rounded-md bg-background px-4 py-2 text-sm transition-colors hover:text-foreground/80 text-foreground/60 focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+              className="text-sm transition-colors hover:text-foreground/80 text-foreground/60 focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:text-primary"
             >
               Debts
             </Link>
             <Link
               to="#"
-              className="inline-flex h-8 items-center justify-center rounded-md bg-background px-4 py-2 text-sm transition-colors hover:text-foreground/80 text-foreground/60 focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+              className="text-sm transition-colors hover:text-foreground/80 text-foreground/60 focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:text-primary"
             >
               Accounts
             </Link>
             <Link
               to="#"
-              className="inline-flex h-8 items-center justify-center rounded-md bg-background px-4 py-2 text-sm transition-colors hover:text-foreground/80 text-foreground/60 focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+              className="text-sm transition-colors hover:text-foreground/80 text-foreground/60 focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:text-primary"
             >
               Reports
             </Link>
             <Link
               to="#"
-              className="inline-flex h-9 items-center justify-center rounded-md bg-background px-4 py-2 text-sm transition-colors hover:text-foreground/80 text-foreground/60 focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+              className="text-sm font-medium transition-colors hover:text-foreground/80 text-foreground/60 focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:text-primary"
             >
               Categories
             </Link>
-          </div>
+          </nav>
         </div>
-        <Separator orientation="vertical" />
+        <Separator orientation="vertical" className="hidden md:block" />
         <div className="flex items-center space-x-2 md:space-x-4">
           <Sheet>
             <SheetTrigger asChild>

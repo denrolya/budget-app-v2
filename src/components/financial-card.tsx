@@ -1,4 +1,4 @@
-import classNames from 'classnames';
+import cn from 'classnames';
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
+import MultiSelect from '@/components/ui/multiselect.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -121,7 +122,7 @@ export const FinancialCard = ({
     React.ElementRef<typeof SheetContent>,
     React.ComponentPropsWithoutRef<typeof SheetContent>
   >(({ className, ...props }, ref) => (
-    <div className={classNames('px-4 py-3', className)} {...props} ref={ref}>
+    <div className={cn('px-4 py-3', className)} {...props} ref={ref}>
       <div className="space-y-4">
         <div>
           <h4 className="mb-2 text-sm font-medium">Type</h4>
@@ -154,7 +155,7 @@ export const FinancialCard = ({
                 >
                   All Categories
                   <CheckIcon
-                    className={classNames(
+                    className={cn(
                       'ml-auto h-4 w-4',
                       category === null ? 'opacity-100' : 'opacity-0',
                     )}
@@ -168,7 +169,7 @@ export const FinancialCard = ({
                   >
                     {cat}
                     <CheckIcon
-                      className={classNames(
+                      className={cn(
                         'ml-auto h-4 w-4',
                         category === cat ? 'opacity-100' : 'opacity-0',
                       )}
@@ -234,7 +235,7 @@ export const FinancialCard = ({
 
   if (loading) {
     return (
-      <Card className="w-full sm:w-[240px] h-[120px] overflow-hidden">
+      <Card className="w-full h-[120px] overflow-hidden">
         <CardContent className="p-4">
           <div className="space-y-2">
             <Skeleton className="h-4 w-[100px]" />
@@ -247,7 +248,7 @@ export const FinancialCard = ({
   }
 
   return (
-    <Card className="w-full sm:w-[240px] h-[120px] overflow-hidden">
+    <Card className="w-full sm:min-w-[240px] h-[120px] overflow-hidden">
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
           <div>
@@ -309,9 +310,11 @@ export const FinancialCard = ({
                             >
                               All Categories
                               <CheckIcon
-                                className={classNames(
-                                  'ml-auto h-4 w-4',
-                                  category === null ? 'opacity-100' : 'opacity-0',
+                                className={cn(
+                                  'ml-auto h-4 w-4', {
+                                    'opacity-100': category === null,
+                                    'opacity-0': category !== null,
+                                  }
                                 )}
                               />
                             </CommandItem>
@@ -326,9 +329,11 @@ export const FinancialCard = ({
                               >
                                 {cat}
                                 <CheckIcon
-                                  className={classNames(
-                                    'ml-auto h-4 w-4',
-                                    category === cat ? 'opacity-100' : 'opacity-0',
+                                  className={cn(
+                                    'ml-auto h-4 w-4', {
+                                      'opacity-100': category === cat,
+                                      'opacity-0': category !== cat,
+                                    }
                                   )}
                                 />
                               </CommandItem>
@@ -399,9 +404,11 @@ export const FinancialCard = ({
         </div>
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-bold">${amount.toLocaleString()}</span>
-          <div className={classNames(
-            'flex items-center',
-            isPositive ? 'text-success' : 'text-destructive',
+          <div className={cn(
+            'flex items-center', {
+              'text-success': isPositive,
+              'text-destructive': !isPositive,
+            }
           )}>
             {isIncrease ? (
               <ArrowUpIcon className="h-4 w-4" aria-hidden="true" />
