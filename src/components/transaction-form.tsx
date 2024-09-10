@@ -1,64 +1,84 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
 import { ArrowDownCircle, ArrowUpCircle, Check, ChevronsUpDown, X } from 'lucide-react';
+import moment from 'moment';
 import { forwardRef, useEffect, useImperativeHandle } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
-
-const categories = [
-  { id: 1, name: 'Groceries', rootCategory: 'Food', icon: '🍎' },
-  { id: 2, name: 'Restaurants', rootCategory: 'Food', icon: '🍽️' },
-  { id: 3, name: 'Rent', rootCategory: 'Housing', icon: '🏠' },
-  { id: 4, name: 'Utilities', rootCategory: 'Housing', icon: '💡' },
-  { id: 5, name: 'Salary', rootCategory: 'Income', icon: '💼' },
-];
+import { Transaction, Type } from '@/models/transaction';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const accounts = [
-  { id: 1, name: 'Main Checking', currency: 'USD', icon: '🏦' },
-  { id: 2, name: 'Savings', currency: 'USD', icon: '💰' },
-  { id: 3, name: 'Credit Card', currency: 'USD', icon: '💳' },
+  { id: 1, name: 'Main Checking', currency: 'USD', icon: '🏦', color: '#FF0000' },
+  { id: 2, name: 'Savings', currency: 'USD', icon: '💰', color: '#00FF00' },
+  { id: 3, name: 'Credit Card', currency: 'USD', icon: '💳', color: '#0000FF' },
+];
+
+const categories = [
+  { id: 1, name: 'Groceries', icon: '🍎' },
+  { id: 2, name: 'Restaurants', icon: '🍽️' },
+  { id: 3, name: 'Rent', icon: '🏠' },
+  { id: 4, name: 'Utilities', icon: '💡' },
+  { id: 5, name: 'Salary', icon: '💼' },
 ];
 
 const formSchema = z.object({
-  type: z.enum(['expense', 'income']),
+  type: z.nativeEnum(Type),
+  accountId: z.number(),
   amount: z.number().min(0, 'Amount is required'),
-  category: z.string().min(1, 'Category is required'),
-  account: z.string().min(1, 'Account is required'),
-  date: z.string().min(1, 'Date is required'),
+  categoryId: z.number(),
+  executedAt: z.string().min(1, 'Date is required'),
   note: z.string().optional(),
+  isDraft: z.boolean(),
   compensations: z.array(
     z.object({
+      accountId: z.number(),
       amount: z.number().min(1, 'Amount is required'),
-      account: z.string().min(1, 'Account is required'),
-      date: z.string().min(1, 'Date is required'),
+      executedAt: z.string().min(1, 'Date is required'),
     }),
   ).optional(),
 });
 
-interface Props {
-  onSubmit: (data: z.infer<typeof formSchema>) => void;
-  onFormStateChange: (isValid: boolean) => void;
+interface TransactionFormProps {
+  data: Transaction | undefined;
+  isEditing: boolean;
+  onClose: () => void;
+  setIsFormValid: (isValid: boolean) => void;
 }
 
-export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ onSubmit, onFormStateChange }, ref) => {
+interface TransactionFormRef {
+  submitForm: () => Promise<void>;
+}
+
+export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>(({
+                                                                                       data,
+                                                                                       isEditing,
+                                                                                       onClose,
+                                                                                       setIsFormValid,
+                                                                                     }, ref) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: 'expense',
-      category: '',
-      account: '',
-      amount: 0,
-      date: '',
-      note: '',
-      compensations: [],
+      type: data?.type || Type.Expense,
+      accountId: data?.account.id || accounts[0].id,
+      amount: data?.amount || 0,
+      categoryId: data?.category.id || categories[0].id,
+      executedAt: data?.executedAt.format('YYYY-MM-DDTHH:mm') || moment().format('YYYY-MM-DDTHH:mm'),
+      note: data?.note || '',
+      isDraft: data?.isDraft || false,
+      compensations: data?.compensations?.map(comp => ({
+        accountId: comp.account.id,
+        amount: comp.amount,
+        executedAt: comp.executedAt.format('YYYY-MM-DDTHH:mm'),
+      })) || [],
     },
     mode: 'onChange',
   });
@@ -73,8 +93,20 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
   }));
 
   useEffect(() => {
-    onFormStateChange(form.formState.isValid);
-  }, [form.formState.isValid, onFormStateChange]);
+    setIsFormValid(form.formState.isValid);
+  }, [form.formState.isValid, setIsFormValid]);
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      console.log('Form submitted:', values);
+      if (isEditing && data?.id) {
+        values.id = data.id;
+      }
+      onClose();
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
+  };
 
   return (
     <Form {...form}>
@@ -89,22 +121,22 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
                 <div className="flex space-x-2">
                   <Button
                     type="button"
-                    variant={field.value === 'expense' ? 'default' : 'outline'}
+                    variant={field.value === Type.Expense ? 'default' : 'outline'}
                     className={cn('w-full justify-start space-x-2', {
-                      'bg-primary text-primary-foreground': field.value === 'expense',
+                      'bg-primary text-primary-foreground': field.value === Type.Expense,
                     })}
-                    onClick={() => field.onChange('expense')}
+                    onClick={() => field.onChange(Type.Expense)}
                   >
                     <ArrowUpCircle className="h-4 w-4" />
                     <span>Expense</span>
                   </Button>
                   <Button
                     type="button"
-                    variant={field.value === 'income' ? 'default' : 'outline'}
+                    variant={field.value === Type.Income ? 'default' : 'outline'}
                     className={cn('w-full justify-start space-x-2', {
-                      'bg-primary text-primary-foreground': field.value === 'income',
+                      'bg-primary text-primary-foreground': field.value === Type.Income,
                     })}
-                    onClick={() => field.onChange('income')}
+                    onClick={() => field.onChange(Type.Income)}
                   >
                     <ArrowDownCircle className="h-4 w-4" />
                     <span>Income</span>
@@ -124,7 +156,9 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
               <FormItem className="flex-1">
                 <FormLabel>Amount</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="Enter amount" {...field} onChange={e => field.onChange(e.target.valueAsNumber)} />
+                  <Input type="number"
+                         placeholder="Enter amount" {...field}
+                         onChange={e => field.onChange(e.target.valueAsNumber)} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -133,7 +167,7 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
 
           <FormField
             control={form.control}
-            name="account"
+            name="accountId"
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel>Account</FormLabel>
@@ -146,7 +180,7 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
                         className={cn('w-full justify-between', {
                           'text-muted-foreground': !field.value,
                         })}>
-                        {field.value || 'Select account'}
+                        {accounts.find(account => account.id === field.value)?.name || 'Select account'}
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </FormControl>
@@ -162,12 +196,12 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
                               value={account.name}
                               key={account.id}
                               onSelect={() => {
-                                form.setValue('account', account.name);
+                                form.setValue('accountId', account.id);
                               }}
                             >
                               <Check className={cn('mr-2 h-4 w-4', {
-                                'opacity-100': account.name === field.value,
-                                'opacity-0': account.name !== field.value,
+                                'opacity-100': account.id === field.value,
+                                'opacity-0': account.id !== field.value,
                               })} />
                               {account.icon} {account.name}
                             </CommandItem>
@@ -185,7 +219,7 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
 
         <FormField
           control={form.control}
-          name="date"
+          name="executedAt"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Date & Time</FormLabel>
@@ -199,7 +233,7 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
 
         <FormField
           control={form.control}
-          name="category"
+          name="categoryId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
@@ -212,7 +246,7 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
                       className={cn('w-full justify-between', {
                         'text-muted-foreground': !field.value,
                       })}>
-                      {field.value || 'Select category'}
+                      {categories.find(category => category.id === field.value)?.name || 'Select category'}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </FormControl>
@@ -228,12 +262,12 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
                             value={category.name}
                             key={category.id}
                             onSelect={() => {
-                              form.setValue('category', category.name);
+                              form.setValue('categoryId', category.id);
                             }}
                           >
                             <Check className={cn('mr-2 h-4 w-4', {
-                              'opacity-100': category.name === field.value,
-                              'opacity-0': category.name !== field.value,
+                              'opacity-100': category.id === field.value,
+                              'opacity-0': category.id !== field.value,
                             })} />
                             {category.icon} {category.name}
                           </CommandItem>
@@ -262,7 +296,30 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
           )}
         />
 
-        {form.watch('type') === 'expense' && (
+        <FormField
+          control={form.control}
+          name="isDraft"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>
+                  Draft
+                </FormLabel>
+                <p className="text-sm text-muted-foreground">
+                  This transaction will be saved as a draft.
+                </p>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        {form.watch('type') === Type.Expense && (
           <div>
             <Label>Compensations</Label>
             {fields.map((field, index) => (
@@ -288,7 +345,7 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
                   />
                   <FormField
                     control={form.control}
-                    name={`compensations.${index}.account`}
+                    name={`compensations.${index}.accountId`}
                     render={({ field }) => (
                       <FormItem className="flex-1">
                         <Popover>
@@ -300,7 +357,7 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
                                 className={cn('w-full justify-between', {
                                   'text-muted-foreground': !field.value,
                                 })}>
-                                {field.value || 'Account'}
+                                {accounts.find(account => account.id === field.value)?.name || 'Account'}
                                 <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
                             </FormControl>
@@ -315,12 +372,12 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
                                     value={account.name}
                                     key={account.id}
                                     onSelect={() => {
-                                      form.setValue(`compensations.${index}.account`, account.name);
+                                      form.setValue(`compensations.${index}.accountId`, account.id);
                                     }}
                                   >
                                     <Check className={cn('mr-2 h-4 w-4', {
-                                      'opacity-100': account.name === field.value,
-                                      'opacity-0': account.name !== field.value,
+                                      'opacity-100': account.id === field.value,
+                                      'opacity-0': account.id !== field.value,
                                     })} />
                                     {account.icon} {account.name}
                                   </CommandItem>
@@ -337,7 +394,7 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
                 <div className="flex items-center gap-2">
                   <FormField
                     control={form.control}
-                    name={`compensations.${index}.date`}
+                    name={`compensations.${index}.executedAt`}
                     render={({ field }) => (
                       <FormItem className="flex-1">
                         <FormControl>
@@ -365,7 +422,11 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
             <Button
               type="button"
               className="mt-2 w-full"
-              onClick={() => append({ amount: 0, account: '', date: '' })}
+              onClick={() => append({
+                accountId: accounts[0].id,
+                amount: 0,
+                executedAt: moment().format('YYYY-MM-DDTHH:mm'),
+              })}
             >
               Add Compensation
             </Button>
@@ -375,5 +436,3 @@ export const TransactionForm = forwardRef<{ submitForm: () => void }, Props>(({ 
     </Form>
   );
 });
-
-export default TransactionForm;

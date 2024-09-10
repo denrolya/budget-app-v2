@@ -1,24 +1,30 @@
 import { Outlet } from 'react-router-dom';
 
 import { CurrencyConverter } from '@/components/currency-converter';
+import { FormRenderer } from '@/components/form-renderer';
 import { Header } from '@/components/header';
 import { Sidebar } from '@/components/sidebar';
+import { FormProvider } from '@/contexts/form.tsx';
 import { SidebarProvider } from '@/contexts/sidebar.tsx';
 
 export const LayoutV9 = () => (
-  <SidebarProvider>
-    <div className="h-screen bg-background flex flex-col">
-      <Header />
+  <FormProvider>
+    <SidebarProvider>
+      <div className="h-screen bg-background flex flex-col">
+        <Header />
 
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar />
 
-        <main className="flex-1 overflow-auto bg-background">
-          <Outlet />
-        </main>
+          <main className="flex-1 overflow-auto bg-background">
+            <Outlet />
+          </main>
+        </div>
+
+        <CurrencyConverter />
       </div>
 
-      <CurrencyConverter />
-    </div>
-  </SidebarProvider>
+      <FormRenderer />
+    </SidebarProvider>
+  </FormProvider>
 );

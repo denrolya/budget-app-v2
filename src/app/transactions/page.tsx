@@ -1,23 +1,13 @@
 import { SlidersHorizontal } from 'lucide-react';
-import React, { useRef, useState } from 'react';
 import moment from 'moment';
+import React, { useState } from 'react';
 
 import { TransactionListItem } from '@/app/transactions/transaction-list-item';
 import { TransferListItem } from '@/app/transactions/transfer-list-item';
 import { Filters } from '@/components/transaction-filters';
-import TransactionForm from '@/components/transaction-form';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import {
   Drawer,
   DrawerClose,
@@ -29,6 +19,7 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useForm } from '@/contexts/form.tsx';
 import { Transaction, Type } from '@/models/transaction.ts';
 import { Transfer } from '@/models/transfer.ts';
 import { generateTransactions } from '@/services/transactions-generator.ts';
@@ -77,35 +68,34 @@ const groupItemsByDate = (items: (Transaction | Transfer)[]): GroupedData[] => {
 };
 
 export default function Component() {
-  const [isTransactionFormOpen, setIsTransactionFormOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isFormValid, setIsFormValid] = useState(false);
-  const formRef = useRef<{ submitForm: () => void } | null>(null);
+
+  const { openForm } = useForm();
+
+  const handleNewTransaction = () => {
+    openForm('transaction');
+  };
+
+  const handleEditTransaction = () => {
+    const existingTransaction = {
+      id: '123',
+      amount: 50,
+      description: 'Groceries',
+      type: 'expense',
+      category: 'Food',
+      date: '2023-06-15',
+    };
+    openForm('transaction', existingTransaction, true);
+  };
 
   const mockData = groupItemsByDate([
-    ...generateTransactions(5, '2024-01-01',1),
+    ...generateTransactions(5, '2024-01-01', 1),
     ...generateTransfers(2, '2024-01-01'),
-    ...generateTransactions(3, '2024-01-02',1),
+    ...generateTransactions(3, '2024-01-02', 1),
     ...generateTransfers(1, '2024-01-02'),
-    ...generateTransactions(8, '2024-01-03',1),
-    ...generateTransfers(1, '2024-01-03')
+    ...generateTransactions(8, '2024-01-03', 1),
+    ...generateTransfers(1, '2024-01-03'),
   ]);
-
-  const handleSubmit = async (values: never) => {
-    setIsLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log(values);
-      // Close the dialog after successful submission
-      document.querySelector<HTMLButtonElement>('[data-dialog-close]')?.click();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="container mx-auto p-4 sm:p-6">
@@ -155,102 +145,40 @@ export default function Component() {
               </SelectContent>
             </Select>
 
-            {/* Desktop version - Dialog */}
-            <div className="hidden md:block">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button>Add New Transaction</Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>New Transaction</DialogTitle>
-                    <DialogDescription>
-                      Add a new transaction to your finances
-                    </DialogDescription>
-                  </DialogHeader>
-                  <TransactionForm
-                    ref={formRef}
-                    onSubmit={handleSubmit}
-                    onFormStateChange={setIsFormValid}
-                  />
-                  <DialogFooter>
-                    <Button
-                      type="submit"
-                      onClick={() => formRef.current?.submitForm()}
-                      disabled={isLoading || !isFormValid}
-                      className="w-full"
-                    >
-                      {isLoading ? 'Submitting...' : 'Submit'}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+            <div className="w-full bg-background">
+              <Button onClick={handleNewTransaction}>New Transaction</Button>
+              <Button onClick={handleEditTransaction}>Edit Transaction</Button>
+              <Accordion type="single" collapsible className="w-full space-y-2">
+                {mockData.map((dateGroup, index) => (
+                  <AccordionItem className="border rounded-lg overflow-hidden bg-card shadow-sm"
+                                 value={`item-${index}`}
+                                 key={index}>
+                    <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-accent/50">
+                      <div className="flex w-full items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">{dateGroup.date}</span>
+                        </div>
+                        <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                          <span>{dateGroup.transactionCount} transactions</span>
+                          <span>{dateGroup.transferCount} transfers</span>
+                          <Badge variant="secondary" className="text-xs font-mono">
+                            ${dateGroup.totalSum.toFixed(2)}
+                          </Badge>
+                        </div>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-2 px-4 py-2">
+                      {dateGroup.items.map((item, itemIndex) => (
+                        <React.Fragment key={itemIndex}>
+                          {(item instanceof Transaction) && <TransactionListItem transaction={item} />}
+                          {(item instanceof Transfer) && <TransferListItem transfer={item} />}
+                        </React.Fragment>
+                      ))}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </div>
-
-            {/* Mobile version - Drawer */}
-            <Drawer open={isTransactionFormOpen} onOpenChange={setIsTransactionFormOpen}>
-              <DrawerTrigger asChild>
-                <Button className="w-full md:hidden">Add New Transaction</Button>
-              </DrawerTrigger>
-              <DrawerContent className="h-[80vh] flex flex-col">
-                <DrawerHeader>
-                  <DrawerTitle>New Transaction</DrawerTitle>
-                  <DrawerDescription>
-                    Add a new transaction to your finances
-                  </DrawerDescription>
-                </DrawerHeader>
-                <div className="flex-grow overflow-y-auto px-4 pb-4">
-                  <TransactionForm
-                    ref={formRef}
-                    onSubmit={handleSubmit}
-                    onFormStateChange={setIsFormValid}
-                  />
-                </div>
-                <DrawerFooter className="p-4 border-t">
-                  <Button
-                    type="submit"
-                    onClick={() => formRef.current?.submitForm()}
-                    disabled={isLoading || !isFormValid}
-                    className="w-full"
-                  >
-                    {isLoading ? 'Submitting...' : 'Submit'}
-                  </Button>
-                </DrawerFooter>
-              </DrawerContent>
-            </Drawer>
-          </div>
-
-          <div className="w-full bg-background">
-            <Accordion type="single" collapsible className="w-full space-y-2">
-              {mockData.map((dateGroup, index) => (
-                <AccordionItem value={`item-${index}`}
-                               key={index}
-                               className="border rounded-lg overflow-hidden bg-card shadow-sm">
-                  <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-accent/50">
-                    <div className="flex w-full items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-semibold">{dateGroup.date}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                        <span>{dateGroup.transactionCount} transactions</span>
-                        <span>{dateGroup.transferCount} transfers</span>
-                        <Badge variant="secondary" className="text-xs font-mono">
-                          ${dateGroup.totalSum.toFixed(2)}
-                        </Badge>
-                      </div>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-2 px-4 py-2">
-                    {dateGroup.items.map((item, itemIndex) => (
-                      <React.Fragment key={itemIndex}>
-                        {(item instanceof Transaction) && <TransactionListItem transaction={item} />}
-                        {(item instanceof Transfer) && <TransferListItem transfer={item} />}
-                      </React.Fragment>
-                    ))}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
           </div>
         </main>
       </div>
