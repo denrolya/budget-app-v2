@@ -45,7 +45,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 interface Transaction {
   id: string;
-  type: 'transaction' | 'transfer';
+  type: 'transaction';
   amount: number;
   account: string;
   category: string;

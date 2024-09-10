@@ -2,5 +2,8 @@ services:
     web:
         build: .
         ports:
-            - "80:80"
+            - "5173:80"
         restart: always
+        container_name: budget-app-v2
+        environment:
+            - NODE_ENV=production

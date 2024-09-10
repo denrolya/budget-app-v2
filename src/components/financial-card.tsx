@@ -47,7 +47,7 @@ const comparisons = [
   { value: 'same-last-year', label: 'Same period last year' },
 ];
 
-type CardProps = {
+interface CardProps {
   initialType?: 'income' | 'expense'
   initialCategory?: string | null
   initialPeriod?: 'week' | 'month' | 'year'
@@ -63,7 +63,7 @@ export const FinancialCard = ({
                                 initialComparison = 'previous',
                                 amount = 1200,
                                 previousAmount = 1000,
-                              }: CardProps) =>  {
+                              }: CardProps) => {
   const [type, setType] = useState(initialType);
   const [category, setCategory] = useState(initialCategory);
   const [period, setPeriod] = useState(initialPeriod);
@@ -187,7 +187,7 @@ export const FinancialCard = ({
               variant={period === p.value ? 'default' : 'outline'}
               size="sm"
               className="mr-2 mb-2"
-              onClick={() => setPeriod(p.value)}
+              onClick={() => setPeriod(p.value as 'month' | 'week' | 'year')}
             >
               {p.label}
             </Button>
@@ -201,7 +201,7 @@ export const FinancialCard = ({
               variant={comparison === c.value ? 'default' : 'outline'}
               size="sm"
               className="mr-2 mb-2"
-              onClick={() => setComparison(c.value)}
+              onClick={() => setComparison(c.value as 'previous' | 'same-last-year')}
             >
               {c.label}
             </Button>
@@ -313,7 +313,7 @@ export const FinancialCard = ({
                                   'ml-auto h-4 w-4', {
                                     'opacity-100': category === null,
                                     'opacity-0': category !== null,
-                                  }
+                                  },
                                 )}
                               />
                             </CommandItem>
@@ -332,7 +332,7 @@ export const FinancialCard = ({
                                     'ml-auto h-4 w-4', {
                                       'opacity-100': category === cat,
                                       'opacity-0': category !== cat,
-                                    }
+                                    },
                                   )}
                                 />
                               </CommandItem>
@@ -348,7 +348,9 @@ export const FinancialCard = ({
                       Set period
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent>
-                      <DropdownMenuRadioGroup value={period} onValueChange={setPeriod}>
+                      <DropdownMenuRadioGroup
+                        value={comparison}
+                        onValueChange={(value: string) => setPeriod(value as 'week' | 'month' | 'year')}>
                         {periods.map((p) => (
                           <DropdownMenuRadioItem key={p.value} value={p.value}>
                             {p.label}
@@ -363,7 +365,9 @@ export const FinancialCard = ({
                       Set comparison
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent>
-                      <DropdownMenuRadioGroup value={comparison} onValueChange={setComparison}>
+                      <DropdownMenuRadioGroup
+                        value={comparison}
+                        onValueChange={(value: string) => setComparison(value as 'previous' | 'same-last-year')}>
                         {comparisons.map((c) => (
                           <DropdownMenuRadioItem key={c.value} value={c.value}>
                             {c.label}
@@ -407,7 +411,7 @@ export const FinancialCard = ({
             'flex items-center', {
               'text-success': isPositive,
               'text-destructive': !isPositive,
-            }
+            },
           )}>
             {isIncrease ? (
               <ArrowUpIcon className="h-4 w-4" aria-hidden="true" />
