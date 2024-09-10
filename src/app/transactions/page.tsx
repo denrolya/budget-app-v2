@@ -1,12 +1,14 @@
-import { ArrowRightLeft, Eye, MoreHorizontal, SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
 import React, { useRef, useState } from 'react';
+import moment from 'moment';
 
+import { TransactionListItem } from '@/app/transactions/transaction-list-item';
+import { TransferListItem } from '@/app/transactions/transfer-list-item';
 import { Filters } from '@/components/transaction-filters';
 import TransactionForm from '@/components/transaction-form';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -26,442 +28,69 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Transaction, Type } from '@/models/transaction.ts';
+import { Transfer } from '@/models/transfer.ts';
+import { generateTransactions } from '@/services/transactions-generator.ts';
+import { generateTransfers } from '@/services/transfers-generator.ts';
 
-// Transaction example
-// {
-//             "id": 12992,
-//             "account": {
-//                 "icon": "ion-ios-card",
-//                 "id": 10,
-//                 "name": "Mono UAH",
-//                 "currency": "UAH",
-//                 "color": "#DAA520"
-//             },
-//             "amount": 266.88,
-//             "convertedValues": {
-//                 "BTC": 0.00012014461688354172,
-//                 "EUR": 5.869300521140137,
-//                 "HUF": 2312.229469684902,
-//                 "UAH": 266.88,
-//                 "USD": 6.510562688178345
-//             },
-//             "note": "Test note",
-//             "executedAt": "2024-09-07T06:19:00+00:00",
-//             "category": {
-//                 "id": 160,
-//                 "name": "Test Category",
-//                 "icon": ""
-//             },
-//             "isDraft": false,
-//             "compensations": [],
-//             "type": "expense"
-//         }
-
-// Transfer example data
-// {
-//             "id": 597,
-//             "from": {
-//                 "id": 2,
-//                 "name": "Cash EUR",
-//                 "currency": "EUR",
-//                 "color": "#4682B4",
-//                 "icon": "ion-ios-cash"
-//             },
-//             "to": {
-//                 "id": 9,
-//                 "name": "Cash HUF",
-//                 "currency": "HUF",
-//                 "color": "#FF4500",
-//                 "icon": "ion-ios-cash"
-//             },
-//             "amount": 160,
-//             "rate": 390,
-//             "fee": 0,
-//             "note": "",
-//             "executedAt": "2024-08-12T13:42:00+00:00"
-//         }
-
-interface Transaction {
-  id: string;
-  type: 'transaction';
-  amount: number;
-  account: string;
-  category: string;
-  executionDate: string;
-  description: string;
-  note: string;
-  compensationIds?: string[];
-  compensatedId?: string;
-  from?: string;
-  to?: string;
-  exchangeRate?: number;
-  fees?: number;
-  fromTransaction?: Transaction;
-  toTransaction?: Transaction;
+interface GroupedData {
+  date: string;
+  totalSum: number;
+  transactionCount: number;
+  transferCount: number;
+  items: (Transaction | Transfer)[];
 }
 
-interface Transfer {
-  id: string;
-  type: 'transfer';
-  amount: number;
-  from: string;
-  to: string;
-  executionDate: string;
-  exchangeRate: number;
-  fees: number;
-  fromTransaction: Transaction;
-  toTransaction: Transaction;
-}
+const groupItemsByDate = (items: (Transaction | Transfer)[]): GroupedData[] => {
+  const groupedData = items.reduce((acc: GroupedData[], item) => {
+    const date = item.executedAt.format('YYYY-MM-DD');
+    const existingGroup = acc.find(group => group.date === date);
 
-interface TransactionDetailsProps {
-  transaction: Transaction;
-  allTransactions: Transaction[];
-}
+    if (existingGroup) {
+      existingGroup.items.push(item);
+      if (item instanceof Transaction) {
+        existingGroup.transactionCount++;
+        existingGroup.totalSum = item.type === Type.Income ? existingGroup.totalSum + item.amount : existingGroup.totalSum - item.amount;
+      } else {
+        existingGroup.transferCount++;
+      }
+    } else {
+      acc.push({
+        date,
+        totalSum: (item instanceof Transaction ? (item.type === Type.Income ? item.amount : -item.amount) : 0),
+        transactionCount: item instanceof Transaction ? 1 : 0,
+        transferCount: item instanceof Transfer ? 1 : 0,
+        items: [item],
+      });
+    }
 
-interface TransferDetailsProps {
-  transfer: Transfer;
-}
+    return acc;
+  }, []);
 
-// Updated mock data to include multiple compensations
-const mockData = [
-  {
-    date: '2023-07-01',
-    totalSum: 220,
-    transactionCount: 2,
-    transferCount: 1,
-    items: [
-      {
-        id: 'T001',
-        type: 'transaction',
-        amount: 50,
-        account: 'Checking',
-        category: 'Groceries',
-        executionDate: '2023-07-01 09:30',
-        description: 'Grocery shopping',
-        note: 'Weekly groceries',
-      },
-      {
-        id: 'TR001',
-        type: 'transfer',
-        amount: 200,
-        from: 'Savings',
-        to: 'Checking',
-        executionDate: '2023-07-01 14:00',
-        exchangeRate: 1,
-        fees: 0,
-        fromTransaction: {
-          id: 'T002',
-          amount: -200,
-          account: 'Savings',
-          category: 'Transfer',
-          executionDate: '2023-07-01 14:00',
-          description: 'Transfer to Checking',
-          note: 'Monthly budget transfer',
-        },
-        toTransaction: {
-          id: 'T003',
-          amount: 200,
-          account: 'Checking',
-          category: 'Transfer',
-          executionDate: '2023-07-01 14:00',
-          description: 'Transfer from Savings',
-          note: 'Monthly budget transfer',
-        },
-      },
-      {
-        id: 'T004',
-        type: 'transaction',
-        amount: -30,
-        account: 'Credit Card',
-        category: 'Dining',
-        executionDate: '2023-07-01 20:15',
-        description: 'Restaurant bill',
-        note: 'Dinner with friends',
-        compensationIds: ['T006', 'T007'],
-      },
-    ],
-  },
-  {
-    date: '2023-07-02',
-    totalSum: 985,
-    transactionCount: 3,
-    transferCount: 0,
-    items: [
-      {
-        id: 'T005',
-        type: 'transaction',
-        amount: -15,
-        account: 'Debit Card',
-        category: 'Food & Drink',
-        executionDate: '2023-07-02 08:45',
-        description: 'Coffee shop',
-        note: 'Morning coffee',
-      },
-      {
-        id: 'T006',
-        type: 'transaction',
-        amount: 20,
-        account: 'Checking',
-        category: 'Compensation',
-        executionDate: '2023-07-02 09:00',
-        description: 'Partial compensation for dinner',
-        note: 'Reimbursement for T004',
-        compensatedId: 'T004',
-      },
-      {
-        id: 'T007',
-        type: 'transaction',
-        amount: 10,
-        account: 'Checking',
-        category: 'Compensation',
-        executionDate: '2023-07-02 10:00',
-        description: 'Final compensation for dinner',
-        note: 'Reimbursement for T004',
-        compensatedId: 'T004',
-      },
-    ],
-  },
-];
+  // Sort items in each group by executedAt in descending order
+  groupedData.forEach(group => {
+    group.items.sort((a, b) => moment(b.executedAt).valueOf() - moment(a.executedAt).valueOf());
+  });
 
-const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transaction, allTransactions }) => {
-  const compensations = transaction.compensationIds
-    ? transaction.compensationIds.map(id => allTransactions.find(t => t.id === id)).filter(Boolean)
-    : [];
-  const compensatedTransaction = transaction.compensatedId
-    ? allTransactions.find(t => t.id === transaction.compensatedId)
-    : null;
-
-  return (
-    <div className="space-y-4">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-1/3">Field</TableHead>
-            <TableHead>Value</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {Object.entries(transaction).map(([key, value]) => (
-            <TableRow key={key}>
-              <TableCell className="font-medium">{key}</TableCell>
-              <TableCell>{typeof value === 'object' ? JSON.stringify(value) : value}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {compensations.length > 0 && (
-        <div>
-          <h3 className="font-semibold mb-2">Compensation Transactions:</h3>
-          <div className="space-y-2">
-            {compensations.map(comp => (
-              comp &&
-              <TransactionItem key={comp.id} transaction={comp} allTransactions={allTransactions} isCompensationView />
-            ))}
-          </div>
-        </div>
-      )}
-      {compensatedTransaction && (
-        <div>
-          <h3 className="font-semibold mb-2">Compensated Transaction:</h3>
-          <TransactionItem transaction={compensatedTransaction} allTransactions={allTransactions} isCompensationView />
-        </div>
-      )}
-    </div>
-  );
-};
-
-const TransferDetails: React.FC<TransferDetailsProps> = ({ transfer }) => (
-  <div className="space-y-4">
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-1/3">Field</TableHead>
-          <TableHead>Value</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {Object.entries(transfer).map(([key, value]) => {
-          if (key !== 'fromTransaction' && key !== 'toTransaction') {
-            return (
-              <TableRow key={key}>
-                <TableCell className="font-medium">{key}</TableCell>
-                <TableCell>{typeof value === 'number' ? (value as number).toFixed(2) : (value as string)}</TableCell>
-              </TableRow>
-            );
-          }
-          return null;
-        })}
-      </TableBody>
-    </Table>
-    <div>
-      <h3 className="font-semibold mb-2">Related Transactions:</h3>
-      <div className="space-y-2">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">View From Transaction</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>From Transaction Details</DialogTitle>
-            </DialogHeader>
-            <TransactionDetails transaction={transfer.fromTransaction} allTransactions={[]} />
-          </DialogContent>
-        </Dialog>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">View To Transaction</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>To Transaction Details</DialogTitle>
-            </DialogHeader>
-            <TransactionDetails transaction={transfer.toTransaction} allTransactions={[]} />
-          </DialogContent>
-        </Dialog>
-      </div>
-    </div>
-  </div>
-);
-
-interface TransferItemProps {
-  transfer: Transfer;
-}
-
-const TransferItem: React.FC<TransferItemProps> = ({ transfer }) => (
-  <Card className="my-2 border-l-4 border-l-primary shadow-md hover:shadow-lg transition-shadow">
-    <CardContent className="p-0">
-      <Accordion type="single" collapsible>
-        <AccordionItem value="item-1" className="border-none">
-          <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-accent/50">
-            <div className="flex w-full items-center justify-between">
-              <div className="flex items-center space-x-2 text-sm">
-                <ArrowRightLeft className="h-4 w-4 text-primary" />
-                <span className="font-medium font-mono">${transfer.amount.toFixed(2)}</span>
-                <span className="text-muted-foreground hidden sm:inline">{transfer.from} → {transfer.to}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xs text-muted-foreground hidden sm:inline">{transfer.executionDate}</span>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-3xl">
-                    <DialogHeader>
-                      <DialogTitle>Transfer Details</DialogTitle>
-                    </DialogHeader>
-                    <TransferDetails transfer={transfer} />
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-4 py-2">
-            <div className="space-y-2">
-              <div className="text-xs text-muted-foreground grid grid-cols-2 gap-1">
-                <span>From: {transfer.from}</span>
-                <span>To: {transfer.to}</span>
-                <span>Date: {transfer.executionDate}</span>
-                <span>Exchange Rate: {transfer.exchangeRate}</span>
-                <span>Fees: ${transfer.fees.toFixed(2)}</span>
-              </div>
-              <TransactionItem transaction={transfer.fromTransaction} allTransactions={[]} />
-              <TransactionItem transaction={transfer.toTransaction} allTransactions={[]} />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </CardContent>
-  </Card>
-);
-
-interface TransactionItemProps {
-  transaction: Transaction;
-  allTransactions: Transaction[];
-  isCompensationView?: boolean;
-}
-
-const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, allTransactions, isCompensationView = false }) => {
-  const compensations: Transaction[] = transaction.compensationIds
-    ? transaction.compensationIds
-      .map(id => allTransactions.find(t => t.id === id) as Transaction)
-      .filter(Boolean)
-    : [];
-  const isCompensated = compensations.length > 0;
-  const isCompensation = Boolean(transaction.compensatedId);
-
-  return (
-    <Card className="shadow-md hover:shadow-lg transition-shadow">
-      <CardContent className="p-2">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0">
-          <div className="flex items-center space-x-2 text-sm">
-            <Badge variant={transaction.amount >= 0 ? 'default' : 'destructive'} className="text-xs font-mono">
-              ${Math.abs(transaction.amount).toFixed(2)}
-            </Badge>
-            <span className="font-medium truncate max-w-[150px] sm:max-w-none">{transaction.description}</span>
-            {(isCompensated || isCompensation) && (
-              <Badge variant="outline" className="text-xs">
-                {isCompensated ? 'Compensated' : 'Compensation'}
-              </Badge>
-            )}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge variant="outline" className="text-xs hidden sm:inline-flex">{transaction.category}</Badge>
-            {!isCompensationView && (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-3xl">
-                  <DialogHeader>
-                    <DialogTitle>Transaction Details</DialogTitle>
-                  </DialogHeader>
-                  <TransactionDetails transaction={transaction} allTransactions={allTransactions} />
-                </DialogContent>
-              </Dialog>
-            )}
-            {!isCompensationView && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Edit transaction</DropdownMenuItem>
-                  <DropdownMenuItem>Delete transaction</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-        </div>
-        <div className="mt-1 text-xs text-muted-foreground flex justify-between">
-          <span>{transaction.account}</span>
-          <span>{transaction.executionDate}</span>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  return groupedData;
 };
 
 export default function Component() {
-  const allTransactions = mockData.flatMap(group => group.items);
   const [isTransactionFormOpen, setIsTransactionFormOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const formRef = useRef<{ submitForm: () => void } | null>(null);
+
+  const mockData = groupItemsByDate([
+    ...generateTransactions(5, '2024-01-01',1),
+    ...generateTransfers(2, '2024-01-01'),
+    ...generateTransactions(3, '2024-01-02',1),
+    ...generateTransfers(1, '2024-01-02'),
+    ...generateTransactions(8, '2024-01-03',1),
+    ...generateTransfers(1, '2024-01-03')
+  ]);
 
   const handleSubmit = async (values: never) => {
     setIsLoading(true);
@@ -614,11 +243,8 @@ export default function Component() {
                   <AccordionContent className="space-y-2 px-4 py-2">
                     {dateGroup.items.map((item, itemIndex) => (
                       <React.Fragment key={itemIndex}>
-                        {item.type === 'transaction' ? (
-                          <TransactionItem transaction={item} allTransactions={allTransactions} />
-                        ) : (
-                          <TransferItem transfer={item} />
-                        )}
+                        {(item instanceof Transaction) && <TransactionListItem transaction={item} />}
+                        {(item instanceof Transfer) && <TransferListItem transfer={item} />}
                       </React.Fragment>
                     ))}
                   </AccordionContent>

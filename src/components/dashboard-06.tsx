@@ -1,6 +1,7 @@
 import { File, ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
 import { useState } from 'react';
 
+import { generateTransfers } from '@/services/transfers-generator.ts';
 import AccountForm from '@/components/account-form.tsx';
 import {
   Dialog,
@@ -37,6 +38,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function Dashboard() {
   const [isAccountFormOpen, setIsAccountFormOpen] = useState(false);
+
+  console.log(generateTransfers(2, 0.8));
 
   return (
     <section className="p-6">

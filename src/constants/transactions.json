@@ -1,0 +1,138 @@
+[
+    {
+        "id": 1,
+        "account": {
+            "icon": "💳",
+            "id": 101,
+            "name": "Credit Card",
+            "currency": "usd",
+            "color": "#FF5733"
+        },
+        "amount": 200,
+        "convertedValues": {
+            "eur": 180,
+            "uah": 7300,
+            "huf": 67000,
+            "btc": 0.005
+        },
+        "note": "Office Supplies",
+        "executedAt": "2024-09-10T10:00:00Z",
+        "category": {
+            "id": 201,
+            "name": "Office",
+            "icon": "📂"
+        },
+        "isDraft": false,
+        "compensations": [
+            {
+                "id": 2,
+                "account": {
+                    "icon": "🏦",
+                    "id": 102,
+                    "name": "Bank Account",
+                    "currency": "usd",
+                    "color": "#33FF57"
+                },
+                "amount": 200,
+                "convertedValues": {
+                    "eur": 180,
+                    "uah": 7300,
+                    "huf": 67000,
+                    "btc": 0.005
+                },
+                "note": "Compensation for Office Supplies",
+                "executedAt": "2024-09-10T12:00:00Z",
+                "category": {
+                    "id": 202,
+                    "name": "Compensation",
+                    "icon": "🔄"
+                },
+                "isDraft": false,
+                "compensations": [],
+                "type": "income"
+            },
+            {
+                "id": 3,
+                "account": {
+                    "icon": "💼",
+                    "id": 103,
+                    "name": "Business Account",
+                    "currency": "usd",
+                    "color": "#3357FF"
+                },
+                "amount": 200,
+                "convertedValues": {
+                    "eur": 180,
+                    "uah": 7300,
+                    "huf": 67000,
+                    "btc": 0.005
+                },
+                "note": "Second Compensation for Office Supplies",
+                "executedAt": "2024-09-10T14:00:00Z",
+                "category": {
+                    "id": 202,
+                    "name": "Compensation",
+                    "icon": "🔄"
+                },
+                "isDraft": false,
+                "compensations": [],
+                "type": "income"
+            }
+        ],
+        "type": "expense"
+    },
+    {
+        "id": 4,
+        "account": {
+            "icon": "🏠",
+            "id": 104,
+            "name": "Home Budget",
+            "currency": "eur",
+            "color": "#FF33A1"
+        },
+        "amount": 150,
+        "convertedValues": {
+            "usd": 165,
+            "uah": 6000,
+            "huf": 55000,
+            "btc": 0.004
+        },
+        "note": "Groceries",
+        "executedAt": "2024-09-09T18:00:00Z",
+        "category": {
+            "id": 203,
+            "name": "Groceries",
+            "icon": "🛒"
+        },
+        "isDraft": false,
+        "compensations": [],
+        "type": "expense"
+    },
+    {
+        "id": 5,
+        "account": {
+            "icon": "💰",
+            "id": 105,
+            "name": "Savings",
+            "currency": "btc",
+            "color": "#FFAA33"
+        },
+        "amount": 0.01,
+        "convertedValues": {
+            "eur": 500,
+            "usd": 550,
+            "uah": 20000,
+            "huf": 1850000
+        },
+        "note": "Crypto Investment",
+        "executedAt": "2024-09-08T08:00:00Z",
+        "category": {
+            "id": 204,
+            "name": "Investment",
+            "icon": "📈"
+        },
+        "isDraft": false,
+        "compensations": [],
+        "type": "income"
+    }
+]

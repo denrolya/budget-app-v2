@@ -1,3 +1,4 @@
+import cn from 'classnames';
 import { ArrowUpDown, ChevronLeft, Download, Edit, Plus, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -41,7 +42,6 @@ const debtsData = [
       { id: 1, date: '2023-05-20', action: 'Debt created', details: 'Borrowed $200 for groceries' },
     ],
   },
-  // Add more mock debts here...
 ];
 
 export default function DebtManagementPage() {
@@ -71,7 +71,9 @@ export default function DebtManagementPage() {
         {debtsData.map((debt) => (
           <div
             key={debt.id}
-            className={`p-4 border-b cursor-pointer hover:bg-accent hover:text-accent-foreground ${selectedDebtId === debt.id ? 'bg-accent text-accent-foreground' : ''}`}
+            className={cn('p-4 border-b cursor-pointer hover:bg-accent hover:text-accent-foreground', {
+              'bg-accent text-accent-foreground': selectedDebtId === debt.id,
+            })}
             onClick={() => setSelectedDebtId(debt.id)}
           >
             <div className="flex justify-between items-center mb-2">
@@ -219,8 +221,9 @@ export default function DebtManagementPage() {
           selectedDebtId ? <DebtDetail /> : <DebtList />
         ) : (
           selectedDebtId ? <DebtDetail /> :
-            <div className="flex items-center justify-center h-full text-muted-foreground">Select a debt to view
-                                                                                           details</div>
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              Select a debt to view details
+            </div>
         )}
       </div>
     </div>
