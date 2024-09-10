@@ -35,6 +35,60 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
+// Transaction example
+// {
+//             "id": 12992,
+//             "account": {
+//                 "icon": "ion-ios-card",
+//                 "id": 10,
+//                 "name": "Mono UAH",
+//                 "currency": "UAH",
+//                 "color": "#DAA520"
+//             },
+//             "amount": 266.88,
+//             "convertedValues": {
+//                 "BTC": 0.00012014461688354172,
+//                 "EUR": 5.869300521140137,
+//                 "HUF": 2312.229469684902,
+//                 "UAH": 266.88,
+//                 "USD": 6.510562688178345
+//             },
+//             "note": "Test note",
+//             "executedAt": "2024-09-07T06:19:00+00:00",
+//             "category": {
+//                 "id": 160,
+//                 "name": "Test Category",
+//                 "icon": ""
+//             },
+//             "isDraft": false,
+//             "compensations": [],
+//             "type": "expense"
+//         }
+
+// Transfer example data
+// {
+//             "id": 597,
+//             "from": {
+//                 "id": 2,
+//                 "name": "Cash EUR",
+//                 "currency": "EUR",
+//                 "color": "#4682B4",
+//                 "icon": "ion-ios-cash"
+//             },
+//             "to": {
+//                 "id": 9,
+//                 "name": "Cash HUF",
+//                 "currency": "HUF",
+//                 "color": "#FF4500",
+//                 "icon": "ion-ios-cash"
+//             },
+//             "amount": 160,
+//             "rate": 390,
+//             "fee": 0,
+//             "note": "",
+//             "executedAt": "2024-08-12T13:42:00+00:00"
+//         }
+
 interface Transaction {
   id: string;
   type: 'transaction';
@@ -277,7 +331,11 @@ const TransferDetails: React.FC<TransferDetailsProps> = ({ transfer }) => (
   </div>
 );
 
-const TransferItem = ({ transfer }) => (
+interface TransferItemProps {
+  transfer: Transfer;
+}
+
+const TransferItem: React.FC<TransferItemProps> = ({ transfer }) => (
   <Card className="my-2 border-l-4 border-l-primary shadow-md hover:shadow-lg transition-shadow">
     <CardContent className="p-0">
       <Accordion type="single" collapsible>
@@ -326,9 +384,17 @@ const TransferItem = ({ transfer }) => (
   </Card>
 );
 
-const TransactionItem = ({ transaction, allTransactions, isCompensationView = false }) => {
-  const compensations = transaction.compensationIds
-    ? transaction.compensationIds.map(id => allTransactions.find(t => t.id === id)).filter(Boolean)
+interface TransactionItemProps {
+  transaction: Transaction;
+  allTransactions: Transaction[];
+  isCompensationView?: boolean;
+}
+
+const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, allTransactions, isCompensationView = false }) => {
+  const compensations: Transaction[] = transaction.compensationIds
+    ? transaction.compensationIds
+      .map(id => allTransactions.find(t => t.id === id) as Transaction)
+      .filter(Boolean)
     : [];
   const isCompensated = compensations.length > 0;
   const isCompensation = Boolean(transaction.compensatedId);
