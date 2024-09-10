@@ -1,12 +1,12 @@
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-
-import { useSidebar } from '@/contexts/sidebar.tsx';
 import cn from 'classnames';
 import { ArrowRightLeft, BarChart2, Briefcase, CreditCard, Home, LucideIcon, PiggyBank, Plus } from 'lucide-react';
 import { FC, ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { useSidebar } from '@/contexts/sidebar.tsx';
 
 interface NavLinkProps {
   to: string;
@@ -17,7 +17,7 @@ interface NavLinkProps {
 export const Sidebar: FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
-  const { isSidebarExpanded, setIsSidebarExpanded } = useSidebar();
+  const { isSidebarExpanded, setIsSidebarExpanded, toggleSidebar } = useSidebar();
 
   useEffect(() => {
     const handleResize = () => {
@@ -64,16 +64,12 @@ export const Sidebar: FC = () => {
     <>
       {/* Overlay for mobile when sidebar is open */}
       {isMobile && isSidebarExpanded && (
-        <div
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-30"
-          onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-        ></div>
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-30" onClick={toggleSidebar} />
       )}
 
       {/* Left Sidebar */}
       <aside
-        className={cn(
-          'bg-background border-r border-accent flex flex-col transition-all duration-300 ease-in-out z-40',
+        className={cn('bg-background border-r border-accent flex flex-col transition-all duration-300 ease-in-out z-40',
           {
             'fixed inset-y-0 left-0 w-64': isMobile && isSidebarExpanded,
             'fixed inset-y-0 -left-64 w-64': isMobile && !isSidebarExpanded,
@@ -84,8 +80,8 @@ export const Sidebar: FC = () => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <ScrollArea className="flex-1 flex flex-col h-full">
-          <div className="flex-grow overflow-hidden flex flex-col">
+        <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full">
             <div className="p-4 space-y-4">
               <div className="space-y-1">
                 <NavLink to="/dashboard" icon={Home}>
@@ -117,30 +113,30 @@ export const Sidebar: FC = () => {
                 </Button>
               </div>
             </div>
-            <Separator />
-            {isSidebarExpanded && (
-              <div className="flex-grow flex flex-col min-h-0 p-4">
-                <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1">Recent Accounts</div>
-                <ScrollArea className="flex-grow">
-                  <div className="pr-4 space-y-1">
-                    {[...Array(20)].map((_, i) => (
-                      <Button key={i} variant="ghost" className="w-full justify-start font-normal">
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        Account {i + 1}
-                      </Button>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
-            )}
           </div>
-        </ScrollArea>
+          <Separator />
+          {isSidebarExpanded && (
+            <div className="flex flex-col flex-grow overflow-hidden">
+              <div className="text-xs font-semibold text-accent-foreground/60 px-6 py-2">Recent Accounts</div>
+              <ScrollArea className="flex-grow px-4">
+                <div className="space-y-1">
+                  {[...Array(20)].map((_, i) => (
+                    <Button key={i} variant="ghost" className="w-full justify-start font-normal">
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Account {i + 1}
+                    </Button>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          )}
 
-        <div className="p-4 border-t border-accent">
-          <Button variant="ghost" className="w-full justify-start">
-            <Plus className="h-4 w-4" />
-            {isSidebarExpanded && <span className="ml-2">Add Account</span>}
-          </Button>
+          <div className="p-4 border-t border-accent">
+            <Button variant="ghost" className="w-full justify-start">
+              <Plus className="h-4 w-4" />
+              {isSidebarExpanded && <span className="ml-2">Add Account</span>}
+            </Button>
+          </div>
         </div>
       </aside>
     </>
