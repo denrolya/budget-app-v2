@@ -1,8 +1,8 @@
 import { ArrowRightLeft, Eye, MoreHorizontal, SlidersHorizontal } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 
-import { Filters } from '@/components/transaction-filters.tsx';
-import TransactionForm from '@/components/transaction-form.tsx';
+import { Filters } from '@/components/transaction-filters';
+import TransactionForm from '@/components/transaction-form';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,26 +21,18 @@ import {
   DrawerClose,
   DrawerContent,
   DrawerDescription,
+  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer.tsx';
+} from '@/components/ui/drawer';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet.tsx';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface Transaction {
@@ -216,7 +208,8 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transaction, al
           <h3 className="font-semibold mb-2">Compensation Transactions:</h3>
           <div className="space-y-2">
             {compensations.map(comp => (
-              comp && <TransactionItem key={comp.id} transaction={comp} allTransactions={allTransactions} isCompensationView />
+              comp &&
+              <TransactionItem key={comp.id} transaction={comp} allTransactions={allTransactions} isCompensationView />
             ))}
           </div>
         </div>
@@ -436,14 +429,14 @@ export default function Component() {
               <DrawerTitle>Filters</DrawerTitle>
               <DrawerDescription>Refine your transaction list</DrawerDescription>
             </DrawerHeader>
-            <div className="flex-grow overflow-y-auto px-4">
+            <div className="flex-grow overflow-y-auto px-4 pb-4">
               <Filters />
             </div>
-            <div className="p-4 border-t">
+            <DrawerFooter className="p-4 border-t">
               <DrawerClose asChild>
                 <Button className="w-full">Apply Filters</Button>
               </DrawerClose>
-            </div>
+            </DrawerFooter>
           </DrawerContent>
         </Drawer>
 
@@ -499,39 +492,37 @@ export default function Component() {
               </Dialog>
             </div>
 
-            {/* Mobile version - Sheet */}
-            <div className="md:hidden">
-              <Sheet open={isTransactionFormOpen} onOpenChange={setIsTransactionFormOpen}>
-                <SheetTrigger asChild>
-                  <Button className="w-full">Add New Transaction</Button>
-                </SheetTrigger>
-                <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
-                  <SheetHeader>
-                    <SheetTitle>New Transaction</SheetTitle>
-                    <SheetDescription>
-                      Add a new transaction to your finances
-                    </SheetDescription>
-                  </SheetHeader>
-                  <div className="mt-4">
-                    <TransactionForm
-                      ref={formRef}
-                      onSubmit={handleSubmit}
-                      onFormStateChange={setIsFormValid}
-                    />
-                  </div>
-                  <SheetFooter>
-                    <Button
-                      type="submit"
-                      onClick={() => formRef.current?.submitForm()}
-                      disabled={isLoading || !isFormValid}
-                      className="w-full"
-                    >
-                      {isLoading ? 'Submitting...' : 'Submit'}
-                    </Button>
-                  </SheetFooter>
-                </SheetContent>
-              </Sheet>
-            </div>
+            {/* Mobile version - Drawer */}
+            <Drawer open={isTransactionFormOpen} onOpenChange={setIsTransactionFormOpen}>
+              <DrawerTrigger asChild>
+                <Button className="w-full md:hidden">Add New Transaction</Button>
+              </DrawerTrigger>
+              <DrawerContent className="h-[80vh] flex flex-col">
+                <DrawerHeader>
+                  <DrawerTitle>New Transaction</DrawerTitle>
+                  <DrawerDescription>
+                    Add a new transaction to your finances
+                  </DrawerDescription>
+                </DrawerHeader>
+                <div className="flex-grow overflow-y-auto px-4 pb-4">
+                  <TransactionForm
+                    ref={formRef}
+                    onSubmit={handleSubmit}
+                    onFormStateChange={setIsFormValid}
+                  />
+                </div>
+                <DrawerFooter className="p-4 border-t">
+                  <Button
+                    type="submit"
+                    onClick={() => formRef.current?.submitForm()}
+                    disabled={isLoading || !isFormValid}
+                    className="w-full"
+                  >
+                    {isLoading ? 'Submitting...' : 'Submit'}
+                  </Button>
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
           </div>
 
           <div className="w-full bg-background">

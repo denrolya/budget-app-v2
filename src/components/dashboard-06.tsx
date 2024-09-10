@@ -11,13 +11,13 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog.tsx';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet.tsx';
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer.tsx';
 import { FinancialCard } from '@/components/financial-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -67,24 +67,22 @@ export default function Dashboard() {
       </div>
 
       {/* Mobile version - Sheet */}
-      <div className="md:hidden">
-        <Sheet open={isAccountFormOpen} onOpenChange={setIsAccountFormOpen}>
-          <SheetTrigger asChild>
-            <Button className="w-full">Add New Account</Button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>New Account</SheetTitle>
-              <SheetDescription>
-                Add a new account to your finances
-              </SheetDescription>
-            </SheetHeader>
-            <div className="mt-4">
-              <AccountForm />
-            </div>
-          </SheetContent>
-        </Sheet>
-      </div>
+      <Drawer open={isAccountFormOpen} onOpenChange={setIsAccountFormOpen}>
+        <DrawerTrigger asChild>
+          <Button className="md:hidden w-full">Add New Account</Button>
+        </DrawerTrigger>
+        <DrawerContent className="h-[80vh] flex flex-col">
+          <DrawerHeader>
+            <DrawerTitle>New Account</DrawerTitle>
+            <DrawerDescription>
+              Add a new account to your finances
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="flex-grow overflow-y-auto px-4 pb-4">
+            <AccountForm />
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       <Tabs defaultValue="all">
         <div className="flex items-center">

@@ -29,7 +29,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const categories = [
@@ -118,8 +118,8 @@ export const FinancialCard = ({
   };
 
   const MenuContent = React.forwardRef<
-    React.ElementRef<typeof SheetContent>,
-    React.ComponentPropsWithoutRef<typeof SheetContent>
+    React.ElementRef<typeof DrawerContent>,
+    React.ComponentPropsWithoutRef<typeof DrawerContent>
   >(({ className, ...props }, ref) => (
     <div className={cn('px-4 py-3', className)} {...props} ref={ref}>
       <div className="space-y-4">
@@ -259,20 +259,22 @@ export const FinancialCard = ({
             </h3>
           </div>
           {isMobile ? (
-            <Sheet>
-              <SheetTrigger asChild>
+            <Drawer>
+              <DrawerTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <MoreHorizontalIcon className="h-4 w-4" />
                 </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>Card Options</SheetTitle>
-                </SheetHeader>
-                <MenuContent />
-              </SheetContent>
-            </Sheet>
-          ) : (
+              </DrawerTrigger>
+              <DrawerContent className="h-[80vh] flex flex-col">
+                <DrawerHeader>
+                  <DrawerTitle>Card Options</DrawerTitle>
+                </DrawerHeader>
+                <div className="flex-grow overflow-y-auto px-4 pb-4">
+                  <MenuContent />
+                </div>
+              </DrawerContent>
+            </Drawer>
+            ) : (
             <DropdownMenu open={open} onOpenChange={setOpen}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
