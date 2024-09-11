@@ -1,5 +1,3 @@
-import { AccountFormRef } from '@/components/account-form.tsx';
-import { defaultOnSubmit, useFormLogic } from '@/hooks/form.tsx';
 import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
 import { ArrowDownCircle, ArrowUpCircle, Check, ChevronsUpDown, X } from 'lucide-react';
@@ -8,6 +6,7 @@ import { forwardRef, useImperativeHandle } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import * as z from 'zod';
 
+import { defaultOnSubmit, useFormLogic } from '@/hooks/form';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -75,7 +74,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
       amount: isEditing ? data?.amount : undefined,
       category: isEditing ? data?.category.id : undefined,
       executedAt: data?.executedAt ? moment(data.executedAt).format('YYYY-MM-DDTHH:mm') : moment().format('YYYY-MM-DDTHH:mm'),
-      note: data?.note || '',
+      note: data?.note || undefined,
       isDraft: data?.isDraft || false,
       compensations: data?.compensations?.map(comp => ({
         account: isEditing ? comp.account.id : undefined,

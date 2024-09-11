@@ -79,6 +79,8 @@ export default function Dashboard() {
         <Button onClick={handleNewTransaction}>New Transaction</Button>
 
         <Button onClick={handleEditTransaction}>Edit Transaction</Button>
+
+        <Button onClick={() => openForm('transfer')}>New Transfer</Button>
       </div>
 
       <Tabs defaultValue="all">

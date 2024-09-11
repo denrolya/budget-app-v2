@@ -149,10 +149,6 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>(({ data,
             </FormItem>
           )}
         />
-
-        <Button type="button" onClick={() => console.log('Is form dirty?', form.formState.isDirty)}>
-          Check Dirty State
-        </Button>
         <FormField
           control={form.control}
           name="type"
