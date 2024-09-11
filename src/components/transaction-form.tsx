@@ -1,20 +1,21 @@
+import { AccountFormRef } from '@/components/account-form.tsx';
+import { defaultOnSubmit, useFormLogic } from '@/hooks/form.tsx';
 import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
 import { ArrowDownCircle, ArrowUpCircle, Check, ChevronsUpDown, X } from 'lucide-react';
 import moment from 'moment';
-import { forwardRef, useEffect, useImperativeHandle } from 'react';
+import { forwardRef, useImperativeHandle } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import * as z from 'zod';
 
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Textarea } from '@/components/ui/textarea';
 import { Transaction, Type } from '@/models/transaction';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 
 const accounts = [
   { id: 1, name: 'Main Checking', currency: 'USD', icon: '🏦', color: '#FF0000' },
@@ -30,54 +31,56 @@ const categories = [
   { id: 5, name: 'Salary', icon: '💼' },
 ];
 
-const formSchema = z.object({
-  type: z.nativeEnum(Type),
-  accountId: z.number(),
-  amount: z.number().min(0, 'Amount is required'),
-  categoryId: z.number(),
-  executedAt: z.string().min(1, 'Date is required'),
-  note: z.string().optional(),
-  isDraft: z.boolean(),
-  compensations: z.array(
-    z.object({
-      accountId: z.number(),
-      amount: z.number().min(1, 'Amount is required'),
-      executedAt: z.string().min(1, 'Date is required'),
-    }),
-  ).optional(),
-});
+interface FormState {
+  isValid: boolean;
+  isDirty: boolean;
+  values: z.infer<typeof formSchema>;
+}
 
 interface TransactionFormProps {
   data: Transaction | undefined;
   isEditing: boolean;
   onClose: () => void;
-  setIsFormValid: (isValid: boolean) => void;
+  setFormState: React.Dispatch<React.SetStateAction<FormState>>;
+  showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
 interface TransactionFormRef {
   submitForm: () => Promise<void>;
 }
 
-export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>(({
-                                                                                       data,
-                                                                                       isEditing,
-                                                                                       onClose,
-                                                                                       setIsFormValid,
-                                                                                     }, ref) => {
+const formSchema = z.object({
+  type: z.nativeEnum(Type),
+  account: z.number().int().positive(),
+  amount: z.number().min(0, 'Amount must be non-negative'),
+  category: z.number().int().positive(),
+  executedAt: z.string().min(1, 'Date is required'),
+  note: z.string().optional(),
+  isDraft: z.boolean().default(false),
+  compensations: z.array(
+    z.object({
+      account: z.number().int().positive(),
+      amount: z.number().positive('Amount must be positive'),
+      executedAt: z.string().min(1, 'Date is required'),
+    }),
+  ).optional(),
+});
+
+export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>(({ data, isEditing, setFormState, showToast }, ref) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       type: data?.type || Type.Expense,
-      accountId: data?.account.id || accounts[0].id,
-      amount: data?.amount || 0,
-      categoryId: data?.category.id || categories[0].id,
-      executedAt: data?.executedAt.format('YYYY-MM-DDTHH:mm') || moment().format('YYYY-MM-DDTHH:mm'),
+      account: isEditing ? data?.account.id : undefined,
+      amount: isEditing ? data?.amount : undefined,
+      category: isEditing ? data?.category.id : undefined,
+      executedAt: data?.executedAt ? moment(data.executedAt).format('YYYY-MM-DDTHH:mm') : moment().format('YYYY-MM-DDTHH:mm'),
       note: data?.note || '',
       isDraft: data?.isDraft || false,
       compensations: data?.compensations?.map(comp => ({
-        accountId: comp.account.id,
+        account: isEditing ? comp.account.id : undefined,
         amount: comp.amount,
-        executedAt: comp.executedAt.format('YYYY-MM-DDTHH:mm'),
+        executedAt: moment(comp.executedAt).format('YYYY-MM-DDTHH:mm'),
       })) || [],
     },
     mode: 'onChange',
@@ -88,32 +91,21 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     name: 'compensations',
   });
 
-  useImperativeHandle(ref, () => ({
-    submitForm: form.handleSubmit(onSubmit),
-  }));
+  const { formRef } = useFormLogic({
+    form,
+    onSubmit: defaultOnSubmit,
+    setFormState,
+    showToast,
+  });
 
-  useEffect(() => {
-    setIsFormValid(form.formState.isValid);
-  }, [form.formState.isValid, setIsFormValid]);
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      console.log('Form submitted:', values);
-      if (isEditing && data?.id) {
-        values.id = data.id;
-      }
-      onClose();
-    } catch (error) {
-      console.error('Error submitting form:', error);
-    }
-  };
+  useImperativeHandle(ref, () => formRef.current!);
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form className="space-y-6">
         <FormField
-          control={form.control}
           name="type"
+          control={form.control}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Transaction Type</FormLabel>
@@ -167,7 +159,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
 
           <FormField
             control={form.control}
-            name="accountId"
+            name="account"
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel>Account</FormLabel>
@@ -196,7 +188,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                               value={account.name}
                               key={account.id}
                               onSelect={() => {
-                                form.setValue('accountId', account.id);
+                                form.setValue('account', account.id);
                               }}
                             >
                               <Check className={cn('mr-2 h-4 w-4', {
@@ -233,7 +225,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
 
         <FormField
           control={form.control}
-          name="categoryId"
+          name="category"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
@@ -262,7 +254,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                             value={category.name}
                             key={category.id}
                             onSelect={() => {
-                              form.setValue('categoryId', category.id);
+                              form.setValue('category', category.id);
                             }}
                           >
                             <Check className={cn('mr-2 h-4 w-4', {
@@ -289,7 +281,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
             <FormItem>
               <FormLabel>Note</FormLabel>
               <FormControl>
-                <Textarea placeholder="Add a note..." className="h-20" {...field} />
+                <Input {...field}  placeholder="Add a note..." />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -345,7 +337,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                   />
                   <FormField
                     control={form.control}
-                    name={`compensations.${index}.accountId`}
+                    name={`compensations.${index}.account`}
                     render={({ field }) => (
                       <FormItem className="flex-1">
                         <Popover>
@@ -367,21 +359,23 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                               <CommandInput placeholder="Search account..." />
                               <CommandEmpty>No account found.</CommandEmpty>
                               <CommandGroup>
-                                {accounts.map((account) => (
-                                  <CommandItem
-                                    value={account.name}
-                                    key={account.id}
-                                    onSelect={() => {
-                                      form.setValue(`compensations.${index}.accountId`, account.id);
-                                    }}
-                                  >
-                                    <Check className={cn('mr-2 h-4 w-4', {
-                                      'opacity-100': account.id === field.value,
-                                      'opacity-0': account.id !== field.value,
-                                    })} />
-                                    {account.icon} {account.name}
-                                  </CommandItem>
-                                ))}
+                                <CommandList>
+                                  {accounts.map((account) => (
+                                    <CommandItem
+                                      value={account.name}
+                                      key={account.id}
+                                      onSelect={() => {
+                                        form.setValue(`compensations.${index}.account`, account.id);
+                                      }}
+                                    >
+                                      <Check className={cn('mr-2 h-4 w-4', {
+                                        'opacity-100': account.id === field.value,
+                                        'opacity-0': account.id !== field.value,
+                                      })} />
+                                      {account.icon} {account.name}
+                                    </CommandItem>
+                                  ))}
+                                </CommandList>
                               </CommandGroup>
                             </Command>
                           </PopoverContent>

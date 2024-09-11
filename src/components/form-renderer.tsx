@@ -1,3 +1,7 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
+
+import { AccountForm } from '@/components/account-form';
 import { TransactionForm } from '@/components/transaction-form';
 import { TransferForm } from '@/components/transfer-form';
 import { Button } from '@/components/ui/button';
@@ -17,23 +21,49 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
-import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useForm } from '@/contexts/form';
-import React, { useEffect, useState } from 'react';
 
 const formComponents = {
+  account: AccountForm,
   transaction: TransactionForm,
   transfer: TransferForm,
 };
 
-export const FormRenderer = () => {
-  const { formState, closeForm } = useForm();
-  const formRef = React.useRef<{ submitForm: () => void }>(null);
-  const [isDesktop, setIsDesktop] = useState(true);
+type FormType = keyof typeof formComponents;
 
-  const FormComponent = formState.type ? formComponents[formState.type] : null;
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [isFormValid, setIsFormValid] = React.useState(false);
+interface FormState {
+  isValid: boolean;
+  isDirty: boolean;
+  values: any; // You might want to use a more specific type here
+}
+
+interface FormContentProps {
+  formType: FormType;
+  isEditing: boolean;
+  data: any;
+  onClose: () => void;
+  setFormState: React.Dispatch<React.SetStateAction<FormState>>;
+  showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+}
+
+const FormContent: React.FC<FormContentProps> = React.forwardRef((props, ref) => {
+  const { formType, isEditing, data, onClose, setFormState, showToast } = props;
+  const FormComponent = formComponents[formType];
+
+  return (
+    <FormComponent
+      ref={ref}
+      data={data}
+      isEditing={isEditing}
+      onClose={onClose}
+      setFormState={setFormState}
+      showToast={showToast}
+    />
+  );
+});
+
+const useScreenSize = () => {
+  const [isDesktop, setIsDesktop] = useState(true);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -46,44 +76,86 @@ export const FormRenderer = () => {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
+  return isDesktop;
+};
+
+export const FormRenderer = () => {
+  const { formState: contextFormState, closeForm } = useForm();
+  const formRef = useRef<{ submitForm: () => Promise<void> }>(null);
+  const isDesktop = useScreenSize();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [formState, setFormState] = useState<FormState>({
+    isValid: false,
+    isDirty: false,
+    values: contextFormState.data,
+  });
+
   const handleSubmit = async () => {
     if (formRef.current) {
       setIsLoading(true);
-      await formRef.current.submitForm();
-      setIsLoading(false);
-      closeForm();
+      try {
+        await formRef.current.submitForm();
+        toast.success('Form submitted successfully!');
+        closeForm();
+      } catch (error) {
+        console.error('Form submission failed:', error);
+        toast.error('Failed to submit form. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open && formState.isOpen) {
+    if (!open && contextFormState.isOpen) {
       handleClose();
     }
   };
 
   const handleClose = () => {
-    // You might want to show a confirmation dialog here if the form is dirty
     closeForm();
   };
 
-  const content = FormComponent ? (
-    <FormComponent
-      ref={formRef}
-      data={formState.data}
-      isEditing={formState.isEditing}
-      onClose={closeForm}
-      setIsFormValid={setIsFormValid}
-    />
-  ) : null;
+  const showToast = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
+    toast[type](message);
+  };
 
-  const title = formState.type
-    ? `${formState.isEditing ? 'Edit' : 'New'} ${formState.type.charAt(0).toUpperCase() + formState.type.slice(1)}`
-    : '';
-  const description = `${formState.isEditing ? 'Edit' : 'Add'} a ${formState.type} in your finances`;
+  if (!contextFormState.type) return null;
+
+  const title = `${contextFormState.isEditing ? 'Edit' : 'New'} ${contextFormState.type.charAt(0).toUpperCase() + contextFormState.type.slice(1)}`;
+  const description = `${contextFormState.isEditing ? 'Edit' : 'Add'} a ${contextFormState.type} in your finances`;
+
+  const content = (
+    <FormContent
+      ref={formRef}
+      formType={contextFormState.type as FormType}
+      isEditing={contextFormState.isEditing}
+      data={contextFormState.data}
+      onClose={handleClose}
+      setFormState={setFormState}
+      showToast={showToast}
+    />
+  );
+
+  const footer = (
+    <>
+      <Button type="button" variant="outline" onClick={handleClose}>
+        Cancel
+      </Button>
+      <Button
+        type="submit"
+        onClick={handleSubmit}
+        disabled={isLoading || !formState.isValid}
+      >
+        {isLoading ? 'Submitting...' : contextFormState.isEditing ? 'Update' : 'Create'}
+      </Button>
+    </>
+  );
 
   if (isDesktop) {
     return (
-      <Dialog open={formState.isOpen} onOpenChange={handleOpenChange}>
+      <Dialog open={contextFormState.isOpen} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
@@ -91,52 +163,15 @@ export const FormRenderer = () => {
           </DialogHeader>
           {content}
           <DialogFooter className="border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={closeForm}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              onClick={handleSubmit}
-              disabled={isLoading || !isFormValid}
-            >
-              {isLoading ? 'Submitting...' : formState.isEditing ? 'Update' : 'Create'}
-            </Button>
+            {footer}
           </DialogFooter>
         </DialogContent>
       </Dialog>
     );
   }
 
-  // <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-  //   <DialogHeader>
-  //     <DialogTitle>New Transaction</DialogTitle>
-  //     <DialogDescription>
-  //       Add a new transaction to your finances
-  //     </DialogDescription>
-  //   </DialogHeader>
-  //   <TransactionForm
-  //     ref={formRef}
-  //     onSubmit={handleSubmit}
-  //     onFormStateChange={setIsFormValid}
-  //   />
-  //   <DialogFooter>
-  //     <Button
-  //       type="submit"
-  //       onClick={() => formRef.current?.submitForm()}
-  //       disabled={isLoading || !isFormValid}
-  //       className="w-full"
-  //     >
-  //       {isLoading ? 'Submitting...' : 'Submit'}
-  //     </Button>
-  //   </DialogFooter>
-  // </DialogContent>
-
   return (
-    <Drawer open={formState.isOpen} onOpenChange={handleOpenChange}>
+    <Drawer open={contextFormState.isOpen} onOpenChange={handleOpenChange}>
       <DrawerContent className="h-[80vh] flex flex-col">
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>
@@ -146,20 +181,7 @@ export const FormRenderer = () => {
           {content}
         </div>
         <DrawerFooter className="p-4 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={closeForm}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            onClick={handleSubmit}
-            disabled={isLoading || !isFormValid}
-          >
-            {isLoading ? 'Submitting...' : formState.isEditing ? 'Update' : 'Create'}
-          </Button>
+          {footer}
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

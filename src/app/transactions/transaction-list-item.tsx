@@ -1,6 +1,7 @@
 import { Eye, MoreHorizontal } from 'lucide-react';
-import React, { FC } from 'react';
+import { FC } from 'react';
 
+import { MOMENT_TIME_VIEW_FORMAT } from '@/app/constants/datetime';
 import { TransactionDetails } from '@/app/transactions/transaction-details';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -72,9 +73,9 @@ export const TransactionListItem: FC<TransactionListItemProps> = ({ transaction,
         </div>
         <div className="mt-1 text-xs text-muted-foreground flex justify-between">
           <span>{transaction.account.name}</span>
-          <span>{transaction.executedAt.format()}</span>
+          <span>{transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}</span>
         </div>
       </CardContent>
     </Card>
   );
-}
+};

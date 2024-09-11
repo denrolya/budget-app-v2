@@ -1,8 +1,8 @@
 import { File, ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
 import { useState } from 'react';
 
-import { generateTransfers } from '@/services/transfers-generator.ts';
-import AccountForm from '@/components/account-form.tsx';
+import { useForm } from '@/contexts/form.tsx';
+import { AccountForm } from '@/components/account-form.tsx';
 import {
   Dialog,
   DialogContent,
@@ -39,7 +39,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 export default function Dashboard() {
   const [isAccountFormOpen, setIsAccountFormOpen] = useState(false);
 
-  console.log(generateTransfers(2, 0.8));
+  const { openForm } = useForm();
+
+  const handleNewTransaction = () => {
+    openForm('transaction');
+  };
+
+  const handleEditTransaction = () => {
+    const existingTransaction = {
+      id: 55,
+      amount: 50,
+      note: 'Groceries',
+      type: 'expense',
+      category: { id: 1, name: 'Groceries', icon: '🍎' },
+      executedAt: '2023-06-15',
+      account: {
+        id: 2,
+        name: 'Savings'
+      }
+    };
+    openForm('transaction', existingTransaction, true);
+  };
 
   return (
     <section className="p-6">
@@ -52,40 +72,14 @@ export default function Dashboard() {
         <FinancialCard />
       </div>
 
-      <div className="hidden md:block">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>New Account</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>New Account</DialogTitle>
-              <DialogDescription>
-                Add a new account to your finances
-              </DialogDescription>
-            </DialogHeader>
-            <AccountForm />
-          </DialogContent>
-        </Dialog>
-      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 mb-6">
 
-      {/* Mobile version - Sheet */}
-      <Drawer open={isAccountFormOpen} onOpenChange={setIsAccountFormOpen}>
-        <DrawerTrigger asChild>
-          <Button className="md:hidden w-full">Add New Account</Button>
-        </DrawerTrigger>
-        <DrawerContent className="h-[80vh] flex flex-col">
-          <DrawerHeader>
-            <DrawerTitle>New Account</DrawerTitle>
-            <DrawerDescription>
-              Add a new account to your finances
-            </DrawerDescription>
-          </DrawerHeader>
-          <div className="flex-grow overflow-y-auto px-4 pb-4">
-            <AccountForm />
-          </div>
-        </DrawerContent>
-      </Drawer>
+        <Button onClick={() => openForm('account')}>New Account</Button>
+
+        <Button onClick={handleNewTransaction}>New Transaction</Button>
+
+        <Button onClick={handleEditTransaction}>Edit Transaction</Button>
+      </div>
 
       <Tabs defaultValue="all">
         <div className="flex items-center">

@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom';
 
+import { Toaster } from '@/components/ui/sonner';
 import { CurrencyConverter } from '@/components/currency-converter';
 import { FormRenderer } from '@/components/form-renderer';
 import { Header } from '@/components/header';
@@ -25,6 +26,7 @@ export const LayoutV9 = () => (
       </div>
 
       <FormRenderer />
+      <Toaster />
     </SidebarProvider>
   </FormProvider>
 );

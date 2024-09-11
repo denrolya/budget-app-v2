@@ -2,6 +2,7 @@ import { SlidersHorizontal } from 'lucide-react';
 import moment from 'moment';
 import React, { useState } from 'react';
 
+import { MOMENT_DATE_VIEW_FORMAT } from '@/app/constants/datetime.ts';
 import { TransactionListItem } from '@/app/transactions/transaction-list-item';
 import { TransferListItem } from '@/app/transactions/transfer-list-item';
 import { Filters } from '@/components/transaction-filters';
@@ -35,7 +36,7 @@ interface GroupedData {
 
 const groupItemsByDate = (items: (Transaction | Transfer)[]): GroupedData[] => {
   const groupedData = items.reduce((acc: GroupedData[], item) => {
-    const date = item.executedAt.format('YYYY-MM-DD');
+    const date = item.executedAt.format(MOMENT_DATE_VIEW_FORMAT);
     const existingGroup = acc.find(group => group.date === date);
 
     if (existingGroup) {
@@ -69,24 +70,6 @@ const groupItemsByDate = (items: (Transaction | Transfer)[]): GroupedData[] => {
 
 export default function Component() {
   const [showFilters, setShowFilters] = useState(false);
-
-  const { openForm } = useForm();
-
-  const handleNewTransaction = () => {
-    openForm('transaction');
-  };
-
-  const handleEditTransaction = () => {
-    const existingTransaction = {
-      id: '123',
-      amount: 50,
-      description: 'Groceries',
-      type: 'expense',
-      category: 'Food',
-      date: '2023-06-15',
-    };
-    openForm('transaction', existingTransaction, true);
-  };
 
   const mockData = groupItemsByDate([
     ...generateTransactions(5, '2024-01-01', 1),
@@ -146,8 +129,6 @@ export default function Component() {
             </Select>
 
             <div className="w-full bg-background">
-              <Button onClick={handleNewTransaction}>New Transaction</Button>
-              <Button onClick={handleEditTransaction}>Edit Transaction</Button>
               <Accordion type="single" collapsible className="w-full space-y-2">
                 {mockData.map((dateGroup, index) => (
                   <AccordionItem className="border rounded-lg overflow-hidden bg-card shadow-sm"
