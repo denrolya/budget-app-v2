@@ -115,7 +115,7 @@ export default function Component() {
 
         {/* Main content area */}
         <main className="flex-1 space-y-4 sm:space-y-6">
-          <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4">
+          <div className="flex md:flex-col sm:flex-row justify-end items-start sm:items-center gap-4">
             <Select>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Sort by" />
@@ -129,7 +129,7 @@ export default function Component() {
             </Select>
 
             <div className="w-full bg-background">
-              <Accordion type="single" collapsible className="w-full space-y-2">
+              <Accordion collapsible type="multiple" className="w-full space-y-2">
                 {mockData.map((dateGroup, index) => (
                   <AccordionItem className="border rounded-lg overflow-hidden bg-card shadow-sm"
                                  value={`item-${index}`}

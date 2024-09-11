@@ -1,32 +1,35 @@
 import { Outlet } from 'react-router-dom';
 
-import { Toaster } from '@/components/ui/sonner';
 import { CurrencyConverter } from '@/components/currency-converter';
 import { FormRenderer } from '@/components/form-renderer';
 import { Header } from '@/components/header';
 import { Sidebar } from '@/components/sidebar';
+import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip.tsx';
 import { FormProvider } from '@/contexts/form.tsx';
 import { SidebarProvider } from '@/contexts/sidebar.tsx';
 
 export const LayoutV9 = () => (
-  <FormProvider>
-    <SidebarProvider>
-      <div className="h-screen bg-background flex flex-col">
-        <Header />
+  <TooltipProvider>
+    <FormProvider>
+      <SidebarProvider>
+        <div className="h-screen bg-background flex flex-col">
+          <Header />
 
-        <div className="flex flex-1 overflow-hidden">
-          <Sidebar />
+          <div className="flex flex-1 overflow-hidden">
+            <Sidebar />
 
-          <main className="flex-1 overflow-auto bg-background">
-            <Outlet />
-          </main>
+            <main className="flex-1 overflow-auto bg-background">
+              <Outlet />
+            </main>
+          </div>
+
+          <CurrencyConverter />
         </div>
 
-        <CurrencyConverter />
-      </div>
-
-      <FormRenderer />
-      <Toaster />
-    </SidebarProvider>
-  </FormProvider>
+        <FormRenderer />
+        <Toaster />
+      </SidebarProvider>
+    </FormProvider>
+  </TooltipProvider>
 );
