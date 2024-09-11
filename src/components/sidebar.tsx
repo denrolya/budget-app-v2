@@ -1,13 +1,15 @@
+import cn from 'classnames';
+import { ArrowRightLeft, BarChart2, Briefcase, CreditCard, Home, LucideIcon, PiggyBank, Plus } from 'lucide-react';
+import { FC, ReactNode, useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useForm } from '@/contexts/form.tsx';
 import { useSidebar } from '@/contexts/sidebar';
-import cn from 'classnames';
-import { ArrowRightLeft, BarChart2, Briefcase, CreditCard, Home, LucideIcon, PiggyBank, Plus } from 'lucide-react';
-import { FC, ReactNode, useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
 
 interface NavLinkProps {
   to: string;
@@ -76,6 +78,7 @@ export const Sidebar: FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
   const { isSidebarExpanded, setIsSidebarExpanded, toggleSidebar } = useSidebar();
+  const { openForm } = useForm();
 
   useEffect(() => {
     const handleResize = () => {
@@ -222,7 +225,7 @@ export const Sidebar: FC = () => {
           )}
 
           <div className="p-4 border-t border-accent">
-            <Button variant="ghost" className="w-full justify-start">
+            <Button variant="ghost" className="w-full justify-start" onClick={() => openForm('account')}>
               <Plus className="h-4 w-4" />
               {isSidebarExpanded && <span className="ml-2">Add Account</span>}
             </Button>

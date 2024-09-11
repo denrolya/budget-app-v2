@@ -51,6 +51,9 @@ export const Header: React.FC = () => {
           <HeaderLink to="/transactions">
             Transactions
           </HeaderLink>
+          <HeaderLink to="/ledger">
+            Ledger
+          </HeaderLink>
           <HeaderLink to="/debts">
             Debts
           </HeaderLink>

@@ -1,7 +1,8 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import LoginPage from '@/app/login/page';
-import TransactionsPage from '@/app/transactions/page';
+import TransactionsListPage from '@/app/transactions/page';
+import DailyLedgerPage from '@/app/daily-ledger/page';
 import DebtsPage from '@/app/debts/page';
 import Dashboard from '@/components/dashboard-06';
 import { LayoutV9 } from '@/components/layout-v9';
@@ -21,7 +22,14 @@ const Routing = () => (
         path="transactions"
         element={
           <PrivateRoute>
-              <TransactionsPage />
+              <TransactionsListPage />
+          </PrivateRoute>
+        } />
+      <Route
+        path="ledger"
+        element={
+          <PrivateRoute>
+            <DailyLedgerPage />
           </PrivateRoute>
         } />
       <Route
