@@ -1,42 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
+import useSWR from 'swr';
 
-import { TransactionListItem } from '@/app/transactions/transaction-list-item.tsx';
-import { PaginationComponent as Pagination } from '@/components/pagination';
+import { Pagination } from '@/components/common/Pagination';
+import { ListItem as TransactionListItem } from '@/components/features/transactions/ListItem';
+import { ListItemSkeleton as TransactionListItemSkeleton } from '@/components/features/transactions/ListItemSkeleton';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ListState, useListState } from '@/hooks/list-state.tsx';
+import { useListState } from '@/hooks/useListState.tsx';
 import { Transaction } from '@/models/transaction.ts';
-import { generateTransactions } from '@/services/transactions-generator.ts';
+import { axiosFetcher } from '@/services/api';
 
 interface TransactionFilters {
   searchTerm: string;
   dateRange: string;
   status: string;
 }
-
-const fetchTransactions = async (listState: ListState<TransactionFilters, Transaction>): Promise<{
-  data: Transaction[];
-  totalPages: number
-}> => {
-  // This is where you'd make your actual API call
-  // For now, we'll simulate it
-  await new Promise(resolve => setTimeout(resolve, 500));
-  console.log(listState);
-
-  const { pagination: { currentPage, pageSize }, filters, sort } = listState;
-
-  // Simulate filtering (in a real scenario, this would be done on the server)
-  let data = generateTransactions(pageSize);
-
-  if (filters.searchTerm) {
-    data = data.filter(t => t.amount.toFixed(2).includes(filters.searchTerm));
-  }
-
-  // Simulate total pages calculation
-  const totalPages = 10;
-
-  return { data, totalPages };
-};
 
 export const TransactionsList = () => {
   const listState = useListState<TransactionFilters, Transaction>({
@@ -63,27 +41,23 @@ export const TransactionsList = () => {
     setSort,
   } = listState;
 
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const url = useMemo(() => {
+    const query = new URLSearchParams({
+      perPage: pageSize,
+      page: currentPage,
+    }).toString();
+    return `/api/v2/transaction?${query}`;
+  }, [filters, currentPage, pageSize]);
 
-  useEffect(() => {
-    const loadTransactions = async () => {
-      setLoading(true);
-      try {
-        const { data, totalPages } = await fetchTransactions(listState);
-        setTransactions(data);
-        setTotalPages(totalPages);
-      } catch (error) {
-        console.error('Failed to fetch transactions:', error);
-        // Handle error (e.g., show error message to user)
-      } finally {
-        setLoading(false);
-      }
+  const { data, error, isLoading } = useSWR(url, async (url) => {
+    const result = await axiosFetcher(url);
+    return {
+      ...result,
+      list: result.list.map((t: never) => new Transaction(t)),
     };
+  });
 
-    loadTransactions();
-  }, [currentPage, pageSize, filters, sort]);
+  const totalPages = useMemo(() => Math.ceil(data?.count / pageSize) || 0, [data, pageSize]);
 
   return (
     <div className="container mx-auto p-4">
@@ -94,7 +68,7 @@ export const TransactionsList = () => {
         <Input
           placeholder="Search transactions"
           value={filters.searchTerm}
-          onChange={value => setFilter('searchTerm', value)}
+          onChange={e => setFilter('searchTerm', e.target.value)}
           className="max-w-sm"
         />
         <Select value={filters.dateRange} onValueChange={value => setFilter('dateRange', value)}>
@@ -121,11 +95,16 @@ export const TransactionsList = () => {
       </div>
 
       {/* Transactions List */}
-      {loading ? (
-        <p>Loading transactions...</p>
-      ) : (
+      {isLoading && (
         <ul className="space-y-2">
-          {transactions.map((transaction: Transaction) => (
+          {[...Array(pageSize)].map((_, index) => (
+            <li key={index}><TransactionListItemSkeleton /></li>
+          ))}
+        </ul>
+      )}
+      {!isLoading && (
+        <ul className="space-y-2">
+          {data.list.map((transaction: Transaction) => (
             <li key={transaction.id}>
               <TransactionListItem transaction={transaction} />
             </li>

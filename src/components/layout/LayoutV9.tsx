@@ -1,13 +1,13 @@
 import { Outlet } from 'react-router-dom';
 
-import { CurrencyConverter } from '@/components/currency-converter';
-import { FormRenderer } from '@/components/form-renderer';
-import { Header } from '@/components/header';
-import { Sidebar } from '@/components/sidebar';
+import { CurrencyConverter } from '@/components/features/CurrencyConverter';
+import { FormRenderer } from '@/components/common/FormRenderer';
+import { Header } from '@/components/layout/Header';
+import { Sidebar } from '@/components/layout/Sidebar';
 import { Toaster } from '@/components/ui/sonner';
-import { TooltipProvider } from '@/components/ui/tooltip.tsx';
-import { FormProvider } from '@/contexts/form.tsx';
-import { SidebarProvider } from '@/contexts/sidebar.tsx';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { FormProvider } from '@/contexts/form';
+import { SidebarProvider } from '@/contexts/sidebar';
 
 export const LayoutV9 = () => (
   <TooltipProvider>

@@ -1,18 +1,18 @@
+import cn from 'classnames';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { useState } from 'react';
 
-import { Badge } from '@/components/ui/badge.tsx';
-import { Button } from '@/components/ui/button.tsx';
-import { Calendar } from '@/components/ui/calendar.tsx';
-import { Input } from '@/components/ui/input.tsx';
-import { Label } from '@/components/ui/label.tsx';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
-import { Slider } from '@/components/ui/slider.tsx';
-import { Switch } from '@/components/ui/switch.tsx';
-import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 
-export const Filters = () => {
+export const ListFilters = () => {
   const [date, setDate] = useState<Date>();
   const [amountRange, setAmountRange] = useState([0, 1000]);
   const [minAmount, setMinAmount] = useState('0');
@@ -49,10 +49,7 @@ export const Filters = () => {
             <Button
               id="date-picker"
               variant={'outline'}
-              className={cn(
-                'w-full justify-start text-left font-normal',
-                !date && 'text-muted-foreground',
-              )}
+              className={cn('w-full justify-start text-left font-normal', { 'text-muted-foreground': !date })}
               aria-label="Select date"
             >
               <CalendarIcon className="mr-2 h-4 w-4" />

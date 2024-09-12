@@ -15,6 +15,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +30,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const categories = [
@@ -48,12 +48,12 @@ const comparisons = [
 ];
 
 interface CardProps {
-  initialType?: 'income' | 'expense'
-  initialCategory?: string | null
-  initialPeriod?: 'week' | 'month' | 'year'
-  initialComparison?: 'previous' | 'same-last-year'
-  amount?: number
-  previousAmount?: number
+  initialType?: 'income' | 'expense';
+  initialCategory?: string | null;
+  initialPeriod?: 'week' | 'month' | 'year';
+  initialComparison?: 'previous' | 'same-last-year';
+  amount?: number;
+  previousAmount?: number;
 }
 
 export const FinancialCard = ({
@@ -258,7 +258,7 @@ export const FinancialCard = ({
               <span className="text-muted-foreground">{getPeriodText()}</span>
             </h3>
           </div>
-          {isMobile ? (
+          {isMobile && (
             <Drawer>
               <DrawerTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -274,7 +274,8 @@ export const FinancialCard = ({
                 </div>
               </DrawerContent>
             </Drawer>
-            ) : (
+          )}
+          {!isMobile && (
             <DropdownMenu open={open} onOpenChange={setOpen}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">

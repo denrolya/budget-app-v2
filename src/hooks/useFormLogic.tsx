@@ -1,5 +1,5 @@
 import { useEffect, useImperativeHandle, useRef } from 'react';
-import { UseFormReturn } from 'react-hook-form';
+import { FieldValues, UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
 
 export interface FormState<T> {
@@ -12,19 +12,19 @@ export interface FormComponentRef {
   submitForm: () => Promise<void>;
 }
 
-interface UseFormLogicProps<T> {
+interface UseFormLogicProps<T extends FieldValues> {
   form: UseFormReturn<T>;
   onSubmit: (values: T) => Promise<void>;
   setFormState: React.Dispatch<React.SetStateAction<FormState<T>>>;
   showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
-export function useFormLogic<T>({
-                                  form,
-                                  onSubmit,
-                                  setFormState,
-                                  showToast,
-                                }: UseFormLogicProps<T>) {
+export const useFormLogic = <T,>({
+                                   form,
+                                   onSubmit,
+                                   setFormState,
+                                   showToast,
+                                 }: UseFormLogicProps<T>) => {
   const formRef = useRef<FormComponentRef>(null);
 
   useImperativeHandle(formRef, () => ({
@@ -52,17 +52,17 @@ export function useFormLogic<T>({
   }, [form, setFormState]);
 
   return { formRef };
-}
+};
 
 export const createFormSchema = <T extends z.ZodRawShape>(schema: T) => z.object(schema);
 
-export async function defaultOnSubmit<T>(values: T) {
+export const defaultOnSubmit = async <T,>(values: T) => {
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     console.log('Form submitted:', values);
     // Perform your actual form submission logic here
   } catch (error) {
     console.error('Error submitting form:', error);
     throw error; // Re-throw the error to be caught by the form renderer
   }
-}
+};

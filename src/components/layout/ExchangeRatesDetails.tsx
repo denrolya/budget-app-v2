@@ -29,7 +29,7 @@ const exchangeRateSources = {
   },
 };
 
-export const HeaderExchangeRatesDetails = () => {
+export const ExchangeRatesDetails = () => {
   const [baseCurrency] = useState<string>('USD');
   const calculateStatistics = (from: string, to: string) => {
     const rates = Object.keys(exchangeRateSources).map((source) => getExchangeRate(source, from, to));

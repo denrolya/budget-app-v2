@@ -6,7 +6,7 @@ import { forwardRef, useImperativeHandle } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { defaultOnSubmit, useFormLogic } from '@/hooks/form';
+import { defaultOnSubmit, useFormLogic } from '@/hooks/useFormLogic';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';

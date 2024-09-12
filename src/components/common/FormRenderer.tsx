@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
-import { AccountForm } from '@/components/account-form';
-import { TransactionForm } from '@/components/transaction-form';
-import { TransferForm } from '@/components/transfer-form';
+import { AccountForm } from '@/components/features/accounts/Form';
+import { TransactionForm } from '@/components/features/transactions/Form';
+import { TransferForm } from '@/components/features/transfers/Form';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

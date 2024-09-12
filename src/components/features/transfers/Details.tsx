@@ -1,7 +1,5 @@
-import React from 'react';
-
 import { Transfer } from '@/models/transfer';
-import { TransactionDetails } from '@/app/transactions/transaction-details';
+import { Details as TransactionDetails } from '@/components/features/transactions/Details';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -10,7 +8,7 @@ interface TransferDetailsProps {
   transfer: Transfer;
 }
 
-export const TransferDetails: React.FC<TransferDetailsProps> = ({ transfer }) => (
+export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => (
   <div className="space-y-4">
     <Table>
       <TableHeader>

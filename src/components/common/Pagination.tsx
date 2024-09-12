@@ -1,5 +1,5 @@
 import {
-  Pagination,
+  Pagination as PaginationComponent,
   PaginationContent,
   PaginationEllipsis,
   PaginationItem,
@@ -15,7 +15,7 @@ interface PaginationProps {
   maxVisiblePages?: number;
 }
 
-export const PaginationComponent: React.FC<PaginationProps> = ({
+export const Pagination: React.FC<PaginationProps> = ({
                                                                  currentPage,
                                                                  totalPages,
                                                                  onPageChange,
@@ -91,7 +91,7 @@ export const PaginationComponent: React.FC<PaginationProps> = ({
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-      <Pagination>
+      <PaginationComponent>
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
@@ -117,7 +117,7 @@ export const PaginationComponent: React.FC<PaginationProps> = ({
             />
           </PaginationItem>
         </PaginationContent>
-      </Pagination>
+      </PaginationComponent>
     </div>
   );
 };

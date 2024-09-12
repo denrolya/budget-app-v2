@@ -4,9 +4,9 @@ import LoginPage from '@/app/login/page';
 import TransactionsListPage from '@/app/transactions/page';
 import DailyLedgerPage from '@/app/daily-ledger/page';
 import DebtsPage from '@/app/debts/page';
-import Dashboard from '@/components/dashboard-06';
-import { LayoutV9 } from '@/components/layout-v9';
-import PrivateRoute from '@/components/shared/PrivateRoute/PrivateRoute';
+import { Dashboard } from '@/components/features/dashboard/Dashboard';
+import { LayoutV9 } from '@/components/layout/LayoutV9';
+import { PrivateRoute } from '@/components/common/PrivateRoute';
 
 const Routing = () => (
   <Routes>

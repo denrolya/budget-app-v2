@@ -1,19 +1,18 @@
 import { ArrowRightLeft, Eye } from 'lucide-react';
-import React from 'react';
 
-import { TransactionListItem } from '@/app/transactions/transaction-list-item';
+import { ListItem as TransactionListItem } from '@/components/features/transactions/ListItem';
+import { Details as TransferDetails } from '@/components/features/transfers/Details';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Transfer } from '@/models/transfer';
-import { TransferDetails } from '@/app/transactions/transfer-details';
 
 interface TransferItemProps {
   transfer: Transfer;
 }
 
-export const TransferListItem: React.FC<TransferItemProps> = ({ transfer }) => (
+export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
   <Card className="my-2 border-l-4 border-l-primary shadow-md hover:shadow-lg transition-shadow">
     <CardContent className="p-0">
       <Accordion type="single" collapsible>

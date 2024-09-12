@@ -1,4 +1,3 @@
-import { defaultOnSubmit, useFormLogic } from '@/hooks/form.tsx';
 import { forwardRef, useImperativeHandle } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,6 +5,7 @@ import * as z from 'zod';
 import { Banknote, CreditCard, MoreHorizontal, Wallet } from 'lucide-react';
 import cn from 'classnames';
 
+import { defaultOnSubmit, useFormLogic } from '@/hooks/useFormLogic';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';

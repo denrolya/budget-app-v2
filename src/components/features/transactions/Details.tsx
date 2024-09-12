@@ -1,14 +1,14 @@
 import React from 'react';
 
 import { Transaction } from '@/models/transaction.ts';
-import { TransactionListItem } from '@/app/transactions/transaction-list-item';
+import { ListItem as TransactionListItem } from '@/components/features/transactions/ListItem';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface TransactionDetailsProps {
   transaction: Transaction;
 }
 
-export const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transaction }) => {
+export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
   const compensatedTransaction = false; // TODO: Compensation transaction's details should show original expense transaction and I dont want to have cyclic dependencies
 
   return (

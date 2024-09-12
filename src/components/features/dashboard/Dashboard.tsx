@@ -1,25 +1,6 @@
 import { File, ListFilter, MoreHorizontal, PlusCircle } from 'lucide-react';
-import { useState } from 'react';
 
-import { useForm } from '@/contexts/form.tsx';
-import { AccountForm } from '@/components/account-form.tsx';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog.tsx';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer.tsx';
-import { FinancialCard } from '@/components/financial-card';
+import { FinancialCard } from '@/components/features/statistics/financial-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,9 +15,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useForm } from '@/contexts/form.tsx';
 
 
-export default function Dashboard() {
+export const Dashboard = () => {
   const { openForm } = useForm();
 
   const handleNewTransaction = () => {
@@ -53,8 +35,8 @@ export default function Dashboard() {
       executedAt: '2023-06-15',
       account: {
         id: 2,
-        name: 'Savings'
-      }
+        name: 'Savings',
+      },
     };
     openForm('transaction', existingTransaction, true);
   };
@@ -429,4 +411,4 @@ export default function Dashboard() {
       </Tabs>
     </section>
   );
-}
+};

@@ -1,10 +1,11 @@
+import { useAuth } from '@/contexts/auth.tsx';
 import { Check, Laptop, LogOut, Menu, Moon, Settings, Sun, User, X } from 'lucide-react';
-import React from 'react';
 import { Link, LinkProps } from 'react-router-dom';
 import cn from 'classnames';
+import React from 'react';
 
-import { CurrencySelector } from '@/components/currency-selector';
-import { HeaderExchangeRatesDetails as ExchangeRatesDetails } from '@/components/header-exchange-rates-details';
+import { CurrencySelector } from '@/components/layout/CurrencySelector';
+import { ExchangeRatesDetails as ExchangeRatesDetails } from '@/components/layout/ExchangeRatesDetails';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -21,6 +22,7 @@ import { useSidebar } from '@/contexts/sidebar';
 import { Theme, useTheme } from '@/contexts/theme';
 
 export const Header: React.FC = () => {
+  const { logout } = useAuth();
   const { isSidebarExpanded, toggleSidebar } = useSidebar();
   const { theme, setTheme } = useTheme();
 
@@ -41,7 +43,7 @@ export const Header: React.FC = () => {
   return (
     <header className="bg-accent/10 backdrop-blur-xl border-b border-accent h-10 md:h-8 flex items-center px-4 justify-between">
       <div className="flex items-center space-x-2">
-        <Button variant="ghost" size="icon" onClick={toggleSidebar} className="md:hidden">
+        <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
           {isSidebarExpanded ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
         <nav className="hidden md:flex space-x-4">
@@ -119,7 +121,7 @@ export const Header: React.FC = () => {
               <span>Preferences</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={logout}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>

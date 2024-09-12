@@ -14,12 +14,12 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command.tsx';
+} from '@/components/ui/command';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
-import { defaultOnSubmit, useFormLogic } from '@/hooks/form.tsx';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { defaultOnSubmit, useFormLogic } from '@/hooks/useFormLogic';
 import { Transfer } from '@/models/transfer';
 
 const accounts = [

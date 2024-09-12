@@ -146,13 +146,10 @@ export const Sidebar: FC = () => {
             <div className="p-4 space-y-4">
               <div className="space-y-1">
                 <NavLink to="/dashboard" icon={Home}>
-                  Overview
+                  Dashboard
                 </NavLink>
-                <NavLink to="/transactions" icon={CreditCard}>
-                  Accounts
-                </NavLink>
-                <NavLink to="/investments" icon={BarChart2}>
-                  Investments
+                <NavLink to="/ledger" icon={BarChart2}>
+                  Daily Ledger
                 </NavLink>
               </div>
               <Separator />
@@ -160,18 +157,15 @@ export const Sidebar: FC = () => {
                 {isSidebarExpanded && (
                   <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1">Tools</div>
                 )}
-                <Button variant="ghost" className="w-full justify-start">
-                  <PiggyBank className="h-4 w-4" />
-                  {isSidebarExpanded && <span className="ml-2">Budgets</span>}
-                </Button>
-                <Button variant="ghost" className="w-full justify-start">
-                  <ArrowRightLeft className="h-4 w-4" />
-                  {isSidebarExpanded && <span className="ml-2">Transfers</span>}
-                </Button>
-                <Button variant="ghost" className="w-full justify-start">
-                  <Briefcase className="h-4 w-4" />
-                  {isSidebarExpanded && <span className="ml-2">Financial Planning</span>}
-                </Button>
+                <NavLink to="/transactions" icon={CreditCard}>
+                  Transactions
+                </NavLink>
+                <NavLink to="/transfers" icon={CreditCard}>
+                  Transfers
+                </NavLink>
+                <NavLink to="/debts" icon={CreditCard}>
+                  Debts
+                </NavLink>
               </div>
             </div>
           </div>
