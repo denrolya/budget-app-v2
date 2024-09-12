@@ -42,6 +42,7 @@ export const TransactionsList = () => {
   } = listState;
 
   const url = useMemo(() => {
+    console.log(filters);
     const query = new URLSearchParams({
       perPage: pageSize,
       page: currentPage,
