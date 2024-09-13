@@ -1,4 +1,3 @@
-import React from 'react';
 import cn from 'classnames';
 
 import { useAuth } from '@/contexts/auth';
@@ -11,11 +10,11 @@ interface TransactionValueProps {
   maximumFractionDigits?: number;
 }
 
-export const TransactionValue: React.FC<TransactionValueProps> = ({
-                                                                    transaction,
-                                                                    className,
-                                                                    maximumFractionDigits = 2,
-                                                                  }) => {
+export const TransactionValue = ({
+                                           transaction,
+                                           className,
+                                           maximumFractionDigits = 2,
+                                         }: TransactionValueProps) => {
   const { user } = useAuth();
   const baseCurrency = CURRENCIES[user?.baseCurrency];
   const { amount, account: { currency }, convertedValues } = transaction;
@@ -31,10 +30,10 @@ export const TransactionValue: React.FC<TransactionValueProps> = ({
   const valueString = value !== undefined ? formatMoney(value, baseCurrency.symbol) : '';
 
   return (
-    <span className={cn('inline-block whitespace-nowrap font-numeric', className)}>
+    <span className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}>
       {amountString}
       {value !== undefined && (baseCurrency.code !== currency || amount !== value) && (
-        <span className="ml-1 text-xs font-light">
+        <span className="ml-1 text-xs font-light tabular-nums slashed-zero">
           | {valueString}
         </span>
       )}

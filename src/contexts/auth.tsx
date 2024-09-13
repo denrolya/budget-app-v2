@@ -11,6 +11,7 @@ interface User {
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
+  isInitialized: boolean;
   user: User | null;
   token: string | null;
   login: (token: string) => void;
@@ -24,6 +25,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   // On login, parse the JWT, store in state and sessionStorage
   const login = (token: string) => {
@@ -49,10 +51,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } else {
       setIsLoading(false);
     }
+    setIsInitialized(true);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated: !!user, isLoading, user, token, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated: !!user, isLoading, isInitialized, user, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

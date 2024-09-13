@@ -4,7 +4,6 @@ import cn from 'classnames';
 
 import { TransactionValue } from '@/components/common/TransactionValue';
 import { Details } from '@/components/features/transactions/Details';
-import { Avatar as AccountAvatar } from '@/components/features/accounts/Avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,6 +17,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { Transaction, Type } from '@/models/transaction';
+import { Avatar as AccountAvatar } from '@/components/features/accounts/Avatar';
 
 interface TransactionListItemProps {
   transaction: Transaction;
