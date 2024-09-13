@@ -1,9 +1,8 @@
-import cn from 'classnames';
-import { format } from 'date-fns';
+import React, { useState } from 'react';
+import moment from 'moment';
 import { CalendarIcon } from 'lucide-react';
-import { useState } from 'react';
 
-import { Badge } from '@/components/ui/badge';
+import { TransactionFilters } from '@/models/TransactionFilters';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
@@ -11,143 +10,203 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 
-export const ListFilters = () => {
-  const [date, setDate] = useState<Date>();
-  const [amountRange, setAmountRange] = useState([0, 1000]);
-  const [minAmount, setMinAmount] = useState('0');
-  const [maxAmount, setMaxAmount] = useState('1000');
+interface ListFiltersProps {
+  data: TransactionFilters;
+  onChange: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K]) => void;
+}
 
+const categories = ['Food & Drinks', 'Transportation', 'Entertainment', 'Bills', 'Shopping'];
+const accounts = ['Checking', 'Savings', 'Credit Card', 'Cash'];
+const datePresets = [
+  { label: 'This Month', range: { from: moment().startOf('month'), to: moment().endOf('month') } },
+  { label: 'Last 30 Days', range: { from: moment().subtract(30, 'days'), to: moment() } },
+  { label: 'This Year', range: { from: moment().startOf('year'), to: moment().endOf('year') } },
+  { label: 'Last Year', range: { from: moment().subtract(1, 'year').startOf('year'), to: moment().subtract(1, 'year').endOf('year') } },
+];
+
+export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
+  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
+  const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState(false);
+  const [isAccountPopoverOpen, setIsAccountPopoverOpen] = useState(false);
+  const [isAmountPopoverOpen, setIsAmountPopoverOpen] = useState(false);
+
+  // Handling the date range change using the onChange prop
+  const handleDateRangeChange = (range: { from: Date | undefined; to: Date | undefined }) => {
+    onChange('after', range.from ? moment(range.from) : undefined);
+    onChange('before', range.to ? moment(range.to) : undefined);
+  };
+
+  // Handling the amount range change using the onChange prop
   const handleAmountChange = (value: number[]) => {
-    setAmountRange(value);
-    setMinAmount(value[0].toString());
-    setMaxAmount(value[1].toString());
-  };
-
-  const handleMinAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value >= 0 && value <= amountRange[1]) {
-      setMinAmount(e.target.value);
-      setAmountRange([value, amountRange[1]]);
-    }
-  };
-
-  const handleMaxAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value >= amountRange[0]) {
-      setMaxAmount(e.target.value);
-      setAmountRange([amountRange[0], value]);
-    }
+    onChange('amountRange', value);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="date-picker">Date</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              id="date-picker"
-              variant={'outline'}
-              className={cn('w-full justify-start text-left font-normal', { 'text-muted-foreground': !date })}
-              aria-label="Select date"
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, 'PPP') : <span>Pick a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
+    <>
+      {/* Date Range Filter */}
+      <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm">
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {data.after && data.before
+              ? `${data.after.format('MMM D, YYYY')} - ${data.before.format('MMM D, YYYY')}`
+              : data.after
+                ? `After ${data.after.format('MMM D, YYYY')}`
+                : data.before
+                  ? `Before ${data.before.format('MMM D, YYYY')}`
+                  : 'Select date range'}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <div className="flex">
             <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
               initialFocus
+              mode="range"
+              defaultMonth={data.after?.toDate() || moment().toDate()}
+              selected={{
+                from: data.after?.toDate(),
+                to: data.before?.toDate(),
+              }}
+              onSelect={handleDateRangeChange}
+              numberOfMonths={2}
             />
-          </PopoverContent>
-        </Popover>
-      </div>
+            <div className="border-l p-3 space-y-3">
+              <h4 className="font-medium text-sm">Presets</h4>
+              {datePresets.map((preset) => (
+                <Button
+                  key={preset.label}
+                  size="sm"
+                  variant="outline"
+                  className="w-full justify-start text-left"
+                  onClick={() => {
+                    handleDateRangeChange(preset.range);
+                    setIsDatePopoverOpen(false);
+                  }}
+                >
+                  {preset.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
 
-      <div className="space-y-2">
-        <Label>Transaction Type</Label>
-        <div className="flex space-x-2">
-          <Button variant="outline" size="sm">Income</Button>
-          <Button variant="outline" size="sm">Expense</Button>
-        </div>
-      </div>
+      {/* Categories Filter */}
+      <Popover open={isCategoryPopoverOpen} onOpenChange={setIsCategoryPopoverOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm">
+            Categories ({data.categories.length})
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[200px]">
+          <div className="space-y-2">
+            {categories.map((category) => (
+              <div key={category} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`category-${category}`}
+                  checked={data.categories.includes(category)}
+                  onCheckedChange={(checked) => {
+                    onChange(
+                      'categories',
+                      checked
+                        ? [...data.categories, category]
+                        : data.categories.filter((c) => c !== category),
+                    );
+                  }}
+                />
+                <label htmlFor={`category-${category}`}>{category}</label>
+              </div>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
 
-      <div className="space-y-2">
-        <Label htmlFor="category-search">Categories</Label>
-        <Input id="category-search" type="text" placeholder="Search categories..." />
-        <div className="flex flex-wrap gap-2 mt-2">
-          <Badge variant="secondary">Food</Badge>
-          <Badge variant="secondary">Transport</Badge>
-          <Badge variant="secondary">Entertainment</Badge>
-        </div>
-      </div>
+      {/* Accounts Filter */}
+      <Popover open={isAccountPopoverOpen} onOpenChange={setIsAccountPopoverOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm">
+            Accounts ({data.accounts.length})
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[200px]">
+          <div className="space-y-2">
+            {accounts.map((account) => (
+              <div key={account} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`account-${account}`}
+                  checked={data.accounts.includes(account)}
+                  onCheckedChange={(checked) => {
+                    onChange(
+                      'accounts',
+                      checked
+                        ? [...data.accounts, account]
+                        : data.accounts.filter((a) => a !== account),
+                    );
+                  }}
+                />
+                <label htmlFor={`account-${account}`}>{account}</label>
+              </div>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
 
-      <div className="space-y-2">
-        <Label htmlFor="account-search">Accounts</Label>
-        <Input id="account-search" type="text" placeholder="Search accounts..." />
-        <div className="flex flex-wrap gap-2 mt-2">
-          <Badge variant="secondary">Checking</Badge>
-          <Badge variant="secondary">Savings</Badge>
-          <Badge variant="secondary">Credit Card</Badge>
-        </div>
-      </div>
+      {/* Amount Range Filter */}
+      <Popover open={isAmountPopoverOpen} onOpenChange={setIsAmountPopoverOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm">
+            Amount: ${data.amountRange[0]} - ${data.amountRange[1]}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80">
+          <div className="space-y-2">
+            <h4 className="font-medium leading-none">Amount Range</h4>
+            <Slider
+              min={0}
+              max={10000}
+              step={100}
+              value={data.amountRange}
+              onValueChange={handleAmountChange}
+            />
+            <div className="flex justify-between">
+              <Input
+                type="number"
+                value={data.amountRange[0]}
+                onChange={(e) => onChange('amountRange', [parseInt(e.target.value), data.amountRange[1]])}
+                className="w-20"
+              />
+              <Input
+                type="number"
+                value={data.amountRange[1]}
+                onChange={(e) => onChange('amountRange', [data.amountRange[0], parseInt(e.target.value)])}
+                className="w-20"
+              />
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
 
+      {/* Include Nested Categories Switch */}
       <div className="flex items-center space-x-2">
-        <Switch id="nested-categories" />
+        <Switch
+          id="nested-categories"
+          checked={data.withNestedCategories}
+          onCheckedChange={(checked) => onChange('withNestedCategories', checked)}
+        />
         <Label htmlFor="nested-categories">Include nested categories</Label>
       </div>
 
+      {/* Show Draft Transactions Switch */}
       <div className="flex items-center space-x-2">
-        <Switch id="draft-transactions" />
-        <Label htmlFor="draft-transactions">Show only draft transactions</Label>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="amount-slider">Amount Range</Label>
-        <Slider
-          id="amount-slider"
-          value={amountRange}
-          max={10000}
-          step={10}
-          onValueChange={handleAmountChange}
-          aria-label="Amount range"
+        <Switch
+          id="draft-transactions"
+          checked={data.showDraftTransactions}
+          onCheckedChange={(checked) => onChange('showDraftTransactions', checked)}
         />
-        <div className="flex justify-between gap-4">
-          <div className="flex-1">
-            <Label htmlFor="min-amount">Min</Label>
-            <Input
-              id="min-amount"
-              type="number"
-              value={minAmount}
-              onChange={handleMinAmountChange}
-              className="mt-1"
-            />
-          </div>
-          <div className="flex-1">
-            <Label htmlFor="max-amount">Max</Label>
-            <Input
-              id="max-amount"
-              type="number"
-              value={maxAmount}
-              onChange={handleMaxAmountChange}
-              className="mt-1"
-            />
-          </div>
-        </div>
+        <Label htmlFor="draft-transactions">Show draft transactions</Label>
       </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="tag-search">Tags</Label>
-        <Input id="tag-search" type="text" placeholder="Search tags..." />
-        <div className="flex flex-wrap gap-2 mt-2">
-          <Badge variant="outline">Work</Badge>
-          <Badge variant="outline">Personal</Badge>
-          <Badge variant="outline">Family</Badge>
-        </div>
-      </div>
-    </div>
+    </>
   );
 };

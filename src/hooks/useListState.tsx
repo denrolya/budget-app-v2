@@ -1,6 +1,11 @@
-import debounce from 'lodash.debounce';
+import debounce from 'lodash/debounce';
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import moment from 'moment';
+
+export interface FilterModel {
+  setFilter<K extends keyof this>(key: K, value: this[K]): void;
+}
 
 /**
  * Pagination state interface
@@ -41,18 +46,20 @@ type SetFilterFunction<T> = <K extends keyof T>(key: K, value: T[K]) => void;
  * @template FilterType - Type of the filters
  * @template ItemType - Type of the items in the list
  */
-interface UseListStateOptions<FilterType, ItemType> {
+interface UseListStateOptions<FilterType extends FilterModel, ItemType> {
   initialPageSize?: number;
   initialFilters: FilterType;
   initialSort?: SortState<ItemType>;
   searchParamKeys?: {
     [K in keyof FilterType]?: string;
   };
+  formatMoment?: string; // Custom date format for moment objects
+  updateUrl?: boolean;   // Flag to enable or disable URL updates
 }
 
 /**
  * Custom hook to manage list state including pagination, filters, and sorting.
- * It syncs with URL search parameters for state persistence.
+ * It syncs with URL search parameters for state persistence if updateUrl is true.
  *
  * @template FilterType - Type of the filters
  * @template ItemType - Type of the items in the list
@@ -60,28 +67,30 @@ interface UseListStateOptions<FilterType, ItemType> {
  * @param options - Configuration options for the hook
  * @returns List state and functions to update pagination, filters, and sorting
  */
-export const useListState = <FilterType extends Record<string, any>, ItemType>({
-                                                                                 initialPageSize = 10,
-                                                                                 initialFilters,
-                                                                                 initialSort = {
-                                                                                   field: null,
-                                                                                   direction: null,
-                                                                                 },
-                                                                                 searchParamKeys = {},
-                                                                               }: UseListStateOptions<FilterType, ItemType>) => {
+export const useListState = <FilterType extends FilterModel, ItemType>({
+                                                                         initialPageSize = 10,
+                                                                         initialFilters,
+                                                                         initialSort = {
+                                                                           field: null,
+                                                                           direction: null,
+                                                                         },
+                                                                         searchParamKeys = {},
+                                                                         formatMoment = 'YYYY-MM-DD',
+                                                                         updateUrl = true,
+                                                                       }: UseListStateOptions<FilterType, ItemType>) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // Extract initial state from URL search params or fallback to default initial state
   const getInitialState = (): UseListState<FilterType, ItemType> => ({
     pagination: {
       currentPage: parseInt(searchParams.get('page') || '1', 10),
-      pageSize: initialPageSize,
+      pageSize: parseInt(searchParams.get('perPage') || initialPageSize.toString(), 10),
     },
-    filters: Object.keys(initialFilters).reduce((acc, key) => {
-      const searchParamKey = searchParamKeys[key as keyof FilterType] || key;
-      const value = searchParams.get(searchParamKey) || initialFilters[key];
-      return { ...acc, [key]: value };
-    }, {} as FilterType),
-    sort: initialSort,
+    filters: initialFilters,
+    sort: {
+      field: (searchParams.get('sortField') as keyof ItemType) || initialSort.field,
+      direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || initialSort.direction,
+    },
   });
 
   const [state, setState] = useState<UseListState<FilterType, ItemType>>(getInitialState);
@@ -94,11 +103,18 @@ export const useListState = <FilterType extends Record<string, any>, ItemType>({
   }, []);
 
   const setFilter: SetFilterFunction<FilterType> = useCallback((key, value) => {
-    setState(prev => ({
-      ...prev,
-      pagination: { ...prev.pagination, currentPage: 1 },
-      filters: { ...prev.filters, [key]: value },
-    }));
+    setState((prev) => {
+      // Properly create a new instance of the filter type to retain methods
+      const updatedFilters = new (prev.filters.constructor as { new (): FilterType })();
+      Object.assign(updatedFilters, prev.filters); // Copy current filter values
+      updatedFilters.setFilter(key, value); // Use the setFilter method from FilterModel
+
+      return {
+        ...prev,
+        pagination: { ...prev.pagination, currentPage: 1 }, // Reset to first page on filter change
+        filters: updatedFilters,
+      };
+    });
   }, []);
 
   const setSort = useCallback((field: keyof ItemType | null, direction: 'asc' | 'desc' | null) => {
@@ -110,23 +126,32 @@ export const useListState = <FilterType extends Record<string, any>, ItemType>({
 
   const updateSearchParamsDebounced = useCallback(
     debounce((params: URLSearchParams) => {
-      setSearchParams(params);
+      if (updateUrl) {
+        setSearchParams(params);
+      }
     }, 300),
-    [setSearchParams]
+    [setSearchParams, updateUrl]
   );
 
   useEffect(() => {
+    if (!updateUrl) return; // Skip URL updates if disabled
+
     const params = new URLSearchParams();
     params.set('page', state.pagination.currentPage.toString());
+    params.set('perPage', state.pagination.pageSize.toString());
+
     Object.entries(state.filters).forEach(([key, value]) => {
       const searchParamKey = searchParamKeys[key as keyof FilterType] || key;
-      if (value) {
-        params.set(searchParamKey, value.toString());
+      const defaultValue = initialFilters[key as keyof FilterType];
+      if (value !== undefined && value !== null && value !== '' && value !== defaultValue) {
+        const formattedValue = moment.isMoment(value) ? value.format(formatMoment) : value.toString();
+        params.set(searchParamKey, formattedValue);
       }
     });
-    if (state.sort.field) {
+
+    if (state.sort.field && state.sort.direction) {
       params.set('sortField', state.sort.field.toString());
-      params.set('sortDirection', state.sort.direction || '');
+      params.set('sortDirection', state.sort.direction);
     }
 
     updateSearchParamsDebounced(params);
@@ -134,7 +159,17 @@ export const useListState = <FilterType extends Record<string, any>, ItemType>({
     return () => {
       updateSearchParamsDebounced.cancel(); // Cancel the debounce to prevent it from firing after unmount
     };
-  }, [state.pagination.currentPage, state.filters, state.sort, searchParamKeys, updateSearchParamsDebounced]);
+  }, [
+    state.pagination.currentPage,
+    state.pagination.pageSize,
+    state.filters,
+    state.sort,
+    searchParamKeys,
+    formatMoment,
+    updateSearchParamsDebounced,
+    updateUrl,
+    initialFilters,
+  ]);
 
   return {
     ...state,

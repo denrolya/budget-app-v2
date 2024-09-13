@@ -1,4 +1,5 @@
 import React from 'react';
+import cn from 'classnames';
 
 import { Avatar as AvatarComponent, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -11,9 +12,10 @@ interface Account {
 
 interface AvatarProps {
   account: Account;
+  className?: string;
 }
 
-export const Avatar: React.FC<AvatarProps> = ({ account }) => {
+export const Avatar: React.FC<AvatarProps> = ({ account, className }) => {
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase();
 
   const accountIcon = account.icon ? (
@@ -23,7 +25,7 @@ export const Avatar: React.FC<AvatarProps> = ({ account }) => {
   );
 
   return (
-    <AvatarComponent className="h-10 w-10" style={{ backgroundColor: account.color }}>
+    <AvatarComponent className={cn('h-10 w-10', className)} style={{ backgroundColor: account.color }}>
       <AvatarImage src={`https://www.gravatar.com/avatar/${account.id}?d=identicon&s=40`} alt={account.name} />
       <AvatarFallback>{accountIcon}</AvatarFallback>
     </AvatarComponent>

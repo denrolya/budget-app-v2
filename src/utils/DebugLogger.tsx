@@ -17,14 +17,14 @@ class DebugLogger {
     return DebugLogger.instance;
   }
 
-  private formatMessage(message: any): string {
+  private formatMessage(message: unknown): string {
     if (typeof message === 'object' && message !== null) {
       return JSON.stringify(message, null, 2);
     }
     return String(message);
   }
 
-  private log(message: any, level: LogLevel, component?: string): void {
+  private log(message: unknown, level: LogLevel, component?: string): void {
     const timestamp = moment().format('YYYY-MM-DD HH:mm:ss.SSS');
     const componentInfo = component ? `[${component}]` : '';
     const formattedMessage = this.formatMessage(message);
@@ -43,15 +43,15 @@ class DebugLogger {
     }
   }
 
-  public info(message: string, component?: string): void {
+  public info(message: unknown, component?: string): void {
     this.log(message, 'INFO', component);
   }
 
-  public warn(message: string, component?: string): void {
+  public warn(message: unknown, component?: string): void {
     this.log(message, 'WARN', component);
   }
 
-  public error(message: string, component?: string): void {
+  public error(message: unknown, component?: string): void {
     this.log(message, 'ERROR', component);
   }
 }

@@ -1,37 +1,21 @@
+import moment from 'moment';
 import { useMemo } from 'react';
 import useSWR from 'swr';
+import isEqual from 'lodash/isEqual';
 
 import { Pagination } from '@/components/common/Pagination';
 import { ListItem as TransactionListItem } from '@/components/features/transactions/ListItem';
 import { ListItemSkeleton as TransactionListItemSkeleton } from '@/components/features/transactions/ListItemSkeleton';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useListState } from '@/hooks/useListState.tsx';
-import { Transaction } from '@/models/transaction.ts';
+import { TransactionFilters } from '@/models/TransactionFilters';
+import { useListState } from '@/hooks/useListState';
+import { Transaction } from '@/models/transaction';
 import { axiosFetcher } from '@/services/api';
+import { ListFilters } from '@/components/features/transactions/ListFilters';
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 
-interface TransactionFilters {
-  searchTerm: string;
-  dateRange: string;
-  status: string;
-}
+const defaultFilters = new TransactionFilters();
 
 export const TransactionsList = () => {
-  const listState = useListState<TransactionFilters, Transaction>({
-    initialPageSize: 10,
-    initialFilters: {
-      searchTerm: '',
-      dateRange: '',
-      status: '',
-    },
-    initialSort: { field: 'executedAt', direction: 'desc' },
-    searchParamKeys: {
-      searchTerm: 'search',
-      dateRange: 'executedAt',
-      status: 'status',
-    },
-  });
-
   const {
     pagination: { currentPage, pageSize },
     filters,
@@ -39,16 +23,57 @@ export const TransactionsList = () => {
     setCurrentPage,
     setFilter,
     setSort,
-  } = listState;
+  } = useListState<TransactionFilters, Transaction>({
+    initialPageSize: 10,
+    initialFilters: defaultFilters,
+    initialSort: { field: 'executedAt', direction: 'desc' },
+    searchParamKeys: {
+      searchTerm: 'q',
+      before: 'before',
+      after: 'after',
+      status: 'status',
+      amountRange: 'amount',
+      categories: 'categories',
+      accounts: 'accounts',
+      withNestedCategories: 'withNestedCategories',
+      isDraft: 'isDraft',
+    },
+    formatMoment: BACKEND_DATE_FORMAT,
+    updateUrl: true,
+  });
 
   const url = useMemo(() => {
-    console.log(filters);
-    const query = new URLSearchParams({
-      perPage: pageSize,
-      page: currentPage,
-    }).toString();
-    return `/api/v2/transaction?${query}`;
-  }, [filters, currentPage, pageSize]);
+    const query = new URLSearchParams();
+
+    const addParam = (key: string, value: unknown, defaultValue: unknown) => {
+      const isEmptyArray = Array.isArray(value) && value.length === 0;
+      const isEmptyValue = value === undefined || value === null || value === '';
+
+      if (!isEmptyValue && !isEmptyArray && !isEqual(value, defaultValue)) {
+        if (Array.isArray(value)) {
+          query.set(key, value.join(','));
+        } else if (typeof value === 'boolean') {
+          query.set(key, !!value ? 1 : 0);
+        } else if (moment.isMoment(value)) {
+          query.set(key, value.format(BACKEND_DATE_FORMAT));
+        } else {
+          query.set(key, value.toString());
+        }
+      }
+    };
+
+    query.set('perPage', pageSize.toString());
+    query.set('page', currentPage.toString());
+
+    Object.entries(filters).forEach(([key, value]) => {
+      addParam(key, value, defaultFilters[key as keyof TransactionFilters]);
+    });
+
+    if (sort.field) query.set('sortField', sort.field as string);
+    if (sort.direction) query.set('sortDirection', sort.direction);
+
+    return `/api/v2/transaction?${query.toString()}`;
+  }, [filters, currentPage, pageSize, sort]);
 
   const { data, error, isLoading } = useSWR(url, async (url) => {
     const result = await axiosFetcher(url);
@@ -65,35 +90,7 @@ export const TransactionsList = () => {
       <h1 className="text-2xl font-bold mb-4">Transactions List</h1>
 
       {/* Filters */}
-      <div className="flex gap-4 mb-4">
-        <Input
-          placeholder="Search transactions"
-          value={filters.searchTerm}
-          onChange={e => setFilter('searchTerm', e.target.value)}
-          className="max-w-sm"
-        />
-        <Select value={filters.dateRange} onValueChange={value => setFilter('dateRange', value)}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Date range" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="today">Today</SelectItem>
-            <SelectItem value="thisWeek">This Week</SelectItem>
-            <SelectItem value="thisMonth">This Month</SelectItem>
-            <SelectItem value="thisYear">This Year</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={filters.status} onValueChange={value => setFilter('status', value)}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="failed">Failed</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <ListFilters data={filters} onChange={setFilter} />
 
       {/* Transactions List */}
       {isLoading && (
@@ -103,6 +100,7 @@ export const TransactionsList = () => {
           ))}
         </ul>
       )}
+
       {!isLoading && (
         <ul className="space-y-2">
           {data.list.map((transaction: Transaction) => (
@@ -115,11 +113,7 @@ export const TransactionsList = () => {
 
       {/* Pagination */}
       <div className="mt-4">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       </div>
     </div>
   );
