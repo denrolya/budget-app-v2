@@ -1,8 +1,7 @@
-import { useAuth } from '@/contexts/auth.tsx';
-import { Check, Laptop, LogOut, Menu, Moon, Settings, Sun, User, X } from 'lucide-react';
-import { Link, LinkProps } from 'react-router-dom';
 import cn from 'classnames';
+import { Check, Laptop, LogOut, Moon, Settings, Sun, User } from 'lucide-react';
 import React from 'react';
+import { Link, LinkProps } from 'react-router-dom';
 
 import { CurrencySelector } from '@/components/layout/CurrencySelector';
 import { ExchangeRatesDetails as ExchangeRatesDetails } from '@/components/layout/ExchangeRatesDetails';
@@ -18,12 +17,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
-import { useSidebar } from '@/contexts/sidebar';
+import { useAuth } from '@/contexts/auth.tsx';
 import { Theme, useTheme } from '@/contexts/theme';
 
-export const Header: React.FC = () => {
+interface Props {
+  className?: string;
+}
+
+export const Header: React.FC<Props> = ({ className }) => {
   const { logout } = useAuth();
-  const { isSidebarExpanded, toggleSidebar } = useSidebar();
   const { theme, setTheme } = useTheme();
 
   interface HeaderLinkProps extends LinkProps {
@@ -31,21 +33,18 @@ export const Header: React.FC = () => {
   }
 
   const HeaderLink: React.FC<HeaderLinkProps> = ({ to, children, className, ...rest }) => (
-      <Link
-        to={to}
-        className={cn('text-sm transition-colors hover:text-foreground/80 text-foreground focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:text-primary', className)}
-        {...rest}
-      >
-        {children}
-      </Link>
-    );
+    <Link
+      to={to}
+      className={cn('text-sm transition-colors hover:text-foreground/80 text-foreground focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:text-primary', className)}
+      {...rest}
+    >
+      {children}
+    </Link>
+  );
 
   return (
-    <header className="bg-accent/10 backdrop-blur-xl border-b border-accent h-10 md:h-8 flex items-center px-4 justify-between">
+    <header className={cn("bg-accent/10 backdrop-blur-xl border-b border-accent h-10 md:h-8 flex items-center px-4 justify-between", className)}>
       <div className="flex items-center space-x-2">
-        <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
-          {isSidebarExpanded ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
         <nav className="hidden md:flex space-x-4">
           <HeaderLink to="/dashboard">
             Dashboard
