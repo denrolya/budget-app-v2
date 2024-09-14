@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/contexts/auth.tsx';
+import { useAuth } from '@/contexts/auth';
 import { Theme, useTheme } from '@/contexts/theme';
 
 interface Props {
@@ -43,7 +43,7 @@ export const Header: React.FC<Props> = ({ className }) => {
   );
 
   return (
-    <header className={cn("bg-accent/10 backdrop-blur-xl border-b border-accent h-10 md:h-8 flex items-center px-4 justify-between", className)}>
+    <header className={cn('bg-accent/10 backdrop-blur-xl border-b border-accent h-10 md:h-8 flex items-center px-4 justify-between', className)}>
       <div className="flex items-center space-x-2">
         <nav className="hidden md:flex space-x-4">
           <HeaderLink to="/dashboard">
