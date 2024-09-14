@@ -1,12 +1,10 @@
-import React, { createContext, useContext, ReactNode, useEffect, useState, useMemo, useCallback } from 'react';
-import useSWR, { preload, SWRResponse, SWRConfiguration } from 'swr';
-import { AlertCircle } from 'lucide-react';
-import orderBy from 'lodash/orderBy';
-
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { axiosFetcher } from '@/services/api';
+import orderBy from 'lodash/orderBy';
+import { AlertCircle } from 'lucide-react';
+import React, { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import useSWR, { preload, SWRConfiguration, SWRResponse } from 'swr';
 
 type Account = {
   id: number;
@@ -70,7 +68,7 @@ export const prefetchFinanceData = (): void => {
 export const generateConvertedValues = (
   rates: ExchangeRates,
   originalCurrency: string,
-  value: number
+  value: number,
 ): Record<string, number> => Object.fromEntries(
   Object.entries(rates).map(([currency, rate]) => [currency, convert(rates, value, originalCurrency, currency)]),
 );
@@ -79,7 +77,7 @@ const convert = (
   rates: ExchangeRates,
   value: number,
   from: string,
-  to: string
+  to: string,
 ): number => {
   if (from === to) return value;
   const fromRate = rates[from];
@@ -109,10 +107,26 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
     onErrorRetry,
   };
 
-  const { data: accounts, error: accountsError, mutate: mutateAccounts }: SWRResponse<Account[], Error> = useSWR<Account[], Error>(ENDPOINTS.accounts, axiosFetcher, swrOptions);
-  const { data: debts, error: debtsError, mutate: mutateDebts }: SWRResponse<Debt[], Error> = useSWR<Debt[], Error>(ENDPOINTS.debts, axiosFetcher, swrOptions);
-  const { data: categories, error: categoriesError, mutate: mutateCategories }: SWRResponse<Category[], Error> = useSWR<Category[], Error>(ENDPOINTS.categories, axiosFetcher, swrOptions);
-  const { data: exchangeRates, error: exchangeRatesError, mutate: mutateExchangeRates }: SWRResponse<ExchangeRates, Error> = useSWR<ExchangeRates, Error>(ENDPOINTS.exchangeRates, async url => {
+  const {
+    data: accounts,
+    error: accountsError,
+    mutate: mutateAccounts,
+  }: SWRResponse<Account[], Error> = useSWR<Account[], Error>(ENDPOINTS.accounts, axiosFetcher, swrOptions);
+  const {
+    data: debts,
+    error: debtsError,
+    mutate: mutateDebts,
+  }: SWRResponse<Debt[], Error> = useSWR<Debt[], Error>(ENDPOINTS.debts, axiosFetcher, swrOptions);
+  const {
+    data: categories,
+    error: categoriesError,
+    mutate: mutateCategories,
+  }: SWRResponse<Category[], Error> = useSWR<Category[], Error>(ENDPOINTS.categories, axiosFetcher, swrOptions);
+  const {
+    data: exchangeRates,
+    error: exchangeRatesError,
+    mutate: mutateExchangeRates,
+  }: SWRResponse<ExchangeRates, Error> = useSWR<ExchangeRates, Error>(ENDPOINTS.exchangeRates, async url => {
     const response = await axiosFetcher(url);
     return response?.rates;
   }, swrOptions);
@@ -136,7 +150,7 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
     mutateAccounts((currentAccounts) => {
       if (!currentAccounts) return currentAccounts;
       const updatedAccounts = currentAccounts.map(account =>
-        account.id === updatedAccount.id ? updatedAccount : account
+        account.id === updatedAccount.id ? updatedAccount : account,
       );
       return updatedAccounts;
     }, false);
@@ -166,9 +180,79 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   if (isLoading) {
     return (
-      <div className="max-w-md mx-auto mt-8">
-        <Progress value={progress} className="w-full" />
-        <p className="text-center mt-2">Loading financial data... {Math.round(progress)}%</p>
+      <div className="fixed inset-0 flex items-center justify-center bg-black">
+        <div className="w-full max-w-md mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative">
+            <svg className="w-64 h-64 mx-auto" viewBox="0 0 100 100">
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#FF6B6B" />
+                  <stop offset="100%" stopColor="#4ECDC4" />
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              {/* Dimmer ring in the middle of the loading circle */}
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke="url(#gradient)"
+                strokeWidth="2"
+                opacity="0.5"
+              />
+
+              {/* Main progress circle */}
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke="url(#gradient)"
+                strokeWidth="4"
+                strokeDasharray="283"
+                strokeDashoffset={283 - (283 * progress) / 100}
+                className="transform -rotate-90 origin-center transition-all duration-500 ease-in-out"
+                filter="url(#glow)"
+              />
+
+              {/* Orbiting circle */}
+              <circle
+                cx="50"
+                cy="5"
+                r="3"
+                fill="#FF6B6B"
+                className="animate-orbit"
+              />
+
+              <text
+                x="50"
+                y="50"
+                textAnchor="middle"
+                dominantBaseline="central"
+                className="text-2xl font-bold fill-white animate-bounce-small"
+              >
+                {Math.round(progress)}%
+              </text>
+            </svg>
+          </div>
+
+          <div className="mt-8 text-center space-y-4">
+            <h2 className="text-2xl font-bold text-white animate-pulse">
+              Revving Up Your Experience
+            </h2>
+            <p className="text-lg text-gray-300">
+              Fasten your seatbelt, we're almost there!
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -188,14 +272,18 @@ export const useFinanceData = (): FinanceDataContextType => {
   return context;
 };
 
-export const useAccounts = (): { accounts: AccountWithConvertedValues[] | null; isLoading: boolean; error: Error | null } => {
+export const useAccounts = (): {
+  accounts: AccountWithConvertedValues[] | null;
+  isLoading: boolean;
+  error: Error | null
+} => {
   const { data, isLoading, error } = useFinanceData();
 
   const accountsWithConvertedValues = useMemo(() => {
     if (!data?.accounts || !data?.exchangeRates) return null;
     return data.accounts.map(account => ({
       ...account,
-      convertedValues: generateConvertedValues(data.exchangeRates, account.currency, account.balance)
+      convertedValues: generateConvertedValues(data.exchangeRates, account.currency, account.balance),
     }));
   }, [data?.accounts, data?.exchangeRates]);
 
@@ -236,7 +324,11 @@ export const useCategories = (): { categories: Category[] | null; isLoading: boo
   return { categories: data?.categories ?? null, isLoading, error };
 };
 
-export const useExchangeRates = (): { exchangeRates: ExchangeRates | null; isLoading: boolean; error: Error | null } => {
+export const useExchangeRates = (): {
+  exchangeRates: ExchangeRates | null;
+  isLoading: boolean;
+  error: Error | null
+} => {
   const { data, isLoading, error } = useFinanceData();
   return { exchangeRates: data?.exchangeRates ?? null, isLoading, error };
 };
