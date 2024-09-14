@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-
+import { AccountsManagementPage } from '@/app/accounts/page';
 import LoginPage from '@/app/login/page';
 import TransactionsListPage from '@/app/transactions/page';
 import DailyLedgerPage from '@/app/daily-ledger/page';
@@ -40,6 +40,11 @@ const ProtectedContent: React.FC = () => {
         <Route path="ledger" element={
           <PrivateRoute>
             <DailyLedgerPage />
+          </PrivateRoute>
+        } />
+        <Route path="accounts" element={
+          <PrivateRoute>
+            <AccountsManagementPage />
           </PrivateRoute>
         } />
         <Route path="debts" element={

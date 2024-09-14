@@ -27,25 +27,22 @@ const datePresets = [
 ];
 
 export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
-  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
-  const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState(false);
-  const [isAccountPopoverOpen, setIsAccountPopoverOpen] = useState(false);
-  const [isAmountPopoverOpen, setIsAmountPopoverOpen] = useState(false);
+  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
+  const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState<boolean>(false);
+  const [isAccountPopoverOpen, setIsAccountPopoverOpen] = useState<boolean>(false);
+  const [isAmountPopoverOpen, setIsAmountPopoverOpen] = useState<boolean>(false);
 
-  // Handling the date range change using the onChange prop
   const handleDateRangeChange = (range: { from: Date | undefined; to: Date | undefined }) => {
     onChange('after', range.from ? moment(range.from) : undefined);
     onChange('before', range.to ? moment(range.to) : undefined);
   };
 
-  // Handling the amount range change using the onChange prop
   const handleAmountChange = (value: number[]) => {
     onChange('amountRange', value);
   };
 
   return (
     <>
-      {/* Date Range Filter */}
       <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm">
@@ -60,7 +57,7 @@ export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          <div className="flex">
+          <div className="flex flex-col sm:flex-row">
             <Calendar
               initialFocus
               mode="range"
@@ -71,29 +68,31 @@ export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
               }}
               onSelect={handleDateRangeChange}
               numberOfMonths={2}
+              className="sm:border-r"
             />
-            <div className="border-l p-3 space-y-3">
+            <div className="p-3 space-y-3">
               <h4 className="font-medium text-sm">Presets</h4>
-              {datePresets.map((preset) => (
-                <Button
-                  key={preset.label}
-                  size="sm"
-                  variant="outline"
-                  className="w-full justify-start text-left"
-                  onClick={() => {
-                    handleDateRangeChange(preset.range);
-                    setIsDatePopoverOpen(false);
-                  }}
-                >
-                  {preset.label}
-                </Button>
-              ))}
+              <div className="grid grid-cols-2 sm:grid-cols-1 gap-2">
+                {datePresets.map((preset) => (
+                  <Button
+                    key={preset.label}
+                    size="sm"
+                    variant="outline"
+                    className="w-full justify-start text-left text-xs"
+                    onClick={() => {
+                      handleDateRangeChange(preset.range);
+                      setIsDatePopoverOpen(false);
+                    }}
+                  >
+                    {preset.label}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
         </PopoverContent>
       </Popover>
 
-      {/* Categories Filter */}
       <Popover open={isCategoryPopoverOpen} onOpenChange={setIsCategoryPopoverOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm">
@@ -123,7 +122,6 @@ export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
         </PopoverContent>
       </Popover>
 
-      {/* Accounts Filter */}
       <Popover open={isAccountPopoverOpen} onOpenChange={setIsAccountPopoverOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm">
@@ -153,7 +151,6 @@ export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
         </PopoverContent>
       </Popover>
 
-      {/* Amount Range Filter */}
       <Popover open={isAmountPopoverOpen} onOpenChange={setIsAmountPopoverOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm">
@@ -188,7 +185,6 @@ export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
         </PopoverContent>
       </Popover>
 
-      {/* Include Nested Categories Switch */}
       <div className="flex items-center space-x-2">
         <Switch
           id="nested-categories"
@@ -198,12 +194,11 @@ export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
         <Label htmlFor="nested-categories">Include nested categories</Label>
       </div>
 
-      {/* Show Draft Transactions Switch */}
       <div className="flex items-center space-x-2">
         <Switch
           id="draft-transactions"
-          checked={data.showDraftTransactions}
-          onCheckedChange={(checked) => onChange('showDraftTransactions', checked)}
+          checked={data.isDraft}
+          onCheckedChange={(checked) => onChange('isDraft', checked)}
         />
         <Label htmlFor="draft-transactions">Show draft transactions</Label>
       </div>

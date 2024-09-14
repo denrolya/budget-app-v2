@@ -112,7 +112,86 @@ export const CurrencyConverter = () => {
           <Button variant="outline" size="sm" onClick={swapCurrencies} className="w-full">
             <ArrowLeftRight className="h-4 w-4 mr-2" />
             Swap Currencies
-          </Button>
+          </Button><Drawer>
+          <DrawerTrigger asChild>
+            <Button variant="outline" className="w-full">
+              <ArrowRightLeft className="h-4 w-4 mr-2" />
+              Currency Converter
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Currency Converter</DrawerTitle>
+              <DrawerDescription>Convert between different currencies</DrawerDescription>
+            </DrawerHeader>
+            <div className="p-4 space-y-4">
+              <div className="flex flex-col space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.valueAsNumber || 0)}
+                    className="w-full font-mono"
+                  />
+                  <Select value={fromCurrency} onValueChange={setFromCurrency}>
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue placeholder="From" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                      <SelectItem value="GBP">GBP</SelectItem>
+                      <SelectItem value="JPY">JPY</SelectItem>
+                      <SelectItem value="HUF">HUF</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-full text-2xl font-bold font-mono">
+                    {(amount * getExchangeRate('Central Bank', fromCurrency, toCurrency)).toFixed(2)}
+                  </div>
+                  <Select value={toCurrency} onValueChange={setToCurrency}>
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue placeholder="To" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                      <SelectItem value="GBP">GBP</SelectItem>
+                      <SelectItem value="JPY">JPY</SelectItem>
+                      <SelectItem value="HUF">HUF</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={swapCurrencies} className="w-full">
+                <ArrowLeftRight className="h-4 w-4 mr-2" />
+                Swap Currencies
+              </Button>
+              <div className="flex flex-wrap gap-2">
+                {presetAmounts.map((preset) => (
+                  <Button
+                    key={preset}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAmount(preset)}
+                    className="font-mono"
+                  >
+                    {preset}
+                  </Button>
+                ))}
+              </div>
+              <div className="text-xs text-muted-foreground font-mono">
+                1 {fromCurrency} = {getExchangeRate('Central Bank', fromCurrency, toCurrency).toFixed(4)} {toCurrency}
+              </div>
+            </div>
+            <DrawerFooter>
+              <DrawerClose asChild>
+                <Button variant="outline">Close</Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
           <div className="flex flex-wrap gap-2">
             {presetAmounts.map((preset) => (
               <Button

@@ -89,7 +89,7 @@ export const Sidebar: FC = () => {
 
       {/* Left Sidebar */}
         <aside
-          className={cn('bg-background border-r border-accent flex flex-col transition-all duration-300 ease-in-out z-40',
+          className={cn('bg-background border-r border-accent flex flex-col transition-all duration-300 ease-in-out z-40 h-screen',
             {
               'fixed inset-y-0 left-0 w-64': isMobile && isSidebarExpanded,
               'fixed inset-y-0 -left-64 w-64': isMobile && !isSidebarExpanded,
@@ -101,36 +101,39 @@ export const Sidebar: FC = () => {
           onMouseLeave={handleMouseLeave}
         >
           <div className="flex flex-col h-full">
-            <div className="flex flex-col h-full">
-              <div className="p-4 space-y-4">
-                <div className="space-y-1">
-                  <NavLink to="/dashboard" icon={Home}>
-                    Dashboard
-                  </NavLink>
-                  <NavLink to="/ledger" icon={BarChart2}>
-                    Daily Ledger
-                  </NavLink>
-                </div>
-                <Separator />
-                <div className="space-y-1">
-                  {isSidebarExpanded && (
-                    <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1">Tools</div>
-                  )}
-                  <NavLink to="/transactions" icon={CreditCard}>
-                    Transactions
-                  </NavLink>
-                  <NavLink to="/transfers" icon={CreditCard}>
-                    Transfers
-                  </NavLink>
-                  <NavLink to="/debts" icon={CreditCard}>
-                    Debts
-                  </NavLink>
-                </div>
+            <div className="flex-shrink-0 p-4 space-y-4">
+              <div className="space-y-1">
+                <NavLink to="/dashboard" icon={Home}>
+                  Dashboard
+                </NavLink>
+                <NavLink to="/ledger" icon={BarChart2}>
+                  Daily Ledger
+                </NavLink>
+              </div>
+              <Separator />
+              <div className="space-y-1">
+                {isSidebarExpanded && (
+                  <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1">Tools</div>
+                )}
+                <NavLink to="/transactions" icon={CreditCard}>
+                  Transactions
+                </NavLink>
+                <NavLink to="/transfers" icon={CreditCard}>
+                  Transfers
+                </NavLink>
+                <NavLink to="/accounts" icon={CreditCard}>
+                  Accounts
+                </NavLink>
+                <NavLink to="/debts" icon={CreditCard}>
+                  Debts
+                </NavLink>
               </div>
             </div>
+
             <Separator />
+
             {isSidebarExpanded && (
-              <div className="flex flex-col flex-grow overflow-hidden">
+              <div className="flex-grow overflow-hidden flex flex-col">
                 <div className="text-xs font-semibold text-accent-foreground/60 px-6 py-2">Recent Accounts</div>
                 <ScrollArea className="flex-grow px-4">
                   <div className="space-y-1">
@@ -138,9 +141,8 @@ export const Sidebar: FC = () => {
                       <Tooltip key={account.id}>
                         <TooltipTrigger asChild>
                           <div className="flex items-center w-full px-2 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground space-x-3 p-2 cursor-pointer">
-                            <div className="flex-shrink-0">
-                              <AccountAvatar account={account} className="w-6 h-6 rounded-full bg-gray-700" />
-                            </div>
+                            <AccountAvatar account={account}
+                                           className="w-6 h-6 rounded-full bg-gray-700 flex-shrink-0" />
                             <div className="flex-grow min-w-0">
                               <p className="text-sm font-medium truncate">{account.name}</p>
                               <div className="flex justify-between items-center text-xs text-gray-400">
@@ -158,7 +160,8 @@ export const Sidebar: FC = () => {
                           <Card className="w-64 bg-popover text-popover-foreground">
                             <CardContent className="p-4">
                               <h3 className="font-bold mb-2">{account.name}</h3>
-                              <p className="text-sm mb-1">Balance: <MoneyValue amount={account.balance} currency={account.currency} /></p>
+                              <p className="text-sm mb-1">Balance: <MoneyValue amount={account.balance}
+                                                                               currency={account.currency} /></p>
                               <p className="text-sm mb-1">Last Transaction: {account.lastTransaction}</p>
                               <p className="text-sm">Account Number: {account.accountNumber}</p>
                             </CardContent>
@@ -171,12 +174,11 @@ export const Sidebar: FC = () => {
               </div>
             )}
 
-            <div className="mt-auto p-4 border-t border-accent space-y-2">
+            <div className="flex-shrink-0 mt-auto p-4 border-t border-accent space-y-2">
               <div className={cn('flex flex-col items-start space-y-1 overflow-hidden transition-all duration-300 ease-in-out', {
-                  'max-h-20 opacity-100': isSidebarExpanded,
-                  'max-h-0 opacity-0': !isSidebarExpanded,
-                },
-              )}>
+                'max-h-20 opacity-100': isSidebarExpanded,
+                'max-h-0 opacity-0': !isSidebarExpanded,
+              })}>
                 <div className="w-full flex justify-between items-center">
                   <span className="text-xs font-semibold text-accent-foreground/60">Total Balance</span>
                   <MoneyValue className="font-bold text-sm" amount={totalBalance} currency={user.baseCurrency} />
