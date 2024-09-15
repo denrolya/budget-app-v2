@@ -1,21 +1,23 @@
-import moment from 'moment';
-import { useMemo } from 'react';
-import useSWR from 'swr';
 import isEqual from 'lodash/isEqual';
+import moment from 'moment';
+import { FC, useCallback, useMemo } from 'react';
+import useSWR from 'swr';
 
 import { Pagination } from '@/components/common/Pagination';
+import { ListFilters } from '@/components/features/transactions/ListFilters';
 import { ListItem as TransactionListItem } from '@/components/features/transactions/ListItem';
 import { ListItemSkeleton as TransactionListItemSkeleton } from '@/components/features/transactions/ListItemSkeleton';
-import { TransactionFilters } from '@/models/TransactionFilters';
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
+import { FormType, useForm, useFormSubmitListener } from '@/contexts/Form';
 import { useListState } from '@/hooks/useListState';
 import { Transaction } from '@/models/transaction';
+import { TransactionFilters } from '@/models/TransactionFilters';
 import { axiosFetcher } from '@/services/api';
-import { ListFilters } from '@/components/features/transactions/ListFilters';
-import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 
 const defaultFilters = new TransactionFilters();
 
-export const TransactionsList = () => {
+export const TransactionsList: FC = () => {
+  const { openForm } = useForm();
   const {
     pagination: { currentPage, pageSize },
     filters,
@@ -75,13 +77,19 @@ export const TransactionsList = () => {
     return `/api/v2/transaction?${query.toString()}`;
   }, [filters, currentPage, pageSize, sort]);
 
-  const { data, error, isLoading } = useSWR(url, async (url) => {
+  const { data, error, isLoading, mutate } = useSWR(url, async (url) => {
     const result = await axiosFetcher(url);
     return {
       ...result,
       list: result.list.map((t: never) => new Transaction(t)),
     };
   });
+
+  const handleFormSubmit = useCallback(response => {
+    mutate();
+  }, [mutate]);
+
+  useFormSubmitListener([FormType.Transaction, FormType.Transfer], handleFormSubmit);
 
   const totalPages = useMemo(() => Math.ceil(data?.count / pageSize) || 0, [data, pageSize]);
 
@@ -90,6 +98,8 @@ export const TransactionsList = () => {
       <h1 className="text-2xl font-bold mb-4">Transactions List</h1>
 
       <ListFilters data={filters} onChange={setFilter} />
+
+      <button onClick={() => openForm('transaction')}>Shheett</button>
 
       {isLoading && (
         <ul className="space-y-2">

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { AccountForm } from '@/components/features/accounts/Form';
@@ -21,12 +21,14 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
-import { useForm } from '@/contexts/form';
+import { FormType, useForm } from '@/contexts/Form';
 
 const formComponents = {
-  account: AccountForm,
-  transaction: TransactionForm,
-  transfer: TransferForm,
+  [FormType.Account]: AccountForm,
+  [FormType.Transaction]: TransactionForm,
+  [FormType.Transfer]: TransferForm,
+  // [FormType.Debt]: DebtForm,
+  // [FormType.Category]: CategoryForm,
 };
 
 type FormType = keyof typeof formComponents;
@@ -41,12 +43,12 @@ interface FormContentProps {
   formType: FormType;
   isEditing: boolean;
   data: any;
-  onClose: () => void;
+  onClose: (submitted: boolean) => void;
   setFormState: React.Dispatch<React.SetStateAction<FormState>>;
   showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
-const FormContent: React.FC<FormContentProps> = React.forwardRef((props, ref) => {
+const FormContent = React.forwardRef<{ submitForm: () => Promise<void> }, FormContentProps>((props, ref) => {
   const { formType, isEditing, data, onClose, setFormState, showToast } = props;
   const FormComponent = formComponents[formType];
 
@@ -79,7 +81,7 @@ const useScreenSize = () => {
   return isDesktop;
 };
 
-export const FormRenderer = () => {
+export const FormRenderer: FC = () => {
   const { formState: contextFormState, closeForm } = useForm();
   const formRef = useRef<{ submitForm: () => Promise<void> }>(null);
   const isDesktop = useScreenSize();
@@ -97,7 +99,7 @@ export const FormRenderer = () => {
       try {
         await formRef.current.submitForm();
         toast.success('Form submitted successfully!');
-        closeForm();
+        closeForm(true);
       } catch (error) {
         console.error('Form submission failed:', error);
         toast.error('Failed to submit form. Please try again.');
@@ -109,12 +111,12 @@ export const FormRenderer = () => {
 
   const handleOpenChange = (open: boolean) => {
     if (!open && contextFormState.isOpen) {
-      handleClose();
+      handleClose(false);
     }
   };
 
-  const handleClose = () => {
-    closeForm();
+  const handleClose = (submitted: boolean) => {
+    closeForm(submitted);
   };
 
   const showToast = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {

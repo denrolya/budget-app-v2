@@ -1,10 +1,11 @@
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { axiosFetcher } from '@/services/api';
 import orderBy from 'lodash/orderBy';
 import { AlertCircle } from 'lucide-react';
 import React, { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import useSWR, { preload, SWRConfiguration, SWRResponse } from 'swr';
+
+import { axiosFetcher } from '@/services/api';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 type Account = {
   id: number;
@@ -272,12 +273,8 @@ export const useFinanceData = (): FinanceDataContextType => {
   return context;
 };
 
-export const useAccounts = (): {
-  accounts: AccountWithConvertedValues[] | null;
-  isLoading: boolean;
-  error: Error | null
-} => {
-  const { data, isLoading, error } = useFinanceData();
+export const useAccounts = (): AccountWithConvertedValues[] | null => {
+  const { data } = useFinanceData();
 
   const accountsWithConvertedValues = useMemo(() => {
     if (!data?.accounts || !data?.exchangeRates) return null;
@@ -287,17 +284,17 @@ export const useAccounts = (): {
     }));
   }, [data?.accounts, data?.exchangeRates]);
 
-  return { accounts: accountsWithConvertedValues, isLoading, error };
+  return accountsWithConvertedValues;
 };
 
 export const useActiveAccounts = (): AccountWithConvertedValues[] | undefined => {
-  const { accounts } = useAccounts();
-  return accounts?.filter(({ archivedAt }) => !archivedAt);
+  const data = useAccounts();
+  return data?.filter(({ archivedAt }) => !archivedAt);
 };
 
 export const useArchivedAccounts = (): AccountWithConvertedValues[] | undefined => {
-  const { accounts } = useAccounts();
-  return accounts?.filter(({ archivedAt }) => !!archivedAt);
+  const data = useAccounts();
+  return data?.filter(({ archivedAt }) => !!archivedAt);
 };
 
 export const useActiveAccountsWithDefaultOrder = (): AccountWithConvertedValues[] | undefined => {
@@ -306,29 +303,25 @@ export const useActiveAccountsWithDefaultOrder = (): AccountWithConvertedValues[
 };
 
 export const useAccountsWithDefaultOrder = (): AccountWithConvertedValues[] | undefined => {
-  const { accounts } = useAccounts();
+  const data = useAccounts();
   return orderBy(
-    accounts,
+    data,
     ['archivedAt', 'currency', 'type', 'name'],
     ['desc', 'asc', 'asc', 'asc'],
   );
 };
 
-export const useDebts = (): { debts: Debt[] | null; isLoading: boolean; error: Error | null } => {
-  const { data, isLoading, error } = useFinanceData();
-  return { debts: data?.debts ?? null, isLoading, error };
+export const useDebts = (): Debt[] | null => {
+  const { data } = useFinanceData();
+  return data?.debts ?? null;
 };
 
-export const useCategories = (): { categories: Category[] | null; isLoading: boolean; error: Error | null } => {
-  const { data, isLoading, error } = useFinanceData();
-  return { categories: data?.categories ?? null, isLoading, error };
+export const useCategories = (): Category[] | null => {
+  const { data } = useFinanceData();
+  return data?.categories ?? null;
 };
 
-export const useExchangeRates = (): {
-  exchangeRates: ExchangeRates | null;
-  isLoading: boolean;
-  error: Error | null
-} => {
-  const { data, isLoading, error } = useFinanceData();
-  return { exchangeRates: data?.exchangeRates ?? null, isLoading, error };
+export const useExchangeRates = (): ExchangeRates | null => {
+  const { data } = useFinanceData();
+  return data?.exchangeRates ?? null;
 };
