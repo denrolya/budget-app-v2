@@ -1,26 +1,18 @@
 import cn from 'classnames';
 import sumBy from 'lodash/sumBy';
-import { BarChart2, CreditCard, Home, LucideIcon, Plus } from 'lucide-react';
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { BarChart2, CreditCard, Home, Plus } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import { MoneyValue } from '@/components/common/MoneyValue';
-import { Avatar as AccountAvatar } from '@/components/features/accounts/Avatar';
+import MoneyValue from '@/components/common/MoneyValue';
+import AccountLink from '@/components/layout/SidebarAccountLink';
+import SidebarLink from '@/components/layout/SidebarLink';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/contexts/auth';
 import { useActiveAccountsWithDefaultOrder } from '@/contexts/FinanceData';
 import { useForm } from '@/contexts/form';
 import { useSidebar } from '@/contexts/sidebar';
-
-interface NavLinkProps {
-  to: string;
-  icon: LucideIcon;
-  children: ReactNode;
-}
 
 interface Props {
   className?: string;
@@ -30,8 +22,7 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
   const { user } = useAuth();
   const accounts = useActiveAccountsWithDefaultOrder();
   const [isMobile, setIsMobile] = useState(false);
-  const location = useLocation();
-  const { isSidebarExpanded, setIsSidebarExpanded, toggleSidebar } = useSidebar();
+  const { isSidebarExpanded, setIsSidebarExpanded } = useSidebar();
   const { openForm } = useForm();
 
   const totalBalance = useMemo(
@@ -39,9 +30,7 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
     [accounts],
   );
 
-  // logger.info(accounts);
   const totalDebt = 55432.42;
-
 
   useEffect(() => {
     const handleResize = () => {
@@ -65,25 +54,6 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
     }
   };
 
-  const NavLink: React.FC<NavLinkProps> = ({ to, icon: Icon, children }) => {
-    const isActive = location.pathname === to;
-    return (
-      <Link
-        to={to}
-        className={cn(
-          'flex items-center w-full px-2 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-          {
-            'bg-primary text-primary-foreground': isActive,
-            'text-foreground': !isActive,
-          },
-        )}
-      >
-        <Icon className="h-4 w-4 shrink-0" />
-        {isSidebarExpanded && <span className="ml-2">{children}</span>}
-      </Link>
-    );
-  };
-
   return (
     <aside
       className={cn('bg-background border-r border-accent flex flex-col transition-all duration-300 ease-in-out z-40',
@@ -101,30 +71,30 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
       <div className="flex flex-col h-full">
         <div className="flex-shrink-0 p-4 space-y-4">
           <div className="space-y-1">
-            <NavLink to="/dashboard" icon={Home}>
+            <SidebarLink to="/dashboard" icon={Home} isSidebarExpanded={isSidebarExpanded}>
               Dashboard
-            </NavLink>
-            <NavLink to="/ledger" icon={BarChart2}>
+            </SidebarLink>
+            <SidebarLink to="/ledger" icon={BarChart2} isSidebarExpanded={isSidebarExpanded}>
               Daily Ledger
-            </NavLink>
+            </SidebarLink>
           </div>
           <Separator />
           <div className="space-y-1">
             {isSidebarExpanded && (
               <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1">Tools</div>
             )}
-            <NavLink to="/transactions" icon={CreditCard}>
+            <SidebarLink to="/transactions" icon={CreditCard} isSidebarExpanded={isSidebarExpanded}>
               Transactions
-            </NavLink>
-            <NavLink to="/transfers" icon={CreditCard}>
+            </SidebarLink>
+            <SidebarLink to="/transfers" icon={CreditCard} isSidebarExpanded={isSidebarExpanded}>
               Transfers
-            </NavLink>
-            <NavLink to="/accounts" icon={CreditCard}>
+            </SidebarLink>
+            <SidebarLink to="/accounts" icon={CreditCard} isSidebarExpanded={isSidebarExpanded}>
               Accounts
-            </NavLink>
-            <NavLink to="/debts" icon={CreditCard}>
+            </SidebarLink>
+            <SidebarLink to="/debts" icon={CreditCard} isSidebarExpanded={isSidebarExpanded}>
               Debts
-            </NavLink>
+            </SidebarLink>
           </div>
         </div>
 
@@ -136,37 +106,10 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
             <ScrollArea className="flex-grow px-4">
               <div className="space-y-1">
                 {accounts.map((account) => (
-                  <Tooltip key={account.id}>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center w-full px-2 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground space-x-3 p-2 cursor-pointer">
-                        <AccountAvatar account={account}
-                                       className="w-6 h-6 rounded-full bg-gray-700 flex-shrink-0" />
-                        <div className="flex-grow min-w-0">
-                          <p className="text-sm font-medium truncate">{account.name}</p>
-                          <div className="flex justify-between items-center text-xs text-gray-400">
-                            <MoneyValue amount={account.balance} currency={account.currency} />
-                            <span>{account.currency}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="right"
-                      align="start"
-                      sideOffset={5}
-                      alignOffset={-8}
-                      className="p-0 bg-transparent border-none shadow-none">
-                      <Card className="w-64 bg-popover text-popover-foreground">
-                        <CardContent className="p-4">
-                          <h3 className="font-bold mb-2">{account.name}</h3>
-                          <p className="text-sm mb-1">Balance: <MoneyValue amount={account.balance}
-                                                                           currency={account.currency} /></p>
-                          <p className="text-sm mb-1">Last Transaction: {account.lastTransaction}</p>
-                          <p className="text-sm">Account Number: {account.accountNumber}</p>
-                        </CardContent>
-                      </Card>
-                    </TooltipContent>
-                  </Tooltip>
+                  <AccountLink
+                    key={`account-sidebar-item-${account.id}`}
+                    account={account}
+                    isSidebarExpanded={isSidebarExpanded} />
                 ))}
               </div>
             </ScrollArea>
@@ -199,3 +142,7 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
     </aside>
   );
 };
+
+Sidebar.displayName = 'Sidebar';
+
+export default Sidebar;

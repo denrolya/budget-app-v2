@@ -1,5 +1,6 @@
 import debounce from 'lodash/debounce';
-import { useCallback, useEffect, useState } from 'react';
+import isEqual from 'lodash/isEqual';
+import { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import moment from 'moment';
 
@@ -80,8 +81,7 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
                                                                        }: UseListStateOptions<FilterType, ItemType>) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Extract initial state from URL search params or fallback to default initial state
-  const getInitialState = (): UseListState<FilterType, ItemType> => ({
+  const getInitialState = useCallback((): UseListState<FilterType, ItemType> => ({
     pagination: {
       currentPage: parseInt(searchParams.get('page') || '1', 10),
       pageSize: parseInt(searchParams.get('perPage') || initialPageSize.toString(), 10),
@@ -91,9 +91,11 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
       field: (searchParams.get('sortField') as keyof ItemType) || initialSort.field,
       direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || initialSort.direction,
     },
-  });
+  }), [searchParams, initialPageSize, initialFilters, initialSort]);
 
   const [state, setState] = useState<UseListState<FilterType, ItemType>>(getInitialState);
+
+  const prevStateRef = useRef(state);
 
   const setCurrentPage = useCallback((page: number) => {
     setState(prev => ({
@@ -104,14 +106,13 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
 
   const setFilter: SetFilterFunction<FilterType> = useCallback((key, value) => {
     setState((prev) => {
-      // Properly create a new instance of the filter type to retain methods
       const updatedFilters = new (prev.filters.constructor as { new (): FilterType })();
-      Object.assign(updatedFilters, prev.filters); // Copy current filter values
-      updatedFilters.setFilter(key, value); // Use the setFilter method from FilterModel
+      Object.assign(updatedFilters, prev.filters);
+      updatedFilters.setFilter(key, value);
 
       return {
         ...prev,
-        pagination: { ...prev.pagination, currentPage: 1 }, // Reset to first page on filter change
+        pagination: { ...prev.pagination, currentPage: 1 },
         filters: updatedFilters,
       };
     });
@@ -124,8 +125,8 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
     }));
   }, []);
 
-  const updateSearchParamsDebounced = useCallback(
-    debounce((params: URLSearchParams) => {
+  const updateSearchParamsDebounced = useMemo(
+    () => debounce((params: URLSearchParams) => {
       if (updateUrl) {
         setSearchParams(params);
       }
@@ -134,7 +135,19 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
   );
 
   useEffect(() => {
-    if (!updateUrl) return; // Skip URL updates if disabled
+    if (!updateUrl) return;
+
+    const hasStateChanged = !isEqual({
+      pagination: state.pagination,
+      filters: state.filters,
+      sort: state.sort
+    }, {
+      pagination: prevStateRef.current.pagination,
+      filters: prevStateRef.current.filters,
+      sort: prevStateRef.current.sort
+    });
+
+    if (!hasStateChanged) return;
 
     const params = new URLSearchParams();
     params.set('page', state.pagination.currentPage.toString());
@@ -155,15 +168,14 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
     }
 
     updateSearchParamsDebounced(params);
+    prevStateRef.current = state;
 
     return () => {
-      updateSearchParamsDebounced.cancel(); // Cancel the debounce to prevent it from firing after unmount
+      updateSearchParamsDebounced.cancel();
     };
   }, [
-    state.pagination.currentPage,
-    state.pagination.pageSize,
-    state.filters,
-    state.sort,
+    state,
+    prevStateRef,
     searchParamKeys,
     formatMoment,
     updateSearchParamsDebounced,
@@ -171,47 +183,10 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
     initialFilters,
   ]);
 
-  return {
+  return useMemo(() => ({
     ...state,
     setCurrentPage,
     setFilter,
     setSort,
-  };
+  }), [state, setCurrentPage, setFilter, setSort]);
 };
-
-// Example usage in a component
-/*
-import React from 'react';
-import { useListState } from './useListState';
-
-const initialFilters = { search: '', category: 'all' };
-
-const ListComponent = () => {
-  const {
-    pagination,
-    filters,
-    sort,
-    setCurrentPage,
-    setFilter,
-    setSort,
-  } = useListState({
-    initialPageSize: 20,
-    initialFilters,
-    initialSort: { field: 'name', direction: 'asc' },
-    searchParamKeys: { search: 'q', category: 'cat' },
-  });
-
-  const handlePageChange = (page: number) => setCurrentPage(page);
-  const handleFilterChange = (key: keyof typeof initialFilters, value: string) => setFilter(key, value);
-  const handleSortChange = (field: keyof typeof initialFilters, direction: 'asc' | 'desc') => setSort(field, direction);
-
-  return (
-    <div>
-      <p>Current Page: {pagination.currentPage}</p>
-      <p>Page Size: {pagination.pageSize}</p>
-      <p>Filters: {JSON.stringify(filters)}</p>
-      <p>Sort: {JSON.stringify(sort)}</p>
-    </div>
-  );
-};
-*/

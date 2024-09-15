@@ -53,7 +53,7 @@ export const TransactionsList = () => {
         if (Array.isArray(value)) {
           query.set(key, value.join(','));
         } else if (typeof value === 'boolean') {
-          query.set(key, !!value ? 1 : 0);
+          query.set(key, value ? 1 : 0);
         } else if (moment.isMoment(value)) {
           query.set(key, value.format(BACKEND_DATE_FORMAT));
         } else {
@@ -89,10 +89,8 @@ export const TransactionsList = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Transactions List</h1>
 
-      {/* Filters */}
       <ListFilters data={filters} onChange={setFilter} />
 
-      {/* Transactions List */}
       {isLoading && (
         <ul className="space-y-2">
           {[...Array(pageSize)].map((_, index) => (
@@ -111,7 +109,6 @@ export const TransactionsList = () => {
         </ul>
       )}
 
-      {/* Pagination */}
       <div className="mt-4">
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       </div>

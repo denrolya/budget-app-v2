@@ -2,13 +2,13 @@ import React from 'react';
 
 import { FormRenderer } from '@/components/common/FormRenderer';
 import { Header } from '@/components/layout/Header';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { MobileNavigation } from '@/components/layout/MobileNavigation';
+import Sidebar from '@/components/layout/Sidebar';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { FinanceDataProvider } from '@/contexts/FinanceData.tsx';
 import { FormProvider } from '@/contexts/form';
 import { SidebarProvider } from '@/contexts/sidebar';
-import { MobileNavigation } from '@/components/layout/MobileNavigation';
 
 export const LayoutV9: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <FinanceDataProvider>

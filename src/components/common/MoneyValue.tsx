@@ -67,3 +67,7 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
     </span>
   );
 };
+
+MoneyValue.displayName = 'MoneyValue';
+
+export default MoneyValue;

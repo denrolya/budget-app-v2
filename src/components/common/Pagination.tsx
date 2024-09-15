@@ -16,11 +16,11 @@ interface PaginationProps {
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
-                                                                 currentPage,
-                                                                 totalPages,
-                                                                 onPageChange,
-                                                                 maxVisiblePages = 5,
-                                                               }) => {
+                                                        currentPage,
+                                                        totalPages,
+                                                        onPageChange,
+                                                        maxVisiblePages = 5,
+                                                      }) => {
   const PaginationLinkWrapper: React.FC<{ page: number }> = ({ page }) => (
     <PaginationLink
       href="#"

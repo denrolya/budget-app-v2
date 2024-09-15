@@ -1,8 +1,8 @@
 import cn from 'classnames';
 import { Check, Laptop, LogOut, Moon, Settings, Sun, User } from 'lucide-react';
 import React from 'react';
-import { Link, LinkProps } from 'react-router-dom';
 
+import HeaderLink from '@/components/layout/HeaderLink';
 import { CurrencySelector } from '@/components/layout/CurrencySelector';
 import { ExchangeRatesDetails as ExchangeRatesDetails } from '@/components/layout/ExchangeRatesDetails';
 import { Button } from '@/components/ui/button';
@@ -27,20 +27,6 @@ interface Props {
 export const Header: React.FC<Props> = ({ className }) => {
   const { logout } = useAuth();
   const { theme, setTheme } = useTheme();
-
-  interface HeaderLinkProps extends LinkProps {
-    className?: string;
-  }
-
-  const HeaderLink: React.FC<HeaderLinkProps> = ({ to, children, className, ...rest }) => (
-    <Link
-      to={to}
-      className={cn('text-sm transition-colors hover:text-foreground/80 text-foreground focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:text-primary', className)}
-      {...rest}
-    >
-      {children}
-    </Link>
-  );
 
   return (
     <header className={cn('bg-accent/10 backdrop-blur-xl border-b border-accent h-10 md:h-8 flex items-center px-4 justify-between', className)}>
