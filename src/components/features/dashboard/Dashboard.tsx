@@ -15,7 +15,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useForm } from '@/contexts/form.tsx';
+import { useForm } from '@/contexts/Form';
+import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
 
 
 export const Dashboard = () => {
@@ -50,6 +51,10 @@ export const Dashboard = () => {
         <FinancialCard />
         <FinancialCard />
         <FinancialCard />
+      </div>
+
+      <div className="w-full">
+      <MoneyFlow />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 mb-6">

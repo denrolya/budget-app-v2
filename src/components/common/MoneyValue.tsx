@@ -39,7 +39,7 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
   const renderMoneyElement = (value: number, symbol: string) => (
     <>
       {showSign && (
-        <span className="mr-1">{value < 0 ? '-' : '+'}</span>
+        <span className="mr-1">{value < 0 && '-'}</span>
       )}
       {showSymbol && <span className="mr-1">{symbol}</span>}
       <span>{formatMoney(value)}</span>
