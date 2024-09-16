@@ -11,7 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/auth';
 import { useActiveAccountsWithDefaultOrder } from '@/contexts/FinanceData';
-import { useForm } from '@/contexts/form';
+import { useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
 
 interface Props {
