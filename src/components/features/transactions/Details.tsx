@@ -1,16 +1,28 @@
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  Bitcoin,
+  Copy,
+  CreditCard,
+  DollarSign,
+  Edit,
+  Euro,
+  Share2,
+  Trash2,
+  User,
+} from 'lucide-react';
 import React from 'react';
-import { Euro, Bitcoin, DollarSign, ArrowDownIcon, ArrowUpIcon, CreditCard, User, Edit, Trash2, Copy, Share2 } from 'lucide-react';
 
-import { CURRENCIES } from '@/constants/currency';
-import { Transaction } from '@/models/transaction';
+import { MoneyValue } from '@/components/common/MoneyValue';
+import { TransactionValue } from '@/components/common/TransactionValue';
 import { ListItem as TransactionListItem } from '@/components/features/transactions/ListItem';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { MoneyValue } from '@/components/common/MoneyValue';
-import { TransactionValue } from '@/components/common/TransactionValue';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { CURRENCIES } from '@/constants/currency';
+import { Transaction } from '@/models/transaction';
+import { useForm as useFormContext } from '@/contexts/Form.tsx';
 
 interface TransactionDetailsProps {
   transaction: Transaction;
@@ -27,8 +39,9 @@ export const Details: React.FC<TransactionDetailsProps> = ({
                                                              onEdit,
                                                              onDelete,
                                                              onDuplicate,
-                                                             onShare
+                                                             onShare,
                                                            }) => {
+  const { openForm } = useFormContext();
   const isIncome = transaction.type === 'income';
   const isDebt = transaction.debt && transaction.debt.debtor;
 
@@ -90,42 +103,40 @@ export const Details: React.FC<TransactionDetailsProps> = ({
                 <p className="text-sm text-muted-foreground">{transaction.account.currency}</p>
               </div>
             </div>
-            <TooltipProvider>
-              <div className="flex space-x-2">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" onClick={() => onEdit?.(transaction)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Edit</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete?.(transaction)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Delete</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" onClick={() => onDuplicate?.(transaction)}>
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Duplicate</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" onClick={() => onShare?.(transaction)}>
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Share</TooltipContent>
-                </Tooltip>
-              </div>
-            </TooltipProvider>
+            <div className="flex space-x-2">
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={() => onEdit?.(transaction)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Edit</TooltipContent>
+              </Tooltip>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={() => onDelete?.(transaction)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Delete</TooltipContent>
+              </Tooltip>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={() => onDuplicate?.(transaction)}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Duplicate</TooltipContent>
+              </Tooltip>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={() => onShare?.(transaction)}>
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Share</TooltipContent>
+              </Tooltip>
+            </div>
           </div>
           <div className="flex items-center space-x-4">
             <div className={`rounded-full p-1 ${isIncome ? 'bg-green-100' : 'bg-red-100'}`}>
@@ -212,3 +223,5 @@ export const Details: React.FC<TransactionDetailsProps> = ({
     </div>
   );
 };
+
+export default Details;

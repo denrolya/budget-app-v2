@@ -3,7 +3,7 @@ import cn from 'classnames';
 import { Link } from 'react-router-dom';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
-import { Avatar as AccountAvatar } from '@/components/features/accounts/Avatar';
+import AccountAvatar from '@/components/features/accounts/Avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -24,22 +24,18 @@ interface SidebarAccountLinkProps {
 }
 
 export const SidebarAccountLink: FC<SidebarAccountLinkProps> = ({ account, isSidebarExpanded }) => (
-  <Tooltip>
+  <Tooltip delayDuration={0}>
     <TooltipTrigger asChild>
       <Link
         to={`/accounts/${account.id}`}
-        className={cn(
-          'flex items-center w-full px-2 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+        className={cn('flex items-center w-full px-2 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
           {
             'justify-center': !isSidebarExpanded,
           }
         )}
       >
         <div className={cn('flex items-center justify-center', isSidebarExpanded ? 'w-6 h-6' : 'w-8 h-8')}>
-          <AccountAvatar
-            account={account}
-            className="w-full h-full"
-          />
+          <AccountAvatar account={account} className="w-full h-full" size="sm" />
         </div>
         {isSidebarExpanded && (
           <div className="flex-grow min-w-0 ml-3 overflow-hidden">

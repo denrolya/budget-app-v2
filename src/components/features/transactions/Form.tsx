@@ -1,15 +1,12 @@
-import { generateTransactions } from '@/services/transactionGenerator.ts';
 import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
 import { ArrowDownCircle, ArrowUpCircle, Check, ChevronsUpDown, X } from 'lucide-react';
 import moment from 'moment';
-import { forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useMemo, memo } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { useForm as useFormContext } from '@/contexts/Form.tsx';
-import { useActiveAccountsWithDefaultOrder, useCategories } from '@/contexts/FinanceData';
-import { defaultOnSubmit, useFormLogic } from '@/hooks/useFormLogic';
+import { api } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -17,7 +14,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Transaction, Type } from '@/models/transaction';
+import { useActiveAccountsWithDefaultOrder, useCategories } from '@/contexts/FinanceData';
+import { useForm as useFormContext } from '@/contexts/Form.tsx';
+import { useFormLogic } from '@/hooks/useFormLogic';
+import { Transaction, Type as TransactionType } from '@/models/transaction';
 
 interface FormState {
   isValid: boolean;
@@ -38,7 +38,7 @@ interface TransactionFormRef {
 }
 
 const formSchema = z.object({
-  type: z.nativeEnum(Type),
+  type: z.nativeEnum(TransactionType),
   account: z.number().int().positive(),
   amount: z.number().min(0, 'Amount must be non-negative'),
   category: z.number().int().positive(),
@@ -54,14 +54,46 @@ const formSchema = z.object({
   ).optional(),
 });
 
-export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>(({ data, isEditing, setFormState, showToast }, ref) => {
-  const accounts = useActiveAccountsWithDefaultOrder();
-  const categories = useCategories();
+const formatTransactionData = (values: z.infer<typeof formSchema>, existingData: Transaction | undefined) => ({
+  account: values.account,
+  amount: values.amount.toString(),
+  category: values.category,
+  executedAt: moment(values.executedAt).toISOString(),
+  isDraft: values.isDraft,
+  note: values.note || '',
+  type: values.type,
+  compensations: values.compensations?.map((comp, index) => {
+    const existingComp = existingData?.compensations?.[index];
+
+    return {
+      id: existingComp ? `api/transactions/${existingComp.id}` : undefined, // Use existing ID if present
+      account: comp.account,
+      amount: comp.amount.toString(), // Convert to string
+      category: 137, // As per your specific requirement
+      executedAt: moment(comp.executedAt).toISOString(),
+      isDraft: false, // Set as per your specific requirement
+      note: `[Compensation]: ${values.note || existingData?.id}`, // Custom note format
+      type: TransactionType.Income,
+    };
+  }),
+});
+
+
+/**
+ * TODO: Organize. Separate logic form visual components.
+ */
+export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>(({
+                                                                                       data,
+                                                                                       isEditing,
+                                                                                       setFormState,
+                                                                                       showToast,
+                                                                                     }, ref) => {
   const { submitForm } = useFormContext();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: data?.type || Type.Expense,
+      ...data,
+      type: data?.type || TransactionType.Expense,
       account: isEditing ? data?.account.id : undefined,
       amount: isEditing ? data?.amount : undefined,
       category: isEditing ? data?.category.id : undefined,
@@ -69,6 +101,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
       note: data?.note || undefined,
       isDraft: data?.isDraft || false,
       compensations: data?.compensations?.map(comp => ({
+        ...comp,
         account: isEditing ? comp.account.id : undefined,
         amount: comp.amount,
         executedAt: moment(comp.executedAt).format('YYYY-MM-DDTHH:mm'),
@@ -76,41 +109,40 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     },
     mode: 'onChange',
   });
-  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'compensations',
+  });
+
+  const handleSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const formattedData = formatTransactionData(values, data);
 
       if (isEditing) {
-        // TODO: Implement edit
-        logger.info(values, '[TransactionForm][Edit]');
+        const response = await api.put(`/api/transactions/${data.id}`, formattedData);
+        logger.info(response, 'Transaction Edit');
       } else {
-        // TODO: Implement create
-        logger.info(values, '[TransactionForm][Create]');
+        const response = await api.post(`/api/transactions/${values.type}`, formattedData);
+        logger.info(response, 'Transaction Create');
       }
 
-      // Call submitForm to emit the event and close the form
       submitForm(values);
     } catch (error) {
-      // Handle error
       console.error('Form submission failed:', error);
     }
-  };
+  }, [data, isEditing, submitForm]);
+
   const { formRef } = useFormLogic({
     form,
     onSubmit: handleSubmit,
     setFormState,
     showToast,
   });
-
   useImperativeHandle(ref, () => formRef.current!);
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: 'compensations',
-  });
-
-
-  const filteredCategories = categories.filter(category => category.type === form.watch('type'));
+  const accounts = useActiveAccountsWithDefaultOrder();
+  const categories = useCategories();
+  const filteredCategories = useMemo(() => categories.filter(category => category.type === form.watch('type')), [categories, form.watch('type')]);
 
   return (
     <Form {...form}>
@@ -125,22 +157,22 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                 <div className="flex space-x-2">
                   <Button
                     type="button"
-                    variant={field.value === Type.Expense ? 'default' : 'outline'}
+                    variant={field.value === TransactionType.Expense ? 'default' : 'outline'}
                     className={cn('w-full justify-start space-x-2', {
-                      'bg-primary text-primary-foreground': field.value === Type.Expense,
+                      'bg-primary text-primary-foreground': field.value === TransactionType.Expense,
                     })}
-                    onClick={() => field.onChange(Type.Expense)}
+                    onClick={() => field.onChange(TransactionType.Expense)}
                   >
                     <ArrowUpCircle className="h-4 w-4" />
                     <span>Expense</span>
                   </Button>
                   <Button
                     type="button"
-                    variant={field.value === Type.Income ? 'default' : 'outline'}
+                    variant={field.value === TransactionType.Income ? 'default' : 'outline'}
                     className={cn('w-full justify-start space-x-2', {
-                      'bg-primary text-primary-foreground': field.value === Type.Income,
+                      'bg-primary text-primary-foreground': field.value === TransactionType.Income,
                     })}
-                    onClick={() => field.onChange(Type.Income)}
+                    onClick={() => field.onChange(TransactionType.Income)}
                   >
                     <ArrowDownCircle className="h-4 w-4" />
                     <span>Income</span>
@@ -322,7 +354,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
           )}
         />
 
-        {form.watch('type') === Type.Expense && (
+        {form.watch('type') === TransactionType.Expense && (
           <div>
             <Label>Compensations</Label>
             {fields.map((field, index) => (
@@ -427,7 +459,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               type="button"
               className="mt-2 w-full"
               onClick={() => append({
-                accountId: accounts[0].id,
+                account: accounts[0].id,
                 amount: 0,
                 executedAt: moment().format('YYYY-MM-DDTHH:mm'),
               })}
@@ -440,3 +472,6 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     </Form>
   );
 });
+
+
+export default memo(TransactionForm);

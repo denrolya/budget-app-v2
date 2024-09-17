@@ -3,9 +3,10 @@ import moment from 'moment';
 import { FC, useCallback, useMemo } from 'react';
 import useSWR from 'swr';
 
+import { Button } from '@/components/ui/button';
 import { Pagination } from '@/components/common/Pagination';
 import { ListFilters } from '@/components/features/transactions/ListFilters';
-import { ListItem as TransactionListItem } from '@/components/features/transactions/ListItem';
+import TransactionListItem from '@/components/features/transactions/ListItemV2';
 import { ListItemSkeleton as TransactionListItemSkeleton } from '@/components/features/transactions/ListItemSkeleton';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { FormType, useForm, useFormSubmitListener } from '@/contexts/Form';
@@ -99,7 +100,7 @@ export const TransactionsList: FC = () => {
 
       <ListFilters data={filters} onChange={setFilter} />
 
-      <button onClick={() => openForm('transaction')}>Shheett</button>
+      <Button onClick={() => openForm('transaction')}>Create new Transaction</Button>
 
       {isLoading && (
         <ul className="space-y-2">

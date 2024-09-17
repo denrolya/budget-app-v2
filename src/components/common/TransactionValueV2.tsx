@@ -31,11 +31,13 @@ export const TransactionValue = ({
 
   return (
     <span className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}>
+      <div>
       {amountString}
+        </div>
       {value !== undefined && (baseCurrency.code !== currency || amount !== value) && (
-        <span className="ml-1 font-light tabular-nums slashed-zero text-muted-foreground text-xs">
+        <div className="ml-1 font-light tabular-nums slashed-zero text-muted-foreground text-xs">
           ≈ {valueString}
-        </span>
+        </div>
       )}
     </span>
   );
