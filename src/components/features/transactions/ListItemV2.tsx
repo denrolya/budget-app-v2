@@ -95,11 +95,11 @@ export const ListItem = ({ transaction, colorBorder = false }: TransactionItemPr
                   <Eye className="h-4 w-4" />
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-3xl">
+              <DialogContent onOpenAutoFocus={(event) => event.preventDefault()}>
                 <DialogHeader>
                   <DialogTitle>Transaction Details</DialogTitle>
                 </DialogHeader>
-                <Details transaction={transaction} onEdit={() => openForm('transaction', transaction, true)} />
+                <Details transaction={transaction} />
               </DialogContent>
             </Dialog>
             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openForm('transaction', transaction, true)}>

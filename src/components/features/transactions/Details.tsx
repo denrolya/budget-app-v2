@@ -3,7 +3,6 @@ import {
   ArrowUpIcon,
   Bitcoin,
   Copy,
-  CreditCard,
   DollarSign,
   Edit,
   Euro,
@@ -11,8 +10,10 @@ import {
   Trash2,
   User,
 } from 'lucide-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
+import AccountAvatar from '@/components/features/accounts/Avatar.tsx';
+import { useAccounts } from '@/contexts/FinanceData.tsx';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { TransactionValue } from '@/components/common/TransactionValue';
 import { ListItem as TransactionListItem } from '@/components/features/transactions/ListItem';
@@ -22,7 +23,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CURRENCIES } from '@/constants/currency';
 import { Transaction } from '@/models/transaction';
-import { useForm as useFormContext } from '@/contexts/Form.tsx';
 
 interface TransactionDetailsProps {
   transaction: Transaction;
@@ -41,9 +41,10 @@ export const Details: React.FC<TransactionDetailsProps> = ({
                                                              onDuplicate,
                                                              onShare,
                                                            }) => {
-  const { openForm } = useFormContext();
   const isIncome = transaction.type === 'income';
   const isDebt = transaction.debt && transaction.debt.debtor;
+  const accounts = useAccounts();
+  const account = useMemo(() => accounts.find(account => account.id === transaction.account.id), [accounts, transaction.account?.id]);
 
   const formatExchangeRate = (convertedAmount: number, targetCurrency: string) => {
     const transactionCurrency = CURRENCIES[transaction.account.currency];
@@ -96,8 +97,8 @@ export const Details: React.FC<TransactionDetailsProps> = ({
         </CardHeader>
         <CardContent className="grid gap-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <CreditCard className="h-5 w-5 text-muted-foreground" />
+            <div className="flex align-center space-x-4">
+              <AccountAvatar account={account} />
               <div>
                 <p className="text-sm font-medium leading-none">{transaction.account.name}</p>
                 <p className="text-sm text-muted-foreground">{transaction.account.currency}</p>

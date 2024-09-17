@@ -47,7 +47,7 @@ export const AccountAvatar: React.FC<AccountAvatarProps> = ({ account, size = 'm
 
   return (
     <div className={cn('relative inline-block', sizeMap[size])}>
-      <Avatar className={cn('bg-background', className)}>
+      <Avatar className={cn('bg-background w-full h-full', className)}>
         <AvatarFallback
           className="bg-background flex items-center justify-center"
           style={{

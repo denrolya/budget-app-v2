@@ -1,6 +1,7 @@
 import { CalendarIcon, FilterIcon } from 'lucide-react';
 import moment from 'moment';
 import React, { useState } from 'react';
+import cn from 'classnames';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -9,9 +10,11 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import { TransactionFilters } from '@/models/TransactionFilters';
+import { Label } from '@/components/ui/label';
 
 interface ListFiltersProps {
   data: TransactionFilters;
+  className?: string;
   onChange: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K]) => void;
 }
 
@@ -27,7 +30,7 @@ const datePresets = [
   },
 ];
 
-export const ListFilters: React.FC<ListFiltersProps> = ({ data, onChange }) => {
+export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onChange }) => {
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
   const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState<boolean>(false);
   const [isAccountPopoverOpen, setIsAccountPopoverOpen] = useState<boolean>(false);
@@ -43,22 +46,25 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, onChange }) => {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 p-4 bg-white rounded-lg shadow">
+    <div className={cn('flex flex-wrap items-center gap-2 p-4 bg-background rounded-lg shadow-md', className)}>
       <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9">
+          <Button variant="outline" size="sm" className="h-9 text-sm">
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {data.after && data.before
-              ? `${data.after.format('MMM D, YYYY')} - ${data.before.format('MMM D, YYYY')}`
-              : data.after
-                ? `After ${data.after.format('MMM D, YYYY')}`
-                : data.before
-                  ? `Before ${data.before.format('MMM D, YYYY')}`
-                  : 'Date'}
+            <span className="hidden sm:inline">
+              {data.after && data.before
+                ? `${data.after.format('MMM D, YYYY')} - ${data.before.format('MMM D, YYYY')}`
+                : data.after
+                  ? `After ${data.after.format('MMM D, YYYY')}`
+                  : data.before
+                    ? `Before ${data.before.format('MMM D, YYYY')}`
+                    : 'Date'}
+            </span>
+            <span className="sm:hidden">Date</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          <div className="flex flex-col sm:flex-row">
+          <div className="flex flex-col">
             <Calendar
               initialFocus
               mode="range"
@@ -69,16 +75,16 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, onChange }) => {
               }}
               onSelect={handleDateRangeChange}
               numberOfMonths={2}
-              className="sm:border-r"
+              className="border-b"
             />
             <div className="p-3 space-y-3">
-              <h4 className="font-medium text-sm">Presets</h4>
-              <div className="grid grid-cols-2 sm:grid-cols-1 gap-2">
+              <h4 className="font-medium text-sm text-primary">Presets</h4>
+              <div className="grid grid-cols-2 gap-2">
                 {datePresets.map((preset) => (
                   <Button
                     key={preset.label}
                     size="sm"
-                    variant="outline"
+                    variant="secondary"
                     className="w-full justify-start text-left text-xs"
                     onClick={() => {
                       handleDateRangeChange(preset.range);
@@ -96,7 +102,7 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, onChange }) => {
 
       <Popover open={isCategoryPopoverOpen} onOpenChange={setIsCategoryPopoverOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9">
+          <Button variant="outline" size="sm" className="h-9 text-sm">
             <FilterIcon className="mr-2 h-4 w-4" />
             Categories ({data.categories.length})
           </Button>
@@ -108,12 +114,16 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, onChange }) => {
                 <Checkbox
                   id={`category-${category}`}
                   checked={data.categories.includes(category)}
-                  onCheckedChange={(checked) => onChange(
-                    'categories',
-                    checked ? [...data.categories, category] : data.categories.filter((c) => c !== category),
-                  )}
+                  onCheckedChange={(checked) => {
+                    onChange(
+                      'categories',
+                      checked
+                        ? [...data.categories, category]
+                        : data.categories.filter((c) => c !== category),
+                    );
+                  }}
                 />
-                <label htmlFor={`category-${category}`}>{category}</label>
+                <Label htmlFor={`category-${category}`} className="text-sm">{category}</Label>
               </div>
             ))}
           </div>
@@ -122,7 +132,7 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, onChange }) => {
 
       <Popover open={isAccountPopoverOpen} onOpenChange={setIsAccountPopoverOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9">
+          <Button variant="outline" size="sm" className="h-9 text-sm">
             <FilterIcon className="mr-2 h-4 w-4" />
             Accounts ({data.accounts.length})
           </Button>
@@ -143,7 +153,7 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, onChange }) => {
                     );
                   }}
                 />
-                <label htmlFor={`account-${account}`}>{account}</label>
+                <Label htmlFor={`account-${account}`} className="text-sm">{account}</Label>
               </div>
             ))}
           </div>
@@ -152,14 +162,14 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, onChange }) => {
 
       <Popover open={isAmountPopoverOpen} onOpenChange={setIsAmountPopoverOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9">
+          <Button variant="outline" size="sm" className="h-9 text-sm">
             <FilterIcon className="mr-2 h-4 w-4" />
             ${data.amountRange[0]} - ${data.amountRange[1]}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-80">
           <div className="space-y-2">
-            <h4 className="font-medium leading-none">Amount Range</h4>
+            <h4 className="font-medium leading-none mb-2 text-primary">Amount Range</h4>
             <Slider
               min={0}
               max={10000}
@@ -167,18 +177,18 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, onChange }) => {
               value={data.amountRange}
               onValueChange={handleAmountChange}
             />
-            <div className="flex justify-between">
+            <div className="flex justify-between mt-2">
               <Input
                 type="number"
                 value={data.amountRange[0]}
                 onChange={(e) => onChange('amountRange', [parseInt(e.target.value), data.amountRange[1]])}
-                className="w-20"
+                className="w-20 text-sm"
               />
               <Input
                 type="number"
                 value={data.amountRange[1]}
                 onChange={(e) => onChange('amountRange', [data.amountRange[0], parseInt(e.target.value)])}
-                className="w-20"
+                className="w-20 text-sm"
               />
             </div>
           </div>
@@ -186,21 +196,23 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, onChange }) => {
       </Popover>
 
       <Button
+        variant={data.withNestedCategories ? 'secondary' : 'outline'}
         size="sm"
-        className="h-9"
-        variant={data.withNestedCategories ? 'default' : 'outline'}
+        className="h-9 text-sm"
         onClick={() => onChange('withNestedCategories', !data.withNestedCategories)}
       >
-        Nested Categories
+        <span className="hidden sm:inline">Nested Categories</span>
+        <span className="sm:hidden">Nested</span>
       </Button>
 
       <Button
-        variant={data.isDraft ? 'default' : 'outline'}
+        variant={data.isDraft ? 'secondary' : 'outline'}
         size="sm"
-        className="h-9"
+        className="h-9 text-sm"
         onClick={() => onChange('isDraft', !data.isDraft)}
       >
-        Draft Transactions
+        <span className="hidden sm:inline">Draft Transactions</span>
+        <span className="sm:hidden">Drafts</span>
       </Button>
     </div>
   );

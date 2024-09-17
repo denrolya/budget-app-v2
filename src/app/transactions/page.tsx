@@ -96,11 +96,9 @@ export const TransactionsList: FC = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Transactions List</h1>
+      <h1 className="text-2xl font-bold mb-4">Transactions List <Button onClick={() => openForm('transaction')}>Create new Transaction</Button></h1>
 
-      <ListFilters data={filters} onChange={setFilter} />
-
-      <Button onClick={() => openForm('transaction')}>Create new Transaction</Button>
+      <ListFilters data={filters} onChange={setFilter} className="mb-6" />
 
       {isLoading && (
         <ul className="space-y-2">
