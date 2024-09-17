@@ -1,16 +1,18 @@
+import cn from 'classnames';
 import { CalendarIcon, FilterIcon } from 'lucide-react';
 import moment from 'moment';
-import React, { useState } from 'react';
-import cn from 'classnames';
+import React, { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
+import TypeaheadV2 from '@/components/ui/typeaheadV2';
+import { useCategories } from '@/contexts/FinanceData.tsx';
 import { TransactionFilters } from '@/models/TransactionFilters';
-import { Label } from '@/components/ui/label';
 
 interface ListFiltersProps {
   data: TransactionFilters;
@@ -31,6 +33,8 @@ const datePresets = [
 ];
 
 export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onChange }) => {
+  const categories = useCategories();
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
   const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState<boolean>(false);
   const [isAccountPopoverOpen, setIsAccountPopoverOpen] = useState<boolean>(false);
@@ -44,6 +48,10 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
   const handleAmountChange = (value: number[]) => {
     onChange('amountRange', value);
   };
+
+  useEffect(() => {
+    console.log(selectedCategories);
+  }, [selectedCategories.length]);
 
   return (
     <div className={cn('flex flex-wrap items-center gap-2 p-4 bg-background rounded-lg shadow-md', className)}>
@@ -99,6 +107,19 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
           </div>
         </PopoverContent>
       </Popover>
+
+      <TypeaheadV2
+        multiple
+        options={categories}
+        labelField="name"
+        valueField="id"
+        renderElement={(el, vf, lf) => (<span>
+          {el[lf]}
+        </span>)}
+        value={selectedCategories}
+        onChange={setSelectedCategories}
+
+      />
 
       <Popover open={isCategoryPopoverOpen} onOpenChange={setIsCategoryPopoverOpen}>
         <PopoverTrigger asChild>

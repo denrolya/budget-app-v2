@@ -181,14 +181,14 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black">
+      <div className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
         <div className="w-full max-w-md mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative">
             <svg className="w-64 h-64 mx-auto" viewBox="0 0 100 100">
               <defs>
                 <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#FF6B6B" />
-                  <stop offset="100%" stopColor="#4ECDC4" />
+                  <stop offset="0%" stopColor="hsl(var(--primary))" />
+                  <stop offset="100%" stopColor="hsl(var(--secondary))" />
                 </linearGradient>
                 <filter id="glow">
                   <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
@@ -199,18 +199,18 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
                 </filter>
               </defs>
 
-              {/* Dimmer ring in the middle of the loading circle */}
+              {/* Thinner and lighter inner line */}
               <circle
                 cx="50"
                 cy="50"
                 r="45"
                 fill="none"
                 stroke="url(#gradient)"
-                strokeWidth="2"
-                opacity="0.5"
+                strokeWidth="1"
+                opacity="0.3"
               />
 
-              {/* Main progress circle */}
+              {/* Main progress circle with rounded edges */}
               <circle
                 cx="50"
                 cy="50"
@@ -218,19 +218,11 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
                 fill="none"
                 stroke="url(#gradient)"
                 strokeWidth="4"
+                strokeLinecap="round"
                 strokeDasharray="283"
                 strokeDashoffset={283 - (283 * progress) / 100}
                 className="transform -rotate-90 origin-center transition-all duration-500 ease-in-out"
                 filter="url(#glow)"
-              />
-
-              {/* Orbiting circle */}
-              <circle
-                cx="50"
-                cy="5"
-                r="3"
-                fill="#FF6B6B"
-                className="animate-orbit"
               />
 
               <text
@@ -238,7 +230,7 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
                 y="50"
                 textAnchor="middle"
                 dominantBaseline="central"
-                className="text-2xl font-bold fill-white animate-bounce-small"
+                className="text-2xl font-bold fill-foreground animate-bounce-small"
               >
                 {Math.round(progress)}%
               </text>
@@ -246,10 +238,10 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
           </div>
 
           <div className="mt-8 text-center space-y-4">
-            <h2 className="text-2xl font-bold text-white animate-pulse">
+            <h2 className="text-2xl font-bold text-foreground animate-pulse">
               Revving Up Your Experience
             </h2>
-            <p className="text-lg text-gray-300">
+            <p className="text-lg text-muted-foreground">
               Fasten your seatbelt, we're almost there!
             </p>
           </div>

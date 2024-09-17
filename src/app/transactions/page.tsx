@@ -1,6 +1,6 @@
 import isEqual from 'lodash/isEqual';
 import moment from 'moment';
-import { FC, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import useSWR from 'swr';
 
 import { Pagination } from '@/components/common/Pagination';
@@ -17,7 +17,7 @@ import { axiosFetcher } from '@/services/api';
 
 const defaultFilters = new TransactionFilters();
 
-export const TransactionsList: FC = () => {
+export const TransactionsList: React.FC = () => {
   const { openForm } = useForm();
   const {
     pagination: { currentPage, pageSize },
