@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState, useMemo } from 'react';
 
 export enum FormType {
   Transaction = 'transaction',
@@ -70,7 +70,7 @@ export const useFormManager = (): FormContextType => {
   };
 };
 
-export const FormProvider = ({ children }: { children: ReactNode }) => {
+export const FormProvider = ({ children }: { children: React.ReactNode }) => {
   const formManager = useFormManager();
 
   return <FormContext.Provider value={formManager}>{children}</FormContext.Provider>;
@@ -87,13 +87,17 @@ export const useForm = () => {
 export const useFormSubmitListener = <T,>(formTypes: FormType[], callback: (response: T) => void) => {
   const { addFormSubmitListener, removeFormSubmitListener } = useForm();
 
+  // Memoize formTypes and callback
+  const memoizedFormTypes = useMemo(() => formTypes, [/* actual dependencies */]);
+  // const memoizedCallback = useCallback(callback, [/* actual dependencies */]);
+
   useEffect(() => {
     const listener: FormEventListener<T> = (formType, response) => {
-      if (formTypes.includes(formType)) {
+      if (memoizedFormTypes.includes(formType)) {
         callback(response);
       }
     };
     addFormSubmitListener(listener);
     return () => removeFormSubmitListener(listener);
-  }, [formTypes, callback, addFormSubmitListener, removeFormSubmitListener]);
+  }, [memoizedFormTypes, callback, addFormSubmitListener, removeFormSubmitListener]);
 };

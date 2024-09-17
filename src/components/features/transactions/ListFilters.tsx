@@ -1,16 +1,14 @@
-import React, { useState } from 'react';
+import { CalendarIcon, FilterIcon } from 'lucide-react';
 import moment from 'moment';
-import { CalendarIcon } from 'lucide-react';
+import React, { useState } from 'react';
 
-import { TransactionFilters } from '@/models/TransactionFilters';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { Checkbox } from '@/components/ui/checkbox';
+import { TransactionFilters } from '@/models/TransactionFilters';
 
 interface ListFiltersProps {
   data: TransactionFilters;
@@ -23,10 +21,13 @@ const datePresets = [
   { label: 'This Month', range: { from: moment().startOf('month'), to: moment().endOf('month') } },
   { label: 'Last 30 Days', range: { from: moment().subtract(30, 'days'), to: moment() } },
   { label: 'This Year', range: { from: moment().startOf('year'), to: moment().endOf('year') } },
-  { label: 'Last Year', range: { from: moment().subtract(1, 'year').startOf('year'), to: moment().subtract(1, 'year').endOf('year') } },
+  {
+    label: 'Last Year',
+    range: { from: moment().subtract(1, 'year').startOf('year'), to: moment().subtract(1, 'year').endOf('year') },
+  },
 ];
 
-export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
+export const ListFilters: React.FC<ListFiltersProps> = ({ data, onChange }) => {
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
   const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState<boolean>(false);
   const [isAccountPopoverOpen, setIsAccountPopoverOpen] = useState<boolean>(false);
@@ -42,10 +43,10 @@ export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
   };
 
   return (
-    <>
+    <div className="flex flex-wrap items-center gap-2 p-4 bg-white rounded-lg shadow">
       <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="h-9">
             <CalendarIcon className="mr-2 h-4 w-4" />
             {data.after && data.before
               ? `${data.after.format('MMM D, YYYY')} - ${data.before.format('MMM D, YYYY')}`
@@ -53,7 +54,7 @@ export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
                 ? `After ${data.after.format('MMM D, YYYY')}`
                 : data.before
                   ? `Before ${data.before.format('MMM D, YYYY')}`
-                  : 'Select date range'}
+                  : 'Date'}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -95,7 +96,8 @@ export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
 
       <Popover open={isCategoryPopoverOpen} onOpenChange={setIsCategoryPopoverOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="h-9">
+            <FilterIcon className="mr-2 h-4 w-4" />
             Categories ({data.categories.length})
           </Button>
         </PopoverTrigger>
@@ -106,14 +108,10 @@ export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
                 <Checkbox
                   id={`category-${category}`}
                   checked={data.categories.includes(category)}
-                  onCheckedChange={(checked) => {
-                    onChange(
-                      'categories',
-                      checked
-                        ? [...data.categories, category]
-                        : data.categories.filter((c) => c !== category),
-                    );
-                  }}
+                  onCheckedChange={(checked) => onChange(
+                    'categories',
+                    checked ? [...data.categories, category] : data.categories.filter((c) => c !== category),
+                  )}
                 />
                 <label htmlFor={`category-${category}`}>{category}</label>
               </div>
@@ -124,7 +122,8 @@ export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
 
       <Popover open={isAccountPopoverOpen} onOpenChange={setIsAccountPopoverOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="h-9">
+            <FilterIcon className="mr-2 h-4 w-4" />
             Accounts ({data.accounts.length})
           </Button>
         </PopoverTrigger>
@@ -153,8 +152,9 @@ export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
 
       <Popover open={isAmountPopoverOpen} onOpenChange={setIsAmountPopoverOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm">
-            Amount: ${data.amountRange[0]} - ${data.amountRange[1]}
+          <Button variant="outline" size="sm" className="h-9">
+            <FilterIcon className="mr-2 h-4 w-4" />
+            ${data.amountRange[0]} - ${data.amountRange[1]}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-80">
@@ -185,23 +185,25 @@ export const ListFilters = ({ data, onChange }: ListFiltersProps) => {
         </PopoverContent>
       </Popover>
 
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="nested-categories"
-          checked={data.withNestedCategories}
-          onCheckedChange={(checked) => onChange('withNestedCategories', checked)}
-        />
-        <Label htmlFor="nested-categories">Include nested categories</Label>
-      </div>
+      <Button
+        size="sm"
+        className="h-9"
+        variant={data.withNestedCategories ? 'default' : 'outline'}
+        onClick={() => onChange('withNestedCategories', !data.withNestedCategories)}
+      >
+        Nested Categories
+      </Button>
 
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="draft-transactions"
-          checked={data.isDraft}
-          onCheckedChange={(checked) => onChange('isDraft', checked)}
-        />
-        <Label htmlFor="draft-transactions">Show draft transactions</Label>
-      </div>
-    </>
+      <Button
+        variant={data.isDraft ? 'default' : 'outline'}
+        size="sm"
+        className="h-9"
+        onClick={() => onChange('isDraft', !data.isDraft)}
+      >
+        Draft Transactions
+      </Button>
+    </div>
   );
 };
+
+export default ListFilters;
