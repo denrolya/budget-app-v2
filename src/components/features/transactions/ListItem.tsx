@@ -1,9 +1,8 @@
 import cn from 'classnames';
 import { Eye, InfoIcon, MoreHorizontal, User } from 'lucide-react';
-import { FC, useMemo } from 'react';
+import React from 'react';
 
 import { TransactionValue } from '@/components/common/TransactionValue';
-import AccountAvatar from '@/components/features/accounts/Avatar';
 import { Details } from '@/components/features/transactions/Details';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,8 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
-import { useAccounts } from '@/contexts/FinanceData';
-import { useForm as useFormContext } from '@/contexts/Form';
+import { useForm as useFormContext, FormType } from '@/contexts/Form';
 import { Transaction, Type } from '@/models/transaction';
 
 interface TransactionListItemProps {
@@ -27,7 +25,7 @@ interface TransactionListItemProps {
   colorBorder?: boolean;
 }
 
-export const ListItem: FC<TransactionListItemProps> = ({
+export const ListItem: React.FC<TransactionListItemProps> = ({
                                                          transaction,
                                                          isCompensationView = false,
                                                          colorBorder = false,
@@ -36,8 +34,6 @@ export const ListItem: FC<TransactionListItemProps> = ({
   const isCompensated = transaction.type === Type.Expense && transaction.compensations && transaction.compensations?.length > 0;
   const isCompensation = transaction.category.name === 'Compensation';
   const isDebt = transaction.debt && transaction.debt.debtor;
-  const accounts = useAccounts();
-  const account = useMemo(() => accounts.find(account => account.id === transaction.account.id), [accounts, transaction.account?.id]);
 
   return (
     <Card className={cn('shadow-md hover:shadow-lg transition-shadow', {
@@ -98,7 +94,7 @@ export const ListItem: FC<TransactionListItemProps> = ({
                         <DialogHeader>
                           <DialogTitle>Transaction Details</DialogTitle>
                         </DialogHeader>
-                        <Details transaction={transaction} />
+                        <Details transaction={transaction} onEdit={() => openForm(FormType.Transaction, transaction, true)} />
                       </DialogContent>
                     </Dialog>
                     <DropdownMenu>
@@ -108,7 +104,7 @@ export const ListItem: FC<TransactionListItemProps> = ({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openForm('transaction', transaction, true)}>
+                        <DropdownMenuItem onClick={() => openForm(FormType.Transaction, transaction, true)}>
                           Edit transaction
                         </DropdownMenuItem>
                         <DropdownMenuItem>Delete transaction</DropdownMenuItem>
