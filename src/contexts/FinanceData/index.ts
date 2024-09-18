@@ -1,0 +1,36 @@
+import { FinanceDataProvider } from '@/contexts/FinanceData/context';
+import {
+  useFinanceData,
+  useAccounts,
+  useActiveAccounts,
+  useArchivedAccounts,
+  useActiveAccountsWithDefaultOrder,
+  useAccountsWithDefaultOrder,
+  useDebts,
+  useCategories,
+  useExchangeRates,
+} from '@/contexts/FinanceData/hooks';
+
+export type {
+  Account,
+  Debt,
+  Category,
+  ExchangeRates,
+  FinanceData,
+  FinanceDataContextType,
+} from '@/contexts/FinanceData/context';
+
+export {
+  FinanceDataProvider,
+  useFinanceData,
+  useAccounts,
+  useActiveAccounts,
+  useArchivedAccounts,
+  useActiveAccountsWithDefaultOrder,
+  useAccountsWithDefaultOrder,
+  useDebts,
+  useCategories,
+  useExchangeRates,
+};
+
+export default FinanceDataProvider;

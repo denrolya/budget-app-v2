@@ -5,9 +5,9 @@ import { CURRENCIES } from '@/constants/currency';
 import { Transaction } from '@/models/transaction';
 
 interface TransactionValueProps {
-  transaction: Transaction;
-  className?: string;
-  maximumFractionDigits?: number;
+  transaction: Transaction
+  className?: string
+  maximumFractionDigits?: number
 }
 
 export const TransactionValue = ({
@@ -33,8 +33,8 @@ export const TransactionValue = ({
     <span className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}>
       {amountString}
       {value !== undefined && (baseCurrency.code !== currency || amount !== value) && (
-        <span className="ml-1 font-light tabular-nums slashed-zero text-muted-foreground text-xs">
-          ≈ {valueString}
+        <span className="ml-1 text-xs opacity-75">
+          | {valueString}
         </span>
       )}
     </span>

@@ -13,7 +13,7 @@ import {
 import React, { useMemo } from 'react';
 
 import AccountAvatar from '@/components/features/accounts/Avatar.tsx';
-import { useAccounts } from '@/contexts/FinanceData.tsx';
+import { useAccounts } from '@/contexts/FinanceData';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { TransactionValue } from '@/components/common/TransactionValue';
 import { ListItem as TransactionListItem } from '@/components/features/transactions/ListItem';

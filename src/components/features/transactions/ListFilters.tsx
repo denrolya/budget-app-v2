@@ -3,6 +3,7 @@ import { CalendarIcon, FilterIcon } from 'lucide-react';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 
+import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -10,8 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
-import TypeaheadV2 from '@/components/ui/typeaheadV2';
-import { useCategories } from '@/contexts/FinanceData.tsx';
+import { useCategories } from '@/contexts/FinanceData';
 import { TransactionFilters } from '@/models/TransactionFilters';
 
 interface ListFiltersProps {
@@ -20,7 +20,6 @@ interface ListFiltersProps {
   onChange: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K]) => void;
 }
 
-const categories = ['Food & Drinks', 'Transportation', 'Entertainment', 'Bills', 'Shopping'];
 const accounts = ['Checking', 'Savings', 'Credit Card', 'Cash'];
 const datePresets = [
   { label: 'This Month', range: { from: moment().startOf('month'), to: moment().endOf('month') } },
@@ -108,18 +107,7 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
         </PopoverContent>
       </Popover>
 
-      <TypeaheadV2
-        multiple
-        options={categories}
-        labelField="name"
-        valueField="id"
-        renderElement={(el, vf, lf) => (<span>
-          {el[lf]}
-        </span>)}
-        value={selectedCategories}
-        onChange={setSelectedCategories}
-
-      />
+      <CategoryTypeahead multiple value={selectedCategories} onChange={setSelectedCategories} className="h-9 text-sm" />
 
       <Popover open={isCategoryPopoverOpen} onOpenChange={setIsCategoryPopoverOpen}>
         <PopoverTrigger asChild>

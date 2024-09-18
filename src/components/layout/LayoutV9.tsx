@@ -6,7 +6,7 @@ import { MobileNavigation } from '@/components/layout/MobileNavigation';
 import Sidebar from '@/components/layout/Sidebar';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { FinanceDataProvider } from '@/contexts/FinanceData.tsx';
+import { FinanceDataProvider } from '@/contexts/FinanceData';
 import { FormProvider } from '@/contexts/Form';
 import { SidebarProvider } from '@/contexts/sidebar';
 

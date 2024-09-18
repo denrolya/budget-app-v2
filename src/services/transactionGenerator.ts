@@ -130,7 +130,7 @@ export const generateTransactions = (numberOfTransactions: number = 1, date?: st
       id: i + 1,
       account: {
         icon: account.type === 'cash' ? '💵' : account.type === 'bank' ? '🏦' : '🌐',
-        id: i + 101,
+        id: 1,
         name: account.name,
         currency: account.currency,
         color: '#' + Math.floor(Math.random() * 16777215).toString(16), // Random color

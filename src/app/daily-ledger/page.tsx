@@ -4,9 +4,8 @@ import React, { useEffect, useState } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
-import { ListItem as TransactionListItem } from '@/components/features/transactions/ListItem';
+import TransactionListItemV2 from '@/components/features/transactions/ListItemV2';
 import { ListItem as TransferListItem } from '@/components/features/transfers/ListItem';
-import { ListFilters } from '@/components/features/transactions/ListFilters';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -111,7 +110,6 @@ export const DailyLedger = () => {
               <DrawerDescription>Refine your transaction list</DrawerDescription>
             </DrawerHeader>
             <div className="flex-grow overflow-y-auto px-4 pb-4">
-              <ListFilters />
             </div>
             <DrawerFooter className="p-4 border-t">
               <DrawerClose asChild>
@@ -123,7 +121,6 @@ export const DailyLedger = () => {
 
         {/* Sidebar for filters on desktop */}
         <aside className="hidden lg:block w-64 space-y-6">
-          <ListFilters />
         </aside>
 
         {/* Main content area */}
@@ -166,7 +163,7 @@ export const DailyLedger = () => {
                     <AccordionContent className="space-y-2 px-4 py-2">
                       {dateGroup.items.map((item, itemIndex) => (
                         <React.Fragment key={itemIndex}>
-                          {(item instanceof Transaction) && <TransactionListItem transaction={item} />}
+                          {(item instanceof Transaction) && <TransactionListItemV2 transaction={item} />}
                           {(item instanceof Transfer) && <TransferListItem transfer={item} />}
                         </React.Fragment>
                       ))}

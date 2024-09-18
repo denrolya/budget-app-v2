@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
-import { useAccounts } from '@/contexts/FinanceData.tsx';
+import { useAccounts } from '@/contexts/FinanceData';
 import { useForm as useFormContext } from '@/contexts/Form';
 import { Transaction, Type } from '@/models/transaction';
 
@@ -120,7 +120,6 @@ export const ListItem: FC<TransactionListItemProps> = ({
             </div>
             <div className="mt-1 text-xs text-muted-foreground flex justify-between">
               <div>
-                <AccountAvatar account={account} className="w-full h-full" size="sm" />
                 <span>{transaction.account.name}</span>
               </div>
               <span>{transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}</span>
@@ -131,3 +130,5 @@ export const ListItem: FC<TransactionListItemProps> = ({
     </Card>
   );
 };
+
+export default ListItem;

@@ -61,15 +61,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
-// Custom hook for using Auth context
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
 // Utility function to decode JWT and extract user data
 const parseJwt = (token: string): User => {
   const base64Url = token.split('.')[1];
@@ -82,4 +73,22 @@ const parseJwt = (token: string): User => {
       .join('')
   );
   return JSON.parse(jsonPayload);
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+export const useUser = () => {
+  const { user } = useAuth();
+  return user;
+};
+
+export const useBaseCurrency = () => {
+  const { user: { baseCurrency } } = useAuth();
+  return baseCurrency;
 };

@@ -1,6 +1,6 @@
-import React from 'react';
-import { CreditCard, Wallet, HelpCircle, Globe } from 'lucide-react';
 import cn from 'classnames';
+import { CreditCard, Globe, HelpCircle, Wallet } from 'lucide-react';
+import React from 'react';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
@@ -11,9 +11,10 @@ interface AccountAvatarProps {
     type: AccountType
     color: string
     currency: string
-  }
-  size?: 'sm' | 'md' | 'lg'
-  className?: string
+  };
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+  showCurrency?: boolean;
 }
 
 const iconMap: Record<AccountType, React.ElementType> = {
@@ -41,7 +42,12 @@ const currencySizeMap = {
   lg: 'text-xs h-4',
 };
 
-export const AccountAvatar: React.FC<AccountAvatarProps> = ({ account, size = 'md', className }) => {
+export const AccountAvatar: React.FC<AccountAvatarProps> = ({
+                                                              account,
+                                                              size = 'md',
+                                                              showCurrency = true,
+                                                              className,
+                                                            }) => {
   const { type, color, currency } = account;
   const Icon = iconMap[type];
 
@@ -60,20 +66,22 @@ export const AccountAvatar: React.FC<AccountAvatarProps> = ({ account, size = 'm
           />
         </AvatarFallback>
       </Avatar>
-      <div
-        className={cn(
-          'absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/3',
-          'rounded-full bg-background px-1 flex items-center justify-center',
-          currencySizeMap[size],
-          'border border-background'
-        )}
-        style={{
-          color,
-          boxShadow: `0 0 0 1px ${color}`,
-        }}
-      >
-        {currency}
-      </div>
+      {showCurrency && (
+        <div
+          className={cn(
+            'absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/3',
+            'rounded-full bg-background px-1 flex items-center justify-center',
+            currencySizeMap[size],
+            'border border-background',
+          )}
+          style={{
+            color,
+            boxShadow: `0 0 0 1px ${color}`,
+          }}
+        >
+          {currency}
+        </div>
+      )}
     </div>
   );
 };

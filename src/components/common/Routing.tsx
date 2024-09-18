@@ -13,11 +13,7 @@ import { FinanceDataProvider, useFinanceData } from '@/contexts/FinanceData';
 import { useAuth } from '@/contexts/auth';
 
 const ProtectedContent: React.FC = () => {
-  const { data, isLoading, error } = useFinanceData();
-
-  if (isLoading) {
-    return <div>Loading financial data...</div>;
-  }
+  const { data, error } = useFinanceData();
 
   if (error || !data) {
     return <Navigate to="/login" replace />;

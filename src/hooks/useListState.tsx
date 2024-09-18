@@ -8,45 +8,25 @@ export interface FilterModel {
   setFilter<K extends keyof this>(key: K, value: this[K]): void;
 }
 
-/**
- * Pagination state interface
- */
 export interface PaginationState {
   currentPage: number;
   pageSize: number;
+  totalPages: number;
 }
 
-/**
- * Sorting state interface
- * @template T - Type of the items in the list
- */
 export interface SortState<T> {
   field: keyof T | null;
   direction: 'asc' | 'desc' | null;
 }
 
-/**
- * List state interface
- * @template FilterType - Type of the filters
- * @template ItemType - Type of the items in the list
- */
 export interface UseListState<FilterType, ItemType> {
   pagination: PaginationState;
   filters: FilterType;
   sort: SortState<ItemType>;
 }
 
-/**
- * Function type for setting filters
- * @template T - Type of the filters
- */
 type SetFilterFunction<T> = <K extends keyof T>(key: K, value: T[K]) => void;
 
-/**
- * Options for configuring the useListState hook
- * @template FilterType - Type of the filters
- * @template ItemType - Type of the items in the list
- */
 interface UseListStateOptions<FilterType extends FilterModel, ItemType> {
   initialPageSize?: number;
   initialFilters: FilterType;
@@ -54,20 +34,10 @@ interface UseListStateOptions<FilterType extends FilterModel, ItemType> {
   searchParamKeys?: {
     [K in keyof FilterType]?: string;
   };
-  formatMoment?: string; // Custom date format for moment objects
-  updateUrl?: boolean;   // Flag to enable or disable URL updates
+  formatMoment?: string;
+  updateUrl?: boolean;
 }
 
-/**
- * Custom hook to manage list state including pagination, filters, and sorting.
- * It syncs with URL search parameters for state persistence if updateUrl is true.
- *
- * @template FilterType - Type of the filters
- * @template ItemType - Type of the items in the list
- *
- * @param options - Configuration options for the hook
- * @returns List state and functions to update pagination, filters, and sorting
- */
 export const useListState = <FilterType extends FilterModel, ItemType>({
                                                                          initialPageSize = 10,
                                                                          initialFilters,
@@ -85,6 +55,7 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
     pagination: {
       currentPage: parseInt(searchParams.get('page') || '1', 10),
       pageSize: parseInt(searchParams.get('perPage') || initialPageSize.toString(), 10),
+      totalPages: parseInt(searchParams.get('totalPages') || '0', 10),
     },
     filters: initialFilters,
     sort: {
@@ -101,6 +72,13 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
     setState(prev => ({
       ...prev,
       pagination: { ...prev.pagination, currentPage: page },
+    }));
+  }, []);
+
+  const setTotalPages = useCallback((count: number) => {
+    setState(prev => ({
+      ...prev,
+      pagination: { ...prev.pagination, totalPages: count },
     }));
   }, []);
 
@@ -188,5 +166,6 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
     setCurrentPage,
     setFilter,
     setSort,
-  }), [state, setCurrentPage, setFilter, setSort]);
+    setTotalPages,
+  }), [state, setCurrentPage, setFilter, setSort, setTotalPages]);
 };

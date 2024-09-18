@@ -1,6 +1,6 @@
 import cn from 'classnames';
 import sumBy from 'lodash/sumBy';
-import { BarChart2, CreditCard, Home, Plus } from 'lucide-react';
+import { BarChart2, CreditCard, Home, Plus, Receipt, ArrowLeftRight, Wallet } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
@@ -11,7 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/auth';
 import { useActiveAccountsWithDefaultOrder } from '@/contexts/FinanceData';
-import { useForm } from '@/contexts/Form';
+import { FormType, useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
 
 interface Props {
@@ -83,13 +83,13 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
             {isSidebarExpanded && (
               <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1">Tools</div>
             )}
-            <SidebarLink to="/transactions" icon={CreditCard} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink to="/transactions" icon={Receipt} isSidebarExpanded={isSidebarExpanded}>
               Transactions
             </SidebarLink>
-            <SidebarLink to="/transfers" icon={CreditCard} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink to="/transfers" icon={ArrowLeftRight} isSidebarExpanded={isSidebarExpanded}>
               Transfers
             </SidebarLink>
-            <SidebarLink to="/accounts" icon={CreditCard} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink to="/accounts" icon={Wallet} isSidebarExpanded={isSidebarExpanded}>
               Accounts
             </SidebarLink>
             <SidebarLink to="/debts" icon={CreditCard} isSidebarExpanded={isSidebarExpanded}>
@@ -133,7 +133,7 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
                 currency={user.baseCurrency} />
             </div>
           </div>
-          <Button variant="ghost" className="w-full justify-start" onClick={() => openForm('account')}>
+          <Button variant="ghost" className="w-full justify-start" onClick={() => openForm(FormType.Account)}>
             <Plus className="h-4 w-4" />
             {isSidebarExpanded && <span className="ml-2">Add Account</span>}
           </Button>

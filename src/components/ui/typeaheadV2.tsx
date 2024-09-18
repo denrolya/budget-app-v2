@@ -3,8 +3,17 @@ import { Check, ChevronsUpDown, X } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 type Option = Record<string, any>
@@ -22,18 +31,18 @@ interface TypeaheadV2Props {
   className?: string;
 }
 
-export const TypeaheadV2: React.FC<TypeaheadV2Props> = ({
-                                               multiple = false,
-                                               options,
-                                               valueField,
-                                               labelField,
-                                               renderElement,
-                                               placeholder = 'Select options...',
-                                               emptyMessage = 'No options found.',
-                                               value,
-                                               onChange,
-  className,
-                                             }) => {
+export const TypeaheadV2 = ({
+                              multiple = false,
+                              options,
+                              valueField,
+                              labelField,
+                              renderElement,
+                              placeholder = 'Select options...',
+                              emptyMessage = 'No options found.',
+                              value,
+                              onChange,
+                              className,
+                            }: TypeaheadV2Props) => {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState('');
 
@@ -47,6 +56,10 @@ export const TypeaheadV2: React.FC<TypeaheadV2Props> = ({
 
   const selectedOptions = React.useMemo(() => {
     return options.filter(option => selectedValues.includes(option[valueField]));
+  }, [options, selectedValues, valueField]);
+
+  const unselectedOptions = React.useMemo(() => {
+    return options.filter(option => !selectedValues.includes(option[valueField]));
   }, [options, selectedValues, valueField]);
 
   const handleSelect = (option: Option) => {
@@ -80,27 +93,34 @@ export const TypeaheadV2: React.FC<TypeaheadV2Props> = ({
 
   const renderSelectedItems = () => {
     if (!multiple && selectedOptions.length === 1) {
-      return <span className="text-sm">{selectedOptions[0][labelField]}</span>;
+      return <span className="text-sm truncate">{selectedOptions[0][labelField]}</span>;
     }
 
-    return selectedOptions.map((option) => (
-      <Badge key={option[valueField]} variant="secondary" className="text-sm">
-        {option[labelField]}
-        {multiple && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="ml-1 h-4 w-4 p-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleRemove(option[valueField]);
-            }}
-          >
-            <X className="h-3 w-3" />
-          </Button>
+    return (
+      <div className="flex flex-wrap gap-1 items-center">
+        {selectedOptions.length > 0 && (
+          <Badge variant="secondary" className="text-sm">
+            <span className="truncate max-w-[100px]">{selectedOptions[0][labelField]}</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-1 h-4 w-4 p-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemove(selectedOptions[0][valueField]);
+              }}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </Badge>
         )}
-      </Badge>
-    ));
+        {selectedOptions.length > 1 && (
+          <Badge variant="secondary" className="text-sm">
+            +{selectedOptions.length - 1} more
+          </Badge>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -110,9 +130,9 @@ export const TypeaheadV2: React.FC<TypeaheadV2Props> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("justify-between", className)}
+          className={cn('justify-between', className)}
         >
-          <div className="flex flex-wrap gap-1 items-center">
+          <div className="flex-1 text-left">
             {selectedOptions.length > 0 ? renderSelectedItems() : placeholder}
           </div>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -126,29 +146,44 @@ export const TypeaheadV2: React.FC<TypeaheadV2Props> = ({
             onValueChange={setInputValue}
             onKeyDown={handleKeyDown}
           />
-          <CommandList>
-            <CommandEmpty>{emptyMessage}</CommandEmpty>
-            <CommandGroup className="max-h-64 overflow-auto">
-              {options.map((option) => (
-                <CommandItem
-                  key={option[valueField]}
-                  onSelect={() => handleSelect(option)}
-                >
-                  <Check
-                    className={cn(
-                      'mr-2 h-4 w-4',
-                      selectedValues.includes(option[valueField]) ? 'opacity-100' : 'opacity-0',
-                    )}
-                  />
-                  {renderElement(option, valueField, labelField)}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
+          <ScrollArea className="h-[300px]">
+            <CommandList>
+              <CommandEmpty>{emptyMessage}</CommandEmpty>
+              {selectedOptions.length > 0 && (
+                <CommandGroup heading="Selected">
+                  {selectedOptions.map((option) => (
+                    <CommandItem
+                      key={option[valueField]}
+                      onSelect={() => handleSelect(option)}
+                    >
+                      <Check className="mr-2 h-4 w-4 opacity-100" />
+                      {renderElement(option, valueField, labelField)}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+              {(selectedOptions.length > 0 && unselectedOptions.length > 0) && (
+                <CommandSeparator />
+              )}
+              {unselectedOptions.length > 0 && (
+                <CommandGroup heading="Available">
+                  {unselectedOptions.map((option) => (
+                    <CommandItem
+                      key={option[valueField]}
+                      onSelect={() => handleSelect(option)}
+                    >
+                      <Check className="mr-2 h-4 w-4 opacity-0" />
+                      {renderElement(option, valueField, labelField)}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+            </CommandList>
+          </ScrollArea>
         </Command>
       </PopoverContent>
     </Popover>
   );
-}
+};
 
 export default TypeaheadV2;

@@ -4,7 +4,7 @@ import React from 'react';
 
 import HeaderLink from '@/components/layout/HeaderLink';
 import { CurrencySelector } from '@/components/layout/CurrencySelector';
-import { ExchangeRatesDetails as ExchangeRatesDetails } from '@/components/layout/ExchangeRatesDetails';
+import ExchangeRatesDetails from '@/components/layout/ExchangeRatesDetails';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,

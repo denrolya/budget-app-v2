@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MOMENT_DATE_VIEW_FORMAT, MOMENT_DATETIME_VIEW_FORMAT } from '@/constants/datetime.ts';
-import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData.tsx';
+import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
 import { generateTransactions } from '@/services/transactionGenerator.ts';
 
 interface Account {
