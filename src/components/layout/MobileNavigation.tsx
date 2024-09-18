@@ -24,6 +24,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useForm } from '@/contexts/Form';
 import { useTheme } from '@/contexts/theme';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import ExchangeRatesPresets from '@/components/common/ExchangeRatesPresets';
 
 export const MobileNavigation: React.FC<{ className: string }> = ({ className }) => {
   const { theme, setTheme } = useTheme();
@@ -80,8 +82,9 @@ export const MobileNavigation: React.FC<{ className: string }> = ({ className })
                   </DrawerHeader>
                   <div className="p-4">
                     <Tabs defaultValue="quickAccess" className="w-full">
-                      <TabsList className="grid w-full grid-cols-2">
+                      <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="quickAccess">Quick Access</TabsTrigger>
+                        <TabsTrigger value="exchangeRates">Rates</TabsTrigger>
                         <TabsTrigger value="settings">Settings</TabsTrigger>
                       </TabsList>
                       <TabsContent value="quickAccess">
@@ -117,6 +120,11 @@ export const MobileNavigation: React.FC<{ className: string }> = ({ className })
                             </Link>
                           </Button>
                         </div>
+                      </TabsContent>
+                      <TabsContent value="exchangeRates">
+                        <ScrollArea className="mt-4">
+                          <ExchangeRatesPresets />
+                        </ScrollArea>
                       </TabsContent>
                       <TabsContent value="settings">
                         <div className="space-y-4">
