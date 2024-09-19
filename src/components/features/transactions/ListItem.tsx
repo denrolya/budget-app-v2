@@ -14,9 +14,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
-import { useForm as useFormContext, FormType } from '@/contexts/Form';
+import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { Transaction, Type } from '@/models/transaction';
 
 interface TransactionListItemProps {
@@ -26,14 +27,16 @@ interface TransactionListItemProps {
 }
 
 export const ListItem: React.FC<TransactionListItemProps> = ({
-                                                         transaction,
-                                                         isCompensationView = false,
-                                                         colorBorder = false,
-                                                       }) => {
+                                                               transaction,
+                                                               isCompensationView = false,
+                                                               colorBorder = false,
+                                                             }) => {
   const { openForm } = useFormContext();
   const isCompensated = transaction.type === Type.Expense && transaction.compensations && transaction.compensations?.length > 0;
   const isCompensation = transaction.category.name === 'Compensation';
   const isDebt = transaction.debt && transaction.debt.debtor;
+
+  const onEdit = () => openForm(FormType.Transaction, transaction, true);
 
   return (
     <Card className={cn('shadow-md hover:shadow-lg transition-shadow', {
@@ -45,10 +48,30 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
           <div className="flex-grow">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0">
               <div className="flex items-center space-x-2 text-sm">
-                <Badge variant={(transaction.type === Type.Income) ? 'success' : 'destructive'}
-                       className={cn('text-xs font-mono')}>
-                  <TransactionValue transaction={transaction} />
-                </Badge>
+                <HoverCard openDelay={1}>
+                  <HoverCardTrigger>
+                    <Badge className="text-xs font-mono"
+                           variant={(transaction.type === Type.Income) ? 'success' : 'destructive'}>
+                      <TransactionValue transaction={transaction} />
+                    </Badge>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80">
+                    <div className="flex justify-between space-x-4">
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-semibold">@nextjs</h4>
+                        <p className="text-sm">
+                          The React Framework – created and maintained by @vercel.
+                        </p>
+                        <div className="flex items-center pt-2">
+                          <InfoIcon className="mr-2 h-4 w-4 opacity-70" />{' '}
+                          <span className="text-xs text-muted-foreground">
+                            Joined December 2021
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
                       <span className="font-medium truncate max-w-[150px] sm:max-w-none cursor-help">
@@ -94,7 +117,7 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
                         <DialogHeader>
                           <DialogTitle>Transaction Details</DialogTitle>
                         </DialogHeader>
-                        <Details transaction={transaction} onEdit={() => openForm(FormType.Transaction, transaction, true)} />
+                        <Details transaction={transaction} onEdit={onEdit} />
                       </DialogContent>
                     </Dialog>
                     <DropdownMenu>
@@ -104,7 +127,7 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openForm(FormType.Transaction, transaction, true)}>
+                        <DropdownMenuItem onClick={onEdit}>
                           Edit transaction
                         </DropdownMenuItem>
                         <DropdownMenuItem>Delete transaction</DropdownMenuItem>
@@ -115,9 +138,7 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
               </div>
             </div>
             <div className="mt-1 text-xs text-muted-foreground flex justify-between">
-              <div>
-                <span>{transaction.account.name}</span>
-              </div>
+              <span>{transaction.account.name}</span>
               <span>{transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}</span>
             </div>
           </div>

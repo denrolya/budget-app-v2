@@ -2,28 +2,16 @@ import { AlertCircle } from 'lucide-react';
 import React, { createContext, ReactNode, useCallback, useEffect, useState } from 'react';
 import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
+import Category, { CategoryTreeBuilder } from '@/models/Category';
+import Account, { AccountRawData } from '@/models/Account';
 import { axiosFetcher } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-
-export type Account = {
-  id: number;
-  name: string;
-  balance: number;
-  currency: string;
-  type: string;
-  archivedAt: string | null;
-};
 
 export type Debt = {
   id: number;
   name: string;
   amount: number;
-};
-
-export type Category = {
-  id: number;
-  name: string;
 };
 
 export type ExchangeRates = Record<string, number>;
@@ -65,9 +53,40 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
     staleTime: Infinity,
   };
 
+  const exchangeRatesQuery: UseQueryResult<ExchangeRates, Error> = useQuery({
+    queryKey: ['exchangeRates'],
+    queryFn: async () => {
+      const response = await axiosFetcher(ENDPOINTS.exchangeRates);
+      return response.rates;
+    },
+    ...queryOptions,
+  });
+
   const accountsQuery: UseQueryResult<Account[], Error> = useQuery({
     queryKey: ['accounts'],
-    queryFn: () => axiosFetcher(ENDPOINTS.accounts),
+    queryFn: async () => {
+      const rawAccounts: AccountRawData[] = await axiosFetcher(ENDPOINTS.accounts);
+
+      if (!exchangeRatesQuery.data) throw new Error('Exchange rates not available');
+
+      const convertBalance = (balance: number, currency: string, rates: ExchangeRates) => {
+        const convertedValues: Record<string, number> = {};
+        for (const [code, rate] of Object.entries(rates)) {
+          if (currency !== code) {
+            convertedValues[code] = balance * (rate / rates[currency]);
+          } else {
+            convertedValues[code] = balance;
+          }
+        }
+        return convertedValues;
+      };
+
+      return rawAccounts.map((account: AccountRawData) => new Account({
+        ...account,
+        convertedValues: convertBalance(account.balance, account.currency, exchangeRatesQuery.data!)
+      }));
+    },
+    enabled: !!exchangeRatesQuery.data, // Fetch accounts only when exchange rates are available
     ...queryOptions,
   });
 
@@ -79,15 +98,15 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   const categoriesQuery: UseQueryResult<Category[], Error> = useQuery({
     queryKey: ['categories'],
-    queryFn: () => axiosFetcher(ENDPOINTS.categories),
-    ...queryOptions,
-  });
-
-  const exchangeRatesQuery: UseQueryResult<ExchangeRates, Error> = useQuery({
-    queryKey: ['exchangeRates'],
     queryFn: async () => {
-      const response = await axiosFetcher(ENDPOINTS.exchangeRates);
-      return response.rates; // Store only the rates part
+      const rawCategories = await axiosFetcher(ENDPOINTS.categories);
+
+      const treeBuilder = new CategoryTreeBuilder();
+      const tree = treeBuilder.normalizeData(rawCategories);
+
+      const plainList = treeBuilder.getPlainList();
+
+      return { tree, list: plainList };
     },
     ...queryOptions,
   });

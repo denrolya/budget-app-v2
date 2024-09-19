@@ -1,15 +1,14 @@
 import orderBy from 'lodash/orderBy';
-import { useContext, useMemo } from 'react';
+import { useContext } from 'react';
 
+import Account from '@/models/Account';
+import Category from '@/models/Category';
 import {
-  Account, Category, Debt, ExchangeRates,
+  Debt,
+  ExchangeRates,
   FinanceDataContext,
   FinanceDataContextType,
 } from '@/contexts/FinanceData/context';
-
-type AccountWithConvertedValues = Account & {
-  convertedValues: Record<string, number>;
-};
 
 const convert = (
   rates: ExchangeRates,
@@ -39,34 +38,28 @@ export const useFinanceData = (): FinanceDataContextType => {
   return context;
 };
 
-export const useAccounts = (): AccountWithConvertedValues[] | null => {
+export const useAccounts = (): Account[] | null => {
   const { data } = useFinanceData();
 
-  return useMemo(() => {
-    if (!data?.accounts || !data?.exchangeRates) return null;
-    return data.accounts.map(account => ({
-      ...account,
-      convertedValues: generateConvertedValues(data.exchangeRates, account.currency, account.balance),
-    }));
-  }, [data?.accounts, data?.exchangeRates]);
+  return data?.accounts ?? null;
 };
 
-export const useActiveAccounts = (): AccountWithConvertedValues[] | undefined => {
+export const useActiveAccounts = (): Account[] | undefined => {
   const data = useAccounts();
   return data?.filter(({ archivedAt }) => !archivedAt);
 };
 
-export const useArchivedAccounts = (): AccountWithConvertedValues[] | undefined => {
+export const useArchivedAccounts = (): Account[] | undefined => {
   const data = useAccounts();
   return data?.filter(({ archivedAt }) => !!archivedAt);
 };
 
-export const useActiveAccountsWithDefaultOrder = (): AccountWithConvertedValues[] | undefined => {
+export const useActiveAccountsWithDefaultOrder = (): Account[] | undefined => {
   const activeAccounts = useActiveAccounts();
   return orderBy(activeAccounts, ['currency', 'type', 'name']);
 };
 
-export const useAccountsWithDefaultOrder = (): AccountWithConvertedValues[] | undefined => {
+export const useAccountsWithDefaultOrder = (): Account[] | undefined => {
   const data = useAccounts();
   return orderBy(
     data,

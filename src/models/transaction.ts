@@ -1,17 +1,15 @@
 import moment, { Moment } from 'moment';
 
+import { useAccounts, useCategories } from '@/contexts/FinanceData';
+import Category from '@/models/category';
+import Account from '@/models/account';
+
 interface Account {
   icon: string;
   id: number;
   name: string;
   currency: string;
   color: string;
-}
-
-interface Category {
-  id: number;
-  name: string;
-  icon: string;
 }
 
 interface ConvertedValues {
@@ -99,3 +97,64 @@ export class Transaction {
     return `Transaction ${this.id}: ${this.type} of ${this.amount} ${this.account.currency} (${this.category.name})`;
   }
 }
+
+interface RawTransaction {
+  id: number;
+  account: {
+    id: number;
+  };
+  amount: number;
+  convertedValues: ConvertedValues;
+  note: string;
+  executedAt: string;
+  category: {
+    id: number;
+  };
+  isDraft: boolean;
+  compensations: RawTransaction[];
+  type: Type;
+}
+
+export const TransactionFactory = () => {
+  const { list: categories } = useCategories();
+  const accounts = useAccounts();
+
+  if (!categories || !accounts) {
+    throw new Error('Finance data is not available');
+  }
+
+  const createTransaction = (rawTransaction: RawTransaction): Transaction => {
+    const account = accounts.find((acc: Account) => acc.id === rawTransaction.account.id);
+    const category = categories.find((cat: Category) => cat.id === rawTransaction.category.id);
+
+    if (!account) {
+      throw new Error(`Account with ID ${rawTransaction.account.id} not found`);
+    }
+
+    if (!category) {
+      throw new Error(`Category with ID ${rawTransaction.category.id} not found`);
+    }
+
+    return new Transaction({
+      ...rawTransaction,
+      account,
+      category,
+      compensations: rawTransaction.compensations?.map((comp) =>
+        createTransaction({
+          id: comp.id!,
+          account: comp.account!,
+          amount: comp.amount!,
+          convertedValues: comp.convertedValues!,
+          note: comp.note!,
+          executedAt: comp.executedAt!,
+          category: comp.category!,
+          isDraft: comp.isDraft!,
+          compensations: comp.compensations || [],
+          type: comp.type!,
+        })
+      )
+    });
+  };
+
+  return { createTransaction };
+};

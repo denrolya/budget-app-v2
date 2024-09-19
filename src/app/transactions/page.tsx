@@ -14,15 +14,15 @@ import { Button } from '@/components/ui/button';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { FormType, useForm, useFormSubmitListener } from '@/contexts/Form';
 import { useListState } from '@/hooks/useListState';
-import { Transaction } from '@/models/transaction';
+import { Transaction, TransactionFactory } from '@/models/transaction';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { axiosFetcher } from '@/services/api';
 
 const defaultFilters = new TransactionFilters();
 
 export const TransactionsList: React.FC = () => {
+  const { createTransaction } = TransactionFactory();
   const { openForm } = useForm();
-  const accounts = useAccounts();
   const queryClient = useQueryClient();
   const [listStyle, setListStyle] = useState<'v1' | 'v2'>('v2');
   const {
@@ -61,7 +61,9 @@ export const TransactionsList: React.FC = () => {
 
       if (!isEmptyValue && !isEmptyArray && !isEqual(value, defaultValue)) {
         if (Array.isArray(value)) {
-          query.set(key, value.join(','));
+          value.forEach((item) => {
+            query.append(`${key}[]`, item.toString());
+          });
         } else if (typeof value === 'boolean') {
           query.set(key, value ? '1' : '0');
         } else if (moment.isMoment(value)) {
@@ -91,10 +93,7 @@ export const TransactionsList: React.FC = () => {
       const result = await axiosFetcher(url);
       return {
         ...result,
-        list: result.list.map((t: never) => {
-          const account = accounts.find((a) => a.id === t.account.id);
-          return new Transaction({ ...t, account });
-        }),
+        list: result.list.map((t: never) => createTransaction(t)),
       };
     },
     staleTime: 5 * 60 * 1000,

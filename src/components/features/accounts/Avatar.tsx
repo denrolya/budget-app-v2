@@ -2,16 +2,11 @@ import cn from 'classnames';
 import { CreditCard, Globe, HelpCircle, Wallet } from 'lucide-react';
 import React from 'react';
 
+import Account, { AccountType } from '@/models/Account';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
-type AccountType = 'internet' | 'cash' | 'bank' | 'other'
-
 interface AccountAvatarProps {
-  account: {
-    type: AccountType
-    color: string
-    currency: string
-  };
+  account: Account;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   showCurrency?: boolean;
@@ -51,18 +46,21 @@ export const AccountAvatar: React.FC<AccountAvatarProps> = ({
   const { type, color, currency } = account;
   const Icon = iconMap[type];
 
+  const borderColor = account.isArchived() ? 'var(--muted-foreground)' : color;
+  const iconColor = account.isArchived() ? 'var(--muted-foreground)' : `${color}80`;
+
   return (
     <div className={cn('relative inline-block', sizeMap[size])}>
       <Avatar className={cn('bg-background w-full h-full', className)}>
         <AvatarFallback
           className="bg-background flex items-center justify-center"
           style={{
-            boxShadow: `inset 0 0 0 1px ${color}`,
+            boxShadow: `inset 0 0 0 1px ${borderColor}`,
           }}
         >
           <Icon
             className={cn(iconSizeMap[size], 'text-foreground')}
-            style={{ color: color + '80' }}  // Adding 80 for 50% opacity
+            style={{ color: iconColor }}
           />
         </AvatarFallback>
       </Avatar>
@@ -75,8 +73,8 @@ export const AccountAvatar: React.FC<AccountAvatarProps> = ({
             'border border-background',
           )}
           style={{
-            color,
-            boxShadow: `0 0 0 1px ${color}`,
+            color: borderColor,
+            boxShadow: `0 0 0 1px ${borderColor}`,
           }}
         >
           {currency}

@@ -12,9 +12,7 @@ import {
 } from '@/contexts/FinanceData/hooks';
 
 export type {
-  Account,
   Debt,
-  Category,
   ExchangeRates,
   FinanceData,
   FinanceDataContextType,

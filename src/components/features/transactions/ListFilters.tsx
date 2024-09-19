@@ -1,17 +1,15 @@
 import cn from 'classnames';
 import { CalendarIcon, FilterIcon } from 'lucide-react';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
+import AccountTypeahead from '@/components/common/AccountTypeahead.tsx';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
-import { useCategories } from '@/contexts/FinanceData';
 import { TransactionFilters } from '@/models/TransactionFilters';
 
 interface ListFiltersProps {
@@ -20,7 +18,6 @@ interface ListFiltersProps {
   onChange: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K]) => void;
 }
 
-const accounts = ['Checking', 'Savings', 'Credit Card', 'Cash'];
 const datePresets = [
   { label: 'This Month', range: { from: moment().startOf('month'), to: moment().endOf('month') } },
   { label: 'Last 30 Days', range: { from: moment().subtract(30, 'days'), to: moment() } },
@@ -32,11 +29,7 @@ const datePresets = [
 ];
 
 export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onChange }) => {
-  const categories = useCategories();
-  const [selectedCategories, setSelectedCategories] = useState([]);
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
-  const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState<boolean>(false);
-  const [isAccountPopoverOpen, setIsAccountPopoverOpen] = useState<boolean>(false);
   const [isAmountPopoverOpen, setIsAmountPopoverOpen] = useState<boolean>(false);
 
   const handleDateRangeChange = (range: { from: Date | undefined; to: Date | undefined }) => {
@@ -47,10 +40,6 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
   const handleAmountChange = (value: number[]) => {
     onChange('amountRange', value);
   };
-
-  useEffect(() => {
-    console.log(selectedCategories);
-  }, [selectedCategories.length]);
 
   return (
     <div className={cn('flex flex-wrap items-center gap-2 p-4 bg-background rounded-lg shadow-md', className)}>
@@ -107,67 +96,19 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
         </PopoverContent>
       </Popover>
 
-      <CategoryTypeahead multiple value={selectedCategories} onChange={setSelectedCategories} className="h-9 text-sm" />
+      <CategoryTypeahead
+        multiple
+        value={data.categories}
+        onChange={(categories) => onChange('categories', categories)}
+        className="h-9 text-sm"
+      />
 
-      <Popover open={isCategoryPopoverOpen} onOpenChange={setIsCategoryPopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9 text-sm">
-            <FilterIcon className="mr-2 h-4 w-4" />
-            Categories ({data.categories.length})
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[200px]">
-          <div className="space-y-2">
-            {categories.map((category) => (
-              <div key={category} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`category-${category}`}
-                  checked={data.categories.includes(category)}
-                  onCheckedChange={(checked) => {
-                    onChange(
-                      'categories',
-                      checked
-                        ? [...data.categories, category]
-                        : data.categories.filter((c) => c !== category),
-                    );
-                  }}
-                />
-                <Label htmlFor={`category-${category}`} className="text-sm">{category}</Label>
-              </div>
-            ))}
-          </div>
-        </PopoverContent>
-      </Popover>
-
-      <Popover open={isAccountPopoverOpen} onOpenChange={setIsAccountPopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9 text-sm">
-            <FilterIcon className="mr-2 h-4 w-4" />
-            Accounts ({data.accounts.length})
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[200px]">
-          <div className="space-y-2">
-            {accounts.map((account) => (
-              <div key={account} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`account-${account}`}
-                  checked={data.accounts.includes(account)}
-                  onCheckedChange={(checked) => {
-                    onChange(
-                      'accounts',
-                      checked
-                        ? [...data.accounts, account]
-                        : data.accounts.filter((a) => a !== account),
-                    );
-                  }}
-                />
-                <Label htmlFor={`account-${account}`} className="text-sm">{account}</Label>
-              </div>
-            ))}
-          </div>
-        </PopoverContent>
-      </Popover>
+      <AccountTypeahead
+        multiple
+        value={data.accounts}
+        onChange={(accounts) => onChange('accounts', accounts)}
+        className="h-9 text-sm"
+        />
 
       <Popover open={isAmountPopoverOpen} onOpenChange={setIsAmountPopoverOpen}>
         <PopoverTrigger asChild>
