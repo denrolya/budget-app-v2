@@ -29,7 +29,9 @@ export const ListItem = ({ transaction, colorBorder = false }: TransactionItemPr
       <CardContent className="p-2 flex items-center">
         <div className="flex-shrink-0 mr-2">
           <ResponsiveTooltip openDelay={0} content={<span className="font-medium">{transaction.account.name}</span>}>
-            <AccountAvatar account={transaction.account} className="h-full w-full" size="sm" />
+            <span>
+              <AccountAvatar account={transaction.account} className="h-full w-full" size="sm" />
+            </span>
           </ResponsiveTooltip>
         </div>
 
