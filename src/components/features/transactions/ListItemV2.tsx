@@ -8,9 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
+import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { Transaction, Type } from '@/models/transaction';
-import { useForm as useFormContext, FormType } from '@/contexts/Form';
 
 interface TransactionItemProps {
   transaction: Transaction;
@@ -28,14 +28,9 @@ export const ListItem = ({ transaction, colorBorder = false }: TransactionItemPr
     >
       <CardContent className="p-2 flex items-center">
         <div className="flex-shrink-0 mr-2">
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger>
-              <AccountAvatar account={transaction.account} className="h-full w-full" size="sm" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <span className="font-medium">{transaction.account.name}</span>
-            </TooltipContent>
-          </Tooltip>
+          <ResponsiveTooltip openDelay={0} content={<span className="font-medium">{transaction.account.name}</span>}>
+            <AccountAvatar account={transaction.account} className="h-full w-full" size="sm" />
+          </ResponsiveTooltip>
         </div>
 
         <div className="flex-grow min-w-0 mr-2">
@@ -44,16 +39,11 @@ export const ListItem = ({ transaction, colorBorder = false }: TransactionItemPr
               {transaction.category.name}
             </Badge>
             {transaction.note && (
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger className="text-left">
-                  <span className="text-xs text-muted-foreground truncate block">
-                    {transaction.note}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{transaction.note}</p>
-                </TooltipContent>
-              </Tooltip>
+              <ResponsiveTooltip openDelay={0} content={<p>{transaction.note}</p>} triggerClassName="text-left">
+                <span className="text-xs text-muted-foreground truncate block">
+                  {transaction.note}
+                </span>
+              </ResponsiveTooltip>
             )}
           </div>
         </div>
@@ -102,6 +92,6 @@ export const ListItem = ({ transaction, colorBorder = false }: TransactionItemPr
       </CardContent>
     </Card>
   );
-}
+};
 
 export default ListItem;

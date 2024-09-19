@@ -14,8 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { Transaction, Type } from '@/models/transaction';
@@ -48,14 +47,10 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
           <div className="flex-grow">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0">
               <div className="flex items-center space-x-2 text-sm">
-                <HoverCard openDelay={1}>
-                  <HoverCardTrigger>
-                    <Badge className="text-xs font-mono"
-                           variant={(transaction.type === Type.Income) ? 'success' : 'destructive'}>
-                      <TransactionValue transaction={transaction} />
-                    </Badge>
-                  </HoverCardTrigger>
-                  <HoverCardContent className="w-80">
+                <ResponsiveTooltip
+                  openDelay={0}
+                  contentClassName="w-80"
+                  content={
                     <div className="flex justify-between space-x-4">
                       <div className="space-y-1">
                         <h4 className="text-sm font-semibold">@nextjs</h4>
@@ -69,19 +64,16 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
                           </span>
                         </div>
                       </div>
-                    </div>
-                  </HoverCardContent>
-                </HoverCard>
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                      <span className="font-medium truncate max-w-[150px] sm:max-w-none cursor-help">
+                    </div>}>
+                  <Badge className="text-xs font-mono" variant={(transaction.type === Type.Income) ? 'success' : 'destructive'}>
+                    <TransactionValue transaction={transaction} />
+                  </Badge>
+                </ResponsiveTooltip>
+                <ResponsiveTooltip openDelay={0} content={<p>{transaction.category.name}</p>}>
+                  <span className="font-medium truncate max-w-[150px] sm:max-w-none cursor-help">
                         {transaction.category.name}
                       </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{transaction.category.name}</p>
-                  </TooltipContent>
-                </Tooltip>
+                </ResponsiveTooltip>
                 {(isCompensated || isCompensation) && (
                   <Badge variant="outline" className="text-xs">
                     {isCompensated ? 'Compensated' : 'Compensation'}
@@ -94,14 +86,9 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
                   </Badge>
                 )}
                 {transaction.note && (
-                  <Tooltip delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <InfoIcon className="h-4 w-4 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{transaction.note}</p>
-                    </TooltipContent>
-                  </Tooltip>
+                  <ResponsiveTooltip openDelay={0} content={<p>{transaction.note}</p>}>
+                    <InfoIcon className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </ResponsiveTooltip>
                 )}
               </div>
               <div className="flex items-center space-x-2">

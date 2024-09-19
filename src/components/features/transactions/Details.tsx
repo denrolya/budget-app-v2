@@ -1,27 +1,16 @@
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  Bitcoin,
-  Copy,
-  DollarSign,
-  Edit,
-  Euro,
-  Share2,
-  Trash2,
-  User,
-} from 'lucide-react';
+import { ArrowDownIcon, ArrowUpIcon, Bitcoin, DollarSign, Edit, Euro, Trash2, User } from 'lucide-react';
 import React, { useMemo } from 'react';
 
-import AccountAvatar from '@/components/features/accounts/Avatar.tsx';
-import { useAccounts } from '@/contexts/FinanceData';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { TransactionValue } from '@/components/common/TransactionValue';
+import AccountAvatar from '@/components/features/accounts/Avatar';
 import { ListItem as TransactionListItem } from '@/components/features/transactions/ListItem';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { CURRENCIES } from '@/constants/currency';
+import { useAccounts } from '@/contexts/FinanceData';
 import { Transaction } from '@/models/transaction';
 
 interface TransactionDetailsProps {
@@ -34,13 +23,7 @@ interface TransactionDetailsProps {
 
 const currencyOrder = ['EUR', 'USD', 'HUF', 'UAH', 'BTC'];
 
-export const Details: React.FC<TransactionDetailsProps> = ({
-                                                             transaction,
-                                                             onEdit,
-                                                             onDelete,
-                                                             onDuplicate,
-                                                             onShare,
-                                                           }) => {
+export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit, onDelete }) => {
   const isIncome = transaction.type === 'income';
   const isDebt = transaction.debt && transaction.debt.debtor;
   const accounts = useAccounts();
@@ -105,38 +88,16 @@ export const Details: React.FC<TransactionDetailsProps> = ({
               </div>
             </div>
             <div className="flex space-x-2">
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={() => onEdit?.(transaction)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Edit</TooltipContent>
-              </Tooltip>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={() => onDelete?.(transaction)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Delete</TooltipContent>
-              </Tooltip>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={() => onDuplicate?.(transaction)}>
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Duplicate</TooltipContent>
-              </Tooltip>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={() => onShare?.(transaction)}>
-                    <Share2 className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Share</TooltipContent>
-              </Tooltip>
+              <ResponsiveTooltip content="Edit" openDelay={0}>
+                <Button variant="ghost" size="icon" onClick={() => onEdit?.(transaction)}>
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </ResponsiveTooltip>
+              <ResponsiveTooltip content="Delete" openDelay={0}>
+                <Button variant="ghost" size="icon" onClick={() => onDelete?.(transaction)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </ResponsiveTooltip>
             </div>
           </div>
           <div className="flex items-center space-x-4">

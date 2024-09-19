@@ -31,8 +31,6 @@ const formComponents = {
   // [FormType.Category]: CategoryForm,
 };
 
-type FormType = keyof typeof formComponents;
-
 interface FormState {
   isValid: boolean;
   isDirty: boolean;

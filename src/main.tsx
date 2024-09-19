@@ -14,8 +14,6 @@ import '@/assets/styles/index.css';
 
 const queryClient = new QueryClient();
 
-
-// Make logger globally available
 if (typeof window !== 'undefined') {
   window.logger = logger;
 }

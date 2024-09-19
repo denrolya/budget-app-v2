@@ -1,23 +1,22 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
-import { ArrowDownCircle, ArrowUpCircle, Check, ChevronsUpDown, X } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, X } from 'lucide-react';
 import moment from 'moment';
-import { forwardRef, useCallback, useImperativeHandle, useMemo, memo } from 'react';
+import { forwardRef, memo, useCallback, useImperativeHandle } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { api } from '@/services/api';
+import AccountTypeahead from '@/components/common/AccountTypeahead';
+import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useActiveAccountsWithDefaultOrder, useCategories } from '@/contexts/FinanceData';
-import { useForm as useFormContext } from '@/contexts/Form.tsx';
+import { useForm as useFormContext } from '@/contexts/Form';
 import { useFormLogic } from '@/hooks/useFormLogic';
 import { Transaction, Type as TransactionType } from '@/models/transaction';
+import { api } from '@/services/api';
 
 interface FormState {
   isValid: boolean;
@@ -59,20 +58,20 @@ const formatTransactionData = (values: z.infer<typeof formSchema>, existingData:
   amount: values.amount.toString(),
   category: values.category,
   executedAt: moment(values.executedAt).toISOString(),
-  isDraft: values.isDraft,
+  isDraft: values.isDraft ?? false,
   note: values.note || '',
   type: values.type,
   compensations: values.compensations?.map((comp, index) => {
     const existingComp = existingData?.compensations?.[index];
 
     return {
-      id: existingComp ? `api/transactions/${existingComp.id}` : undefined, // Use existing ID if present
+      id: existingComp ? `api/transactions/${existingComp.id}` : undefined,
       account: comp.account,
-      amount: comp.amount.toString(), // Convert to string
-      category: 137, // As per your specific requirement
+      amount: comp.amount.toString(),
+      category: 137,
       executedAt: moment(comp.executedAt).toISOString(),
-      isDraft: false, // Set as per your specific requirement
-      note: `[Compensation]: ${values.note || existingData?.id}`, // Custom note format
+      isDraft: false,
+      note: `[Compensation]: ${values.note || existingData?.id}`,
       type: TransactionType.Income,
     };
   }),
@@ -99,7 +98,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
       category: isEditing ? data?.category.id : undefined,
       executedAt: data?.executedAt ? moment(data.executedAt).format('YYYY-MM-DDTHH:mm') : moment().format('YYYY-MM-DDTHH:mm'),
       note: data?.note || undefined,
-      isDraft: data?.isDraft || false,
+      isDraft: data?.isDraft ?? false,
       compensations: data?.compensations?.map(comp => ({
         ...comp,
         account: isEditing ? comp.account.id : undefined,
@@ -109,6 +108,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     },
     mode: 'onChange',
   });
+  console.log(form);
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'compensations',
@@ -139,10 +139,6 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     showToast,
   });
   useImperativeHandle(ref, () => formRef.current!);
-
-  const accounts = useActiveAccountsWithDefaultOrder();
-  const categories = useCategories();
-  const filteredCategories = useMemo(() => categories.filter(category => category.type === form.watch('type')), [categories, form.watch('type')]);
 
   return (
     <Form {...form}>
@@ -206,52 +202,20 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
 
           <FormField
             control={form.control}
-            name="account"
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel>Account</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn('w-full justify-between', {
-                          'text-muted-foreground': !field.value,
-                        })}
-                      >
-                        {accounts.find(account => account.id === field.value)?.name || 'Select account'}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search account..." />
-                      <CommandEmpty>No account found.</CommandEmpty>
-                      <CommandGroup>
-                        <CommandList>
-                          {accounts.map((account) => (
-                            <CommandItem
-                              value={account.name}
-                              key={account.id}
-                              onSelect={() => form.setValue('account', account.id)}
-                            >
-                              <Check className={cn('mr-2 h-4 w-4', {
-                                'opacity-100': account.id === field.value,
-                                'opacity-0': account.id !== field.value,
-                              })} />
-                              {account.icon} {account.name}
-                            </CommandItem>
-                          ))}
-                        </CommandList>
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+                <AccountTypeahead
+                  {...field}
+                  multiple={false}
+                  className={cn('w-full justify-between', {
+                    'text-muted-foreground': !field.value,
+                  })}
+                />
                 <FormMessage />
               </FormItem>
             )}
+            name="account"
           />
         </div>
 
@@ -275,45 +239,13 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className={cn('w-full justify-between', {
-                        'text-muted-foreground': !field.value,
-                      })}
-                    >
-                      {filteredCategories.find(category => category.id === field.value)?.name || 'Select category'}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Search category..." />
-                    <CommandEmpty>No category found.</CommandEmpty>
-                    <CommandGroup>
-                      <CommandList>
-                        {filteredCategories.map((category) => (
-                          <CommandItem
-                            value={category.name}
-                            key={category.id}
-                            onSelect={() => form.setValue('category', category.id)}
-                          >
-                            <Check className={cn('mr-2 h-4 w-4', {
-                              'opacity-100': category.id === field.value,
-                              'opacity-0': category.id !== field.value,
-                            })} />
-                            {category.icon} {category.name}
-                          </CommandItem>
-                        ))}
-                      </CommandList>
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <CategoryTypeahead
+                {...field}
+                multiple={false}
+                className={cn('w-full justify-between', {
+                  'text-muted-foreground': !field.value,
+                })}
+              />
               <FormMessage />
             </FormItem>
           )}
@@ -383,45 +315,9 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                     name={`compensations.${index}.account`}
                     render={({ field }) => (
                       <FormItem className="flex-1">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                className={cn('w-full justify-between', {
-                                  'text-muted-foreground': !field.value,
-                                })}
-                              >
-                                {accounts.find(account => account.id === field.value)?.name || 'Account'}
-                                <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-full p-0">
-                            <Command>
-                              <CommandInput placeholder="Search account..." />
-                              <CommandEmpty>No account found.</CommandEmpty>
-                              <CommandGroup>
-                                <CommandList>
-                                  {accounts.map((account) => (
-                                    <CommandItem
-                                      value={account.name}
-                                      key={account.id}
-                                      onSelect={() => form.setValue(`compensations.${index}.account`, account.id)}
-                                    >
-                                      <Check className={cn('mr-2 h-4 w-4', {
-                                        'opacity-100': account.id === field.value,
-                                        'opacity-0': account.id !== field.value,
-                                      })} />
-                                      {account.icon} {account.name}
-                                    </CommandItem>
-                                  ))}
-                                </CommandList>
-                              </CommandGroup>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
+                        <AccountTypeahead multiple={false} {...field} className={cn('w-full justify-between', {
+                          'text-muted-foreground': !field.value,
+                        })} />
                         <FormMessage />
                       </FormItem>
                     )}
@@ -459,9 +355,9 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               type="button"
               className="mt-2 w-full"
               onClick={() => append({
-                account: accounts[0].id,
+                account: undefined,
                 amount: 0,
-                executedAt: moment().format('YYYY-MM-DDTHH:mm'),
+                executedAt: moment().toISOString(),
               })}
             >
               Add Compensation

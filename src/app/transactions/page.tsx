@@ -4,7 +4,7 @@ import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { useAccounts } from '@/contexts/FinanceData';
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip.tsx';
 import { Pagination } from '@/components/common/Pagination';
 import ListFilters from '@/components/features/transactions/ListFilters';
 import { ListItemSkeleton as TransactionListItemSkeleton } from '@/components/features/transactions/ListItemSkeleton';
