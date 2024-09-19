@@ -436,3 +436,5 @@ export const FinancialCard = ({
     </Card>
   );
 };
+
+export default FinancialCard;

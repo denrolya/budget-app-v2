@@ -8,10 +8,10 @@ import { ListItem as TransactionListItem } from '@/components/features/transacti
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { CURRENCIES } from '@/constants/currency';
 import { useAccounts } from '@/contexts/FinanceData';
 import { Transaction } from '@/models/transaction';
+import { useExchangeRates } from '@/contexts/FinanceData';
 
 interface TransactionDetailsProps {
   transaction: Transaction;
@@ -28,22 +28,45 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
   const isDebt = transaction.debt && transaction.debt.debtor;
   const accounts = useAccounts();
   const account = useMemo(() => accounts.find(account => account.id === transaction.account.id), [accounts, transaction.account?.id]);
+  const currentRates = useExchangeRates();
 
   const formatExchangeRate = (convertedAmount: number, targetCurrency: string) => {
     const transactionCurrency = CURRENCIES[transaction.account.currency];
     const transactionAmount = transaction.amount;
 
-    switch (targetCurrency) {
-      case 'BTC':
-        return `1 ₿ = ${transactionCurrency.symbol}${(transactionAmount / convertedAmount).toFixed(2)}`;
-      case 'HUF':
-        const rateFor1000HUF = (1000 * transactionAmount) / convertedAmount;
-        return `1000 Ft = ${transactionCurrency.symbol}${rateFor1000HUF.toFixed(2)}`;
-      case transactionCurrency.code:
-        return null; // Don't show exchange rate for the transaction currency
-      default:
-        const rateForOneTargetCurrency = transactionAmount / convertedAmount;
-        return `1 ${CURRENCIES[targetCurrency].symbol} = ${transactionCurrency.symbol}${rateForOneTargetCurrency.toFixed(2)}`;
+    if (targetCurrency === transactionCurrency.code) {
+      return null; // Don't show exchange rate for the transaction currency
+    }
+
+    let baseCurrencySymbol, quoteCurrencySymbol, rate;
+
+    if (targetCurrency === 'BTC') {
+      // Display how many EUR is one BTC
+      baseCurrencySymbol = CURRENCIES['BTC'].symbol; // "₿"
+      quoteCurrencySymbol = CURRENCIES['USD'].symbol; // "€"
+      // Calculate the exchange rate using currentRates
+      const rateBTCtoUSD = currentRates['USD'] / currentRates['BTC'];
+      rate = rateBTCtoUSD;
+      return `1 ${baseCurrencySymbol} = ${quoteCurrencySymbol}${rate.toFixed(2)}`;
+    } else if (transactionCurrency.code === 'EUR' || transactionCurrency.code === 'USD') {
+      // When transaction currency is EUR or USD
+      baseCurrencySymbol = transactionCurrency.symbol;
+      quoteCurrencySymbol = CURRENCIES[targetCurrency].symbol;
+      rate = convertedAmount / transactionAmount;
+      return `1 ${baseCurrencySymbol} = ${quoteCurrencySymbol}${rate.toFixed(2)}`;
+    } else if (transactionCurrency.code === 'UAH' && targetCurrency === 'HUF') {
+      // When transaction currency is UAH and target currency is HUF
+      const rateFor1000HUF = (1000 * transactionAmount) / convertedAmount;
+      baseCurrencySymbol = `1000 ${CURRENCIES[targetCurrency].symbol}`; // "1000 Ft"
+      quoteCurrencySymbol = transactionCurrency.symbol; // "₴"
+      rate = rateFor1000HUF;
+      return `${baseCurrencySymbol} = ${quoteCurrencySymbol}${rate.toFixed(2)}`;
+    } else {
+      // Default case
+      baseCurrencySymbol = CURRENCIES[targetCurrency].symbol;
+      quoteCurrencySymbol = transactionCurrency.symbol;
+      rate = transactionAmount / convertedAmount;
+      return `1 ${baseCurrencySymbol} = ${quoteCurrencySymbol}${rate.toFixed(2)}`;
     }
   };
 
@@ -88,16 +111,12 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
               </div>
             </div>
             <div className="flex space-x-2">
-              <ResponsiveTooltip content="Edit" openDelay={0}>
-                <Button variant="ghost" size="icon" onClick={() => onEdit?.(transaction)}>
-                  <Edit className="h-4 w-4" />
-                </Button>
-              </ResponsiveTooltip>
-              <ResponsiveTooltip content="Delete" openDelay={0}>
-                <Button variant="ghost" size="icon" onClick={() => onDelete?.(transaction)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </ResponsiveTooltip>
+              <Button variant="ghost" size="icon" onClick={() => onEdit?.(transaction)}>
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => onDelete?.(transaction)}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
           <div className="flex items-center space-x-4">
@@ -147,19 +166,29 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
                 const value = transaction.convertedValues[currency];
                 if (value === undefined) return null;
                 const exchangeRate = formatExchangeRate(value, currency);
-                if (!exchangeRate) return null; // Skip displaying the transaction currency
+                if (!exchangeRate) return null;
+
+                const currentValue = transaction.amount * currentRates[currency] / currentRates[transaction.account.currency];
+
                 return (
                   <div key={currency} className="flex flex-col">
                     <div className="flex justify-between items-center">
-                      <span className="font-medium flex items-center space-x-2">
-                        <CurrencyIcon currency={currency} />
-                        <span>{currency}</span>
+                      <span className="flex flex-col justify-start">
+                        <span className="flex flex-row items-center justify-start font-medium space-x-2">
+                          <CurrencyIcon currency={currency} />
+                          <span>{currency}</span>
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          {exchangeRate}
+                        </span>
                       </span>
-                      <MoneyValue amount={value} currency={currency} />
+                      <div className="flex flex-col items-end">
+                        <MoneyValue amount={value} currency={currency} />
+                        <span className="text-sm text-muted-foreground">
+                          Now: <MoneyValue amount={currentValue} currency={currency} />
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {exchangeRate}
-                    </p>
                   </div>
                 );
               })}

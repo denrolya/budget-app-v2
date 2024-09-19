@@ -1,14 +1,13 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import isEqual from 'lodash/isEqual';
 import moment from 'moment';
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip.tsx';
 import { Pagination } from '@/components/common/Pagination';
 import ListFilters from '@/components/features/transactions/ListFilters';
-import { ListItemSkeleton as TransactionListItemSkeleton } from '@/components/features/transactions/ListItemSkeleton';
 import TransactionListItemV1 from '@/components/features/transactions/ListItem';
+import { ListItemSkeleton as TransactionListItemSkeleton } from '@/components/features/transactions/ListItemSkeleton';
 import TransactionListItemV2 from '@/components/features/transactions/ListItemV2';
 import { Button } from '@/components/ui/button';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
@@ -126,52 +125,55 @@ export const TransactionsList: React.FC = () => {
   const TransactionListItem = useMemo(() => listStyle === 'v1' ? TransactionListItemV1 : TransactionListItemV2, [listStyle]);
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">
-        Transactions List <Button onClick={() => openForm(FormType.Transaction)}>Create new Transaction</Button>
-        <Button onClick={() => setListStyle(listStyle === 'v1' ? 'v2' : 'v1')} className="ml-2">
-          Switch to {listStyle === 'v1' ? 'v2' : 'v1'} style
-        </Button>
-      </h1>
+    <section className="container mx-auto p-4">
+      <div>
+        <h1 className="text-2xl font-bold mb-4">
+          Transactions List <Button onClick={() => openForm(FormType.Transaction)}>Create new Transaction</Button>
+          <Button onClick={() => setListStyle(listStyle === 'v1' ? 'v2' : 'v1')} className="ml-2">
+            Switch to {listStyle === 'v1' ? 'v2' : 'v1'} style
+          </Button>
+        </h1>
 
-      <ListFilters data={filters} onChange={setFilter} className="mb-6" />
-
-
-      {isPending && (
-        <ul className="space-y-2">
-          {[...Array(pageSize)].map((_, index) => (
-            <li key={index}><TransactionListItemSkeleton /></li>
-          ))}
-        </ul>
-      )}
-
-      {isError && (
-        <div className="p-4 mb-4 text-sm rounded-lg bg-destructive/10 text-destructive">
-          <p className="font-medium">Error:</p>
-          <p>{error?.message || 'An unexpected error occurred.'}</p>
-        </div>
-      )}
-
-      {(!isPending && !isError && data) && (
-        <ul className="space-y-2">
-          {data.list.map((transaction: Transaction) => (
-            <li key={transaction.id}>
-              <TransactionListItem transaction={transaction} />
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <div className="mt-4">
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+        <ListFilters data={filters} onChange={setFilter} className="mb-6" />
       </div>
 
-      {(isFetching && !isPending) && (
-        <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded">
-          Updating...
+      <div className="flex-grow overflow-hidden flex flex-col">
+        {isPending && (
+          <ul className="space-y-2">
+            {[...Array(pageSize)].map((_, index) => (
+              <li key={index}><TransactionListItemSkeleton /></li>
+            ))}
+          </ul>
+        )}
+
+        {isError && (
+          <div className="p-4 mb-4 text-sm rounded-lg bg-destructive/10 text-destructive">
+            <p className="font-medium">Error:</p>
+            <p>{error?.message || 'An unexpected error occurred.'}</p>
+          </div>
+        )}
+
+        {(!isPending && !isError && data) && (
+          <ul className="space-y-2">
+            {data.list.map((transaction: Transaction) => (
+              <li key={transaction.id}>
+                <TransactionListItem transaction={transaction} />
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="mt-4">
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
-      )}
-    </div>
+
+        {(isFetching && !isPending) && (
+          <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded">
+            Updating...
+          </div>
+        )}
+      </div>
+    </section>
   );
 };
 
