@@ -1,8 +1,8 @@
-import React from 'react';
+import { forwardRef } from 'react';
 
-import Category from '@/models/Category';
 import TypeaheadV2 from '@/components/ui/typeaheadV2';
 import { useCategories } from '@/contexts/FinanceData';
+import Category from '@/models/Category';
 
 interface CategoryTypeaheadProps {
   multiple?: boolean;
@@ -11,12 +11,12 @@ interface CategoryTypeaheadProps {
   className?: string;
 }
 
-export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
-  multiple = false,
-  value,
-  onChange,
-  className,
-}) => {
+const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(({
+                                                                                  multiple = false,
+                                                                                  value,
+                                                                                  onChange,
+                                                                                  className,
+                                                                                }, ref) => {
   const { list: categories } = useCategories();
 
   const getPath = (category: Category): string => {
@@ -55,8 +55,9 @@ export const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
       value={value}
       onChange={onChange}
       className={className}
+      ref={ref}
     />
   );
-};
+});
 
 export default CategoryTypeahead;

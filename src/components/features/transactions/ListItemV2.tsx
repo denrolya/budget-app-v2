@@ -1,8 +1,11 @@
 import cn from 'classnames';
 import { MoreVertical, User } from 'lucide-react';
+import React from 'react';
 
+import { Skeleton } from '@/components/ui/skeleton.tsx';
+import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime.ts';
 import TransactionValue from '@/components/common/TransactionValue';
-import AccountAvatar from '@/components/features/accounts/Avatar';
+import AccountBadge from '@/components/features/accounts/Badge';
 import Details from '@/components/features/transactions/Details';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,7 +20,7 @@ interface TransactionItemProps {
   colorBorder?: boolean;
 }
 
-export const ListItem = ({ transaction, colorBorder = false }: TransactionItemProps) => {
+export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBorder = false }) => {
   const { openForm } = useFormContext();
   return (
     <Card
@@ -26,48 +29,42 @@ export const ListItem = ({ transaction, colorBorder = false }: TransactionItemPr
         'border-l-2 border-l-red-500': colorBorder && transaction.type === Type.Expense,
       })}
     >
-      <CardContent className="p-2 flex items-center">
-        <div className="flex-shrink-0 mr-2">
-          <ResponsiveTooltip openDelay={0} content={<span className="font-medium">{transaction.account.name}</span>}>
-            <span>
-              <AccountAvatar account={transaction.account} className="h-full w-full" size="sm" />
-            </span>
-          </ResponsiveTooltip>
-        </div>
-
-        <div className="flex-grow min-w-0 mr-2">
-          <div className="flex flex-col">
-            <Badge variant="outline" className="text-xs px-1 py-0 w-fit mb-1">
-              {transaction.category.name}
+      <CardContent className="p-2 flex flex-row">
+        <div className="flex flex-col flex-1">
+          <div className="flex justify-between">
+            <AccountBadge account={transaction.account} size="sm" />
+            <Badge variant={(transaction.type === Type.Income) ? 'success' : 'destructive'}
+                   className={cn('text-xs font-mono')}>
+              <TransactionValue transaction={transaction} />
             </Badge>
-            {transaction.note && (
-              <ResponsiveTooltip openDelay={0} content={<p>{transaction.note}</p>} triggerClassName="text-left">
-                <span className="text-xs text-muted-foreground truncate block">
+          </div>
+          <div className="flex justify-between">
+            <div>
+              <Badge variant="outline" className="text-xs px-1 py-0 w-fit">
+                {transaction.category.name}
+              </Badge>
+              {transaction.note && (
+                <ResponsiveTooltip openDelay={0} content={<p>{transaction.note}</p>} triggerClassName="text-left">
+                <span className="text-xs text-muted-foreground truncate">
                   {transaction.note}
                 </span>
-              </ResponsiveTooltip>
-            )}
+                </ResponsiveTooltip>
+              )}
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
+            </span>
           </div>
         </div>
 
-        <div className="flex-shrink-0 mr-2 text-right">
-          <Badge variant={(transaction.type === Type.Income) ? 'success' : 'destructive'}
-                 className={cn('text-xs font-mono')}>
-            <TransactionValue transaction={transaction} />
-          </Badge>
-          <div className="text-xs text-muted-foreground">
-            {transaction.executedAt.format('DD MMM HH:mm')}
-          </div>
-        </div>
-
-        <div className="flex-shrink-0">
+        <div className="flex items-center">
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]" onOpenAutoFocus={(event) => event.preventDefault()}>
+            <DialogContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
               <DialogHeader>
                 <DialogTitle>Transaction Details</DialogTitle>
               </DialogHeader>
@@ -95,5 +92,28 @@ export const ListItem = ({ transaction, colorBorder = false }: TransactionItemPr
     </Card>
   );
 };
+
+
+export const ListItemSkeleton: React.FC = () => (
+  <Card className="mb-0.5">
+    <CardContent className="p-2 flex flex-row items-center justify-between">
+      <div className="flex flex-col space-y-2 flex-1">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+        <div className="flex justify-between items-center">
+          <div className="flex flex-col space-y-1">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+          <Skeleton className="h-3 w-20" />
+        </div>
+      </div>
+      <Skeleton className="h-8 w-8 rounded-full ml-2" />
+    </CardContent>
+  </Card>
+);
+
 
 export default ListItem;

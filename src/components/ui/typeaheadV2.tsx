@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +31,7 @@ interface TypeaheadV2Props {
   className?: string;
 }
 
-export const TypeaheadV2 = ({
+export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
                               multiple = false,
                               options,
                               valueField,
@@ -42,7 +42,7 @@ export const TypeaheadV2 = ({
                               value,
                               onChange,
                               className,
-                            }: TypeaheadV2Props) => {
+                            }, ref) => {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState('');
 
@@ -145,6 +145,7 @@ export const TypeaheadV2 = ({
             value={inputValue}
             onValueChange={setInputValue}
             onKeyDown={handleKeyDown}
+            ref={ref}
           />
           <ScrollArea className="h-[300px]">
             <CommandList>
@@ -184,6 +185,6 @@ export const TypeaheadV2 = ({
       </PopoverContent>
     </Popover>
   );
-};
+});
 
 export default TypeaheadV2;

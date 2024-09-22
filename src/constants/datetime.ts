@@ -5,6 +5,8 @@ export const MOMENT_TIME_VIEW_FORMAT = 'HH:mm';
 export const MOMENT_DATE_VIEW_FORMAT = 'Do, MMM YYYY';
 export const MOMENT_DATETIME_VIEW_FORMAT = `${MOMENT_DATE_VIEW_FORMAT} ${MOMENT_TIME_VIEW_FORMAT}`;
 
+export const MOMENT_DATEPICKER_FORMAT = 'MMM D, YYYY';
+
 export const PERIOD_OPTIONS = [
   {
     label: '1D',

@@ -1,10 +1,4 @@
 export const CURRENCIES = {
-  UAH: {
-    code: 'UAH',
-    symbol: '₴',
-    name: 'Ukrainian Hryvnia',
-    type: 'fiat',
-  },
   EUR: {
     code: 'EUR',
     symbol: '€',
@@ -15,6 +9,18 @@ export const CURRENCIES = {
     code: 'USD',
     symbol: '$',
     name: 'US Dollar',
+    type: 'fiat',
+  },
+  HUF: {
+    code: 'HUF',
+    symbol: 'Ft.',
+    name: 'Hungarian Forint',
+    type: 'fiat',
+  },
+  UAH: {
+    code: 'UAH',
+    symbol: '₴',
+    name: 'Ukrainian Hryvnia',
     type: 'fiat',
   },
   BTC: {
@@ -28,11 +34,5 @@ export const CURRENCIES = {
     symbol: 'Ξ',
     name: 'Ethereum',
     type: 'crypto',
-  },
-  HUF: {
-    code: 'HUF',
-    symbol: 'Ft.',
-    name: 'Hungarian Forint',
-    type: 'fiat',
   },
 };

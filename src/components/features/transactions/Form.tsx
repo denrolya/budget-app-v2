@@ -108,7 +108,6 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     },
     mode: 'onChange',
   });
-  console.log(form);
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'compensations',

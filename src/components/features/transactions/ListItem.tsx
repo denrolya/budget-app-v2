@@ -2,6 +2,8 @@ import cn from 'classnames';
 import { Eye, InfoIcon, MoreHorizontal, User } from 'lucide-react';
 import React from 'react';
 
+import AccountAvatar from '@/components/features/accounts/Avatar.tsx';
+import AccountBadge from '@/components/features/accounts/Badge';
 import { TransactionValue } from '@/components/common/TransactionValue';
 import { Details } from '@/components/features/transactions/Details';
 import { Badge } from '@/components/ui/badge';
@@ -100,7 +102,7 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
                           <Eye className="h-4 w-4" />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-3xl">
+                      <DialogContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
                         <DialogHeader>
                           <DialogTitle>Transaction Details</DialogTitle>
                         </DialogHeader>
@@ -125,7 +127,7 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
               </div>
             </div>
             <div className="mt-1 text-xs text-muted-foreground flex justify-between">
-              <span>{transaction.account.name}</span>
+              <AccountBadge account={transaction.account} size="sm" />
               <span>{transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}</span>
             </div>
           </div>

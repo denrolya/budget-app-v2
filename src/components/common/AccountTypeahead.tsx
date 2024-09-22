@@ -1,5 +1,5 @@
 import cn from 'classnames';
-import React from 'react';
+import { forwardRef } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountAvatar from '@/components/features/accounts/Avatar';
@@ -14,12 +14,12 @@ interface AccountTypeaheadProps {
   className?: string;
 }
 
-export const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
+const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
                                                                     multiple = false,
                                                                     value,
                                                                     onChange,
                                                                     className,
-                                                                  }) => {
+                                                                  }, ref) => {
   const accounts = useAccountsWithDefaultOrder();
 
   const renderElement = (el: Account) => (
@@ -53,8 +53,9 @@ export const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
       value={value}
       onChange={onChange}
       className={className}
+      ref={ref}
     />
   );
-};
+});
 
 export default AccountTypeahead;

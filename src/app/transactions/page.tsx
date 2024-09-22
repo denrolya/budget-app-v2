@@ -5,13 +5,15 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Pagination } from '@/components/common/Pagination';
+import EmptyTransactionState from '@/components/features/transactions/EmptyTransactionState.tsx';
 import ListFilters from '@/components/features/transactions/ListFilters';
 import TransactionListItemV1 from '@/components/features/transactions/ListItem';
-import { ListItemSkeleton as TransactionListItemSkeleton } from '@/components/features/transactions/ListItemSkeleton';
-import TransactionListItemV2 from '@/components/features/transactions/ListItemV2';
+import TransactionListItemV2, {
+  ListItemSkeleton as TransactionListItemSkeleton,
+} from '@/components/features/transactions/ListItemV2';
 import { Button } from '@/components/ui/button';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
-import { FormType, useForm, useFormSubmitListener } from '@/contexts/Form';
+import { FormType, useForm as useFormContext, useFormSubmitListener } from '@/contexts/Form';
 import { useListState } from '@/hooks/useListState';
 import { Transaction, TransactionFactory } from '@/models/transaction';
 import { TransactionFilters } from '@/models/TransactionFilters';
@@ -19,9 +21,13 @@ import { axiosFetcher } from '@/services/api';
 
 const defaultFilters = new TransactionFilters();
 
+interface TransformedResponse {
+  list: Transaction[];
+}
+
 export const TransactionsList: React.FC = () => {
   const { createTransaction } = TransactionFactory();
-  const { openForm } = useForm();
+  const { openForm } = useFormContext();
   const queryClient = useQueryClient();
   const [listStyle, setListStyle] = useState<'v1' | 'v2'>('v2');
   const {
@@ -86,19 +92,19 @@ export const TransactionsList: React.FC = () => {
     return `/api/v2/transaction?${query.toString()}`;
   }, [filters, currentPage, pageSize, sort]);
 
-  const { data, error, isPending, isError, isFetching, refetch } = useQuery({
+  const { data, error, isPending, isError, isFetching, refetch } = useQuery<TransformedResponse, Error>({
     queryKey: ['transactions', url],
-    queryFn: async () => {
+    queryFn: async (): Promise<TransformedResponse> => {
       const result = await axiosFetcher(url);
       return {
         ...result,
         list: result.list.map((t: never) => createTransaction(t)),
       };
     },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   useEffect(() => {
@@ -124,17 +130,41 @@ export const TransactionsList: React.FC = () => {
 
   const TransactionListItem = useMemo(() => listStyle === 'v1' ? TransactionListItemV1 : TransactionListItemV2, [listStyle]);
 
-  return (
-    <section className="container mx-auto p-4">
-      <div>
-        <h1 className="text-2xl font-bold mb-4">
-          Transactions List <Button onClick={() => openForm(FormType.Transaction)}>Create new Transaction</Button>
-          <Button onClick={() => setListStyle(listStyle === 'v1' ? 'v2' : 'v1')} className="ml-2">
-            Switch to {listStyle === 'v1' ? 'v2' : 'v1'} style
-          </Button>
-        </h1>
+  const groupedAndSortedTransactions = useMemo(() => {
+    const transactions = data?.list;
 
-        <ListFilters data={filters} onChange={setFilter} className="mb-6" />
+    if (!transactions) return [];
+
+    const grouped = transactions.reduce((groups, transaction) => {
+      const date = moment(transaction.executedAt).format('YYYY-MM-DD');
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(transaction);
+      return groups;
+    }, {} as Record<string, Transaction[]>);
+
+    return Object.entries(grouped)
+      .sort(([dateA], [dateB]) => moment(dateB).diff(moment(dateA)))
+      .map(([date, transactions]) => ({
+        date,
+        transactions: transactions.sort((a, b) =>
+          moment(b.executedAt).diff(moment(a.executedAt)),
+        ),
+      }));
+  }, [data?.list]);
+
+  return (
+    <section className="container mx-auto px-4">
+      <div className="flex flex-row">
+        <h1 className="text-2xl font-bold">Transactions List</h1>
+        <Button variant="ghost"
+                size="icon"
+                className="p-0 ml-2"
+                onClick={() => setListStyle(listStyle === 'v1' ? 'v2' : 'v1')}>
+          {listStyle === 'v1' ? 'v2' : 'v1'}
+        </Button>
+        <ListFilters data={filters} onChange={setFilter} />
       </div>
 
       <div className="flex-grow overflow-hidden flex flex-col">
@@ -154,18 +184,32 @@ export const TransactionsList: React.FC = () => {
         )}
 
         {(!isPending && !isError && data) && (
-          <ul className="space-y-2">
-            {data.list.map((transaction: Transaction) => (
-              <li key={transaction.id}>
-                <TransactionListItem transaction={transaction} />
-              </li>
-            ))}
-          </ul>
+          <>
+            {groupedAndSortedTransactions.length > 0 && (
+              <>
+                {groupedAndSortedTransactions.map(({ date, transactions }) => (
+                  <>
+                    <div key={date} className="mb-6">
+                      <h5 className="text-lg font-semibold mb-2">{moment(date).format('dddd, MMMM D, YYYY')}</h5>
+                      <ul className="space-y-2">
+                        {transactions.map((transaction: Transaction) => (
+                          <li key={transaction.id}>
+                            <TransactionListItem transaction={transaction} />
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
+                ))}
+                <div className="mt-4">
+                  <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                </div>
+              </>
+            )}
+            {groupedAndSortedTransactions.length === 0 &&
+              <EmptyTransactionState onRefresh={refetch} onAddTransaction={() => openForm(FormType.Transaction)} />}
+          </>
         )}
-
-        <div className="mt-4">
-          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-        </div>
 
         {(isFetching && !isPending) && (
           <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded">

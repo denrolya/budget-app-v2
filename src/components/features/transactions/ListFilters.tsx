@@ -3,7 +3,8 @@ import { CalendarIcon, FilterIcon } from 'lucide-react';
 import moment from 'moment';
 import React, { useState } from 'react';
 
-import AccountTypeahead from '@/components/common/AccountTypeahead.tsx';
+import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
+import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -42,18 +43,18 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
   };
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-2 p-4 bg-background rounded-lg shadow-md', className)}>
+    <div className={cn('flex flex-wrap items-center gap-2 bg-background rounded-lg shadow-md', className)}>
       <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm" className="h-9 text-sm">
             <CalendarIcon className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">
               {data.after && data.before
-                ? `${data.after.format('MMM D, YYYY')} - ${data.before.format('MMM D, YYYY')}`
+                ? `${data.after.format(MOMENT_DATEPICKER_FORMAT)} - ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`
                 : data.after
-                  ? `After ${data.after.format('MMM D, YYYY')}`
+                  ? `After ${data.after.format(MOMENT_DATEPICKER_FORMAT)}`
                   : data.before
-                    ? `Before ${data.before.format('MMM D, YYYY')}`
+                    ? `Before ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`
                     : 'Date'}
             </span>
             <span className="sm:hidden">Date</span>
@@ -161,7 +162,7 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
         className="h-9 text-sm"
         onClick={() => onChange('isDraft', !data.isDraft)}
       >
-        <span className="hidden sm:inline">Draft Transactions</span>
+        <span className="hidden sm:inline">Drafts</span>
         <span className="sm:hidden">Drafts</span>
       </Button>
     </div>

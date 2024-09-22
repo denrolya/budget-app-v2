@@ -1,6 +1,7 @@
 import { ArrowDownIcon, ArrowUpIcon, Bitcoin, DollarSign, Edit, Euro, Trash2, User } from 'lucide-react';
 import React, { useMemo } from 'react';
 
+import { MOMENT_DATETIME_VIEW_FORMAT } from '@/constants/datetime';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { TransactionValue } from '@/components/common/TransactionValue';
 import AccountAvatar from '@/components/features/accounts/Avatar';
@@ -17,8 +18,6 @@ interface TransactionDetailsProps {
   transaction: Transaction;
   onEdit?: (transaction: Transaction) => void;
   onDelete?: (transaction: Transaction) => void;
-  onDuplicate?: (transaction: Transaction) => void;
-  onShare?: (transaction: Transaction) => void;
 }
 
 const currencyOrder = ['EUR', 'USD', 'HUF', 'UAH', 'BTC'];
@@ -93,7 +92,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center space-x-2">
-              <span>{isIncome ? 'Income' : 'Expense'} <code>#{transaction.id}</code></span>
+              <span className="capitalize">{transaction.type} <code>#{transaction.id}</code></span>
               {transaction.isDraft && <Badge variant="outline">Draft</Badge>}
             </CardTitle>
             <Badge variant={isIncome ? 'default' : 'destructive'} className="text-lg">
@@ -130,7 +129,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
             <div>
               <p className="text-sm font-medium leading-none">{transaction.category.name}</p>
               <p className="text-sm text-muted-foreground">
-                {transaction.executedAt.format('PPP p')}
+                {transaction.executedAt.format(MOMENT_DATETIME_VIEW_FORMAT)}
               </p>
             </div>
           </div>

@@ -38,7 +38,7 @@ export const LayoutV9: React.FC<{ children: React.ReactNode }> = ({ children }) 
             <div className="flex flex-1 overflow-hidden">
               <Sidebar className="hidden md:block md:h-[calc(100vh-2rem)]" />
 
-              <main className="flex flex-1 overflow-y-auto pb-16 md:pb-4">
+              <main className="overflow-y-auto pb-20 md:pb-4 mx-auto">
                 {children}
               </main>
             </div>
