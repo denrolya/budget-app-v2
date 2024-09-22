@@ -1,6 +1,3 @@
-import React, { forwardRef } from 'react';
-import { Check, ChevronsUpDown, X } from 'lucide-react';
-
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,6 +12,8 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { Check, ChevronsUpDown, X } from 'lucide-react';
+import React, { forwardRef, useCallback, useMemo, useState } from 'react';
 
 type Option = Record<string, any>
 
@@ -32,21 +31,21 @@ interface TypeaheadV2Props {
 }
 
 export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
-                              multiple = false,
-                              options,
-                              valueField,
-                              labelField,
-                              renderElement,
-                              placeholder = 'Select options...',
-                              emptyMessage = 'No options found.',
-                              value,
-                              onChange,
-                              className,
-                            }, ref) => {
-  const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState('');
+                                                                             multiple = false,
+                                                                             options,
+                                                                             valueField,
+                                                                             labelField,
+                                                                             renderElement,
+                                                                             placeholder = 'Select options...',
+                                                                             emptyMessage = 'No options found.',
+                                                                             value,
+                                                                             onChange,
+                                                                             className,
+                                                                           }, ref) => {
+  const [open, setOpen] = useState(false);
+  const [inputValue, setInputValue] = useState('');
 
-  const selectedValues = React.useMemo(() => {
+  const selectedValues = useMemo(() => {
     if (multiple) {
       return Array.isArray(value) ? value : [];
     } else {
@@ -54,15 +53,18 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
     }
   }, [multiple, value]);
 
-  const selectedOptions = React.useMemo(() => {
+  const selectedOptions = useMemo(() => {
     return options.filter(option => selectedValues.includes(option[valueField]));
   }, [options, selectedValues, valueField]);
 
-  const unselectedOptions = React.useMemo(() => {
-    return options.filter(option => !selectedValues.includes(option[valueField]));
-  }, [options, selectedValues, valueField]);
+  const filteredOptions = useMemo(() => {
+    return options.filter(option =>
+      option[labelField].toLowerCase().includes(inputValue.toLowerCase()) &&
+      !selectedValues.includes(option[valueField]),
+    );
+  }, [options, inputValue, labelField, selectedValues, valueField]);
 
-  const handleSelect = (option: Option) => {
+  const handleSelect = useCallback((option: Option) => {
     const optionValue = option[valueField];
     if (multiple) {
       const newValue = selectedValues.includes(optionValue)
@@ -73,25 +75,26 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
       onChange(optionValue);
       setOpen(false);
     }
-  };
+    setInputValue('');
+  }, [multiple, onChange, selectedValues, valueField]);
 
-  const handleRemove = (optionValue: string) => {
+  const handleRemove = useCallback((optionValue: string) => {
     if (multiple) {
       const newValue = selectedValues.filter(v => v !== optionValue);
       onChange(newValue);
     } else {
       onChange(null);
     }
-  };
+  }, [multiple, onChange, selectedValues]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
       const newValue = selectedValues.slice(0, -1);
       onChange(multiple ? newValue : newValue[0] || null);
     }
-  };
+  }, [inputValue, multiple, onChange, selectedValues]);
 
-  const renderSelectedItems = () => {
+  const renderSelectedItems = useCallback(() => {
     if (!multiple && selectedOptions.length === 1) {
       return <span className="text-sm truncate">{selectedOptions[0][labelField]}</span>;
     }
@@ -121,7 +124,7 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
         )}
       </div>
     );
-  };
+  }, [multiple, selectedOptions, labelField, valueField, handleRemove]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -130,7 +133,7 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn('justify-between', className)}
+          className={cn('w-full justify-between', className)}
         >
           <div className="flex-1 text-left">
             {selectedOptions.length > 0 ? renderSelectedItems() : placeholder}
@@ -138,7 +141,7 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[400px] p-0">
+      <PopoverContent className="w-[400px] p-0" align="start">
         <Command>
           <CommandInput
             placeholder={`Search ${placeholder.toLowerCase()}...`}
@@ -163,12 +166,12 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
                   ))}
                 </CommandGroup>
               )}
-              {(selectedOptions.length > 0 && unselectedOptions.length > 0) && (
+              {(selectedOptions.length > 0 && filteredOptions.length > 0) && (
                 <CommandSeparator />
               )}
-              {unselectedOptions.length > 0 && (
+              {filteredOptions.length > 0 && (
                 <CommandGroup heading="Available">
-                  {unselectedOptions.map((option) => (
+                  {filteredOptions.map((option) => (
                     <CommandItem
                       key={option[valueField]}
                       onSelect={() => handleSelect(option)}
@@ -186,5 +189,7 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
     </Popover>
   );
 });
+
+TypeaheadV2.displayName = 'TypeaheadV2';
 
 export default TypeaheadV2;

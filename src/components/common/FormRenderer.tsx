@@ -124,7 +124,6 @@ export const FormRenderer: FC = () => {
   if (!contextFormState.type) return null;
 
   const title = `${contextFormState.isEditing ? 'Edit' : 'New'} ${contextFormState.type.charAt(0).toUpperCase() + contextFormState.type.slice(1)}`;
-  const description = `${contextFormState.isEditing ? 'Edit' : 'Add'} a ${contextFormState.type} in your finances`;
 
   const content = (
     <FormContent
@@ -159,7 +158,6 @@ export const FormRenderer: FC = () => {
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
-            <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
           {content}
           <DialogFooter className="border-t">
@@ -172,12 +170,11 @@ export const FormRenderer: FC = () => {
 
   return (
     <Drawer open={contextFormState.isOpen} onOpenChange={handleOpenChange}>
-      <DrawerContent className="h-[80vh] flex flex-col">
+      <DrawerContent className="max-h-[90vh] overflow-y-auto">
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>
-          <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
-        <div className="flex-grow overflow-y-auto px-4 pb-4">
+        <div className="px-4 pb-4">
           {content}
         </div>
         <DrawerFooter className="p-4 border-t">

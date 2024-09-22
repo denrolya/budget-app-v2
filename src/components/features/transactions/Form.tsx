@@ -313,10 +313,10 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                     control={form.control}
                     name={`compensations.${index}.account`}
                     render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <AccountTypeahead multiple={false} {...field} className={cn('w-full justify-between', {
+                      <FormItem>
+                        <AccountTypeahead multiple={false} className={cn('w-full justify-between', {
                           'text-muted-foreground': !field.value,
-                        })} />
+                        })} {...field} />
                         <FormMessage />
                       </FormItem>
                     )}
