@@ -6,7 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Transfer } from '@/models/transfer';
+import Transfer from '@/models/Transfer';
 
 interface TransferItemProps {
   transfer: Transfer;
@@ -49,7 +49,9 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
                 <span>To: {transfer.toIncome.account.name}</span>
                 <span>Date: {transfer.executedAt.format()}</span>
                 <span>Exchange Rate: {transfer.rate}</span>
-                <span>Fees: ${transfer.feeExpense.amount.toFixed(2)} paid from {transfer.feeExpense.account.name}</span>
+                {transfer.hasFee() && (
+                  <span>Fees: ${transfer.feeExpense.amount.toFixed(2)} paid from {transfer.feeExpense.account.name}</span>
+                )}
               </div>
               <TransactionListItem transaction={transfer.fromExpense} />
               <TransactionListItem transaction={transfer.toIncome} />
@@ -60,3 +62,5 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
     </CardContent>
   </Card>
 );
+
+export default ListItem;

@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AccountsManagementPage } from '@/app/accounts/page';
 import LoginPage from '@/app/login/page';
 import TransactionsListPage from '@/app/transactions/page';
+import TransfersListPage from '@/app/transfers/page';
 import DailyLedgerPage from '@/app/daily-ledger/page';
 import DebtsPage from '@/app/debts/page';
 import { Dashboard } from '@/components/features/dashboard/Dashboard';
@@ -31,6 +32,11 @@ const ProtectedContent: React.FC = () => {
         <Route path="transactions" element={
           <PrivateRoute>
             <TransactionsListPage />
+          </PrivateRoute>
+        } />
+        <Route path="transfers" element={
+          <PrivateRoute>
+            <TransfersListPage />
           </PrivateRoute>
         } />
         <Route path="ledger" element={

@@ -7,9 +7,7 @@ export interface TransferProps {
   rate: number;
   note: string;
   executedAt: string;
-  fromExpense: Transaction;
-  toIncome: Transaction;
-  feeExpense: Transaction;
+  transactions: Transaction[];
 }
 
 export class Transfer {
@@ -26,17 +24,15 @@ export class Transfer {
                 rate,
                 note,
                 executedAt,
-                fromExpense,
-                toIncome,
-                feeExpense,
+                transactions,
               }: TransferProps) {
     this.id = id;
     this.rate = rate;
     this.note = note;
     this.executedAt = moment(executedAt);
-    this.fromExpense = new Transaction(fromExpense);
-    this.toIncome = new Transaction(toIncome);
-    this.feeExpense = new Transaction(feeExpense);
+    this.fromExpense = transactions.find((t) => t.type === 'expense' && t.category.name === 'Transfer')!;
+    this.toIncome = transactions.find((t) => t.type === 'income' && t.category.name === 'Transfer')!;
+    this.feeExpense = transactions.find((t) => t.type === 'expense' && t.category.name === 'Transfer Fee');
   }
 
   get amount(): number {
@@ -55,3 +51,5 @@ export class Transfer {
     return !!this.feeExpense;
   }
 }
+
+export default Transfer;
