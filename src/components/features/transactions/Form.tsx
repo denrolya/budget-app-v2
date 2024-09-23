@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
 import { ArrowDownCircle, ArrowUpCircle, X } from 'lucide-react';
 import moment from 'moment';
-import { forwardRef, memo, useCallback, useImperativeHandle } from 'react';
+import { forwardRef, useImperativeHandle } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -26,10 +26,8 @@ interface FormState {
 
 interface TransactionFormProps {
   data: Transaction | undefined;
-  isEditing: boolean;
   onClose: () => void;
   setFormState: React.Dispatch<React.SetStateAction<FormState>>;
-  showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
 interface TransactionFormRef {
@@ -81,27 +79,22 @@ const formatTransactionData = (values: z.infer<typeof formSchema>, existingData:
 /**
  * TODO: Organize. Separate logic form visual components.
  */
-export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>(({
-                                                                                       data,
-                                                                                       isEditing,
-                                                                                       setFormState,
-                                                                                       showToast,
-                                                                                     }, ref) => {
-  const { submitForm } = useFormContext();
+export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>((props, ref) => {
+  const { data, setFormState } = props;
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       ...data,
       type: data?.type || TransactionType.Expense,
-      account: isEditing ? data?.account.id : undefined,
-      amount: isEditing ? data?.amount : undefined,
-      category: isEditing ? data?.category.id : undefined,
+      account: data?.id ? data?.account.id : undefined,
+      amount: data?.id ? data?.amount : undefined,
+      category: data?.id ? data?.category.id : undefined,
       executedAt: data?.executedAt ? moment(data.executedAt).format('YYYY-MM-DDTHH:mm') : moment().format('YYYY-MM-DDTHH:mm'),
       note: data?.note || undefined,
       isDraft: data?.isDraft ?? false,
       compensations: data?.compensations?.map(comp => ({
         ...comp,
-        account: isEditing ? comp.account.id : undefined,
+        account: data?.id ? comp.account.id : undefined,
         amount: comp.amount,
         executedAt: moment(comp.executedAt).format('YYYY-MM-DDTHH:mm'),
       })) || [],
@@ -112,30 +105,27 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     control: form.control,
     name: 'compensations',
   });
-
-  const handleSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
-    try {
-      const formattedData = formatTransactionData(values, data);
-
-      if (isEditing) {
-        const response = await api.put(`/api/transactions/${data.id}`, formattedData);
-        logger.info(response, 'Transaction Edit');
-      } else {
-        const response = await api.post(`/api/transactions/${values.type}`, formattedData);
-        logger.info(response, 'Transaction Create');
-      }
-
-      submitForm(values);
-    } catch (error) {
-      console.error('Form submission failed:', error);
-    }
-  }, [data, isEditing, submitForm]);
-
+  const { submitForm } = useFormContext();
   const { formRef } = useFormLogic({
     form,
-    onSubmit: handleSubmit,
     setFormState,
-    showToast,
+    onSubmit: async (values: z.infer<typeof formSchema>) => {
+      try {
+        const formattedData = formatTransactionData(values, data);
+
+        if (data?.id) {
+          const response = await api.put(`/api/transactions/${data.id}`, formattedData);
+          logger.info(response, 'Transaction Edit');
+        } else {
+          const response = await api.post(`/api/transactions/${values.type}`, formattedData);
+          logger.info(response, 'Transaction Create');
+        }
+
+        submitForm(values);
+      } catch (error) {
+        console.error('Form submission failed:', error);
+      }
+    },
   });
   useImperativeHandle(ref, () => formRef.current!);
 
@@ -191,7 +181,10 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                     type="number"
                     placeholder="Enter amount"
                     {...field}
-                    onChange={e => field.onChange(e.target.valueAsNumber)}
+                    value={field.value ?? ''}
+                    onChange={e => {
+                      field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber);
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -369,4 +362,4 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
 });
 
 
-export default memo(TransactionForm);
+export default TransactionForm;

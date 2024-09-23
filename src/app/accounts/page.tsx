@@ -1,8 +1,22 @@
 import cn from 'classnames';
-import { Building2, Banknote, Globe, HelpCircle, Archive, Calendar, ArrowUpDown, ChevronLeft, Download, Edit, Plus, Search } from 'lucide-react';
+import {
+  Archive,
+  ArrowUpDown,
+  Banknote,
+  Building2,
+  Calendar,
+  ChevronLeft,
+  Download,
+  Edit,
+  Globe,
+  HelpCircle,
+  Plus,
+  Search,
+} from 'lucide-react';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 
+import AccountAvatar from '@/components/features/accounts/Avatar.tsx';
 import { ListItem } from '@/components/features/transactions/ListItem.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -11,21 +25,22 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MOMENT_DATE_VIEW_FORMAT, MOMENT_DATETIME_VIEW_FORMAT } from '@/constants/datetime.ts';
+import { MOMENT_DATE_VIEW_FORMAT, MOMENT_DATETIME_VIEW_FORMAT } from '@/constants/datetime';
 import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
-import { generateTransactions } from '@/services/transactionGenerator.ts';
+import { AccountType } from '@/models/Account';
+import { generateTransactions } from '@/services/transactionGenerator';
 
 interface Account {
-  id: number
-  name: string
-  balance: number
-  currency: string
-  type: 'bank' | 'cash' | 'internet' | 'other'
-  color: string
-  isDisplayedOnSidebar: boolean
-  archivedAt: string | null
-  createdAt: string
-  updatedAt: string
+  id: number;
+  name: string;
+  balance: number;
+  currency: string;
+  type: AccountType;
+  color: string;
+  isDisplayedOnSidebar: boolean;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const AccountsManagementPage = () => {
@@ -58,61 +73,58 @@ export const AccountsManagementPage = () => {
   const selectedAccount = selectedAccountId ? accounts.find(account => account.id === selectedAccountId) : null;
 
   const AccountList = () => (
-      <div className="h-full flex flex-col">
-        <div className="p-4 border-b">
-          <h2 className="text-lg font-semibold mb-2">Accounts</h2>
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search accounts" className="pl-8" />
-          </div>
+    <div className="h-full flex flex-col">
+      <div className="p-4 border-b">
+        <h2 className="text-lg font-semibold mb-2">Accounts</h2>
+        <div className="relative">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search accounts" className="pl-8" />
         </div>
-        <ScrollArea className="flex-grow">
-          {accounts.map((account) => (
-            <div
-              key={account.id}
-              className={cn('p-4 border-b cursor-pointer hover:bg-accent hover:text-accent-foreground', {
-                'bg-accent text-accent-foreground': selectedAccountId === account.id,
-              })}
-              onClick={() => setSelectedAccountId(account.id)}
-            >
-              <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center"
-                       style={{ backgroundColor: account.color }}>
-                    {getIconComponent(account.icon)}
-                  </div>
-                  <h3 className="font-medium">{account.name}</h3>
-                </div>
-                <Badge variant={account.balance > 0 ? 'default' : 'secondary'}>
-                  {account.currency} {Math.abs(account.balance).toFixed(2)}
-                </Badge>
+      </div>
+      <ScrollArea className="flex-grow">
+        {accounts.map((account) => (
+          <div
+            key={account.id}
+            className={cn('p-4 border-b cursor-pointer hover:bg-accent hover:text-accent-foreground', {
+              'bg-accent text-accent-foreground': selectedAccountId === account.id,
+            })}
+            onClick={() => setSelectedAccountId(account.id)}
+          >
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center gap-2">
+                <AccountAvatar account={account} size="sm" />
+                <h3 className="font-medium">{account.name}</h3>
               </div>
-              <div className="flex justify-between items-center text-xs text-muted-foreground">
-                <span>{account.type}</span>
-                {account.archivedAt && (
-                  <span className="flex items-center gap-1">
+              <Badge variant={account.balance > 0 ? 'default' : 'secondary'}>
+                {account.currency} {Math.abs(account.balance).toFixed(2)}
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center text-xs text-muted-foreground">
+              <span>{account.type}</span>
+              {account.archivedAt && (
+                <span className="flex items-center gap-1">
                 <Archive className="w-3 h-3" />
                 Archived
               </span>
-                )}
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                <Calendar className="w-3 h-3 inline mr-1" />
-                Last updated: {new Date(account.updatedAt).toLocaleDateString()}
-              </div>
+              )}
             </div>
-          ))}
-          <div className="p-4">
-            <button
-              className="text-sm text-muted-foreground hover:text-foreground"
-              onClick={() => setShowArchived(!showArchived)}
-            >
-              {showArchived ? 'Hide Archived' : 'Show Archived'}
-            </button>
+            <div className="text-xs text-muted-foreground mt-1">
+              <Calendar className="w-3 h-3 inline mr-1" />
+              Last updated: {account.updatedAt.format(MOMENT_DATETIME_VIEW_FORMAT)}
+            </div>
           </div>
-        </ScrollArea>
-      </div>
-    );
+        ))}
+        <div className="p-4">
+          <button
+            className="text-sm text-muted-foreground hover:text-foreground"
+            onClick={() => setShowArchived(!showArchived)}
+          >
+            {showArchived ? 'Hide Archived' : 'Show Archived'}
+          </button>
+        </div>
+      </ScrollArea>
+    </div>
+  );
 
   const AccountDetail = () => (
     <div className="h-full flex flex-col">
@@ -140,18 +152,17 @@ export const AccountsManagementPage = () => {
           <CardHeader>
             <div className="flex flex-col">
               <div className="flex items-center space-x-4 mb-2">
-                <Avatar>
-                  <AvatarImage src="/placeholder.svg?height=40&width=40" alt={selectedAccount?.name} />
-                  <AvatarFallback>{selectedAccount?.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                </Avatar>
+                <AccountAvatar account={selectedAccount} />
                 <div>
                   <CardTitle>{selectedAccount?.name}</CardTitle>
-                  <CardDescription>Created
-                                   on {moment(selectedAccount?.createdAt).format(MOMENT_DATETIME_VIEW_FORMAT)}</CardDescription>
+                  <CardDescription>
+                    Created on {selectedAccount?.createdAt.format(MOMENT_DATETIME_VIEW_FORMAT)}
+                  </CardDescription>
                 </div>
               </div>
-              <Badge variant={selectedAccount?.balance && selectedAccount.balance > 0 ? 'destructive' : 'secondary'}
-                     className="self-start">
+              <Badge
+                variant={selectedAccount?.balance && selectedAccount.balance > 0 ? 'destructive' : 'secondary'}
+                className="self-start">
                 ${Math.abs(selectedAccount?.balance ?? 0).toFixed(2)} {selectedAccount?.balance && selectedAccount.balance > 0 ? 'Owed' : 'Overpaid'}
               </Badge>
             </div>
@@ -181,11 +192,8 @@ export const AccountsManagementPage = () => {
               <CardContent>
                 <ScrollArea className="h-[300px]">
                   <ul className="space-y-4">
-                    {
-                      generateTransactions(5).map((transaction) => (
-                        <ListItem key={transaction.id} transaction={transaction} />
-                      ))
-                    }
+                    <li>transaction 1</li>
+                    <li>transaction 2</li>
                   </ul>
                 </ScrollArea>
               </CardContent>

@@ -1,27 +1,13 @@
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, forwardRef } from 'react';
 import { toast } from 'sonner';
 
 import { AccountForm } from '@/components/features/accounts/Form';
 import TransactionForm from '@/components/features/transactions/Form';
 import { TransferForm } from '@/components/features/transfers/Form';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
-import { FormType, useForm } from '@/contexts/Form';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { FormType, useForm as useFormContext } from '@/contexts/Form';
 
 const formComponents = {
   [FormType.Account]: AccountForm,
@@ -39,25 +25,21 @@ interface FormState {
 
 interface FormContentProps {
   formType: FormType;
-  isEditing: boolean;
   data: any;
   onClose: (submitted: boolean) => void;
   setFormState: React.Dispatch<React.SetStateAction<FormState>>;
-  showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
-const FormContent = React.forwardRef<{ submitForm: () => Promise<void> }, FormContentProps>((props, ref) => {
-  const { formType, isEditing, data, onClose, setFormState, showToast } = props;
+const FormContent = forwardRef<{ submitForm: () => Promise<void> }, FormContentProps>((props, ref) => {
+  const { formType, data, onClose, setFormState } = props;
   const FormComponent = formComponents[formType];
 
   return (
     <FormComponent
       ref={ref}
       data={data}
-      isEditing={isEditing}
       onClose={onClose}
       setFormState={setFormState}
-      showToast={showToast}
     />
   );
 });
@@ -79,8 +61,8 @@ const useScreenSize = () => {
   return isDesktop;
 };
 
-export const FormRenderer: FC = () => {
-  const { formState: contextFormState, closeForm } = useForm();
+export const FormRenderer: React.FC = () => {
+  const { formState: contextFormState, closeForm } = useFormContext();
   const formRef = useRef<{ submitForm: () => Promise<void> }>(null);
   const isDesktop = useScreenSize();
 
@@ -117,23 +99,17 @@ export const FormRenderer: FC = () => {
     closeForm(submitted);
   };
 
-  const showToast = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
-    toast[type](message);
-  };
-
   if (!contextFormState.type) return null;
 
-  const title = `${contextFormState.isEditing ? 'Edit' : 'New'} ${contextFormState.type.charAt(0).toUpperCase() + contextFormState.type.slice(1)}`;
+  const title = `${contextFormState.data?.id ? 'Edit' : 'New'} ${contextFormState.type.charAt(0).toUpperCase() + contextFormState.type.slice(1)}`;
 
   const content = (
     <FormContent
       ref={formRef}
       formType={contextFormState.type as FormType}
-      isEditing={contextFormState.isEditing}
       data={contextFormState.data}
       onClose={handleClose}
       setFormState={setFormState}
-      showToast={showToast}
     />
   );
 
@@ -147,7 +123,7 @@ export const FormRenderer: FC = () => {
         onClick={handleSubmit}
         disabled={isLoading || !formState.isValid}
       >
-        {isLoading ? 'Submitting...' : contextFormState.isEditing ? 'Update' : 'Create'}
+        {isLoading ? 'Submitting...' : contextFormState.data?.id ? 'Update' : 'Create'}
       </Button>
     </>
   );
@@ -170,7 +146,7 @@ export const FormRenderer: FC = () => {
 
   return (
     <Drawer open={contextFormState.isOpen} onOpenChange={handleOpenChange}>
-      <DrawerContent className="max-h-[90vh] overflow-y-auto">
+      <DrawerContent className="max-h-[90vh]">
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>
         </DrawerHeader>

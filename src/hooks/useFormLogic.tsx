@@ -1,6 +1,7 @@
 import { useEffect, useImperativeHandle, useRef } from 'react';
-import { FieldValues, UseFormReturn } from 'react-hook-form';
+import { FieldValues, UseFormReturn, useFormState, useWatch } from 'react-hook-form';
 import { z } from 'zod';
+import { toast } from 'sonner';
 
 export interface FormState<T> {
   isValid: boolean;
@@ -16,15 +17,9 @@ interface UseFormLogicProps<T extends FieldValues> {
   form: UseFormReturn<T>;
   onSubmit: (values: T) => Promise<void>;
   setFormState: React.Dispatch<React.SetStateAction<FormState<T>>>;
-  showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 }
 
-export const useFormLogic = <T,>({
-                                   form,
-                                   onSubmit,
-                                   setFormState,
-                                   showToast,
-                                 }: UseFormLogicProps<T>) => {
+export const useFormLogic = <T,>({ form, onSubmit, setFormState }: UseFormLogicProps<T>) => {
   const formRef = useRef<FormComponentRef>(null);
 
   useImperativeHandle(formRef, () => ({
@@ -33,23 +28,28 @@ export const useFormLogic = <T,>({
       if (isValid) {
         return form.handleSubmit(onSubmit)();
       } else {
-        showToast('Please fix the errors in the form', 'error');
+        toast.error('Please fix the errors in the form');
         throw new Error('Form validation failed');
       }
     },
   }));
 
+  const { isValid, isDirty } = useFormState({
+    control: form.control,
+  });
+
+  const values = useWatch({
+    control: form.control,
+  });
+
+  // Update formState whenever dependencies change
   useEffect(() => {
-    const subscription = form.watch((value) => {
-      setFormState((prevState) => ({
-        ...prevState,
-        isValid: form.formState.isValid,
-        isDirty: form.formState.isDirty,
-        values: value as T,
-      }));
+    setFormState({
+      isValid,
+      isDirty,
+      values: values as T,
     });
-    return () => subscription.unsubscribe();
-  }, [form, setFormState]);
+  }, [isValid, isDirty, values, setFormState]);
 
   return { formRef };
 };

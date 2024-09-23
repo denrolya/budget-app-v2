@@ -37,7 +37,7 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
   const isCompensation = transaction.category.name === 'Compensation';
   const isDebt = transaction.debt && transaction.debt.debtor;
 
-  const onEdit = () => openForm(FormType.Transaction, transaction, true);
+  const onEdit = () => openForm(FormType.Transaction, transaction);
 
   return (
     <Card className={cn('shadow-md hover:shadow-lg transition-shadow', {

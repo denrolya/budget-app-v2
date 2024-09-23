@@ -12,14 +12,13 @@ interface FormState {
   isOpen: boolean;
   type: FormType | null;
   data: any | null;
-  isEditing: boolean;
 }
 
 type FormEventListener<T = any> = (formType: FormType, response: T) => void;
 
 interface FormContextType {
   formState: FormState;
-  openForm: (type: FormType, data?: any, isEditing?: boolean) => void;
+  openForm: (type: FormType, data?: any) => void;
   closeForm: () => void;
   submitForm: <T>(response: T) => void;
   addFormSubmitListener: <T>(listener: FormEventListener<T>) => void;
@@ -33,16 +32,15 @@ export const useFormManager = (): FormContextType => {
     isOpen: false,
     type: null,
     data: null,
-    isEditing: false,
   });
   const [listeners, setListeners] = useState<FormEventListener[]>([]);
 
-  const openForm = useCallback((type: FormType, data: any = null, isEditing: boolean = false) => {
-    setFormState({ isOpen: true, type, data, isEditing });
+  const openForm = useCallback((type: FormType, data: any = null) => {
+    setFormState({ isOpen: true, type, data });
   }, []);
 
   const closeForm = useCallback(() => {
-    setFormState({ isOpen: false, type: null, data: null, isEditing: false });
+    setFormState({ isOpen: false, type: null, data: null });
   }, []);
 
   const submitForm = useCallback(<T,>(response: T) => {

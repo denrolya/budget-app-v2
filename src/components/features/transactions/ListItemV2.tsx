@@ -68,7 +68,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
               <DialogHeader>
                 <DialogTitle>Transaction Details</DialogTitle>
               </DialogHeader>
-              <Details transaction={transaction} onEdit={() => openForm(FormType.Transaction, transaction, true)} />
+              <Details transaction={transaction} onEdit={() => openForm(FormType.Transaction, transaction)} />
               <div className="flex items-center space-x-2 mt-4">
                 {transaction?.debt?.debtor && (
                   <Badge variant="outline" className="text-xs flex items-center px-1">

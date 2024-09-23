@@ -155,7 +155,7 @@ export const TransactionsList: React.FC = () => {
   }, [data?.list]);
 
   return (
-    <section className="container mx-auto px-4">
+    <section className="container p-4 mx-auto">
       <div className="flex flex-row">
         <h1 className="text-2xl font-bold">Transactions List</h1>
         <Button variant="ghost"
@@ -188,7 +188,6 @@ export const TransactionsList: React.FC = () => {
             {groupedAndSortedTransactions.length > 0 && (
               <>
                 {groupedAndSortedTransactions.map(({ date, transactions }) => (
-                  <>
                     <div key={date} className="mb-6">
                       <h5 className="text-lg font-semibold mb-2">{moment(date).format('dddd, MMMM D, YYYY')}</h5>
                       <ul className="space-y-2">
@@ -199,7 +198,6 @@ export const TransactionsList: React.FC = () => {
                         ))}
                       </ul>
                     </div>
-                  </>
                 ))}
                 <div className="mt-4">
                   <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />

@@ -1,3 +1,6 @@
+import { Check, ChevronsUpDown, X } from 'lucide-react';
+import React, { forwardRef, useCallback, useMemo, useState } from 'react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,8 +15,6 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { Check, ChevronsUpDown, X } from 'lucide-react';
-import React, { forwardRef, useCallback, useMemo, useState } from 'react';
 
 type Option = Record<string, any>
 
@@ -133,7 +134,7 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn('w-full justify-between', className)}
+          className={cn('justify-between', className)}
         >
           <div className="flex-1 text-left">
             {selectedOptions.length > 0 ? renderSelectedItems() : placeholder}
