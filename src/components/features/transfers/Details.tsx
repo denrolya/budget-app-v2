@@ -1,4 +1,4 @@
-import { Transfer } from '@/models/transfer';
+import Transfer from '@/models/Transfer';
 import { Details as TransactionDetails } from '@/components/features/transactions/Details';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';

@@ -158,3 +158,5 @@ export const TransactionFactory = () => {
 
   return { createTransaction };
 };
+
+export default Transaction;

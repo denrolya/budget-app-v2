@@ -19,8 +19,8 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
-import { Transaction, Type } from '@/models/transaction.ts';
-import { Transfer } from '@/models/Transfer';
+import Transaction, { Type } from '@/models/Transaction';
+import Transfer from '@/models/Transfer';
 import { generateTransactions } from '@/services/transactionGenerator';
 import { generateTransfers } from '@/services/transferGenerator';
 

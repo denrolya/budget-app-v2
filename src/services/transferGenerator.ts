@@ -1,7 +1,7 @@
 import moment from 'moment';
 
-import { Transfer, TransferProps } from '@/models/transfer';
-import { Transaction, Type } from '@/models/transaction';
+import Transfer, { TransferProps } from '@/models/Transfer';
+import Transaction, { Type } from '@/models/Transaction';
 
 const accounts: { name: string; currency: string; type: string }[] = [
   { name: 'Zen EUR', currency: 'EUR', type: 'internet' },

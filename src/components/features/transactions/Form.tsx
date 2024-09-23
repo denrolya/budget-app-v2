@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm as useFormContext } from '@/contexts/Form';
 import { useFormLogic } from '@/hooks/useFormLogic';
-import { Transaction, Type as TransactionType } from '@/models/transaction';
+import Transaction, { Type as TransactionType } from '@/models/Transaction';
 import { api } from '@/services/api';
 
 interface FormState {

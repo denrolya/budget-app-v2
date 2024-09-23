@@ -1,6 +1,6 @@
 import moment, { Moment } from 'moment';
 
-import { Transaction } from '@/models/transaction';
+import Transaction from '@/models/Transaction';
 
 export interface TransferProps {
   id: number;

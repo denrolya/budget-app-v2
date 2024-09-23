@@ -13,7 +13,7 @@ import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime.ts';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { Transaction, Type } from '@/models/transaction';
+import Transaction, { Type } from '@/models/Transaction';
 
 interface TransactionItemProps {
   transaction: Transaction;

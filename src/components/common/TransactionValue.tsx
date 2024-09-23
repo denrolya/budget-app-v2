@@ -2,7 +2,7 @@ import cn from 'classnames';
 
 import { useAuth } from '@/contexts/auth';
 import { CURRENCIES } from '@/constants/currency';
-import { Transaction } from '@/models/transaction';
+import Transaction from '@/models/Transaction';
 
 interface TransactionValueProps {
   transaction: Transaction

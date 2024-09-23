@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CURRENCIES } from '@/constants/currency';
 import { useAccounts } from '@/contexts/FinanceData';
-import { Transaction } from '@/models/transaction';
+import Transaction from '@/models/Transaction';
 import { useExchangeRates } from '@/contexts/FinanceData';
 
 interface TransactionDetailsProps {

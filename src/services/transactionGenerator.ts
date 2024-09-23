@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-import { Transaction, Type } from '@/models/transaction';
+import Transaction, { Type } from '@/models/Transaction';
 
 interface Category {
   id: number;

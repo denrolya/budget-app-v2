@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { defaultOnSubmit, useFormLogic } from '@/hooks/useFormLogic';
-import { Transfer } from '@/models/transfer';
+import Transfer from '@/models/Transfer';
 
 const accounts = [
   { id: 1, name: 'Main Checking', currency: 'USD', icon: '🏦', color: '#FF0000' },

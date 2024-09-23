@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext, useFormSubmitListener } from '@/contexts/Form';
 import { useListState } from '@/hooks/useListState';
-import { Transaction, TransactionFactory } from '@/models/transaction';
+import Transaction, { TransactionFactory } from '@/models/Transaction';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { axiosFetcher } from '@/services/api';
 
