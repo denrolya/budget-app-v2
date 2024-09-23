@@ -2,8 +2,6 @@ import cn from 'classnames';
 import { MoreVertical, User } from 'lucide-react';
 import React from 'react';
 
-import { Skeleton } from '@/components/ui/skeleton.tsx';
-import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime.ts';
 import TransactionValue from '@/components/common/TransactionValue';
 import AccountBadge from '@/components/features/accounts/Badge';
 import Details from '@/components/features/transactions/Details';
@@ -12,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
+import { Skeleton } from '@/components/ui/skeleton.tsx';
+import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime.ts';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { Transaction, Type } from '@/models/transaction';
 
@@ -29,34 +29,39 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
         'border-l-2 border-l-red-500': colorBorder && transaction.type === Type.Expense,
       })}
     >
-      <CardContent className="p-2 flex flex-row">
-        <div className="flex flex-col flex-1">
-          <div className="flex justify-between">
+      <CardContent className="p-2 grid grid-cols-[1fr_auto] gap-2">
+        <div className="grid grid-cols-1 gap-2">
+          <div className="flex justify-between items-center">
             <AccountBadge account={transaction.account} size="sm" />
-            <Badge variant={(transaction.type === Type.Income) ? 'success' : 'destructive'}
-                   className={cn('text-xs font-mono')}>
+            <Badge
+              variant={(transaction.type === Type.Income) ? 'success' : 'destructive'}
+              className={cn('text-xs font-mono')}
+            >
               <TransactionValue transaction={transaction} />
             </Badge>
           </div>
-          <div className="flex justify-between">
-            <div>
-              <Badge variant="outline" className="text-xs px-1 py-0 w-fit">
-                {transaction.category.name}
-              </Badge>
-              {transaction.note && (
-                <ResponsiveTooltip openDelay={0} content={<p>{transaction.note}</p>} triggerClassName="text-left">
-                <span className="text-xs text-muted-foreground truncate">
-                  {transaction.note}
-                </span>
-                </ResponsiveTooltip>
-              )}
-            </div>
-            <span className="text-xs text-muted-foreground">
-              {transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
+          <div className="grid grid-cols-[auto_1fr_auto] gap-2 items-center">
+            <Badge variant="outline" className="text-xs px-1 py-0">
+              {transaction.category.name}
+            </Badge>
+            {transaction.note ? (
+              <ResponsiveTooltip
+                openDelay={0}
+                content={<p>{transaction.note}</p>}
+                triggerClassName="overflow-hidden"
+              >
+            <span className="text-xs text-muted-foreground truncate block">
+              {transaction.note}
             </span>
+              </ResponsiveTooltip>
+            ) : (
+              <span className="text-xs text-muted-foreground">&nbsp;</span>
+            )}
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+          {transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
+        </span>
           </div>
         </div>
-
         <div className="flex items-center">
           <Dialog>
             <DialogTrigger asChild>

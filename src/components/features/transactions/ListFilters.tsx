@@ -1,17 +1,20 @@
-import cn from 'classnames';
-import { CalendarIcon, FilterIcon } from 'lucide-react';
-import moment from 'moment';
-import React, { useState } from 'react';
+'use client';
 
-import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
+
+import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { TransactionFilters } from '@/models/TransactionFilters';
+import cn from 'classnames';
+import { CalendarIcon, FilterIcon } from 'lucide-react';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
 
 interface ListFiltersProps {
   data: TransactionFilters;
@@ -29,9 +32,19 @@ const datePresets = [
   },
 ];
 
-export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onChange }) => {
+const FilterContent: React.FC<ListFiltersProps & { isMobile?: boolean }> = ({ data, onChange, isMobile = false }) => {
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
   const [isAmountPopoverOpen, setIsAmountPopoverOpen] = useState<boolean>(false);
+  const [isMobileView, setIsMobileView] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkMobileView = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    checkMobileView();
+    window.addEventListener('resize', checkMobileView);
+    return () => window.removeEventListener('resize', checkMobileView);
+  }, []);
 
   const handleDateRangeChange = (range: { from: Date | undefined; to: Date | undefined }) => {
     onChange('after', range.from ? moment(range.from) : undefined);
@@ -42,11 +55,13 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
     onChange('amountRange', value);
   };
 
+  const commonClasses = isMobile ? 'w-full' : 'w-auto';
+
   return (
-    <div className={cn('flex flex-wrap items-center gap-2 bg-background rounded-lg shadow-md', className)}>
+    <div className={isMobile ? 'space-y-4' : 'flex items-center gap-2'}>
       <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9 text-sm">
+          <Button variant="outline" size="sm" className={cn('h-9 text-sm', commonClasses)}>
             <CalendarIcon className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">
               {data.after && data.before
@@ -71,7 +86,7 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
                 to: data.before?.toDate(),
               }}
               onSelect={handleDateRangeChange}
-              numberOfMonths={2}
+              numberOfMonths={isMobileView ? 1 : 2}
               className="border-b"
             />
             <div className="p-3 space-y-3">
@@ -101,19 +116,19 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
         multiple
         value={data.categories}
         onChange={(categories) => onChange('categories', categories)}
-        className="h-9 text-sm"
+        className={cn('h-9 text-sm', commonClasses)}
       />
 
       <AccountTypeahead
         multiple
         value={data.accounts}
         onChange={(accounts) => onChange('accounts', accounts)}
-        className="h-9 text-sm"
-        />
+        className={cn('h-9 text-sm', commonClasses)}
+      />
 
       <Popover open={isAmountPopoverOpen} onOpenChange={setIsAmountPopoverOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9 text-sm">
+          <Button variant="outline" size="sm" className={cn('h-9 text-sm', commonClasses)}>
             <FilterIcon className="mr-2 h-4 w-4" />
             ${data.amountRange[0]} - ${data.amountRange[1]}
           </Button>
@@ -149,7 +164,7 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
       <Button
         variant={data.withNestedCategories ? 'secondary' : 'outline'}
         size="sm"
-        className="h-9 text-sm"
+        className={cn('h-9 text-sm', commonClasses)}
         onClick={() => onChange('withNestedCategories', !data.withNestedCategories)}
       >
         <span className="hidden sm:inline">Nested Categories</span>
@@ -159,12 +174,41 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
       <Button
         variant={data.isDraft ? 'secondary' : 'outline'}
         size="sm"
-        className="h-9 text-sm"
+        className={cn('h-9 text-sm', commonClasses)}
         onClick={() => onChange('isDraft', !data.isDraft)}
       >
-        <span className="hidden sm:inline">Drafts</span>
-        <span className="sm:hidden">Drafts</span>
+        Drafts
       </Button>
+    </div>
+  );
+};
+
+export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onChange }) => {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  return (
+    <div className={cn('bg-background rounded-lg shadow-md', className)}>
+      <div className="hidden md:flex items-center gap-2 p-4">
+        <FilterContent data={data} onChange={onChange} />
+      </div>
+
+      <div className="md:hidden">
+        <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+          <DrawerTrigger asChild>
+            <Button variant="outline" size="icon" className="h-9 w-9" aria-label="Open filters">
+              <FilterIcon className="h-4 w-4" />
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Filters</DrawerTitle>
+            </DrawerHeader>
+            <div className="p-4">
+              <FilterContent data={data} onChange={onChange} isMobile={true} />
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </div>
     </div>
   );
 };

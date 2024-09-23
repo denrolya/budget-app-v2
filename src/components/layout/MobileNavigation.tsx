@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import {
   ArrowLeftRight,
-  BookOpen,
   CreditCard,
   DollarSign,
   Home,
@@ -12,20 +11,21 @@ import {
   MoreHorizontal,
   PieChart,
   Plus,
+  Receipt,
   RefreshCw,
   Sun,
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
+import ExchangeRatesPresets from '@/components/common/ExchangeRatesPresets';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useForm } from '@/contexts/Form';
 import { useTheme } from '@/contexts/theme';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import ExchangeRatesPresets from '@/components/common/ExchangeRatesPresets';
 
 export const MobileNavigation: React.FC<{ className: string }> = ({ className }) => {
   const { theme, setTheme } = useTheme();
@@ -35,7 +35,7 @@ export const MobileNavigation: React.FC<{ className: string }> = ({ className })
 
   const navItems = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
-    { path: '/ledger', icon: BookOpen, label: 'Daily Ledger' },
+    { path: '/transactions', icon: Receipt, label: 'Transactions' },
     { path: '/accounts', icon: CreditCard, label: 'Accounts' },
   ];
 
@@ -61,7 +61,7 @@ export const MobileNavigation: React.FC<{ className: string }> = ({ className })
                       transition={{
                         type: 'spring',
                         stiffness: 500,
-                        damping: 30,
+                        damping: 50,
                       }}
                     />
                   )}
@@ -108,9 +108,9 @@ export const MobileNavigation: React.FC<{ className: string }> = ({ className })
                             </Link>
                           </Button>
                           <Button variant="ghost" className="w-full justify-start" asChild>
-                            <Link to="/transactions">
+                            <Link to="/ledger">
                               <RefreshCw className="mr-2 h-4 w-4" />
-                              Transactions
+                              Daily Ledger
                             </Link>
                           </Button>
                           <Button variant="ghost" className="w-full justify-start" asChild>

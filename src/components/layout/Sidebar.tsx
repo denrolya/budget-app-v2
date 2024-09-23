@@ -3,6 +3,7 @@ import sumBy from 'lodash/sumBy';
 import { BarChart2, CreditCard, Home, Plus, Receipt, ArrowLeftRight, Wallet } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { ROUTES } from '@/constants/routes';
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountLink from '@/components/layout/SidebarAccountLink';
 import SidebarLink from '@/components/layout/SidebarLink';
@@ -13,6 +14,7 @@ import { useAuth } from '@/contexts/auth';
 import { useActiveAccountsWithDefaultOrder } from '@/contexts/FinanceData';
 import { FormType, useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
+import { Route } from 'react-router-dom';
 
 interface Props {
   className?: string;
@@ -71,10 +73,10 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
       <div className="flex flex-col h-full">
         <div className="flex-shrink-0 p-4 space-y-4">
           <div className="space-y-1">
-            <SidebarLink to="/dashboard" icon={Home} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink to={ROUTES.DASHBOARD.path} icon={ROUTES.DASHBOARD.icon} isSidebarExpanded={isSidebarExpanded}>
               Dashboard
             </SidebarLink>
-            <SidebarLink to="/ledger" icon={BarChart2} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink to={ROUTES.DAILY_LEDGER.path} icon={ROUTES.DAILY_LEDGER.icon} isSidebarExpanded={isSidebarExpanded}>
               Daily Ledger
             </SidebarLink>
           </div>
@@ -83,16 +85,16 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
             {isSidebarExpanded && (
               <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1">Tools</div>
             )}
-            <SidebarLink to="/transactions" icon={Receipt} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink to={ROUTES.TRANSACTION_LIST.path} icon={ROUTES.TRANSACTION_LIST.icon} isSidebarExpanded={isSidebarExpanded}>
               Transactions
             </SidebarLink>
-            <SidebarLink to="/transfers" icon={ArrowLeftRight} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink to={ROUTES.TRANSFER_LIST.path} icon={ROUTES.TRANSFER_LIST.icon} isSidebarExpanded={isSidebarExpanded}>
               Transfers
             </SidebarLink>
-            <SidebarLink to="/accounts" icon={Wallet} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink to={ROUTES.ACCOUNT_LIST.path} icon={ROUTES.ACCOUNT_LIST.icon} isSidebarExpanded={isSidebarExpanded}>
               Accounts
             </SidebarLink>
-            <SidebarLink to="/debts" icon={CreditCard} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink to={ROUTES.DEBT_LIST.path} icon={ROUTES.DEBT_LIST.icon} isSidebarExpanded={isSidebarExpanded}>
               Debts
             </SidebarLink>
           </div>
