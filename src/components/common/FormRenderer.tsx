@@ -146,7 +146,7 @@ export const FormRenderer: React.FC = () => {
 
   return (
     <Drawer open={contextFormState.isOpen} onOpenChange={handleOpenChange}>
-      <DrawerContent className="max-h-[90vh]">
+      <DrawerContent>
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>
         </DrawerHeader>
