@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Sun,
 } from 'lucide-react';
+import cn from 'classnames';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -27,7 +28,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useForm } from '@/contexts/Form';
 import { useTheme } from '@/contexts/theme';
 
-export const MobileNavigation: React.FC<{ className: string }> = ({ className }) => {
+interface Props {
+  className?: string;
+}
+
+export const MobileNavigation: React.FC<Props> = ({ className }) => {
   const { theme, setTheme } = useTheme();
   const { openForm } = useForm();
   const [currency, setCurrency] = useState('USD');
@@ -40,7 +45,7 @@ export const MobileNavigation: React.FC<{ className: string }> = ({ className })
   ];
 
   return (
-    <nav className={`fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 ${className}`}>
+    <nav className={cn('fixed bottom-0 left-0 right-0 md:hidden bg-background border-t border-border z-10', className)}>
       <div className="max-w-screen-xl mx-auto relative">
         <div className="flex justify-between items-center">
           <ul className="flex justify-start flex-1">

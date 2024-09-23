@@ -1,4 +1,7 @@
-'use client';
+import cn from 'classnames';
+import { CalendarIcon, FilterIcon } from 'lucide-react';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
 
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
@@ -8,13 +11,8 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
-
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { TransactionFilters } from '@/models/TransactionFilters';
-import cn from 'classnames';
-import { CalendarIcon, FilterIcon } from 'lucide-react';
-import moment from 'moment';
-import React, { useEffect, useState } from 'react';
 
 interface ListFiltersProps {
   data: TransactionFilters;
@@ -63,7 +61,7 @@ const FilterContent: React.FC<ListFiltersProps & { isMobile?: boolean }> = ({ da
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm" className={cn('h-9 text-sm', commonClasses)}>
             <CalendarIcon className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">
+            <span>
               {data.after && data.before
                 ? `${data.after.format(MOMENT_DATEPICKER_FORMAT)} - ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`
                 : data.after
@@ -72,7 +70,6 @@ const FilterContent: React.FC<ListFiltersProps & { isMobile?: boolean }> = ({ da
                     ? `Before ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`
                     : 'Date'}
             </span>
-            <span className="sm:hidden">Date</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">

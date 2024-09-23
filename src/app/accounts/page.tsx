@@ -40,7 +40,7 @@ export const AccountsManagementPage = () => {
         </div>
       </div>
       <ScrollArea className="flex-1">
-        {accounts.filter(a => showArchived ? true : (a.isArchived() ? false : true)).map((account) => (
+        {accounts.filter(a => showArchived ? true : !a.isArchived()).map((account) => (
           <div
             key={account.id}
             className={cn('p-4 border-b cursor-pointer hover:bg-accent hover:text-accent-foreground', {
@@ -70,7 +70,7 @@ export const AccountsManagementPage = () => {
             </div>
             <div className="text-xs text-muted-foreground mt-1">
               <Calendar className="w-3 h-3 inline mr-1" />
-              Last updated: {account.updatedAt.format(MOMENT_DATETIME_VIEW_FORMAT)}
+              Last updated: {account.updatedAt.fromNow()}
             </div>
           </div>
         ))}
@@ -124,7 +124,7 @@ export const AccountsManagementPage = () => {
                   <div>
                     <CardTitle>{selectedAccount?.name}</CardTitle>
                     <CardDescription>
-                      Created on {selectedAccount?.createdAt.format(MOMENT_DATETIME_VIEW_FORMAT)}
+                      Created on {selectedAccount?.createdAt.format('LLL')}
                     </CardDescription>
                   </div>
                 </div>
@@ -193,7 +193,7 @@ export const AccountsManagementPage = () => {
                             <p className="font-medium">{event.action}</p>
                             <p className="text-sm text-muted-foreground">{event.details}</p>
                           </div>
-                          <Badge variant="secondary">{moment(event.date).format(MOMENT_DATE_VIEW_FORMAT)}</Badge>
+                          <Badge variant="secondary">{moment(event.date).format('LLL')}</Badge>
                         </li>
                       ))}
                     </ul>
@@ -208,7 +208,7 @@ export const AccountsManagementPage = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen md:h-[calc(100vh-2rem)] overflow-hidden pb-16 md:pb-0">
       {/* Sidebar for desktop */}
       {!isMobile && (
         <div className="w-80 border-r bg-background">
@@ -217,7 +217,7 @@ export const AccountsManagementPage = () => {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
         {isMobile ? (
           selectedAccountId ? <AccountDetail /> : <AccountList />
         ) : (
@@ -230,3 +230,5 @@ export const AccountsManagementPage = () => {
     </div>
   );
 };
+
+export default AccountsManagementPage;

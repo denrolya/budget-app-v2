@@ -1,20 +1,19 @@
 import cn from 'classnames';
 import sumBy from 'lodash/sumBy';
-import { BarChart2, CreditCard, Home, Plus, Receipt, ArrowLeftRight, Wallet } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { ROUTES } from '@/constants/routes';
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountLink from '@/components/layout/SidebarAccountLink';
 import SidebarLink from '@/components/layout/SidebarLink';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/contexts/auth';
-import { useActiveAccountsWithDefaultOrder } from '@/contexts/FinanceData';
+import { useActiveAccountsWithDefaultOrder, useDebts } from '@/contexts/FinanceData';
 import { FormType, useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
-import { Route } from 'react-router-dom';
 
 interface Props {
   className?: string;
@@ -23,16 +22,17 @@ interface Props {
 export const Sidebar: React.FC<Props> = ({ className }) => {
   const { user } = useAuth();
   const accounts = useActiveAccountsWithDefaultOrder();
+  const debts = useDebts();
   const [isMobile, setIsMobile] = useState(false);
   const { isSidebarExpanded, setIsSidebarExpanded } = useSidebar();
   const { openForm } = useForm();
 
   const totalBalance = useMemo(
     () => sumBy(accounts, ({ convertedValues }) => convertedValues[user.baseCurrency] || 0),
-    [accounts],
+    [accounts?.length],
   );
 
-  const totalDebt = 55432.42;
+  const totalDebt = useMemo(() => sumBy(debts, ({ convertedValues }) => convertedValues[user?.baseCurrency] || 0), [debts?.length]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -76,7 +76,9 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
             <SidebarLink to={ROUTES.DASHBOARD.path} icon={ROUTES.DASHBOARD.icon} isSidebarExpanded={isSidebarExpanded}>
               Dashboard
             </SidebarLink>
-            <SidebarLink to={ROUTES.DAILY_LEDGER.path} icon={ROUTES.DAILY_LEDGER.icon} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink to={ROUTES.DAILY_LEDGER.path}
+                         icon={ROUTES.DAILY_LEDGER.icon}
+                         isSidebarExpanded={isSidebarExpanded}>
               Daily Ledger
             </SidebarLink>
           </div>
@@ -85,13 +87,19 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
             {isSidebarExpanded && (
               <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1">Tools</div>
             )}
-            <SidebarLink to={ROUTES.TRANSACTION_LIST.path} icon={ROUTES.TRANSACTION_LIST.icon} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink to={ROUTES.TRANSACTION_LIST.path}
+                         icon={ROUTES.TRANSACTION_LIST.icon}
+                         isSidebarExpanded={isSidebarExpanded}>
               Transactions
             </SidebarLink>
-            <SidebarLink to={ROUTES.TRANSFER_LIST.path} icon={ROUTES.TRANSFER_LIST.icon} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink to={ROUTES.TRANSFER_LIST.path}
+                         icon={ROUTES.TRANSFER_LIST.icon}
+                         isSidebarExpanded={isSidebarExpanded}>
               Transfers
             </SidebarLink>
-            <SidebarLink to={ROUTES.ACCOUNT_LIST.path} icon={ROUTES.ACCOUNT_LIST.icon} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink to={ROUTES.ACCOUNT_LIST.path}
+                         icon={ROUTES.ACCOUNT_LIST.icon}
+                         isSidebarExpanded={isSidebarExpanded}>
               Accounts
             </SidebarLink>
             <SidebarLink to={ROUTES.DEBT_LIST.path} icon={ROUTES.DEBT_LIST.icon} isSidebarExpanded={isSidebarExpanded}>

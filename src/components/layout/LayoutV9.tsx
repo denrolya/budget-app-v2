@@ -14,12 +14,12 @@ import { SidebarProvider } from '@/contexts/sidebar';
 const HotkeyHandler: React.FC = () => {
   const { openForm } = useFormContext();
 
-  useHotkeys(['ctrl+t'], (event) => {
+  useHotkeys(['shift+t'], (event) => {
     event.preventDefault();
     openForm(FormType.Transaction);
   }, [openForm]);
 
-  useHotkeys(['ctrl+r'], (event) => {
+  useHotkeys(['shift+r'], (event) => {
     event.preventDefault();
     openForm(FormType.Transfer);
   }, [openForm]);
@@ -32,16 +32,16 @@ export const LayoutV9: React.FC<{ children: React.ReactNode }> = ({ children }) 
     <TooltipProvider>
       <FormProvider>
         <SidebarProvider>
-          <div className="flex flex-col h-screen">
+          <div className="flex flex-col min-h-screen">
             <Header className="fixed top-0 left-0 right-0 z-10 hidden md:flex" />
 
             <div className="flex flex-1 md:pt-8">
               <Sidebar className="hidden md:block overflow-y-auto fixed top-8 left-0 w-16" />
 
-              <main className="flex-1 overflow-y-auto md:ml-16 pb-16 md:pb-4" id="main-content" tabIndex={-1}>
+              <main className="flex-1 overflow-y-auto md:ml-16 pb-0" id="main-content" tabIndex={-1}>
                 {children}
 
-                <MobileNavigation className="md:hidden fixed bottom-0 left-0 right-0" />
+                <MobileNavigation />
                 <HotkeyHandler />
                 <FormRenderer />
                 <Toaster />

@@ -154,8 +154,26 @@ export const TransactionsList: React.FC = () => {
       }));
   }, [data?.list]);
 
+  const RECENT_THRESHOLD_DAYS = 7;
+
+  const formatTransactionDate = (dateString: string): string => {
+    const transactionDate = moment(dateString);
+    const now = moment();
+
+    const diffInDays = now.diff(transactionDate, 'day');
+
+    const formattedDate = transactionDate.format('MMM D, YYYY'); // e.g., "Sep 16, 2024"
+
+    if (diffInDays < RECENT_THRESHOLD_DAYS) {
+      const relativeTime = transactionDate.fromNow(); // e.g., "3 days ago"
+      return `${relativeTime} (${formattedDate})`; // e.g., "3 days ago (Sep 20, 2024)"
+    } else {
+      return formattedDate;
+    }
+  };
+
   return (
-    <section className="container p-4 mx-auto">
+    <section className="container p-4 mx-auto pb-20 md:pb-4">
       <div className="flex flex-row">
         <h1 className="text-2xl font-bold">Transactions List</h1>
         <Button variant="ghost"
@@ -189,7 +207,7 @@ export const TransactionsList: React.FC = () => {
               <>
                 {groupedAndSortedTransactions.map(({ date, transactions }) => (
                     <div key={date} className="mb-6">
-                      <h5 className="text-lg font-semibold mb-2">{moment(date).format('dddd, MMMM D, YYYY')}</h5>
+                      <h5 className="text-lg font-semibold mb-2">{formatTransactionDate(date)}</h5>
                       <ul className="space-y-2">
                         {transactions.map((transaction: Transaction) => (
                           <li key={transaction.id}>
