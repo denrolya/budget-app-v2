@@ -58,7 +58,7 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
 
   return (
     <aside
-      className={cn('bg-background border-r border-accent flex flex-col transition-all duration-300 ease-in-out z-40',
+      className={cn('bg-background border-r border-accent flex flex-col h-[calc(100vh-2rem)] transition-all duration-300 ease-in-out z-40',
         className,
         {
           'fixed inset-y-0 left-0 w-64': isMobile && isSidebarExpanded,

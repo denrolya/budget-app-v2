@@ -32,22 +32,22 @@ export const LayoutV9: React.FC<{ children: React.ReactNode }> = ({ children }) 
     <TooltipProvider>
       <FormProvider>
         <SidebarProvider>
-          <div className="flex flex-col bg-background h-screen overflow-hidden">
-            <Header className="hidden md:flex" />
+          <div className="flex flex-col h-screen">
+            <Header className="fixed top-0 left-0 right-0 z-10 hidden md:flex" />
 
-            <div className="flex flex-1 overflow-hidden min-h-0">
-              <Sidebar className="hidden md:block md:h-[calc(100vh-2rem)]" />
+            <div className="flex flex-1 md:pt-8">
+              <Sidebar className="hidden md:block overflow-y-auto fixed top-8 left-0 w-16" />
 
-              <main className="flex-1 flex flex-col overflow-auto pb-16 md:pb-4 mx-auto min-h-0">
+              <main className="flex-1 overflow-y-auto md:ml-16 pb-16 md:pb-4" id="main-content" tabIndex={-1}>
                 {children}
+
+                <MobileNavigation className="md:hidden fixed bottom-0 left-0 right-0" />
+                <HotkeyHandler />
+                <FormRenderer />
+                <Toaster />
               </main>
             </div>
-
-            <MobileNavigation className="md:hidden" />
           </div>
-          <HotkeyHandler />
-          <FormRenderer />
-          <Toaster />
         </SidebarProvider>
       </FormProvider>
     </TooltipProvider>

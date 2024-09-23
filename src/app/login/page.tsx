@@ -53,7 +53,6 @@ export const Page = () => {
       <Card className="mx-auto w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>Enter your username below to login to your account</CardDescription>
         </CardHeader>
         <CardContent>
           <LoginForm error={error} isLoading={isLoading} onSubmit={handleLogin} />
