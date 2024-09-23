@@ -1,3 +1,4 @@
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import React, { useEffect, useRef, useState, forwardRef } from 'react';
 import { toast } from 'sonner';
 
@@ -146,11 +147,11 @@ export const FormRenderer: React.FC = () => {
 
   return (
     <Drawer open={contextFormState.isOpen} onOpenChange={handleOpenChange}>
-      <DrawerContent className="max-h-[80vh] overflow-y-auto">
+      <DrawerContent className="max-h-[80vh]">
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>
         </DrawerHeader>
-        <div className="px-4 pb-4">
+        <div className="px-4 pb-4 overflow-y-auto">
           {content}
         </div>
         <DrawerFooter className="p-4 border-t">
