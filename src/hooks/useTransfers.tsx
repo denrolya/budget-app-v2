@@ -89,7 +89,7 @@ export const useTransfers = (options: UseTransfersOptions = {}): {
         } else if (typeof value === 'boolean') {
           query.set(key, value ? '1' : '0');
         } else if (moment.isMoment(value)) {
-          query.set(`executedAt[${key}]`, value.format(BACKEND_DATE_FORMAT));
+          query.set(`executedAt[${key}]`, key === 'before' ? value.clone().endOf('day').toISOString() : value.format(BACKEND_DATE_FORMAT));
         } else {
           query.set(key, value.toString());
         }
