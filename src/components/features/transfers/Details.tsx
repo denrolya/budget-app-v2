@@ -1,62 +1,88 @@
+import { InfoIcon } from 'lucide-react';
+import React from 'react';
+
+import MoneyValue from '@/components/common/MoneyValue.tsx';
+import AccountBadge from '@/components/features/accounts/Badge.tsx';
+import TransactionListItem from '@/components/features/transactions/ListItemV2.tsx';
+import { Separator } from '@/components/ui/separator.tsx';
+import { MOMENT_DATETIME_VIEW_FORMAT } from '@/constants/datetime.ts';
 import Transfer from '@/models/Transfer';
-import { Details as TransactionDetails } from '@/components/features/transactions/Details';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface TransferDetailsProps {
   transfer: Transfer;
 }
 
 export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => (
-  <div className="space-y-4">
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-1/3">Field</TableHead>
-          <TableHead>Value</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {Object.entries(transfer).map(([key, value]) => {
-          if (key !== 'fromTransaction' && key !== 'toTransaction') {
-            return (
-              <TableRow key={key}>
-                <TableCell className="font-medium">{key}</TableCell>
-                <TableCell>{typeof value === 'number' ? (value as number).toFixed(2) : (value as string)}</TableCell>
-              </TableRow>
-            );
-          }
-          return null;
-        })}
-      </TableBody>
-    </Table>
-    <div>
-      <h3 className="font-semibold mb-2">Related Transactions:</h3>
-      <div className="space-y-2">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">View From Transaction</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>From Transaction Details</DialogTitle>
-            </DialogHeader>
-            <TransactionDetails transaction={transfer.fromExpense} />
-          </DialogContent>
-        </Dialog>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">View To Transaction</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>To Transaction Details</DialogTitle>
-            </DialogHeader>
-            <TransactionDetails transaction={transfer.toIncome} />
-          </DialogContent>
-        </Dialog>
+  <>
+    <div className="grid gap-4 py-4">
+      <div className="grid gap-2">
+        <h3 className="font-semibold">Transfer Data</h3>
+        <div className="flex justify-between items-center">
+          <span className="text-sm">Date</span>
+          <span className="font-medium">{transfer.executedAt.format(MOMENT_DATETIME_VIEW_FORMAT)}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-sm">Amount</span>
+          <span className="font-medium font-mono"><MoneyValue amount={transfer.amount} /></span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-sm">From</span>
+          <span className="font-medium"><AccountBadge account={transfer.fromExpense.account} size="sm" /></span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-sm">To</span>
+          <span className="font-medium"><AccountBadge account={transfer.toIncome.account} size="sm" /></span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-sm">Rate</span>
+          <span className="font-medium font-mono">
+            <MoneyValue amount={1} currency={transfer.fromExpense.account.currency} />
+            {' = '}
+            <MoneyValue amount={transfer.rate} currency={transfer.toIncome.account.currency} />
+          </span>
+        </div>
       </div>
+      <Separator />
+      <div className="grid gap-2">
+        <h3 className="font-semibold">Related Transactions</h3>
+        <div className="flex justify-between items-center">
+          <span className="text-sm">Sender</span>
+          <span className="font-medium text-destructive font-mono">
+            - <MoneyValue amount={transfer.fromExpense.amount} currency={transfer.fromExpense.account.currency} />
+          </span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-sm">Recipient</span>
+          <span className="font-medium text-success font-mono">
+            + <MoneyValue amount={transfer.toIncome.amount} currency={transfer.toIncome.account.currency} />
+          </span>
+        </div>
+      </div>
+      <TransactionListItem transaction={transfer.fromExpense} />
+      <TransactionListItem transaction={transfer.toIncome} />
+      {transfer.hasFee() && (
+        <>
+          <Separator />
+          <div className="grid gap-2">
+            <h3 className="font-semibold">Fees</h3>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Transfer Fee</span>
+              <span className="font-medium font-mono">
+                <MoneyValue amount={transfer.feeExpense.amount} currency={transfer.feeExpense.account.currency} />
+              </span>
+            </div>
+          </div>
+          <TransactionListItem transaction={transfer.feeExpense} />
+        </>
+      )}
     </div>
-  </div>
+    <div className="flex items-center space-x-2">
+      <InfoIcon className="h-4 w-4 text-muted-foreground" />
+      <p className="text-sm text-muted-foreground">
+        Transfer completed successfully
+      </p>
+    </div>
+  </>
 );
+
+export default Details;

@@ -1,11 +1,11 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import cn from 'classnames';
-import isEqual from 'lodash/isEqual';
 import { CalendarIcon } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { Skeleton } from '@/components/ui/skeleton.tsx';
 import { TransactionFactory } from '@/models/Transaction';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { TransferFilters } from '@/models/TransferFilters';
 import { Pagination } from '@/components/common/Pagination';
 import EmptyTransferState from '@/components/features/transfers/EmptyTransferState';
-import TransferListItem from '@/components/features/transfers/ListItem';
+import TransferListItem, { ListItemSkeleton as TransferListItemSkeleton } from '@/components/features/transfers/ListItem';
 import { BACKEND_DATE_FORMAT, MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext, useFormSubmitListener } from '@/contexts/Form';
 import { useListState } from '@/hooks/useListState';
@@ -67,11 +67,11 @@ export const TransferList: React.FC = () => {
   const url = useMemo(() => {
     const query = new URLSearchParams();
 
-    const addParam = (key: string, value: unknown, defaultValue: unknown) => {
+    const addParam = (key: string, value: unknown) => {
       const isEmptyArray = Array.isArray(value) && value.length === 0;
       const isEmptyValue = value === undefined || value === null || value === '';
 
-      if (!isEmptyValue && !isEmptyArray && !isEqual(value, defaultValue)) {
+      if (!isEmptyValue && !isEmptyArray) {
         if (Array.isArray(value)) {
           value.forEach((item) => {
             query.append(`${key}[]`, item.toString());
@@ -90,7 +90,7 @@ export const TransferList: React.FC = () => {
     query.set('page', currentPage.toString());
 
     Object.entries(filters).forEach(([key, value]) => {
-      addParam(key, value, defaultFilters[key]);
+      addParam(key, value);
     });
 
     if (sort.field) query.set('sortField', sort.field as string);
@@ -245,11 +245,20 @@ export const TransferList: React.FC = () => {
 
       <div className="flex-grow overflow-hidden flex flex-col">
         {isPending && (
-          <ul className="space-y-2">
-            {[...Array(pageSize)].map((_, index) => (
-              <li key={index}>Loading</li>
+          <div className="space-y-6">
+            {[1, 2, 3].map((group) => (
+              <div key={group} className="mb-6">
+                <Skeleton className="h-6 w-32 mb-2" />
+                <ul className="space-y-2">
+                  {[...Array(Math.floor(Math.random() * 3) + 1)].map((_, index) => (
+                    <li key={index}>
+                      <TransferListItemSkeleton />
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
 
         {isError && (
@@ -264,24 +273,25 @@ export const TransferList: React.FC = () => {
             {groupedAndSortedTransfers.length > 0 && (
               <>
                 {groupedAndSortedTransfers.map(({ date, transfers }) => (
-                    <div key={date} className="mb-6">
-                      <h5 className="text-lg font-semibold mb-2">{formatTransferDate(date)}</h5>
-                      <ul className="space-y-2">
-                        {transfers.map((transfer: Transfer) => (
-                          <li key={transfer.id}>
-                            <TransferListItem transfer={transfer} />
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  <div key={date} className="mb-6">
+                    <h5 className="text-lg font-semibold mb-2">{formatTransferDate(date)}</h5>
+                    <ul className="space-y-2">
+                      {transfers.map((transfer: Transfer) => (
+                        <li key={transfer.id}>
+                          <TransferListItem transfer={transfer} />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ))}
                 <div className="mt-4">
                   <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
                 </div>
               </>
             )}
-            {groupedAndSortedTransfers.length === 0 &&
-              <EmptyTransferState onRefresh={refetch} onAddTransfer={() => openForm(FormType.Transfer)} />}
+            {groupedAndSortedTransfers.length === 0 && (
+              <EmptyTransferState onRefresh={refetch} onAddTransfer={() => openForm(FormType.Transfer)} />
+            )}
           </>
         )}
 

@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import isEqual from 'lodash/isEqual';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -60,11 +59,11 @@ export const TransactionsList: React.FC = () => {
   const url = useMemo(() => {
     const query = new URLSearchParams();
 
-    const addParam = (key: string, value: unknown, defaultValue: unknown) => {
+    const addParam = (key: string, value: unknown) => {
       const isEmptyArray = Array.isArray(value) && value.length === 0;
       const isEmptyValue = value === undefined || value === null || value === '';
 
-      if (!isEmptyValue && !isEmptyArray && !isEqual(value, defaultValue)) {
+      if (!isEmptyValue && !isEmptyArray) {
         if (Array.isArray(value)) {
           value.forEach((item) => {
             query.append(`${key}[]`, item.toString());
@@ -83,7 +82,7 @@ export const TransactionsList: React.FC = () => {
     query.set('page', currentPage.toString());
 
     Object.entries(filters).forEach(([key, value]) => {
-      addParam(key, value, defaultFilters[key as keyof TransactionFilters]);
+      addParam(key, value);
     });
 
     if (sort.field) query.set('sortField', sort.field as string);
