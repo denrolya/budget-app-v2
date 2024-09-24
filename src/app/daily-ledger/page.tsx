@@ -1,182 +1,207 @@
-import { ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { useQueries } from '@tanstack/react-query';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 
-import { Skeleton } from '@/components/ui/skeleton.tsx';
-import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
-import TransactionListItemV2 from '@/components/features/transactions/ListItemV2';
-import { ListItem as TransferListItem } from '@/components/features/transfers/ListItem';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
-import Transaction, { Type } from '@/models/Transaction';
+import TransactionListItem from '@/components/features/transactions/ListItemV2';
+import TransferListItem from '@/components/features/transfers/ListItem';
+import { Pagination } from '@/components/ui/pagination';
+import { useListState } from '@/hooks/useListState.tsx';
+import Transaction, { TransactionFactory } from '@/models/Transaction';
 import Transfer from '@/models/Transfer';
-import { generateTransactions } from '@/services/transactionGenerator';
-import { generateTransfers } from '@/services/transferGenerator';
+import { api } from '@/services/api';
 
-interface GroupedData {
-  date: string;
-  totalSum: number;
-  transactionCount: number;
-  transferCount: number;
-  items: (Transaction | Transfer)[];
-}
+const BACKEND_DATE_FORMAT = 'YYYY-MM-DD';
+const RECENT_THRESHOLD_DAYS = 7;
 
-const groupItemsByDate = (items: (Transaction | Transfer)[]): GroupedData[] => {
-  const groupedData = items.reduce((acc: GroupedData[], item) => {
-    const date = item.executedAt.format(MOMENT_DATE_VIEW_FORMAT);
-    const existingGroup = acc.find(group => group.date === date);
+export const CombinedList: React.FC = () => {
+  const { createTransaction } = TransactionFactory();
 
-    if (existingGroup) {
-      existingGroup.items.push(item);
-      if (item instanceof Transaction) {
-        existingGroup.transactionCount++;
-        existingGroup.totalSum = item.type === Type.Income ? existingGroup.totalSum + item.amount : existingGroup.totalSum - item.amount;
-      } else {
-        existingGroup.transferCount++;
-      }
-    } else {
-      acc.push({
-        date,
-        totalSum: (item instanceof Transaction ? (item.type === Type.Income ? item.amount : -item.amount) : 0),
-        transactionCount: item instanceof Transaction ? 1 : 0,
-        transferCount: item instanceof Transfer ? 1 : 0,
-        items: [item],
-      });
-    }
-
-    return acc;
-  }, []);
-
-  // Sort items in each group by executedAt in descending order
-  groupedData.forEach(group => {
-    group.items.sort((a, b) => moment(b.executedAt).valueOf() - moment(a.executedAt).valueOf());
+  const {
+    pagination: { currentPage, perPage, totalPages },
+    filters,
+    sort,
+    setCurrentPage,
+    setFilter,
+    setSort,
+    setTotalPages,
+  } = useListState({
+    initialPerPage: 50000,
+    initialFilters: {},
+    initialSort: { field: 'executedAt', direction: 'desc' },
+    searchParamKeys: {
+      searchTerm: 'q',
+      before: 'before',
+      after: 'after',
+      amountRange: 'amount',
+      accounts: 'accounts',
+    },
+    formatMoment: BACKEND_DATE_FORMAT,
+    updateUrl: true,
   });
 
-  return groupedData;
-};
+  const createUrl = (endpoint: string) => {
+    const query = new URLSearchParams();
+    query.set('perPage', perPage.toString());
+    query.set('page', currentPage.toString());
 
-export const DailyLedger = () => {
-  const [showFilters, setShowFilters] = useState(false);
-  const [data, setData] = useState<GroupedData[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    const fetchData = async (): Promise<GroupedData[]> => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      return groupItemsByDate([
-        ...generateTransactions(5, '2024-01-01', 1),
-        ...generateTransfers(2, '2024-01-01'),
-        ...generateTransactions(3, '2024-01-02', 1),
-        ...generateTransfers(1, '2024-01-02'),
-        ...generateTransactions(8, '2024-01-03', 1),
-        ...generateTransfers(1, '2024-01-03'),
-      ]);
-    };
-
-    setIsLoading(true);
-    fetchData().then(v => {
-      setData(v);
-      setIsLoading(false);
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        if (Array.isArray(value)) {
+          value.forEach((item) => query.append(`${key}[]`, item.toString()));
+        } else if (typeof value === 'boolean') {
+          query.set(key, value ? '1' : '0');
+        } else if (moment.isMoment(value)) {
+            query.set(endpoint === '/api/transfers' ? `executedAt[${key}]` : key, value.format(BACKEND_DATE_FORMAT));
+        } else {
+          query.set(key, value.toString());
+        }
+      }
     });
-  }, []);
+
+    if (sort.field) query.set('sortField', sort.field as string);
+    if (sort.direction) query.set('sortDirection', sort.direction);
+
+    return `${endpoint}?${query.toString()}`;
+  };
+
+  const queries = useQueries({
+    queries: [
+      {
+        queryKey: ['transactions', filters, currentPage, perPage, sort],
+        queryFn: () => api(createUrl('/api/v2/transaction')),
+        select: (data: any) => ({
+          ...data.data,
+          list: data.data.list.map((t: any) => createTransaction(t)),
+        }),
+      },
+      {
+        queryKey: ['transfers', filters, currentPage, perPage, sort],
+        queryFn: () => api(createUrl('/api/transfers')),
+        select: (data: any) => ({
+          ...data.data,
+          list: data.data['hydra:member'].map((t: any) => new Transfer({
+            ...t,
+            transactions: t.transactions.map(createTransaction),
+          })),
+          count: data.data['hydra:totalItems'],
+        }),
+      },
+    ],
+  });
+
+  const [transactionsQuery, transfersQuery] = queries;
+
+  const combinedData = useMemo(() => {
+    if (!transactionsQuery.data || !transfersQuery.data) return [];
+
+    const combined = [
+      ...transactionsQuery.data.list,
+      ...transfersQuery.data.list,
+    ];
+
+    return combined.sort((a, b) => b.executedAt.diff(a.executedAt));
+  }, [transactionsQuery.data, transfersQuery.data]);
+
+  const groupedAndSortedItems = useMemo(() => {
+    if (!combinedData.length) return [];
+
+    const grouped = combinedData.reduce((groups, item) => {
+      const date = item.executedAt.format('YYYY-MM-DD');
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(item);
+      return groups;
+    }, {} as Record<string, (Transaction | Transfer)[]>);
+
+    return Object.entries(grouped)
+      .sort(([dateA], [dateB]) => moment(dateB).diff(moment(dateA)))
+      .map(([date, items]) => ({
+        date,
+        items: items.sort((a, b) => b.executedAt.diff(a.executedAt)),
+      }));
+  }, [combinedData]);
+
+  const formatItemDate = (dateString: string): string => {
+    const itemDate = moment(dateString);
+    const now = moment();
+    const diffInDays = now.diff(itemDate, 'day');
+    const formattedDate = itemDate.format('MMM D, YYYY');
+
+    if (diffInDays < RECENT_THRESHOLD_DAYS) {
+      const relativeTime = itemDate.fromNow();
+      return `${relativeTime} (${formattedDate})`;
+    } else {
+      return formattedDate;
+    }
+  };
+
+  const isLoading = transactionsQuery.isLoading || transfersQuery.isLoading;
+  const isError = transactionsQuery.isError || transfersQuery.isError;
+  const error = transactionsQuery.error || transfersQuery.error;
 
   return (
-    <div className="container mx-auto p-4 sm:p-6">
-      <h2 className="text-xl sm:text-2xl font-semibold">Your Transactions</h2>
-      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
-        {/* Drawer for filters on mobile */}
-        <Drawer open={showFilters} onOpenChange={setShowFilters}>
-          <DrawerTrigger asChild>
-            <Button variant="outline" className="lg:hidden mb-4">
-              <SlidersHorizontal className="mr-2 h-4 w-4" />
-              Filters
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent className="h-[80vh] flex flex-col">
-            <DrawerHeader className="flex-shrink-0">
-              <DrawerTitle>Filters</DrawerTitle>
-              <DrawerDescription>Refine your transaction list</DrawerDescription>
-            </DrawerHeader>
-            <div className="flex-grow overflow-y-auto px-4 pb-4">
-            </div>
-            <DrawerFooter className="p-4 border-t">
-              <DrawerClose asChild>
-                <Button className="w-full">Apply Filters</Button>
-              </DrawerClose>
-            </DrawerFooter>
-          </DrawerContent>
-        </Drawer>
-
-        {/* Sidebar for filters on desktop */}
-        <aside className="hidden lg:block w-64 space-y-6">
-        </aside>
-
-        {/* Main content area */}
-        <main className="flex-1 space-y-4 sm:space-y-6">
-          <div className="flex md:flex-col sm:flex-row justify-end items-start sm:items-center gap-4">
-
-            <div className="w-full bg-background">
-              {isLoading && (
-                <div className="flex w-full items-center justify-between p-4 bg-background border border-input rounded-lg hover:bg-accent hover:text-accent-foreground transition-all">
-                  <div className="flex items-center space-x-2">
-                    <Skeleton className="h-5 w-24 bg-muted" /> {/* Date placeholder */}
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <Skeleton className="h-4 w-28 bg-muted" /> {/* Transactions count placeholder */}
-                    <Skeleton className="h-4 w-24 bg-muted" /> {/* Transfers count placeholder */}
-                    <Skeleton className="h-5 w-20 bg-muted" /> {/* Total sum placeholder */}
-                    <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
-                  </div>
-                </div>
-              )}
-              <Accordion type="multiple" className="w-full space-y-2">
-                {data.map((dateGroup, index) => (
-                  <AccordionItem className="border rounded-lg overflow-hidden bg-card shadow-sm"
-                                 value={`item-${index}`}
-                                 key={index}>
-                    <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-accent/50">
-                      <div className="flex w-full items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold">{dateGroup.date}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                          <span>{dateGroup.transactionCount} transactions</span>
-                          <span>{dateGroup.transferCount} transfers</span>
-                          <Badge variant="secondary" className="text-xs font-mono">
-                            ${dateGroup.totalSum.toFixed(2)}
-                          </Badge>
-                        </div>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-2 px-4 py-2">
-                      {dateGroup.items.map((item, itemIndex) => (
-                        <React.Fragment key={itemIndex}>
-                          {(item instanceof Transaction) && <TransactionListItemV2 transaction={item} />}
-                          {(item instanceof Transfer) && <TransferListItem transfer={item} />}
-                        </React.Fragment>
-                      ))}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
-          </div>
-        </main>
+    <section className="container p-4 mx-auto pb-20 md:pb-4">
+      <div className="flex flex-row">
+        <h1 className="text-2xl font-bold">Combined Transactions and Transfers</h1>
       </div>
-    </div>
+
+      <div className="flex-grow overflow-hidden flex flex-col">
+        {isLoading && (
+          <ul className="space-y-2">
+            {[...Array(perPage)].map((_, index) => (
+              <li key={index}>Loading</li>
+            ))}
+          </ul>
+        )}
+
+        {isError && (
+          <div className="p-4 mb-4 text-sm rounded-lg bg-destructive/10 text-destructive">
+            <p className="font-medium">Error:</p>
+            <p>{error?.message || 'An unexpected error occurred.'}</p>
+          </div>
+        )}
+
+        {(!isLoading && !isError && combinedData.length > 0) && (
+          <>
+            {groupedAndSortedItems.map(({ date, items }) => (
+              <div key={date} className="mb-6">
+                <h5 className="text-lg font-semibold mb-2">{formatItemDate(date)}</h5>
+                <ul className="space-y-2">
+                  {items.map((item) => (
+                    <li key={item.id}>
+                      {item instanceof Transaction ? (
+                        <TransactionListItem transaction={item} />
+                      ) : (
+                        <TransferListItem transfer={item} />
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            <div className="mt-4">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          </>
+        )}
+
+        {(!isLoading && !isError && combinedData.length === 0) && (
+          <span> error </span>
+        )}
+
+        {((transactionsQuery.isFetching || transfersQuery.isFetching) && !isLoading) && (
+          <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded">
+            Updating...
+          </div>
+        )}
+      </div>
+    </section>
   );
 };
 
-export default DailyLedger;
+export default CombinedList;

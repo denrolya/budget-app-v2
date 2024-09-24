@@ -10,7 +10,7 @@ export interface FilterModel {
 
 export interface PaginationState {
   currentPage: number;
-  pageSize: number;
+  perPage: number;
   totalPages: number;
 }
 
@@ -28,7 +28,7 @@ export interface UseListState<FilterType, ItemType> {
 type SetFilterFunction<T> = <K extends keyof T>(key: K, value: T[K]) => void;
 
 interface UseListStateOptions<FilterType extends FilterModel, ItemType> {
-  initialPageSize?: number;
+  initialPerPage?: number;
   initialFilters: FilterType;
   initialSort?: SortState<ItemType>;
   searchParamKeys?: {
@@ -39,7 +39,7 @@ interface UseListStateOptions<FilterType extends FilterModel, ItemType> {
 }
 
 export const useListState = <FilterType extends FilterModel, ItemType>({
-                                                                         initialPageSize = 10,
+                                                                         initialPerPage = 30,
                                                                          initialFilters,
                                                                          initialSort = {
                                                                            field: null,
@@ -54,7 +54,7 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
   const getInitialState = useCallback((): UseListState<FilterType, ItemType> => ({
     pagination: {
       currentPage: parseInt(searchParams.get('page') || '1', 10),
-      pageSize: parseInt(searchParams.get('perPage') || initialPageSize.toString(), 10),
+      perPage: parseInt(searchParams.get('perPage') || initialPerPage.toString(), 10),
       totalPages: parseInt(searchParams.get('totalPages') || '0', 10),
     },
     filters: initialFilters,
@@ -62,7 +62,7 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
       field: (searchParams.get('sortField') as keyof ItemType) || initialSort.field,
       direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || initialSort.direction,
     },
-  }), [searchParams, initialPageSize, initialFilters, initialSort]);
+  }), [searchParams, initialPerPage, initialFilters, initialSort]);
 
   const [state, setState] = useState<UseListState<FilterType, ItemType>>(getInitialState);
 
@@ -106,6 +106,11 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
   const updateSearchParamsDebounced = useMemo(
     () => debounce((params: URLSearchParams) => {
       if (updateUrl) {
+        for (const [key, value] of params.entries()) {
+          if (!value) {
+            params.delete(key);
+          }
+        }
         setSearchParams(params);
       }
     }, 300),
@@ -129,12 +134,12 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
 
     const params = new URLSearchParams();
     params.set('page', state.pagination.currentPage.toString());
-    params.set('perPage', state.pagination.pageSize.toString());
+    params.set('perPage', state.pagination.perPage.toString());
 
     Object.entries(state.filters).forEach(([key, value]) => {
       const searchParamKey = searchParamKeys[key as keyof FilterType] || key;
       const defaultValue = initialFilters[key as keyof FilterType];
-      if (value !== undefined && value !== null && value !== '' && value !== defaultValue) {
+      if (value !== undefined && value !== null && value !== '' && !isEqual(value, defaultValue)) {
         const formattedValue = moment.isMoment(value) ? value.format(formatMoment) : value.toString();
         params.set(searchParamKey, formattedValue);
       }

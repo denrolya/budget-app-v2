@@ -1,5 +1,5 @@
 import cn from 'classnames';
-import { MoreVertical, User } from 'lucide-react';
+import { Eye, MoreVertical, User } from 'lucide-react';
 import React from 'react';
 
 import TransactionValue from '@/components/common/TransactionValue';
@@ -65,8 +65,8 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
         <div className="flex items-center">
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreVertical className="h-4 w-4" />
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                <Eye className="h-4 w-4" />
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>

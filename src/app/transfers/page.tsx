@@ -1,30 +1,22 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import cn from 'classnames';
 import { CalendarIcon } from 'lucide-react';
 import moment from 'moment';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { toast } from 'sonner';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import { Skeleton } from '@/components/ui/skeleton.tsx';
-import { TransactionFactory } from '@/models/Transaction';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { Button } from '@/components/ui/button';
-import { TransferFilters } from '@/models/TransferFilters';
 import { Pagination } from '@/components/common/Pagination';
 import EmptyTransferState from '@/components/features/transfers/EmptyTransferState';
-import TransferListItem, { ListItemSkeleton as TransferListItemSkeleton } from '@/components/features/transfers/ListItem';
-import { BACKEND_DATE_FORMAT, MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
+import TransferListItem, {
+  ListItemSkeleton as TransferListItemSkeleton,
+} from '@/components/features/transfers/ListItem';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Skeleton } from '@/components/ui/skeleton.tsx';
+import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext, useFormSubmitListener } from '@/contexts/Form';
-import { useListState } from '@/hooks/useListState';
-import { axiosFetcher } from '@/services/api';
+import { useTransfers } from '@/hooks/useTransfers.tsx';
 import Transfer from '@/models/Transfer';
-
-const defaultFilters = new TransferFilters();
-
-interface TransformedResponse {
-  list: Transfer[];
-}
 
 const datePresets = [
   { label: 'This Month', range: { from: moment().startOf('month'), to: moment().endOf('month') } },
@@ -37,114 +29,31 @@ const datePresets = [
 ];
 
 export const TransferList: React.FC = () => {
-  const { createTransaction } = TransactionFactory();
+  const {
+    transfers,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    pagination: { currentPage, totalPages, perPage, setCurrentPage },
+    filters,
+    setFilter,
+    isFetching,
+  } = useTransfers();
   const { openForm } = useFormContext();
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
+
   const queryClient = useQueryClient();
-  const {
-    pagination: { currentPage, pageSize, totalPages },
-    filters,
-    sort,
-    setCurrentPage,
-    setFilter,
-    setSort,
-    setTotalPages,
-  } = useListState<any, Transfer>({
-    initialPageSize: 10,
-    initialFilters: defaultFilters,
-    initialSort: { field: 'executedAt', direction: 'desc' },
-    searchParamKeys: {
-      searchTerm: 'q',
-      before: 'before',
-      after: 'after',
-      amountRange: 'amount',
-      accounts: 'accounts',
-    },
-    formatMoment: BACKEND_DATE_FORMAT,
-    updateUrl: true,
-  });
-
-  const url = useMemo(() => {
-    const query = new URLSearchParams();
-
-    const addParam = (key: string, value: unknown) => {
-      const isEmptyArray = Array.isArray(value) && value.length === 0;
-      const isEmptyValue = value === undefined || value === null || value === '';
-
-      if (!isEmptyValue && !isEmptyArray) {
-        if (Array.isArray(value)) {
-          value.forEach((item) => {
-            query.append(`${key}[]`, item.toString());
-          });
-        } else if (typeof value === 'boolean') {
-          query.set(key, value ? '1' : '0');
-        } else if (moment.isMoment(value)) {
-          query.set(`executedAt[${key}]`, value.format(BACKEND_DATE_FORMAT));
-        } else {
-          query.set(key, value.toString());
-        }
-      }
-    };
-
-    query.set('perPage', pageSize.toString());
-    query.set('page', currentPage.toString());
-
-    Object.entries(filters).forEach(([key, value]) => {
-      addParam(key, value);
-    });
-
-    if (sort.field) query.set('sortField', sort.field as string);
-    if (sort.direction) query.set('sortDirection', sort.direction);
-
-    return `/api/transfers?${query.toString()}`;
-  }, [filters, currentPage, pageSize, sort]);
-
-  const { data, error, isPending, isError, isFetching, refetch } = useQuery<TransformedResponse, Error>({
-    queryKey: ['transfers', url],
-    queryFn: async (): Promise<TransformedResponse> => {
-      const result = await axiosFetcher(url);
-      return {
-        list: result['hydra:member'].map(t => new Transfer({
-          ...t,
-            transactions: t.transactions.map(createTransaction),
-        })),
-        count: result['hydra:totalItems'],
-      };
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    retry: 3,
-    retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
-  });
-
-  useEffect(() => {
-    if (isError) {
-      setTotalPages(0);
-      toast.error('Failed to fetch transfers', {
-        description: error?.message || 'An unexpected error occurred.',
-        action: {
-          label: 'Retry',
-          onClick: () => refetch(),
-        },
-      });
-    } else if (data) {
-      setTotalPages(Math.ceil(data.count / pageSize) || 0);
-    }
-  }, [isError, data, pageSize, setTotalPages]);
-
   const handleFormSubmit = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['transfers'] });
   }, [queryClient]);
-
   useFormSubmitListener([FormType.Transaction, FormType.Transfer], handleFormSubmit);
 
   const groupedAndSortedTransfers = useMemo(() => {
-    const transfers = data?.list;
-
     if (!transfers) return [];
 
     const grouped = transfers.reduce((groups, transfer) => {
-      const date = moment(transfer.executedAt).format('YYYY-MM-DD');
+      const date = transfer.executedAt.format('YYYY-MM-DD');
       if (!groups[date]) {
         groups[date] = [];
       }
@@ -156,25 +65,23 @@ export const TransferList: React.FC = () => {
       .sort(([dateA], [dateB]) => moment(dateB).diff(moment(dateA)))
       .map(([date, transfers]) => ({
         date,
-        transfers: transfers.sort((a, b) =>
-          moment(b.executedAt).diff(moment(a.executedAt)),
-        ),
+        transfers: transfers.sort((a, b) => b.executedAt.diff(a.executedAt)),
       }));
-  }, [data?.list]);
+  }, [transfers]);
 
-  const RECENT_THRESHOLD_DAYS = 7;
 
   const formatTransferDate = (dateString: string): string => {
+    const RECENT_THRESHOLD_DAYS = 7;
     const transferDate = moment(dateString);
     const now = moment();
 
     const diffInDays = now.diff(transferDate, 'day');
 
-    const formattedDate = transferDate.format('MMM D, YYYY'); // e.g., "Sep 16, 2024"
+    const formattedDate = transferDate.format('MMM D, YYYY');
 
     if (diffInDays < RECENT_THRESHOLD_DAYS) {
-      const relativeTime = transferDate.fromNow(); // e.g., "3 days ago"
-      return `${relativeTime} (${formattedDate})`; // e.g., "3 days ago (Sep 20, 2024)"
+      const relativeTime = transferDate.fromNow();
+      return `${relativeTime} (${formattedDate})`;
     } else {
       return formattedDate;
     }
@@ -244,7 +151,7 @@ export const TransferList: React.FC = () => {
       </div>
 
       <div className="flex-grow overflow-hidden flex flex-col">
-        {isPending && (
+        {isLoading && (
           <div className="space-y-6">
             {[1, 2, 3].map((group) => (
               <div key={group} className="mb-6">
@@ -268,7 +175,7 @@ export const TransferList: React.FC = () => {
           </div>
         )}
 
-        {(!isPending && !isError && data) && (
+        {(!isLoading && !isError && transfers) && (
           <>
             {groupedAndSortedTransfers.length > 0 && (
               <>
@@ -295,7 +202,7 @@ export const TransferList: React.FC = () => {
           </>
         )}
 
-        {(isFetching && !isPending) && (
+        {(isFetching && !isLoading) && (
           <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded">
             Updating...
           </div>

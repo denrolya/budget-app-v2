@@ -1,3 +1,4 @@
+import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime.ts';
 import { ArrowRightLeft, Eye } from 'lucide-react';
 import React from 'react';
 
@@ -36,7 +37,7 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
           )}
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-xs text-muted-foreground hidden sm:inline">{transfer.executedAt.fromNow()}</span>
+          <span className="text-xs text-muted-foreground hidden sm:inline">{transfer.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}</span>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
