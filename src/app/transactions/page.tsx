@@ -1,6 +1,5 @@
-import { useQueryClient } from '@tanstack/react-query';
 import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { Pagination } from '@/components/common/Pagination';
 import EmptyTransactionState from '@/components/features/transactions/EmptyTransactionState.tsx';
@@ -10,7 +9,7 @@ import TransactionListItemV2, {
   ListItemSkeleton as TransactionListItemSkeleton,
 } from '@/components/features/transactions/ListItemV2';
 import { Button } from '@/components/ui/button';
-import { FormType, useForm as useFormContext, useFormSubmitListener } from '@/contexts/Form';
+import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactions } from '@/hooks/useTransactions.tsx';
 import Transaction from '@/models/Transaction';
 
@@ -28,12 +27,6 @@ export const TransactionsList: React.FC = () => {
     setFilter,
     isFetching,
   } = useTransactions();
-
-  const queryClient = useQueryClient();
-  const handleFormSubmit = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['transactions'] });
-  }, [queryClient]);
-  useFormSubmitListener([FormType.Transaction, FormType.Transfer], handleFormSubmit);
 
   const TransactionListItem = useMemo(() => listStyle === 'v1' ? TransactionListItemV1 : TransactionListItemV2, [listStyle]);
 

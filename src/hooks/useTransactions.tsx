@@ -1,8 +1,9 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import moment from 'moment';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { FormType, useFormSubmitListener } from '@/contexts/Form.tsx';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useListState } from '@/hooks/useListState';
 import Transaction, { TransactionFactory } from '@/models/Transaction';
@@ -76,6 +77,12 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
     formatMoment: BACKEND_DATE_FORMAT,
     updateUrl,
   });
+
+  const queryClient = useQueryClient();
+  const handleFormSubmit = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['transactions'] });
+  }, [queryClient]);
+  useFormSubmitListener([FormType.Transaction, FormType.Transfer], handleFormSubmit);
 
   const url = useMemo(() => {
     const query = new URLSearchParams();

@@ -1,14 +1,12 @@
-import { useQueryClient } from '@tanstack/react-query';
+import cn from 'classnames';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment';
-import cn from 'classnames';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { FormType, useFormSubmitListener } from '@/contexts/Form.tsx';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import TransactionListItem from '@/components/features/transactions/ListItemV2';
 import TransferListItem from '@/components/features/transfers/ListItem';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useTransfers } from '@/hooks/useTransfers';
 import Transaction from '@/models/Transaction';
@@ -25,13 +23,6 @@ const DailyLedger: React.FC = () => {
     const endDate = startDate.clone().add(daysPerPage - 1, 'days');
     return { startDate, endDate };
   }, [currentDate]);
-
-  const queryClient = useQueryClient();
-  const handleFormSubmit = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['transactions'] });
-    queryClient.invalidateQueries({ queryKey: ['transfers'] });
-  }, [queryClient]);
-  useFormSubmitListener([FormType.Transaction, FormType.Transfer], handleFormSubmit);
 
   const {
     transactions,
@@ -120,7 +111,7 @@ const DailyLedger: React.FC = () => {
       )}
 
       {!isLoading && !isError && (
-        <div className={cn('grid gap-4','md:grid-cols-3')}>
+        <div className={cn('grid gap-4', 'md:grid-cols-3')}>
           {Array.from({ length: daysPerPage }, (_, i) => moment(currentDate).add(i, 'days')).map(date => {
             const dateKey = date.format('YYYY-MM-DD');
             const items = groupedItems[dateKey] || [];

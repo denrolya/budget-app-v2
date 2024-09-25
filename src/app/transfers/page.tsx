@@ -1,8 +1,7 @@
-import { useQueryClient } from '@tanstack/react-query';
 import cn from 'classnames';
 import { CalendarIcon } from 'lucide-react';
 import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { Pagination } from '@/components/common/Pagination';
 import EmptyTransferState from '@/components/features/transfers/EmptyTransferState';
@@ -14,7 +13,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
-import { FormType, useForm as useFormContext, useFormSubmitListener } from '@/contexts/Form';
+import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransfers } from '@/hooks/useTransfers.tsx';
 import Transfer from '@/models/Transfer';
 
@@ -42,12 +41,6 @@ export const TransferList: React.FC = () => {
   } = useTransfers();
   const { openForm } = useFormContext();
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
-
-  const queryClient = useQueryClient();
-  const handleFormSubmit = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['transfers'] });
-  }, [queryClient]);
-  useFormSubmitListener([FormType.Transaction, FormType.Transfer], handleFormSubmit);
 
   const groupedAndSortedTransfers = useMemo(() => {
     if (!transfers) return [];
