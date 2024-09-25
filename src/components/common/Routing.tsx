@@ -7,7 +7,7 @@ import TransactionsListPage from '@/app/transactions/page';
 import TransfersListPage from '@/app/transfers/page';
 import DailyLedgerPage from '@/app/daily-ledger/page';
 import DebtsPage from '@/app/debts/page';
-import { Dashboard } from '@/components/features/dashboard/Dashboard';
+import DashboardPage from '@/app/dashboard/page';
 import { LayoutV9 } from '@/components/layout/LayoutV9';
 import { PrivateRoute } from '@/components/common/PrivateRoute';
 import { FinanceDataProvider, useFinanceData } from '@/contexts/FinanceData';
@@ -26,7 +26,7 @@ const ProtectedContent: React.FC = () => {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={
           <PrivateRoute>
-            <Dashboard />
+            <DashboardPage />
           </PrivateRoute>
         } />
         <Route path="transactions" element={
