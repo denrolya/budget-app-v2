@@ -133,13 +133,24 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
           })}>
             <div className="w-full flex justify-between items-center">
               <span className="text-xs font-semibold text-accent-foreground/60">Total Balance</span>
-              <MoneyValue className="font-bold text-sm" amount={totalBalance} currency={user.baseCurrency} />
+              <MoneyValue className="font-medium text-sm text-mono" amount={totalBalance} currency={user.baseCurrency} />
             </div>
             <div className="w-full flex justify-between items-center">
               <span className="text-xs font-semibold text-accent-foreground/60">Total Debt</span>
               <MoneyValue
-                className="font-bold text-sm text-destructive"
+                className="font-medium text-sm text-destructive text-mono"
                 amount={totalDebt}
+                currency={user.baseCurrency} />
+            </div>
+            <div className="w-full flex justify-between items-center">
+              <span className="text-xs font-semibold text-accent-foreground/60">Total</span>
+              <MoneyValue
+                className={cn('font-medium text-sm text-destructive', 'text-mono', {
+                  'text-destructive': totalDebt + totalBalance < 0,
+                  'text-success': totalDebt + totalBalance > 0,
+                  'text-accent-foreground': totalDebt + totalBalance === 0,
+                })}
+                amount={totalDebt + totalBalance}
                 currency={user.baseCurrency} />
             </div>
           </div>

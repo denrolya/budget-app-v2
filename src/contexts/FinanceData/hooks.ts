@@ -10,26 +10,6 @@ import {
   FinanceDataContextType,
 } from '@/contexts/FinanceData/context';
 
-const convert = (
-  rates: ExchangeRates,
-  value: number,
-  from: string,
-  to: string,
-): number => {
-  if (from === to) return value;
-  const fromRate = rates[from];
-  const toRate = rates[to];
-  return (value / fromRate) * toRate;
-};
-
-const generateConvertedValues = (
-  rates: ExchangeRates,
-  originalCurrency: string,
-  value: number,
-): Record<string, number> => Object.fromEntries(
-  Object.entries(rates).map(([currency]) => [currency, convert(rates, value, originalCurrency, currency)]),
-);
-
 export const useFinanceData = (): FinanceDataContextType => {
   const context = useContext(FinanceDataContext);
   if (context === undefined) {

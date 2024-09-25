@@ -1,5 +1,5 @@
-import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import React, { useEffect, useRef, useState, forwardRef } from 'react';
+import { Loader2 } from 'lucide-react';
+import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { AccountForm } from '@/components/features/accounts/Form';
@@ -26,21 +26,23 @@ interface FormState {
 
 interface FormContentProps {
   formType: FormType;
-  data: any;
-  onClose: (submitted: boolean) => void;
+  values: any;
+  onClose: () => void;
   setFormState: React.Dispatch<React.SetStateAction<FormState>>;
+  key: string;
 }
 
 const FormContent = forwardRef<{ submitForm: () => Promise<void> }, FormContentProps>((props, ref) => {
-  const { formType, data, onClose, setFormState } = props;
+  const { key, formType, values, onClose, setFormState } = props;
   const FormComponent = formComponents[formType];
 
   return (
     <FormComponent
       ref={ref}
-      data={data}
+      values={values}
       onClose={onClose}
       setFormState={setFormState}
+      key={key}
     />
   );
 });
@@ -63,24 +65,25 @@ const useScreenSize = () => {
 };
 
 export const FormRenderer: React.FC = () => {
-  const { formState: contextFormState, closeForm } = useFormContext();
+  const { formState, submitForm, closeForm, resetForm, updateFormState } = useFormContext();
   const formRef = useRef<{ submitForm: () => Promise<void> }>(null);
   const isDesktop = useScreenSize();
-
+  const [formKey, setFormKey] = useState('0');
   const [isLoading, setIsLoading] = useState(false);
-  const [formState, setFormState] = useState<FormState>({
-    isValid: false,
-    isDirty: false,
-    values: contextFormState.data,
-  });
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (shouldClose = true) => {
     if (formRef.current) {
       setIsLoading(true);
       try {
         await formRef.current.submitForm();
+        submitForm(formState.values);
         toast.success('Form submitted successfully!');
-        closeForm(true);
+        if (shouldClose) {
+          closeForm();
+        } else {
+          resetForm();
+          setFormKey(prev => (parseInt(prev) + 1).toString());
+        }
       } catch (error) {
         console.error('Form submission failed:', error);
         toast.error('Failed to submit form. Please try again.');
@@ -91,53 +94,62 @@ export const FormRenderer: React.FC = () => {
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open && contextFormState.isOpen) {
-      handleClose(false);
+    if (!open && formState.isOpen) {
+      closeForm();
     }
   };
 
-  const handleClose = (submitted: boolean) => {
-    closeForm(submitted);
-  };
+  if (!formState.type) return null;
 
-  if (!contextFormState.type) return null;
-
-  const title = `${contextFormState.data?.id ? 'Edit' : 'New'} ${contextFormState.type.charAt(0).toUpperCase() + contextFormState.type.slice(1)}`;
+  const isEditMode = !!formState.values?.id;
+  const title = `${isEditMode ? 'Edit' : 'New'} ${formState.type.charAt(0).toUpperCase() + formState.type.slice(1)}`;
 
   const content = (
     <FormContent
       ref={formRef}
-      formType={contextFormState.type as FormType}
-      data={contextFormState.data}
-      onClose={handleClose}
-      setFormState={setFormState}
+      formType={formState.type as FormType}
+      data={formState.values}
+      onClose={closeForm}
+      setFormState={updateFormState}
+      key={formKey}
     />
   );
 
   const footer = (
-    <>
-      <Button type="button" variant="outline" onClick={handleClose}>
-        Cancel
-      </Button>
+    <div className="flex justify-end space-x-2">
       <Button
         type="submit"
-        onClick={handleSubmit}
+        onClick={() => handleSubmit(false)}
         disabled={isLoading || !formState.isValid}
       >
-        {isLoading ? 'Submitting...' : contextFormState.data?.id ? 'Update' : 'Create'}
+        {isEditMode ? 'Update' : 'Create'}
       </Button>
-    </>
+      <Button
+        type="button"
+        onClick={() => handleSubmit(true)}
+        disabled={isLoading || !formState.isValid}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {isEditMode ? 'Updating...' : 'Creating...'}
+          </>
+        ) : (
+          `${isEditMode ? 'Update' : 'Create'} & Close`
+        )}
+      </Button>
+    </div>
   );
 
   if (isDesktop) {
     return (
-      <Dialog open={contextFormState.isOpen} onOpenChange={handleOpenChange}>
+      <Dialog open={formState.isOpen} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
           </DialogHeader>
           {content}
-          <DialogFooter className="border-t">
+          <DialogFooter className="border-t pt-2">
             {footer}
           </DialogFooter>
         </DialogContent>
@@ -146,7 +158,7 @@ export const FormRenderer: React.FC = () => {
   }
 
   return (
-    <Drawer open={contextFormState.isOpen} onOpenChange={handleOpenChange}>
+    <Drawer open={formState.isOpen} onOpenChange={handleOpenChange}>
       <DrawerContent className="max-h-[80vh]">
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>

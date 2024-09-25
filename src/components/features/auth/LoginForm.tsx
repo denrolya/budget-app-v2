@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -60,7 +61,13 @@ export const LoginForm = ({ error, isLoading, onSubmit }: Props) => {
         />
         {error && <p className="text-red-500 text-sm">{error}</p>}
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Logging in...' : 'Login'}
+          {isLoading && (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Logging in
+            </>
+          )}
+          {!isLoading && 'Log In'}
         </Button>
       </form>
     </Form>

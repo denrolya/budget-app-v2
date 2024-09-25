@@ -11,7 +11,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MOMENT_DATE_VIEW_FORMAT, MOMENT_DATETIME_VIEW_FORMAT } from '@/constants/datetime';
 import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
 
 export const AccountsManagementPage = () => {
@@ -53,8 +52,9 @@ export const AccountsManagementPage = () => {
                 <AccountAvatar account={account} size="sm" />
                 <h3 className="font-medium">{account.name}</h3>
               </div>
-              <Badge variant={account.balance > 0 ? 'default' : 'secondary'}>
+              <Badge variant={account.balance > 0 ? 'success' : 'destructive'}>
                 <MoneyValue
+                  showSign
                   amount={account.balance}
                   currency={account.currency}
                   values={account.convertedValues} />
@@ -91,7 +91,7 @@ export const AccountsManagementPage = () => {
     if (selectedAccount?.balance && selectedAccount.balance < 0) {
       balanceBadgeVariant = 'destructive';
     } else if (selectedAccount?.balance && selectedAccount.balance > 0) {
-      balanceBadgeVariant = 'default';
+      balanceBadgeVariant = 'success';
     }
 
     return (
@@ -130,6 +130,7 @@ export const AccountsManagementPage = () => {
                 </div>
                 <Badge className="self-start" variant={balanceBadgeVariant}>
                   <MoneyValue
+                    showSign
                     amount={selectedAccount.balance}
                     currency={selectedAccount.currency}
                     values={selectedAccount.convertedValues} />

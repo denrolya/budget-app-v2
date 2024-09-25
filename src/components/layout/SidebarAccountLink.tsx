@@ -1,5 +1,5 @@
-import { FC, memo } from 'react';
 import cn from 'classnames';
+import { FC, memo } from 'react';
 import { Link } from 'react-router-dom';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
@@ -31,7 +31,7 @@ export const SidebarAccountLink: FC<SidebarAccountLinkProps> = ({ account, isSid
         className={cn('flex items-center w-full px-2 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
           {
             'justify-center': !isSidebarExpanded,
-          }
+          },
         )}
       >
         <div className={cn('flex items-center justify-center', isSidebarExpanded ? 'w-6 h-6' : 'w-8 h-8')}>
@@ -40,10 +40,16 @@ export const SidebarAccountLink: FC<SidebarAccountLinkProps> = ({ account, isSid
         {isSidebarExpanded && (
           <div className="flex-grow min-w-0 ml-3 overflow-hidden">
             <p className="text-sm font-medium truncate">{account.name}</p>
-            <div className="flex justify-between items-center text-xs text-muted-foreground">
-              <MoneyValue amount={account.balance} currency={account.currency} />
-              <span>{account.currency}</span>
-            </div>
+            <MoneyValue
+              showSign
+              className={cn('items-center text-xs text-mono', {
+                'text-destructive': account.balance < 0,
+                'text-success': account.balance > 0,
+                'text-muted-foreground': account.balance === 0,
+              })}
+              amount={account.balance}
+              currency={account.currency}
+            />
           </div>
         )}
       </Link>
@@ -58,7 +64,10 @@ export const SidebarAccountLink: FC<SidebarAccountLinkProps> = ({ account, isSid
       <Card className="w-64 bg-popover text-popover-foreground">
         <CardContent className="p-4">
           <h3 className="font-bold mb-2">{account.name}</h3>
-          <p className="text-sm mb-1">Balance: <MoneyValue amount={account.balance} currency={account.currency} /></p>
+          <p className="text-sm mb-1">Balance: <MoneyValue showSign
+                                                           className="text-mono"
+                                                           amount={account.balance}
+                                                           currency={account.currency} /></p>
           <p className="text-sm mb-1">Last Transaction: {account.lastTransaction}</p>
           <p className="text-sm">Account Number: {account.accountNumber}</p>
         </CardContent>
@@ -72,5 +81,5 @@ SidebarAccountLink.displayName = 'SidebarAccountLink';
 export default memo(SidebarAccountLink, (prevProps, nextProps) =>
   prevProps.isSidebarExpanded === nextProps.isSidebarExpanded &&
   prevProps.account.id === nextProps.account.id &&
-  prevProps.account.balance === nextProps.account.balance
+  prevProps.account.balance === nextProps.account.balance,
 );

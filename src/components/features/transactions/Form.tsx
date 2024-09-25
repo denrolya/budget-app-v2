@@ -2,10 +2,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
 import { ArrowDownCircle, ArrowUpCircle, X } from 'lucide-react';
 import moment from 'moment';
-import { forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useImperativeHandle } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import * as z from 'zod';
 
+import { useFinanceData } from '@/contexts/FinanceData';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
@@ -25,9 +26,10 @@ interface FormState {
 }
 
 interface TransactionFormProps {
-  data: Transaction | undefined;
+  values: Transaction | undefined;
   onClose: () => void;
   setFormState: React.Dispatch<React.SetStateAction<FormState>>;
+  key: string;
 }
 
 interface TransactionFormRef {
@@ -80,7 +82,8 @@ const formatTransactionData = (values: z.infer<typeof formSchema>, existingData:
  * TODO: Organize. Separate logic form visual components.
  */
 export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>((props, ref) => {
-  const { data, setFormState } = props;
+  const { refetchAccounts } = useFinanceData();
+  const { values: data, setFormState } = props;
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -121,6 +124,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
           logger.info(response, 'Transaction Create');
         }
 
+        await refetchAccounts();
         submitForm(values);
       } catch (error) {
         console.error('Form submission failed:', error);

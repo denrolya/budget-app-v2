@@ -4,7 +4,6 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
-import DebtAvatar from '@/components/features/accounts/Avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';

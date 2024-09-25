@@ -24,7 +24,7 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
 
   const renderElement = (el: Account) => (
     <>
-      <div className={cn('flex items-center justify-center rounded-full mr-2', el.archivedAt ? 'bg-gray-300' : el.color)}>
+      <div className={cn('flex items-center justify-center rounded-full mr-2', el.archivedAt ? 'text-muted' : el.color)}>
         <AccountAvatar account={el} size="sm" />
       </div>
       <div className="flex-1">
@@ -34,7 +34,11 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
         </p>
       </div>
       <div className="text-right">
-        <MoneyValue amount={el.balance} currency={el.currency} />
+        <MoneyValue showSign className={cn('font-medium', 'text-xs', 'text-mono', {
+          'text-destructive': el.balance < 0,
+          'text-success': el.balance > 0,
+          'text-muted-foreground': el.balance === 0,
+        })} amount={el.balance} currency={el.currency} />
         {el.archivedAt && (
           <p className="text-xs text-muted-foreground">Archived</p>
         )}
