@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import cn from 'classnames';
 import { ArrowDownIcon, ArrowUpIcon, DollarSignIcon, TrendingUpIcon } from 'lucide-react';
 import moment from 'moment';
-import { FC, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { BACKEND_DATE_FORMAT, PERIOD_OPTIONS, PeriodOption, INTERVAL_OPTIONS } from '@/constants/datetime';
 import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem';
@@ -37,7 +37,7 @@ interface Props {
   className?: string;
 }
 
-export const MoneyFlowCard: FC<Props> = ({ className }) => {
+export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
   const [period, setPeriod] = useState<PeriodOption['value']>('YTD');
   const [interval, setInterval] = useState(INTERVAL_OPTIONS[2].value);
   const [isBarChart, setIsBarChart] = useState(true);
