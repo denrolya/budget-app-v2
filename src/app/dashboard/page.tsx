@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 
+import CategoryTreeCard from '@/components/features/statistics/CategoryTreeCard';
 import FinancialCard from '@/components/features/statistics/FinancialCard';
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
-import { CardConfig, cardConfigs } from '@/constants/dashboard-config.ts';
+import { CardConfig, cardConfigs } from '@/constants/dashboard-config';
 
 const DashboardPage: React.FC = () => {
   const [configs, setConfigs] = useState(cardConfigs);
@@ -15,8 +16,13 @@ const DashboardPage: React.FC = () => {
   };
   return (
     <section className="p-6">
-      <div className="w-full mb-6">
-        <MoneyFlow />
+      <div className="grid grid-cols-5 gap-4 mb-6">
+        <div className="col-span-5 md:col-span-3">
+          <MoneyFlow />
+        </div>
+        <div className="col-span-5 md:col-span-2">
+          <CategoryTreeCard />
+        </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 justify-items-center mb-6">
         {configs.map(card => (

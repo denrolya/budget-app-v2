@@ -160,11 +160,49 @@ export const MoneyFlowCard: FC<Props> = ({ className }) => {
   }, [transformedData]);
 
   return (
-    <Card className={cn('w-full max-w-3xl', className)}>
-      <CardHeader className="pb-2 border-b">
-        <CardTitle className="text-lg font-normal">Money Flow</CardTitle>
-      </CardHeader>
+    <Card className={cn('w-full', className)}>
       <CardContent className="pt-6">
+        <div className="flex flex-row items-center">
+          <h3 className="text-lg font-normal">
+            Money Flow
+          </h3>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-2 sm:space-y-0">
+            <div className="flex flex-wrap items-center gap-2">
+              {PERIOD_OPTIONS.map((p) => (
+                <Button
+                  key={p.value}
+                  variant={period === p.value ? 'default' : 'outline'}
+                  onClick={() => setPeriod(p.value)}
+                  className="text-xs px-2 py-1 h-auto"
+                >
+                  {p.label}
+                </Button>
+              ))}
+              <Select value={interval} onValueChange={setInterval}>
+                <SelectTrigger className="w-[100px] h-8">
+                  <SelectValue placeholder="Interval" />
+                </SelectTrigger>
+                <SelectContent>
+                  {INTERVAL_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="chart-type"
+                checked={isBarChart}
+                onCheckedChange={setIsBarChart}
+              />
+              <Label htmlFor="chart-type" className="text-xs">
+                {isBarChart ? 'Bar Chart' : 'Line Chart'}
+              </Label>
+            </div>
+          </div>
+        </div>
         <div className="mb-4">
           <h2 className="text-4xl font-bold">
             <MoneyValue showSign amount={totalRevenue} />
@@ -186,42 +224,6 @@ export const MoneyFlowCard: FC<Props> = ({ className }) => {
               <ArrowDownIcon className="h-4 w-4" />
             )}
             <span className="ml-2">vs. previous {period}</span>
-          </div>
-        </div>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-2 sm:space-y-0">
-          <div className="flex flex-wrap items-center gap-2">
-            {PERIOD_OPTIONS.map((p) => (
-              <Button
-                key={p.value}
-                variant={period === p.value ? 'default' : 'outline'}
-                onClick={() => setPeriod(p.value)}
-                className="text-xs px-2 py-1 h-auto"
-              >
-                {p.label}
-              </Button>
-            ))}
-            <Select value={interval} onValueChange={setInterval}>
-              <SelectTrigger className="w-[100px] h-8">
-                <SelectValue placeholder="Interval" />
-              </SelectTrigger>
-              <SelectContent>
-                {INTERVAL_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="chart-type"
-              checked={isBarChart}
-              onCheckedChange={setIsBarChart}
-            />
-            <Label htmlFor="chart-type" className="text-xs">
-              {isBarChart ? 'Bar Chart' : 'Line Chart'}
-            </Label>
           </div>
         </div>
         <div className="h-[300px] mb-4">

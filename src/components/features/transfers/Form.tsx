@@ -1,36 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
-import { Check, ChevronsUpDown } from 'lucide-react';
 import moment from 'moment';
-import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
+import AccountTypeahead from '@/components/common/AccountTypeahead';
 import { Button } from '@/components/ui/button';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { defaultOnSubmit, useFormLogic } from '@/hooks/useFormLogic';
 import Transfer from '@/models/Transfer';
 
-const accounts = [
-  { id: 1, name: 'Main Checking', currency: 'USD', icon: '🏦', color: '#FF0000' },
-  { id: 2, name: 'Savings', currency: 'USD', icon: '💰', color: '#00FF00' },
-  { id: 3, name: 'Credit Card', currency: 'USD', icon: '💳', color: '#0000FF' },
-];
-
 const formSchema = z.object({
-  accountFrom: z.number().int().positive(),
-  accountTo: z.number().int().positive(),
+  from: z.number().int().positive(),
+  to: z.number().int().positive(),
   amount: z.number().min(0, 'Amount must be a positive number'),
   rate: z.number().min(0, 'Rate must be a positive number'),
   feeAmount: z.number().min(0, 'Fee must be non-negative').optional(),
@@ -46,8 +31,7 @@ interface FormState {
 }
 
 interface TransferFormProps {
-  data: Transfer | undefined;
-  isEditing: boolean;
+  values: Transfer | undefined;
   onClose: () => void;
   setFormState: React.Dispatch<React.SetStateAction<FormState>>;
   showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
@@ -65,8 +49,7 @@ interface TransferFormRef {
  *
  */
 export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
-                                                                              data,
-                                                                              isEditing,
+                                                                              values: data,
                                                                               setFormState,
                                                                               showToast,
                                                                             }, ref) => {
@@ -76,8 +59,8 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      accountFrom: undefined,
-      accountTo: undefined,
+      from: undefined,
+      to: undefined,
       amount: 0,
       rate: 0,
       feeAmount: undefined,
@@ -132,99 +115,37 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField
             control={form.control}
-            name="accountFrom"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel>Account From</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn('w-full justify-between', {
-                          'text-muted-foreground': !field.value,
-                        })}>
-                        {accounts.find(account => account.id === field.value)?.name || 'Select account'}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search account..." />
-                      <CommandEmpty>No account found.</CommandEmpty>
-                      <CommandGroup>
-                        <CommandList>
-                          {accounts.map((account) => (
-                            <CommandItem
-                              value={account.name}
-                              key={account.id}
-                              onSelect={() => form.setValue('accountFrom', account.id)}
-                            >
-                              <Check className={cn('mr-2 h-4 w-4', {
-                                'opacity-100': account.id === field.value,
-                                'opacity-0': account.id !== field.value,
-                              })} />
-                              {account.icon} {account.name}
-                            </CommandItem>
-                          ))}
-                        </CommandList>
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+                <FormLabel>From</FormLabel>
+                <AccountTypeahead
+                  {...field}
+                  multiple={false}
+                  className={cn('w-full justify-between', {
+                    'text-muted-foreground': !field.value,
+                  })}
+                />
                 <FormMessage />
               </FormItem>
             )}
+            name="from"
           />
           <FormField
             control={form.control}
-            name="accountTo"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel>Account From</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn('w-full justify-between', {
-                          'text-muted-foreground': !field.value,
-                        })}>
-                        {accounts.find(account => account.id === field.value)?.name || 'Select account'}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search account..." />
-                      <CommandEmpty>No account found.</CommandEmpty>
-                      <CommandGroup>
-                        <CommandList>
-                          {accounts.map((account) => (
-                            <CommandItem
-                              value={account.name}
-                              key={account.id}
-                              onSelect={() => form.setValue('accountTo', account.id)}
-                            >
-                              <Check className={cn('mr-2 h-4 w-4', {
-                                'opacity-100': account.id === field.value,
-                                'opacity-0': account.id !== field.value,
-                              })} />
-                              {account.icon} {account.name}
-                            </CommandItem>
-                          ))}
-                        </CommandList>
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+                <FormLabel>To</FormLabel>
+                <AccountTypeahead
+                  {...field}
+                  multiple={false}
+                  className={cn('w-full justify-between', {
+                    'text-muted-foreground': !field.value,
+                  })}
+                />
                 <FormMessage />
               </FormItem>
             )}
+            name="to"
           />
         </div>
 
@@ -279,51 +200,20 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
           />
           <FormField
             control={form.control}
-            name="feeAccount"
             render={({ field }) => (
               <FormItem className="flex-1">
-                <FormLabel>Account From</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn('w-full justify-between', {
-                          'text-muted-foreground': !field.value,
-                        })}>
-                        {accounts.find(account => account.id === field.value)?.name || 'Select account'}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search account..." />
-                      <CommandEmpty>No account found.</CommandEmpty>
-                      <CommandGroup>
-                        <CommandList>
-                          {accounts.map((account) => (
-                            <CommandItem
-                              value={account.name}
-                              key={account.id}
-                              onSelect={() => form.setValue('feeAccount', account.id)}
-                            >
-                              <Check className={cn('mr-2 h-4 w-4', {
-                                'opacity-100': account.id === field.value,
-                                'opacity-0': account.id !== field.value,
-                              })} />
-                              {account.icon} {account.name}
-                            </CommandItem>
-                          ))}
-                        </CommandList>
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+                <FormLabel>Fee Account</FormLabel>
+                <AccountTypeahead
+                  {...field}
+                  multiple={false}
+                  className={cn('w-full justify-between', {
+                    'text-muted-foreground': !field.value,
+                  })}
+                />
                 <FormMessage />
               </FormItem>
             )}
+            name="feeAccount"
           />
         </div>
 
