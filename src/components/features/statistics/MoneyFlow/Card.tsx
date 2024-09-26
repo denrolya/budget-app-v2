@@ -7,7 +7,6 @@ import { FC, useMemo, useState } from 'react';
 import { BACKEND_DATE_FORMAT, PERIOD_OPTIONS, PeriodOption, INTERVAL_OPTIONS } from '@/constants/datetime';
 import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -39,8 +38,8 @@ interface Props {
 }
 
 export const MoneyFlowCard: FC<Props> = ({ className }) => {
-  const [period, setPeriod] = useState<PeriodOption['value']>('1M');
-  const [interval, setInterval] = useState(INTERVAL_OPTIONS[0].value);
+  const [period, setPeriod] = useState<PeriodOption['value']>('YTD');
+  const [interval, setInterval] = useState(INTERVAL_OPTIONS[2].value);
   const [isBarChart, setIsBarChart] = useState(true);
 
   const selectedPeriodOption = useMemo(() =>

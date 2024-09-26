@@ -29,7 +29,9 @@ const MoneyFlowChart: React.FC<Props> = ({ data, isBarChart }) => {
   }));
 
   const maxValue = Math.max(...data.map(item => Math.max(item.income, item.expenses, item.revenue, item.previousRevenue)));
-
+  const CustomReferenceLine = ({ y = 0, stroke = "hsl(var(--muted-foreground))", strokeOpacity = 0.2 }) => (
+    <ReferenceLine y={y} stroke={stroke} strokeOpacity={strokeOpacity} />
+  );
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex items-center space-x-2 mb-4">
@@ -65,8 +67,8 @@ const MoneyFlowChart: React.FC<Props> = ({ data, isBarChart }) => {
             hide
           />
           <YAxis hide domain={[-maxValue, maxValue]} />
-          <Tooltip content={<CustomTooltip data={data} />} />
-          <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeOpacity={0.2} />
+          <Tooltip cursor={false} content={<CustomTooltip data={data} />} />
+          <CustomReferenceLine />
           {showRevenue ? (
             <>
               <Line
