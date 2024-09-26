@@ -3,13 +3,13 @@ import cn from 'classnames';
 import { ArrowDownIcon, ArrowUpIcon, DollarSignIcon, TrendingUpIcon } from 'lucide-react';
 import moment from 'moment';
 import { FC, useMemo, useState } from 'react';
-import { Area, Bar, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 import { BACKEND_DATE_FORMAT, PERIOD_OPTIONS, PeriodOption, INTERVAL_OPTIONS } from '@/constants/datetime';
 import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem';
-import CustomTooltip from '@/components/features/statistics/MoneyFlow/Tooltip';
+import Chart from '@/components/features/statistics/MoneyFlow/Chart';
+
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -46,7 +46,7 @@ export const MoneyFlowCard: FC<Props> = ({ className }) => {
   const selectedPeriodOption = useMemo(() =>
      PERIOD_OPTIONS.find((p) => p.value === period) || PERIOD_OPTIONS[2]
   , [period]);
-  const now = useMemo(() => moment(), []);
+  const now = moment();
   const { currentDateRange, previousDateRange } = useMemo(() => {
     const currentRange = selectedPeriodOption.getDateRange(now);
     const duration = moment.duration(currentRange.before.diff(currentRange.after));
@@ -74,10 +74,9 @@ export const MoneyFlowCard: FC<Props> = ({ className }) => {
       return response.data;
     },
     refetchOnWindowFocus: false,
-    staleTime: 60 * 60 * 1000, // Example: data is fresh for 1 hour
+    staleTime: 60 * 60 * 1000, // 1h
   });
 
-  // Fetch previous period data
   const {
     data: previousDataBackend,
     isLoading: isPreviousLoading,
@@ -237,58 +236,7 @@ export const MoneyFlowCard: FC<Props> = ({ className }) => {
           )}
 
           {!isCurrentLoading && !isPreviousLoading && !currentError && !previousError && (
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={transformedData}>
-                <XAxis
-                  dataKey="time"
-                  scale="time"
-                  type="number"
-                  domain={['dataMin', 'dataMax']}
-                  tickFormatter={(unixTime) => moment(unixTime).format('MM/DD')}
-                  hide
-                />
-                <YAxis hide />
-                <Tooltip content={<CustomTooltip transformedData={transformedData} />} />
-                {isBarChart ? (
-                  <>
-                    <Bar dataKey="income" fill="hsl(var(--primary))" />
-                    <Bar dataKey="expenses" fill="hsl(var(--destructive))" />
-                  </>
-                ) : (
-                  <>
-                    <Area
-                      type="monotone"
-                      dataKey="income"
-                      fill="hsl(var(--primary))"
-                      stroke="hsl(var(--primary))"
-                      fillOpacity={0.3}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="expenses"
-                      fill="hsl(var(--destructive))"
-                      stroke="hsl(var(--destructive))"
-                      fillOpacity={0.3}
-                    />
-                  </>
-                )}
-                <Line
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="hsl(var(--secondary))"
-                  strokeWidth={2}
-                  dot={false}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="previousRevenue"
-                  stroke="hsl(var(--secondary))"
-                  strokeWidth={2}
-                  strokeDasharray="5 5"
-                  dot={false}
-                />
-              </ComposedChart>
-            </ResponsiveContainer>
+            <Chart data={transformedData} isBarChart={isBarChart} />
           )}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm mb-4">

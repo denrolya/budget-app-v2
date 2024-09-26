@@ -14,9 +14,8 @@ import MoneyValue from '@/components/common/MoneyValue';
 
 const DATE_FORMAT = 'MMM D, YYYY HH:mm';
 
-// Define the shape of your transformed data
 type TransformedData = {
-  time: number; // Unix timestamp in milliseconds
+  time: number;
   income: number;
   expenses: number;
   revenue: number;
@@ -30,7 +29,7 @@ interface TooltipProps {
   active: boolean;
   payload: any[]; // Ideally, replace 'any' with the specific type from Recharts
   label: number;
-  transformedData: TransformedData[];
+  data: TransformedData[];
 }
 
 const calculateChange = (current: number, previous: number) => {
@@ -43,14 +42,14 @@ const calculateChange = (current: number, previous: number) => {
   };
 };
 
-export const Tooltip: FC<TooltipProps> = ({ active, payload, label, transformedData }) => {
+export const Tooltip: FC<TooltipProps> = ({ active, payload, label, data }) => {
   const dataPointMap = useMemo(() => {
     const map = new Map<number, TransformedData>();
-    transformedData.forEach((data) => {
+    data.forEach((data) => {
       map.set(data.time, data);
     });
     return map;
-  }, [transformedData]);
+  }, [data]);
 
   const dataPoint = useMemo(() => dataPointMap.get(label), [dataPointMap, label]);
 
