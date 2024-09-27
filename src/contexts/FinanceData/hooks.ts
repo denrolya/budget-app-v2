@@ -2,8 +2,8 @@ import orderBy from 'lodash/orderBy';
 import { useContext } from 'react';
 
 import Account from '@/models/Account';
-import Category from '@/models/Category';
 import {
+  CategoriesData,
   Debt,
   ExchangeRates,
   ExchangeRatesData,
@@ -19,28 +19,28 @@ export const useFinanceData = (): FinanceDataContextType => {
   return context;
 };
 
-export const useAccounts = (): Account[] | null => {
+export const useAccounts = (): Account[] => {
   const { data } = useFinanceData();
 
-  return data?.accounts ?? null;
+  return data.accounts;
 };
 
-export const useActiveAccounts = (): Account[] | undefined => {
+export const useActiveAccounts = (): Account[] => {
   const data = useAccounts();
-  return data?.filter(({ archivedAt }) => !archivedAt);
+  return data.filter(({ archivedAt }) => !archivedAt);
 };
 
-export const useArchivedAccounts = (): Account[] | undefined => {
+export const useArchivedAccounts = (): Account[] => {
   const data = useAccounts();
-  return data?.filter(({ archivedAt }) => !!archivedAt);
+  return data.filter(({ archivedAt }) => !!archivedAt);
 };
 
-export const useActiveAccountsWithDefaultOrder = (): Account[] | undefined => {
+export const useActiveAccountsWithDefaultOrder = (): Account[] => {
   const activeAccounts = useActiveAccounts();
   return orderBy(activeAccounts, ['currency', 'type', 'name']);
 };
 
-export const useAccountsWithDefaultOrder = (): Account[] | undefined => {
+export const useAccountsWithDefaultOrder = (): Account[] => {
   const data = useAccounts();
   return orderBy(
     data,
@@ -49,27 +49,27 @@ export const useAccountsWithDefaultOrder = (): Account[] | undefined => {
   );
 };
 
-export const useDebts = (): Debt[] | null => {
+export const useDebts = (): Debt[] => {
   const { data } = useFinanceData();
-  return data?.debts ?? null;
+  return data.debts;
 };
 
-export const useCategories = (): { list: Category[], tree: Category[] } | null => {
+export const useCategories = (): CategoriesData => {
   const { data } = useFinanceData();
-  return data?.categories ?? null;
+  return data.categories;
 };
 
-export const useExchangeRates = (): ExchangeRatesData | null => {
+export const useExchangeRates = (): ExchangeRatesData => {
   const { data } = useFinanceData();
-  return data?.exchangeRates ?? null;
+  return data.exchangeRates;
 };
 
-export const useMonobankExchangeRates = (): ExchangeRates | null => {
+export const useMonobankExchangeRates = (): ExchangeRates => {
   const { data } = useFinanceData();
-  return data?.exchangeRates?.mono ?? null;
+  return data.exchangeRates.mono;
 };
 
-export const useFixerExchangeRates = (): ExchangeRates | null => {
+export const useFixerExchangeRates = (): ExchangeRates => {
   const { data } = useFinanceData();
-  return data?.exchangeRates?.fixer ?? null;
+  return data.exchangeRates.fixer;
 };

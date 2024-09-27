@@ -1,6 +1,4 @@
-'use client';
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CalendarIcon, ChevronRightIcon, TrendingUpIcon, TrendingDownIcon, BarChartIcon, PieChartIcon, RadarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import {

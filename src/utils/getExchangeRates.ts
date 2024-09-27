@@ -1,14 +1,15 @@
+import { CURRENCY_CODE } from '@/constants/currency';
 import { ExchangeRates } from '@/contexts/FinanceData';
 
 export const getExchangeRate = (from: string, to: string, rates: ExchangeRates | null): number | null => {
   if (!rates) return null;
   if (from === to) return 1;
 
-  if (from === 'EUR') {
+  if (from === CURRENCY_CODE.EUR) {
     return rates[to] ?? null;
   }
 
-  if (to === 'EUR') {
+  if (to === CURRENCY_CODE.EUR) {
     return rates[from] ? 1 / rates[from] : null;
   }
 

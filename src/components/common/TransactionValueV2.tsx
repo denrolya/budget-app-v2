@@ -1,7 +1,7 @@
 import cn from 'classnames';
 
-import { useAuth } from '@/contexts/auth';
 import { CURRENCIES } from '@/constants/currency';
+import { useBaseCurrency } from '@/contexts/auth';
 import Transaction from '@/models/Transaction';
 
 interface TransactionValueProps {
@@ -10,13 +10,9 @@ interface TransactionValueProps {
   maximumFractionDigits?: number;
 }
 
-export const TransactionValue = ({
-                                           transaction,
-                                           className,
-                                           maximumFractionDigits = 2,
-                                         }: TransactionValueProps) => {
-  const { user } = useAuth();
-  const baseCurrency = CURRENCIES[user?.baseCurrency];
+export const TransactionValue = ({ transaction, className, maximumFractionDigits = 2 }: TransactionValueProps) => {
+  const baseCurrencyCode = useBaseCurrency();
+  const baseCurrency = CURRENCIES[baseCurrencyCode];
   const { amount, account: { currency }, convertedValues } = transaction;
   const symbol = currency ? CURRENCIES[currency]?.symbol : baseCurrency.symbol;
   const value = convertedValues?.[baseCurrency.code];

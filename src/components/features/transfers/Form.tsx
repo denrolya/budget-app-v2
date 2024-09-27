@@ -31,7 +31,6 @@ interface FormState {
 }
 
 interface TransferFormProps {
-  values: Transfer | undefined;
   onClose: () => void;
   setFormState: React.Dispatch<React.SetStateAction<FormState>>;
   showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
@@ -49,7 +48,6 @@ interface TransferFormRef {
  *
  */
 export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
-                                                                              values: data,
                                                                               setFormState,
                                                                               showToast,
                                                                             }, ref) => {

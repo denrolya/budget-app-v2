@@ -25,6 +25,8 @@ class DebugLogger {
   }
 
   private log(message: unknown, level: LogLevel, component?: string): void {
+    if (!this.isDev) return;
+
     const timestamp = moment().format('YYYY-MM-DD HH:mm:ss.SSS');
     const componentInfo = component ? `[${component}]` : '';
     const formattedMessage = this.formatMessage(message);

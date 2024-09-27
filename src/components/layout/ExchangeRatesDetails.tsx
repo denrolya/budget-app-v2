@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
 
+import { CURRENCY_CODE } from '@/constants/currency';
 import MoneyValue from '@/components/common/MoneyValue';
 import ExchangeRatesPresets from '@/components/common/ExchangeRatesPresets';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -12,10 +13,10 @@ export const ExchangeRatesDetails: React.FC = () => {
   const fixerExchangeRates = useFixerExchangeRates();
 
   const headerCurrencyPairs = [
-    { from: 'EUR', to: 'USD' },
-    { from: 'EUR', to: 'HUF' },
-    { from: 'EUR', to: 'UAH' },
-    { from: 'USD', to: 'UAH' },
+    { from: CURRENCY_CODE.EUR, to: CURRENCY_CODE.USD },
+    { from: CURRENCY_CODE.EUR, to: CURRENCY_CODE.HUF },
+    { from: CURRENCY_CODE.EUR, to: CURRENCY_CODE.UAH },
+    { from: CURRENCY_CODE.USD, to: CURRENCY_CODE.UAH },
   ];
 
   return (
@@ -24,7 +25,7 @@ export const ExchangeRatesDetails: React.FC = () => {
         <div className="hidden md:flex items-center text-xs text-accent-foreground/80 space-x-2 cursor-pointer hover:text-accent-foreground transition-colors">
           {headerCurrencyPairs.map(({ from, to }) => (
             <span key={`${from}/${to}`} className="font-mono">
-              {from}/{to}: <MoneyValue showSymbol={false} amount={getExchangeRate(from, to, fixerExchangeRates)} />
+              {from}/{to}: <MoneyValue showSymbol={false} amount={getExchangeRate(from, to, fixerExchangeRates) ?? 0} />
             </span>
           ))}
           <ChevronRight className="h-4 w-4 ml-1" />

@@ -1,5 +1,5 @@
 import { ArrowDownIcon, ArrowUpIcon, Bitcoin, DollarSign, Edit, Euro, Trash2, User } from 'lucide-react';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { MOMENT_DATETIME_VIEW_FORMAT } from '@/constants/datetime';
 import { MoneyValue } from '@/components/common/MoneyValue';
@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
-import { useAccounts } from '@/contexts/FinanceData';
 import Transaction, { Type as TransactionType } from '@/models/Transaction';
 import { useFixerExchangeRates } from '@/contexts/FinanceData';
 
@@ -25,11 +24,9 @@ const currencyOrder = [CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.HUF, 
 export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit, onDelete }) => {
   const isIncome = transaction.type === TransactionType.Income;
   const isDebt = transaction.debt && transaction.debt.debtor;
-  const accounts = useAccounts();
-  const account = useMemo(() => accounts.find(account => account.id === transaction.account.id), [accounts, transaction.account?.id]);
   const currentRates = useFixerExchangeRates();
 
-  const formatExchangeRate = (convertedAmount: number, targetCurrency: string) => {
+  const formatExchangeRate = (convertedAmount: number, targetCurrency: CURRENCY_CODE) => {
     const transactionCurrency = CURRENCIES[transaction.account.currency];
     const transactionAmount = transaction.amount;
 
@@ -103,7 +100,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
         <CardContent className="grid gap-4">
           <div className="flex items-center justify-between">
             <div className="flex align-center space-x-4">
-              <AccountAvatar account={account} />
+              <AccountAvatar account={transaction.account} />
               <div>
                 <p className="text-sm font-medium leading-none">{transaction.account.nameWithCurrency}</p>
                 <p className="text-sm text-muted-foreground">{transaction.account.currency}</p>
@@ -196,7 +193,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
         </Card>
       )}
 
-      {transaction.compensations && transaction.compensations.length > 0 && (
+      {(transaction.compensations && transaction.compensations.length > 0) && (
         <Card>
           <CardHeader>
             <CardTitle>Compensation Transactions</CardTitle>

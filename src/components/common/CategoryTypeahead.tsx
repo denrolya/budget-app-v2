@@ -6,8 +6,8 @@ import Category from '@/models/Category';
 
 interface CategoryTypeaheadProps {
   multiple?: boolean;
-  value: string | string[] | null;
-  onChange: (value: string | string[] | null) => void;
+  value: number | number[] | string | string[] | null;
+  onChange: (value: number | number[] | string | string[] | null) => void;
   className?: string;
 }
 
@@ -29,7 +29,7 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>((
     return path;
   };
 
-  const renderElement = (el: Category, vf: string, lf: string) => (
+  const renderElement = (el: Category) => (
     <>
       <div className="flex flex-col">
         <span>{el.name}</span>

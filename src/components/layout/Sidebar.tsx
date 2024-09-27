@@ -10,13 +10,13 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { ROUTES } from '@/constants/routes';
-import { useAuth } from '@/contexts/auth';
+import { useBaseCurrency } from '@/contexts/auth';
 import { useActiveAccountsWithDefaultOrder, useDebts } from '@/contexts/FinanceData';
 import { FormType, useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
 
 export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className }) => {
-  const { user } = useAuth();
+  const baseCurrency = useBaseCurrency();
   const accounts = useActiveAccountsWithDefaultOrder();
   const debts = useDebts();
   const [isMobile, setIsMobile] = useState(false);
@@ -24,11 +24,15 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
   const { openForm } = useForm();
 
   const totalBalance = useMemo(
-    () => sumBy(accounts, ({ convertedValues }) => convertedValues[user.baseCurrency] || 0),
-    [accounts?.length],
-  );
+    () => sumBy(
+      accounts,
+      ({ convertedValues }) => convertedValues?.[baseCurrency] || 0
+    ), [accounts.length]);
 
-  const totalDebt = useMemo(() => sumBy(debts, ({ convertedValues }) => convertedValues[user?.baseCurrency] || 0), [debts?.length]);
+  const totalDebt = useMemo(() => sumBy(
+    debts,
+    ({ convertedValues }) => convertedValues?.[baseCurrency] || 0
+    ), [debts?.length]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -128,14 +132,14 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
               <span className="text-xs font-semibold text-accent-foreground/60">Total Balance</span>
               <MoneyValue className="font-medium text-sm text-mono"
                           amount={totalBalance}
-                          currency={user.baseCurrency} />
+                          currency={baseCurrency} />
             </div>
             <div className="w-full flex justify-between items-center">
               <span className="text-xs font-semibold text-accent-foreground/60">Total Debt</span>
               <MoneyValue
                 className="font-medium text-sm text-destructive text-mono"
                 amount={totalDebt}
-                currency={user.baseCurrency} />
+                currency={baseCurrency} />
             </div>
             <div className="w-full flex justify-between items-center">
               <span className="text-xs font-semibold text-accent-foreground/60">Total</span>
@@ -146,7 +150,7 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
                   'text-accent-foreground': totalDebt + totalBalance === 0,
                 })}
                 amount={totalDebt + totalBalance}
-                currency={user.baseCurrency} />
+                currency={baseCurrency} />
             </div>
           </div>
           <Button variant="ghost" className="w-full justify-start" onClick={() => openForm(FormType.Account)}>

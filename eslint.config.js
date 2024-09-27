@@ -58,6 +58,7 @@ export default tseslint.config(
       'react/prop-types': 'off', // We're using TypeScript for prop type checking
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
+      "@typescript-eslint/no-explicit-any": "off",
       'import/order': [
         'error',
         {

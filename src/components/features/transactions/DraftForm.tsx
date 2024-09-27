@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
 
-import { useAccountsWithDefaultOrder, useCategories } from '@/contexts/FinanceData';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { useAccountsWithDefaultOrder, useCategories } from '@/contexts/FinanceData';
 
 interface Transaction {
-  type: 'e' | 'i'
-  amount: string
-  category: string
-  account: string
+  type: 'e' | 'i';
+  amount: string;
+  category: string;
+  account: string;
 }
 
 export const DraftForm: React.FC = () => {
@@ -51,7 +58,7 @@ export const DraftForm: React.FC = () => {
       case 'type':
         return [
           { value: 'e', label: 'Expense' },
-          { value: 'i', label: 'Income' }
+          { value: 'i', label: 'Income' },
         ];
       case 'category':
         return categories.map(category => ({ value: category.id, label: category.name }));
@@ -93,7 +100,7 @@ export const DraftForm: React.FC = () => {
             step === 'type' ? 'Select transaction type (e for expense, i for income)' :
               step === 'amount' ? 'Enter amount (e.g., 50.10)' :
                 step === 'category' ? 'Select or enter category' :
-                  step === 'account' && 'Select or enter account'
+                  step === 'account' ? 'Select or enter account' : ''
           }
           value={inputValue}
           onValueChange={handleInputChange}

@@ -1,12 +1,12 @@
 import cn from 'classnames';
 import React from 'react';
 
-import { CURRENCIES } from '@/constants/currency';
-import { useAuth } from '@/contexts/auth';
+import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { useBaseCurrency } from '@/contexts/auth';
 
 interface MoneyValueProps {
   id?: string;
-  currency?: string;
+  currency?: CURRENCY_CODE;
   amount: number | string;
   values?: Record<string, number>;
   showSymbol?: boolean;
@@ -27,8 +27,8 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
                                                         className,
                                                         bold = false,
                                                       }) => {
-  const { user } = useAuth();
-  const baseCurrency = CURRENCIES[user?.baseCurrency];
+  const baseCurrencyCode = useBaseCurrency();
+  const baseCurrency = CURRENCIES[baseCurrencyCode];
   const symbol = currency ? CURRENCIES[currency]?.symbol : baseCurrency.symbol;
   const value = values[baseCurrency.code];
 

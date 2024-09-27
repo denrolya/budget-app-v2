@@ -1,14 +1,9 @@
-import { FC, memo, useMemo } from 'react';
 import cn from 'classnames';
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  CalendarIcon,
-  DollarSignIcon,
-  PercentIcon,
-  TrendingUpIcon,
-} from 'lucide-react';
+import { ArrowDownIcon, ArrowUpIcon, CalendarIcon, DollarSignIcon, PercentIcon, TrendingUpIcon } from 'lucide-react';
 import moment from 'moment';
+import React, { memo, useMemo } from 'react';
+import { TooltipProps } from 'recharts';
+import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 import MoneyValue from '@/components/common/MoneyValue';
 
@@ -25,10 +20,7 @@ type TransformedData = {
   previousRevenue: number;
 };
 
-interface TooltipProps {
-  active: boolean;
-  payload: any[]; // Ideally, replace 'any' with the specific type from Recharts
-  label: number;
+interface Props extends TooltipProps<ValueType, NameType> {
   data: TransformedData[];
 }
 
@@ -42,7 +34,7 @@ const calculateChange = (current: number, previous: number) => {
   };
 };
 
-export const Tooltip: FC<TooltipProps> = ({ active, payload, label, data }) => {
+export const Tooltip: React.FC<Props> = ({ label, active, payload, data }) => {
   const dataPointMap = useMemo(() => {
     const map = new Map<number, TransformedData>();
     data.forEach((data) => {

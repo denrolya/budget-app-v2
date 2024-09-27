@@ -8,7 +8,8 @@ interface TransactionFiltersProps {
   after?: Moment;
   status?: string;
   amountRange?: number[];
-  categories?: string[];
+  categories?: string[] | number[];
+  excludedCategories?: string[] | number[];
   accounts?: string[];
   withNestedCategories?: boolean;
   isDraft?: boolean;
@@ -21,6 +22,7 @@ export class TransactionFilters implements FilterModel {
   status: string;
   amountRange: number[];
   categories: string[];
+  excludedCategories: string[];
   accounts: string[];
   withNestedCategories: boolean;
   isDraft: boolean;
@@ -32,6 +34,7 @@ export class TransactionFilters implements FilterModel {
                 status = '',
                 amountRange = [0, 10000],
                 categories = [],
+                excludedCategories = [],
                 accounts = [],
                 withNestedCategories = false,
                 isDraft = false,
@@ -42,6 +45,7 @@ export class TransactionFilters implements FilterModel {
     this.status = status;
     this.amountRange = amountRange;
     this.categories = categories;
+    this.excludedCategories = excludedCategories;
     this.accounts = accounts;
     this.withNestedCategories = withNestedCategories;
     this.isDraft = isDraft;

@@ -1,11 +1,11 @@
 import cn from 'classnames';
 import { Archive, ArrowUpDown, Calendar, ChevronLeft, Download, Edit, Plus, Search } from 'lucide-react';
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountAvatar from '@/components/features/accounts/Avatar';
-import { Badge } from '@/components/ui/badge';
+import { Badge, BadgeVariant, badgeVariants } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
 
-export const AccountsManagementPage = () => {
+export const AccountsManagementPage: React.FC = () => {
   const accounts = useAccountsWithDefaultOrder();
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState('transactions');
@@ -29,7 +29,7 @@ export const AccountsManagementPage = () => {
 
   const selectedAccount = selectedAccountId ? accounts.find(account => account.id === selectedAccountId) : null;
 
-  const AccountList = () => (
+  const AccountList: React.FC = () => (
     <div className="flex flex-col h-full">
       <div className="p-4 border-b">
         <h2 className="text-lg font-semibold mb-2">Accounts</h2>
@@ -86,12 +86,13 @@ export const AccountsManagementPage = () => {
     </div>
   );
 
-  const AccountDetail = () => {
-    let balanceBadgeVariant = 'secondary';
+  const AccountDetail: React.FC = () => {
+    if (!selectedAccount) return null;
+    let balanceBadgeVariant: BadgeVariant = BadgeVariant.Secondary;
     if (selectedAccount?.balance && selectedAccount.balance < 0) {
-      balanceBadgeVariant = 'destructive';
+      balanceBadgeVariant = BadgeVariant.Destructive;
     } else if (selectedAccount?.balance && selectedAccount.balance > 0) {
-      balanceBadgeVariant = 'success';
+      balanceBadgeVariant = BadgeVariant.Success;
     }
 
     return (
@@ -138,7 +139,7 @@ export const AccountsManagementPage = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">{selectedAccount?.notes}</p>
+              <p className="text-sm text-muted-foreground">Notes here</p>
             </CardContent>
             <CardFooter>
               <Button variant="outline" size="sm">

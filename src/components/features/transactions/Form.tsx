@@ -351,7 +351,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               type="button"
               className="mt-2 w-full"
               onClick={() => append({
-                account: undefined,
+                account: -1,
                 amount: 0,
                 executedAt: moment().toISOString(),
               })}

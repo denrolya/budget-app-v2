@@ -1,3 +1,4 @@
+import cn from 'classnames';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import React, { forwardRef, useCallback, useMemo, useState } from 'react';
 
@@ -14,20 +15,17 @@ import {
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
-
-type Option = Record<string, any>
 
 interface TypeaheadV2Props {
   multiple?: boolean;
-  options: Option[];
+  options: any[];
   valueField: string;
   labelField: string;
-  renderElement: (element: Option, valueField: string, labelField: string) => React.ReactNode;
+  renderElement: (element: any, valueField?: string, labelField?: string) => React.ReactNode;
   placeholder?: string;
   emptyMessage?: string;
-  value: string | string[] | null;
-  onChange: (value: string | string[] | null) => void;
+  value: number | number[] | string | string[] | null;
+  onChange: (value: number | number[] | string | string[] | null) => void;
   className?: string;
 }
 
@@ -65,7 +63,7 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
     );
   }, [options, inputValue, labelField, selectedValues, valueField]);
 
-  const handleSelect = useCallback((option: Option) => {
+  const handleSelect = useCallback((option: any) => {
     const optionValue = option[valueField];
     if (multiple) {
       const newValue = selectedValues.includes(optionValue)
@@ -82,6 +80,7 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
   const handleRemove = useCallback((optionValue: string) => {
     if (multiple) {
       const newValue = selectedValues.filter(v => v !== optionValue);
+      // @ts-ignore
       onChange(newValue);
     } else {
       onChange(null);
@@ -91,6 +90,7 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
       const newValue = selectedValues.slice(0, -1);
+      // @ts-ignore
       onChange(multiple ? newValue : newValue[0] || null);
     }
   }, [inputValue, multiple, onChange, selectedValues]);

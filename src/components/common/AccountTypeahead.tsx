@@ -9,8 +9,8 @@ import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
 
 interface AccountTypeaheadProps {
   multiple?: boolean;
-  value: string | string[] | null;
-  onChange: (value: string | string[] | null) => void;
+  value: number | number[] | string | string[] | null;
+  onChange: (value: number | number[] | string | string[] | null) => void;
   className?: string;
 }
 

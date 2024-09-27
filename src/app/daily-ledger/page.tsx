@@ -4,10 +4,11 @@ import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
+import { useCategories } from '@/contexts/FinanceData';
 import TransactionListItem from '@/components/features/transactions/ListItemV2';
 import TransferListItem from '@/components/features/transfers/ListItem';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useTransfers } from '@/hooks/useTransfers';
 import Transaction from '@/models/Transaction';
@@ -18,6 +19,8 @@ import { TransferFilters } from '@/models/TransferFilters';
 const DailyLedger: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(moment().startOf('day'));
   const daysPerPage = 3;
+  const { list:categories } = useCategories();
+  const transferCategories = useMemo(() => categories.filter(c => c.name === 'Transfer').map(({ id }) => id), [categories.length]);
 
   const dateRange = useMemo(() => {
     const startDate = currentDate.clone().subtract(daysPerPage - 1, 'days');
@@ -32,7 +35,9 @@ const DailyLedger: React.FC = () => {
     error: errorTransactions,
     setFilter: setTransactionFilter,
   } = useTransactions({
-    initialFilters: new TransactionFilters(),
+    initialFilters: new TransactionFilters({
+      excludedCategories: transferCategories,
+    }),
     updateUrl: false,
   });
 
@@ -124,7 +129,7 @@ const DailyLedger: React.FC = () => {
       )}
 
       {!isLoading && !isError && (
-        <div className={cn('grid gap-4', 'md:grid-cols-3')}>
+        <div className="grid gap-4 md:grid-cols-3">
           {Array.from({ length: daysPerPage }, (_, i) => moment(currentDate).subtract(i, 'days')).reverse().map(date => {
             const dateKey = date.format('YYYY-MM-DD');
             const items = groupedItems[dateKey] || [];

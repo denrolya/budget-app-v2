@@ -20,20 +20,21 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 interface CardConfig {
-  type: 'income' | 'expense'
-  category: string | null
-  period: 'week' | 'month' | 'year'
-  comparison: 'previous' | 'same-last-year'
-  amount: number
-  previousAmount: number
-  statType: 'sum' | 'daily' | 'avg' | 'min-max'
-  minAmount?: number
-  maxAmount?: number
+  id: string;
+  type: 'income' | 'expense';
+  category: string | number | null;
+  period: 'week' | 'month' | 'year';
+  comparison: 'previous' | 'same-last-year';
+  amount: number;
+  previousAmount: number;
+  statType: 'sum' | 'daily' | 'avg' | 'min-max';
+  minAmount?: number;
+  maxAmount?: number;
 }
 
 interface Props {
-  config: CardConfig
-  onConfigChange: (id: string, newConfig: Partial<CardConfig>) => void
+  config: CardConfig;
+  onConfigChange: (id: string, newConfig: Partial<CardConfig>) => void;
 }
 
 const comparisons = [

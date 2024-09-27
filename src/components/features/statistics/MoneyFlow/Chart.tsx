@@ -2,7 +2,7 @@ import moment from 'moment/moment';
 import React, { useState } from 'react';
 import { Area, Bar, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-import CustomTooltip from '@/components/features/statistics/MoneyFlow/Tooltip.tsx';
+import CustomTooltip from '@/components/features/statistics/MoneyFlow/Tooltip';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 
@@ -56,11 +56,18 @@ const MoneyFlowChart: React.FC<Props> = ({ data, isBarChart }) => {
               <stop offset="100%" stopColor="hsl(var(--destructive) / 0.2)" />
             </linearGradient>
           </defs>
-          <XAxis dataKey="time" scale="time" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(unixTime: number) => moment(unixTime).format('MM/DD')} hide />
+          <XAxis dataKey="time"
+                 scale="time"
+                 type="number"
+                 domain={['dataMin', 'dataMax']}
+                 tickFormatter={(unixTime: number) => moment(unixTime).format('MM/DD')}
+                 hide />
           <YAxis hide domain={[-maxValue, maxValue]} />
-          <Tooltip cursor={false} content={<CustomTooltip data={data} />} />
+          <Tooltip
+            cursor={false}
+            content={(props) => <CustomTooltip {...props} data={data} />} />
           <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeOpacity={0.2} />
-          {showRevenue ? (
+          {showRevenue && (
             <>
               <Line
                 type="monotone"
@@ -78,51 +85,51 @@ const MoneyFlowChart: React.FC<Props> = ({ data, isBarChart }) => {
                 dot={false}
               />
             </>
-          ) : (
-            isBarChart ? (
-              <>
-                <Bar
-                  dataKey="expenses"
-                  fill="hsl(var(--destructive))"
-                  stackId="stack"
-                  radius={[4, 4, 0, 0]}
-                  maxBarSize={60}
-                >
-                  {transformedData.map((entry, index) => (
-                    <rect key={`expenses-${index}`} fill="url(#expensesGradient)" />
-                  ))}
-                </Bar>
-                <Bar
-                  dataKey="income"
-                  fill="hsl(var(--primary))"
-                  stackId="stack"
-                  radius={[4, 4, 0, 0]}
-                  maxBarSize={60}
-                >
-                  {transformedData.map((entry, index) => (
-                    <rect key={`income-${index}`} fill="url(#incomeGradient)" />
-                  ))}
-                </Bar>
-              </>
-            ) : (
-              <>
-                <Area
-                  type="monotone"
-                  dataKey="income"
-                  fill="hsl(var(--primary))"
-                  stroke="hsl(var(--primary))"
-                  fillOpacity={0.3}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="expenses"
-                  fill="hsl(var(--destructive))"
-                  stroke="hsl(var(--destructive))"
-                  fillOpacity={0.3}
-                  baseValue={0}
-                />
-              </>
-            )
+          )}
+          {isBarChart && (
+            <>
+              <Bar
+                dataKey="expenses"
+                fill="hsl(var(--destructive))"
+                stackId="stack"
+                radius={[4, 4, 0, 0]}
+                maxBarSize={60}
+              >
+                {transformedData.map((_, index) => (
+                  <rect key={`expenses-${index}`} fill="url(#expensesGradient)" />
+                ))}
+              </Bar>
+              <Bar
+                dataKey="income"
+                fill="hsl(var(--primary))"
+                stackId="stack"
+                radius={[4, 4, 0, 0]}
+                maxBarSize={60}
+              >
+                {transformedData.map((_, index) => (
+                  <rect key={`income-${index}`} fill="url(#incomeGradient)" />
+                ))}
+              </Bar>
+            </>
+          )}
+          {!isBarChart && (
+            <>
+              <Area
+                type="monotone"
+                dataKey="income"
+                fill="hsl(var(--primary))"
+                stroke="hsl(var(--primary))"
+                fillOpacity={0.3}
+              />
+              <Area
+                type="monotone"
+                dataKey="expenses"
+                fill="hsl(var(--destructive))"
+                stroke="hsl(var(--destructive))"
+                fillOpacity={0.3}
+                baseValue={0}
+              />
+            </>
           )}
         </ComposedChart>
       </ResponsiveContainer>

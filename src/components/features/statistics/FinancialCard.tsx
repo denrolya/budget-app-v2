@@ -1,44 +1,42 @@
-'use client';
-
-import { ArrowDownIcon, ArrowUpIcon, CalendarIcon, DollarSignIcon, TrendingUpIcon, BarChartIcon } from 'lucide-react';
 import cn from 'classnames';
+import { ArrowDownIcon, ArrowUpIcon, BarChartIcon, CalendarIcon, DollarSignIcon, TrendingUpIcon } from 'lucide-react';
 import React, { useMemo } from 'react';
 
-import { useCategories } from '@/contexts/FinanceData';
 import MenuButton from '@/components/features/statistics/FinancialCardMenuButton';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { useCategories } from '@/contexts/FinanceData';
 
 interface CardConfig {
-  id: string
-  type: 'income' | 'expense'
-  category: string | null
-  period: 'week' | 'month' | 'year'
-  comparison: 'previous' | 'same-last-year'
-  amount: number
-  previousAmount: number
-  statType: 'sum' | 'daily' | 'avg' | 'min-max'
-  minAmount?: number
-  maxAmount?: number
+  id: string;
+  type: 'income' | 'expense';
+  category: string | null;
+  period: 'week' | 'month' | 'year';
+  comparison: 'previous' | 'same-last-year';
+  amount: number;
+  previousAmount: number;
+  statType: 'sum' | 'daily' | 'avg' | 'min-max';
+  minAmount?: number;
+  maxAmount?: number;
 }
 
 interface Props extends CardConfig {
-  onConfigChange: (id: string, newConfig: Partial<CardConfig>) => void
+  onConfigChange: (id: string, newConfig: Partial<CardConfig>) => void;
 }
 
-export default function Component({
-                                    id,
-                                    type,
-                                    category,
-                                    period,
-                                    comparison,
-                                    amount,
-                                    previousAmount,
-                                    statType,
-                                    minAmount,
-                                    maxAmount,
-                                    onConfigChange,
-                                  }: Props) {
+export const Component: React.FC<Props> = ({
+                                             id,
+                                             type,
+                                             category,
+                                             period,
+                                             comparison,
+                                             amount,
+                                             previousAmount,
+                                             statType,
+                                             minAmount,
+                                             maxAmount,
+                                             onConfigChange,
+                                           }) => {
   const { list: categories } = useCategories();
   const selectedCategory = useMemo(() => categories.find(c => c.name === category), [categories, category]);
   const percentageChange = ((amount - previousAmount) / previousAmount) * 100;
@@ -156,4 +154,6 @@ export default function Component({
       </CardContent>
     </Card>
   );
-}
+};
+
+export default Component;

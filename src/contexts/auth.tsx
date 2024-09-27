@@ -1,12 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-interface User {
-  username: string;
-  roles: string[];
-  exp: number;
-  iat: number;
-  baseCurrency: string;
-}
+import { parseJwt } from '@/utils/parseJWT';
+import User from '@/models/User';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -20,30 +15,26 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Provider component
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
-  // On login, parse the JWT, store in state and sessionStorage
   const login = (token: string) => {
-    const decodedUser = parseJwt(token); // Implement parseJwt to decode token and extract user data
+    const decodedUser = parseJwt(token);
     setToken(token);
     setUser(decodedUser);
     sessionStorage.setItem('token', token);
     setIsLoading(false);
   };
 
-  // On logout, clear the state and sessionStorage
   const logout = () => {
     setToken(null);
     setUser(null);
     sessionStorage.removeItem('token');
   };
 
-  // Initialize state from sessionStorage on app load
   useEffect(() => {
     const storedToken = sessionStorage.getItem('token');
     if (storedToken) {
@@ -61,20 +52,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
-// Utility function to decode JWT and extract user data
-const parseJwt = (token: string): User => {
-  const base64Url = token.split('.')[1];
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  const jsonPayload = decodeURIComponent(
-    window
-      .atob(base64)
-      .split('')
-      .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-      .join('')
-  );
-  return JSON.parse(jsonPayload);
-};
-
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -85,10 +62,13 @@ export const useAuth = () => {
 
 export const useUser = () => {
   const { user } = useAuth();
+  if (!user) {
+    throw new Error('User is not authenticated');
+  }
   return user;
 };
 
 export const useBaseCurrency = () => {
-  const { user: { baseCurrency } } = useAuth();
+  const { baseCurrency } = useUser();
   return baseCurrency;
 };

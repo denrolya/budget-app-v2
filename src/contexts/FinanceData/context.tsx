@@ -1,13 +1,13 @@
+import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { AlertCircle } from 'lucide-react';
 import React, { createContext, ReactNode, useCallback, useEffect, useState } from 'react';
-import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
 import MainLoadingScreen from '@/components/layout/MainLoadingScreen';
-import Category, { CategoryTreeBuilder } from '@/models/Category';
-import Account, { AccountRawData } from '@/models/Account';
-import { axiosFetcher } from '@/services/api';
-import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import Account, { AccountRawData } from '@/models/Account';
+import Category, { CategoryTreeBuilder } from '@/models/Category';
+import { axiosFetcher } from '@/services/api';
 
 export type Debt = {
   id: number;
@@ -22,21 +22,33 @@ export type ExchangeRatesData = {
   mono: ExchangeRates;
 }
 
+export type CategoriesData = {
+  tree: Category[];
+  list: Category[];
+}
+
 export interface FinanceData {
   accounts: Account[];
   debts: Debt[];
-  categories: { tree: Category[], list: Category[] };
+  categories: CategoriesData;
   exchangeRates: ExchangeRatesData;
 }
 
 export interface FinanceDataContextType {
-  data: FinanceData | null;
+  data: FinanceData;
   isLoading: boolean;
   error: Error | null;
   retry: () => void;
   updateAccount: (updatedAccount: Account) => void;
   refetchAccounts: () => Promise<void>;
 }
+
+const INITIAL_STATE: FinanceData = {
+  accounts: [],
+  debts: [],
+  categories: { tree: [], list: [] },
+  exchangeRates: { fixer: {}, mono: {} },
+};
 
 export const FinanceDataContext = createContext<FinanceDataContextType | undefined>(undefined);
 
@@ -99,7 +111,7 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       return rawAccounts.map((account: AccountRawData) => new Account({
         ...account,
-        convertedValues: convertBalance(account.balance, account.currency, exchangeRatesQuery.data.fixer!)
+        convertedValues: convertBalance(account.balance, account.currency, exchangeRatesQuery.data.fixer!),
       }));
     },
     enabled: !!exchangeRatesQuery.data, // Fetch accounts only when exchange rates are available
@@ -112,7 +124,7 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
     ...queryOptions,
   });
 
-  const categoriesQuery: UseQueryResult<Category[], Error> = useQuery({
+  const categoriesQuery: UseQueryResult<CategoriesData, Error> = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
       const rawCategories = await axiosFetcher(ENDPOINTS.categories);
@@ -130,14 +142,12 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
   const isLoading = accountsQuery.isLoading || debtsQuery.isLoading || categoriesQuery.isLoading || exchangeRatesQuery.isLoading;
   const error = accountsQuery.error || debtsQuery.error || categoriesQuery.error || exchangeRatesQuery.error;
 
-  const financeData: FinanceData | null = isLoading
-    ? null
-    : {
-      accounts: accountsQuery.data!,
-      debts: debtsQuery.data!,
-      categories: categoriesQuery.data!,
-      exchangeRates: exchangeRatesQuery.data!,
-    };
+  const financeData: FinanceData = isLoading ? INITIAL_STATE : {
+    accounts: accountsQuery.data!,
+    debts: debtsQuery.data!,
+    categories: categoriesQuery.data!,
+    exchangeRates: exchangeRatesQuery.data!,
+  };
 
   const retry = useCallback((): void => {
     setProgress(0);
