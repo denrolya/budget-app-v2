@@ -1,3 +1,12 @@
+export enum CURRENCY_CODE {
+  EUR = 'EUR',
+  USD = 'USD',
+  HUF = 'HUF',
+  UAH = 'UAH',
+  BTC = 'BTC',
+  ETH = 'ETH',
+}
+
 export const CURRENCIES = {
   EUR: {
     code: 'EUR',

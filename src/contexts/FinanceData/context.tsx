@@ -17,11 +17,16 @@ export type Debt = {
 
 export type ExchangeRates = Record<string, number>;
 
+export type ExchangeRatesData = {
+  fixer: ExchangeRates;
+  mono: ExchangeRates;
+}
+
 export interface FinanceData {
   accounts: Account[];
   debts: Debt[];
   categories: Category[];
-  exchangeRates: ExchangeRates;
+  exchangeRates: ExchangeRatesData;
 }
 
 export interface FinanceDataContextType {
@@ -42,7 +47,8 @@ const ENDPOINTS = {
   accounts: '/api/v2/account',
   debts: '/api/v2/debt',
   categories: '/api/v2/category',
-  exchangeRates: '/api/v2/exchange-rates',
+  fixerExchangeRates: '/api/v2/exchange-rates',
+  monobankExchangeRates: '/api/v2/exchange-rates/monobank',
 } as const;
 
 export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -55,11 +61,19 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
     staleTime: Infinity,
   };
 
-  const exchangeRatesQuery: UseQueryResult<ExchangeRates, Error> = useQuery({
+  const exchangeRatesQuery: UseQueryResult<ExchangeRatesData, Error> = useQuery({
     queryKey: ['exchangeRates'],
     queryFn: async () => {
-      const response = await axiosFetcher(ENDPOINTS.exchangeRates);
-      return response.rates;
+      const fixerExchangeRatesResponse = await axiosFetcher(ENDPOINTS.fixerExchangeRates);
+      const fixerExchangeRates: Record<string, number> = fixerExchangeRatesResponse.rates;
+
+      const monobankExchangeRatesResponse = await axiosFetcher(ENDPOINTS.monobankExchangeRates);
+      const monobankExchangeRates: Record<string, number> = monobankExchangeRatesResponse.rates;
+
+      return {
+        fixer: fixerExchangeRates,
+        mono: monobankExchangeRates,
+      };
     },
     ...queryOptions,
   });

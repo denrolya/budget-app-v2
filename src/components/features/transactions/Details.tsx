@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CURRENCIES } from '@/constants/currency';
 import { useAccounts } from '@/contexts/FinanceData';
 import Transaction from '@/models/Transaction';
-import { useExchangeRates } from '@/contexts/FinanceData';
+import { useFixerExchangeRates } from '@/contexts/FinanceData';
 
 interface TransactionDetailsProps {
   transaction: Transaction;
@@ -27,7 +27,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
   const isDebt = transaction.debt && transaction.debt.debtor;
   const accounts = useAccounts();
   const account = useMemo(() => accounts.find(account => account.id === transaction.account.id), [accounts, transaction.account?.id]);
-  const currentRates = useExchangeRates();
+  const currentRates = useFixerExchangeRates();
 
   const formatExchangeRate = (convertedAmount: number, targetCurrency: string) => {
     const transactionCurrency = CURRENCIES[transaction.account.currency];

@@ -29,15 +29,7 @@ const MoneyFlowChart: React.FC<Props> = ({ data, isBarChart }) => {
   }));
 
   const maxValue = Math.max(...data.map(item => Math.max(item.income, item.expenses, item.revenue, item.previousRevenue)));
-  const CustomXAxis = ({ dataKey = "time", scale = "time", type = "number", domain = ['dataMin', 'dataMax'], tickFormatter = (unixTime: number) => moment(unixTime).format('MM/DD'), hide = true }) => (
-    <XAxis dataKey={dataKey} scale={scale} type={type} domain={domain} tickFormatter={tickFormatter} hide={hide} />
-  );
-  const CustomYAxis = ({ hide = true, domain = [-maxValue, maxValue] }) => (
-    <YAxis hide={hide} domain={domain} />
-  );
-  const CustomReferenceLine = ({ y = 0, stroke = 'hsl(var(--muted-foreground))', strokeOpacity = 0.2 }) => (
-    <ReferenceLine y={y} stroke={stroke} strokeOpacity={strokeOpacity} />
-  );
+
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex items-center space-x-2 mb-4">
@@ -64,10 +56,10 @@ const MoneyFlowChart: React.FC<Props> = ({ data, isBarChart }) => {
               <stop offset="100%" stopColor="hsl(var(--destructive) / 0.2)" />
             </linearGradient>
           </defs>
-          <CustomXAxis />
-          <CustomYAxis />
+          <XAxis dataKey="time" scale="time" type="number" domain={['dataMin', 'dataMax']} tickFormatter={(unixTime: number) => moment(unixTime).format('MM/DD')} hide />
+          <YAxis hide domain={[-maxValue, maxValue]} />
           <Tooltip cursor={false} content={<CustomTooltip data={data} />} />
-          <CustomReferenceLine />
+          <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeOpacity={0.2} />
           {showRevenue ? (
             <>
               <Line

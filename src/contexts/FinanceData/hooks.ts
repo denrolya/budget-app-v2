@@ -6,6 +6,7 @@ import Category from '@/models/Category';
 import {
   Debt,
   ExchangeRates,
+  ExchangeRatesData,
   FinanceDataContext,
   FinanceDataContextType,
 } from '@/contexts/FinanceData/context';
@@ -58,7 +59,17 @@ export const useCategories = (): Category[] | null => {
   return data?.categories ?? null;
 };
 
-export const useExchangeRates = (): ExchangeRates | null => {
+export const useExchangeRates = (): ExchangeRatesData | null => {
   const { data } = useFinanceData();
   return data?.exchangeRates ?? null;
+};
+
+export const useMonobankExchangeRates = (): ExchangeRates | null => {
+  const { data } = useFinanceData();
+  return data?.exchangeRates?.mono ?? null;
+};
+
+export const useFixerExchangeRates = (): ExchangeRates | null => {
+  const { data } = useFinanceData();
+  return data?.exchangeRates?.fixer ?? null;
 };

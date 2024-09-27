@@ -40,8 +40,8 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
 
   const navItems = [
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
-    { path: '/transactions', icon: Receipt, label: 'Transactions' },
-    { path: '/accounts', icon: CreditCard, label: 'Accounts' },
+    { path: '/ledger', icon: Receipt, label: 'Ledger' },
+    { path: '/transactions', icon: CreditCard, label: 'Transactions' },
   ];
 
   return (
@@ -95,9 +95,21 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                       <TabsContent value="quickAccess">
                         <div className="space-y-4">
                           <Button variant="ghost" className="w-full justify-start" asChild>
+                            <Link to="/accounts">
+                              <DollarSign className="mr-2 h-4 w-4" />
+                              Accounts
+                            </Link>
+                          </Button>
+                          <Button variant="ghost" className="w-full justify-start" asChild>
                             <Link to="/debts">
                               <DollarSign className="mr-2 h-4 w-4" />
                               Debts
+                            </Link>
+                          </Button>
+                          <Button variant="ghost" className="w-full justify-start" asChild>
+                            <Link to="/transfers">
+                              <ArrowLeftRight className="mr-2 h-4 w-4" />
+                              Transfers
                             </Link>
                           </Button>
                           <Button variant="ghost" className="w-full justify-start" asChild>
@@ -110,18 +122,6 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                             <Link to="/categories">
                               <List className="mr-2 h-4 w-4" />
                               Categories
-                            </Link>
-                          </Button>
-                          <Button variant="ghost" className="w-full justify-start" asChild>
-                            <Link to="/ledger">
-                              <RefreshCw className="mr-2 h-4 w-4" />
-                              Daily Ledger
-                            </Link>
-                          </Button>
-                          <Button variant="ghost" className="w-full justify-start" asChild>
-                            <Link to="/transfers">
-                              <ArrowLeftRight className="mr-2 h-4 w-4" />
-                              Transfers
                             </Link>
                           </Button>
                         </div>

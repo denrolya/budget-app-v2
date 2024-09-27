@@ -9,6 +9,8 @@ import {
   useDebts,
   useCategories,
   useExchangeRates,
+  useFixerExchangeRates,
+  useMonobankExchangeRates,
 } from '@/contexts/FinanceData/hooks';
 
 export type {
@@ -29,6 +31,8 @@ export {
   useDebts,
   useCategories,
   useExchangeRates,
+  useFixerExchangeRates,
+  useMonobankExchangeRates,
 };
 
 export default FinanceDataProvider;

@@ -1,8 +1,8 @@
-import React from 'react';
 import cn from 'classnames';
+import React from 'react';
 
-import { useAuth } from '@/contexts/auth';
 import { CURRENCIES } from '@/constants/currency';
+import { useAuth } from '@/contexts/auth';
 
 interface MoneyValueProps {
   id?: string;
@@ -41,21 +41,17 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
       {showSign && (
         <span className="mr-1">{value < 0 && '-'}</span>
       )}
-      {showSymbol && <span className="mr-1">{symbol}</span>}
       <span>{formatMoney(value)}</span>
+      {showSymbol && <span className="ml-1">{symbol}</span>}
     </>
   );
 
   return (
     <span
       id={id}
-      className={cn(
-        'inline-block whitespace-nowrap font-numeric',
-        {
-          'font-bold': bold,
-        },
-        className,
-      )}
+      className={cn('inline-block whitespace-nowrap font-numeric', {
+        'font-bold': bold,
+      }, className)}
     >
       {renderMoneyElement(numericAmount, symbol)}
       {value !== undefined && (baseCurrency.code !== currency || numericAmount !== value) && (
