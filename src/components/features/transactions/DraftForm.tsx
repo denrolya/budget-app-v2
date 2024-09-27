@@ -56,7 +56,7 @@ export const DraftForm: React.FC = () => {
       case 'category':
         return categories.map(category => ({ value: category.id, label: category.name }));
       case 'account':
-        return accounts.map(account => ({ value: account.id, label: account.name }));
+        return accounts.map(account => ({ value: account.id, label: account.nameWithCurrency }));
       default:
         return [];
     }

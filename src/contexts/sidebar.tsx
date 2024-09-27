@@ -1,14 +1,14 @@
-import { createContext, ReactNode, useContext, useState, Dispatch, SetStateAction } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 interface SidebarContextType {
   isSidebarExpanded: boolean;
-  setIsSidebarExpanded: Dispatch<SetStateAction<boolean>>;
+  setIsSidebarExpanded: React.Dispatch<React.SetStateAction<boolean>>;
   toggleSidebar: () => void;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
-export const SidebarProvider = ({ children }: { children: ReactNode }) => {
+export const SidebarProvider = ({ children }: { children: React.ReactNode }) => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
 
   const toggleSidebar = () => {

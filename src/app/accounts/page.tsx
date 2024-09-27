@@ -50,7 +50,7 @@ export const AccountsManagementPage = () => {
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center gap-2">
                 <AccountAvatar account={account} size="sm" />
-                <h3 className="font-medium">{account.name}</h3>
+                <h3 className="font-medium">{account.nameWithCurrency}</h3>
               </div>
               <Badge variant={account.balance > 0 ? 'success' : 'destructive'}>
                 <MoneyValue
@@ -122,7 +122,7 @@ export const AccountsManagementPage = () => {
                 <div className="flex items-center space-x-4 mb-2">
                   <AccountAvatar account={selectedAccount} />
                   <div>
-                    <CardTitle>{selectedAccount?.name}</CardTitle>
+                    <CardTitle>{selectedAccount?.nameWithCurrency}</CardTitle>
                     <CardDescription>
                       Created on {selectedAccount?.createdAt.format('LLL')}
                     </CardDescription>

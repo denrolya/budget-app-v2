@@ -54,7 +54,7 @@ export const useDebts = (): Debt[] | null => {
   return data?.debts ?? null;
 };
 
-export const useCategories = (): Category[] | null => {
+export const useCategories = (): { list: Category[], tree: Category[] } | null => {
   const { data } = useFinanceData();
   return data?.categories ?? null;
 };

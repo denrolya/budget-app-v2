@@ -12,7 +12,6 @@ import {
   PieChart,
   Plus,
   Receipt,
-  RefreshCw,
   Sun,
 } from 'lucide-react';
 import cn from 'classnames';
@@ -25,7 +24,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useForm } from '@/contexts/Form';
+import { useForm, FormType } from '@/contexts/Form';
 import { useTheme } from '@/contexts/theme';
 
 interface Props {
@@ -190,7 +189,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
             <Button
               className="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-primary-foreground shadow-lg"
               aria-label="Add new"
-              onClick={() => openForm('transaction')}
+              onClick={() => openForm(FormType.Transaction)}
             >
               <Plus className="h-6 w-6" />
             </Button>

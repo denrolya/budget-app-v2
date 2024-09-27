@@ -1,16 +1,8 @@
 import moment, { Moment } from 'moment';
 
 import { useAccounts, useCategories } from '@/contexts/FinanceData';
-import Category from '@/models/category';
-import Account from '@/models/account';
-
-interface Account {
-  icon: string;
-  id: number;
-  name: string;
-  currency: string;
-  color: string;
-}
+import Category from '@/models/Category';
+import Account from '@/models/Account';
 
 interface ConvertedValues {
   [key: string]: number;
@@ -27,10 +19,10 @@ interface TransactionProps {
   amount: number;
   convertedValues: ConvertedValues;
   note: string;
-  executedAt: string;
+  executedAt: Moment | string;
   category: Category;
   isDraft: boolean;
-  compensations: undefined | Partial<Transaction>[];
+  compensations: undefined | Partial<TransactionProps>[];
   type: Type;
 }
 
@@ -66,7 +58,6 @@ export class Transaction {
     this.executedAt = moment(executedAt);
     this.category = category;
     this.isDraft = isDraft;
-    // Recursively instantiate compensations as transactions
     this.compensations = compensations?.map(
       (comp) =>
         new Transaction({
@@ -75,7 +66,7 @@ export class Transaction {
           amount: comp.amount!,
           convertedValues: comp.convertedValues!,
           note: comp.note!,
-          executedAt: comp.executedAt!,
+          executedAt: moment(comp.executedAt)!,
           category: comp.category!,
           isDraft: comp.isDraft!,
           compensations: comp.compensations || [],
@@ -100,18 +91,14 @@ export class Transaction {
 
 interface RawTransaction {
   id: number;
-  account: {
-    id: number;
-  };
+  account: Account;
   amount: number;
   convertedValues: ConvertedValues;
   note: string;
   executedAt: string;
-  category: {
-    id: number;
-  };
+  category: Category;
   isDraft: boolean;
-  compensations: RawTransaction[];
+  compensations?: RawTransaction[];
   type: Type;
 }
 
@@ -139,17 +126,18 @@ export const TransactionFactory = () => {
       ...rawTransaction,
       account,
       category,
+      executedAt: moment(rawTransaction.executedAt),
       compensations: rawTransaction.compensations?.map((comp) =>
-        createTransaction({
+        new Transaction({
           id: comp.id!,
           account: comp.account!,
           amount: comp.amount!,
           convertedValues: comp.convertedValues!,
           note: comp.note!,
-          executedAt: comp.executedAt!,
+          executedAt: moment(comp.executedAt)!,
           category: comp.category!,
           isDraft: comp.isDraft!,
-          compensations: comp.compensations || [],
+          compensations: comp.compensations,
           type: comp.type!,
         })
       )

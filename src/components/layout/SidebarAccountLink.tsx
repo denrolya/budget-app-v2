@@ -1,47 +1,38 @@
 import cn from 'classnames';
-import { FC, memo } from 'react';
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 
-import { MoneyValue } from '@/components/common/MoneyValue';
+import MoneyValue from '@/components/common/MoneyValue';
 import AccountAvatar from '@/components/features/accounts/Avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-
-interface Account {
-  id: string;
-  name: string;
-  balance: number;
-  currency: string;
-  lastTransaction: string;
-  accountNumber: string;
-  color: string;
-  icon?: string;
-}
+import Account from '@/models/Account';
 
 interface SidebarAccountLinkProps {
   account: Account;
   isSidebarExpanded: boolean;
 }
 
-export const SidebarAccountLink: FC<SidebarAccountLinkProps> = ({ account, isSidebarExpanded }) => (
+export const SidebarAccountLink: React.FC<SidebarAccountLinkProps> = ({ account, isSidebarExpanded }) => (
   <Tooltip delayDuration={0}>
     <TooltipTrigger asChild>
       <Link
         to={`/accounts/${account.id}`}
-        className={cn('flex items-center w-full px-2 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-          {
-            'justify-center': !isSidebarExpanded,
-          },
-        )}
-      >
-        <div className={cn('flex items-center justify-center', isSidebarExpanded ? 'w-6 h-6' : 'w-8 h-8')}>
+        className={cn('flex items-center w-full px-2 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground', {
+          'justify-center': !isSidebarExpanded,
+        })}>
+        <div className={cn('flex items-center justify-center', {
+          'w-6 h-6': !isSidebarExpanded,
+          'w-8 h-8': isSidebarExpanded,
+        })}>
           <AccountAvatar account={account} className="w-full h-full" size="sm" />
         </div>
         {isSidebarExpanded && (
           <div className="flex-grow min-w-0 ml-3 overflow-hidden">
-            <p className="text-sm font-medium truncate">{account.name}</p>
+            <p className="text-sm font-medium truncate">{account.nameWithCurrency}</p>
             <MoneyValue
               showSign
+              maximumFractionDigits={0}
               className={cn('items-center text-xs text-mono', {
                 'text-destructive': account.balance < 0,
                 'text-success': account.balance > 0,
@@ -49,6 +40,7 @@ export const SidebarAccountLink: FC<SidebarAccountLinkProps> = ({ account, isSid
               })}
               amount={account.balance}
               currency={account.currency}
+              values={account.convertedValues}
             />
           </div>
         )}
@@ -63,11 +55,16 @@ export const SidebarAccountLink: FC<SidebarAccountLinkProps> = ({ account, isSid
     >
       <Card className="w-64 bg-popover text-popover-foreground">
         <CardContent className="p-4">
-          <h3 className="font-bold mb-2">{account.name}</h3>
-          <p className="text-sm mb-1">Balance: <MoneyValue showSign
-                                                           className="text-mono"
-                                                           amount={account.balance}
-                                                           currency={account.currency} /></p>
+          <h3 className="font-bold mb-2">{account.nameWithCurrency}</h3>
+          <p className="text-sm mb-1">
+            {'Balance: '}
+            <MoneyValue
+              showSign
+              className="text-mono"
+              maximumFractionDigits={0}
+              amount={account.balance}
+              currency={account.currency} />
+          </p>
           <p className="text-sm mb-1">Last Transaction: {account.lastTransaction}</p>
           <p className="text-sm">Account Number: {account.accountNumber}</p>
         </CardContent>

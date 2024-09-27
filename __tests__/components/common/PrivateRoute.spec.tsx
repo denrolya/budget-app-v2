@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 
-import PrivateRoute from './PrivateRoute';
+import PrivateRoute from '@/components/common/PrivateRoute';
 
 describe('PrivateRoute Component', () => {
   const mockedUseLocation = vi.mocked(useLocation);

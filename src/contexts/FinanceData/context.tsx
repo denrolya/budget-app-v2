@@ -25,7 +25,7 @@ export type ExchangeRatesData = {
 export interface FinanceData {
   accounts: Account[];
   debts: Debt[];
-  categories: Category[];
+  categories: { tree: Category[], list: Category[] };
   exchangeRates: ExchangeRatesData;
 }
 
@@ -99,7 +99,7 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       return rawAccounts.map((account: AccountRawData) => new Account({
         ...account,
-        convertedValues: convertBalance(account.balance, account.currency, exchangeRatesQuery.data!)
+        convertedValues: convertBalance(account.balance, account.currency, exchangeRatesQuery.data.fixer!)
       }));
     },
     enabled: !!exchangeRatesQuery.data, // Fetch accounts only when exchange rates are available

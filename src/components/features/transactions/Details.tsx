@@ -9,9 +9,9 @@ import { ListItem as TransactionListItem } from '@/components/features/transacti
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CURRENCIES } from '@/constants/currency';
+import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useAccounts } from '@/contexts/FinanceData';
-import Transaction from '@/models/Transaction';
+import Transaction, { Type as TransactionType } from '@/models/Transaction';
 import { useFixerExchangeRates } from '@/contexts/FinanceData';
 
 interface TransactionDetailsProps {
@@ -20,10 +20,10 @@ interface TransactionDetailsProps {
   onDelete?: (transaction: Transaction) => void;
 }
 
-const currencyOrder = ['EUR', 'USD', 'HUF', 'UAH', 'BTC'];
+const currencyOrder = [CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.HUF, CURRENCY_CODE.UAH, CURRENCY_CODE.BTC];
 
 export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit, onDelete }) => {
-  const isIncome = transaction.type === 'income';
+  const isIncome = transaction.type === TransactionType.Income;
   const isDebt = transaction.debt && transaction.debt.debtor;
   const accounts = useAccounts();
   const account = useMemo(() => accounts.find(account => account.id === transaction.account.id), [accounts, transaction.account?.id]);
@@ -39,21 +39,21 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
 
     let baseCurrencySymbol, quoteCurrencySymbol, rate;
 
-    if (targetCurrency === 'BTC') {
+    if (targetCurrency === CURRENCY_CODE.BTC) {
       // Display how many EUR is one BTC
-      baseCurrencySymbol = CURRENCIES['BTC'].symbol; // "₿"
-      quoteCurrencySymbol = CURRENCIES['USD'].symbol; // "€"
+      baseCurrencySymbol = CURRENCIES[CURRENCY_CODE.BTC].symbol; // "₿"
+      quoteCurrencySymbol = CURRENCIES[CURRENCY_CODE.USD].symbol; // "€"
       // Calculate the exchange rate using currentRates
-      const rateBTCtoUSD = currentRates['USD'] / currentRates['BTC'];
+      const rateBTCtoUSD = currentRates[CURRENCY_CODE.USD] / currentRates[CURRENCY_CODE.BTC];
       rate = rateBTCtoUSD;
       return `1 ${baseCurrencySymbol} = ${quoteCurrencySymbol}${rate.toFixed(2)}`;
-    } else if (transactionCurrency.code === 'EUR' || transactionCurrency.code === 'USD') {
+    } else if (transactionCurrency.code === CURRENCY_CODE.EUR || transactionCurrency.code === CURRENCY_CODE.USD) {
       // When transaction currency is EUR or USD
       baseCurrencySymbol = transactionCurrency.symbol;
       quoteCurrencySymbol = CURRENCIES[targetCurrency].symbol;
       rate = convertedAmount / transactionAmount;
       return `1 ${baseCurrencySymbol} = ${quoteCurrencySymbol}${rate.toFixed(2)}`;
-    } else if (transactionCurrency.code === 'UAH' && targetCurrency === 'HUF') {
+    } else if (transactionCurrency.code === CURRENCY_CODE.UAH && targetCurrency === CURRENCY_CODE.HUF) {
       // When transaction currency is UAH and target currency is HUF
       const rateFor1000HUF = (1000 * transactionAmount) / convertedAmount;
       baseCurrencySymbol = `1000 ${CURRENCIES[targetCurrency].symbol}`; // "1000 Ft"
@@ -71,15 +71,15 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
 
   const CurrencyIcon = ({ currency }: { currency: string }) => {
     switch (currency) {
-      case 'EUR':
+      case CURRENCY_CODE.EUR:
         return <Euro className="h-4 w-4" />;
-      case 'USD':
+      case CURRENCY_CODE.USD:
         return <DollarSign className="h-4 w-4" />;
-      case 'BTC':
+      case CURRENCY_CODE.BTC:
         return <Bitcoin className="h-4 w-4" />;
-      case 'HUF':
+      case CURRENCY_CODE.HUF:
         return <span className="text-sm font-bold">Ft</span>;
-      case 'UAH':
+      case CURRENCY_CODE.UAH:
         return <span className="text-sm font-bold">₴</span>;
       default:
         return null;
@@ -105,7 +105,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
             <div className="flex align-center space-x-4">
               <AccountAvatar account={account} />
               <div>
-                <p className="text-sm font-medium leading-none">{transaction.account.name}</p>
+                <p className="text-sm font-medium leading-none">{transaction.account.nameWithCurrency}</p>
                 <p className="text-sm text-muted-foreground">{transaction.account.currency}</p>
               </div>
             </div>

@@ -77,6 +77,10 @@ export default class Account {
     this.convertedValues = data.convertedValues || undefined;
   }
 
+  get nameWithCurrency(): string {
+    return `${this.name} [${CURRENCIES[this.currency].symbol}]`;
+  }
+
   isArchived(): boolean {
     return this.archivedAt !== null;
   }

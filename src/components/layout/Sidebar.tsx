@@ -15,11 +15,7 @@ import { useActiveAccountsWithDefaultOrder, useDebts } from '@/contexts/FinanceD
 import { FormType, useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
 
-interface Props {
-  className?: string;
-}
-
-export const Sidebar: React.FC<Props> = ({ className }) => {
+export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className }) => {
   const { user } = useAuth();
   const accounts = useActiveAccountsWithDefaultOrder();
   const debts = useDebts();
@@ -58,15 +54,12 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
 
   return (
     <aside
-      className={cn('bg-background border-r border-accent flex flex-col h-[calc(100vh-2rem)] transition-all duration-300 ease-in-out z-40',
-        className,
-        {
-          'fixed inset-y-0 left-0 w-64': isMobile && isSidebarExpanded,
-          'fixed inset-y-0 -left-64 w-64': isMobile && !isSidebarExpanded,
-          'w-64': !isMobile && isSidebarExpanded,
-          'w-16': !isMobile && !isSidebarExpanded,
-        },
-      )}
+      className={cn('bg-background border-r border-accent flex flex-col h-[calc(100vh-2rem)] transition-all duration-300 ease-in-out z-40', {
+        'fixed inset-y-0 left-0 w-64': isMobile && isSidebarExpanded,
+        'fixed inset-y-0 -left-64 w-64': isMobile && !isSidebarExpanded,
+        'w-64': !isMobile && isSidebarExpanded,
+        'w-16': !isMobile && !isSidebarExpanded,
+      }, className)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -133,7 +126,9 @@ export const Sidebar: React.FC<Props> = ({ className }) => {
           })}>
             <div className="w-full flex justify-between items-center">
               <span className="text-xs font-semibold text-accent-foreground/60">Total Balance</span>
-              <MoneyValue className="font-medium text-sm text-mono" amount={totalBalance} currency={user.baseCurrency} />
+              <MoneyValue className="font-medium text-sm text-mono"
+                          amount={totalBalance}
+                          currency={user.baseCurrency} />
             </div>
             <div className="w-full flex justify-between items-center">
               <span className="text-xs font-semibold text-accent-foreground/60">Total Debt</span>
