@@ -1,24 +1,26 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
 import moment from 'moment';
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
+import { useForm as useFormContext } from '@/contexts/Form';
+import { useFinanceData } from '@/contexts/FinanceData';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { defaultOnSubmit, useFormLogic } from '@/hooks/useFormLogic';
-import Transfer from '@/models/Transfer';
+import { useFormLogic } from '@/hooks/useFormLogic';
+import { api } from '@/services/api';
 
 const formSchema = z.object({
   from: z.number().int().positive(),
   to: z.number().int().positive(),
   amount: z.number().min(0, 'Amount must be a positive number'),
   rate: z.number().min(0, 'Rate must be a positive number'),
-  feeAmount: z.number().min(0, 'Fee must be non-negative').optional(),
+  fee: z.number().min(0, 'Fee must be non-negative').optional(),
   feeAccount: z.number().int().positive().optional(),
   executedAt: z.string().min(1, 'Date is required'),
   note: z.string().optional(),
@@ -40,17 +42,11 @@ interface TransferFormRef {
   submitForm: () => Promise<void>;
 }
 
-/**
- * TODO:
- * 1. When fee amount or account value is provided the missing fee field becomes required and form is not valid otherwise
- * 2. How do I edit transfer??
- * 3. Account selector should be able to be cleared.
- *
- */
 export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
                                                                               setFormState,
                                                                               showToast,
                                                                             }, ref) => {
+  const { refetchAccounts } = useFinanceData();
   const [calculationMode, setCalculationMode] = useState('result');
   const [resultingAmount, setResultingAmount] = useState('');
 
@@ -61,7 +57,7 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
       to: undefined,
       amount: 0,
       rate: 0,
-      feeAmount: undefined,
+      fee: undefined,
       feeAccount: undefined,
       executedAt: moment().format('YYYY-MM-DDTHH:mm'),
       note: undefined,
@@ -70,40 +66,61 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
   });
 
   const { watch, setValue } = form;
+  const { submitForm } = useFormContext();
+  const { formRef } = useFormLogic({
+    form,
+    setFormState,
+    onSubmit: async (values: z.infer<typeof formSchema>) => {
+      try {
+        const formattedData = {
+          from: values.from,
+          to: values.to,
+          amount: values.amount.toString(),
+          rate: values.rate.toString(),
+          fee: values.fee ? values.fee.toString() : undefined,
+          feeAccount: values.feeAccount,
+          executedAt: moment(values.executedAt).toISOString(),
+          note: values.note || '',
+        };
 
-  const calculateMissingValue = (formValues: z.infer<typeof formSchema>) => {
+        const response = await api.post('/api/transfers', formattedData);
+        logger.info(response, 'Transfer Create');
+
+        await refetchAccounts();
+        submitForm(values);
+      } catch (error) {
+        console.error('Form submission failed:', error);
+        showToast('Failed to submit transfer. Please try again.', 'error');
+      }
+    },
+  });
+
+  const calculateMissingValue = useCallback((formValues: z.infer<typeof formSchema>) => {
     const amount = formValues.amount || 0;
     const rate = formValues.rate || 1;
-    const feeAmount = formValues.feeAmount || 0;
+    const fee = formValues.fee || 0;
     const result = resultingAmount || 0;
 
     switch (calculationMode) {
       case 'result':
-        setResultingAmount(((amount * rate) - feeAmount).toFixed(2));
+        setResultingAmount(((amount * rate) - fee).toFixed(2));
         break;
       case 'amount':
-        setValue('amount', (result + feeAmount) / rate);
+        setValue('amount', (result + fee) / rate);
         break;
       case 'rate':
-        setValue('rate', (result + feeAmount) / amount);
+        setValue('rate', (result + fee) / amount);
         break;
       case 'fee':
-        setValue('feeAmount', (amount * rate) - result);
+        setValue('fee', (amount * rate) - result);
         break;
     }
-  };
+  }, [calculationMode, resultingAmount, setValue]);
 
   useEffect(() => {
     const subscription = watch((value) => calculateMissingValue(value));
     return () => subscription.unsubscribe();
   }, [calculateMissingValue, watch, calculationMode]);
-
-  const { formRef } = useFormLogic({
-    form,
-    onSubmit: defaultOnSubmit,
-    setFormState,
-    showToast,
-  });
 
   useImperativeHandle(ref, () => formRef.current!);
 
@@ -112,6 +129,7 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
       <form className="space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField
+            name="from"
             control={form.control}
             render={({ field }) => (
               <FormItem className="flex-1">
@@ -126,9 +144,9 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
                 <FormMessage />
               </FormItem>
             )}
-            name="from"
           />
           <FormField
+            name="to"
             control={form.control}
             render={({ field }) => (
               <FormItem className="flex-1">
@@ -143,36 +161,40 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
                 <FormMessage />
               </FormItem>
             )}
-            name="to"
           />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField
-            control={form.control}
             name="amount"
+            control={form.control}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Amount</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field}
-                         readOnly={calculationMode === 'amount'}
-                         onChange={e => field.onChange(e.target.valueAsNumber)} />
+                  <Input
+                    {...field}
+                    type="number"
+                    readOnly={calculationMode === 'amount'}
+                    onChange={e => field.onChange(e.target.valueAsNumber)} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           <FormField
-            control={form.control}
             name="rate"
+            control={form.control}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Rate</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field}
-                         readOnly={calculationMode === 'rate'}
-                         onChange={e => field.onChange(e.target.valueAsNumber)} />
+                  <Input
+                    {...field}
+                    type="number"
+                    readOnly={calculationMode === 'rate'}
+                    onChange={e => field.onChange(e.target.valueAsNumber)} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -182,21 +204,24 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField
+            name="fee"
             control={form.control}
-            name="feeAmount"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Fee Amount</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field}
-                         readOnly={calculationMode === 'fee'}
-                         onChange={e => field.onChange(e.target.valueAsNumber)} />
+                  <Input
+                    {...field}
+                    type="number"
+                    readOnly={calculationMode === 'fee'}
+                    onChange={e => field.onChange(e.target.valueAsNumber)} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
+            name="feeAccount"
             control={form.control}
             render={({ field }) => (
               <FormItem className="flex-1">
@@ -211,7 +236,6 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
                 <FormMessage />
               </FormItem>
             )}
-            name="feeAccount"
           />
         </div>
 
@@ -262,44 +286,40 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
             <Button
               type="button"
               onClick={() => setCalculationMode('result')}
-              className={`flex-1 rounded-none ${
-                calculationMode === 'result'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-              }`}
+              className={cn('flex-1 rounded-none', {
+                'bg-primary text-primary-foreground': calculationMode === 'result',
+                'bg-secondary text-secondary-foreground hover:bg-secondary/80': calculationMode !== 'result',
+              })}
             >
               Result
             </Button>
             <Button
               type="button"
               onClick={() => setCalculationMode('amount')}
-              className={`flex-1 rounded-none ${
-                calculationMode === 'amount'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-              }`}
+              className={cn('flex-1 rounded-none', {
+                'bg-primary text-primary-foreground': calculationMode === 'amount',
+                'bg-secondary text-secondary-foreground hover:bg-secondary/80': calculationMode !== 'amount',
+              })}
             >
               Amount
             </Button>
             <Button
               type="button"
               onClick={() => setCalculationMode('rate')}
-              className={`flex-1 rounded-none ${
-                calculationMode === 'rate'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-              }`}
+              className={cn('flex-1 rounded-none', {
+                'bg-primary text-primary-foreground': calculationMode === 'rate',
+                'bg-secondary text-secondary-foreground hover:bg-secondary/80': calculationMode !== 'rate',
+              })}
             >
               Rate
             </Button>
             <Button
               type="button"
               onClick={() => setCalculationMode('fee')}
-              className={`flex-1 rounded-none ${
-                calculationMode === 'fee'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-              }`}
+              className={cn('flex-1 rounded-none', {
+                'bg-primary text-primary-foreground': calculationMode === 'fee',
+                'bg-secondary text-secondary-foreground hover:bg-secondary/80': calculationMode !== 'fee',
+              })}
             >
               Fee
             </Button>
@@ -309,3 +329,5 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
     </Form>
   );
 });
+
+export default TransferForm;

@@ -21,9 +21,9 @@ export class TransactionFilters implements FilterModel {
   after: Moment;
   status: string;
   amountRange: number[];
-  categories: string[];
-  excludedCategories: string[];
-  accounts: string[];
+  categories: number[] | string[];
+  excludedCategories: number[] | string[];
+  accounts: number[] | string[];
   withNestedCategories: boolean;
   isDraft: boolean;
 

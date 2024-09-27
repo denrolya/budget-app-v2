@@ -353,7 +353,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               onClick={() => append({
                 account: -1,
                 amount: 0,
-                executedAt: moment().toISOString(),
+                executedAt: moment().format('YYYY-MM-DDTHH:mm'),
               })}
             >
               Add Compensation

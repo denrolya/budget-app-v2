@@ -28,7 +28,7 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
         <AccountAvatar account={el} size="sm" />
       </div>
       <div className="flex-1">
-        <p className="text-sm font-medium">{el.name}</p>
+        <p className="text-sm font-medium">{el.nameWithCurrency}</p>
         <p className="text-xs text-muted-foreground">
           {el.type.charAt(0).toUpperCase() + el.type.slice(1)} • {el.currency}
         </p>
@@ -49,7 +49,7 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
   return (
     <TypeaheadV2
       valueField="id"
-      labelField="name"
+      labelField="nameWithCurrency"
       placeholder={multiple ? 'Select accounts...' : 'Select account...'}
       multiple={multiple}
       options={accounts}
