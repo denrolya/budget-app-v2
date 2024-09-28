@@ -19,16 +19,7 @@ import { useFormLogic } from '@/hooks/useFormLogic';
 import Transaction, { Type as TransactionType } from '@/models/Transaction';
 import { api } from '@/services/api';
 
-interface FormState {
-  isValid: boolean;
-  isDirty: boolean;
-  values: z.infer<typeof formSchema>;
-}
-
 interface TransactionFormProps {
-  values: Transaction | undefined;
-  onClose: () => void;
-  setFormState: React.Dispatch<React.SetStateAction<FormState>>;
   key: string;
 }
 
@@ -81,9 +72,9 @@ const formatTransactionData = (values: z.infer<typeof formSchema>, existingData:
 /**
  * TODO: Organize. Separate logic form visual components.
  */
-export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>((props, ref) => {
+export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>((_, ref) => {
   const { refetchAccounts } = useFinanceData();
-  const { values: data, setFormState } = props;
+  const { submitForm, updateFormState, formState: { values: data } } = useFormContext();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -108,10 +99,9 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     control: form.control,
     name: 'compensations',
   });
-  const { submitForm } = useFormContext();
   const { formRef } = useFormLogic({
     form,
-    setFormState,
+    setFormState: updateFormState,
     onSubmit: async (values: z.infer<typeof formSchema>) => {
       try {
         const formattedData = formatTransactionData(values, data);

@@ -78,7 +78,7 @@ export default class Account {
   }
 
   get nameWithCurrency(): string {
-    return `${this.name} [${CURRENCIES[this.currency].symbol}]`;
+    return `[${CURRENCIES[this.currency].symbol}] ${this.name}`;
   }
 
   isArchived(): boolean {

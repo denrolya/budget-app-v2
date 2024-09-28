@@ -1,14 +1,14 @@
-import React from 'react';
 import { Bitcoin, DollarSign, Edit, Euro, InfoIcon, Trash2 } from 'lucide-react';
+import React from 'react';
 
+import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
-import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { MoneyValue } from '@/components/common/MoneyValue';
-import TransactionValueBadge from '@/components/common/TransactionValueBadge';
+import TransactionValue from '@/components/common/TransactionValue';
 import AccountBadge from '@/components/features/accounts/Badge';
 import { ListItem as TransactionListItem } from '@/components/features/transactions/ListItem';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Separator } from '@/components/ui/separator';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useFixerExchangeRates, useMonobankExchangeRates } from '@/contexts/FinanceData';
@@ -107,7 +107,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
             {transaction.type} <code>#{transaction.id}</code>
             {transaction.isDraft && <Badge variant="outline">Draft</Badge>}
           </span>
-          <TransactionValueBadge transaction={transaction} />
+          <TransactionValue badge transaction={transaction} />
         </div>
         <div className="grid gap-2">
           <h3 className="font-semibold">Transaction Data</h3>
@@ -161,36 +161,40 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
 
                   return (
                     <>
-                      <ResponsiveTooltip openDelay={0} desktopComponent="hovercard" content={
-                        <div className="space-y-2">
-                          <h4 className="font-semibold">Current {currency} Rates</h4>
-                          <p className="text-sm text-muted-foreground">{exchangeRate}</p>
-                          <div className="space-y-1">
-                            <RateDisplay
-                              value={currentRates[currency] / currentRates[transaction.account.currency]}
-                              source="fx"
-                              from={transaction.account.currency}
-                              to={currency}
-                              amount={transaction.amount}
-                              maximumFractionDigits={2}
-                            />
-                            <RateDisplay
-                              value={monobankRates[currency] / monobankRates[transaction.account.currency]}
-                              source="mb"
-                              from={transaction.account.currency}
-                              to={currency}
-                              amount={transaction.amount}
-                              maximumFractionDigits={2}
-                            />
+                      <ResponsiveTooltip
+                        openDelay={0}
+                        desktopComponent="hovercard"
+                        key={`transaction-${transaction.id}-converted-values-${currency}`}
+                        content={
+                          <div className="space-y-2">
+                            <h4 className="font-semibold">Current {currency} Rates</h4>
+                            <p className="text-sm text-muted-foreground">{exchangeRate}</p>
+                            <div className="space-y-1">
+                              <RateDisplay
+                                value={currentRates[currency] / currentRates[transaction.account.currency]}
+                                source="fx"
+                                from={transaction.account.currency}
+                                to={currency}
+                                amount={transaction.amount}
+                                maximumFractionDigits={2}
+                              />
+                              <RateDisplay
+                                value={monobankRates[currency] / monobankRates[transaction.account.currency]}
+                                source="mb"
+                                from={transaction.account.currency}
+                                to={currency}
+                                amount={transaction.amount}
+                                maximumFractionDigits={2}
+                              />
+                            </div>
                           </div>
-                        </div>
-                      }>
+                        }>
                         <div className="flex justify-between items-center cursor-help">
                           <span className="flex items-center space-x-2">
                             <CurrencyIcon currency={currency} />
                             <span>{currency}</span>
                           </span>
-                            <MoneyValue className="font-medium text-sm" amount={value} currency={currency} />
+                          <MoneyValue className="font-medium text-sm" amount={value} currency={currency} />
                         </div>
                       </ResponsiveTooltip>
                     </>
@@ -215,7 +219,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
       </div>
 
       <div className="flex items-center justify-between mt-6">
-      <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2">
           <InfoIcon className="h-4 w-4 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
             Transaction completed successfully

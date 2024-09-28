@@ -1,20 +1,24 @@
+import cn from 'classnames';
 import React from 'react';
 
-import { useBaseCurrency } from '@/contexts/auth';
 import { CURRENCIES } from '@/constants/currency';
+import { useBaseCurrency } from '@/contexts/auth';
 import Transaction from '@/models/Transaction';
+import { Badge } from '@/components/ui/badge';
 
 interface Props {
   transaction: Transaction;
   className?: string;
   maximumFractionDigits?: number;
+  badge?: boolean;
 }
 
 export const TransactionValue: React.FC<Props> = ({
-                                           transaction,
-                                           className = '',
-                                           maximumFractionDigits = 2
-                                         }) => {
+                                                    transaction,
+                                                    className = '',
+                                                    maximumFractionDigits = 2,
+                                                    badge = false
+                                                  }) => {
   const baseCurrencyCode = useBaseCurrency();
   const baseCurrency = CURRENCIES[baseCurrencyCode];
   const { amount, account: { currency }, convertedValues } = transaction;
@@ -31,14 +35,35 @@ export const TransactionValue: React.FC<Props> = ({
 
   const textColorClass = transaction.isExpense() ? 'text-destructive' : 'text-success';
 
-  return (
-    <span className={`inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero ${textColorClass} ${className}`}>
-      {amountString}
-      {value !== undefined && (baseCurrency.code !== currency || amount !== value) && (
-        <span className="ml-1 text-xs opacity-75">
-          | {valueString}
+  const content = (
+    <span className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}>
+      {/* Always show base currency value */}
+      {value !== undefined && (
+        <span className="mr-1">
+          {valueString}
         </span>
       )}
+
+      {/* Conditionally show transaction amount on small screens or when width allows */}
+      {amountString && (
+        <span className="text-xs opacity-75 hidden md:inline">
+          | {amountString}
+        </span>
+      )}
+    </span>
+  );
+
+  // Conditionally render Badge or simple text based on the `badge` prop
+  return badge ? (
+    <Badge
+      className="text-xs font-mono"
+      variant={transaction.isIncome() ? 'success' : 'destructive'}
+    >
+      {content}
+    </Badge>
+  ) : (
+    <span className={`${textColorClass} ${className}`}>
+      {content}
     </span>
   );
 };

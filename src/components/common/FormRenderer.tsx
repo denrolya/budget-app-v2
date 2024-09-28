@@ -33,17 +33,11 @@ interface FormContentProps {
 }
 
 const FormContent = forwardRef<{ submitForm: () => Promise<void> }, FormContentProps>((props, ref) => {
-  const { key, formType, values, onClose, setFormState } = props;
+  const { key, formType } = props;
   const FormComponent = formComponents[formType];
 
   return (
-    <FormComponent
-      ref={ref}
-      values={values}
-      onClose={onClose}
-      setFormState={setFormState}
-      key={key}
-    />
+    <FormComponent ref={ref} key={key} />
   );
 });
 
@@ -108,7 +102,7 @@ export const FormRenderer: React.FC = () => {
     <FormContent
       ref={formRef}
       formType={formState.type as FormType}
-      data={formState.values}
+      values={formState.values}
       onClose={closeForm}
       setFormState={updateFormState}
       key={formKey}

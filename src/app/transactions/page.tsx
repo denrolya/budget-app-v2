@@ -7,7 +7,6 @@ import ListFilters from '@/components/features/transactions/ListFilters';
 import TransactionListItemV3, {
   ListItemSkeleton as TransactionListItemSkeletonV3,
 } from '@/components/features/transactions/ListItemV3';
-import { Button } from '@/components/ui/button';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactions } from '@/hooks/useTransactions.tsx';
 import Transaction from '@/models/Transaction';
@@ -72,20 +71,20 @@ export const TransactionsList: React.FC = () => {
         <ListFilters data={filters} onChange={setFilter} />
       </div>
 
-      <div className="flex-grow overflow-hidden flex flex-col">
+      <div className="flex-grow overflow-hidden flex flex-col mb-6">
+        {isError && (
+          <div className="p-4 mb-4 text-sm rounded-lg bg-destructive/10 text-destructive">
+            <p className="font-medium">Error:</p>
+            <p>{error?.message || 'An unexpected error occurred.'}</p>
+          </div>
+        )}
+
         {isLoading && (
           <ul className="space-y-2">
             {[...Array(perPage)].map((_, index) => (
               <li key={index}><TransactionListItemSkeletonV3 /></li>
             ))}
           </ul>
-        )}
-
-        {isError && (
-          <div className="p-4 mb-4 text-sm rounded-lg bg-destructive/10 text-destructive">
-            <p className="font-medium">Error:</p>
-            <p>{error?.message || 'An unexpected error occurred.'}</p>
-          </div>
         )}
 
         {(!isLoading && !isError && transactions) && (
@@ -97,7 +96,7 @@ export const TransactionsList: React.FC = () => {
                     <h5 className="text-lg font-semibold mb-2">{formatTransactionDate(date)}</h5>
                     <ul className="space-y-2">
                       {transactions.map((transaction: Transaction) => (
-                        <li key={transaction.id}>
+                        <li key={transaction.id} className="relative">
                           <TransactionListItemV3 transaction={transaction} />
                         </li>
                       ))}

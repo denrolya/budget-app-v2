@@ -11,6 +11,7 @@ interface AccountBadgeProps {
   account: Account;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  tooltip?: boolean;
 }
 
 const iconMap: Record<AccountType, React.ElementType> = {
@@ -32,10 +33,16 @@ const iconSizeMap = {
   lg: 'h-3.5 w-3.5',
 };
 
-const widthMap = {
+const maxWidthMap = {
   sm: 'max-w-[120px]',
   md: 'max-w-[160px]',
   lg: 'max-w-[200px]',
+};
+
+const charLimitMap = {
+  sm: 15,
+  md: 20,
+  lg: 25,
 };
 
 const getContrastColor = (hexColor: string): 'black' | 'white' => {
@@ -47,27 +54,36 @@ const getContrastColor = (hexColor: string): 'black' | 'white' => {
   return luminance > 0.5 ? 'black' : 'white';
 };
 
-export const AccountBadge: React.FC<AccountBadgeProps> = ({
-                                                            account,
-                                                            size = 'md',
-                                                            className,
-                                                          }) => {
+const truncateText = (text: string, maxLength: number) => {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength - 1) + '…';
+};
+
+export default function AccountBadge({
+                                       account,
+                                       size = 'md',
+                                       className,
+                                       tooltip = true,
+                                     }: AccountBadgeProps) {
   const { type, color, nameWithCurrency } = account;
   const Icon = iconMap[type];
 
   const badgeColor = account.isArchived() ? 'var(--muted-foreground)' : color;
   const textColor = account.isArchived() ? 'var(--muted-foreground)' : getContrastColor(color);
 
+  const truncatedText = truncateText(nameWithCurrency, charLimitMap[size]);
+
   const badgeContent = (
     <Badge
       variant="outline"
       className={cn(
-        'inline-flex items-center gap-1',
+        'inline-flex items-center',
         'transition-all duration-200 ease-in-out',
         'hover:opacity-90',
         sizeMap[size],
-        widthMap[size],
-        className,
+        maxWidthMap[size],
+        'w-fit',
+        className
       )}
       style={{
         backgroundColor: badgeColor,
@@ -75,22 +91,26 @@ export const AccountBadge: React.FC<AccountBadgeProps> = ({
         borderColor: 'transparent',
       }}
     >
-      <Icon className={cn(iconSizeMap[size])} />
-      <span className="font-medium truncate">{nameWithCurrency}</span>
+      <div className="flex items-center gap-1 min-w-0">
+        <Icon className={cn(iconSizeMap[size], 'flex-shrink-0')} />
+        <span className="font-medium truncate">{truncatedText}</span>
+      </div>
     </Badge>
   );
 
   return (
     <ResponsiveTooltip
       desktopComponent="hovercard"
+      triggerClassName={cn({
+        'cursor-pointer': tooltip,
+      })}
       contentClassName="bg-transparent border-none"
       openDelay={0}
-      content={<AccountDetailsHoverCard account={account} />}>
-      <span>
+      content={tooltip ? <AccountDetailsHoverCard account={account} /> : null}
+    >
+      <span className="inline-block">
         {badgeContent}
       </span>
     </ResponsiveTooltip>
   );
-};
-
-export default AccountBadge;
+}

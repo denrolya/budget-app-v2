@@ -1,4 +1,4 @@
-import { useEffect, useImperativeHandle, useRef } from 'react';
+import React, { useEffect, useImperativeHandle, useRef } from 'react';
 import { FieldValues, UseFormReturn, useFormState, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { toast } from 'sonner';
@@ -16,7 +16,7 @@ export interface FormComponentRef {
 interface UseFormLogicProps<T extends FieldValues> {
   form: UseFormReturn<T>;
   onSubmit: (values: T) => Promise<void>;
-  setFormState: React.Dispatch<React.SetStateAction<FormState<T>>>;
+  setFormState: (updates: Partial<FormState<T>>) => void;
 }
 
 export const useFormLogic = <T,>({ form, onSubmit, setFormState }: UseFormLogicProps<T>) => {
