@@ -1,11 +1,10 @@
-import cn from 'classnames';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import { useCategories } from '@/contexts/FinanceData';
-import TransactionListItem from '@/components/features/transactions/ListItemV2';
+import TransactionListItem from '@/components/features/transactions/ListItemV3';
 import TransferListItem from '@/components/features/transfers/ListItem';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
