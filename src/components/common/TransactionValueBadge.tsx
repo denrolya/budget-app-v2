@@ -1,16 +1,18 @@
 import cn from 'classnames';
+import React from 'react';
 
 import { CURRENCIES } from '@/constants/currency';
 import { useBaseCurrency } from '@/contexts/auth';
 import Transaction from '@/models/Transaction';
+import { Badge } from '@/components/ui/badge';
 
-interface TransactionValueProps {
+interface Props {
   transaction: Transaction;
   className?: string;
   maximumFractionDigits?: number;
 }
 
-export const TransactionValue = ({ transaction, className, maximumFractionDigits = 2 }: TransactionValueProps) => {
+export const TransactionValueBadge: React.FC<Props> = ({ transaction, className, maximumFractionDigits = 2 }) => {
   const baseCurrencyCode = useBaseCurrency();
   const baseCurrency = CURRENCIES[baseCurrencyCode];
   const { amount, account: { currency }, convertedValues } = transaction;
@@ -26,17 +28,20 @@ export const TransactionValue = ({ transaction, className, maximumFractionDigits
   const valueString = value !== undefined ? formatMoney(value, baseCurrency.symbol) : '';
 
   return (
+    <Badge
+      className="text-xs font-mono"
+      variant={transaction.isIncome() ? 'success' : 'destructive'}
+    >
     <span className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}>
-      <div>
       {amountString}
-        </div>
       {value !== undefined && (baseCurrency.code !== currency || amount !== value) && (
-        <div className="ml-1 font-light tabular-nums slashed-zero text-muted-foreground text-xs">
-          ≈ {valueString}
-        </div>
+        <span className="ml-1 text-xs opacity-75">
+          | {valueString}
+        </span>
       )}
     </span>
+    </Badge>
   );
 };
 
-export default TransactionValue;
+export default TransactionValueBadge;

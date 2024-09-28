@@ -1,5 +1,5 @@
 import cn from 'classnames';
-import { Eye, MoreVertical, User } from 'lucide-react';
+import { Eye, User } from 'lucide-react';
 import React from 'react';
 
 import TransactionValue from '@/components/common/TransactionValue';
@@ -33,12 +33,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
         <div className="grid grid-cols-1 gap-2">
           <div className="flex justify-between items-center">
             <AccountBadge account={transaction.account} size="sm" />
-            <Badge
-              variant={(transaction.type === Type.Income) ? 'success' : 'destructive'}
-              className={cn('text-xs font-mono')}
-            >
-              <TransactionValue transaction={transaction} />
-            </Badge>
+            <TransactionValue transaction={transaction} className="text-xs" />
           </div>
           <div className="grid grid-cols-[auto_1fr_auto] gap-2 items-center">
             <Badge variant="outline" className="text-xs px-1 py-0">

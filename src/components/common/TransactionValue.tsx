@@ -1,22 +1,22 @@
-import cn from 'classnames';
+import React from 'react';
 
-import { useAuth } from '@/contexts/auth';
+import { useBaseCurrency } from '@/contexts/auth';
 import { CURRENCIES } from '@/constants/currency';
 import Transaction from '@/models/Transaction';
 
-interface TransactionValueProps {
-  transaction: Transaction
-  className?: string
-  maximumFractionDigits?: number
+interface Props {
+  transaction: Transaction;
+  className?: string;
+  maximumFractionDigits?: number;
 }
 
-export const TransactionValue = ({
+export const TransactionValue: React.FC<Props> = ({
                                            transaction,
-                                           className,
-                                           maximumFractionDigits = 2,
-                                         }: TransactionValueProps) => {
-  const { user } = useAuth();
-  const baseCurrency = CURRENCIES[user?.baseCurrency];
+                                           className = '',
+                                           maximumFractionDigits = 2
+                                         }) => {
+  const baseCurrencyCode = useBaseCurrency();
+  const baseCurrency = CURRENCIES[baseCurrencyCode];
   const { amount, account: { currency }, convertedValues } = transaction;
   const symbol = currency ? CURRENCIES[currency]?.symbol : baseCurrency.symbol;
   const value = convertedValues?.[baseCurrency.code];
@@ -29,8 +29,10 @@ export const TransactionValue = ({
   const amountString = formatMoney(amount, symbol);
   const valueString = value !== undefined ? formatMoney(value, baseCurrency.symbol) : '';
 
+  const textColorClass = transaction.isExpense() ? 'text-destructive' : 'text-success';
+
   return (
-    <span className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}>
+    <span className={`inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero ${textColorClass} ${className}`}>
       {amountString}
       {value !== undefined && (baseCurrency.code !== currency || amount !== value) && (
         <span className="ml-1 text-xs opacity-75">

@@ -2,9 +2,7 @@ import cn from 'classnames';
 import { Eye, InfoIcon, MoreHorizontal, User } from 'lucide-react';
 import React from 'react';
 
-import AccountAvatar from '@/components/features/accounts/Avatar.tsx';
 import AccountBadge from '@/components/features/accounts/Badge';
-import { TransactionValue } from '@/components/common/TransactionValue';
 import { Details } from '@/components/features/transactions/Details';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,6 +18,8 @@ import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import Transaction, { Type } from '@/models/Transaction';
+
+import TransactionValue from '@/components/common/TransactionValue';
 
 interface TransactionListItemProps {
   transaction: Transaction;
@@ -67,7 +67,8 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
                         </div>
                       </div>
                     </div>}>
-                  <Badge className="text-xs font-mono" variant={(transaction.type === Type.Income) ? 'success' : 'destructive'}>
+                  <Badge className="text-xs font-mono"
+                         variant={(transaction.type === Type.Income) ? 'success' : 'destructive'}>
                     <TransactionValue transaction={transaction} />
                   </Badge>
                 </ResponsiveTooltip>

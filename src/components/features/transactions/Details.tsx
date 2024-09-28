@@ -1,17 +1,18 @@
-import { ArrowDownIcon, ArrowUpIcon, Bitcoin, DollarSign, Edit, Euro, Trash2, User } from 'lucide-react';
 import React from 'react';
+import { Bitcoin, DollarSign, Edit, Euro, InfoIcon, Trash2 } from 'lucide-react';
 
-import { MOMENT_DATETIME_VIEW_FORMAT } from '@/constants/datetime';
+import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDispay';
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { MoneyValue } from '@/components/common/MoneyValue';
-import { TransactionValue } from '@/components/common/TransactionValue';
-import AccountAvatar from '@/components/features/accounts/Avatar';
+import TransactionValueBadge from '@/components/common/TransactionValueBadge';
+import AccountBadge from '@/components/features/accounts/Badge';
 import { ListItem as TransactionListItem } from '@/components/features/transactions/ListItem';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
-import Transaction, { Type as TransactionType } from '@/models/Transaction';
-import { useFixerExchangeRates } from '@/contexts/FinanceData';
+import { useFixerExchangeRates, useMonobankExchangeRates } from '@/contexts/FinanceData';
+import Transaction from '@/models/Transaction';
 
 interface TransactionDetailsProps {
   transaction: Transaction;
@@ -21,44 +22,59 @@ interface TransactionDetailsProps {
 
 const currencyOrder = [CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.HUF, CURRENCY_CODE.UAH, CURRENCY_CODE.BTC];
 
+const RateDisplay: React.FC<{
+  value: number;
+  source: string;
+  from: CURRENCY_CODE;
+  to: CURRENCY_CODE;
+  amount: number;
+  maximumFractionDigits: number
+}> = ({ value, source, from, to, amount, maximumFractionDigits }) => (
+  <div className="flex items-center space-x-2 text-sm">
+    <MoneyValue amount={amount} currency={from} />
+    <span className="text-muted-foreground">=</span>
+    <div className="flex-1 flex items-start">
+      <MoneyValue amount={amount * value} currency={to} maximumFractionDigits={maximumFractionDigits} />
+      <sup className="ml-1 mt-2 text-[8px] font-medium text-muted-foreground">
+        {source}
+      </sup>
+    </div>
+  </div>
+);
+
 export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit, onDelete }) => {
-  const isIncome = transaction.type === TransactionType.Income;
   const isDebt = transaction.debt && transaction.debt.debtor;
   const currentRates = useFixerExchangeRates();
+  const monobankRates = useMonobankExchangeRates();
 
   const formatExchangeRate = (convertedAmount: number, targetCurrency: CURRENCY_CODE) => {
     const transactionCurrency = CURRENCIES[transaction.account.currency];
     const transactionAmount = transaction.amount;
 
     if (targetCurrency === transactionCurrency.code) {
-      return null; // Don't show exchange rate for the transaction currency
+      return null;
     }
 
     let baseCurrencySymbol, quoteCurrencySymbol, rate;
 
     if (targetCurrency === CURRENCY_CODE.BTC) {
-      // Display how many EUR is one BTC
-      baseCurrencySymbol = CURRENCIES[CURRENCY_CODE.BTC].symbol; // "₿"
-      quoteCurrencySymbol = CURRENCIES[CURRENCY_CODE.USD].symbol; // "€"
-      // Calculate the exchange rate using currentRates
+      baseCurrencySymbol = CURRENCIES[CURRENCY_CODE.BTC].symbol;
+      quoteCurrencySymbol = CURRENCIES[CURRENCY_CODE.USD].symbol;
       const rateBTCtoUSD = currentRates[CURRENCY_CODE.USD] / currentRates[CURRENCY_CODE.BTC];
       rate = rateBTCtoUSD;
       return `1 ${baseCurrencySymbol} = ${quoteCurrencySymbol}${rate.toFixed(2)}`;
     } else if (transactionCurrency.code === CURRENCY_CODE.EUR || transactionCurrency.code === CURRENCY_CODE.USD) {
-      // When transaction currency is EUR or USD
       baseCurrencySymbol = transactionCurrency.symbol;
       quoteCurrencySymbol = CURRENCIES[targetCurrency].symbol;
       rate = convertedAmount / transactionAmount;
       return `1 ${baseCurrencySymbol} = ${quoteCurrencySymbol}${rate.toFixed(2)}`;
     } else if (transactionCurrency.code === CURRENCY_CODE.UAH && targetCurrency === CURRENCY_CODE.HUF) {
-      // When transaction currency is UAH and target currency is HUF
       const rateFor1000HUF = (1000 * transactionAmount) / convertedAmount;
-      baseCurrencySymbol = `1000 ${CURRENCIES[targetCurrency].symbol}`; // "1000 Ft"
-      quoteCurrencySymbol = transactionCurrency.symbol; // "₴"
+      baseCurrencySymbol = `1000 ${CURRENCIES[targetCurrency].symbol}`;
+      quoteCurrencySymbol = transactionCurrency.symbol;
       rate = rateFor1000HUF;
       return `${baseCurrencySymbol} = ${quoteCurrencySymbol}${rate.toFixed(2)}`;
     } else {
-      // Default case
       baseCurrencySymbol = CURRENCIES[targetCurrency].symbol;
       quoteCurrencySymbol = transactionCurrency.symbol;
       rate = transactionAmount / convertedAmount;
@@ -84,130 +100,139 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center space-x-2">
-              <span className="capitalize">{transaction.type} <code>#{transaction.id}</code></span>
-              {transaction.isDraft && <Badge variant="outline">Draft</Badge>}
-            </CardTitle>
-            <Badge variant={isIncome ? 'default' : 'destructive'} className="text-lg">
-              <TransactionValue transaction={transaction} />
-            </Badge>
+    <>
+      <div className="grid gap-4 py-4">
+        <div className="flex justify-between">
+          <span className="capitalize">
+            {transaction.type} <code>#{transaction.id}</code>
+            {transaction.isDraft && <Badge variant="outline">Draft</Badge>}
+          </span>
+          <TransactionValueBadge transaction={transaction} />
+        </div>
+        <div className="grid gap-2">
+          <h3 className="font-semibold">Transaction Data</h3>
+          <div className="flex justify-between items-center">
+            <span className="text-sm">Date</span>
+            <RelativeDatetimeDisplay date={transaction.executedAt} className="font-medium" />
           </div>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="flex items-center justify-between">
-            <div className="flex align-center space-x-4">
-              <AccountAvatar account={transaction.account} />
-              <div>
-                <p className="text-sm font-medium leading-none">{transaction.account.nameWithCurrency}</p>
-                <p className="text-sm text-muted-foreground">{transaction.account.currency}</p>
-              </div>
-            </div>
-            <div className="flex space-x-2">
-              <Button variant="ghost" size="icon" onClick={() => onEdit?.(transaction)}>
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => onDelete?.(transaction)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm">Category</span>
+            <Badge variant="outline" className="text-xs px-1 py-0 whitespace-nowrap">{transaction.category.name}</Badge>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className={`rounded-full p-1 ${isIncome ? 'bg-green-100' : 'bg-red-100'}`}>
-              {isIncome ? (
-                <ArrowUpIcon className="h-4 w-4 text-green-600" />
-              ) : (
-                <ArrowDownIcon className="h-4 w-4 text-red-600" />
-              )}
-            </div>
-            <div>
-              <p className="text-sm font-medium leading-none">{transaction.category.name}</p>
-              <p className="text-sm text-muted-foreground">
-                {transaction.executedAt.format(MOMENT_DATETIME_VIEW_FORMAT)}
-              </p>
-            </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm">Account</span>
+            <span className="font-medium"><AccountBadge account={transaction.account} size="sm" /></span>
           </div>
           {isDebt && (
-            <div className="flex items-center space-x-4">
-              <User className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium leading-none">Debtor</p>
-                <p className="text-sm text-muted-foreground">{transaction.debt.debtor}</p>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Debtor</span>
+              <span className="font-medium">{transaction.debt.debtor}</span>
+            </div>
+          )}
+          <div className="flex justify-between items-center">
+            <span className="text-sm">Amount</span>
+            <span className="font-medium font-mono">
+              <MoneyValue amount={transaction.amount} currency={transaction.account.currency} />
+            </span>
+          </div>
+        </div>
+
+        {transaction.note && (
+          <>
+            <Separator />
+            <div className="grid gap-2">
+              <h3 className="font-semibold">Note</h3>
+              <p className="text-sm">{transaction.note}</p>
+            </div>
+          </>
+        )}
+
+        {transaction.convertedValues && Object.keys(transaction.convertedValues).length > 0 && (
+          <>
+            <Separator />
+            <div className="grid gap-2">
+              <h3 className="font-semibold">Converted Values</h3>
+              <div className="space-y-2">
+                {currencyOrder.map((currency) => {
+                  const value = transaction.convertedValues[currency];
+                  if (value === undefined) return null;
+                  const exchangeRate = formatExchangeRate(value, currency);
+                  if (!exchangeRate) return null;
+
+                  return (
+                    <>
+                      <ResponsiveTooltip openDelay={0} desktopComponent="hovercard" content={
+                        <div className="space-y-2">
+                          <h4 className="font-semibold">Current {currency} Rates</h4>
+                          <p className="text-sm text-muted-foreground">{exchangeRate}</p>
+                          <div className="space-y-1">
+                            <RateDisplay
+                              value={currentRates[currency] / currentRates[transaction.account.currency]}
+                              source="fx"
+                              from={transaction.account.currency}
+                              to={currency}
+                              amount={transaction.amount}
+                              maximumFractionDigits={2}
+                            />
+                            <RateDisplay
+                              value={monobankRates[currency] / monobankRates[transaction.account.currency]}
+                              source="mb"
+                              from={transaction.account.currency}
+                              to={currency}
+                              amount={transaction.amount}
+                              maximumFractionDigits={2}
+                            />
+                          </div>
+                        </div>
+                      }>
+                        <div className="flex justify-between items-center cursor-help">
+                          <span className="flex items-center space-x-2">
+                            <CurrencyIcon currency={currency} />
+                            <span>{currency}</span>
+                          </span>
+                            <MoneyValue className="font-medium text-sm" amount={value} currency={currency} />
+                        </div>
+                      </ResponsiveTooltip>
+                    </>
+                  );
+                })}
               </div>
             </div>
-          )}
-          {transaction.note && (
-            <div>
-              <p className="text-sm font-medium leading-none">Note</p>
-              <p className="text-sm text-muted-foreground">{transaction.note}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </>
+        )}
 
-      {transaction.convertedValues && Object.keys(transaction.convertedValues).length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <DollarSign className="h-5 w-5" />
-              <span>Converted Values</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {currencyOrder.map((currency) => {
-                const value = transaction.convertedValues[currency];
-                if (value === undefined) return null;
-                const exchangeRate = formatExchangeRate(value, currency);
-                if (!exchangeRate) return null;
-
-                const currentValue = transaction.amount * currentRates[currency] / currentRates[transaction.account.currency];
-
-                return (
-                  <div key={currency} className="flex flex-col">
-                    <div className="flex justify-between items-center">
-                      <span className="flex flex-col justify-start">
-                        <span className="flex flex-row items-center justify-start font-medium space-x-2">
-                          <CurrencyIcon currency={currency} />
-                          <span>{currency}</span>
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          {exchangeRate}
-                        </span>
-                      </span>
-                      <div className="flex flex-col items-end">
-                        <MoneyValue amount={value} currency={currency} />
-                        <span className="text-sm text-muted-foreground">
-                          Now: <MoneyValue amount={currentValue} currency={currency} />
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {(transaction.compensations && transaction.compensations.length > 0) && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Compensation Transactions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+        {transaction.compensations && transaction.compensations.length > 0 && (
+          <>
+            <Separator />
+            <div className="grid gap-2">
+              <h3 className="font-semibold">Compensation Transactions</h3>
               {transaction.compensations.map(comp => (
                 comp && <TransactionListItem key={comp.id} transaction={comp} isCompensationView />
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+          </>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between mt-6">
+      <div className="flex items-center space-x-2">
+          <InfoIcon className="h-4 w-4 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">
+            Transaction completed successfully
+          </p>
+        </div>
+        <div className="flex space-x-2">
+          <Button variant="outline" size="sm" onClick={() => onEdit?.(transaction)}>
+            <Edit className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => onDelete?.(transaction)}>
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </Button>
+        </div>
+      </div>
+    </>
   );
 };
 

@@ -8,6 +8,9 @@ import TransactionListItemV1 from '@/components/features/transactions/ListItem';
 import TransactionListItemV2, {
   ListItemSkeleton as TransactionListItemSkeleton,
 } from '@/components/features/transactions/ListItemV2';
+import TransactionListItemV3, {
+  ListItemSkeleton as TransactionListItemSkeletonV3,
+} from '@/components/features/transactions/ListItemV3';
 import { Button } from '@/components/ui/button';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactions } from '@/hooks/useTransactions.tsx';
@@ -86,7 +89,7 @@ export const TransactionsList: React.FC = () => {
         {isLoading && (
           <ul className="space-y-2">
             {[...Array(perPage)].map((_, index) => (
-              <li key={index}><TransactionListItemSkeleton /></li>
+              <li key={index}><TransactionListItemSkeletonV3 /></li>
             ))}
           </ul>
         )}
@@ -108,7 +111,7 @@ export const TransactionsList: React.FC = () => {
                     <ul className="space-y-2">
                       {transactions.map((transaction: Transaction) => (
                         <li key={transaction.id}>
-                          <TransactionListItem transaction={transaction} />
+                          <TransactionListItemV3 transaction={transaction} />
                         </li>
                       ))}
                     </ul>

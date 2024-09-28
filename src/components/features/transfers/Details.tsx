@@ -1,11 +1,11 @@
 import { InfoIcon } from 'lucide-react';
 import React from 'react';
 
-import MoneyValue from '@/components/common/MoneyValue.tsx';
-import AccountBadge from '@/components/features/accounts/Badge.tsx';
-import TransactionListItem from '@/components/features/transactions/ListItemV2.tsx';
-import { Separator } from '@/components/ui/separator.tsx';
-import { MOMENT_DATETIME_VIEW_FORMAT } from '@/constants/datetime.ts';
+import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDispay';
+import MoneyValue from '@/components/common/MoneyValue';
+import AccountBadge from '@/components/features/accounts/Badge';
+import TransactionListItem from '@/components/features/transactions/ListItemV2';
+import { Separator } from '@/components/ui/separator';
 import Transfer from '@/models/Transfer';
 
 interface TransferDetailsProps {
@@ -16,10 +16,9 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => (
   <>
     <div className="grid gap-4 py-4">
       <div className="grid gap-2">
-        <h3 className="font-semibold">Transfer Data</h3>
         <div className="flex justify-between items-center">
           <span className="text-sm">Date</span>
-          <span className="font-medium">{transfer.executedAt.format(MOMENT_DATETIME_VIEW_FORMAT)}</span>
+          <RelativeDatetimeDisplay date={transfer.executedAt} className="font-medium" />
         </div>
         <div className="flex justify-between items-center">
           <span className="text-sm">Amount</span>
