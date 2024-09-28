@@ -61,7 +61,7 @@ export const SidebarAccountLink: React.FC<SidebarAccountLinkProps> = ({ account,
             <MoneyValue
               showSign
               className="text-mono"
-              maximumFractionDigits={0}
+              maximumFractionDigits={2}
               amount={account.balance}
               currency={account.currency} />
           </p>

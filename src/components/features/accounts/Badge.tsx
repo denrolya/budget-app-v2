@@ -1,9 +1,10 @@
-import { CreditCard, Globe, HelpCircle, Wallet } from 'lucide-react';
-import React from 'react';
-
 import { Badge } from '@/components/ui/badge';
+
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip.tsx';
 import { cn } from '@/lib/utils';
 import Account, { AccountType } from '@/models/Account';
+import { CreditCard, Globe, HelpCircle, Wallet } from 'lucide-react';
+import React from 'react';
 
 interface AccountBadgeProps {
   account: Account;
@@ -30,6 +31,12 @@ const iconSizeMap = {
   lg: 'h-3.5 w-3.5',
 };
 
+const widthMap = {
+  sm: 'max-w-[120px]',
+  md: 'max-w-[160px]',
+  lg: 'max-w-[200px]',
+};
+
 const getContrastColor = (hexColor: string): 'black' | 'white' => {
   hexColor = hexColor.replace('#', '');
   const r = parseInt(hexColor.substr(0, 2), 16);
@@ -44,13 +51,13 @@ export const AccountBadge: React.FC<AccountBadgeProps> = ({
                                                             size = 'md',
                                                             className,
                                                           }) => {
-  const { type, color, name } = account;
+  const { type, color, nameWithCurrency } = account;
   const Icon = iconMap[type];
 
   const badgeColor = account.isArchived() ? 'var(--muted-foreground)' : color;
   const textColor = account.isArchived() ? 'var(--muted-foreground)' : getContrastColor(color);
 
-  return (
+  const badgeContent = (
     <Badge
       variant="outline"
       className={cn(
@@ -58,6 +65,7 @@ export const AccountBadge: React.FC<AccountBadgeProps> = ({
         'transition-all duration-200 ease-in-out',
         'hover:opacity-90',
         sizeMap[size],
+        widthMap[size],
         className,
       )}
       style={{
@@ -67,8 +75,16 @@ export const AccountBadge: React.FC<AccountBadgeProps> = ({
       }}
     >
       <Icon className={cn(iconSizeMap[size])} />
-      <span className="font-medium truncate">{name}</span>
+      <span className="font-medium truncate">{nameWithCurrency}</span>
     </Badge>
+  );
+
+  return (
+    <ResponsiveTooltip openDelay={0} content={nameWithCurrency}>
+      <span>
+        {badgeContent}
+      </span>
+    </ResponsiveTooltip>
   );
 };
 

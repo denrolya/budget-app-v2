@@ -76,7 +76,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
             triggerClassName="w-full overflow-hidden"
           >
             <span className="text-sm text-muted-foreground truncate block">
-              {transaction.note || '\u00A0'}
+              {transaction.note}
             </span>
           </ResponsiveTooltip>
         </div>
