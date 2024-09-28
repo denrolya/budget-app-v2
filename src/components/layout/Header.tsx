@@ -56,7 +56,7 @@ export const Header: React.FC<Props> = ({ className }) => {
         </nav>
       </div>
 
-      <Separator orientation="vertical" className="hidden md:block" />
+      <Separator orientation="vertical" />
 
       <div className="flex items-center space-x-2 md:space-x-4">
         <ExchangeRatesDetails />

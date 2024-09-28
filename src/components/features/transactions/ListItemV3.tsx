@@ -33,7 +33,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
       <CardContent className="p-2 flex flex-col space-y-1">
         <div className="flex flex-row items-center justify-between">
           <div className="flex-grow flex items-center space-x-2 overflow-x-auto">
-            <TransactionValue transaction={transaction} className="text-xs whitespace-nowrap" />
+            <TransactionValue transaction={transaction} className="text-xs" />
             <AccountBadge account={transaction.account} size="sm" />
             {transaction?.debt?.debtor && (
               <Badge variant="outline" className="text-[10px] flex items-center px-1">
@@ -51,7 +51,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
             )}
           </div>
 
-          <div className="flex flex-row items-center">
+          <div className="flex flex-row items-center space-x-2">
             <span className="text-xs text-muted-foreground whitespace-nowrap">
               {transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
             </span>
@@ -78,7 +78,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
             content={<p>{transaction.note}</p>}
             triggerClassName="w-full overflow-hidden"
           >
-            <p className="text-sm text-muted-foreground truncate">
+            <p className="text-sm text-muted-foreground truncate overflow-hidden text-ellipsis whitespace-nowrap">
               {transaction.note}
             </p>
           </ResponsiveTooltip>

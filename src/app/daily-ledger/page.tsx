@@ -128,21 +128,21 @@ const DailyLedger: React.FC = () => {
       )}
 
       {!isLoading && !isError && (
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-3">
           {Array.from({ length: daysPerPage }, (_, i) => moment(currentDate).subtract(i, 'days')).reverse().map(date => {
             const dateKey = date.format('YYYY-MM-DD');
             const items = groupedItems[dateKey] || [];
 
             return (
-              <Card key={dateKey} className="flex flex-col">
+              <Card key={dateKey} className="flex flex-col max-w-full">
                 <CardHeader>
                   <CardTitle>{date.format('ddd, MMM D')}</CardTitle>
                 </CardHeader>
-                <CardContent className="flex-grow overflow-auto">
+                <CardContent className="flex-grow overflow-auto max-w-full">
                   {items.length > 0 ? (
                     <ul className="space-y-2">
                       {items.map((item) => (
-                        <li key={item.id}>
+                        <li key={item.id} className="max-w-full">
                           {item instanceof Transaction ? (
                             <TransactionListItem transaction={item} />
                           ) : (

@@ -1,15 +1,15 @@
-import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime.ts';
 import { ArrowRightLeft, Eye } from 'lucide-react';
 import React from 'react';
 
-import { Skeleton } from '@/components/ui/skeleton.tsx';
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountBadge from '@/components/features/accounts/Badge';
 import TransferDetails from '@/components/features/transfers/Details';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip.tsx';
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
+import { Skeleton } from '@/components/ui/skeleton';
+import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import Transfer from '@/models/Transfer';
 
 interface TransferItemProps {
@@ -17,40 +17,46 @@ interface TransferItemProps {
 }
 
 export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
-  <Card className="my-2 border-l-4 border-l-primary shadow-md hover:shadow-lg transition-shadow">
-    <CardContent className="px-4 py-2 hover:no-underline hover:bg-accent/50">
-      <div className="flex w-full items-center justify-between">
-        <div className="flex items-center space-x-2 text-sm">
-          <ArrowRightLeft className="h-4 w-4 text-primary" />
-          <MoneyValue className="font-medium font-mono"
-                      amount={transfer.amount}
-                      currency={transfer.fromExpense.account.currency} />
-          <span className="text-muted-foreground hidden sm:inline">
-            <AccountBadge account={transfer.fromExpense.account} size="sm" />
-            {' → '}
-            <AccountBadge account={transfer.toIncome.account} size="sm" />
+  <Card className="mb-0.5 border-l-4 border-l-primary shadow-md hover:shadow-lg hover:bg-secondary/10 dark:hover:bg-secondary/20 transition-colors relative group overflow-visible">
+    <CardContent className="p-2 flex flex-col space-y-1 hover:no-underline hover:bg-accent/50">
+      <div className="flex flex-row items-center justify-between">
+        <div className="flex-grow flex items-center space-x-2 overflow-x-auto">
+          <MoneyValue
+            className="text-xs"
+            amount={transfer.amount}
+            currency={transfer.fromExpense.account.currency}
+          />
+          <span className="text-muted-foreground hidden sm:flex items-center space-x-1">
+            <AccountBadge account={transfer.fromExpense.account} size="sm" className="flex-shrink-0" />
+            <ArrowRightLeft className="h-3 w-3 flex-shrink-0" />
+            <AccountBadge account={transfer.toIncome.account} size="sm" className="flex-shrink-0" />
           </span>
           {transfer.hasFee() && (
             <ResponsiveTooltip content={<p>Fees applied to this transfer</p>} openDelay={0}>
-              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
             </ResponsiveTooltip>
           )}
         </div>
-        <div className="flex items-center space-x-2">
-          <span className="text-xs text-muted-foreground hidden sm:inline">{transfer.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}</span>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                <Eye className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl">
-              <DialogHeader>
-                <DialogTitle>Transfer Details</DialogTitle>
-              </DialogHeader>
-              <TransferDetails transfer={transfer} />
-            </DialogContent>
-          </Dialog>
+
+        <div className="flex flex-row items-center space-x-2">
+          <span className="text-xs text-muted-foreground whitespace-nowrap">
+            {transfer.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
+          </span>
+          <div className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+            <Dialog>
+              <DialogTrigger className="m-0" asChild>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
+                <DialogHeader>
+                  <DialogTitle>Transfer Details</DialogTitle>
+                </DialogHeader>
+                <TransferDetails transfer={transfer} />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
     </CardContent>
@@ -61,17 +67,17 @@ export const ListItemSkeleton: React.FC = () => (
   <Card className="border-l-4 border-l-primary shadow-md">
     <CardContent className="px-4 py-2">
       <div className="flex w-full items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Skeleton className="h-4 w-4 rounded-full" />
-          <Skeleton className="h-4 w-20" />
-          <div className="hidden sm:flex items-center space-x-2">
-            <Skeleton className="h-6 w-16 rounded-full" />
-            <Skeleton className="h-4 w-4" />
-            <Skeleton className="h-6 w-16 rounded-full" />
+        <div className="flex items-center space-x-2 overflow-hidden">
+          <Skeleton className="h-4 w-4 rounded-full flex-shrink-0" />
+          <Skeleton className="h-4 w-20 flex-shrink-0" />
+          <div className="hidden sm:flex items-center space-x-2 overflow-hidden">
+            <Skeleton className="h-6 w-16 rounded-full flex-shrink-0" />
+            <Skeleton className="h-3 w-3 flex-shrink-0" />
+            <Skeleton className="h-6 w-16 rounded-full flex-shrink-0" />
           </div>
-          <Skeleton className="h-2 w-2 rounded-full" />
+          <Skeleton className="h-2 w-2 rounded-full flex-shrink-0" />
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 ml-2 flex-shrink-0">
           <Skeleton className="h-4 w-24 hidden sm:inline-block" />
           <Skeleton className="h-6 w-6 rounded-full" />
         </div>

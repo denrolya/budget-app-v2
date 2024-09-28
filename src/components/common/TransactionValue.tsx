@@ -56,7 +56,7 @@ export const TransactionValue: React.FC<Props> = ({
   // Conditionally render Badge or simple text based on the `badge` prop
   return badge ? (
     <Badge
-      className="text-xs font-mono"
+      className="text-xs"
       variant={transaction.isIncome() ? 'success' : 'destructive'}
     >
       {content}

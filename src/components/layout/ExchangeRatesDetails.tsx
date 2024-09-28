@@ -24,9 +24,10 @@ export const ExchangeRatesDetails: React.FC = () => {
       <SheetTrigger asChild>
         <div className="hidden md:flex items-center text-xs text-accent-foreground/80 space-x-2 cursor-pointer hover:text-accent-foreground transition-colors">
           {headerCurrencyPairs.map(({ from, to }) => (
-            <span key={`${from}/${to}`} className="font-mono">
-              {from}/{to}: <MoneyValue showSymbol={false} amount={getExchangeRate(from, to, fixerExchangeRates) ?? 0} />
-            </span>
+            <div className="font-mono flex flex-col items-center" key={`${from}/${to}`}>
+              <span>{from}/{to}</span>
+              <MoneyValue showSymbol={false} amount={getExchangeRate(from, to, fixerExchangeRates) ?? 0} />
+            </div>
           ))}
           <ChevronRight className="h-4 w-4 ml-1" />
         </div>

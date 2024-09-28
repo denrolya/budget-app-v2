@@ -41,15 +41,15 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
       {showSign && (
         <span>{value < 0 && '-'}</span>
       )}
+      {showSymbol && <span className="mr-1">{symbol}</span>}
       <span>{formatMoney(value)}</span>
-      {showSymbol && <span className="ml-1">{symbol}</span>}
     </>
   );
 
   return (
     <span
       id={id}
-      className={cn('inline-block whitespace-nowrap font-numeric', {
+      className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', {
         'font-bold': bold,
       }, className)}
     >
