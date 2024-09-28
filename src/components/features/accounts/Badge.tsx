@@ -1,10 +1,11 @@
-import { Badge } from '@/components/ui/badge';
-
-import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip.tsx';
-import { cn } from '@/lib/utils';
-import Account, { AccountType } from '@/models/Account';
 import { CreditCard, Globe, HelpCircle, Wallet } from 'lucide-react';
 import React from 'react';
+
+import AccountDetailsHoverCard from '@/components/features/accounts/DetailsHoverCard';
+import { Badge } from '@/components/ui/badge';
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
+import { cn } from '@/lib/utils';
+import Account, { AccountType } from '@/models/Account';
 
 interface AccountBadgeProps {
   account: Account;
@@ -80,7 +81,11 @@ export const AccountBadge: React.FC<AccountBadgeProps> = ({
   );
 
   return (
-    <ResponsiveTooltip openDelay={0} content={nameWithCurrency}>
+    <ResponsiveTooltip
+      desktopComponent="hovercard"
+      contentClassName="bg-transparent border-none"
+      openDelay={0}
+      content={<AccountDetailsHoverCard account={account} />}>
       <span>
         {badgeContent}
       </span>

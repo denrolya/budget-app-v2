@@ -4,9 +4,9 @@ import { Link } from 'react-router-dom';
 
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountAvatar from '@/components/features/accounts/Avatar';
-import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import Account from '@/models/Account';
+import AccountDetailsHoverCard from '@/components/features/accounts/DetailsHoverCard';
 
 interface SidebarAccountLinkProps {
   account: Account;
@@ -32,7 +32,7 @@ export const SidebarAccountLink: React.FC<SidebarAccountLinkProps> = ({ account,
             <p className="text-sm font-medium truncate">{account.nameWithCurrency}</p>
             <MoneyValue
               showSign
-              maximumFractionDigits={0}
+              maximumFractionDigits={2}
               className={cn('items-center text-xs text-mono', {
                 'text-destructive': account.balance < 0,
                 'text-success': account.balance > 0,
@@ -53,22 +53,7 @@ export const SidebarAccountLink: React.FC<SidebarAccountLinkProps> = ({ account,
       alignOffset={-8}
       className="p-0 bg-transparent border-none shadow-none"
     >
-      <Card className="w-64 bg-popover text-popover-foreground">
-        <CardContent className="p-4">
-          <h3 className="font-bold mb-2">{account.nameWithCurrency}</h3>
-          <p className="text-sm mb-1">
-            {'Balance: '}
-            <MoneyValue
-              showSign
-              className="text-mono"
-              maximumFractionDigits={2}
-              amount={account.balance}
-              currency={account.currency} />
-          </p>
-          <p className="text-sm mb-1">Last Transaction: {account.lastTransaction}</p>
-          <p className="text-sm">Account Number: {account.accountNumber}</p>
-        </CardContent>
-      </Card>
+      <AccountDetailsHoverCard account={account} />
     </TooltipContent>
   </Tooltip>
 );

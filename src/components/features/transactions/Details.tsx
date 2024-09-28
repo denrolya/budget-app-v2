@@ -1,7 +1,7 @@
 import React from 'react';
 import { Bitcoin, DollarSign, Edit, Euro, InfoIcon, Trash2 } from 'lucide-react';
 
-import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDispay';
+import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import TransactionValueBadge from '@/components/common/TransactionValueBadge';

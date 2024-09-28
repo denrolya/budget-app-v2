@@ -1,13 +1,9 @@
 import moment from 'moment';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import { Pagination } from '@/components/common/Pagination';
 import EmptyTransactionState from '@/components/features/transactions/EmptyTransactionState.tsx';
 import ListFilters from '@/components/features/transactions/ListFilters';
-import TransactionListItemV1 from '@/components/features/transactions/ListItem';
-import TransactionListItemV2, {
-  ListItemSkeleton as TransactionListItemSkeleton,
-} from '@/components/features/transactions/ListItemV2';
 import TransactionListItemV3, {
   ListItemSkeleton as TransactionListItemSkeletonV3,
 } from '@/components/features/transactions/ListItemV3';
@@ -18,7 +14,6 @@ import Transaction from '@/models/Transaction';
 
 export const TransactionsList: React.FC = () => {
   const { openForm } = useFormContext();
-  const [listStyle, setListStyle] = useState<'v1' | 'v2'>('v2');
   const {
     transactions,
     isLoading,
@@ -30,8 +25,6 @@ export const TransactionsList: React.FC = () => {
     setFilter,
     isFetching,
   } = useTransactions();
-
-  const TransactionListItem = useMemo(() => listStyle === 'v1' ? TransactionListItemV1 : TransactionListItemV2, [listStyle]);
 
   const formatTransactionDate = (dateString: string): string => {
     const RECENT_THRESHOLD_DAYS = 7;
@@ -74,14 +67,8 @@ export const TransactionsList: React.FC = () => {
 
   return (
     <section className="container p-4 mx-auto pb-20 md:pb-4">
-      <div className="flex flex-row">
+      <div className="flex flex-row items-center">
         <h1 className="text-2xl font-bold">Transactions List</h1>
-        <Button variant="ghost"
-                size="icon"
-                className="p-0 ml-2"
-                onClick={() => setListStyle(listStyle === 'v1' ? 'v2' : 'v1')}>
-          {listStyle === 'v1' ? 'v2' : 'v1'}
-        </Button>
         <ListFilters data={filters} onChange={setFilter} />
       </div>
 

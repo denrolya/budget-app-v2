@@ -1,7 +1,7 @@
 import { InfoIcon } from 'lucide-react';
 import React from 'react';
 
-import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDispay';
+import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountBadge from '@/components/features/accounts/Badge';
 import TransactionListItem from '@/components/features/transactions/ListItemV2';
