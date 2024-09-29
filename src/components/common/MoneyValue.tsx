@@ -46,6 +46,11 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
     </>
   );
 
+  const shouldShowConvertedValue = value !== undefined &&
+    currency !== undefined &&
+    baseCurrency.code !== currency &&
+    numericAmount !== value;
+
   return (
     <span
       id={id}
@@ -54,7 +59,7 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
       }, className)}
     >
       {renderMoneyElement(numericAmount, symbol)}
-      {value !== undefined && (baseCurrency.code !== currency || numericAmount !== value) && (
+      {shouldShowConvertedValue && (
         <>
           <span className="mx-1">|</span>
           {renderMoneyElement(value, baseCurrency.symbol)}

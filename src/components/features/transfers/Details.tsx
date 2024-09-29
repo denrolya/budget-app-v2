@@ -1,8 +1,8 @@
 import { InfoIcon } from 'lucide-react';
 import React from 'react';
 
-import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import MoneyValue from '@/components/common/MoneyValue';
+import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountBadge from '@/components/features/accounts/Badge';
 import TransactionListItem from '@/components/features/transactions/ListItemV3';
 import { Separator } from '@/components/ui/separator';
@@ -24,7 +24,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
         <>
           <MoneyValue amount={1} currency={toCurrency} />
           {' = '}
-          <MoneyValue amount={1/rate} currency={fromCurrency} />
+          <MoneyValue amount={1 / rate} currency={fromCurrency} />
         </>
       );
     } else if ((fromCurrency === 'UAH' && toCurrency === 'EUR') || (fromCurrency === 'EUR' && toCurrency === 'UAH')) {
@@ -32,7 +32,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
         <>
           <MoneyValue amount={1} currency={toCurrency} />
           {' = '}
-          <MoneyValue amount={1/rate} currency={fromCurrency} />
+          <MoneyValue amount={1 / rate} currency={fromCurrency} />
         </>
       );
     } else if ((fromCurrency === 'HUF' && toCurrency === 'UAH') || (fromCurrency === 'UAH' && toCurrency === 'HUF')) {
@@ -99,13 +99,27 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
           <div className="flex justify-between items-center">
             <span className="text-sm">Sender</span>
             <span className="font-medium text-destructive font-mono">
-            - <MoneyValue amount={transfer.fromExpense.amount} currency={transfer.fromExpense.account.currency} />
+              {' - '}
+              {transfer?.feeExpense?.account.id === transfer.fromExpense.account.id ? (
+                <MoneyValue
+                  amount={transfer.fromExpense.amount + transfer.feeExpense.amount}
+                  currency={transfer.fromExpense.account.currency} />
+              ) : (
+                <MoneyValue amount={transfer.fromExpense.amount} currency={transfer.fromExpense.account.currency} />
+              )}
           </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm">Recipient</span>
             <span className="font-medium text-success font-mono">
-            + <MoneyValue amount={transfer.toIncome.amount} currency={transfer.toIncome.account.currency} />
+            {' + '}
+              {transfer?.feeExpense?.account.id === transfer.toIncome.account.id ? (
+                <MoneyValue
+                  amount={transfer.feeExpense.amount + transfer.toIncome.amount}
+                  currency={transfer.feeExpense.account.currency} />
+              ) : (
+                <MoneyValue amount={transfer.toIncome.amount} currency={transfer.toIncome.account.currency} />
+              )}
           </span>
           </div>
         </div>

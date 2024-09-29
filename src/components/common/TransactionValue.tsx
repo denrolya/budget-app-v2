@@ -35,25 +35,23 @@ export const TransactionValue: React.FC<Props> = ({
 
   const textColorClass = transaction.isExpense() ? 'text-destructive' : 'text-success';
 
+  const shouldShowConvertedValue = value !== undefined && currency !== baseCurrencyCode && Math.abs(amount) !== Math.abs(value);
+
   const content = (
     <span className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}>
-      {/* Always show base currency value */}
-      {value !== undefined && (
-        <span className="mr-1">
-          {valueString}
-        </span>
-      )}
-
-      {/* Conditionally show transaction amount on small screens or when width allows */}
-      {amountString && (
-        <span className="text-xs opacity-75 hidden md:inline">
-          | {amountString}
-        </span>
+      {shouldShowConvertedValue ? (
+        <>
+          <span>{valueString}</span>
+          <span className="text-xs opacity-75 hidden md:inline ml-1">
+            | {amountString}
+          </span>
+        </>
+      ) : (
+        <span>{amountString}</span>
       )}
     </span>
   );
 
-  // Conditionally render Badge or simple text based on the `badge` prop
   return badge ? (
     <Badge
       className="text-xs"
