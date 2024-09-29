@@ -4,6 +4,7 @@ import moment from 'moment';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { toast } from 'sonner';
 
 import { useForm as useFormContext } from '@/contexts/Form';
 import { useFinanceData } from '@/contexts/FinanceData';
@@ -42,14 +43,11 @@ interface TransferFormRef {
   submitForm: () => Promise<void>;
 }
 
-export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
-                                                                              setFormState,
-                                                                              showToast,
-                                                                            }, ref) => {
+export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>((_, ref) => {
   const { refetchAccounts } = useFinanceData();
   const [calculationMode, setCalculationMode] = useState('result');
   const [resultingAmount, setResultingAmount] = useState('');
-
+  const { submitForm, updateFormState } = useFormContext();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -66,10 +64,9 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
   });
 
   const { watch, setValue } = form;
-  const { submitForm } = useFormContext();
   const { formRef } = useFormLogic({
     form,
-    setFormState,
+    setFormState: updateFormState,
     onSubmit: async (values: z.infer<typeof formSchema>) => {
       try {
         const formattedData = {
@@ -90,7 +87,7 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>(({
         submitForm(values);
       } catch (error) {
         console.error('Form submission failed:', error);
-        showToast('Failed to submit transfer. Please try again.', 'error');
+        toast.error('Failed to submit transfer. Please try again.');
       }
     },
   });

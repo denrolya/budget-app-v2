@@ -4,7 +4,7 @@ import React from 'react';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountBadge from '@/components/features/accounts/Badge';
-import TransactionListItem from '@/components/features/transactions/ListItemV2';
+import TransactionListItem from '@/components/features/transactions/ListItemV3';
 import { Separator } from '@/components/ui/separator';
 import Transfer from '@/models/Transfer';
 

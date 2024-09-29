@@ -5,6 +5,7 @@ import moment from 'moment';
 import React, { forwardRef, useImperativeHandle } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { toast } from 'sonner';
 
 import { useFinanceData } from '@/contexts/FinanceData';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
@@ -118,6 +119,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
         submitForm(values);
       } catch (error) {
         console.error('Form submission failed:', error);
+        toast.error('Failed to submit transaction. Issue requires investigation.');
       }
     },
   });
