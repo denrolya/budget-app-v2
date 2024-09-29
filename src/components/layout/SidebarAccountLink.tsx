@@ -14,7 +14,7 @@ interface SidebarAccountLinkProps {
 }
 
 export const SidebarAccountLink: React.FC<SidebarAccountLinkProps> = ({ account, isSidebarExpanded }) => (
-  <Tooltip delayDuration={0}>
+  <Tooltip delayDuration={1}>
     <TooltipTrigger asChild>
       <Link
         to={`/accounts/${account.id}`}
@@ -22,7 +22,7 @@ export const SidebarAccountLink: React.FC<SidebarAccountLinkProps> = ({ account,
           'justify-center': !isSidebarExpanded,
         })}>
         <div className={cn('flex items-center justify-center', {
-          'w-6 h-6': !isSidebarExpanded,
+          'w-4 h-4': !isSidebarExpanded,
           'w-8 h-8': isSidebarExpanded,
         })}>
           <AccountAvatar account={account} className="w-full h-full" size="sm" />

@@ -1,8 +1,3 @@
-import cn from 'classnames';
-import sumBy from 'lodash/sumBy';
-import { Plus } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
-
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountLink from '@/components/layout/SidebarAccountLink';
 import SidebarLink from '@/components/layout/SidebarLink';
@@ -14,6 +9,10 @@ import { useBaseCurrency } from '@/contexts/auth';
 import { useActiveAccountsWithDefaultOrder, useDebts } from '@/contexts/FinanceData';
 import { FormType, useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
+import cn from 'classnames';
+import sumBy from 'lodash/sumBy';
+import { Plus } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
@@ -26,13 +25,13 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
   const totalBalance = useMemo(
     () => sumBy(
       accounts,
-      ({ convertedValues }) => convertedValues?.[baseCurrency] || 0
+      ({ convertedValues }) => convertedValues?.[baseCurrency] || 0,
     ), [accounts.length]);
 
   const totalDebt = useMemo(() => sumBy(
     debts,
-    ({ convertedValues }) => convertedValues?.[baseCurrency] || 0
-    ), [debts?.length]);
+    ({ convertedValues }) => convertedValues?.[baseCurrency] || 0,
+  ), [debts?.length]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -107,21 +106,19 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
 
         <Separator />
 
-        {isSidebarExpanded && (
-          <div className="flex-grow overflow-hidden flex flex-col">
-            <div className="text-xs font-semibold text-accent-foreground/60 px-6 py-2">Recent Accounts</div>
-            <ScrollArea className="flex-grow px-4">
-              <div className="space-y-1">
-                {accounts.map((account) => (
-                  <AccountLink
-                    key={`account-sidebar-item-${account.id}`}
-                    account={account}
-                    isSidebarExpanded={isSidebarExpanded} />
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
-        )}
+        <div className="flex-grow overflow-hidden flex flex-col space-y-2">
+          {isSidebarExpanded && (
+            <div className="text-xs font-semibold text-accent-foreground/60 px-6 py-2">Accounts</div>
+          )}
+          <ScrollArea className="flex-grow px-4 space-y-1">
+            {accounts.map((account) => (
+              <AccountLink
+                key={`account-sidebar-item-${account.id}`}
+                account={account}
+                isSidebarExpanded={isSidebarExpanded} />
+            ))}
+          </ScrollArea>
+        </div>
 
         <div className="flex-shrink-0 mt-auto p-4 border-t border-accent space-y-2">
           <div className={cn('flex flex-col items-start space-y-1 overflow-hidden transition-all duration-300 ease-in-out', {
