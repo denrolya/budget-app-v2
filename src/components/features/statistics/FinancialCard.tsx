@@ -26,6 +26,7 @@ interface Props extends CardConfig {
 
 export const Component: React.FC<Props> = ({
                                              id,
+  title,
                                              type,
                                              category,
                                              period,
@@ -96,7 +97,7 @@ export const Component: React.FC<Props> = ({
       <CardContent className="p-4 flex flex-col justify-between h-full">
         <div className="flex justify-between items-start">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm text-primary truncate">{getTitle()}</h3>
+            <h3 className="font-semibold text-sm text-primary truncate">{title || getTitle()}</h3>
             <p className="text-xs text-muted-foreground">{getPeriodText()}</p>
           </div>
           <div className="flex items-center space-x-2 ml-2">

@@ -1,21 +1,21 @@
-import { TrendingDown, TrendingUp, Utensils } from 'lucide-react';
-
 export interface CardConfig {
-  id: string
-  type: 'income' | 'expense'
-  category: string | null
-  period: 'week' | 'month' | 'year'
-  comparison: 'previous' | 'same-last-year'
-  amount: number
-  previousAmount: number
-  statType: 'sum' | 'daily' | 'avg' | 'min-max'
-  minAmount?: number
-  maxAmount?: number
+  id: string;
+  title?: string;
+  type: 'income' | 'expense';
+  category: string | null;
+  period: 'week' | 'month' | 'year';
+  comparison: 'previous' | 'same-last-year';
+  amount: number;
+  previousAmount: number;
+  statType: 'sum' | 'daily' | 'avg' | 'min-max';
+  minAmount?: number;
+  maxAmount?: number;
 }
 
 export const cardConfigs: CardConfig[] = [
   {
     id: 'total-expenses-month',
+    title: 'Monthly Expenses',
     type: 'expense',
     category: null,
     period: 'month',
@@ -26,6 +26,7 @@ export const cardConfigs: CardConfig[] = [
   },
   {
     id: 'total-income-year',
+    title: 'Yearly Income',
     type: 'income',
     category: null,
     period: 'year',
@@ -36,6 +37,7 @@ export const cardConfigs: CardConfig[] = [
   },
   {
     id: 'daily-expenses-month-vs-year',
+    title: 'Daily Expenses',
     type: 'expense',
     category: null,
     period: 'month',
@@ -46,6 +48,7 @@ export const cardConfigs: CardConfig[] = [
   },
   {
     id: 'food-expenses-month',
+    title: 'Food Expenses',
     type: 'expense',
     category: 'Food & Drinks',
     period: 'month',
@@ -56,6 +59,7 @@ export const cardConfigs: CardConfig[] = [
   },
   {
     id: 'daily-food-expenses',
+    title: 'Daily Food Expenses',
     type: 'expense',
     category: 'Food & Drinks',
     period: 'month',
@@ -66,6 +70,7 @@ export const cardConfigs: CardConfig[] = [
   },
   {
     id: 'groceries-min-max-month',
+    title: 'Groceries',
     type: 'expense',
     category: 'Groceries',
     period: 'month',
@@ -78,6 +83,7 @@ export const cardConfigs: CardConfig[] = [
   },
   {
     id: 'groceries-avg-check',
+    title: 'Avg Grocery Check',
     type: 'expense',
     category: 'Groceries',
     period: 'month',
