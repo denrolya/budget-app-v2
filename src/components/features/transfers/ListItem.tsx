@@ -1,13 +1,13 @@
 import { ArrowRightLeft, Eye } from 'lucide-react';
 import React from 'react';
 
+import FeeIndicator from '@/components/features/transfers/ListItemFeeIndicator';
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountBadge from '@/components/features/accounts/Badge';
 import TransferDetails from '@/components/features/transfers/Details';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import Transfer from '@/models/Transfer';
@@ -32,9 +32,11 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
             <AccountBadge account={transfer.toIncome.account} size="sm" className="flex-shrink-0" />
           </span>
           {transfer.hasFee() && (
-            <ResponsiveTooltip content={<p>Fees applied to this transfer</p>} openDelay={0}>
-              <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
-            </ResponsiveTooltip>
+            <FeeIndicator
+              feeAmount={transfer.feeExpense.amount}
+              feeCurrency={transfer.feeExpense.account.currency}
+              transferAmount={transfer.amount}
+            />
           )}
         </div>
 

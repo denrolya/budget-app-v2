@@ -3,8 +3,8 @@ import moment from 'moment';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import { FormType, useFormSubmitListener } from '@/contexts/Form.tsx';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
+import { FormType, useFormSubmitListener } from '@/contexts/Form.tsx';
 import { useListState } from '@/hooks/useListState';
 import Transaction, { TransactionFactory } from '@/models/Transaction';
 import { TransactionFilters } from '@/models/TransactionFilters';
@@ -16,6 +16,7 @@ interface UseTransactionsOptions {
   initialSort?: { field: string; direction: 'asc' | 'desc' };
   updateUrl?: boolean;
   queryKey?: string;
+  excludeTransfers?: boolean;
 }
 
 interface TransformedResponse {
@@ -47,6 +48,7 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
     initialSort = { field: 'executedAt', direction: 'desc' },
     updateUrl = true,
     queryKey = 'transactions',
+    excludeTransfers = false,
   } = options;
 
   const { createTransaction } = TransactionFactory();
@@ -130,9 +132,14 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
     queryKey: [queryKey, url],
     queryFn: async (): Promise<TransformedResponse> => {
       const result = await axiosFetcher(url);
+
+      const filteredList = excludeTransfers
+        ? result.list.filter((t: any) => !t.transfer?.id)
+        : result.list;
+
       return {
         ...result,
-        list: result.list.map((t: never) => createTransaction(t)),
+        list: filteredList.map((t: any) => createTransaction(t)),
       };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

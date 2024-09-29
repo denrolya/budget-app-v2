@@ -18,8 +18,6 @@ import { TransferFilters } from '@/models/TransferFilters';
 const DailyLedger: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(moment().startOf('day'));
   const daysPerPage = 3;
-  const { list:categories } = useCategories();
-  const transferCategories = useMemo(() => categories.filter(c => c.name === 'Transfer').map(({ id }) => id), [categories.length]);
 
   const dateRange = useMemo(() => {
     const startDate = currentDate.clone().subtract(daysPerPage - 1, 'days');
@@ -34,10 +32,9 @@ const DailyLedger: React.FC = () => {
     error: errorTransactions,
     setFilter: setTransactionFilter,
   } = useTransactions({
-    initialFilters: new TransactionFilters({
-      excludedCategories: transferCategories,
-    }),
+    initialFilters: new TransactionFilters(),
     updateUrl: false,
+    excludeTransfers: true,
   });
 
   const {
