@@ -22,33 +22,33 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
     if ((fromCurrency === 'UAH' && toCurrency === 'USD') || (fromCurrency === 'USD' && toCurrency === 'UAH')) {
       return (
         <>
-          <MoneyValue amount={1} currency={toCurrency} />
+          <MoneyValue useColors={false} amount={1} currency={toCurrency} />
           {' = '}
-          <MoneyValue amount={1 / rate} currency={fromCurrency} />
+          <MoneyValue useColors={false} amount={1 / rate} currency={fromCurrency} />
         </>
       );
     } else if ((fromCurrency === 'UAH' && toCurrency === 'EUR') || (fromCurrency === 'EUR' && toCurrency === 'UAH')) {
       return (
         <>
-          <MoneyValue amount={1} currency={toCurrency} />
+          <MoneyValue useColors={false} amount={1} currency={toCurrency} />
           {' = '}
-          <MoneyValue amount={1 / rate} currency={fromCurrency} />
+          <MoneyValue useColors={false} amount={1 / rate} currency={fromCurrency} />
         </>
       );
     } else if ((fromCurrency === 'HUF' && toCurrency === 'UAH') || (fromCurrency === 'UAH' && toCurrency === 'HUF')) {
       return (
         <>
-          <MoneyValue amount={1000} currency={fromCurrency} />
+          <MoneyValue useColors={false} amount={1000} currency={fromCurrency} />
           {' = '}
-          <MoneyValue amount={rate * 1000} currency={toCurrency} />
+          <MoneyValue useColors={false} amount={rate * 1000} currency={toCurrency} />
         </>
       );
     } else {
       return (
         <>
-          <MoneyValue amount={1} currency={fromCurrency} />
+          <MoneyValue useColors={false} amount={1} currency={fromCurrency} />
           {' = '}
-          <MoneyValue amount={rate} currency={toCurrency} />
+          <MoneyValue useColors={false} amount={rate} currency={toCurrency} />
         </>
       );
     }
@@ -75,7 +75,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
           <div className="flex justify-between items-center">
             <span className="text-sm">Amount</span>
             <span className="font-medium font-mono">
-              <MoneyValue amount={transfer.amount} currency={transfer.fromExpense.account.currency} />
+              <MoneyValue useColors={false} amount={transfer.amount} currency={transfer.fromExpense.account.currency} />
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -105,7 +105,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
                   amount={-(transfer.fromExpense.amount + transfer.feeExpense.amount)}
                   currency={transfer.fromExpense.account.currency} />
               ) : (
-                <MoneyValue amount={transfer.fromExpense.amount} currency={transfer.fromExpense.account.currency} />
+                <MoneyValue amount={-transfer.fromExpense.amount} currency={transfer.fromExpense.account.currency} />
               )}
           </span>
           </div>
