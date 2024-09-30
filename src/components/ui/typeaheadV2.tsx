@@ -1,19 +1,9 @@
 import cn from 'classnames';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
-import React, { forwardRef, useCallback, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface TypeaheadV2Props {
@@ -43,6 +33,10 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
                                                                            }, ref) => {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const selectedValues = useMemo(() => {
     if (multiple) {
@@ -75,119 +69,148 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
       setOpen(false);
     }
     setInputValue('');
+    setHighlightedIndex(-1);
   }, [multiple, onChange, selectedValues, valueField]);
 
   const handleRemove = useCallback((optionValue: string) => {
     if (multiple) {
       const newValue = selectedValues.filter(v => v !== optionValue);
-      // @ts-ignore
       onChange(newValue);
     } else {
       onChange(null);
     }
+    setInputValue('');
   }, [multiple, onChange, selectedValues]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIndex(prev => (prev < filteredOptions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex(prev => (prev > 0 ? prev - 1 : filteredOptions.length - 1));
+    } else if (e.key === 'Enter' && highlightedIndex !== -1) {
+      e.preventDefault();
+      handleSelect(filteredOptions[highlightedIndex]);
+    } else if (e.key === 'Escape') {
+      setOpen(false);
+    } else if (e.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
       const newValue = selectedValues.slice(0, -1);
-      // @ts-ignore
-      onChange(multiple ? newValue : newValue[0] || null);
+      onChange(multiple ? newValue : null);
     }
-  }, [inputValue, multiple, onChange, selectedValues]);
+  }, [inputValue, multiple, onChange, selectedValues, filteredOptions, highlightedIndex, handleSelect]);
 
-  const renderSelectedItems = useCallback(() => {
-    if (!multiple && selectedOptions.length === 1) {
-      return <span className="text-sm truncate">{selectedOptions[0][labelField]}</span>;
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (open && highlightedIndex !== -1) {
+      optionRefs.current[highlightedIndex]?.scrollIntoView({ block: 'nearest' });
     }
+  }, [open, highlightedIndex]);
 
-    return (
-      <div className="flex flex-wrap gap-1 items-center">
-        {selectedOptions.length > 0 && (
-          <Badge variant="secondary" className="text-sm">
-            <span className="truncate max-w-[100px]">{selectedOptions[0][labelField]}</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-1 h-4 w-4 p-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRemove(selectedOptions[0][valueField]);
-              }}
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </Badge>
-        )}
-        {selectedOptions.length > 1 && (
-          <Badge variant="secondary" className="text-sm">
-            +{selectedOptions.length - 1} more
-          </Badge>
-        )}
-      </div>
-    );
-  }, [multiple, selectedOptions, labelField, valueField, handleRemove]);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    setHighlightedIndex(-1);
+    if (!open) {
+      setOpen(true);
+    }
+  };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn('justify-between', className)}
-        >
-          <div className="flex-1 text-left">
-            {selectedOptions.length > 0 ? renderSelectedItems() : placeholder}
-          </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[400px] p-0" align="start">
-        <Command>
-          <CommandInput
-            placeholder={`Search ${placeholder.toLowerCase()}...`}
+    <div className={cn('relative', className)} ref={dropdownRef}>
+      <div
+        className="flex items-center flex-wrap gap-1 px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+        onClick={() => {
+          setOpen(true);
+          inputRef.current?.focus();
+        }}
+      >
+        <div className="flex-1 flex flex-wrap items-center gap-1 pr-4">
+          {selectedOptions.map((option) => (
+            <Badge key={option[valueField]} variant="secondary" className="text-sm">
+              <span className="truncate max-w-[100px]">{option[labelField]}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-1 h-4 w-4 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemove(option[valueField]);
+                }}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
+          ))}
+          <input
+            ref={inputRef}
             value={inputValue}
-            onValueChange={setInputValue}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            ref={ref}
+            onFocus={() => setOpen(true)}
+            placeholder={selectedOptions.length === 0 ? placeholder : ''}
+            className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground min-w-[50px]"
           />
-          <ScrollArea className="h-[300px]">
-            <CommandList>
-              <CommandEmpty>{emptyMessage}</CommandEmpty>
-              {selectedOptions.length > 0 && (
-                <CommandGroup heading="Selected">
-                  {selectedOptions.map((option) => (
-                    <CommandItem
-                      key={option[valueField]}
-                      onSelect={() => handleSelect(option)}
-                    >
-                      <Check className="mr-2 h-4 w-4 opacity-100" />
-                      {renderElement(option, valueField, labelField)}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-4 w-4 p-0 hover:bg-transparent absolute right-3"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(!open);
+          }}
+        >
+          <ChevronsUpDown className="h-4 w-4 opacity-50" />
+        </Button>
+      </div>
+      {open && (
+        <div className="absolute z-10 w-[calc(100%+6rem)] -left-12 mt-1 bg-popover border border-input rounded-md shadow-md overflow-hidden">
+          <ScrollArea className="max-h-[300px] overflow-y-auto">
+            <div className="p-1">
+              {filteredOptions.length === 0 ? (
+                <div className="p-2 text-sm text-muted-foreground">{emptyMessage}</div>
+              ) : (
+                filteredOptions.map((option, index) => (
+                  <div
+                    key={option[valueField]}
+                    ref={el => optionRefs.current[index] = el}
+                    className={cn(
+                      'flex items-center px-2 py-1.5 text-sm cursor-pointer',
+                      highlightedIndex === index
+                        ? 'bg-accent text-accent-foreground'
+                        : 'text-popover-foreground hover:bg-accent hover:text-accent-foreground',
+                    )}
+                    onClick={() => handleSelect(option)}
+                    onMouseEnter={() => setHighlightedIndex(index)}
+                  >
+                    <Check className={cn(
+                      'mr-2 h-4 w-4',
+                      selectedValues.includes(option[valueField])
+                        ? 'opacity-100'
+                        : 'opacity-0',
+                    )} />
+                    {renderElement(option, valueField, labelField)}
+                  </div>
+                ))
               )}
-              {(selectedOptions.length > 0 && filteredOptions.length > 0) && (
-                <CommandSeparator />
-              )}
-              {filteredOptions.length > 0 && (
-                <CommandGroup heading="Available">
-                  {filteredOptions.map((option) => (
-                    <CommandItem
-                      key={option[valueField]}
-                      onSelect={() => handleSelect(option)}
-                    >
-                      <Check className="mr-2 h-4 w-4 opacity-0" />
-                      {renderElement(option, valueField, labelField)}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              )}
-            </CommandList>
+            </div>
           </ScrollArea>
-        </Command>
-      </PopoverContent>
-    </Popover>
+        </div>
+      )}
+    </div>
   );
 });
 

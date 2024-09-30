@@ -127,7 +127,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
 
   return (
     <Form {...form}>
-      <form className="space-y-6">
+      <form className="space-y-2">
         <FormField
           name="type"
           control={form.control}
@@ -160,6 +160,24 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                   </Button>
                 </div>
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Category</FormLabel>
+              <CategoryTypeahead
+                {...field}
+                multiple={false}
+                className={cn('w-full justify-between', {
+                  'text-muted-foreground': !field.value,
+                })}
+              />
               <FormMessage />
             </FormItem>
           )}
@@ -216,24 +234,6 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               <FormControl>
                 <Input type="datetime-local" className="w-full" {...field} />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Category</FormLabel>
-              <CategoryTypeahead
-                {...field}
-                multiple={false}
-                className={cn('w-full justify-between', {
-                  'text-muted-foreground': !field.value,
-                })}
-              />
               <FormMessage />
             </FormItem>
           )}

@@ -7,6 +7,7 @@ import DraftForm from '@/components/features/transactions/DraftForm';
 import InputForm from '@/components/features/transactions/InputForm';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { CardConfig, cardConfigs } from '@/constants/dashboard-config';
+import TypeaheadV2   from '@/components/ui/typeaheadV2';
 
 const DashboardPage: React.FC = () => {
   const [configs, setConfigs] = useState<CardConfig[]>(cardConfigs);
@@ -17,8 +18,25 @@ const DashboardPage: React.FC = () => {
       ),
     );
   };
+
+  const [value, setValue] = useState<string | string[] | null>(null);
+  const options = [
+    { id: '1', name: 'Option 1' },
+    { id: '2', name: 'Option 2' },
+    { id: '3', name: 'Option 3' },
+  ];
+
   return (
     <section className="p-6">
+      <TypeaheadV2
+        options={options}
+        valueField="id"
+        labelField="name"
+        renderElement={(option) => option.name}
+        value={value}
+        onChange={setValue}
+        multiple={false}
+      />
       <div className="grid grid-cols-5 gap-4 mb-6">
         <div className="col-span-5 md:col-span-3">
           <MoneyFlow />

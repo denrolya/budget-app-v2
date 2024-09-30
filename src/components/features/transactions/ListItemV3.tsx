@@ -93,7 +93,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
       </Card>
       <Badge
         variant="outline"
-        className="absolute top-0 left-0 -translate-y-1/2 text-xs px-1 py-0 whitespace-nowrap z-50 bg-background shadow-md"
+        className="absolute top-0 left-0 -translate-y-1/2 text-xs px-1 py-0 whitespace-nowrap z-10 bg-background shadow-md"
       >
         {transaction.category.name}
       </Badge>
@@ -118,7 +118,7 @@ export const ListItemSkeleton: React.FC = () => (
         <Skeleton className="h-5 w-full" />
       </CardContent>
     </Card>
-    <Skeleton className="absolute top-0 left-0 h-4 w-16 -translate-y-1/2 z-50" />
+    <Skeleton className="absolute top-0 left-0 h-4 w-16 -translate-y-1/2 z-10" />
   </div>
 );
 

@@ -123,7 +123,7 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>((_, r
 
   return (
     <Form {...form}>
-      <form className="space-y-3">
+      <form className="space-y-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField
             name="from"

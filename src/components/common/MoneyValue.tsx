@@ -35,7 +35,7 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
   const baseCurrencyCode = useBaseCurrency();
   const baseCurrency = CURRENCIES[baseCurrencyCode];
   const symbol = currency ? CURRENCIES[currency]?.symbol : baseCurrency.symbol;
-  const value = values[baseCurrency.code];
+  const baseValue = values[baseCurrency.code];
 
   const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
 
@@ -51,10 +51,10 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
     </>
   );
 
-  const shouldShowConvertedValue = value !== undefined &&
+  const shouldShowConvertedValue = baseValue !== undefined &&
     currency !== undefined &&
     baseCurrency.code !== currency &&
-    numericAmount !== value;
+    Math.abs(numericAmount - baseValue) > 0.01; // Using a small threshold to account for floating-point imprecision
 
   const getColorClass = (value: number) => {
     if (!useColors) return '';
@@ -78,12 +78,14 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
       id={id}
       className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}
     >
-      {renderMoneyElement(numericAmount, symbol)}
-      {shouldShowConvertedValue && (
+      {shouldShowConvertedValue ? (
         <>
+          {renderMoneyElement(baseValue, baseCurrency.symbol)}
           <span className="mx-1">|</span>
-          {renderMoneyElement(value, baseCurrency.symbol)}
+          {renderMoneyElement(numericAmount, symbol)}
         </>
+      ) : (
+        renderMoneyElement(numericAmount, symbol)
       )}
     </span>
   );
