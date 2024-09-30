@@ -1,8 +1,7 @@
+import { ArrowRightLeftIcon, CalendarIcon, CalendarX, DollarSignIcon } from 'lucide-react';
 import { Moment } from 'moment';
 import React from 'react';
 
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 import MoneyValue from '@/components/common/MoneyValue';
 import TransactionListItem, {
   ListItemSkeleton as TransactionListItemSkeleton,
@@ -10,54 +9,76 @@ import TransactionListItem, {
 import TransferListItem, {
   ListItemSkeleton as TransferListItemSkeleton,
 } from '@/components/features/transfers/ListItem';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardHeader } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useBaseCurrency } from '@/contexts/auth';
+import { cn } from '@/lib/utils';
 import Transaction from '@/models/Transaction';
 import Transfer from '@/models/Transfer';
 
 interface Props {
-  date: Moment
-  items: (Transaction | Transfer)[]
-  index: number
-  totalDays: number
+  date: Moment;
+  items: (Transaction | Transfer)[];
+  index: number;
+  totalDays: number;
 }
 
-const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => {
+export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => {
   const baseCurrency = useBaseCurrency();
-  const transactionCount = items.filter(item => item instanceof Transaction).length;
-  const transferCount = items.filter(item => item instanceof Transfer).length;
-  const { totalIncome, totalExpense } = items
-    .filter(item => item instanceof Transaction)
-    .reduce((acc, item) => {
-      const transaction = item as Transaction;
-      if (transaction.isIncome()) {
-        acc.totalIncome += transaction.convertedValues[baseCurrency];
-      } else {
-        acc.totalExpense += transaction.convertedValues[baseCurrency];
-      }
-      return acc;
-    }, { totalIncome: 0, totalExpense: 0 });
+  const transactions = items.filter(item => item instanceof Transaction) as Transaction[];
+  const transfers = items.filter(item => item instanceof Transfer) as Transfer[];
+  const transactionCount = transactions.length;
+  const transferCount = transfers.length;
+
+  const { totalIncome, totalExpense } = transactions.reduce((acc, transaction) => {
+    if (transaction.isIncome()) {
+      acc.totalIncome += transaction.convertedValues[baseCurrency];
+    } else {
+      acc.totalExpense += transaction.convertedValues[baseCurrency];
+    }
+    return acc;
+  }, { totalIncome: 0, totalExpense: 0 });
+
   const netAmount = totalIncome - totalExpense;
 
-  const getNetAmountColor = (amount: number) => {
-    if (amount > 0) return 'text-success';
-    if (amount < 0) return 'text-destructive';
-    return 'text-muted-foreground';
-  };
+  const transferAmount = transfers.reduce((total, transfer) =>
+    total + transfer.fromExpense.convertedValues[baseCurrency], 0);
 
   const content = (
     <>
-      <div className="flex flex-col items-start justify-between space-y-1 pb-2">
-        <h2 className="text-base font-semibold">{date.format('ddd, MMM D')}</h2>
-        <div className="flex justify-between w-full text-xs">
-          <span>{transactionCount + transferCount} items</span>
-          <span className={getNetAmountColor(netAmount)}>
-            <MoneyValue amount={netAmount} />
-          </span>
+      <div className="flex items-start justify-between space-y-1 pb-2">
+        <h2 className="text-lg font-semibold flex items-center">
+          <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground" />
+          <span>{date.format('dddd, D MMM')}</span>
+        </h2>
+        <div className="flex items-center space-x-4 text-sm">
+          <div className="flex items-center">
+            <ArrowRightLeftIcon className="mr-1 h-4 w-4" />
+            <span className="font-medium">{transferCount}</span>
+            <span className="ml-1 text-muted-foreground">
+              (<MoneyValue amount={transferAmount} />)
+            </span>
+          </div>
+          <div className="flex items-center">
+            <DollarSignIcon className="mr-1 h-4 w-4" />
+            <span className="font-medium">{transactions.filter(t => !t.isIncome()).length}</span>
+            <span className="ml-1 text-muted-foreground">
+              (<MoneyValue amount={netAmount} />)
+            </span>
+          </div>
         </div>
       </div>
       <div className="flex-grow overflow-auto max-w-full pt-2">
-        {items.length > 0 ? (
+        {items.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+            <CalendarX className="w-10 h-10 text-muted-foreground mb-3" />
+            <h3 className="text-base font-medium text-foreground mb-1">No entries for today</h3>
+            <p className="text-sm text-muted-foreground max-w-xs">
+              There are no financial activities recorded for this date.
+            </p>
+          </div>
+        )}
+        {items.length > 0 && (
           <ul className="space-y-2">
             {items.map((item) => (
               <li key={item.id} className="max-w-full">
@@ -69,8 +90,6 @@ const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => {
               </li>
             ))}
           </ul>
-        ) : (
-          <p className="text-center text-muted-foreground text-sm">No entries</p>
         )}
       </div>
     </>
@@ -100,7 +119,11 @@ export const DateCardSkeleton: React.FC<{ index: number; totalDays: number }> = 
       <div className="flex flex-col items-start justify-between space-y-1 pb-2">
         <Skeleton className="h-6 w-32" />
         <div className="flex justify-between w-full">
-          <Skeleton className="h-4 w-16" />
+          <div className="flex space-x-2">
+            <Skeleton className="h-5 w-16" />
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-5 w-24" />
+          </div>
           <Skeleton className="h-4 w-20" />
         </div>
       </div>
