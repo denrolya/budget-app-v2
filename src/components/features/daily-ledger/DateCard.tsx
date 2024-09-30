@@ -46,7 +46,7 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
 
   const content = (
     <>
-      <div className="flex items-start justify-between space-y-1 pb-2">
+      <div className="flex flex-col md:flex-row items-start justify-between space-y-1 pb-2">
         <h2 className="text-lg font-semibold flex items-center">
           <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground" />
           <span>{date.format('dddd, D MMM')}</span>
