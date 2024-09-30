@@ -45,6 +45,18 @@ export default class Category {
     child.parent = this;
     this.children.push(child);
   }
+
+  getFullPath(): string[] {
+    const path: string[] = [this.name];
+    let currentCategory: Category | null = this.parent;
+
+    while (currentCategory !== null) {
+      path.unshift(currentCategory.name);
+      currentCategory = currentCategory.parent;
+    }
+
+    return path;
+  }
 }
 
 export class CategoryTreeBuilder {

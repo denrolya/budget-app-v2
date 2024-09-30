@@ -31,10 +31,13 @@ const RateDisplay: React.FC<{
   maximumFractionDigits: number
 }> = ({ value, source, from, to, amount, maximumFractionDigits }) => (
   <div className="flex items-center space-x-2 text-sm">
-    <MoneyValue amount={amount} currency={from} />
+    <MoneyValue useColors={false} amount={amount} currency={from} />
     <span className="text-muted-foreground">=</span>
     <div className="flex-1 flex items-start">
-      <MoneyValue amount={amount * value} currency={to} maximumFractionDigits={maximumFractionDigits} />
+      <MoneyValue useColors={false}
+                  amount={amount * value}
+                  currency={to}
+                  maximumFractionDigits={maximumFractionDigits} />
       <sup className="ml-1 mt-2 text-[8px] font-medium text-muted-foreground">
         {source}
       </sup>
@@ -117,7 +120,14 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm">Category</span>
-            <Badge variant="outline" className="text-xs px-1 py-0 whitespace-nowrap">{transaction.category.name}</Badge>
+            <div className="flex flex-col items-end">
+              <Badge variant="outline" className="text-xs px-1 py-0 whitespace-nowrap mb-1">
+                {transaction.category.name}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+              {transaction.category.getFullPath().join(' > ')}
+            </span>
+            </div>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm">Account</span>
@@ -134,7 +144,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
           <div className="flex justify-between items-center">
             <span className="text-sm">Amount</span>
             <span className="font-medium font-mono">
-              <MoneyValue amount={transaction.amount} currency={transaction.account.currency} />
+              <MoneyValue useColors={false} amount={transaction.amount} currency={transaction.account.currency} />
             </span>
           </div>
         </div>
@@ -196,7 +206,10 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
                             <CurrencyIcon currency={currency} />
                             <span>{currency}</span>
                           </span>
-                          <MoneyValue className="font-medium text-sm" amount={value} currency={currency} />
+                          <MoneyValue useColors={false}
+                                      className="font-medium text-sm"
+                                      amount={value}
+                                      currency={currency} />
                         </div>
                       </ResponsiveTooltip>
                     </>

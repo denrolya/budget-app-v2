@@ -56,7 +56,7 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
             <ArrowRightLeftIcon className="mr-1 h-4 w-4" />
             <span className="font-medium">{transferCount}</span>
             <span className="ml-1 text-muted-foreground">
-              (<MoneyValue amount={transferAmount} />)
+              (<MoneyValue useColors={false} amount={transferAmount} />)
             </span>
           </div>
           <div className="flex items-center">
