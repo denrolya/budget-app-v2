@@ -1,24 +1,23 @@
 import cn from 'classnames';
-import { Archive, ArrowUpDown, Calendar, ChevronLeft, Download, Edit, Plus, Search } from 'lucide-react';
-import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import { Archive, Calendar, Search } from 'lucide-react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 
+import Account from '@/models/Account.ts';
 import MoneyValue from '@/components/common/MoneyValue';
+import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay.tsx';
 import AccountAvatar from '@/components/features/accounts/Avatar';
-import { Badge, BadgeVariant, badgeVariants } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import AccountDetails from '@/components/features/accounts/Details';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
 
 export const AccountsManagementPage: React.FC = () => {
   const accounts = useAccountsWithDefaultOrder();
-  const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState('transactions');
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [showArchived, setShowArchived] = useState<boolean>(false);
+  const selectedAccountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -27,7 +26,16 @@ export const AccountsManagementPage: React.FC = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const selectedAccount = selectedAccountId ? accounts.find(account => account.id === selectedAccountId) : null;
+  const handleAccountSelect = useCallback((account: Account) => {
+    setSelectedAccount(account);
+    // Scroll the selected account into view smoothly
+    setTimeout(() => {
+      selectedAccountRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }, 0);
+  }, []);
 
   const AccountList: React.FC = () => (
     <div className="flex flex-col h-full">
@@ -42,10 +50,11 @@ export const AccountsManagementPage: React.FC = () => {
         {accounts.filter(a => showArchived ? true : !a.isArchived()).map((account) => (
           <div
             key={account.id}
+            ref={selectedAccount?.id === account.id ? selectedAccountRef : null}
             className={cn('p-4 border-b cursor-pointer hover:bg-accent hover:text-accent-foreground', {
-              'bg-accent text-accent-foreground': selectedAccountId === account.id,
+              'bg-accent text-accent-foreground': selectedAccount?.id === account.id,
             })}
-            onClick={() => setSelectedAccountId(account.id)}
+            onClick={() => handleAccountSelect(account)}
           >
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center gap-2">
@@ -63,14 +72,14 @@ export const AccountsManagementPage: React.FC = () => {
             <div className="flex justify-between items-center text-xs text-muted-foreground">
               {account.archivedAt && (
                 <span className="flex items-center gap-1">
-                <Archive className="w-3 h-3" />
-                Archived
-              </span>
+                  <Archive className="w-3 h-3" />
+                  Archived
+                </span>
               )}
             </div>
             <div className="text-xs text-muted-foreground mt-1">
               <Calendar className="w-3 h-3 inline mr-1" />
-              Last updated: {account.updatedAt.fromNow()}
+              Last updated: <RelativeDatetimeDisplay date={account.updatedAt} />
             </div>
           </div>
         ))}
@@ -86,146 +95,22 @@ export const AccountsManagementPage: React.FC = () => {
     </div>
   );
 
-  const AccountDetail: React.FC = () => {
-    if (!selectedAccount) return null;
-    let balanceBadgeVariant: BadgeVariant = BadgeVariant.Secondary;
-    if (selectedAccount?.balance && selectedAccount.balance < 0) {
-      balanceBadgeVariant = BadgeVariant.Destructive;
-    } else if (selectedAccount?.balance && selectedAccount.balance > 0) {
-      balanceBadgeVariant = BadgeVariant.Success;
-    }
-
-    return (
-      <div className="h-full flex flex-col">
-        <header className="bg-background border-b p-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <Button variant="ghost" size="icon" className="mr-2" onClick={() => setSelectedAccountId(null)}>
-              <ChevronLeft className="h-6 w-6" />
-              <span className="sr-only">Back to list</span>
-            </Button>
-            <h1 className="text-xl font-bold">Account Details</h1>
-          </div>
-          <div className="flex space-x-2">
-            <Button variant="outline" size="icon">
-              <Download className="h-4 w-4" />
-              <span className="sr-only">Export</span>
-            </Button>
-            <Button variant="outline" size="icon">
-              <Edit className="h-4 w-4" />
-              <span className="sr-only">Edit</span>
-            </Button>
-          </div>
-        </header>
-        <div className="flex-1 overflow-auto p-4">
-          <Card className="mb-4">
-            <CardHeader>
-              <div className="flex flex-col">
-                <div className="flex items-center space-x-4 mb-2">
-                  <AccountAvatar account={selectedAccount} />
-                  <div>
-                    <CardTitle>{selectedAccount?.nameWithCurrency}</CardTitle>
-                    <CardDescription>
-                      Created on {selectedAccount?.createdAt.format('LLL')}
-                    </CardDescription>
-                  </div>
-                </div>
-                <Badge className="self-start" variant={balanceBadgeVariant}>
-                  <MoneyValue
-                    showSign
-                    amount={selectedAccount.balance}
-                    currency={selectedAccount.currency}
-                    values={selectedAccount.convertedValues} />
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Notes here</p>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" size="sm">
-                <ArrowUpDown className="mr-2 h-4 w-4" />
-                Edit Balance
-              </Button>
-            </CardFooter>
-          </Card>
-
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className={isMobile ? 'grid w-full grid-cols-2' : ''}>
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
-              <TabsTrigger value="history">Account History</TabsTrigger>
-            </TabsList>
-            <TabsContent value="transactions">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Transactions</CardTitle>
-                  <CardDescription>List of all transactions related to this account</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[300px]">
-                    <ul className="space-y-4">
-                      <li>transaction 1</li>
-                      <li>transaction 2</li>
-                    </ul>
-                  </ScrollArea>
-                </CardContent>
-                <CardFooter>
-                  <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Transaction
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-            <TabsContent value="history">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Account History</CardTitle>
-                  <CardDescription>Timeline of actions and changes related to this account</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[300px]">
-                    <ul className="space-y-4">
-                      {[
-                        { id: 1, date: '2023-06-15', action: 'Debt created', details: 'Initial loan of $1000' },
-                        { id: 2, date: '2023-07-01', action: 'Repayment received', details: 'Repayment of $250' },
-                        { id: 3, date: '2023-08-01', action: 'Repayment received', details: 'Repayment of $250' },
-                      ].map((event) => (
-                        <li key={event.id} className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">{event.action}</p>
-                            <p className="text-sm text-muted-foreground">{event.details}</p>
-                          </div>
-                          <Badge variant="secondary">{moment(event.date).format('LLL')}</Badge>
-                        </li>
-                      ))}
-                    </ul>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="flex h-screen md:h-[calc(100vh-2rem)] overflow-hidden pb-16 md:pb-0">
-      {/* Sidebar for desktop */}
       {!isMobile && (
         <div className="w-80 border-r bg-background">
           <AccountList />
         </div>
       )}
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         {isMobile ? (
-          selectedAccountId ? <AccountDetail /> : <AccountList />
+          selectedAccount ? <AccountDetails account={selectedAccount} setSelectedAccount={setSelectedAccount} /> :
+            <AccountList />
         ) : (
-          selectedAccountId ? <AccountDetail /> :
+          selectedAccount ? <AccountDetails account={selectedAccount} setSelectedAccount={setSelectedAccount} /> :
             <div className="flex items-center justify-center h-full text-muted-foreground">
-              Select a account to view details
+              Select an account to view details
             </div>
         )}
       </div>

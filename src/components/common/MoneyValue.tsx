@@ -3,6 +3,7 @@ import React from 'react';
 
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useBaseCurrency } from '@/contexts/auth';
+import { Badge } from '@/components/ui/badge';
 
 interface MoneyValueProps {
   id?: string;
@@ -13,7 +14,9 @@ interface MoneyValueProps {
   showSign?: boolean;
   maximumFractionDigits?: number;
   className?: string;
-  bold?: boolean;
+  badge?: boolean;
+  revertColors?: boolean;
+  useColors?: boolean;
 }
 
 export const MoneyValue: React.FC<MoneyValueProps> = ({
@@ -25,7 +28,9 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
                                                         showSign = false,
                                                         maximumFractionDigits = 2,
                                                         className,
-                                                        bold = false,
+                                                        badge = false,
+                                                        revertColors = false,
+                                                        useColors = true,
                                                       }) => {
   const baseCurrencyCode = useBaseCurrency();
   const baseCurrency = CURRENCIES[baseCurrencyCode];
@@ -39,7 +44,7 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
   const renderMoneyElement = (value: number, symbol: string) => (
     <>
       {showSign && (
-        <span>{value < 0 && '-'}</span>
+        <span>{value < 0 ? '- ' : '+ '}</span>
       )}
       {showSymbol && <span className="mr-1">{symbol}</span>}
       <span>{formatMoney(value)}</span>
@@ -51,12 +56,27 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
     baseCurrency.code !== currency &&
     numericAmount !== value;
 
-  return (
+  const getColorClass = (value: number) => {
+    if (!useColors) return '';
+    if (value > 0) return revertColors ? 'text-destructive' : 'text-success';
+    if (value < 0) return revertColors ? 'text-success' : 'text-destructive';
+    return 'text-muted-foreground';
+  };
+
+  const getBadgeVariant = (value: number): 'default' | 'destructive' | 'success' | 'outline' => {
+    if (!useColors) return 'outline';
+    if (value > 0) return revertColors ? 'destructive' : 'success';
+    if (value < 0) return revertColors ? 'success' : 'destructive';
+    return 'outline';
+  };
+
+  const colorClass = getColorClass(numericAmount);
+  const badgeVariant = getBadgeVariant(numericAmount);
+
+  const content = (
     <span
       id={id}
-      className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', {
-        'font-bold': bold,
-      }, className)}
+      className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}
     >
       {renderMoneyElement(numericAmount, symbol)}
       {shouldShowConvertedValue && (
@@ -65,6 +85,19 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
           {renderMoneyElement(value, baseCurrency.symbol)}
         </>
       )}
+    </span>
+  );
+
+  return badge ? (
+    <Badge
+      className={cn(className)}
+      variant={badgeVariant}
+    >
+      {content}
+    </Badge>
+  ) : (
+    <span className={cn(colorClass, className)}>
+      {content}
     </span>
   );
 };

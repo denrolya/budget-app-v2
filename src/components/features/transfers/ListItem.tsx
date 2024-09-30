@@ -22,7 +22,8 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
       <div className="flex flex-row items-center justify-between">
         <div className="flex-grow flex items-center space-x-2 overflow-x-auto">
           <MoneyValue
-            className="text-xs"
+            useColors={false}
+            className="text-xs font-medium"
             amount={transfer.amount}
             currency={transfer.fromExpense.account.currency}
           />

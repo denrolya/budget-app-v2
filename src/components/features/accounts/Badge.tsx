@@ -1,10 +1,10 @@
 import { CreditCard, Globe, HelpCircle, Wallet } from 'lucide-react';
 import React from 'react';
+import cn from 'classnames';
 
 import AccountDetailsHoverCard from '@/components/features/accounts/DetailsHoverCard';
 import { Badge } from '@/components/ui/badge';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { cn } from '@/lib/utils';
 import Account, { AccountType } from '@/models/Account';
 
 interface AccountBadgeProps {
@@ -80,9 +80,9 @@ export default function AccountBadge({
         'inline-flex items-center',
         'transition-all duration-200 ease-in-out',
         'hover:opacity-90',
+        'w-fit',
         sizeMap[size],
         maxWidthMap[size],
-        'w-fit',
         className
       )}
       style={{
@@ -104,7 +104,7 @@ export default function AccountBadge({
       triggerClassName={cn({
         'cursor-pointer': tooltip,
       })}
-      contentClassName="bg-transparent border-none"
+      contentClassName="bg-transparent border-none shadow-none"
       openDelay={0}
       content={tooltip ? <AccountDetailsHoverCard account={account} /> : null}
     >

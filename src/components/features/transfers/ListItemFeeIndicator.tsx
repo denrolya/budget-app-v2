@@ -20,7 +20,7 @@ export const FeeIndicator: React.FC<FeeIndicatorProps> = ({ feeAmount, feeCurren
 
   const tooltipContent = (
     <p>
-      Fee: <MoneyValue amount={feeAmount} currency={feeCurrency} />
+      Fee: <MoneyValue useColors={false} amount={feeAmount} currency={feeCurrency} />
       <br />
       ({feePercentage}% of transfer amount)
     </p>

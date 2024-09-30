@@ -1,3 +1,10 @@
+import cn from 'classnames';
+import sumBy from 'lodash/sumBy';
+import groupBy from 'lodash/groupBy';
+import startCase from 'lodash/startCase';
+import { Plus } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountLink from '@/components/layout/SidebarAccountLink';
 import SidebarLink from '@/components/layout/SidebarLink';
@@ -9,10 +16,7 @@ import { useBaseCurrency } from '@/contexts/auth';
 import { useActiveAccountsWithDefaultOrder, useDebts } from '@/contexts/FinanceData';
 import { FormType, useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
-import cn from 'classnames';
-import sumBy from 'lodash/sumBy';
-import { Plus } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import { AccountType } from '@/models/Account';
 
 export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
@@ -53,6 +57,37 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
     if (!isMobile) {
       setIsSidebarExpanded(false);
     }
+  };
+
+  const orderedAccountTypes: AccountType[] = [
+    AccountType.Bank,
+    AccountType.Cash,
+    AccountType.Internet,
+    AccountType.Other,
+  ];
+
+  const groupedAccounts = groupBy(accounts, 'type');
+
+  const renderAccountGroup = (type: AccountType) => {
+    const accountsOfType = groupedAccounts[type] || [];
+    if (accountsOfType.length === 0) return null;
+
+    return (
+      <div key={`account-group-${type}`} className="mb-4">
+        {isSidebarExpanded && (
+          <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1 mb-1">
+            {startCase(type)}
+          </div>
+        )}
+        {accountsOfType.map((account) => (
+          <AccountLink
+            key={`account-sidebar-item-${account.id}`}
+            account={account}
+            isSidebarExpanded={isSidebarExpanded}
+          />
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -106,22 +141,19 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
 
         <Separator />
 
-        <div className="flex-grow overflow-hidden flex flex-col space-y-2">
+        <div className="flex-grow overflow-hidden flex flex-col">
           {isSidebarExpanded && (
             <div className="text-xs font-semibold text-accent-foreground/60 px-6 py-2">Accounts</div>
           )}
-          <ScrollArea className="flex-grow px-4 space-y-1">
-            {accounts.map((account) => (
-              <AccountLink
-                key={`account-sidebar-item-${account.id}`}
-                account={account}
-                isSidebarExpanded={isSidebarExpanded} />
-            ))}
+          <ScrollArea className="flex-grow px-4">
+            <div aria-labelledby="accounts-heading">
+              {orderedAccountTypes.map(renderAccountGroup)}
+            </div>
           </ScrollArea>
         </div>
 
         <div className="flex-shrink-0 mt-auto p-4 border-t border-accent space-y-2">
-          <div className={cn('flex flex-col items-start space-y-1 overflow-hidden transition-all duration-300 ease-in-out', {
+        <div className={cn('flex flex-col items-start space-y-1 overflow-hidden transition-all duration-300 ease-in-out', {
             'max-h-20 opacity-100': isSidebarExpanded,
             'max-h-0 opacity-0': !isSidebarExpanded,
           })}>

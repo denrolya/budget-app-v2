@@ -25,13 +25,13 @@ export const SidebarAccountLink: React.FC<SidebarAccountLinkProps> = ({ account,
           'w-4 h-4': !isSidebarExpanded,
           'w-8 h-8': isSidebarExpanded,
         })}>
-          <AccountAvatar account={account} className="w-full h-full" size="sm" />
+          <AccountAvatar className="w-full h-full" size="sm" account={account} />
         </div>
         {isSidebarExpanded && (
           <div className="flex-grow min-w-0 ml-3 overflow-hidden">
             <p className="text-sm font-medium truncate">{account.nameWithCurrency}</p>
             <MoneyValue
-              showSign
+              showSign={false}
               maximumFractionDigits={2}
               className={cn('items-center text-xs text-mono', {
                 'text-destructive': account.balance < 0,

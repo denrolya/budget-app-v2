@@ -1,7 +1,9 @@
+import React from 'react';
 import cn from 'classnames';
 import { Eye, User } from 'lucide-react';
-import React from 'react';
+import moment from 'moment';
 
+import { Skeleton } from '@/components/ui/skeleton.tsx';
 import TransactionValue from '@/components/common/TransactionValue';
 import AccountBadge from '@/components/features/accounts/Badge';
 import Details from '@/components/features/transactions/Details';
@@ -10,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { Skeleton } from '@/components/ui/skeleton';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import Transaction from '@/models/Transaction';
@@ -22,6 +23,11 @@ interface TransactionItemProps {
 
 export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBorder = false }) => {
   const { openForm } = useFormContext();
+
+  const truncateNote = (note: string, maxLength: number) => {
+    if (note.length <= maxLength) return note;
+    return `${note.substring(0, maxLength)}...`;
+  };
 
   return (
     <Card
@@ -78,15 +84,15 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
             content={<p>{transaction.note}</p>}
             triggerClassName="w-full overflow-hidden"
           >
-            <p className="text-sm text-muted-foreground truncate overflow-hidden text-ellipsis whitespace-nowrap">
-              {transaction.note}
+            <p className="text-sm text-muted-foreground truncate overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
+              {truncateNote(transaction.note, 50)}
             </p>
           </ResponsiveTooltip>
         )}
       </CardContent>
       <Badge
         variant="outline"
-        className="absolute top-0 left-0 -mt-3 -ml-3 text-xs px-1 py-0 whitespace-nowrap z-10"
+        className="absolute top-0 left-0 -mt-3 -ml-3 text-xs px-1 py-0 whitespace-nowrap z-10 bg-accent"
       >
         {transaction.category.name}
       </Badge>

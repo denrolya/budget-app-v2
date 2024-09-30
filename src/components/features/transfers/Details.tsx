@@ -98,11 +98,11 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
           <h3 className="font-semibold">Related Transactions</h3>
           <div className="flex justify-between items-center">
             <span className="text-sm">Sender</span>
-            <span className="font-medium text-destructive font-mono">
-              {' - '}
+            <span className="font-medium font-mono">
               {transfer?.feeExpense?.account.id === transfer.fromExpense.account.id ? (
                 <MoneyValue
-                  amount={transfer.fromExpense.amount + transfer.feeExpense.amount}
+                  showSign
+                  amount={-(transfer.fromExpense.amount + transfer.feeExpense.amount)}
                   currency={transfer.fromExpense.account.currency} />
               ) : (
                 <MoneyValue amount={transfer.fromExpense.amount} currency={transfer.fromExpense.account.currency} />
@@ -112,9 +112,9 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
           <div className="flex justify-between items-center">
             <span className="text-sm">Recipient</span>
             <span className="font-medium text-success font-mono">
-            {' + '}
               {transfer?.feeExpense?.account.id === transfer.toIncome.account.id ? (
                 <MoneyValue
+                  showSign
                   amount={transfer.feeExpense.amount + transfer.toIncome.amount}
                   currency={transfer.feeExpense.account.currency} />
               ) : (
@@ -133,8 +133,8 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
               <div className="flex justify-between items-center">
                 <span className="text-sm">Transfer Fee</span>
                 <span className="font-medium font-mono">
-                  <MoneyValue amount={transfer.feeExpense.amount} currency={transfer.feeExpense.account.currency} />
-                  <span className="text-sm text-muted-foreground ml-2">
+                  <MoneyValue showSign amount={-transfer.feeExpense.amount} currency={transfer.feeExpense.account.currency} />
+                  <span className="text-sm text-destructive opacity-75 ml-2">
                     ({calculateFeePercentage()}%)
                   </span>
                 </span>
