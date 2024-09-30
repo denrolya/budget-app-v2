@@ -85,11 +85,11 @@ export const Tooltip: React.FC<Props> = ({ label, active, payload, data }) => {
             Revenue
           </p>
           <p className="text-lg font-bold">
-            <MoneyValue showSign amount={dataPoint.revenue} />
+            <MoneyValue useColors={false} amount={dataPoint.revenue} />
           </p>
           <div
             className={cn('text-xs flex items-center', {
-              'text-primary': revenueChange.isPositive,
+              'text-success': revenueChange.isPositive,
               'text-destructive': !revenueChange.isPositive,
             })}
           >
@@ -98,7 +98,7 @@ export const Tooltip: React.FC<Props> = ({ label, active, payload, data }) => {
             ) : (
               <ArrowDownIcon className="mr-1" size={12} />
             )}
-            <MoneyValue showSign amount={revenueChange.difference} />
+            <MoneyValue useColors={false} amount={revenueChange.difference} />
             <PercentIcon className="mx-1" size={12} />
             <span>{revenueChange.percentChange.toFixed(1)}%</span>
           </div>
@@ -109,12 +109,12 @@ export const Tooltip: React.FC<Props> = ({ label, active, payload, data }) => {
               <DollarSignIcon className="mr-2" size={16} />
               Income
             </p>
-            <p className="text-primary">
-              <MoneyValue showSign amount={dataPoint.income} />
+            <p>
+              <MoneyValue useColors={false} amount={dataPoint.income} />
             </p>
             <div
               className={cn('text-xs flex items-center', {
-                'text-primary': incomeChange.isPositive,
+                'text-success': incomeChange.isPositive,
                 'text-destructive': !incomeChange.isPositive,
               })}
             >
@@ -123,23 +123,22 @@ export const Tooltip: React.FC<Props> = ({ label, active, payload, data }) => {
               ) : (
                 <ArrowDownIcon className="mr-1" size={12} />
               )}
-              <MoneyValue showSign amount={incomeChange.difference} />
+              <MoneyValue useColors={false} amount={incomeChange.difference} />
               <PercentIcon className="mx-1" size={12} />
               <span>{incomeChange.percentChange.toFixed(1)}%</span>
             </div>
           </div>
+
           <div>
             <p className="text-sm font-medium flex items-center">
               <DollarSignIcon className="mr-2" size={16} />
               Expenses
             </p>
-            <p className="text-destructive">
-              <MoneyValue showSign amount={dataPoint.expenses} />
-            </p>
+            <MoneyValue useColors={false} amount={-dataPoint.expenses} />
             <div
               className={cn('text-xs flex items-center', {
-                'text-primary': expensesChange.isPositive,
-                'text-destructive': !expensesChange.isPositive,
+                'text-destructive': expensesChange.isPositive,
+                'text-success': !expensesChange.isPositive,
               })}
             >
               {expensesChange.isPositive ? (
@@ -147,7 +146,7 @@ export const Tooltip: React.FC<Props> = ({ label, active, payload, data }) => {
               ) : (
                 <ArrowDownIcon className="mr-1" size={12} />
               )}
-              <MoneyValue showSign amount={Math.abs(expensesChange.difference)} />
+              <MoneyValue useColors={false} amount={Math.abs(expensesChange.difference)} />
               <PercentIcon className="mx-1" size={12} />
               <span>{Math.abs(expensesChange.percentChange).toFixed(1)}%</span>
             </div>

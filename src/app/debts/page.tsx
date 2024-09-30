@@ -53,6 +53,7 @@ export const DebtsManagementPage = () => {
               </div>
               <Badge variant={debt.balance > 0 ? 'default' : 'secondary'}>
                 <MoneyValue
+                  useColors={false}
                   amount={debt.balance}
                   currency={debt.currency}
                   values={debt.convertedValues} />

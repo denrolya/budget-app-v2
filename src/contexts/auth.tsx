@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+import { CURRENCY_CODE } from '@/constants/currency';
 import { parseJwt } from '@/utils/parseJWT';
 import User from '@/models/User';
+import { api } from '@/services/api';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -11,6 +13,7 @@ interface AuthContextType {
   token: string | null;
   login: (token: string) => void;
   logout: () => void;
+  updateCurrency: (currency: CURRENCY_CODE) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +23,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+
 
   const login = (token: string) => {
     const decodedUser = parseJwt(token);
@@ -35,6 +39,20 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     sessionStorage.removeItem('token');
   };
 
+  const updateCurrency = async (currency: CURRENCY_CODE) => {
+    if (!user) return;
+
+    // Send request to backend to update currency
+    await api.put(`/api/users/${user.username}`, {
+      baseCurrency: currency,
+    });
+
+    // Update user state
+    setUser({ ...user, baseCurrency: currency });
+
+    // TODO: Fetch refreshed token here
+  };
+
   useEffect(() => {
     const storedToken = sessionStorage.getItem('token');
     if (storedToken) {
@@ -46,7 +64,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated: !!user, isLoading, isInitialized, user, token, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated: !!user, isLoading, isInitialized, user, token, login, logout, updateCurrency }}>
       {children}
     </AuthContext.Provider>
   );

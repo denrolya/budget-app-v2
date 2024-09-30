@@ -2,8 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import cn from 'classnames';
 import { ArrowDownIcon, ArrowUpIcon, DollarSignIcon, TrendingUpIcon } from 'lucide-react';
 import moment from 'moment';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
+import { useBaseCurrency } from '@/contexts/auth.tsx';
 import { BACKEND_DATE_FORMAT, PERIOD_OPTIONS, PeriodOption, INTERVAL_OPTIONS } from '@/constants/datetime';
 import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
@@ -41,6 +42,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
   const [period, setPeriod] = useState<PeriodOption['value']>('YTD');
   const [interval, setInterval] = useState(INTERVAL_OPTIONS[2].value);
   const [isBarChart, setIsBarChart] = useState(true);
+  const baseCurrency = useBaseCurrency();
 
   const selectedPeriodOption = useMemo(() =>
      PERIOD_OPTIONS.find((p) => p.value === period) || PERIOD_OPTIONS[2]
@@ -60,6 +62,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
     data: currentDataBackend,
     isLoading: isCurrentLoading,
     error: currentError,
+    refetch: refetchCurrentPeriodData,
   } = useQuery<BackendData[]>({
     queryKey: ['currentData', period, interval],
     queryFn: async () => {
@@ -80,6 +83,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
     data: previousDataBackend,
     isLoading: isPreviousLoading,
     error: previousError,
+    refetch: refetchPreviousPeriodData,
   } = useQuery<BackendData[]>({
     queryKey: ['previousData', period, interval],
     queryFn: async () => {
@@ -95,6 +99,11 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
     refetchOnWindowFocus: false,
     staleTime: 240 * 60 * 1000, // Example: data is fresh for 4 hours
   });
+
+  useEffect(() => {
+    refetchCurrentPeriodData();
+    refetchPreviousPeriodData();
+  }, [baseCurrency, refetchPreviousPeriodData, refetchCurrentPeriodData]);
 
   const transformedData: TransformedData[] = useMemo(() => {
     if (!currentDataBackend || !previousDataBackend) return [];
