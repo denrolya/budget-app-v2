@@ -50,6 +50,7 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
     <TypeaheadV2
       valueField="id"
       labelField="nameWithCurrency"
+      groupBy="type"
       placeholder={multiple ? 'Select accounts...' : 'Select account...'}
       multiple={multiple}
       options={accounts}

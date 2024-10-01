@@ -173,6 +173,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               <FormLabel>Category</FormLabel>
               <CategoryTypeahead
                 {...field}
+                type={form.watch('type')}
                 multiple={false}
                 className={cn('w-full justify-between', {
                   'text-muted-foreground': !field.value,

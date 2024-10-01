@@ -1,6 +1,8 @@
+import Category from '@/models/Category.ts';
 import orderBy from 'lodash/orderBy';
 import { useContext } from 'react';
 
+import { Type as TransactionType } from '@/models/Transaction';
 import Account from '@/models/Account';
 import {
   CategoriesData,
@@ -57,6 +59,16 @@ export const useDebts = (): Debt[] => {
 export const useCategories = (): CategoriesData => {
   const { data } = useFinanceData();
   return data.categories;
+};
+
+export const useIncomeCategories = (): Category[] => {
+  const { data } = useFinanceData();
+  return data.categories.list.filter(({ type }) => type === TransactionType.Income);
+};
+
+export const useExpenseCategories = (): Category[] => {
+  const { data } = useFinanceData();
+  return data.categories.list.filter(({ type }) => type === TransactionType.Expense);
 };
 
 export const useExchangeRates = (): ExchangeRatesData => {

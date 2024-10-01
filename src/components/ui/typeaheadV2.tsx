@@ -6,11 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+interface Option {
+  [key: string]: any;
+}
+
 interface TypeaheadV2Props {
   multiple?: boolean;
-  options: any[];
+  options: Option[];
   valueField: string;
   labelField: string;
+  groupBy?: string;
   renderElement: (element: any, valueField?: string, labelField?: string) => React.ReactNode;
   placeholder?: string;
   emptyMessage?: string;
@@ -24,6 +29,7 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
                                                                              options,
                                                                              valueField,
                                                                              labelField,
+                                                                             groupBy,
                                                                              renderElement,
                                                                              placeholder = 'Select options...',
                                                                              emptyMessage = 'No options found.',
@@ -50,14 +56,37 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
     return options.filter(option => selectedValues.includes(option[valueField]));
   }, [options, selectedValues, valueField]);
 
-  const filteredOptions = useMemo(() => {
-    return options.filter(option =>
-      option[labelField].toLowerCase().includes(inputValue.toLowerCase()) &&
-      !selectedValues.includes(option[valueField]),
-    );
-  }, [options, inputValue, labelField, selectedValues, valueField]);
+  const groupedOptions = useMemo(() => {
+    if (!groupBy) {
+      return [{ label: '', options: options }];
+    }
 
-  const handleSelect = useCallback((option: any) => {
+    const groups = options.reduce((acc, option) => {
+      const groupLabel = option[groupBy] || '';
+      if (!acc[groupLabel]) {
+        acc[groupLabel] = [];
+      }
+      acc[groupLabel].push(option);
+      return acc;
+    }, {} as Record<string, Option[]>);
+
+    return Object.entries(groups).map(([label, groupOptions]) => ({
+      label,
+      options: groupOptions,
+    }));
+  }, [options, groupBy]);
+
+  const filteredOptions = useMemo(() => {
+    return groupedOptions.map(group => ({
+      ...group,
+      options: group.options.filter(option =>
+        option[labelField].toLowerCase().includes(inputValue.toLowerCase()) &&
+        !selectedValues.includes(option[valueField])
+      ),
+    })).filter(group => group.options.length > 0);
+  }, [groupedOptions, inputValue, labelField, selectedValues, valueField]);
+
+  const handleSelect = useCallback((option: Option) => {
     const optionValue = option[valueField];
     if (multiple) {
       const newValue = selectedValues.includes(optionValue)
@@ -72,7 +101,7 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
     setHighlightedIndex(-1);
   }, [multiple, onChange, selectedValues, valueField]);
 
-  const handleRemove = useCallback((optionValue: string) => {
+  const handleRemove = useCallback((optionValue: string | number) => {
     if (multiple) {
       const newValue = selectedValues.filter(v => v !== optionValue);
       onChange(newValue);
@@ -83,15 +112,16 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
   }, [multiple, onChange, selectedValues]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    const flatFilteredOptions = filteredOptions.flatMap(group => group.options);
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setHighlightedIndex(prev => (prev < filteredOptions.length - 1 ? prev + 1 : 0));
+      setHighlightedIndex(prev => (prev < flatFilteredOptions.length - 1 ? prev + 1 : 0));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setHighlightedIndex(prev => (prev > 0 ? prev - 1 : filteredOptions.length - 1));
+      setHighlightedIndex(prev => (prev > 0 ? prev - 1 : flatFilteredOptions.length - 1));
     } else if (e.key === 'Enter' && highlightedIndex !== -1) {
       e.preventDefault();
-      handleSelect(filteredOptions[highlightedIndex]);
+      handleSelect(flatFilteredOptions[highlightedIndex]);
     } else if (e.key === 'Escape') {
       setOpen(false);
     } else if (e.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
@@ -128,7 +158,7 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
   };
 
   return (
-    <div className={cn('relative', className)} ref={dropdownRef}>
+    <div className={cn('relative w-full', className)} ref={dropdownRef}>
       <div
         className="flex items-center flex-wrap gap-1 px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
         onClick={() => {
@@ -183,22 +213,32 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
               {filteredOptions.length === 0 && (
                 <div className="p-2 text-sm text-muted-foreground">{emptyMessage}</div>
               )}
-              {filteredOptions.map((option, index) => (
-                <div
-                  key={option[valueField]}
-                  ref={el => optionRefs.current[index] = el}
-                  className={cn('flex items-center px-2 py-1.5 text-sm cursor-pointer', {
-                    'bg-accent text-accent-foreground': highlightedIndex === index,
-                    'text-popover-foreground hover:bg-accent hover:text-accent-foreground': highlightedIndex !== index,
+              {filteredOptions.map((group, groupIndex) => (
+                <div key={group.label || groupIndex}>
+                  {groupBy && group.label && (
+                    <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground capitalize">{group.label}</div>
+                  )}
+                  {group.options.map((option, index) => {
+                    const flatIndex = filteredOptions.slice(0, groupIndex).reduce((acc, g) => acc + g.options.length, 0) + index;
+                    return (
+                      <div
+                        key={option[valueField]}
+                        ref={el => optionRefs.current[flatIndex] = el}
+                        className={cn('flex items-center px-2 py-1.5 text-sm cursor-pointer', {
+                          'bg-accent text-accent-foreground': highlightedIndex === flatIndex,
+                          'text-popover-foreground hover:bg-accent hover:text-accent-foreground': highlightedIndex !== flatIndex,
+                        })}
+                        onClick={() => handleSelect(option)}
+                        onMouseEnter={() => setHighlightedIndex(flatIndex)}
+                      >
+                        <Check className={cn('mr-2 h-4 w-4', {
+                          'opacity-0': !selectedValues.includes(option[valueField]),
+                          'opacity-100': selectedValues.includes(option[valueField]),
+                        })} />
+                        {renderElement(option, valueField, labelField)}
+                      </div>
+                    );
                   })}
-                  onClick={() => handleSelect(option)}
-                  onMouseEnter={() => setHighlightedIndex(index)}
-                >
-                  <Check className={cn('mr-2 h-4 w-4', {
-                    'opacity-0': !selectedValues.includes(option[valueField]),
-                    'opacity-100': selectedValues.includes(option[valueField]),
-                  })} />
-                  {renderElement(option, valueField, labelField)}
                 </div>
               ))}
             </div>
