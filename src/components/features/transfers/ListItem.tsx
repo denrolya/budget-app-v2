@@ -1,10 +1,10 @@
 import { ArrowRightLeft, Eye } from 'lucide-react';
 import React from 'react';
 
-import FeeIndicator from '@/components/features/transfers/ListItemFeeIndicator';
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountBadge from '@/components/features/accounts/Badge';
 import TransferDetails from '@/components/features/transfers/Details';
+import FeeIndicator from '@/components/features/transfers/ListItemFeeIndicator';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -17,8 +17,8 @@ interface TransferItemProps {
 }
 
 export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
-  <Card className="mb-0.5 border-l-4 border-l-primary hover:bg-secondary/10 dark:hover:bg-secondary/20 transition-colors relative group overflow-visible">
-    <CardContent className="p-2 flex flex-col space-y-1 hover:no-underline hover:bg-accent/50">
+  <Card className="mb-0.5 border-l-4 border-l-primary ease-in-out hover:shadow-md dark:hover:shadow-primary/25 transition-colors relative group overflow-visible">
+    <CardContent className="p-2 flex flex-col space-y-1 hover:no-underline">
       <div className="flex flex-row items-center justify-between">
         <div className="flex-grow flex items-center space-x-2 overflow-x-auto">
           <MoneyValue
@@ -67,26 +67,28 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
 );
 
 export const ListItemSkeleton: React.FC = () => (
-  <Card className="border-l-4 border-l-primary shadow-md">
-    <CardContent className="px-4 py-2">
-      <div className="flex w-full items-center justify-between">
-        <div className="flex items-center space-x-2 overflow-hidden">
-          <Skeleton className="h-4 w-4 rounded-full flex-shrink-0" />
-          <Skeleton className="h-4 w-20 flex-shrink-0" />
-          <div className="hidden sm:flex items-center space-x-2 overflow-hidden">
-            <Skeleton className="h-6 w-16 rounded-full flex-shrink-0" />
-            <Skeleton className="h-3 w-3 flex-shrink-0" />
-            <Skeleton className="h-6 w-16 rounded-full flex-shrink-0" />
+  <div className="relative mb-4 mt-4">
+    <Card>
+      <CardContent className="px-4 py-2">
+        <div className="flex w-full items-center justify-between">
+          <div className="flex items-center space-x-2 overflow-hidden">
+            <Skeleton className="h-4 w-4 rounded-full flex-shrink-0" />
+            <Skeleton className="h-4 w-20 flex-shrink-0" />
+            <div className="hidden sm:flex items-center space-x-2 overflow-hidden">
+              <Skeleton className="h-6 w-16 rounded-full flex-shrink-0" />
+              <Skeleton className="h-3 w-3 flex-shrink-0" />
+              <Skeleton className="h-6 w-16 rounded-full flex-shrink-0" />
+            </div>
+            <Skeleton className="h-2 w-2 rounded-full flex-shrink-0" />
           </div>
-          <Skeleton className="h-2 w-2 rounded-full flex-shrink-0" />
+          <div className="flex items-center space-x-2 ml-2 flex-shrink-0">
+            <Skeleton className="h-4 w-24 hidden sm:inline-block" />
+            <Skeleton className="h-6 w-6 rounded-full" />
+          </div>
         </div>
-        <div className="flex items-center space-x-2 ml-2 flex-shrink-0">
-          <Skeleton className="h-4 w-24 hidden sm:inline-block" />
-          <Skeleton className="h-6 w-6 rounded-full" />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
+      </CardContent>
+    </Card>
+  </div>
 );
 
 export default ListItem;

@@ -31,7 +31,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
   return (
     <div className="relative mb-4 mt-4">
       <Card
-        className={cn('hover:bg-secondary/10 dark:hover:bg-secondary/20 transition-colors group', {
+        className={cn('ease-in-out hover:shadow-md dark:hover:shadow-primary/25 transition-colors group', {
           'border-l-2 border-l-green-500': colorBorder && transaction.isIncome(),
           'border-l-2 border-l-red-500': colorBorder && transaction.isExpense(),
         })}

@@ -40,10 +40,10 @@ export const ExchangeRatesPresets: React.FC = () => {
 
     const RateDisplay: React.FC<RateDisplayProps> = ({ value, source, from, to, amount, maximumFractionDigits }) => (
       <div className="flex items-center space-x-2 text-sm">
-        <MoneyValue amount={amount} currency={from} />
+        <MoneyValue useColors={false} amount={amount} currency={from} />
         <Equal className="h-3 w-3 text-muted-foreground" />
         <div className="flex-1 flex items-start">
-          <MoneyValue amount={amount * value} currency={to} maximumFractionDigits={maximumFractionDigits} />
+          <MoneyValue useColors={false} amount={amount * value} currency={to} maximumFractionDigits={maximumFractionDigits} />
           <sup className="ml-1 mt-2 text-[8px] font-medium text-muted-foreground">
             {source}
           </sup>

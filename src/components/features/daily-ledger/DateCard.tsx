@@ -46,12 +46,12 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
 
   const content = (
     <>
-      <div className="flex flex-col md:flex-row items-start justify-between space-y-1 pb-2">
+      <div className="flex flex-col items-start justify-between space-y-1 pb-2">
         <h2 className="text-lg font-semibold flex items-center">
           <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground" />
           <span>{date.format('dddd, D MMM')}</span>
         </h2>
-        <div className="flex items-center space-x-4 text-sm">
+        <div className="flex items-center space-x-4 text-sm whitespace-nowrap">
           <div className="flex items-center">
             <ArrowRightLeftIcon className="mr-1 h-4 w-4" />
             <span className="font-medium">{transferCount}</span>
@@ -61,7 +61,7 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
           </div>
           <div className="flex items-center">
             <DollarSignIcon className="mr-1 h-4 w-4" />
-            <span className="font-medium">{transactions.filter(t => !t.isIncome()).length}</span>
+            <span className="font-medium">{transactionCount}</span>
             <span className="ml-1 text-muted-foreground">
               (<MoneyValue amount={netAmount} />)
             </span>
@@ -121,7 +121,6 @@ export const DateCardSkeleton: React.FC<{ index: number; totalDays: number }> = 
         <div className="flex justify-between w-full">
           <div className="flex space-x-2">
             <Skeleton className="h-5 w-16" />
-            <Skeleton className="h-5 w-24" />
             <Skeleton className="h-5 w-24" />
           </div>
           <Skeleton className="h-4 w-20" />

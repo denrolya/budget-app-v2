@@ -56,7 +56,9 @@ export const ResponsiveTooltip = ({
     return (
       <HoverCard openDelay={openDelay} closeDelay={closeDelay}>
         <HoverCardTrigger asChild className={cn(triggerClassName)}>
-          {children}
+          <span>
+            {children}
+          </span>
         </HoverCardTrigger>
         <HoverCardContent className={cn(contentClassName)}>
           {content}
@@ -69,7 +71,9 @@ export const ResponsiveTooltip = ({
     <TooltipProvider delayDuration={openDelay}>
       <Tooltip>
         <TooltipTrigger asChild className={cn(triggerClassName)}>
-          {children}
+          <span>
+            {children}
+          </span>
         </TooltipTrigger>
         <TooltipContent className={cn(contentClassName)} sideOffset={5}>
           {content}
