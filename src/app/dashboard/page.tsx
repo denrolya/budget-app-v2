@@ -24,11 +24,11 @@ const DashboardPage: React.FC = () => {
       {/* Mobile view: CardStack */}
       <div className="md:hidden mb-6">
         <CardStack
-          cards={cardConfigs.map(card => (
+          cards={configs.map(card => (
             <StatisticsCard
               key={card.id}
               {...card}
-              config={cardConfigs[card.id]}
+              config={configs[card.id]}
               onConfigChange={(newConfig) => handleConfigChange(card.id, newConfig)}
             />
           ))}
@@ -37,11 +37,11 @@ const DashboardPage: React.FC = () => {
 
       {/* Desktop view: Grid */}
       <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 justify-items-center mb-6">
-        {cardConfigs.map(card => (
+        {configs.map(card => (
           <StatisticsCard
             key={card.id}
             {...card}
-            config={cardConfigs[card.id]}
+            config={configs[card.id]}
             onConfigChange={(newConfig) => handleConfigChange(card.id, newConfig)}
           />
         ))}

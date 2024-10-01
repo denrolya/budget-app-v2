@@ -1,5 +1,3 @@
-'use client';
-
 import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import cn from 'classnames';
@@ -8,7 +6,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   cards: ReactElement[]
 }
 
-export default function CardStack({ cards, className, ...props }: Props) {
+export const CardStack: React.FC<Props> = ({ cards, className, ...props }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dragDistance, setDragDistance] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -98,4 +96,6 @@ export default function CardStack({ cards, className, ...props }: Props) {
       </div>
     </div>
   );
-}
+};
+
+export default CardStack;
