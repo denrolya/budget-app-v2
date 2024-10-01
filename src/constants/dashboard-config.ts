@@ -24,17 +24,6 @@ export interface CardConfig {
 
 export const cardConfigs: CardConfig[] = [
   {
-    id: 'total-expenses-month',
-    title: 'Monthly Expenses',
-    type: TransactionType.Expense,
-    interval: {
-      unit: 'month',
-      value: 1,
-    },
-    comparison: 'previous',
-    statType: 'sum',
-  },
-  {
     id: 'total-income-year',
     title: 'Yearly Income',
     type: TransactionType.Income,
@@ -46,11 +35,33 @@ export const cardConfigs: CardConfig[] = [
     statType: 'sum',
   },
   {
+    id: 'total-expenses-year',
+    title: 'Yearly Expenses',
+    type: TransactionType.Expense,
+    interval: {
+      unit: 'year',
+      value: 1,
+    },
+    comparison: 'previous',
+    statType: 'sum',
+  },
+  {
+    id: 'total-expenses-month',
+    title: 'Monthly Expenses',
+    type: TransactionType.Expense,
+    interval: {
+      unit: 'month',
+      value: 1,
+    },
+    comparison: 'previous',
+    statType: 'sum',
+  },
+  {
     id: 'daily-expenses-month-vs-year',
     title: 'Daily Expenses',
     type: TransactionType.Expense,
     interval: {
-      unit: 'month',
+      unit: 'year',
       value: 1,
     },
     comparison: 'same-last-year',
@@ -74,7 +85,7 @@ export const cardConfigs: CardConfig[] = [
     type: TransactionType.Expense,
     categories: ['Food & Drinks'],
     interval: {
-      unit: 'month',
+      unit: 'year',
       value: 1,
     },
     comparison: 'previous',
