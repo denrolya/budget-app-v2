@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import { Separator } from '@/components/ui/separator';
 
 const formComponents = {
   [FormType.Account]: AccountForm,
