@@ -7,7 +7,7 @@ import TransactionForm from '@/components/features/transactions/Form';
 import { TransferForm } from '@/components/features/transfers/Form';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 
 const formComponents = {
@@ -160,9 +160,7 @@ export const FormRenderer: React.FC = () => {
         <div className="px-4 pb-4 overflow-y-auto">
           {content}
         </div>
-        <DrawerFooter className="p-4 border-t">
-          {footer}
-        </DrawerFooter>
+        {footer}
       </DrawerContent>
     </Drawer>
   );
