@@ -29,14 +29,14 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     const decodedUser = parseJwt(token);
     setToken(token);
     setUser(decodedUser);
-    sessionStorage.setItem('token', token);
+    localStorage.setItem('token', token);
     setIsLoading(false);
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
-    sessionStorage.removeItem('token');
+    localStorage.removeItem('token');
   };
 
   const updateCurrency = async (currency: CURRENCY_CODE) => {
@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   };
 
   useEffect(() => {
-    const storedToken = sessionStorage.getItem('token');
+    const storedToken = localStorage.getItem('token');
     if (storedToken) {
       login(storedToken);
     } else {
