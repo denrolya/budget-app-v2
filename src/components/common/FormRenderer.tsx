@@ -160,7 +160,9 @@ export const FormRenderer: React.FC = () => {
         <div className="px-4 pb-4 overflow-y-auto">
           {content}
         </div>
-        {footer}
+        <DrawerFooter className="p-4 border-t">
+          {footer}
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   );
