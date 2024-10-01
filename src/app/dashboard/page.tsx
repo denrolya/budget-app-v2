@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 
+import CardStack from '@/components/common/CardStack.tsx';
 import CategoryTreeCard from '@/components/features/statistics/CategoryTreeCard';
-import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card';
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
+import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card';
 import DraftForm from '@/components/features/transactions/DraftForm';
 import InputForm from '@/components/features/transactions/InputForm';
 import { Card, CardContent } from '@/components/ui/card.tsx';
@@ -20,12 +21,28 @@ const DashboardPage: React.FC = () => {
 
   return (
     <section className="p-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 justify-items-center mb-6">
-        {configs.map(card => (
+      {/* Mobile view: CardStack */}
+      <div className="md:hidden mb-6">
+        <CardStack
+          cards={cardConfigs.map(card => (
+            <StatisticsCard
+              key={card.id}
+              {...card}
+              config={cardConfigs[card.id]}
+              onConfigChange={(newConfig) => handleConfigChange(card.id, newConfig)}
+            />
+          ))}
+        />
+      </div>
+
+      {/* Desktop view: Grid */}
+      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 justify-items-center mb-6">
+        {cardConfigs.map(card => (
           <StatisticsCard
             key={card.id}
             {...card}
-            onConfigChange={(id, newConfig) => handleConfigChange(id, newConfig)}
+            config={cardConfigs[card.id]}
+            onConfigChange={(newConfig) => handleConfigChange(card.id, newConfig)}
           />
         ))}
       </div>
