@@ -153,14 +153,15 @@ export const FormRenderer: React.FC = () => {
 
   return (
     <Drawer open={formState.isOpen} onOpenChange={handleOpenChange}>
-      <DrawerContent className="max-h-[80vh]">
+      <DrawerContent>
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>
         </DrawerHeader>
         <div className="px-4 pb-4 overflow-y-auto">
           {content}
+          <Separator />
+          {footer}
         </div>
-        {footer}
       </DrawerContent>
     </Drawer>
   );
