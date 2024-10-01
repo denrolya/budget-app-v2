@@ -98,7 +98,7 @@ export const cardConfigs: CardConfig[] = [
   },
   {
     id: 'groceries-avg-check',
-    title: 'Avg Grocery Check',
+    title: 'Avg Groceries',
     type: TransactionType.Expense,
     categories: ['Groceries'],
     interval: {
@@ -106,7 +106,7 @@ export const cardConfigs: CardConfig[] = [
       value: 1,
     },
     period: {
-      unit: 'month',
+      unit: 'week',
       value: 1,
     },
     comparison: 'previous',
