@@ -1,7 +1,3 @@
-import React, { memo, useMemo } from 'react';
-import { Moment } from 'moment';
-import cn from 'classnames';
-
 import MoneyValue from '@/components/common/MoneyValue';
 import MenuButton from '@/components/features/statistics/FinancialCardMenuButton';
 import PercentageBadge from '@/components/features/statistics/StatisticsCard/PercentageBadge';
@@ -13,6 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Interval } from '@/constants/dashboard-config';
 import { CardConfig, useValueByPeriod } from '@/hooks/useValueByPeriodStatistics';
 import { Type as TransactionType } from '@/models/Transaction';
+import { Moment } from 'moment';
+import React, { memo, useMemo } from 'react';
 
 interface Props extends CardConfig {
   onConfigChange: (id: string, newConfig: Partial<CardConfig>) => void;
@@ -49,11 +47,15 @@ const StatisticsCardSkeleton = () => (
   </Card>
 );
 
-const TooltipContent: React.FC<{ label: string; date: Moment | undefined; amount: number }> = ({ label, date, amount }) => (
+const TooltipContent: React.FC<{ label: string; date: Moment | undefined; amount: number }> = ({
+                                                                                                 label,
+                                                                                                 date,
+                                                                                                 amount,
+                                                                                               }) => (
   <div className="p-2">
     <p className="font-semibold mb-1">{label}</p>
     <p className="text-sm">{date?.format('MMM D, YYYY')}</p>
-    <MoneyValue amount={amount} className="text-lg font-bold mt-1" />
+    <MoneyValue useColors={false} className="text-lg font-bold mt-1" amount={amount} />
   </div>
 );
 
@@ -143,19 +145,23 @@ export const StatisticsCard: React.FC<Props> = memo(({
                     <ResponsiveTooltip content={
                       <TooltipContent label="Minimum Value" date={minDate} amount={currentValue.min} />
                     }>
-                      <MoneyValue useColors={false}
-                                  showSign={false}
-                                  amount={currentValue.min}
-                                  className="text-lg font-bold" />
+                      <MoneyValue
+                        className="text-lg font-bold"
+                        useColors={false}
+                        showSign={false}
+                        amount={currentValue.min} />
                     </ResponsiveTooltip>
+
                     <span className="text-sm text-muted-foreground mx-2">-</span>
+
                     <ResponsiveTooltip content={
                       <TooltipContent label="Maximum Value" date={maxDate} amount={currentValue.max} />
                     }>
-                      <MoneyValue useColors={false}
-                                  showSign={false}
-                                  amount={currentValue.max}
-                                  className="text-lg font-bold" />
+                      <MoneyValue
+                        className="text-lg font-bold"
+                        useColors={false}
+                        showSign={false}
+                        amount={currentValue.max} />
                     </ResponsiveTooltip>
                   </div>
                 ) : (
@@ -191,8 +197,10 @@ export const StatisticsCard: React.FC<Props> = memo(({
                       </div>
                     }
                   >
-                    <span>Min:</span>
-                    <PercentageBadge percentage={percentageChange.min} reverted />
+                    <>
+                      <span>Min:</span>
+                      <PercentageBadge percentage={percentageChange.min} reverted />
+                    </>
                   </ResponsiveTooltip>
                   <ResponsiveTooltip
                     triggerClassName="flex justify-between items-center"
@@ -201,21 +209,23 @@ export const StatisticsCard: React.FC<Props> = memo(({
                         <p className="font-semibold mb-1">Maximum Comparison</p>
                         <div className="flex justify-between items-center">
                           <span>Current:</span>
-                          <MoneyValue amount={currentValue.max} className="font-medium" />
+                          <MoneyValue className="font-medium" amount={currentValue.max} />
                         </div>
                         <div className="flex justify-between items-center">
                           <span>Previous:</span>
-                          <MoneyValue amount={comparisonValue.max} className="font-medium" />
+                          <MoneyValue className="font-medium" amount={comparisonValue.max} />
                         </div>
                         <div className="flex justify-between items-center mt-1">
                           <span>Change:</span>
-                          <PercentageBadge percentage={percentageChange.max} reverted />
+                          <PercentageBadge reverted percentage={percentageChange.max} />
                         </div>
                       </div>
                     }
                   >
-                    <span>Max:</span>
-                    <PercentageBadge percentage={percentageChange.max} reverted />
+                    <>
+                      <span>Max:</span>
+                      <PercentageBadge reverted percentage={percentageChange.max} />
+                    </>
                   </ResponsiveTooltip>
                 </div>
               ) : (
@@ -223,7 +233,7 @@ export const StatisticsCard: React.FC<Props> = memo(({
                   <span className="text-muted-foreground">
                     vs {comparison === 'previous' ? 'previous' : 'last year'}
                   </span>
-                  <MoneyValue useColors={false} className={cn('font-medium')} amount={comparisonValue} />
+                  <MoneyValue useColors={false} className="font-medium" amount={comparisonValue} />
                 </div>
               )}
             </div>

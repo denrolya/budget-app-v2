@@ -1,7 +1,6 @@
 import cn from 'classnames';
 import sumBy from 'lodash/sumBy';
 import groupBy from 'lodash/groupBy';
-import startCase from 'lodash/startCase';
 import { Plus } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 
@@ -70,13 +69,14 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
 
   const renderAccountGroup = (type: AccountType) => {
     const accountsOfType = groupedAccounts[type] || [];
+    const groupTotal = sumBy(accountsOfType, ({ convertedValues }) => convertedValues?.[baseCurrency] || 0);
     if (accountsOfType.length === 0) return null;
 
     return (
       <div key={`account-group-${type}`} className="mb-4">
         {isSidebarExpanded && (
-          <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1 mb-1">
-            {startCase(type)}
+          <div className="flex justify-between text-xs font-semibold text-accent-foreground/60 px-2 py-2 mb-1 capitalize">
+            {type}: <MoneyValue amount={groupTotal} currency={baseCurrency} />
           </div>
         )}
         {accountsOfType.map((account) => (
@@ -86,6 +86,7 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
             isSidebarExpanded={isSidebarExpanded}
           />
         ))}
+        <Separator />
       </div>
     );
   };
@@ -142,9 +143,6 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
         <Separator />
 
         <div className="flex-grow overflow-hidden flex flex-col">
-          {isSidebarExpanded && (
-            <div className="text-xs font-semibold text-accent-foreground/60 px-6 py-2">Accounts</div>
-          )}
           <ScrollArea className="flex-grow px-4">
             <div aria-labelledby="accounts-heading">
               {orderedAccountTypes.map(renderAccountGroup)}

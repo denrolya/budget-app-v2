@@ -1,12 +1,12 @@
+import cn from 'classnames';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import cn from 'classnames';
-import { Separator } from '@/components/ui/separator';
 import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useTransfers } from '@/hooks/useTransfers';
 import Transaction from '@/models/Transaction';
@@ -14,7 +14,8 @@ import { TransactionFilters } from '@/models/TransactionFilters';
 import Transfer from '@/models/Transfer';
 import { TransferFilters } from '@/models/TransferFilters';
 
-export default function Component() {
+
+export const DailyLedgerPage = () => {
   const [currentDate, setCurrentDate] = useState(moment().startOf('day'));
   const daysPerPage = 5;
 
@@ -129,9 +130,10 @@ export default function Component() {
                 'order-last md:order-first': index === dates.length - 1,
               })}
             >
-              {isLoading ? (
+              {isLoading && (
                 <DateCardSkeleton index={index} totalDays={dates.length} />
-              ) : (
+              )}
+              {!isLoading && (
                 <DateCard
                   date={date}
                   items={groupedItems[date.format('YYYY-MM-DD')] || []}
@@ -146,4 +148,6 @@ export default function Component() {
       </div>
     </section>
   );
-}
+};
+
+export default DailyLedgerPage;

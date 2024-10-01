@@ -1,8 +1,8 @@
 import cn from 'classnames';
+import sumBy from 'lodash/sumBy';
 import { Archive, Calendar, Search } from 'lucide-react';
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import Account, { AccountType } from '@/models/Account.ts';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay.tsx';
 import AccountAvatar from '@/components/features/accounts/Avatar';
@@ -10,9 +10,12 @@ import AccountDetails from '@/components/features/accounts/Details';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useBaseCurrency } from '@/contexts/auth.tsx';
 import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
+import Account, { AccountType } from '@/models/Account.ts';
 
 export const AccountsManagementPage: React.FC = () => {
+  const baseCurrency = useBaseCurrency();
   const accounts = useAccountsWithDefaultOrder();
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -39,7 +42,7 @@ export const AccountsManagementPage: React.FC = () => {
 
   const filteredAccounts = accounts.filter(account =>
     (showArchived || !account.isArchived()) &&
-    account.nameWithCurrency.toLowerCase().includes(searchTerm.toLowerCase())
+    account.nameWithCurrency.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const groupedAccounts = Object.values(AccountType).reduce((acc, type) => {
@@ -62,10 +65,17 @@ export const AccountsManagementPage: React.FC = () => {
         </div>
       </div>
       <ScrollArea className="flex-1">
-        {Object.values(AccountType).map((type) => (
-          groupedAccounts[type].length > 0 && (
+        {Object.values(AccountType).map((type) => {
+          if (groupedAccounts[type].length === 0) return null;
+
+          const groupTotal = sumBy(groupedAccounts[type], ({ convertedValues }) => convertedValues?.[baseCurrency] || 0);
+
+          return (
             <div key={type} className="mb-4">
-              <h3 className="px-4 py-2 text-sm font-semibold text-muted-foreground capitalize">{type}</h3>
+              <h3 className="px-4 py-2 text-sm font-semibold text-muted-foreground capitalize flex justify-between">
+                <span>{type}</span>
+                <MoneyValue amount={groupTotal} currency={baseCurrency} />
+              </h3>
               {groupedAccounts[type].map((account) => (
                 <div
                   key={account.id}
@@ -103,8 +113,8 @@ export const AccountsManagementPage: React.FC = () => {
                 </div>
               ))}
             </div>
-          )
-        ))}
+          );
+        })}
         <div className="p-4">
           <button
             className="text-sm text-muted-foreground hover:text-foreground"

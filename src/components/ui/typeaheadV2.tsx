@@ -177,35 +177,30 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
         </Button>
       </div>
       {open && (
-        <div className="absolute z-10 w-[calc(100%+6rem)] -left-12 mt-1 bg-popover border border-input rounded-md shadow-md overflow-hidden">
+        <div className="absolute z-50 w-full left-0 mt-1 bg-popover border border-input rounded-md shadow-md overflow-hidden">
           <ScrollArea className="max-h-[300px] overflow-y-auto">
             <div className="p-1">
-              {filteredOptions.length === 0 ? (
+              {filteredOptions.length === 0 && (
                 <div className="p-2 text-sm text-muted-foreground">{emptyMessage}</div>
-              ) : (
-                filteredOptions.map((option, index) => (
-                  <div
-                    key={option[valueField]}
-                    ref={el => optionRefs.current[index] = el}
-                    className={cn(
-                      'flex items-center px-2 py-1.5 text-sm cursor-pointer',
-                      highlightedIndex === index
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-popover-foreground hover:bg-accent hover:text-accent-foreground',
-                    )}
-                    onClick={() => handleSelect(option)}
-                    onMouseEnter={() => setHighlightedIndex(index)}
-                  >
-                    <Check className={cn(
-                      'mr-2 h-4 w-4',
-                      selectedValues.includes(option[valueField])
-                        ? 'opacity-100'
-                        : 'opacity-0',
-                    )} />
-                    {renderElement(option, valueField, labelField)}
-                  </div>
-                ))
               )}
+              {filteredOptions.map((option, index) => (
+                <div
+                  key={option[valueField]}
+                  ref={el => optionRefs.current[index] = el}
+                  className={cn('flex items-center px-2 py-1.5 text-sm cursor-pointer', {
+                    'bg-accent text-accent-foreground': highlightedIndex === index,
+                    'text-popover-foreground hover:bg-accent hover:text-accent-foreground': highlightedIndex !== index,
+                  })}
+                  onClick={() => handleSelect(option)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
+                >
+                  <Check className={cn('mr-2 h-4 w-4', {
+                    'opacity-0': !selectedValues.includes(option[valueField]),
+                    'opacity-100': selectedValues.includes(option[valueField]),
+                  })} />
+                  {renderElement(option, valueField, labelField)}
+                </div>
+              ))}
             </div>
           </ScrollArea>
         </div>
