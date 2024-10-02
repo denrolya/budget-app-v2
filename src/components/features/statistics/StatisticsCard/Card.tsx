@@ -39,7 +39,7 @@ const getPeriodText = (interval: Interval, period?: Interval): string => {
 };
 
 const StatisticsCardSkeleton = () => (
-  <Card className="w-full sm:min-w-[240px] h-[140px]">
+  <Card className="w-full sm:min-w-[240px] h-[140px] transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25">
     <CardContent className="p-4">
       <Skeleton className="h-4 w-[200px]" />
       <Skeleton className="h-4 w-[150px] mt-2" />

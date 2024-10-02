@@ -104,7 +104,7 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
     >
       <div className="md:hidden w-full">{content}</div>
 
-      <Card className="hidden md:flex md:flex-col">
+      <Card className="hidden md:flex md:flex-col transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25">
         <CardHeader className="pb-2">{content}</CardHeader>
       </Card>
     </div>
@@ -147,7 +147,7 @@ export const DateCardSkeleton: React.FC<{ index: number; totalDays: number }> = 
     >
       <div className="md:hidden w-full">{content}</div>
 
-      <Card className="hidden md:flex md:flex-col">
+      <Card className="hidden md:flex md:flex-col transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25">
         <CardHeader className="pb-2">{content}</CardHeader>
       </Card>
     </div>

@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import cn from 'classnames';
 import { ArrowDownIcon, ArrowUpIcon, DollarSignIcon, TrendingUpIcon } from 'lucide-react';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { useBaseCurrency } from '@/contexts/auth.tsx';
+import { useBaseCurrency } from '@/contexts/auth';
 import { BACKEND_DATE_FORMAT, PERIOD_OPTIONS, PeriodOption, INTERVAL_OPTIONS } from '@/constants/datetime';
 import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
@@ -17,36 +17,37 @@ import { api } from '@/services/api';
 import MoneyValue from '@/components/common/MoneyValue';
 
 interface BackendData {
-  after: number;
-  before: number;
-  expense: number;
-  income: number;
+  after: number
+  before: number
+  expense: number
+  income: number
 }
 
 interface TransformedData {
-  time: number;
-  income: number;
-  expenses: number;
-  revenue: number;
-  date: moment.Moment;
-  previousIncome: number;
-  previousExpenses: number;
-  previousRevenue: number;
+  time: number
+  income: number
+  expenses: number
+  revenue: number
+  date: Moment
+  previousIncome: number
+  previousExpenses: number
+  previousRevenue: number
 }
 
 interface Props {
-  className?: string;
+  className?: string
 }
 
 export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
-  const [period, setPeriod] = useState<PeriodOption['value']>('YTD');
-  const [interval, setInterval] = useState(INTERVAL_OPTIONS[2].value);
+  const [period, setPeriod] = useState<PeriodOption['value']>(PERIOD_OPTIONS[2].value);
+  const [interval, setInterval] = useState(INTERVAL_OPTIONS[1].value); // Default to '1 day'
   const [isBarChart, setIsBarChart] = useState(true);
   const baseCurrency = useBaseCurrency();
 
   const selectedPeriodOption = useMemo(() =>
-     PERIOD_OPTIONS.find((p) => p.value === period) || PERIOD_OPTIONS[2]
-  , [period]);
+      PERIOD_OPTIONS.find((p) => p.value === period) || PERIOD_OPTIONS[2]
+    , [period]);
+
   const now = moment();
   const { currentDateRange, previousDateRange } = useMemo(() => {
     const currentRange = selectedPeriodOption.getDateRange(now);
@@ -57,6 +58,22 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
     };
     return { currentDateRange: currentRange, previousDateRange: previousRange };
   }, [selectedPeriodOption, now]);
+
+  const availableIntervals = useMemo(() => {
+    const durationInDays = currentDateRange.before.diff(currentDateRange.after, 'days');
+    return INTERVAL_OPTIONS.filter(option => {
+      if (durationInDays <= 1) return option.value === '1 day';
+      if (durationInDays <= 7) return ['1 hour', '1 day'].includes(option.value);
+      if (durationInDays <= 31) return ['1 day', '1 week'].includes(option.value);
+      return true;
+    });
+  }, [currentDateRange]);
+
+  useEffect(() => {
+    if (!availableIntervals.some(option => option.value === interval)) {
+      setInterval(availableIntervals[0].value);
+    }
+  }, [availableIntervals, interval]);
 
   const {
     data: currentDataBackend,
@@ -167,7 +184,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
   }, [transformedData]);
 
   return (
-    <Card className={cn('w-full', className)}>
+    <Card className={cn('w-full', 'transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25', className)}>
       <CardContent className="pt-6">
         <div className="flex flex-row items-center">
           <h3 className="text-lg font-normal">
@@ -177,10 +194,10 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
             <div className="flex flex-wrap items-center gap-2">
               {PERIOD_OPTIONS.map((p) => (
                 <Button
+                  className="text-xs px-2 py-1 h-auto"
                   key={p.value}
                   variant={period === p.value ? 'default' : 'outline'}
                   onClick={() => setPeriod(p.value)}
-                  className="text-xs px-2 py-1 h-auto"
                 >
                   {p.label}
                 </Button>
@@ -190,7 +207,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
                   <SelectValue placeholder="Interval" />
                 </SelectTrigger>
                 <SelectContent>
-                  {INTERVAL_OPTIONS.map((option) => (
+                  {availableIntervals.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>

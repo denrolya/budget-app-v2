@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 
-import CardStack from '@/components/common/CardStack.tsx';
-import CategoryTreeCard from '@/components/features/statistics/CategoryTreeCard';
+import CardStack from '@/components/common/CardStack';
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
 import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card';
-import DraftForm from '@/components/features/transactions/DraftForm';
-import InputForm from '@/components/features/transactions/InputForm';
-import { Card, CardContent } from '@/components/ui/card.tsx';
 import { CardConfig, cardConfigs } from '@/constants/dashboard-config';
 
 const DashboardPage: React.FC = () => {
