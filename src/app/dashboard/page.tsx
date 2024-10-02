@@ -42,11 +42,8 @@ const DashboardPage: React.FC = () => {
           />
         ))}
       </div>
-      <div className="grid grid-cols-5 gap-4 mb-6">
-        <div className="col-span-5 md:col-span-3">
-          <MoneyFlow />
-        </div>
-      </div>
+
+      <MoneyFlow />
     </section>
   );
 };

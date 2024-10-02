@@ -1,3 +1,6 @@
+import { Moment } from 'moment';
+import React, { memo, useMemo } from 'react';
+
 import MoneyValue from '@/components/common/MoneyValue';
 import MenuButton from '@/components/features/statistics/FinancialCardMenuButton';
 import PercentageBadge from '@/components/features/statistics/StatisticsCard/PercentageBadge';
@@ -9,8 +12,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Interval } from '@/constants/dashboard-config';
 import { CardConfig, useValueByPeriod } from '@/hooks/useValueByPeriodStatistics';
 import { Type as TransactionType } from '@/models/Transaction';
-import { Moment } from 'moment';
-import React, { memo, useMemo } from 'react';
 
 interface Props extends CardConfig {
   onConfigChange: (id: string, newConfig: Partial<CardConfig>) => void;
@@ -252,4 +253,4 @@ export const StatisticsCard: React.FC<Props> = memo(({
 
 StatisticsCard.displayName = 'StatisticsCard';
 
-export default StatisticsCard;
+export default memo(StatisticsCard);

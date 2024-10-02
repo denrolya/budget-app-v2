@@ -17,10 +17,10 @@ export const PERIOD_OPTIONS = [
     }),
   },
   {
-    label: '1W',
-    value: '1W',
+    label: 'WTD',
+    value: 'WTD',
     getDateRange: (now: Moment) => ({
-      after: now.clone().subtract(1, 'week').startOf('day'),
+      after: now.clone().startOf('isoWeek').startOf('day'),
       before: now.clone().endOf('day'),
     }),
   },
@@ -81,6 +81,7 @@ export const PERIOD_OPTIONS = [
     }),
   },
 ] as const;
+export const COMMON_PERIODS = ['WTD', 'MTD', '1M', 'YTD'] as const;
 
 export type PeriodOption = typeof PERIOD_OPTIONS[number]
 
