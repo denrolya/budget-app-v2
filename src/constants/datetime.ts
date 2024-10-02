@@ -73,6 +73,14 @@ export const PERIOD_OPTIONS = [
     }),
   },
   {
+    label: '3Y',
+    value: '3Y',
+    getDateRange: (now: Moment) => ({
+      after: now.clone().subtract(3, 'years').startOf('day'),
+      before: now.clone().endOf('day'),
+    }),
+  },
+  {
     label: '5Y',
     value: '5Y',
     getDateRange: (now: Moment) => ({
@@ -81,7 +89,7 @@ export const PERIOD_OPTIONS = [
     }),
   },
 ] as const;
-export const COMMON_PERIODS = ['WTD', 'MTD', '1M', 'YTD'] as const;
+export const COMMON_PERIODS = ['WTD', 'MTD', '3M', 'YTD'] as const;
 
 export type PeriodOption = typeof PERIOD_OPTIONS[number]
 

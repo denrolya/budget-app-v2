@@ -100,7 +100,7 @@ export const Tooltip: React.FC<Props> = ({ label, active, payload, data }) => {
             )}
             <MoneyValue useColors={false} amount={revenueChange.difference} />
             <PercentIcon className="mx-1" size={12} />
-            <span>{revenueChange.percentChange.toFixed(1)}%</span>
+            <span>{revenueChange.percentChange.toFixed(0)}%</span>
           </div>
         </div>
         <div className="flex justify-between pt-2 border-t border-border">
@@ -125,7 +125,7 @@ export const Tooltip: React.FC<Props> = ({ label, active, payload, data }) => {
               )}
               <MoneyValue useColors={false} amount={incomeChange.difference} />
               <PercentIcon className="mx-1" size={12} />
-              <span>{incomeChange.percentChange.toFixed(1)}%</span>
+              <span>{incomeChange.percentChange.toFixed(0)}%</span>
             </div>
           </div>
 
@@ -148,7 +148,7 @@ export const Tooltip: React.FC<Props> = ({ label, active, payload, data }) => {
               )}
               <MoneyValue useColors={false} amount={Math.abs(expensesChange.difference)} />
               <PercentIcon className="mx-1" size={12} />
-              <span>{Math.abs(expensesChange.percentChange).toFixed(1)}%</span>
+              <span>{Math.abs(expensesChange.percentChange).toFixed(0)}%</span>
             </div>
           </div>
         </div>

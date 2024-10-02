@@ -18,10 +18,10 @@ interface Props {
     previousRevenue: number;
   }[];
   isBarChart: boolean;
+  showRevenue: boolean;
 }
 
-const MoneyFlowChart: React.FC<Props> = ({ data, isBarChart }) => {
-  const [showRevenue, setShowRevenue] = useState(false);
+const MoneyFlowChart: React.FC<Props> = ({ data, isBarChart, showRevenue }) => {
 
   const transformedData = data.map(item => ({
     ...item,
@@ -32,16 +32,6 @@ const MoneyFlowChart: React.FC<Props> = ({ data, isBarChart }) => {
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="flex items-center space-x-2 mb-4">
-        <Switch
-          id="show-revenue"
-          checked={showRevenue}
-          onCheckedChange={setShowRevenue}
-        />
-        <Label htmlFor="show-revenue">
-          {showRevenue ? 'Show Income/Expenses' : 'Show Revenue'}
-        </Label>
-      </div>
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart stackOffset="sign" data={transformedData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
           <defs>
