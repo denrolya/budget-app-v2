@@ -72,7 +72,12 @@ export const FormRenderer: React.FC = () => {
       try {
         await formRef.current.submitForm();
         submitForm(formState.values);
-        toast.success('Form submitted successfully!');
+        toast.success('Form submitted successfully!', {
+          action: {
+            label: 'Close',
+            onClick: () => toast.dismiss()
+          }
+        });
         if (shouldClose) {
           closeForm();
         } else {
@@ -81,7 +86,12 @@ export const FormRenderer: React.FC = () => {
         }
       } catch (error) {
         console.error('Form submission failed:', error);
-        toast.error('Failed to submit form. Please try again.');
+        toast.error('Failed to submit form. Please try again.', {
+          action: {
+            label: 'Close',
+            onClick: () => toast.dismiss()
+          }
+        });
       } finally {
         setIsLoading(false);
       }

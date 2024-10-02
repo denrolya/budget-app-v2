@@ -1,4 +1,4 @@
-import React, { useEffect, useImperativeHandle, useRef } from 'react';
+import { useEffect, useImperativeHandle, useRef } from 'react';
 import { FieldValues, UseFormReturn, useFormState, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { toast } from 'sonner';
@@ -28,7 +28,12 @@ export const useFormLogic = <T,>({ form, onSubmit, setFormState }: UseFormLogicP
       if (isValid) {
         return form.handleSubmit(onSubmit)();
       } else {
-        toast.error('Please fix the errors in the form');
+        toast.error('Please fix the errors in the form', {
+          action: {
+            label: 'Close',
+            onClick: () => toast.dismiss()
+          }
+        });
         throw new Error('Form validation failed');
       }
     },

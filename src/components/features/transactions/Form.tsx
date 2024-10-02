@@ -2,12 +2,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
 import { ArrowDownCircle, ArrowUpCircle, X } from 'lucide-react';
 import moment from 'moment';
-import React, { forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useImperativeHandle } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
-import * as z from 'zod';
 import { toast } from 'sonner';
+import * as z from 'zod';
 
-import { useFinanceData } from '@/contexts/FinanceData';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
@@ -15,10 +14,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useFinanceData } from '@/contexts/FinanceData';
 import { useForm as useFormContext } from '@/contexts/Form';
 import { useFormLogic } from '@/hooks/useFormLogic';
 import Transaction, { Type as TransactionType } from '@/models/Transaction';
-import { api } from '@/services/api';
+import { createTransaction, updateTransaction } from '@/services/api/transaction.ts';
 
 interface TransactionFormProps {
   key: string;
@@ -28,7 +28,7 @@ interface TransactionFormRef {
   submitForm: () => Promise<void>;
 }
 
-const formSchema = z.object({
+export const formSchema = z.object({
   type: z.nativeEnum(TransactionType),
   account: z.number().int().positive(),
   amount: z.number().min(0, 'Amount must be non-negative'),
@@ -45,34 +45,6 @@ const formSchema = z.object({
   ).optional(),
 });
 
-const formatTransactionData = (values: z.infer<typeof formSchema>, existingData: Transaction | undefined) => ({
-  account: values.account,
-  amount: values.amount.toString(),
-  category: values.category,
-  executedAt: moment(values.executedAt).toISOString(),
-  isDraft: values.isDraft ?? false,
-  note: values.note || '',
-  type: values.type,
-  compensations: values.compensations?.map((comp, index) => {
-    const existingComp = existingData?.compensations?.[index];
-
-    return {
-      id: existingComp ? `api/transactions/${existingComp.id}` : undefined,
-      account: comp.account,
-      amount: comp.amount.toString(),
-      category: 137,
-      executedAt: moment(comp.executedAt).toISOString(),
-      isDraft: false,
-      note: `[Compensation]: ${values.note || existingData?.id}`,
-      type: TransactionType.Income,
-    };
-  }),
-});
-
-
-/**
- * TODO: Organize. Separate logic form visual components.
- */
 export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>((_, ref) => {
   const { refetchAccounts } = useFinanceData();
   const { submitForm, updateFormState, formState: { values: data } } = useFormContext();
@@ -87,7 +59,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
       executedAt: data?.executedAt ? moment(data.executedAt).format('YYYY-MM-DDTHH:mm') : moment().format('YYYY-MM-DDTHH:mm'),
       note: data?.note || undefined,
       isDraft: data?.isDraft ?? false,
-      compensations: data?.compensations?.map(comp => ({
+      compensations: data?.compensations?.map((comp: Transaction) => ({
         ...comp,
         account: comp?.account ? comp.account.id : undefined,
         amount: comp.amount,
@@ -105,13 +77,11 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     setFormState: updateFormState,
     onSubmit: async (values: z.infer<typeof formSchema>) => {
       try {
-        const formattedData = formatTransactionData(values, data);
-
         if (data?.id) {
-          const response = await api.put(`/api/transactions/${data.id}`, formattedData);
+          const response = await updateTransaction(data.id, values, data);
           logger.info(response, 'Transaction Edit');
         } else {
-          const response = await api.post(`/api/transactions/${values.type}`, formattedData);
+          const response = await createTransaction(values);
           logger.info(response, 'Transaction Create');
         }
 

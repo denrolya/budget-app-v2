@@ -26,6 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useForm, FormType } from '@/contexts/Form';
 import { useTheme } from '@/contexts/theme';
+import DraftTransactionForm from '@/components/features/transactions/DraftForm';
 
 interface Props {
   className?: string;
@@ -186,13 +187,14 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
             </li>
           </ul>
           <div className="absolute left-1/2 -translate-x-1/2 -top-6">
-            <Button
-              className="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-primary-foreground shadow-lg"
-              aria-label="Add new"
-              onClick={() => openForm(FormType.Transaction)}
-            >
-              <Plus className="h-6 w-6" />
-            </Button>
+            <DraftTransactionForm>
+              <Button
+                className="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-primary-foreground shadow-lg"
+                aria-label="New draft transaction"
+              >
+                <Plus className="h-6 w-6" />
+              </Button>
+            </DraftTransactionForm>
           </div>
         </div>
       </div>
