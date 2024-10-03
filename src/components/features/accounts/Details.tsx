@@ -1,23 +1,23 @@
+import { AlertCircle, ArrowUpDown, ChevronLeft, Download, Edit, Plus } from 'lucide-react';
+import moment from 'moment/moment';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import MoneyValue from '@/components/common/MoneyValue';
-import { Pagination } from '@/components/common/Pagination';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountAvatar from '@/components/features/accounts/Avatar';
-import TransactionListItemV3, {
-  ListItemSkeleton as TransactionListItemSkeletonV3,
-} from '@/components/features/transactions/ListItemV3';
-import { Badge, BadgeVariant } from '@/components/ui/badge';
+import TransactionListItem from '@/components/features/transactions/ListItemV3';
+import TransferListItem from '@/components/features/transfers/ListItem';
+import TransactionListItemSkeleton from '@/components/features/transactions/ListItemSkeleton';
+import TransferListItemSkeleton from '@/components/features/transfers/ListItemSkeleton';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useTransactions } from '@/hooks/useTransactions';
+import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 import Account from '@/models/Account';
-import Transaction from '@/models/Transaction.ts';
-import { TransactionFilters } from '@/models/TransactionFilters';
-import { ArrowUpDown, ChevronLeft, Download, Edit, Plus } from 'lucide-react';
-import moment from 'moment/moment';
-import React, { useEffect, useMemo, useState } from 'react';
+import Transaction from '@/models/Transaction';
 
 interface Props {
   account: Account;
@@ -26,65 +26,35 @@ interface Props {
 
 const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
   const { openForm } = useFormContext();
+  const currentDate = moment().startOf('day');
+  const daysPerPage = 7;
   const [activeTab, setActiveTab] = useState('transactions');
-  let balanceBadgeVariant: BadgeVariant = BadgeVariant.Secondary;
-  if (account.balance < 0) {
-    balanceBadgeVariant = BadgeVariant.Destructive;
-  } else if (account.balance > 0) {
-    balanceBadgeVariant = BadgeVariant.Success;
-  }
+  const dateRange = useMemo(() => {
+    const startDate = currentDate.clone().subtract(daysPerPage - 1, 'days');
+    const endDate = currentDate.clone();
+    return { startDate, endDate };
+  }, [currentDate]);
+
   const {
-    transactions,
+    groupedItems,
+    combinedItems,
     isLoading,
     isError,
     error,
-    refetch,
-    pagination: { currentPage, totalPages, perPage, setCurrentPage },
-    filters,
     setFilter,
-    isFetching,
-  } = useTransactions({
-    initialFilters: new TransactionFilters({ accounts: [account.id] }),
+  } = useTransactionsAndTransfers({
+    updateUrl: false,
+    excludeTransfers: true,
   });
 
-  const groupedAndSortedTransactions = useMemo(() => {
-    if (!transactions) return [];
+  useEffect(() => {
+    setFilter('after', dateRange.startDate);
+    setFilter('before', dateRange.endDate.clone().endOf('day'));
+  }, [dateRange, setFilter]);
 
-    const grouped = transactions.reduce((groups, transaction) => {
-      const date = moment(transaction.executedAt).format('YYYY-MM-DD');
-      if (!groups[date]) {
-        groups[date] = [];
-      }
-      groups[date].push(transaction);
-      return groups;
-    }, {} as Record<string, Transaction[]>);
-
-    return Object.entries(grouped)
-      .sort(([dateA], [dateB]) => moment(dateB).diff(moment(dateA)))
-      .map(([date, transactions]) => ({
-        date,
-        transactions: transactions.sort((a, b) =>
-          moment(b.executedAt).diff(moment(a.executedAt)),
-        ),
-      }));
-  }, [transactions]);
-
-  const formatTransactionDate = (dateString: string): string => {
-    const RECENT_THRESHOLD_DAYS = 7;
-    const transactionDate = moment(dateString);
-    const now = moment();
-
-    const diffInDays = now.diff(transactionDate, 'day');
-
-    const formattedDate = transactionDate.format('MMM D, YYYY'); // e.g., "Sep 16, 2024"
-
-    if (diffInDays < RECENT_THRESHOLD_DAYS) {
-      const relativeTime = transactionDate.fromNow(); // e.g., "3 days ago"
-      return `${relativeTime} (${formattedDate})`; // e.g., "3 days ago (Sep 20, 2024)"
-    } else {
-      return formattedDate;
-    }
-  };
+  useEffect(() => {
+    setFilter('accounts', [account.id]);
+  }, [account, setFilter]);
 
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
@@ -94,6 +64,62 @@ const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  const renderTransactionContent = () => {
+    if (isLoading) {
+      return (
+        <div className="space-y-4 animate-pulse">
+          {[...Array(5)].map((_, index) => (
+            <div key={index} className="space-y-2">
+              <div className="h-5 bg-muted rounded w-1/4"></div>
+              <TransactionListItemSkeleton />
+              <TransferListItemSkeleton />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (isError) {
+      return (
+        <div className="flex flex-col items-center justify-center h-[200px] text-center">
+          <AlertCircle className="h-10 w-10 text-destructive mb-2" />
+          <p className="text-lg font-semibold text-destructive">Error loading transactions</p>
+          <p className="text-sm text-muted-foreground">{error?.message || 'An unexpected error occurred.'}</p>
+        </div>
+      );
+    }
+
+    if (combinedItems.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center h-[200px] text-center">
+          <p className="text-lg font-semibold">No transactions found</p>
+          <p className="text-sm text-muted-foreground">There are no transactions for the selected period.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        {Object.keys(groupedItems).map((date) => (
+          <div key={date}>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">{moment(date).format('dddd, D MMM')}</h3>
+            <ul className="space-y-2">
+              {groupedItems[date].map((item) => (
+                <li key={item.id}>
+                  {item instanceof Transaction ? (
+                    <TransactionListItem transaction={item} />
+                  ) : (
+                    <TransferListItem transfer={item} />
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -123,15 +149,14 @@ const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
               <AccountAvatar account={account} />
               <div>
                 <CardTitle className="flex space-x-2 items-center">
-                  <span>
-                    {account.nameWithCurrency}
-                  </span>
+                  <span>{account.nameWithCurrency}</span>
                   <MoneyValue
                     badge
                     showSign
                     amount={account.balance}
                     currency={account.currency}
-                    values={account.convertedValues} />
+                    values={account.convertedValues}
+                  />
                 </CardTitle>
                 <CardDescription>
                   Created: <RelativeDatetimeDisplay date={account.createdAt} />
@@ -159,40 +184,11 @@ const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
             <Card>
               <CardHeader>
                 <CardTitle>Transactions</CardTitle>
-                <CardDescription>List of all transactions related to this account</CardDescription>
+                <CardDescription>List of all transactions for past 7 days</CardDescription>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[300px]">
-                  <>
-                    {isLoading && (
-                      <ul className="space-y-2">
-                        {[...Array(perPage)].map((_, index) => (
-                          <li key={index}><TransactionListItemSkeletonV3 /></li>
-                        ))}
-                      </ul>
-                    )}
-
-                    {(!isLoading && !isError && transactions) && (
-                      <>
-                        {groupedAndSortedTransactions.length > 0 && (
-                          <>
-                            {groupedAndSortedTransactions.map(({ date, transactions }) => (
-                              <div key={date} className="mb-6">
-                                <h5 className="text-lg font-semibold mb-2">{formatTransactionDate(date)}</h5>
-                                <ul className="space-y-2">
-                                  {transactions.map((transaction: Transaction) => (
-                                    <li key={transaction.id} className="relative">
-                                      <TransactionListItemV3 transaction={transaction} />
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            ))}
-                          </>
-                        )}
-                      </>
-                    )}
-                  </>
+                  {renderTransactionContent()}
                 </ScrollArea>
               </CardContent>
               <CardFooter>
@@ -200,9 +196,6 @@ const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
                   <Plus className="mr-2 h-4 w-4" />
                   Add Transaction
                 </Button>
-                <Pagination currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={setCurrentPage} />
               </CardFooter>
             </Card>
           </TabsContent>

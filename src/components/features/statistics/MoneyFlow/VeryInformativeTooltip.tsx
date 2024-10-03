@@ -1,11 +1,12 @@
-import ArrowChangeIndicator from '@/components/common/ArrowChangeIndicator.tsx';
-import MoneyValue from '@/components/common/MoneyValue';
 
-import { formatShortDate } from '@/utils/formatShortDate.ts';
 import cn from 'classnames';
-import { ArrowRightIcon, CalendarIcon, TrendingUpIcon } from 'lucide-react';
+import { ArrowRightIcon, TrendingUpIcon } from 'lucide-react';
 import moment from 'moment';
 import React from 'react';
+
+import { formatShortDate } from '@/utils/formatShortDate';
+import MoneyValue from '@/components/common/MoneyValue';
+import ArrowChangeIndicator from '@/components/common/ArrowChangeIndicator';
 
 interface VeryInformativeTooltipProps {
   currentTimeframe: { after: moment.Moment; before: moment.Moment };

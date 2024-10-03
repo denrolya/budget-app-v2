@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import ExampleHorizontalScrollCardWithTooltip
+  from '@/components/features/statistics/ExampleHorizontalScrollCardWithTooltip.tsx';
 import CardStack from '@/components/common/CardStack';
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
 import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card';
@@ -44,6 +46,8 @@ const DashboardPage: React.FC = () => {
       </div>
 
       <MoneyFlow />
+
+      <ExampleHorizontalScrollCardWithTooltip />
     </section>
   );
 };

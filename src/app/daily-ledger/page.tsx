@@ -7,11 +7,8 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { useTransactions } from '@/hooks/useTransactions';
-import { useTransfers } from '@/hooks/useTransfers';
-import Transaction from '@/models/Transaction';
+import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 import { TransactionFilters } from '@/models/TransactionFilters';
-import Transfer from '@/models/Transfer';
 import { TransferFilters } from '@/models/TransferFilters';
 
 
@@ -26,55 +23,20 @@ export const DailyLedgerPage = () => {
   }, [currentDate]);
 
   const {
-    transactions,
-    isLoading: isLoadingTransactions,
-    isError: isErrorTransactions,
-    error: errorTransactions,
-    setFilter: setTransactionFilter,
-  } = useTransactions({
-    initialFilters: new TransactionFilters(),
+    groupedItems,
+    isLoading,
+    isError,
+    error,
+    setFilter,
+  } = useTransactionsAndTransfers({
     updateUrl: false,
     excludeTransfers: true,
   });
 
-  const {
-    transfers,
-    isLoading: isLoadingTransfers,
-    isError: isErrorTransfers,
-    error: errorTransfers,
-    setFilter: setTransferFilter,
-  } = useTransfers({
-    initialFilters: new TransferFilters(),
-    updateUrl: false,
-  });
-
   useEffect(() => {
-    setTransactionFilter('after', dateRange.startDate);
-    setTransactionFilter('before', dateRange.endDate.clone().endOf('day'));
-    setTransferFilter('after', dateRange.startDate);
-    setTransferFilter('before', dateRange.endDate.clone().endOf('day'));
-  }, [dateRange, setTransactionFilter, setTransferFilter]);
-
-  const isLoading = isLoadingTransactions || isLoadingTransfers;
-  const isError = isErrorTransactions || isErrorTransfers;
-  const error = errorTransactions || errorTransfers;
-
-  const combinedItems = useMemo(() => {
-    const items = [...transactions, ...transfers];
-    return items.sort((a, b) => b.executedAt.diff(a.executedAt));
-  }, [transactions, transfers]);
-
-  const groupedItems = useMemo(() => {
-    const groups: { [key: string]: (Transaction | Transfer)[] } = {};
-    combinedItems.forEach(item => {
-      const dateKey = item.executedAt.format('YYYY-MM-DD');
-      if (!groups[dateKey]) {
-        groups[dateKey] = [];
-      }
-      groups[dateKey].push(item);
-    });
-    return groups;
-  }, [combinedItems]);
+    setFilter('after', dateRange.startDate);
+    setFilter('before', dateRange.endDate.clone().endOf('day'));
+  }, [dateRange, setFilter]);
 
   const goToNextPage = useCallback(() => {
     setCurrentDate(prev => prev.clone().add(daysPerPage, 'days'));
@@ -83,6 +45,7 @@ export const DailyLedgerPage = () => {
   const goToPreviousPage = useCallback(() => {
     setCurrentDate(prev => prev.clone().subtract(daysPerPage, 'days'));
   }, [daysPerPage]);
+
   useHotkeys('arrowleft', goToPreviousPage);
   useHotkeys('arrowright', goToNextPage);
 

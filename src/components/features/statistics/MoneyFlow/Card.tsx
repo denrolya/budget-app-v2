@@ -225,14 +225,14 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
             >
               <div className="inline-flex flex-col items-start mb-2">
                 <h2 className="text-xl sm:text-2xl font-bold">
-                  <MoneyValue showSign amount={totalRevenue} useColors />
+                  <MoneyValue showSign useColors amount={totalRevenue} />
                 </h2>
                 <span className={cn('flex items-center text-xs', {
                   'text-success': revenueChange >= 0,
                   'text-destructive': revenueChange < 0,
                 })}>
                   {getSummaryText()}
-                  <ArrowChangeIndicator value={revenueChange} className="ml-1" />
+                  <ArrowChangeIndicator className="ml-1" value={revenueChange} />
                   <InfoIcon className="h-3 w-3 ml-1" />
                 </span>
               </div>
