@@ -89,7 +89,7 @@ export class Transaction {
   }
 }
 
-interface RawTransaction {
+export interface RawTransaction {
   id: number;
   account: Account;
   amount: number;

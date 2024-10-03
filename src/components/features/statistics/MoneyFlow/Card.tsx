@@ -141,7 +141,9 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
               contentClassName="w-full max-w-sm p-4 sm:w-96 bg-transparent border-none shadow-none"
               triggerClassName="cursor-help"
               content={
+              <span>
                 <YearDoughnutTimeframeDisplayChart data={[previousTimeframe, currentTimeframe]} />
+                </span>
               }
             >
               <>

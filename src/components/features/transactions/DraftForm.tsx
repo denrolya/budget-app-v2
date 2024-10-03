@@ -24,7 +24,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useAccountsWithDefaultOrder, useCategories, useFinanceData } from '@/contexts/FinanceData';
 import Category from '@/models/Category';
 import { Type as TransactionType } from '@/models/Transaction';
-import { createTransaction } from '@/services/api/transaction';
+import { transactionService } from '@/services/api/transaction';
 
 interface Props {
   children: React.ReactNode;
@@ -161,7 +161,7 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
     onSubmit: async (values: z.infer<typeof transactionSchema>) => {
       setIsSubmitting(true);
       try {
-        const response = await createTransaction({
+        const response = await transactionService.createTransaction({
           type: data.type,
           amount: parseFloat(data.amount),
           category: parseInt(data.category),

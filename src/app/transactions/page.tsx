@@ -25,6 +25,8 @@ export const TransactionsList: React.FC = () => {
     isFetching,
   } = useTransactions();
 
+  console.log({ transactions, isLoading, error });
+
   const formatTransactionDate = (dateString: string): string => {
     const RECENT_THRESHOLD_DAYS = 7;
     const transactionDate = moment(dateString);

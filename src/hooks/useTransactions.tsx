@@ -1,14 +1,13 @@
 import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
-import moment from 'moment';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
-import { FormType, useFormSubmitListener } from '@/contexts/Form.tsx';
+import { FormType, useFormSubmitListener } from '@/contexts/Form';
 import { useListState } from '@/hooks/useListState';
 import Transaction, { TransactionFactory } from '@/models/Transaction';
 import { TransactionFilters } from '@/models/TransactionFilters';
-import { axiosFetcher } from '@/services/api';
+import { transactionService, FetchResponse as FetchTransactionsResponse } from '@/services/api/transaction';
 
 interface UseTransactionsOptions {
   initialPerPage?: number;
@@ -51,9 +50,6 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
     excludeTransfers = false,
   } = options;
 
-  const { createTransaction } = TransactionFactory();
-  const [totalPages, setTotalPages] = useState(0);
-
   const {
     pagination: { currentPage, perPage },
     filters,
@@ -82,44 +78,10 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
 
   const queryClient = useQueryClient();
   const handleFormSubmit = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['transactions'] });
-  }, [queryClient]);
+    queryClient.invalidateQueries({ queryKey: [queryKey] });
+  }, [queryClient, queryKey]);
   useFormSubmitListener([FormType.Transaction, FormType.Transfer], handleFormSubmit);
-
-  const url = useMemo(() => {
-    const query = new URLSearchParams();
-
-    const addParam = (key: string, value: unknown) => {
-      const isEmptyArray = Array.isArray(value) && value.length === 0;
-      const isEmptyValue = value === undefined || value === null || value === '';
-
-      if (!isEmptyValue && !isEmptyArray) {
-        if (Array.isArray(value)) {
-          value.forEach((item) => {
-            query.append(`${key}[]`, item.toString());
-          });
-        } else if (typeof value === 'boolean') {
-          query.set(key, value ? '1' : '0');
-        } else if (moment.isMoment(value)) {
-          query.set(key, value.format(BACKEND_DATE_FORMAT));
-        } else {
-          query.set(key, value.toString());
-        }
-      }
-    };
-
-    query.set('perPage', perPage.toString());
-    query.set('page', currentPage.toString());
-
-    Object.entries(filters).forEach(([key, value]) => {
-      addParam(key, value);
-    });
-
-    if (sort.field) query.set('sortField', sort.field as string);
-    if (sort.direction) query.set('sortDirection', sort.direction);
-
-    return `/api/v2/transaction?${query.toString()}`;
-  }, [filters, currentPage, perPage, sort]);
+  const { createTransaction } = TransactionFactory();
 
   const {
     data,
@@ -129,28 +91,27 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
     isFetching,
     refetch,
   }: UseQueryResult<TransformedResponse, Error> = useQuery({
-    queryKey: [queryKey, url],
-    queryFn: async (): Promise<TransformedResponse> => {
-      const result = await axiosFetcher(url);
-
-      const filteredList = excludeTransfers
-        ? result.list.filter((t: any) => !t.transfer?.id)
-        : result.list;
-
-      return {
-        ...result,
-        list: filteredList.map((t: any) => createTransaction(t)),
-      };
-    },
+    queryKey: [queryKey, currentPage, perPage, filters, sort, excludeTransfers],
+    queryFn: async (): Promise<FetchTransactionsResponse> =>
+      await transactionService.fetchTransactions({
+        page: currentPage,
+        perPage,
+        filters,
+        sort,
+        excludeTransfers,
+      }),
+    select: (data: FetchTransactionsResponse): TransformedResponse => ({
+      ...data,
+      list: data.list.map((item) => createTransaction(item)),
+    }),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 3,
-    retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   const handleError = useCallback(() => {
     if (isError) {
-      setTotalPages(0);
       toast.error('Failed to fetch transactions', {
         description: error?.message || 'An unexpected error occurred.',
         action: {
@@ -158,16 +119,15 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
           onClick: () => refetch(),
         },
       });
-    } else if (data) {
-      setTotalPages(Math.ceil(data.count / perPage) || 0);
     }
-  }, [isError, error, data, perPage, refetch]);
+  }, [isError, error, refetch]);
 
-  // Call handleError whenever relevant dependencies change
   useMemo(handleError, [handleError]);
 
+  const totalPages = useMemo(() => Math.ceil((data?.count ?? 0) / perPage) || 0, [data?.count, perPage]);
+
   return {
-    transactions: data?.list || [],
+    transactions: data?.list ?? [],
     isLoading: isPending,
     isError,
     error: error || null,

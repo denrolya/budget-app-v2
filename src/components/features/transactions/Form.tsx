@@ -18,7 +18,7 @@ import { useFinanceData } from '@/contexts/FinanceData';
 import { useForm as useFormContext } from '@/contexts/Form';
 import { useFormLogic } from '@/hooks/useFormLogic';
 import Transaction, { Type as TransactionType } from '@/models/Transaction';
-import { createTransaction, updateTransaction } from '@/services/api/transaction.ts';
+import { transactionService } from '@/services/api/transaction.ts';
 
 interface TransactionFormProps {
   key: string;
@@ -78,10 +78,10 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     onSubmit: async (values: z.infer<typeof formSchema>) => {
       try {
         if (data?.id) {
-          const response = await updateTransaction(data.id, values, data);
+          const response = await transactionService.updateTransaction(data.id, values, data);
           logger.info(response, 'Transaction Edit');
         } else {
-          const response = await createTransaction(values);
+          const response = await transactionService.createTransaction(values);
           logger.info(response, 'Transaction Create');
         }
 
