@@ -24,10 +24,9 @@ interface TransformedData {
 }
 
 interface UseMoneyFlowProps {
-  period: string
   interval: string
-  currentDateRange: { after: moment.Moment; before: moment.Moment }
-  previousDateRange: { after: moment.Moment; before: moment.Moment }
+  currentTimeframe: { after: moment.Moment; before: moment.Moment }
+  previousTimeframe: { after: moment.Moment; before: moment.Moment }
   baseCurrency: string
 }
 
@@ -38,8 +37,8 @@ interface UseMoneyFlowReturn {
   error: Error | null
   refetchData: () => void
   setInterval: (newInterval: string) => void
-  change: number
-  changePercent: number
+  revenueChange: number
+  revenueChangePercent: number
   totalIncome: number
   totalExpenses: number
   totalRevenue: number
@@ -50,26 +49,25 @@ interface UseMoneyFlowReturn {
   incomeChangePercent: number
   expensesChange: number
   expensesChangePercent: number
-  avgDailyIncome: number
-  avgDailyExpenses: number
+  avgIntervalIncome: number
+  avgIntervalExpenses: number
 }
 
 export const useMoneyFlow = ({
-                                   period,
-                                   interval,
-                                   currentDateRange,
-                                   previousDateRange,
-                                   baseCurrency,
-                                 }: UseMoneyFlowProps): UseMoneyFlowReturn => {
+                               interval,
+                               currentTimeframe,
+                               previousTimeframe,
+                               baseCurrency,
+                             }: UseMoneyFlowProps): UseMoneyFlowReturn => {
   const availableIntervals = useMemo(() => {
-    const durationInDays = currentDateRange.before.diff(currentDateRange.after, 'days');
+    const durationInDays = currentTimeframe.before.diff(currentTimeframe.after, 'days');
     return INTERVAL_OPTIONS.filter(option => {
       if (durationInDays <= 1) return option.value === '1 day';
       if (durationInDays <= 7) return ['1 hour', '1 day'].includes(option.value);
       if (durationInDays <= 31) return ['1 day', '1 week'].includes(option.value);
       return true;
     });
-  }, [currentDateRange]);
+  }, [currentTimeframe]);
 
   const {
     data: currentDataBackend,
@@ -77,12 +75,12 @@ export const useMoneyFlow = ({
     error: currentError,
     refetch: refetchCurrentPeriodData,
   } = useQuery<BackendData[]>({
-    queryKey: ['currentData', period, interval],
+    queryKey: ['currentData', currentTimeframe, interval],
     queryFn: async () => {
       const response = await api.get('/api/v2/statistics/value-by-period', {
         params: {
-          after: currentDateRange.after.format(BACKEND_DATE_FORMAT),
-          before: currentDateRange.before.format(BACKEND_DATE_FORMAT),
+          after: currentTimeframe.after.format(BACKEND_DATE_FORMAT),
+          before: currentTimeframe.before.format(BACKEND_DATE_FORMAT),
           interval,
         },
       });
@@ -98,12 +96,12 @@ export const useMoneyFlow = ({
     error: previousError,
     refetch: refetchPreviousPeriodData,
   } = useQuery<BackendData[]>({
-    queryKey: ['previousData', period, interval],
+    queryKey: ['previousData', currentTimeframe, interval],
     queryFn: async () => {
       const response = await api.get('/api/v2/statistics/value-by-period', {
         params: {
-          after: previousDateRange.after.format(BACKEND_DATE_FORMAT),
-          before: previousDateRange.before.format(BACKEND_DATE_FORMAT),
+          after: previousTimeframe.after.format(BACKEND_DATE_FORMAT),
+          before: previousTimeframe.before.format(BACKEND_DATE_FORMAT),
           interval,
         },
       });
@@ -173,8 +171,8 @@ export const useMoneyFlow = ({
   }, [currentDataBackend, previousDataBackend, interval]);
 
   const {
-    change,
-    changePercent,
+    revenueChange,
+    revenueChangePercent,
     totalIncome,
     totalExpenses,
     totalRevenue,
@@ -185,8 +183,8 @@ export const useMoneyFlow = ({
     incomeChangePercent,
     expensesChange,
     expensesChangePercent,
-    avgDailyIncome,
-    avgDailyExpenses,
+    avgIntervalIncome,
+    avgIntervalExpenses,
   } = useMemo(() => {
     const currentIncome = transformedData.reduce((sum, d) => sum + d.income, 0);
     const currentExpenses = transformedData.reduce((sum, d) => sum + d.expenses, 0);
@@ -205,13 +203,16 @@ export const useMoneyFlow = ({
     const expensesChange = currentExpenses - previousExpenses;
     const expensesChangePercent = previousExpenses !== 0 ? (expensesChange / Math.abs(previousExpenses)) * 100 : 0;
 
-    const dataLength = transformedData.length;
-    const avgIncome = dataLength > 0 ? currentIncome / dataLength : 0;
-    const avgExpenses = dataLength > 0 ? currentExpenses / dataLength : 0;
+    // Calculate the number of intervals in the current period
+    const intervalCount = transformedData.length;
+
+    // Calculate average per interval
+    const avgIntervalIncome = intervalCount > 0 ? currentIncome / intervalCount : 0;
+    const avgIntervalExpenses = intervalCount > 0 ? currentExpenses / intervalCount : 0;
 
     return {
-      change: revenueChange,
-      changePercent: revenueChangePercent,
+      revenueChange,
+      revenueChangePercent,
       totalIncome: currentIncome,
       totalExpenses: currentExpenses,
       totalRevenue: currentRevenue,
@@ -222,8 +223,8 @@ export const useMoneyFlow = ({
       incomeChangePercent,
       expensesChange,
       expensesChangePercent,
-      avgDailyIncome: avgIncome,
-      avgDailyExpenses: avgExpenses,
+      avgIntervalIncome,
+      avgIntervalExpenses,
     };
   }, [transformedData]);
 
@@ -236,8 +237,8 @@ export const useMoneyFlow = ({
     setInterval: (newInterval: string) => {
       // This function is a placeholder. The actual setInterval function should be implemented in the component using this hook.
     },
-    change,
-    changePercent,
+    revenueChange,
+    revenueChangePercent,
     totalIncome,
     totalExpenses,
     totalRevenue,
@@ -248,7 +249,7 @@ export const useMoneyFlow = ({
     incomeChangePercent,
     expensesChange,
     expensesChangePercent,
-    avgDailyIncome,
-    avgDailyExpenses,
+    avgIntervalIncome,
+    avgIntervalExpenses,
   };
 };

@@ -7,7 +7,7 @@ export const MOMENT_DATETIME_VIEW_FORMAT = `${MOMENT_DATE_VIEW_FORMAT} ${MOMENT_
 
 export const MOMENT_DATEPICKER_FORMAT = 'MMM D, YYYY';
 
-export const PERIOD_OPTIONS = [
+export const TIMEFRAME_OPTIONS = [
   {
     label: '1D',
     value: '1D',
@@ -89,9 +89,9 @@ export const PERIOD_OPTIONS = [
     }),
   },
 ] as const;
-export const COMMON_PERIODS = ['WTD', 'MTD', '3M', 'YTD'] as const;
+export const COMMON_TIMEFRAMES = ['WTD', 'MTD', '3M', 'YTD'] as const;
 
-export type PeriodOption = typeof PERIOD_OPTIONS[number]
+export type TimeframeOption = typeof TIMEFRAME_OPTIONS[number]
 
 export const INTERVAL_OPTIONS = [
   { label: '1 Day', value: '1 day' },

@@ -1,126 +1,148 @@
-import React from 'react';
-import moment from 'moment';
-import { ArrowDownIcon, ArrowRightIcon, ArrowUpIcon, CalendarIcon, TrendingUpIcon } from 'lucide-react';
-
+import ArrowChangeIndicator from '@/components/common/ArrowChangeIndicator.tsx';
 import MoneyValue from '@/components/common/MoneyValue';
 
+import { formatShortDate } from '@/utils/formatShortDate.ts';
+import cn from 'classnames';
+import { ArrowRightIcon, CalendarIcon, TrendingUpIcon } from 'lucide-react';
+import moment from 'moment';
+import React from 'react';
+
 interface VeryInformativeTooltipProps {
-  currentDateRange: { after: moment.Moment; before: moment.Moment }
-  previousDateRange: { after: moment.Moment; before: moment.Moment }
-  totalIncome: number
-  totalExpenses: number
-  totalRevenue: number
-  previousTotalIncome: number
-  previousTotalExpenses: number
-  previousTotalRevenue: number
-  incomeChange: number
-  incomeChangePercent: number
-  expensesChange: number
-  expensesChangePercent: number
-  change: number
-  changePercent: number
+  currentTimeframe: { after: moment.Moment; before: moment.Moment };
+  previousTimeframe: { after: moment.Moment; before: moment.Moment };
+  totalIncome: number;
+  totalExpenses: number;
+  totalRevenue: number;
+  previousTotalIncome: number;
+  previousTotalExpenses: number;
+  previousTotalRevenue: number;
+  incomeChange: number;
+  incomeChangePercent: number;
+  expensesChange: number;
+  expensesChangePercent: number;
+  revenueChange: number;
+  revenueChangePercent: number;
 }
 
 const VeryInformativeTooltip: React.FC<VeryInformativeTooltipProps> = ({
-                                                                     currentDateRange,
-                                                                     previousDateRange,
-                                                                     totalIncome,
-                                                                     totalExpenses,
-                                                                     totalRevenue,
-                                                                     previousTotalIncome,
-                                                                     previousTotalExpenses,
-                                                                     previousTotalRevenue,
-                                                                     incomeChange,
-                                                                     incomeChangePercent,
-                                                                     expensesChange,
-                                                                     expensesChangePercent,
-                                                                     change,
-                                                                     changePercent,
-                                                                   }) => {
-  const formatShortDate = (date: moment.Moment) => {
-    const now = moment();
-    if (date.year() === now.year()) {
-      return date.format('MMM D');
-    } else {
-      return date.format('MMM D, YYYY');
-    }
-  };
-
-  const renderChangeIndicator = (value: number) => value >= 0 ? (
-      <ArrowUpIcon className="h-4 w-4 text-primary" />
-    ) : (
-      <ArrowDownIcon className="h-4 w-4 text-destructive" />
-    );
-
-  return (
-    <div className="space-y-4">
-      <h3 className="font-semibold text-lg border-b pb-2 dark:border-gray-700">Comparison Details</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-        <div className="flex items-center">
-          <CalendarIcon className="h-4 w-4 mr-2" />
-          <span className="font-medium">Current period:</span>
-        </div>
-        <p>{formatShortDate(currentDateRange.after)} - {formatShortDate(currentDateRange.before)}</p>
-        <div className="flex items-center">
-          <CalendarIcon className="h-4 w-4 mr-2" />
-          <span className="font-medium">Previous period:</span>
-        </div>
-        <p>{formatShortDate(previousDateRange.after)} - {formatShortDate(previousDateRange.before)}</p>
+                                                                         currentTimeframe,
+                                                                         previousTimeframe,
+                                                                         totalIncome,
+                                                                         totalExpenses,
+                                                                         totalRevenue,
+                                                                         previousTotalIncome,
+                                                                         previousTotalExpenses,
+                                                                         previousTotalRevenue,
+                                                                         incomeChange,
+                                                                         incomeChangePercent,
+                                                                         expensesChange,
+                                                                         expensesChangePercent,
+                                                                         revenueChange,
+                                                                         revenueChangePercent,
+                                                                       }) => (
+  <div className="space-y-4">
+    <h3 className="font-semibold text-lg border-b pb-2 dark:border-gray-700">
+      Summary for <span>{formatShortDate(currentTimeframe.after)} - {formatShortDate(currentTimeframe.before)}</span>
+      <span className="block text-sm font-normal mt-1">
+          <span>Compared to {formatShortDate(previousTimeframe.after)} - {formatShortDate(previousTimeframe.before)}</span>
+      </span>
+    </h3>
+    <div className="space-y-2">
+      <h4 className="font-medium text-sm flex items-center">
+        <ArrowRightIcon className="h-4 w-4 mr-2" />
+        Current vs Previous
+      </h4>
+      <div className="grid grid-cols-3 gap-x-2 gap-y-1 text-sm">
+        <p>Income</p>
+        <p className="text-right">
+          <MoneyValue
+            className="font-medium text-xs font-mono"
+            useColors={false}
+            amount={totalIncome} />
+        </p>
+        <p className="text-right">
+          <MoneyValue
+            useColors={false}
+            className="text-xs font-mono"
+            amount={previousTotalIncome} /></p>
+        <p>Expenses</p>
+        <p className="text-right">
+          <MoneyValue
+            className="font-medium text-xs font-mono"
+            useColors={false}
+            amount={totalExpenses} />
+        </p>
+        <p className="text-right">
+          <MoneyValue
+            useColors={false}
+            className="text-xs font-mono"
+            amount={previousTotalExpenses} />
+        </p>
+        <p className="font-medium">Revenue</p>
+        <p className="text-right">
+          <MoneyValue
+            useColors
+            showSign
+            className="font-medium text-xs font-mono"
+            amount={totalRevenue} />
+        </p>
+        <p className="text-right">
+          <MoneyValue
+            useColors
+            showSign
+            className="font-medium text-xs font-mono"
+            amount={previousTotalRevenue} />
+        </p>
       </div>
-      <div className="space-y-2">
-        <h4 className="font-medium text-sm flex items-center">
-          <ArrowRightIcon className="h-4 w-4 mr-2" />
-          Current vs Previous
-        </h4>
-        <div className="grid grid-cols-3 gap-x-2 gap-y-1 text-sm">
-          <p>Income</p>
-          <p className="text-right"><MoneyValue amount={totalIncome} className="font-medium" useColors={false} /></p>
-          <p className="text-right"><MoneyValue amount={previousTotalIncome} useColors={false} /></p>
-          <p>Expenses</p>
-          <p className="text-right"><MoneyValue amount={totalExpenses} className="font-medium" useColors={false} /></p>
-          <p className="text-right"><MoneyValue amount={previousTotalExpenses} useColors={false} /></p>
-          <p className="font-medium">Revenue</p>
-          <p className="text-right"><MoneyValue useColors className="font-medium" amount={totalRevenue} /></p>
-          <p className="text-right"><MoneyValue useColors className="font-medium" amount={previousTotalRevenue} /></p>
+    </div>
+    <div className="space-y-2">
+      <h4 className="font-medium text-sm flex items-center">
+        <TrendingUpIcon className="h-4 w-4 mr-2" />
+        Changes
+      </h4>
+      <div className="space-y-1 text-sm">
+        <div className="flex justify-between items-center">
+          <span>Income:</span>
+          <span className={cn('flex items-center text-xs font-mono', {
+            'text-muted-foreground': incomeChange === 0,
+            'text-success': incomeChange > 0,
+            'text-destructive': incomeChange < 0,
+          })}>
+            <MoneyValue showSign useColors amount={incomeChange} />
+            {' '}
+            (<ArrowChangeIndicator value={incomeChange} />
+            {Math.abs(incomeChangePercent).toFixed(0)}%)
+            </span>
         </div>
-      </div>
-      <div className="space-y-2">
-        <h4 className="font-medium text-sm flex items-center">
-          <TrendingUpIcon className="h-4 w-4 mr-2" />
-          Changes
-        </h4>
-        <div className="space-y-1 text-sm">
-          <div className="flex justify-between items-center">
-            <span>Income:</span>
-            <span className="flex items-center">
-              <MoneyValue amount={incomeChange} showSign useColors />
-              {' '}
-              ({incomeChangePercent.toFixed(0)}%)
-              {renderChangeIndicator(incomeChange)}
+        <div className="flex justify-between items-center">
+          <span>Expenses:</span>
+          <span className={cn('flex items-center text-xs font-mono', {
+            'text-muted-foreground': expensesChange === 0,
+            'text-destructive': expensesChange > 0,
+            'text-success': expensesChange < 0,
+          })}>
+            <MoneyValue showSign revertColors amount={expensesChange} />
+            {' '}
+            (<ArrowChangeIndicator value={expensesChange} />
+            {Math.abs(expensesChangePercent).toFixed(0)}%)
             </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span>Expenses:</span>
-            <span className="flex items-center">
-              <MoneyValue amount={expensesChange} showSign useColors={false} />
-              {' '}
-              ({expensesChangePercent.toFixed(0)}%)
-              {renderChangeIndicator(-expensesChange)}
+        </div>
+        <div className="flex justify-between items-center font-medium">
+          <span>Revenue:</span>
+          <span className={cn('flex items-center font-medium text-xs font-mono', {
+            'text-muted-foreground': revenueChange === 0,
+            'text-success': revenueChange > 0,
+            'text-destructive': revenueChange < 0,
+          })}>
+              <MoneyValue showSign amount={revenueChange} />
+            {' '}
+            (<ArrowChangeIndicator value={revenueChange} />
+            {Math.abs(revenueChangePercent).toFixed(0)}%)
             </span>
-          </div>
-          <div className="flex justify-between items-center font-medium">
-            <span>Revenue:</span>
-            <span className="flex items-center">
-              <MoneyValue amount={change} showSign useColors />
-              {' '}
-              ({changePercent.toFixed(0)}%)
-              {renderChangeIndicator(change)}
-            </span>
-          </div>
         </div>
       </div>
     </div>
-  );
-};
+  </div>
+);
 
 export default VeryInformativeTooltip;

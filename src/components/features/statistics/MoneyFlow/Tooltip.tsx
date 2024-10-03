@@ -1,15 +1,14 @@
 import cn from 'classnames';
-import { ArrowDownIcon, ArrowUpIcon, CalendarIcon, DollarSignIcon, PercentIcon, TrendingUpIcon } from 'lucide-react';
+import { ArrowRightIcon, TrendingUpIcon } from 'lucide-react';
 import moment from 'moment';
 import React, { memo, useMemo } from 'react';
 import { TooltipProps } from 'recharts';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
-import MoneyValue from '@/components/common/MoneyValue';
+import MoneyValue from '@/components/common/MoneyValue.tsx';
+import ArrowChangeIndicator from '@/components/common/ArrowChangeIndicator';
 
-const DATE_FORMAT = 'MMM D, YYYY HH:mm';
-
-type TransformedData = {
+interface TransformedData {
   time: number;
   income: number;
   expenses: number;
@@ -18,137 +17,195 @@ type TransformedData = {
   previousIncome: number;
   previousExpenses: number;
   previousRevenue: number;
-};
+}
 
 interface Props extends TooltipProps<ValueType, NameType> {
   data: TransformedData[];
+  currentTimeframe: { after: moment.Moment; before: moment.Moment };
+  previousTimeframe: { after: moment.Moment; before: moment.Moment };
+  interval: '1 day' | '1 week' | '1 month';
 }
 
 const calculateChange = (current: number, previous: number) => {
-  const difference = current - previous;
-  const percentChange = previous !== 0 ? (difference / Math.abs(previous)) * 100 : 0;
+  const value = current - previous;
+  const percentage = previous !== 0 ? (value / Math.abs(previous)) * 100 : 0;
   return {
-    difference,
-    percentChange,
-    isPositive: difference >= 0,
+    value,
+    percentage,
   };
 };
 
-export const Tooltip: React.FC<Props> = ({ label, active, payload, data }) => {
+const formatDate = (date: moment.Moment, interval: '1 day' | '1 week' | '1 month'): string => {
+  switch (interval) {
+    case '1 day':
+      return date.format('MMM D, YYYY');
+    case '1 week':
+      return `Week of ${date.format('MMM D, YYYY')}`;
+    case '1 month':
+      return date.format('MMMM YYYY');
+  }
+};
+
+export const Tooltip: React.FC<Props> = ({
+                                           active,
+                                           payload,
+                                           label,
+                                           data,
+                                           currentTimeframe,
+                                           previousTimeframe,
+                                           interval,
+                                         }) => {
   const dataPointMap = useMemo(() => {
     const map = new Map<number, TransformedData>();
-    data.forEach((data) => {
-      map.set(data.time, data);
+    data.forEach((item) => {
+      map.set(item.time, item);
     });
     return map;
   }, [data]);
 
-  const dataPoint = useMemo(() => dataPointMap.get(label), [dataPointMap, label]);
+  const dataPoint = useMemo(() => dataPointMap.get(label as number), [dataPointMap, label]);
 
-  const revenueChange = useMemo(() => {
+  const changes = useMemo(() => {
     if (dataPoint) {
-      return calculateChange(dataPoint.revenue, dataPoint.previousRevenue);
+      return {
+        revenue: calculateChange(dataPoint.revenue, dataPoint.previousRevenue),
+        income: calculateChange(dataPoint.income, dataPoint.previousIncome),
+        expenses: calculateChange(dataPoint.expenses, dataPoint.previousExpenses),
+      };
     }
-    return { difference: 0, percentChange: 0, isPositive: true };
+    return {
+      revenue: { value: 0, percentage: 0 },
+      income: { value: 0, percentage: 0 },
+      expenses: { value: 0, percentage: 0 },
+    };
   }, [dataPoint]);
 
-  const incomeChange = useMemo(() => {
+  const comparisonDate = useMemo(() => {
     if (dataPoint) {
-      return calculateChange(dataPoint.income, dataPoint.previousIncome);
+      const currentDate = dataPoint.date;
+      const diffDays = currentDate.diff(currentTimeframe.after, 'days');
+      return previousTimeframe.after.clone().add(diffDays, 'days');
     }
-    return { difference: 0, percentChange: 0, isPositive: true };
-  }, [dataPoint]);
+    return null;
+  }, [dataPoint, currentTimeframe, previousTimeframe]);
 
-  const expensesChange = useMemo(() => {
-    if (dataPoint) {
-      return calculateChange(dataPoint.expenses, dataPoint.previousExpenses);
-    }
-    return { difference: 0, percentChange: 0, isPositive: true };
-  }, [dataPoint]);
-
-  const shouldRender = active && payload && payload.length && dataPoint;
-
-  if (!shouldRender) {
+  if (!active || !payload || !payload.length || !dataPoint || !comparisonDate) {
     return null;
   }
 
-  return (
-    <div className="bg-background border border-border p-4 rounded-lg shadow-lg max-w-sm">
-      <p className="font-bold mb-2 flex items-center">
-        <CalendarIcon className="mr-2" size={16} />
-        {dataPoint.date.format(DATE_FORMAT)}
-      </p>
-      <div className="space-y-3">
-        <div>
-          <p className="text-sm font-medium flex items-center">
-            <TrendingUpIcon className="mr-2" size={16} />
-            Revenue
-          </p>
-          <p className="text-lg font-bold">
-            <MoneyValue useColors={false} amount={dataPoint.revenue} />
-          </p>
-          <div
-            className={cn('text-xs flex items-center', {
-              'text-success': revenueChange.isPositive,
-              'text-destructive': !revenueChange.isPositive,
-            })}
-          >
-            {revenueChange.isPositive ? (
-              <ArrowUpIcon className="mr-1" size={12} />
-            ) : (
-              <ArrowDownIcon className="mr-1" size={12} />
-            )}
-            <MoneyValue useColors={false} amount={revenueChange.difference} />
-            <PercentIcon className="mx-1" size={12} />
-            <span>{revenueChange.percentChange.toFixed(0)}%</span>
-          </div>
-        </div>
-        <div className="flex justify-between pt-2 border-t border-border">
-          <div>
-            <p className="text-sm font-medium flex items-center">
-              <DollarSignIcon className="mr-2" size={16} />
-              Income
-            </p>
-            <p>
-              <MoneyValue useColors={false} amount={dataPoint.income} />
-            </p>
-            <div
-              className={cn('text-xs flex items-center', {
-                'text-success': incomeChange.isPositive,
-                'text-destructive': !incomeChange.isPositive,
-              })}
-            >
-              {incomeChange.isPositive ? (
-                <ArrowUpIcon className="mr-1" size={12} />
-              ) : (
-                <ArrowDownIcon className="mr-1" size={12} />
-              )}
-              <MoneyValue useColors={false} amount={incomeChange.difference} />
-              <PercentIcon className="mx-1" size={12} />
-              <span>{incomeChange.percentChange.toFixed(0)}%</span>
-            </div>
-          </div>
+  const formattedCurrentDate = formatDate(dataPoint.date, interval);
+  const formattedComparisonDate = formatDate(comparisonDate, interval);
 
-          <div>
-            <p className="text-sm font-medium flex items-center">
-              <DollarSignIcon className="mr-2" size={16} />
-              Expenses
-            </p>
-            <MoneyValue useColors={false} amount={-dataPoint.expenses} />
-            <div
-              className={cn('text-xs flex items-center', {
-                'text-destructive': expensesChange.isPositive,
-                'text-success': !expensesChange.isPositive,
-              })}
-            >
-              {expensesChange.isPositive ? (
-                <ArrowUpIcon className="mr-1" size={12} />
-              ) : (
-                <ArrowDownIcon className="mr-1" size={12} />
-              )}
-              <MoneyValue useColors={false} amount={Math.abs(expensesChange.difference)} />
-              <PercentIcon className="mx-1" size={12} />
-              <span>{Math.abs(expensesChange.percentChange).toFixed(0)}%</span>
+  return (
+    <div className="bg-background border border-border p-4 rounded-lg shadow-lg max-w-md space-y-4">
+      <div className="space-y-2">
+        <h3 className="font-semibold text-lg border-b pb-2 dark:border-gray-700">
+          Summary for <span>{formattedCurrentDate}</span>
+          <span className="block text-sm font-normal mt-1">
+            <span>Compared to {formattedComparisonDate}</span>
+          </span>
+        </h3>
+      </div>
+
+      <div className="space-y-2">
+        <h4 className="font-medium text-sm flex items-center">
+          <ArrowRightIcon className="h-4 w-4 mr-2" />
+          Current vs Previous
+        </h4>
+        <div className="grid grid-cols-3 gap-x-2 gap-y-1 text-sm">
+          <p>Income</p>
+          <p className="text-right">
+            <MoneyValue
+              useColors={false}
+              showSign={false}
+              className="text-xs font-mono"
+              amount={dataPoint.income} />
+          </p>
+          <p className="text-right">
+            <MoneyValue
+              useColors={false}
+              showSign={false}
+              className="text-xs font-mono"
+              amount={dataPoint.previousIncome} />
+          </p>
+          <p>Expenses</p>
+          <p className="text-right">
+            <MoneyValue
+              useColors={false}
+              showSign={false}
+              className="text-xs font-mono"
+              amount={dataPoint.expenses} />
+          </p>
+          <p className="text-right">
+            <MoneyValue
+              useColors={false}
+              showSign={false}
+              className="text-xs font-mono"
+              amount={dataPoint.previousExpenses} />
+          </p>
+          <p className="font-medium">Revenue</p>
+          <p className="text-right font-medium">
+            <MoneyValue
+              useColors
+              showSign
+              className="text-xs font-mono"
+              amount={dataPoint.revenue} />
+          </p>
+          <p className="text-right font-medium">
+            <MoneyValue
+              useColors
+              showSign
+              className="text-xs font-mono"
+              amount={dataPoint.previousRevenue} />
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <h4 className="font-medium text-sm flex items-center">
+          <TrendingUpIcon className="h-4 w-4 mr-2" />
+          Changes
+        </h4>
+        <div className="space-y-1 text-sm">
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between items-center">
+              <span>Income:</span>
+              <span className={cn('flex items-center text-xs font-mono', {
+                'text-muted-foreground': changes.income.value === 0,
+                'text-success': changes.income.value > 0,
+                'text-destructive': changes.income.value < 0,
+              })}>
+                <MoneyValue useColors showSign amount={changes.income.value} />
+                {' '}
+                (<ArrowChangeIndicator value={changes.income.value} />
+                {Math.abs(changes.income.percentage).toFixed(0)}%)
+            </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Expenses:</span>
+              <span className={cn('flex items-center text-xs font-mono', {
+                'text-muted-foreground': changes.expenses.value === 0,
+                'text-destructive': changes.expenses.value > 0,
+                'text-success': changes.expenses.value < 0,
+              })}>
+                <MoneyValue showSign revertColors amount={changes.expenses.value} />
+                {' '}
+                (<ArrowChangeIndicator value={changes.expenses.value} />
+                {Math.abs(changes.expenses.percentage).toFixed(0)}%)
+            </span>
+            </div>
+            <div className="flex justify-between items-center font-medium">
+              <span>Revenue:</span>
+              <span className={cn('flex items-center font-medium text-xs font-mono', {
+                'text-muted-foreground': changes.revenue.value === 0,
+                'text-success': changes.revenue.value > 0,
+                'text-destructive': changes.revenue.value < 0,
+              })}>
+                <MoneyValue showSign amount={changes.revenue.value} />
+                {' '}
+                (<ArrowChangeIndicator value={changes.revenue.value} />
+                {Math.abs(changes.revenue.percentage).toFixed(0)}%)
+            </span>
             </div>
           </div>
         </div>
@@ -156,7 +213,5 @@ export const Tooltip: React.FC<Props> = ({ label, active, payload, data }) => {
     </div>
   );
 };
-
-Tooltip.displayName = 'MoneyFlowTooltip';
 
 export default memo(Tooltip);
