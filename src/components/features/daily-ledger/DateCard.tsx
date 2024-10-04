@@ -3,6 +3,7 @@ import { Moment } from 'moment';
 import React from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
+import DayChart from '@/components/features/daily-ledger/DayChart.tsx';
 import TransactionListItem, {
   ListItemSkeleton as TransactionListItemSkeleton,
 } from '@/components/features/transactions/ListItemV3';
@@ -10,6 +11,7 @@ import TransferListItem, {
   ListItemSkeleton as TransferListItemSkeleton,
 } from '@/components/features/transfers/ListItem';
 import { Card, CardHeader } from '@/components/ui/card';
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip.tsx';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBaseCurrency } from '@/contexts/auth';
 import { cn } from '@/lib/utils';
@@ -104,9 +106,15 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
     >
       <div className="md:hidden w-full">{content}</div>
 
-      <Card className="hidden md:flex md:flex-col transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25">
-        <CardHeader className="pb-2">{content}</CardHeader>
-      </Card>
+      <ResponsiveTooltip
+        desktopComponent="hovercard"
+        openDelay={2}
+        contentClassName={cn({ 'none': transactions.length === 0 })}
+        content={transactions.length ? <DayChart transactions={transactions} baseCurrency={baseCurrency} date={date} /> : null}>
+        <Card className="hidden md:flex md:flex-col transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25">
+          <CardHeader className="pb-2">{content}</CardHeader>
+        </Card>
+      </ResponsiveTooltip>
     </div>
   );
 };

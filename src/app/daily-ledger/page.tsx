@@ -4,12 +4,10 @@ import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
-import { TransactionFilters } from '@/models/TransactionFilters';
-import { TransferFilters } from '@/models/TransferFilters';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
 
 
 export const DailyLedgerPage = () => {
@@ -59,7 +57,7 @@ export const DailyLedgerPage = () => {
     }
   };
 
-  const dates = Array.from({ length: daysPerPage }, (_, i) => moment(currentDate).subtract(i, 'days'));
+  const dates = useMemo(() => Array.from({ length: daysPerPage }, (_, i) => moment(currentDate).subtract(i, 'days')), [currentDate, daysPerPage]);
 
   return (
     <section className="w-full mx-auto p-4 pb-16">
@@ -84,19 +82,13 @@ export const DailyLedgerPage = () => {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row md:-mx-2 mb-6">
+      <div className="flex flex-col md:flex-row-reverse md:-mx-2 mb-6">
         {dates.map((date, index) => (
           <React.Fragment key={date.format('YYYY-MM-DD')}>
-            <div
-              className={cn('w-full md:w-1/5 md:px-2', {
-                'order-first md:order-last': index === 0,
-                'order-last md:order-first': index === dates.length - 1,
-              })}
-            >
-              {isLoading && (
+            <div className="w-full md:w-1/5 md:px-2">
+              {isLoading ? (
                 <DateCardSkeleton index={index} totalDays={dates.length} />
-              )}
-              {!isLoading && (
+              ) : (
                 <DateCard
                   date={date}
                   items={groupedItems[date.format('YYYY-MM-DD')] || []}

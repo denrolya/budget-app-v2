@@ -1,11 +1,12 @@
 import cn from 'classnames';
 import { ArrowRightIcon, TrendingUpIcon } from 'lucide-react';
 import moment from 'moment';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { TooltipProps } from 'recharts';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
-import MoneyValue from '@/components/common/MoneyValue.tsx';
+import MoneyValue from '@/components/common/MoneyValue';
 import ArrowChangeIndicator from '@/components/common/ArrowChangeIndicator';
 
 interface TransformedData {
@@ -54,7 +55,10 @@ export const Tooltip: React.FC<Props> = ({
                                            currentTimeframe,
                                            previousTimeframe,
                                            interval,
+                                           coordinate,
                                          }) => {
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const { x, y } = coordinate;
   const dataPointMap = useMemo(() => {
     const map = new Map<number, TransformedData>();
     data.forEach((item) => {
@@ -89,6 +93,33 @@ export const Tooltip: React.FC<Props> = ({
     return null;
   }, [dataPoint, currentTimeframe, previousTimeframe]);
 
+  useEffect(() => {
+    if (active && payload && payload.length && dataPoint && comparisonDate) {
+      const tooltipWidth = 320; // Approximate width of the tooltip
+      const tooltipHeight = 300; // Approximate height of the tooltip
+      const margin = 10; // Margin from the edges of the viewport
+
+      let top = y + 300;
+      let left = x;
+
+      // Check if the tooltip would go off the bottom of the screen
+      if (top + tooltipHeight > window.innerHeight) {
+        top = window.innerHeight - tooltipHeight - margin;
+      }
+
+      // Check if the tooltip would go off the right of the screen
+      if (left + tooltipWidth > window.innerWidth) {
+        left = window.innerWidth - tooltipWidth - margin;
+      }
+
+      // Ensure the tooltip doesn't go off the left or top of the screen
+      top = Math.max(margin, top);
+      left = Math.max(margin, left);
+
+      setPosition({ top, left });
+    }
+  }, [active, payload, dataPoint, comparisonDate, x, y]);
+
   if (!active || !payload || !payload.length || !dataPoint || !comparisonDate) {
     return null;
   }
@@ -96,8 +127,11 @@ export const Tooltip: React.FC<Props> = ({
   const formattedCurrentDate = formatDate(dataPoint.date, interval);
   const formattedComparisonDate = formatDate(comparisonDate, interval);
 
-  return (
-    <div className="bg-background border border-border p-4 rounded-lg shadow-lg max-w-md space-y-4">
+  return createPortal(
+    <div
+      style={{ top: position.top, left: position.left }}
+      className="fixed z-50 pointer-events-none bg-background border border-border p-4 rounded-lg shadow-lg w-80 space-y-4"
+    >
       <div className="space-y-2">
         <h3 className="font-semibold text-lg border-b pb-2 dark:border-gray-700">
           Summary for <span>{formattedCurrentDate}</span>
@@ -179,7 +213,7 @@ export const Tooltip: React.FC<Props> = ({
                 {' '}
                 (<ArrowChangeIndicator value={changes.income.value} />
                 {Math.abs(changes.income.percentage).toFixed(0)}%)
-            </span>
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span>Expenses:</span>
@@ -192,7 +226,7 @@ export const Tooltip: React.FC<Props> = ({
                 {' '}
                 (<ArrowChangeIndicator value={changes.expenses.value} />
                 {Math.abs(changes.expenses.percentage).toFixed(0)}%)
-            </span>
+              </span>
             </div>
             <div className="flex justify-between items-center font-medium">
               <span>Revenue:</span>
@@ -205,12 +239,13 @@ export const Tooltip: React.FC<Props> = ({
                 {' '}
                 (<ArrowChangeIndicator value={changes.revenue.value} />
                 {Math.abs(changes.revenue.percentage).toFixed(0)}%)
-            </span>
+              </span>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 

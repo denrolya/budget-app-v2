@@ -240,7 +240,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
               </div>
             </ResponsiveTooltip>
 
-            <div className="h-[200px] sm:h-[250px] mb-2">
+            <div className="overflow-x-auto">
               {error ? (
                 <div className="w-full h-full flex items-center justify-center text-destructive text-xs">
                   Error loading data: {error.message}

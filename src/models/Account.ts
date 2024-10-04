@@ -9,6 +9,13 @@ export enum AccountType {
   Other = 'other',
 }
 
+export const ACCOUNT_TYPES_ORDER: AccountType[] = [
+  AccountType.Bank,
+  AccountType.Cash,
+  AccountType.Internet,
+  AccountType.Other,
+];
+
 const colorScheme = {
   [AccountType.Bank]: {
     [CURRENCIES.EUR.code]: '#33CCFF',

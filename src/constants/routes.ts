@@ -1,13 +1,13 @@
-import { ArrowLeftRight, Home, Receipt, Wallet } from 'lucide-react';
+import { ArrowLeftRight, LayoutDashboard, Handshake, CalendarDays, Receipt, Wallet } from 'lucide-react';
 
 export const ROUTES = {
   DASHBOARD: {
     path: '/dashboard',
-    icon: Home
+    icon: LayoutDashboard
   },
   DAILY_LEDGER: {
     path: '/ledger',
-    icon: Receipt
+    icon: CalendarDays
   },
   TRANSACTION_LIST: {
     path: '/transactions',
@@ -19,7 +19,7 @@ export const ROUTES = {
   },
   DEBT_LIST: {
     path: '/debts',
-    icon: Wallet
+    icon: Handshake
   },
   TRANSFER_LIST: {
     path: '/transfers',

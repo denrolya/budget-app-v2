@@ -57,14 +57,15 @@ export const useTransactionsAndTransfers = ({
     return items.sort((a, b) => b.executedAt.valueOf() - a.executedAt.valueOf());
   }, [transactions, transfers]);
 
-  const groupedItems = useMemo(() => combinedItems.reduce<Record<string, (Transaction | Transfer)[]>>((groups, item) => {
-    const dateKey = item.executedAt.format('YYYY-MM-DD');
-    if (!groups[dateKey]) {
-      groups[dateKey] = [];
-    }
-    groups[dateKey].push(item);
-    return groups;
-  }, {}), [combinedItems]);
+  const groupedItems = useMemo(() => combinedItems
+    .reduce<Record<string, (Transaction | Transfer)[]>>((groups, item) => {
+      const dateKey = item.executedAt.format('YYYY-MM-DD');
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+      groups[dateKey].push(item);
+      return groups;
+    }, {}), [combinedItems]);
 
   return {
     transactions,

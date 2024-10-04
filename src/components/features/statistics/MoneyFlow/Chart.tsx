@@ -47,8 +47,8 @@ const MoneyFlowChart: React.FC<Props> = ({
   );
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="min-w-[600px]">
+      <ResponsiveContainer width="100%" height={300}>
         <ComposedChart stackOffset="sign" data={transformedData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
           <defs>
             <linearGradient id="incomeGradient" x1="0" y1="1" x2="0" y2="0">

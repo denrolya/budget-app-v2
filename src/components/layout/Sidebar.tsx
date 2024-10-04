@@ -1,9 +1,3 @@
-import cn from 'classnames';
-import sumBy from 'lodash/sumBy';
-import groupBy from 'lodash/groupBy';
-import { Plus } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
-
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountLink from '@/components/layout/SidebarAccountLink';
 import SidebarLink from '@/components/layout/SidebarLink';
@@ -15,7 +9,12 @@ import { useBaseCurrency } from '@/contexts/auth';
 import { useActiveAccountsWithDefaultOrder, useDebts } from '@/contexts/FinanceData';
 import { FormType, useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
-import { AccountType } from '@/models/Account';
+import { ACCOUNT_TYPES_ORDER, AccountType } from '@/models/Account';
+import cn from 'classnames';
+import groupBy from 'lodash/groupBy';
+import sumBy from 'lodash/sumBy';
+import { Plus } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
@@ -58,13 +57,6 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
     }
   };
 
-  const orderedAccountTypes: AccountType[] = [
-    AccountType.Bank,
-    AccountType.Cash,
-    AccountType.Internet,
-    AccountType.Other,
-  ];
-
   const groupedAccounts = groupBy(accounts, 'type');
 
   const renderAccountGroup = (type: AccountType) => {
@@ -105,12 +97,16 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
       <div className="flex flex-col h-full">
         <div className="flex-shrink-0 p-4 space-y-4">
           <div className="space-y-1">
-            <SidebarLink to={ROUTES.DASHBOARD.path} icon={ROUTES.DASHBOARD.icon} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink
+              to={ROUTES.DASHBOARD.path}
+              icon={ROUTES.DASHBOARD.icon}
+              isSidebarExpanded={isSidebarExpanded}>
               Dashboard
             </SidebarLink>
-            <SidebarLink to={ROUTES.DAILY_LEDGER.path}
-                         icon={ROUTES.DAILY_LEDGER.icon}
-                         isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink
+              to={ROUTES.DAILY_LEDGER.path}
+              icon={ROUTES.DAILY_LEDGER.icon}
+              isSidebarExpanded={isSidebarExpanded}>
               Daily Ledger
             </SidebarLink>
           </div>
@@ -119,22 +115,28 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
             {isSidebarExpanded && (
               <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1">Tools</div>
             )}
-            <SidebarLink to={ROUTES.TRANSACTION_LIST.path}
-                         icon={ROUTES.TRANSACTION_LIST.icon}
-                         isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink
+              to={ROUTES.TRANSACTION_LIST.path}
+              icon={ROUTES.TRANSACTION_LIST.icon}
+              isSidebarExpanded={isSidebarExpanded}>
               Transactions
             </SidebarLink>
-            <SidebarLink to={ROUTES.TRANSFER_LIST.path}
-                         icon={ROUTES.TRANSFER_LIST.icon}
-                         isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink
+              to={ROUTES.TRANSFER_LIST.path}
+              icon={ROUTES.TRANSFER_LIST.icon}
+              isSidebarExpanded={isSidebarExpanded}>
               Transfers
             </SidebarLink>
-            <SidebarLink to={ROUTES.ACCOUNT_LIST.path}
-                         icon={ROUTES.ACCOUNT_LIST.icon}
-                         isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink
+              to={ROUTES.ACCOUNT_LIST.path}
+              icon={ROUTES.ACCOUNT_LIST.icon}
+              isSidebarExpanded={isSidebarExpanded}>
               Accounts
             </SidebarLink>
-            <SidebarLink to={ROUTES.DEBT_LIST.path} icon={ROUTES.DEBT_LIST.icon} isSidebarExpanded={isSidebarExpanded}>
+            <SidebarLink
+              to={ROUTES.DEBT_LIST.path}
+              icon={ROUTES.DEBT_LIST.icon}
+              isSidebarExpanded={isSidebarExpanded}>
               Debts
             </SidebarLink>
           </div>
@@ -145,21 +147,22 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
         <div className="flex-grow overflow-hidden flex flex-col">
           <ScrollArea className="flex-grow px-4">
             <div aria-labelledby="accounts-heading">
-              {orderedAccountTypes.map(renderAccountGroup)}
+              {ACCOUNT_TYPES_ORDER.map(renderAccountGroup)}
             </div>
           </ScrollArea>
         </div>
 
         <div className="flex-shrink-0 mt-auto p-4 border-t border-accent space-y-2">
-        <div className={cn('flex flex-col items-start space-y-1 overflow-hidden transition-all duration-300 ease-in-out', {
+          <div className={cn('flex flex-col items-start space-y-1 overflow-hidden transition-all duration-300 ease-in-out', {
             'max-h-20 opacity-100': isSidebarExpanded,
             'max-h-0 opacity-0': !isSidebarExpanded,
           })}>
             <div className="w-full flex justify-between items-center">
               <span className="text-xs font-semibold text-accent-foreground/60">Total Balance</span>
-              <MoneyValue className="font-medium text-sm text-mono"
-                          amount={totalBalance}
-                          currency={baseCurrency} />
+              <MoneyValue
+                className="font-medium text-sm text-mono"
+                amount={totalBalance}
+                currency={baseCurrency} />
             </div>
             <div className="w-full flex justify-between items-center">
               <span className="text-xs font-semibold text-accent-foreground/60">Total Debt</span>
