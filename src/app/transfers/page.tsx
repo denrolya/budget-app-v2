@@ -88,11 +88,11 @@ export const TransferList: React.FC = () => {
   return (
     <section className="container p-4 mx-auto pb-20 md:pb-4">
       <div className="flex flex-row">
-        <h1 className="text-2xl font-bold">Transfer List</h1>
+        <h1 className="hidden md:block text-2xl font-bold">Transfer List</h1>
 
         <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className={cn('h-9 text-sm')}>
+            <Button variant="outline" size="sm" className="h-9 text-sm">
               <CalendarIcon className="mr-2 h-4 w-4" />
               <span>
               {filters.after && filters.before

@@ -37,7 +37,7 @@ export const MoneyFlowSkeleton: React.FC = () => (
       <Skeleton className="h-6 w-32 mb-1" />
       <Skeleton className="h-4 w-48" />
     </div>
-    <div className="h-[180px] sm:h-[250px] mb-2">
+    <div className="h-[250px] mb-2">
       <Skeleton className="w-full h-full" />
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs mb-2">

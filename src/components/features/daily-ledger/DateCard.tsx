@@ -97,7 +97,7 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
 
   return (
     <div
-      className={cn('flex flex-col w-full mb-6 md:mb-0', {
+      className={cn('flex flex-col w-full md:mb-0', {
         'order-first md:order-last': index === 0,
         'order-last md:order-first': index === totalDays - 1,
       })}
@@ -140,7 +140,7 @@ export const DateCardSkeleton: React.FC<{ index: number; totalDays: number }> = 
 
   return (
     <div
-      className={cn('flex flex-col w-full mb-6 md:mb-0', {
+      className={cn('flex flex-col w-full md:mb-0', {
         'order-first md:order-last': index === 0,
         'order-last md:order-first': index === totalDays - 1,
       })}

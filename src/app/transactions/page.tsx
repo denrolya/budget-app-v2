@@ -58,7 +58,7 @@ export const TransactionsList: React.FC = () => {
   return (
     <section className="container p-4 mx-auto pb-20 md:pb-4">
       <div className="flex flex-row items-center">
-        <h1 className="text-2xl font-bold">Transactions List</h1>
+        <h1 className="hidden md:block text-2xl font-bold">Transactions List</h1>
         <ListFilters data={filters} onChange={setFilter} />
       </div>
 
