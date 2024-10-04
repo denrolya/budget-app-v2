@@ -1,6 +1,3 @@
-import { Bitcoin, DollarSign, Edit, Euro, InfoIcon, Trash2 } from 'lucide-react';
-import React from 'react';
-
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import TransactionValue from '@/components/common/TransactionValue';
@@ -12,12 +9,15 @@ import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Separator } from '@/components/ui/separator';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useFixerExchangeRates, useMonobankExchangeRates } from '@/contexts/FinanceData';
+import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import { useTransactionMutations } from '@/hooks/useTransactionMutations';
 import Transaction from '@/models/Transaction';
+import { confirm } from '@/utils/confirmation';
+import { Bitcoin, DollarSign, Edit, Euro, InfoIcon, Loader2, Trash2 } from 'lucide-react';
+import React from 'react';
 
 interface TransactionDetailsProps {
   transaction: Transaction;
-  onEdit?: (transaction: Transaction) => void;
-  onDelete?: (transaction: Transaction) => void;
 }
 
 const currencyOrder = [CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.HUF, CURRENCY_CODE.UAH, CURRENCY_CODE.BTC];
@@ -28,16 +28,17 @@ const RateDisplay: React.FC<{
   from: CURRENCY_CODE;
   to: CURRENCY_CODE;
   amount: number;
-  maximumFractionDigits: number
-}> = ({ value, source, from, to, amount, maximumFractionDigits }) => (
+  decimals: number
+}> = ({ value, source, from, to, amount, decimals }) => (
   <div className="flex items-center space-x-2 text-sm">
     <MoneyValue useColors={false} amount={amount} currency={from} />
     <span className="text-muted-foreground">=</span>
     <div className="flex-1 flex items-start">
-      <MoneyValue useColors={false}
-                  amount={amount * value}
-                  currency={to}
-                  maximumFractionDigits={maximumFractionDigits} />
+      <MoneyValue
+        useColors={false}
+        amount={amount * value}
+        currency={to}
+        maximumFractionDigits={decimals} />
       <sup className="ml-1 mt-2 text-[8px] font-medium text-muted-foreground">
         {source}
       </sup>
@@ -45,7 +46,10 @@ const RateDisplay: React.FC<{
   </div>
 );
 
-export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit, onDelete }) => {
+export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
+  const { openForm } = useFormContext();
+  const { deleteTransaction, isDeleting, isUpdating: isEditing } = useTransactionMutations();
+
   const isDebt = transaction.debt && transaction.debt.debtor;
   const currentRates = useFixerExchangeRates();
   const monobankRates = useMonobankExchangeRates();
@@ -99,6 +103,19 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
         return <span className="text-sm font-bold">₴</span>;
       default:
         return null;
+    }
+  };
+
+  const handleDelete = async (transaction: Transaction) => {
+    const confirmed = await confirm({
+      title: 'Are you absolutely sure?',
+      description: `You are about to delete ${transaction.type} transaction #${transaction.id}(${transaction.account.currency}${transaction.amount}). This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    });
+
+    if (confirmed) {
+      deleteTransaction(transaction.id);
     }
   };
 
@@ -188,7 +205,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
                                 from={transaction.account.currency}
                                 to={currency}
                                 amount={transaction.amount}
-                                maximumFractionDigits={2}
+                                decimals={2}
                               />
                               <RateDisplay
                                 value={monobankRates[currency] / monobankRates[transaction.account.currency]}
@@ -196,7 +213,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
                                 from={transaction.account.currency}
                                 to={currency}
                                 amount={transaction.amount}
-                                maximumFractionDigits={2}
+                                decimals={2}
                               />
                             </div>
                           </div>
@@ -241,13 +258,40 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction, onEdit
           </p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" size="sm" onClick={() => onEdit?.(transaction)}>
-            <Edit className="h-4 w-4 mr-2" />
-            Edit
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isEditing || isDeleting}
+            onClick={() => openForm(FormType.Transaction, transaction)}>
+            {isEditing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Updating...
+              </>
+            ) : (
+              <>
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </>
+            )}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => onDelete?.(transaction)}>
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+            disabled={isEditing || isDeleting}
+            onClick={() => handleDelete(transaction)}>
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              <>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </>
+            )}
           </Button>
         </div>
       </div>

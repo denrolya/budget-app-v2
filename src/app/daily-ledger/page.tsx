@@ -1,13 +1,14 @@
-import cn from 'classnames';
+import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart.tsx';
+import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
+import { Button } from '@/components/ui/button';
+
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip.tsx';
+import { Separator } from '@/components/ui/separator';
+import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-
-import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
-import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
 
 
 export const DailyLedgerPage = () => {
@@ -68,7 +69,19 @@ export const DailyLedgerPage = () => {
           <ChevronLeft className="mr-2 h-4 w-4" />
           <span className="hidden md:inline"> Previous</span>
         </Button>
-        <span className="text-lg font-medium">{formatDateRange(dateRange.startDate, dateRange.endDate)}</span>
+        <ResponsiveTooltip
+          openDelay={1}
+          desktopComponent="hovercard"
+          contentClassName="w-full max-w-sm p-4 sm:w-96 bg-transparent border-none shadow-none"
+          triggerClassName="cursor-help"
+          content={
+            <span>
+                <YearDoughnutTimeframeDisplayChart data={[{ after: dateRange.startDate, before: dateRange.endDate }]} />
+                </span>
+          }
+        >
+          <span className="text-lg font-medium">{formatDateRange(dateRange.startDate, dateRange.endDate)}</span>
+        </ResponsiveTooltip>
         <Button onClick={goToNextPage} disabled={isLoading} size="sm" variant="ghost">
           <span className="hidden md:inline">Next </span>
           <ChevronRight className="ml-2 h-4 w-4" />

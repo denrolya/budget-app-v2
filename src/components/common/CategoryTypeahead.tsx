@@ -28,7 +28,7 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>((
       <div className="flex flex-col">
         <span>{el.name}</span>
         <span className="text-xs text-muted-foreground">
-          {el.getFullPath()}
+          {el.getFullPath().join(' > ')}
         </span>
       </div>
       <div className="ml-auto flex items-center space-x-2">

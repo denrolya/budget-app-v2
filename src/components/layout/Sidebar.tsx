@@ -103,18 +103,18 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
               isSidebarExpanded={isSidebarExpanded}>
               Dashboard
             </SidebarLink>
+          </div>
+          <Separator />
+          <div className="space-y-1">
+            {isSidebarExpanded && (
+              <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1">Areas</div>
+            )}
             <SidebarLink
               to={ROUTES.DAILY_LEDGER.path}
               icon={ROUTES.DAILY_LEDGER.icon}
               isSidebarExpanded={isSidebarExpanded}>
               Daily Ledger
             </SidebarLink>
-          </div>
-          <Separator />
-          <div className="space-y-1">
-            {isSidebarExpanded && (
-              <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1">Tools</div>
-            )}
             <SidebarLink
               to={ROUTES.TRANSACTION_LIST.path}
               icon={ROUTES.TRANSACTION_LIST.icon}

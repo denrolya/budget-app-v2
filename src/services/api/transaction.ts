@@ -150,8 +150,8 @@ export const transactionService = {
     return api.post(`/api/transactions/${data.type}`, this.formatData(data));
   },
 
-  updateTransaction(id: string | number, updatedData: z.infer<typeof formSchema>, initialData: Transaction) {
-    return api.put(`/api/transactions/${id}`, this.formatData(updatedData, initialData));
+  updateTransaction(id: string | number, updates: z.infer<typeof formSchema>, originalTransaction: Transaction) {
+    return api.put(`/api/transactions/${id}`, this.formatData(updates, originalTransaction));
   },
 
   deleteTransaction(id: string | number) {

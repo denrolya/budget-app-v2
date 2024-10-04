@@ -7,6 +7,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
+import { useTransactionMutations } from '@/hooks/useTransactionMutations';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
@@ -14,11 +15,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useFinanceData } from '@/contexts/FinanceData';
 import { useForm as useFormContext } from '@/contexts/Form';
 import { useFormLogic } from '@/hooks/useFormLogic';
 import Transaction, { Type as TransactionType } from '@/models/Transaction';
-import { transactionService } from '@/services/api/transaction.ts';
 
 interface TransactionFormProps {
   key: string;
@@ -46,7 +45,7 @@ export const formSchema = z.object({
 });
 
 export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>((_, ref) => {
-  const { refetchAccounts } = useFinanceData();
+  const { createTransaction, updateTransaction } = useTransactionMutations();
   const { submitForm, updateFormState, formState: { values: data } } = useFormContext();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -78,14 +77,11 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     onSubmit: async (values: z.infer<typeof formSchema>) => {
       try {
         if (data?.id) {
-          const response = await transactionService.updateTransaction(data.id, values, data);
-          logger.info(response, 'Transaction Edit');
+          await updateTransaction({ id: data.id, updates: values, originalTransaction: data });
         } else {
-          const response = await transactionService.createTransaction(values);
-          logger.info(response, 'Transaction Create');
+          await createTransaction(values);
         }
 
-        await refetchAccounts();
         submitForm(values);
       } catch (error) {
         console.error('Form submission failed:', error);

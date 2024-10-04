@@ -1,18 +1,17 @@
-import React from 'react';
 import cn from 'classnames';
 import { Eye, User } from 'lucide-react';
+import React from 'react';
 
-import { Skeleton } from '@/components/ui/skeleton';
 import TransactionValue from '@/components/common/TransactionValue';
 import AccountBadge from '@/components/features/accounts/Badge';
 import Details from '@/components/features/transactions/Details';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
+import { Skeleton } from '@/components/ui/skeleton';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
-import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import Transaction from '@/models/Transaction';
 
 interface TransactionItemProps {
@@ -21,8 +20,6 @@ interface TransactionItemProps {
 }
 
 export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBorder = false }) => {
-  const { openForm } = useFormContext();
-
   const truncateNote = (note: string, maxLength: number) => {
     if (note.length <= maxLength) return note;
     return `${note.substring(0, maxLength)}...`;
@@ -62,19 +59,19 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
                 {transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
               </span>
               <div className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                <Dialog>
-                  <DialogTrigger className="m-0" asChild>
+                <Sheet>
+                  <SheetTrigger className="m-0" asChild>
                     <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                       <Eye className="h-4 w-4" />
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
-                    <DialogHeader>
-                      <DialogTitle>Transaction Details</DialogTitle>
-                    </DialogHeader>
-                    <Details transaction={transaction} onEdit={() => openForm(FormType.Transaction, transaction)} />
-                  </DialogContent>
-                </Dialog>
+                  </SheetTrigger>
+                  <SheetContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
+                    <SheetHeader>
+                      <SheetTitle>Transaction Details</SheetTitle>
+                    </SheetHeader>
+                    <Details transaction={transaction} />
+                  </SheetContent>
+                </Sheet>
               </div>
             </div>
           </div>

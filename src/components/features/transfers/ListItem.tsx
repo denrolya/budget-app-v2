@@ -7,7 +7,7 @@ import TransferDetails from '@/components/features/transfers/Details';
 import FeeIndicator from '@/components/features/transfers/ListItemFeeIndicator';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import Transfer from '@/models/Transfer';
@@ -46,19 +46,19 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
             {transfer.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
           </span>
           <div className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-            <Dialog>
-              <DialogTrigger className="m-0" asChild>
+            <Sheet>
+              <SheetTrigger className="m-0" asChild>
                 <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                   <Eye className="h-4 w-4" />
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
-                <DialogHeader>
-                  <DialogTitle>Transfer Details</DialogTitle>
-                </DialogHeader>
+              </SheetTrigger>
+              <SheetContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
+                <SheetHeader>
+                  <SheetTitle>Transfer Details</SheetTitle>
+                </SheetHeader>
                 <TransferDetails transfer={transfer} />
-              </DialogContent>
-            </Dialog>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
