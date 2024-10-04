@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -9,13 +8,13 @@ import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutT
 import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
 import { Button } from '@/components/ui/button';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { Separator } from '@/components/ui/separator';
+import { Separator } from '@/components/ui/separator.tsx';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 
 export const DailyLedgerPage = () => {
   const [currentDate, setCurrentDate] = useState(moment().startOf('day'));
   const [isMobile, setIsMobile] = useState(false);
-  const daysPerPage = isMobile ? 1 : 5;
+  const daysPerPage = isMobile ? 2 : 5;
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -28,7 +27,7 @@ export const DailyLedgerPage = () => {
     const startDate = currentDate.clone().subtract(daysPerPage - 1, 'days');
     const endDate = currentDate.clone();
     return { startDate, endDate };
-  }, [currentDate, daysPerPage]);
+  }, [currentDate]);
 
   const {
     groupedItems,
@@ -48,11 +47,11 @@ export const DailyLedgerPage = () => {
 
   const goToNextPage = useCallback(() => {
     setCurrentDate(prev => prev.clone().add(daysPerPage, 'days'));
-  }, [daysPerPage]);
+  }, []);
 
   const goToPreviousPage = useCallback(() => {
     setCurrentDate(prev => prev.clone().subtract(daysPerPage, 'days'));
-  }, [daysPerPage]);
+  }, []);
 
   useHotkeys('arrowleft', goToPreviousPage);
   useHotkeys('arrowright', goToNextPage);
@@ -61,13 +60,11 @@ export const DailyLedgerPage = () => {
     onSwipedLeft: goToNextPage,
     onSwipedRight: goToPreviousPage,
     preventDefaultTouchmoveEvent: true,
-    trackMouse: true
+    trackMouse: true,
   });
 
   const formatDateRange = (startDate: moment.Moment, endDate: moment.Moment) => {
-    if (isMobile) {
-      return startDate.format('MMMM D, YYYY');
-    } else if (startDate.isSame(endDate, 'month')) {
+    if (startDate.isSame(endDate, 'month')) {
       return `${startDate.format('MMM D')}-${endDate.format('D, YYYY')}`;
     } else if (startDate.isSame(endDate, 'year')) {
       return `${startDate.format('MMM D')} - ${endDate.format('MMM D, YYYY')}`;
@@ -78,48 +75,14 @@ export const DailyLedgerPage = () => {
 
   const dates = useMemo(() => Array.from({ length: daysPerPage }, (_, i) => moment(currentDate).subtract(i, 'days')), [currentDate, daysPerPage]);
 
-  const pageVariants = {
-    enter: (direction: number) => ({
-        x: direction > 0 ? 1000 : -1000,
-        opacity: 0
-      }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1
-    },
-    exit: (direction: number) => ({
-        zIndex: 0,
-        x: direction < 0 ? 1000 : -1000,
-        opacity: 0
-      })
-  };
-
-  const pageTransition = {
-    type: 'tween',
-    ease: 'anticipate',
-    duration: 0.5
-  };
-
-  const [direction, setDirection] = useState(0);
-
-  const handlePageChange = useCallback((newDirection: number) => {
-    setDirection(newDirection);
-    if (newDirection > 0) {
-      goToNextPage();
-    } else {
-      goToPreviousPage();
-    }
-  }, [goToNextPage, goToPreviousPage]);
-
   return (
     <section className="w-full mx-auto p-4 pb-16" {...swipeHandlers}>
       <h1 className="hidden sm:block text-2xl font-bold mb-4">Daily Ledger</h1>
 
       <div className="flex justify-between items-center mb-4">
-        <Button onClick={() => handlePageChange(-1)} disabled={isLoading} size="sm" variant="ghost">
+        <Button onClick={goToPreviousPage} disabled={isLoading} size="sm" variant="ghost">
           <ChevronLeft className="mr-2 h-4 w-4" />
-          <span className="hidden md:inline"> Previous</span>
+          <span className="hidden sm:inline"> Previous</span>
         </Button>
         <ResponsiveTooltip
           openDelay={1}
@@ -134,8 +97,8 @@ export const DailyLedgerPage = () => {
         >
           <span className="text-lg font-medium">{formatDateRange(dateRange.startDate, dateRange.endDate)}</span>
         </ResponsiveTooltip>
-        <Button onClick={() => handlePageChange(1)} disabled={isLoading} size="sm" variant="ghost">
-          <span className="hidden md:inline">Next </span>
+        <Button onClick={goToNextPage} disabled={isLoading} size="sm" variant="ghost">
+          <span className="hidden sm:inline">Next </span>
           <ChevronRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
@@ -147,36 +110,29 @@ export const DailyLedgerPage = () => {
         </div>
       )}
 
-      <AnimatePresence initial={false} custom={direction}>
-        <motion.div
-          key={currentDate.format('YYYY-MM-DD')}
-          custom={direction}
-          variants={pageVariants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={pageTransition}
-          className="flex flex-col md:flex-row-reverse md:-mx-2 mb-6"
-        >
-          {dates.map((date, index) => (
-            <React.Fragment key={date.format('YYYY-MM-DD')}>
-              <div className={`w-full ${isMobile ? '' : 'md:w-1/5'} md:px-2`}>
-                {isLoading ? (
-                  <DateCardSkeleton index={index} totalDays={dates.length} />
-                ) : (
-                  <DateCard
-                    date={date}
-                    items={groupedItems[date.format('YYYY-MM-DD')] || []}
-                    index={index}
-                    totalDays={dates.length}
-                  />
-                )}
-              </div>
-              {!isMobile && index < dates.length - 1 && <Separator className="md:hidden my-6" />}
-            </React.Fragment>
-          ))}
-        </motion.div>
-      </AnimatePresence>
+
+      <div className="flex flex-col md:flex-row-reverse md:-mx-2 mb-6">
+        {dates.map((date, index) => (
+          <React.Fragment key={date.format('YYYY-MM-DD')}>
+            <div
+              className={`w-full ${isMobile ? '' : 'md:w-1/5'} md:px-2`}
+              style={{
+                order: `${daysPerPage - index - 1} sm:${index}`,
+              }}>
+              {isLoading ? (
+                <DateCardSkeleton index={index} totalDays={dates.length} />
+              ) : (
+                <DateCard
+                  date={date}
+                  items={groupedItems[date.format('YYYY-MM-DD')] || []}
+                  index={index}
+                  totalDays={dates.length}
+                />
+              )}
+            </div>
+          </React.Fragment>
+        ))}
+      </div>
     </section>
   );
 };
