@@ -1,3 +1,7 @@
+import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime.ts';
+import { Bitcoin, DollarSign, Edit, Euro, InfoIcon, Loader2, Trash2 } from 'lucide-react';
+import React from 'react';
+
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import TransactionValue from '@/components/common/TransactionValue';
@@ -13,8 +17,6 @@ import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactionMutations } from '@/hooks/useTransactionMutations';
 import Transaction from '@/models/Transaction';
 import { confirm } from '@/utils/confirmation';
-import { Bitcoin, DollarSign, Edit, Euro, InfoIcon, Loader2, Trash2 } from 'lucide-react';
-import React from 'react';
 
 interface TransactionDetailsProps {
   transaction: Transaction;
@@ -28,14 +30,15 @@ const RateDisplay: React.FC<{
   from: CURRENCY_CODE;
   to: CURRENCY_CODE;
   amount: number;
-  decimals: number
+  decimals: number;
 }> = ({ value, source, from, to, amount, decimals }) => (
-  <div className="flex items-center space-x-2 text-sm">
+  <div className="flex items-center space-x-2 text-xs font-mono">
     <MoneyValue useColors={false} amount={amount} currency={from} />
     <span className="text-muted-foreground">=</span>
     <div className="flex-1 flex items-start">
       <MoneyValue
         useColors={false}
+        className="font-mono"
         amount={amount * value}
         currency={to}
         maximumFractionDigits={decimals} />
@@ -69,7 +72,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
       quoteCurrencySymbol = CURRENCIES[CURRENCY_CODE.USD].symbol;
       const rateBTCtoUSD = currentRates[CURRENCY_CODE.USD] / currentRates[CURRENCY_CODE.BTC];
       rate = rateBTCtoUSD;
-      return `1 ${baseCurrencySymbol} = ${quoteCurrencySymbol}${rate.toFixed(2)}`;
+      return `1 ${baseCurrencySymbol} = ${quoteCurrencySymbol}${rate.toFixed(8)}`;
     } else if (transactionCurrency.code === CURRENCY_CODE.EUR || transactionCurrency.code === CURRENCY_CODE.USD) {
       baseCurrencySymbol = transactionCurrency.symbol;
       quoteCurrencySymbol = CURRENCIES[targetCurrency].symbol;
@@ -180,24 +183,38 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
           <>
             <Separator />
             <div className="grid gap-2">
-              <h3 className="font-semibold">Converted Values</h3>
+              <h3 className="font-semibold">Converted Values (At Time of Transaction)</h3>
               <div className="space-y-2">
                 {currencyOrder.map((currency) => {
                   const value = transaction.convertedValues[currency];
                   if (value === undefined) return null;
                   const exchangeRate = formatExchangeRate(value, currency);
                   if (!exchangeRate) return null;
+                  const isBTC = currency === CURRENCY_CODE.BTC;
 
                   return (
-                    <>
-                      <ResponsiveTooltip
-                        openDelay={0}
-                        desktopComponent="hovercard"
-                        key={`transaction-${transaction.id}-converted-values-${currency}`}
-                        content={
-                          <div className="space-y-2">
-                            <h4 className="font-semibold">Current {currency} Rates</h4>
-                            <p className="text-sm text-muted-foreground">{exchangeRate}</p>
+                    <ResponsiveTooltip
+                      openDelay={0}
+                      desktopComponent="hovercard"
+                      key={`transaction-${transaction.id}-converted-values-${currency}`}
+                      content={
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className="font-semibold">Historical Rate</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {transaction.executedAt.format('DD-MM-YYYY')}
+                            </p>
+                            <RateDisplay
+                              value={value / transaction.amount}
+                              source="hist"
+                              from={transaction.account.currency}
+                              to={currency}
+                              amount={transaction.amount}
+                              decimals={isBTC ? 8 : 2}
+                            />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">Current Rates</h4>
                             <div className="space-y-1">
                               <RateDisplay
                                 value={currentRates[currency] / currentRates[transaction.account.currency]}
@@ -205,7 +222,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
                                 from={transaction.account.currency}
                                 to={currency}
                                 amount={transaction.amount}
-                                decimals={2}
+                                decimals={isBTC ? 8 : 2}
                               />
                               <RateDisplay
                                 value={monobankRates[currency] / monobankRates[transaction.account.currency]}
@@ -213,23 +230,26 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
                                 from={transaction.account.currency}
                                 to={currency}
                                 amount={transaction.amount}
-                                decimals={2}
+                                decimals={isBTC ? 8 : 2}
                               />
                             </div>
                           </div>
-                        }>
-                        <div className="flex justify-between items-center cursor-help">
-                          <span className="flex items-center space-x-2">
-                            <CurrencyIcon currency={currency} />
-                            <span>{currency}</span>
-                          </span>
-                          <MoneyValue useColors={false}
-                                      className="font-medium text-sm"
-                                      amount={value}
-                                      currency={currency} />
                         </div>
-                      </ResponsiveTooltip>
-                    </>
+                      }>
+                      <div className="flex justify-between items-center cursor-help">
+                        <span className="flex items-center space-x-2">
+                          <CurrencyIcon currency={currency} />
+                          <span>{currency}</span>
+                        </span>
+                        <MoneyValue
+                          useColors={false}
+                          className="font-medium font-mono"
+                          amount={value}
+                          currency={currency}
+                          maximumFractionDigits={isBTC ? 8 : 2}
+                        />
+                      </div>
+                    </ResponsiveTooltip>
                   );
                 })}
               </div>
