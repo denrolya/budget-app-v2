@@ -1,6 +1,7 @@
 import { Moment } from 'moment';
 import React, { memo, useMemo } from 'react';
 
+import { generateSlug } from '@/utils/generateSlug.ts';
 import MoneyValue from '@/components/common/MoneyValue';
 import MenuButton from '@/components/features/statistics/FinancialCardMenuButton';
 import PercentageBadge from '@/components/features/statistics/StatisticsCard/PercentageBadge';
@@ -10,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Interval } from '@/constants/dashboard-config';
-import { CardConfig, useValueByPeriod } from '@/hooks/useValueByPeriodStatistics';
+import { CardConfig, useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
 import { Type as TransactionType } from '@/models/Transaction';
 
 interface Props extends CardConfig {
@@ -61,7 +62,6 @@ const TooltipContent: React.FC<{ label: string; date: Moment | undefined; amount
 );
 
 export const StatisticsCard: React.FC<Props> = memo(({
-                                                       id,
                                                        title,
                                                        type,
                                                        categories,
@@ -83,7 +83,6 @@ export const StatisticsCard: React.FC<Props> = memo(({
     maxDate,
   } = useValueByPeriod({
     config: {
-      id,
       title,
       type,
       categories,
@@ -95,6 +94,9 @@ export const StatisticsCard: React.FC<Props> = memo(({
     after,
     before,
   });
+
+  const id = useMemo(() => generateSlug([title, type, statType, comparison]), [title, type, statType, comparison]);
+  console.log({ id });
 
   const cardTitle = useMemo(() =>
       title || (categories?.length ? categories.join(', ') : (type === TransactionType.Income ? 'Income' : 'Expenses')),

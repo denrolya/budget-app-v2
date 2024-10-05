@@ -1,7 +1,8 @@
 import { Loader2 } from 'lucide-react';
-import React, { forwardRef, useEffect, useRef, useState } from 'react';
+import React, { forwardRef, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
+import { useScreenSize } from '@/hooks/useScreenSize';
 import { AccountForm } from '@/components/features/accounts/Form';
 import TransactionForm from '@/components/features/transactions/Form';
 import { TransferForm } from '@/components/features/transfers/Form';
@@ -41,23 +42,6 @@ const FormContent = forwardRef<{ submitForm: () => Promise<void> }, FormContentP
     <FormComponent ref={ref} key={key} />
   );
 });
-
-const useScreenSize = () => {
-  const [isDesktop, setIsDesktop] = useState(true);
-
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsDesktop(window.innerWidth >= 768); // Adjust this breakpoint as needed
-    };
-
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-
-  return isDesktop;
-};
 
 export const FormRenderer: React.FC = () => {
   const { formState, submitForm, closeForm, resetForm, updateFormState } = useFormContext();

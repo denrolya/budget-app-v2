@@ -14,12 +14,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize.ts';
-import { TransactionFilters } from '@/models/TransactionFilters';
+import { TransferFilters } from '@/models/TransferFilters';
 
 interface ListFiltersProps {
-  data: TransactionFilters;
+  data: TransferFilters;
   className?: string;
-  onChange: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K]) => void;
+  onChange: <K extends keyof TransferFilters>(key: K, value: TransferFilters[K]) => void;
 }
 
 const datePresets = [
@@ -53,40 +53,6 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange }) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant={data.withNestedCategories ? 'secondary' : 'outline'}
-              size="icon"
-              className="h-9 w-9"
-              onClick={() => onChange('withNestedCategories', !data.withNestedCategories)}
-            >
-              <Layers className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Toggle nested categories view</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant={data.isDraft ? 'secondary' : 'outline'}
-              size="icon"
-              className="h-9 w-9"
-              onClick={() => onChange('isDraft', !data.isDraft)}
-            >
-              <FileText className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Show draft transactions</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-
       <div className="space-y-2">
         <Label htmlFor="date-range">Date Range</Label>
         <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
@@ -138,17 +104,6 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange }) => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="categories">Categories</Label>
-        <CategoryTypeahead
-          id="categories"
-          multiple
-          value={data.categories}
-          onChange={(categories) => onChange('categories', categories)}
-          className="h-9 w-full"
-        />
-      </div>
-
-      <div className="space-y-2">
         <Label htmlFor="accounts">Accounts</Label>
         <AccountTypeahead
           id="accounts"
@@ -192,7 +147,7 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const isDesktop = useScreenSize();
 
-  const handleChange = useCallback(<K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K]) => {
+  const handleChange = useCallback(<K extends keyof TransferFilters>(key: K, value: TransferFilters[K]) => {
     onChange(key, value);
     // Do not close the sheet/drawer when filters change
   }, [onChange]);

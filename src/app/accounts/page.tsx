@@ -1,8 +1,9 @@
 import cn from 'classnames';
 import sumBy from 'lodash/sumBy';
 import { Archive, Calendar, Search } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
+import { useScreenSize } from '@/hooks/useScreenSize.ts';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay.tsx';
 import AccountAvatar from '@/components/features/accounts/Avatar';
@@ -18,17 +19,10 @@ export const AccountsManagementPage: React.FC = () => {
   const baseCurrency = useBaseCurrency();
   const accounts = useAccountsWithDefaultOrder();
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
-  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const isDesktop = useScreenSize();
   const [showArchived, setShowArchived] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const selectedAccountRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const handleAccountSelect = useCallback((account: Account) => {
     setSelectedAccount(account);
@@ -129,14 +123,14 @@ export const AccountsManagementPage: React.FC = () => {
 
   return (
     <div className="flex h-screen md:h-[calc(100vh-2rem)] overflow-hidden pb-16 md:pb-0">
-      {!isMobile && (
+      {isDesktop && (
         <div className="w-80 border-r bg-background">
           <AccountList />
         </div>
       )}
 
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        {isMobile ? (
+        {!isDesktop ? (
           selectedAccount ? <AccountDetails account={selectedAccount} setSelectedAccount={setSelectedAccount} /> :
             <AccountList />
         ) : (

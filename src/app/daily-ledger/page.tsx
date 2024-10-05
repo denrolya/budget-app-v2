@@ -4,24 +4,17 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSwipeable } from 'react-swipeable';
 
+import { useScreenSize } from '@/hooks/useScreenSize';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
 import { Button } from '@/components/ui/button';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { Separator } from '@/components/ui/separator.tsx';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 
 export const DailyLedgerPage = () => {
   const [currentDate, setCurrentDate] = useState(moment().startOf('day'));
-  const [isMobile, setIsMobile] = useState(false);
-  const daysPerPage = isMobile ? 2 : 5;
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const isDesktop = useScreenSize();
+  const daysPerPage = isDesktop ? 5 : 2;
 
   const dateRange = useMemo(() => {
     const startDate = currentDate.clone().subtract(daysPerPage - 1, 'days');
@@ -115,7 +108,7 @@ export const DailyLedgerPage = () => {
         {dates.map((date, index) => (
           <React.Fragment key={date.format('YYYY-MM-DD')}>
             <div
-              className={`w-full ${isMobile ? '' : 'md:w-1/5'} md:px-2`}
+              className={`w-full ${isDesktop ? 'md:w-1/5' : ''} md:px-2`}
               style={{
                 order: `${daysPerPage - index - 1} sm:${index}`,
               }}>

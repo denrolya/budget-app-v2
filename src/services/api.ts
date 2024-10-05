@@ -12,10 +12,7 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-export const axiosFetcher = (url: string) => {
-  console.debug('Fetching', url);
-  return api.get(url).then(res => res.data);
-};
+export const axiosFetcher = (url: string) => api.get(url).then(res => res.data);
 
 export {
   api

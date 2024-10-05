@@ -57,11 +57,6 @@ export const TransactionsList: React.FC = () => {
 
   return (
     <section className="container p-4 mx-auto pb-20 md:pb-4">
-      <div className="flex flex-row items-center">
-        <h1 className="hidden md:block text-2xl font-bold">Transactions List</h1>
-        <ListFilters data={filters} onChange={setFilter} />
-      </div>
-
       <div className="flex-grow overflow-hidden flex flex-col mb-6">
         {isError && (
           <Alert variant="destructive">
@@ -92,6 +87,8 @@ export const TransactionsList: React.FC = () => {
               <EmptyTransactionState onRefresh={refetch} onAddTransaction={() => openForm(FormType.Transaction)} />}
           </>
         )}
+
+        <ListFilters data={filters} onChange={setFilter} />
 
         {(isFetching && !isLoading) && (
           <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded">

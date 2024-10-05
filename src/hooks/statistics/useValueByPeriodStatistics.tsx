@@ -1,40 +1,59 @@
 import { useQuery } from '@tanstack/react-query';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import qs from 'qs';
 
 import { useCategories } from '@/contexts/FinanceData';
 import { Interval } from '@/constants/dashboard-config';
 import { axiosFetcher } from '@/services/api';
+import { Type as TransactionType } from '@/models/Transaction';
 
 export type PeriodUnit = 'day' | 'week' | 'month' | 'quarter' | 'year';
 
+export enum StatisticsType {
+  Sum = 'sum',
+  Daily = 'daily',
+  Avg ='avg',
+  MinMax = 'min-max',
+}
+
+export enum ComparisonType {
+  Previous = 'previous',
+  SameLastYear = 'same-last-year',
+}
+
 export interface CardConfig {
-  id: string;
   title: string;
-  type: 'income' | 'expense';
+  type: TransactionType;
   categories?: string[];
   interval: Interval;
   period?: Interval;
-  comparison: 'previous' | 'same-last-year';
-  statType: 'sum' | 'daily' | 'avg' | 'min-max';
+  comparison: ComparisonType;
+  statType: StatisticsType;
 }
 
 interface ValueByPeriodParams {
   config: CardConfig;
-  after?: moment.Moment;
-  before?: moment.Moment;
+  after?: Moment;
+  before?: Moment;
 }
 
-interface StatValue {
+interface StatisticsResponseEntry {
+  expense: number;
+  income: number;
+  after: number;
+  before: number;
+}
+
+interface StatisticsFormattedEntry {
   min: number;
   max: number;
-  minDate?: moment.Moment;
-  maxDate?: moment.Moment;
+  minDate?: Moment;
+  maxDate?: Moment;
 }
 
-type StatResult = number | StatValue;
+type StatisticsData = number | StatisticsFormattedEntry;
 
-const getDateRange = (interval: Interval, after?: moment.Moment, before?: moment.Moment): [moment.Moment, moment.Moment] => {
+const getDateRange = (interval: Interval, after?: Moment, before?: Moment): [Moment, Moment] => {
   const { value, unit } = interval;
   const end = before || moment().endOf(unit);
   const start = after || end.clone().subtract(value - 1, unit).startOf(unit);
@@ -42,27 +61,27 @@ const getDateRange = (interval: Interval, after?: moment.Moment, before?: moment
 };
 
 const calculateStatValue = (
-  data: { expense: number; income: number; after: moment.Moment; before: moment.Moment }[],
+  data: { expense: number; income: number; after: Moment; before: Moment }[],
   type: 'income' | 'expense',
   statType: CardConfig['statType'],
   isCurrentPeriod: boolean
-): StatResult => {
+): StatisticsData => {
   if (!data || data.length === 0) {
-    return statType === 'min-max' ? { min: 0, max: 0 } : 0;
+    return statType === StatisticsType.MinMax ? { min: 0, max: 0 } : 0;
   }
 
   const values = data.map(item => (type === 'expense' ? item.expense : item.income));
   const nonZeroValues = values.filter(v => v > 0);
 
   switch (statType) {
-    case 'sum':
+    case StatisticsType.Sum:
       return values.reduce((a, b) => a + b, 0);
-    case 'daily':
+    case StatisticsType.Daily:
       const days = moment(data[data.length - 1].before).diff(moment(data[0].after), 'days') + 1;
       return values.reduce((a, b) => a + b, 0) / days;
-    case 'avg':
+    case StatisticsType.Avg:
       return nonZeroValues.length > 0 ? nonZeroValues.reduce((a, b) => a + b, 0) / nonZeroValues.length : 0;
-    case 'min-max':
+    case StatisticsType.MinMax:
       if (isCurrentPeriod && nonZeroValues.length === 0) {
         return { min: 0, max: 0 };
       }
@@ -100,17 +119,17 @@ export const useValueByPeriod = (params: ValueByPeriodParams) => {
     categories: categoryIds,
   }, { arrayFormat: 'brackets' });
 
-  const { data: currentData, isLoading: isLoadingCurrent, error: errorCurrent } = useQuery({
+  const { data: currentData, isLoading: isLoadingCurrent, error: errorCurrent } = useQuery<StatisticsResponseEntry[], Error, StatisticsFormattedEntry[]>({
     queryKey: ['valueByPeriod', { periodStart, periodEnd, interval: period || interval, type, categories }],
     queryFn: () => axiosFetcher(`/api/v2/statistics/value-by-period?${queryParams}`),
-    select: (data) => data.map((item: any) => ({
+    select: (data: StatisticsResponseEntry[]): StatisticsFormattedEntry[] => data.map((item: StatisticsResponseEntry) => ({
       ...item,
       after: moment.unix(item.after),
       before: moment.unix(item.before),
     })),
   });
 
-  const [comparisonStart, comparisonEnd] = comparison === 'previous'
+  const [comparisonStart, comparisonEnd] = comparison === ComparisonType.Previous
     ? [periodStart.clone().subtract(interval.value, interval.unit), periodEnd.clone().subtract(interval.value, interval.unit)]
     : [periodStart.clone().subtract(1, 'year'), periodEnd.clone().subtract(1, 'year')];
 
@@ -122,10 +141,10 @@ export const useValueByPeriod = (params: ValueByPeriodParams) => {
     categories: categoryIds,
   }, { arrayFormat: 'brackets' });
 
-  const { data: comparisonData, isLoading: isLoadingComparison, error: errorComparison } = useQuery({
+  const { data: comparisonData, isLoading: isLoadingComparison, error: errorComparison } = useQuery<StatisticsResponseEntry[], Error, StatisticsFormattedEntry[]>({
     queryKey: ['valueByPeriod', { comparisonStart, comparisonEnd, interval: period || interval, type, categories }],
     queryFn: () => axiosFetcher(`/api/v2/statistics/value-by-period?${comparisonQueryParams}`),
-    select: (data) => data.map((item: any) => ({
+    select: (data: StatisticsResponseEntry[]): StatisticsFormattedEntry[] => data.map((item: StatisticsResponseEntry) => ({
       ...item,
       after: moment.unix(item.after),
       before: moment.unix(item.before),

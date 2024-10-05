@@ -106,13 +106,16 @@ export const transactionService = {
   addQueryParam(query: URLSearchParams, key: string, value: unknown): void {
     if (value == null || (Array.isArray(value) && value.length === 0)) return;
 
-    if (Array.isArray(value)) {
+    if (key === 'amountRange') {
+      query.set('amount[gte]', value[0]);
+      query.set('amount[lte]', value[1]);
+    } else if (Array.isArray(value)) {
       value.forEach((item) => query.append(`${key}[]`, String(item)));
     } else if (typeof value === 'boolean') {
       query.set(key, value ? '1' : '0');
     } else if (moment.isMoment(value)) {
       query.set(key, value.format(BACKEND_DATE_FORMAT));
-    } else {
+    } else  {
       query.set(key, String(value));
     }
   },
