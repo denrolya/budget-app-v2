@@ -72,12 +72,7 @@ export const transferService = {
       if (value == null || (Array.isArray(value) && value.length === 0)) return;
 
       if (Array.isArray(value)) {
-        if (key === 'accounts') {
-          value.forEach((item: string | number) => query.append('from.id[]', String(item)));
-          value.forEach((item: string | number) => query.append('to.id[]', String(item)));
-        } else {
-          value.forEach((item) => query.append(`${key}[]`, String(item)));
-        }
+        value.forEach((item) => query.append(`${key}[]`, String(item)));
       } else if (typeof value === 'boolean') {
         query.set(key, value ? '1' : '0');
       } else if (moment.isMoment(value)) {
