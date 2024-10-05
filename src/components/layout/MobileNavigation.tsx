@@ -1,5 +1,7 @@
+import cn from 'classnames';
 import { motion } from 'framer-motion';
 import {
+  Airplay,
   ArrowLeftRight,
   CreditCard,
   DollarSign,
@@ -14,19 +16,19 @@ import {
   Receipt,
   Sun,
 } from 'lucide-react';
-import cn from 'classnames';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
+import { ROUTES } from '@/constants/routes.ts';
 import ExchangeRatesPresets from '@/components/common/ExchangeRatesPresets';
+import DraftTransactionForm from '@/components/features/transactions/DraftForm';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useForm, FormType } from '@/contexts/Form';
+import { useForm } from '@/contexts/Form';
 import { useTheme } from '@/contexts/theme';
-import DraftTransactionForm from '@/components/features/transactions/DraftForm';
 
 interface Props {
   className?: string;
@@ -34,7 +36,6 @@ interface Props {
 
 export const MobileNavigation: React.FC<Props> = ({ className }) => {
   const { theme, setTheme } = useTheme();
-  const { openForm } = useForm();
   const [currency, setCurrency] = useState('USD');
   const location = useLocation();
 
@@ -110,6 +111,12 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                             <Link to="/transfers">
                               <ArrowLeftRight className="mr-2 h-4 w-4" />
                               Transfers
+                            </Link>
+                          </Button>
+                          <Button variant="ghost" className="w-full justify-start" asChild>
+                            <Link to={ROUTES.TESTING_PAGE.path}>
+                              <Airplay className="mr-2 h-4 w-4" />
+                              Categories
                             </Link>
                           </Button>
                           <Button variant="ghost" className="w-full justify-start" asChild>

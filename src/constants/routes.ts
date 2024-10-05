@@ -1,4 +1,4 @@
-import { ArrowLeftRight, LayoutDashboard, Handshake, CalendarDays, Receipt, Wallet } from 'lucide-react';
+import { ArrowLeftRight, LayoutDashboard, Handshake, CalendarDays, Receipt, Wallet, Airplay } from 'lucide-react';
 
 export const ROUTES = {
   DASHBOARD: {
@@ -24,5 +24,9 @@ export const ROUTES = {
   TRANSFER_LIST: {
     path: '/transfers',
     icon: ArrowLeftRight
+  },
+  TESTING_PAGE: {
+    path: '/testing',
+    icon: Airplay
   }
 };

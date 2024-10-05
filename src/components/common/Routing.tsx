@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
+import TestingPage from '@/app/testing-page/page.tsx';
 import { AccountsManagementPage } from '@/app/accounts/page';
 import LoginPage from '@/app/login/page';
 import TransactionsListPage from '@/app/transactions/page';
@@ -54,6 +55,12 @@ const ProtectedContent: React.FC = () => {
             <DebtsPage />
           </PrivateRoute>
         } />
+        <Route path="testing" element={
+          <PrivateRoute>
+            <TestingPage />
+          </PrivateRoute>
+        } />
+        <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </LayoutV9>
   );

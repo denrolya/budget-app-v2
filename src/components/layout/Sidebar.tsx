@@ -1,3 +1,9 @@
+import cn from 'classnames';
+import groupBy from 'lodash/groupBy';
+import sumBy from 'lodash/sumBy';
+import { Plus } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountLink from '@/components/layout/SidebarAccountLink';
 import SidebarLink from '@/components/layout/SidebarLink';
@@ -10,11 +16,6 @@ import { useActiveAccountsWithDefaultOrder, useDebts } from '@/contexts/FinanceD
 import { FormType, useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
 import { ACCOUNT_TYPES_ORDER, AccountType } from '@/models/Account';
-import cn from 'classnames';
-import groupBy from 'lodash/groupBy';
-import sumBy from 'lodash/sumBy';
-import { Plus } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
 
 export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
@@ -138,6 +139,12 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
               icon={ROUTES.DEBT_LIST.icon}
               isSidebarExpanded={isSidebarExpanded}>
               Debts
+            </SidebarLink>
+            <SidebarLink
+              to={ROUTES.TESTING_PAGE.path}
+              icon={ROUTES.TESTING_PAGE.icon}
+              isSidebarExpanded={isSidebarExpanded}>
+              Tests
             </SidebarLink>
           </div>
         </div>
