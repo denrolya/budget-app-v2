@@ -1,9 +1,8 @@
-import { CalendarIcon, FileText, FilterIcon, Layers } from 'lucide-react';
+import { CalendarIcon, FilterIcon } from 'lucide-react';
 import moment from 'moment';
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import AccountTypeahead from '@/components/common/AccountTypeahead';
-import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
@@ -11,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize.ts';
 import { TransferFilters } from '@/models/TransferFilters';
@@ -169,7 +167,8 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
           <FilterIcon className="h-6 w-6" />
         </Button>
       </FilterTrigger>
-      <FilterContent side={isDesktop ? 'right' : undefined} className={isDesktop ? 'w-[400px] sm:w-[540px]' : undefined}>
+      <FilterContent side={isDesktop ? 'right' : undefined}
+                     className={isDesktop ? 'w-[400px] sm:w-[540px]' : undefined}>
         <FilterHeader>
           <FilterTitle>Transaction Filters</FilterTitle>
         </FilterHeader>

@@ -96,7 +96,6 @@ export const StatisticsCard: React.FC<Props> = memo(({
   });
 
   const id = useMemo(() => generateSlug([title, type, statType, comparison]), [title, type, statType, comparison]);
-  console.log({ id });
 
   const cardTitle = useMemo(() =>
       title || (categories?.length ? categories.join(', ') : (type === TransactionType.Income ? 'Income' : 'Expenses')),
