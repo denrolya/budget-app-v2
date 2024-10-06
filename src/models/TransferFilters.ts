@@ -22,7 +22,7 @@ export class TransferFilters implements FilterModel {
                 searchTerm = '',
                 before = moment(),
                 after = moment().subtract(30, 'days'),
-                amountRange = [0, 10000],
+                amountRange = [],
                 accounts = [],
               }: TransferFiltersProps = {}) {
     this.searchTerm = searchTerm;

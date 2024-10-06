@@ -41,6 +41,7 @@ export const TransactionsList: React.FC = () => {
     pagination: { currentPage, totalPages, perPage, setCurrentPage },
     filters,
     setFilter,
+    resetFilters,
     isFetching,
   } = useTransactions();
 
@@ -88,7 +89,7 @@ export const TransactionsList: React.FC = () => {
           </>
         )}
 
-        <ListFilters data={filters} onChange={setFilter} />
+        <ListFilters data={filters} onChange={setFilter} onReset={resetFilters} />
 
         {(isFetching && !isLoading) && (
           <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded">

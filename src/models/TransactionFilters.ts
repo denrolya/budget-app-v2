@@ -6,7 +6,6 @@ interface TransactionFiltersProps {
   searchTerm?: string;
   before?: Moment;
   after?: Moment;
-  status?: string;
   amountRange?: number[];
   categories?: string[] | number[];
   excludedCategories?: string[] | number[];
@@ -19,7 +18,6 @@ export class TransactionFilters implements FilterModel {
   searchTerm: string;
   before: Moment;
   after: Moment;
-  status: string;
   amountRange: number[];
   categories: number[] | string[];
   excludedCategories: number[] | string[];
@@ -31,8 +29,7 @@ export class TransactionFilters implements FilterModel {
                 searchTerm = '',
                 before = moment(),
                 after = moment().subtract(30, 'days'),
-                status = '',
-                amountRange = [0, 10000],
+                amountRange = [],
                 categories = [],
                 excludedCategories = [],
                 accounts = [],
@@ -42,7 +39,6 @@ export class TransactionFilters implements FilterModel {
     this.searchTerm = searchTerm;
     this.before = before;
     this.after = after;
-    this.status = status;
     this.amountRange = amountRange;
     this.categories = categories;
     this.excludedCategories = excludedCategories;

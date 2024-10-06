@@ -107,8 +107,8 @@ export const transactionService = {
     if (value == null || (Array.isArray(value) && value.length === 0)) return;
 
     if (key === 'amountRange') {
-      query.set('amount[gte]', value[0]);
-      query.set('amount[lte]', value[1]);
+      if (!isNaN(value[0])) query.set('amount[gte]', value[0]);
+      if (!isNaN(value[1])) query.set('amount[lte]', value[1]);
     } else if (Array.isArray(value)) {
       value.forEach((item) => query.append(`${key}[]`, String(item)));
     } else if (typeof value === 'boolean') {

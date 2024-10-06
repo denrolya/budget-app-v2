@@ -27,6 +27,7 @@ export const useTransactionsAndTransfers = ({
     error: errorTransactions,
     setFilter: setTransactionFilter,
   } = useTransactions({
+    initialPerPage: 99999,
     initialFilters: initialTransactionFilters,
     updateUrl,
     excludeTransfers,
@@ -39,6 +40,7 @@ export const useTransactionsAndTransfers = ({
     error: errorTransfers,
     setFilter: setTransferFilter,
   } = useTransfers({
+    initialPerPage: 99999,
     initialFilters: initialTransferFilters,
     updateUrl,
   });

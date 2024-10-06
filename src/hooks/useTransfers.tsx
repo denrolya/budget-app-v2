@@ -38,6 +38,7 @@ export const useTransfers = (options: UseTransfersOptions = {}) => {
     sort,
     setCurrentPage,
     setFilter,
+    resetFilters,
     setSort,
   } = useListState<TransferFilters, Transfer>({
     initialPerPage,
@@ -112,6 +113,7 @@ export const useTransfers = (options: UseTransfersOptions = {}) => {
     },
     filters,
     setFilter,
+    resetFilters,
     sort,
     setSort,
     isFetching,

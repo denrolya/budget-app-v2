@@ -36,7 +36,8 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
     setCurrentPage: (page: number) => void;
   };
   filters: TransactionFilters;
-  setFilter: (key: string, value: any) => void;
+  setFilter: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K]) => void;
+  resetFilters: () => void;
   sort: { field: string; direction: 'asc' | 'desc' };
   setSort: (sort: { field: string; direction: 'asc' | 'desc' }) => void;
   isFetching: boolean;
@@ -56,6 +57,7 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
     sort,
     setCurrentPage,
     setFilter,
+    resetFilters,
     setSort,
   } = useListState<TransactionFilters, Transaction>({
     initialPerPage,
@@ -140,6 +142,7 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
     },
     filters,
     setFilter,
+    resetFilters,
     sort,
     setSort,
     isFetching,

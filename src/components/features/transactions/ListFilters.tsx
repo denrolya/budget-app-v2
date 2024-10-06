@@ -1,9 +1,11 @@
 import { CalendarIcon, FileText, FilterIcon, Layers } from 'lucide-react';
 import moment from 'moment';
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import debounce from 'lodash/debounce';
 
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
@@ -19,7 +21,8 @@ import { TransactionFilters } from '@/models/TransactionFilters';
 interface ListFiltersProps {
   data: TransactionFilters;
   className?: string;
-  onChange: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K]) => void;
+  onChange: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => void;
+  onReset: () => void;
 }
 
 const datePresets = [
@@ -32,24 +35,41 @@ const datePresets = [
   },
 ];
 
-const Content: React.FC<ListFiltersProps> = ({ data, onChange }) => {
+const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
+  const [localAmountRange, setLocalAmountRange] = useState(data.amountRange);
   const isDesktop = useScreenSize();
+
+  const debouncedOnChange = useRef(
+    debounce(<K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => {
+      onChange(key, value);
+    }, 300)
+  ).current;
+
+  useEffect(() => () => {
+      debouncedOnChange.cancel();
+    }, [debouncedOnChange]);
+
+  useEffect(() => {
+    setLocalAmountRange(data.amountRange);
+  }, [data.amountRange]);
+
+  const handleMinAmountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newMin = e.target.value === '' ? undefined : parseInt(e.target.value);
+    setLocalAmountRange(prev => [newMin, prev[1]]);
+    debouncedOnChange('amountRange', [newMin, localAmountRange[1]]);
+  }, [localAmountRange, debouncedOnChange]);
+
+  const handleMaxAmountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newMax = e.target.value === '' ? undefined : parseInt(e.target.value);
+    setLocalAmountRange(prev => [prev[0], newMax]);
+    debouncedOnChange('amountRange', [localAmountRange[0], newMax]);
+  }, [localAmountRange, debouncedOnChange]);
 
   const handleDateRangeChange = useCallback((range: { from: Date | undefined; to: Date | undefined }) => {
     onChange('after', range.from ? moment(range.from) : undefined);
     onChange('before', range.to ? moment(range.to) : undefined);
   }, [onChange]);
-
-  const handleMinAmountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMin = parseInt(e.target.value);
-    onChange('amountRange', [newMin, data.amountRange[1]]);
-  }, [data.amountRange, onChange]);
-
-  const handleMaxAmountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMax = parseInt(e.target.value);
-    onChange('amountRange', [data.amountRange[0], newMax]);
-  }, [data.amountRange, onChange]);
 
   return (
     <div className="space-y-4">
@@ -57,26 +77,10 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange }) => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              variant={data.withNestedCategories ? 'secondary' : 'outline'}
-              size="icon"
-              className="h-9 w-9"
-              onClick={() => onChange('withNestedCategories', !data.withNestedCategories)}
-            >
-              <Layers className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Toggle nested categories view</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
               variant={data.isDraft ? 'secondary' : 'outline'}
               size="icon"
               className="h-9 w-9"
-              onClick={() => onChange('isDraft', !data.isDraft)}
+              onClick={() => debouncedOnChange('isDraft', !data.isDraft)}
             >
               <FileText className="h-4 w-4" />
             </Button>
@@ -138,7 +142,24 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange }) => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="categories">Categories</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="categories">Categories</Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={data.withNestedCategories ? 'secondary' : 'outline'}
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => debouncedOnChange('withNestedCategories', !data.withNestedCategories)}
+              >
+                <Layers className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Toggle nested categories view</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
         <CategoryTypeahead
           id="categories"
           multiple
@@ -168,7 +189,7 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange }) => {
           <Input
             type="number"
             id="min-amount"
-            value={data.amountRange[0]}
+            value={localAmountRange[0] === undefined ? '' : localAmountRange[0]}
             onChange={handleMinAmountChange}
             className="w-full"
             placeholder="Min"
@@ -177,22 +198,26 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange }) => {
           <Input
             type="number"
             id="max-amount"
-            value={data.amountRange[1]}
+            value={localAmountRange[1] === undefined ? '' : localAmountRange[1]}
             onChange={handleMaxAmountChange}
             className="w-full"
             placeholder="Max"
           />
         </div>
       </div>
+
+      <Button onClick={onReset} variant="outline" className="w-full">
+        Reset Filters
+      </Button>
     </div>
   );
 };
 
-export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onChange }) => {
+export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onChange, onReset }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const isDesktop = useScreenSize();
 
-  const handleChange = useCallback(<K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K]) => {
+  const handleChange = useCallback(<K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => {
     onChange(key, value);
     // Do not close the sheet/drawer when filters change
   }, [onChange]);
@@ -203,6 +228,17 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
   const FilterTrigger = isDesktop ? SheetTrigger : DrawerTrigger;
   const FilterContent = isDesktop ? SheetContent : DrawerContent;
 
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (data.after || data.before) count++;
+    if (data.categories.length > 0) count++;
+    if (data.accounts.length > 0) count++;
+    if (data.amountRange[0] !== 0 || data.amountRange[1] !== Infinity) count++;
+    if (data.withNestedCategories) count++;
+    if (data.isDraft) count++;
+    return count;
+  }, [data]);
+
   return (
     <FilterWrapper open={isOpen} onOpenChange={setIsOpen}>
       <FilterTrigger asChild>
@@ -212,14 +248,20 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
           className="h-14 w-14 rounded-full shadow-lg fixed bottom-20 right-4 z-50"
         >
           <FilterIcon className="h-6 w-6" />
+          {activeFiltersCount > 0 && (
+            <Badge className="absolute -top-2 -right-2 px-2 py-1 text-xs">
+              {activeFiltersCount}
+            </Badge>
+          )}
         </Button>
       </FilterTrigger>
-      <FilterContent side={isDesktop ? 'right' : undefined} className={isDesktop ? 'w-[400px] sm:w-[540px]' : undefined}>
+      <FilterContent side={isDesktop ? 'right' : undefined}
+                     className={isDesktop ? 'w-[400px] sm:w-[540px]' : undefined}>
         <FilterHeader>
           <FilterTitle>Transaction Filters</FilterTitle>
         </FilterHeader>
         <div className={isDesktop ? 'mt-4' : 'px-4 pb-4'}>
-          <Content data={data} onChange={handleChange} />
+          <Content data={data} onChange={handleChange} onReset={onReset} />
         </div>
       </FilterContent>
     </FilterWrapper>

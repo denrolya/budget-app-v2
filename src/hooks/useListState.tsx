@@ -96,6 +96,14 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
     });
   }, []);
 
+  const resetFilters = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      filters: initialFilters,
+      pagination: { ...prev.pagination, currentPage: 1 },
+    }));
+  }, [initialFilters]);
+
   const setSort = useCallback((field: keyof ItemType | null, direction: 'asc' | 'desc' | null) => {
     setState(prev => ({
       ...prev,
@@ -170,7 +178,8 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
     ...state,
     setCurrentPage,
     setFilter,
+    resetFilters,
     setSort,
     setTotalPages,
-  }), [state, setCurrentPage, setFilter, setSort, setTotalPages]);
+  }), [state, setCurrentPage, setFilter, setSort, setTotalPages, resetFilters]);
 };
