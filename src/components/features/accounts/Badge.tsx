@@ -77,7 +77,7 @@ export default function AccountBadge({
     <Badge
       variant="outline"
       className={cn(
-        'inline-flex items-center',
+        'inline-flex items-center shadow-md',
         'transition-all duration-200 ease-in-out',
         'hover:opacity-90',
         'w-fit',

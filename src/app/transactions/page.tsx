@@ -1,18 +1,19 @@
-import React, { useMemo } from 'react';
 import moment from 'moment';
+import React, { useMemo } from 'react';
 
+import DesktopTable from '@/components/features/transactions/DesktopTable';
 import { Pagination } from '@/components/common/Pagination';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useTransactions } from '@/hooks/useTransactions';
-import Transaction from '@/models/Transaction';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import EmptyTransactionState from '@/components/features/transactions/EmptyTransactionState';
 import ListFilters from '@/components/features/transactions/ListFilters';
 import TransactionListItemV3, { ListItemSkeleton } from '@/components/features/transactions/ListItemV3';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import { useTransactions } from '@/hooks/useTransactions';
+import Transaction from '@/models/Transaction';
 
 const GroupedTransactions: React.FC<{ groupedTransactions: [string, Transaction[]][] }> = ({ groupedTransactions }) => (
-  <>
+  <div>
     {groupedTransactions.map(([date, transactions]) => (
       <div key={date} className="mb-6">
         <h5 className="text-lg font-semibold mb-2">
@@ -27,7 +28,7 @@ const GroupedTransactions: React.FC<{ groupedTransactions: [string, Transaction[
         </ul>
       </div>
     ))}
-  </>
+  </div>
 );
 
 export const TransactionsList: React.FC = () => {
@@ -78,14 +79,20 @@ export const TransactionsList: React.FC = () => {
           <>
             {groupedAndSortedTransactions.length > 0 && (
               <>
-                <GroupedTransactions groupedTransactions={groupedAndSortedTransactions} />
+                <div className="hidden md:block">
+                  <DesktopTable groupedTransactions={groupedAndSortedTransactions} />
+                </div>
+                <div className="md:hidden">
+                  <GroupedTransactions groupedTransactions={groupedAndSortedTransactions} />
+                </div>
                 <div className="mt-4">
                   <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
                 </div>
               </>
             )}
-            {groupedAndSortedTransactions.length === 0 &&
-              <EmptyTransactionState onRefresh={refetch} onAddTransaction={() => openForm(FormType.Transaction)} />}
+            {groupedAndSortedTransactions.length === 0 && (
+              <EmptyTransactionState onRefresh={refetch} onAddTransaction={() => openForm(FormType.Transaction)} />
+            )}
           </>
         )}
 

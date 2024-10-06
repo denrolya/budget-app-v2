@@ -36,7 +36,7 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
     setCurrentPage: (page: number) => void;
   };
   filters: TransactionFilters;
-  setFilter: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K]) => void;
+  setFilter: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => void;
   resetFilters: () => void;
   sort: { field: string; direction: 'asc' | 'desc' };
   setSort: (sort: { field: string; direction: 'asc' | 'desc' }) => void;

@@ -76,6 +76,10 @@ export class Transaction {
     this.type = type;
   }
 
+  isTransfer(): boolean {
+    return this.category.name === 'Transfer';
+  }
+
   isExpense(): boolean {
     return this.type === Type.Expense;
   }
