@@ -1,5 +1,3 @@
-import moment from 'moment';
-
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { TransferFilters } from '@/models/TransferFilters.ts';
 import { axiosFetcher } from '@/services/api';
@@ -68,27 +66,43 @@ export const transferService = {
   buildUrl({ page, perPage, filters, sort }: FetchTransfersParams): string {
     const query = new URLSearchParams();
 
-    const addParam = (key: string, value: unknown) => {
-      if (value == null || (Array.isArray(value) && value.length === 0)) return;
+    // Add pagination parameters
+    query.set('page', String(page));
+    query.set('perPage', String(perPage));
 
-      if (Array.isArray(value)) {
-        value.forEach((item) => query.append(`${key}[]`, String(item)));
-      } else if (typeof value === 'boolean') {
-        query.set(key, value ? '1' : '0');
-      } else if (moment.isMoment(value)) {
-        query.set(`executedAt[${key}]`, key === 'before' ? value.clone().endOf('day').toISOString() : value.format(BACKEND_DATE_FORMAT));
-      } else {
-        query.set(key, String(value));
+    // Add filter parameters
+    if (filters.searchTerm) {
+      query.set('searchTerm', filters.searchTerm);
+    }
+
+    if (filters.before) {
+      query.set('executedAt[before]', filters.before.clone().endOf('day').toISOString());
+    }
+
+    if (filters.after) {
+      query.set('executedAt[after]', filters.after.format(BACKEND_DATE_FORMAT));
+    }
+
+    if (filters.amountRange) {
+      const [min, max] = filters.amountRange;
+      if (!isNaN(min)) {
+        query.append('amount[gte]', String(min));
       }
-    };
+      if (!isNaN(max)) {
+        query.append('amount[lte]', String(max));
+      }
+    }
 
-    addParam('perPage', perPage);
-    addParam('page', page);
+    if (filters.accounts && filters.accounts.length > 0) {
+      filters.accounts.forEach(account => query.append('accounts[]', account));
+    }
 
-    Object.entries(filters).forEach(([key, value]) => addParam(key, value));
-
-    addParam('sortField', sort.field);
-    addParam('sortDirection', sort.direction);
+    if (sort.field) {
+      query.set('sortField', sort.field);
+    }
+    if (sort.direction) {
+      query.set('sortDirection', sort.direction);
+    }
 
     return `${BASE_URL}?${query.toString()}`;
   },

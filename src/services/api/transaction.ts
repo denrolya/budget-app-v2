@@ -89,35 +89,70 @@ export const transactionService = {
     };
   },
 
-  buildUrl({ page, perPage, filters, sort }: Omit<FetchTransactionsParams, 'excludeTransfers'>): string {
+  buildUrl({ page, perPage, filters, sort }: {
+    page: number;
+    perPage: number;
+    filters: TransactionFilters;
+    sort: { field: string; direction: 'asc' | 'desc' };
+  }): string {
     const query = new URLSearchParams();
 
-    this.addQueryParam(query, 'perPage', perPage);
-    this.addQueryParam(query, 'page', page);
+    // Add pagination parameters
+    query.set('page', String(page));
+    query.set('perPage', String(perPage));
 
-    Object.entries(filters).forEach(([key, value]) => this.addQueryParam(query, key, value));
+    // Add filter parameters
+    if (filters.searchTerm) {
+      query.set('searchTerm', filters.searchTerm);
+    }
 
-    this.addQueryParam(query, 'sortField', sort.field);
-    this.addQueryParam(query, 'sortDirection', sort.direction);
+    if (filters.before) {
+      query.set('before', filters.before.format(BACKEND_DATE_FORMAT));
+    }
+
+    if (filters.after) {
+      query.set('after', filters.after.format(BACKEND_DATE_FORMAT));
+    }
+
+    if (filters.amountRange && filters.amountRange.length > 0) {
+      const [min, max] = filters.amountRange;
+      if (!isNaN(min)) {
+        query.set('amount[gte]', String(min));
+      }
+      if (!isNaN(max)) {
+        query.set('amount[lte]', String(max));
+      }
+    }
+
+    if (filters.categories && filters.categories.length > 0) {
+      filters.categories.forEach(category => query.append('categories[]', String(category)));
+    }
+
+    if (filters.excludedCategories && filters.excludedCategories.length > 0) {
+      filters.excludedCategories.forEach(category => query.append('excludedCategories[]', String(category)));
+    }
+
+    if (filters.accounts && filters.accounts.length > 0) {
+      filters.accounts.forEach(account => query.append('accounts[]', String(account)));
+    }
+
+    if (filters.withNestedCategories !== undefined) {
+      query.set('withNestedCategories', filters.withNestedCategories ? '1' : '0');
+    }
+
+    if (filters.isDraft !== undefined) {
+      query.set('isDraft', filters.isDraft ? '1' : '0');
+    }
+
+    // Add sorting parameters
+    if (sort.field) {
+      query.set('sortField', sort.field);
+    }
+    if (sort.direction) {
+      query.set('sortDirection', sort.direction);
+    }
 
     return `${BASE_URL}?${query.toString()}`;
-  },
-
-  addQueryParam(query: URLSearchParams, key: string, value: unknown): void {
-    if (value == null || (Array.isArray(value) && value.length === 0)) return;
-
-    if (key === 'amountRange') {
-      if (!isNaN(value[0])) query.set('amount[gte]', value[0]);
-      if (!isNaN(value[1])) query.set('amount[lte]', value[1]);
-    } else if (Array.isArray(value)) {
-      value.forEach((item) => query.append(`${key}[]`, String(item)));
-    } else if (typeof value === 'boolean') {
-      query.set(key, value ? '1' : '0');
-    } else if (moment.isMoment(value)) {
-      query.set(key, value.format(BACKEND_DATE_FORMAT));
-    } else  {
-      query.set(key, String(value));
-    }
   },
 
   formatData(values: z.infer<typeof formSchema>, existingData?: Transaction) {
