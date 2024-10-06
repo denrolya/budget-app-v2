@@ -46,7 +46,7 @@ export const formSchema = z.object({
 
 export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>((_, ref) => {
   const { createTransaction, updateTransaction } = useTransactionMutations();
-  const { submitForm, updateFormState, formState: { values: data } } = useFormContext();
+  const { updateFormState, formState: { values: data } } = useFormContext();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -81,8 +81,6 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
         } else {
           await createTransaction(values);
         }
-
-        submitForm(values);
       } catch (error) {
         console.error('Form submission failed:', error);
         toast.error('Failed to submit transaction. Issue requires investigation.');

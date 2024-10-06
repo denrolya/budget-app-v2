@@ -68,7 +68,7 @@ export const useFormManager = (): FormContextType => {
       ...prev,
       isValid: false,
       isDirty: false,
-      values: prev.values, // Reset to initial values
+      values: initialFormState.values,
     }));
   }, []);
 

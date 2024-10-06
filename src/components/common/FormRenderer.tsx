@@ -56,12 +56,6 @@ export const FormRenderer: React.FC = () => {
       try {
         await formRef.current.submitForm();
         submitForm(formState.values);
-        toast.success('Form submitted successfully!', {
-          action: {
-            label: 'Close',
-            onClick: () => toast.dismiss()
-          }
-        });
         if (shouldClose) {
           closeForm();
         } else {
