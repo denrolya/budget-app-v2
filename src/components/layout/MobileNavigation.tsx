@@ -1,5 +1,4 @@
 import cn from 'classnames';
-import { motion } from 'framer-motion';
 import {
   Home,
   Receipt,
@@ -141,6 +140,12 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                           <Link to="/categories">
                             <List className="mr-2 h-4 w-4" />
                             Categories
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start" asChild>
+                          <Link to="/testing">
+                            <Airplay className="mr-2 h-4 w-4" />
+                            Test page
                           </Link>
                         </Button>
                       </div>
