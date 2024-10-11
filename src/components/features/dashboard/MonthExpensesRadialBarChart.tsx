@@ -1,5 +1,3 @@
-'use client';
-
 import { ResponsiveRadialBar } from '@nivo/radial-bar';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

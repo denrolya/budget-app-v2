@@ -1,0 +1,16 @@
+pipelines:
+    branches:
+        develop:
+            -   step:
+                    name: Deploy Frontend
+                    deployment: production
+                    script:
+                        -   pipe: atlassian/ssh-run:0.5.7
+                            variables:
+                                SSH_USER: $SSH_USER
+                                SERVER: $SERVER
+                                SSH_KEY: $SSH_KEY
+                                SCRIPT: |
+                                    cd $FRONTEND_APP_PATH
+                                    git pull origin develop
+                                    docker-compose up --build -d
