@@ -5,7 +5,7 @@ pipelines:
         develop:
             -   step:
                     name: 'Deploy to Development'
-                    deployment: development
+                    deployment: Production
                     script:
                         - apt-get update && apt-get install -y openssh-client # Install SSH client
                         - mkdir -p ~/.ssh
@@ -22,7 +22,7 @@ pipelines:
         manual-deploy:
             -   step:
                     name: 'Manual Deployment'
-                    deployment: development
+                    deployment: Production
                     script:
                         - apt-get update && apt-get install -y openssh-client # Install SSH client
                         - mkdir -p ~/.ssh
