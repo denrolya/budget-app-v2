@@ -1,7 +1,7 @@
-import Category from '@/models/Category.ts';
 import orderBy from 'lodash/orderBy';
 import { useContext } from 'react';
 
+import Category from '@/models/Category';
 import { Type as TransactionType } from '@/models/Transaction';
 import Account from '@/models/Account';
 import {

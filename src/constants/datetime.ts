@@ -1,4 +1,4 @@
-import moment, { Moment } from 'moment/moment';
+import { Moment } from 'moment/moment';
 
 export const BACKEND_DATE_FORMAT = 'YYYY-MM-DD';
 export const MOMENT_TIME_VIEW_FORMAT = 'HH:mm';

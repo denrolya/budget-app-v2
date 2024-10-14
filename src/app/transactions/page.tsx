@@ -1,3 +1,4 @@
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime.ts';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 
@@ -50,7 +51,7 @@ export const TransactionsList: React.FC = () => {
     if (!transactions) return [];
 
     const grouped = transactions.reduce((groups, transaction) => {
-      const date = moment(transaction.executedAt).format('YYYY-MM-DD');
+      const date = moment(transaction.executedAt).format(BACKEND_DATE_FORMAT);
       return { ...groups, [date]: [...(groups[date] || []), transaction] };
     }, {} as Record<string, Transaction[]>);
 
@@ -58,7 +59,7 @@ export const TransactionsList: React.FC = () => {
   }, [transactions]);
 
   return (
-    <section className="container p-4 mx-auto pb-20 md:pb-4">
+    <section className="w-full p-4 md:p-0 mx-auto pb-20 md:pb-0">
       <div className="flex-grow overflow-hidden flex flex-col mb-6">
         {isError && (
           <Alert variant="destructive">

@@ -194,6 +194,7 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
           />
         </div>
         <Button
+          tabIndex={-1}
           type="button"
           variant="ghost"
           size="sm"

@@ -1,7 +1,9 @@
-import { Badge } from '@/components/ui/badge.tsx';
 import moment from 'moment';
 import React from 'react';
+import { Pencil } from 'lucide-react';
 
+import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime.ts';
+import { Badge } from '@/components/ui/badge';
 import MoneyValue from '@/components/common/MoneyValue';
 import { useBaseCurrency } from '@/contexts/auth';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
@@ -31,7 +33,7 @@ export const DesktopTable: React.FC<Props> = ({ groupedTransactions, ...props })
 
   return (
     <Table {...props}>
-      <TableHeader>
+      <TableHeader className="sr-only">
         <TableRow>
           <TableHead>Date</TableHead>
           <TableHead>ID</TableHead>
@@ -52,7 +54,7 @@ export const DesktopTable: React.FC<Props> = ({ groupedTransactions, ...props })
                   <RelativeDatetimeDisplay showTime={false} date={moment(date)} />
                   <div className="text-sm font-normal">
                     <span className="mr-4">{transactions.length} transactions</span>
-                    <span>Total: <MoneyValue amount={calculateTotalValue(transactions)} /></span>
+                    <span>Total: <MoneyValue className="font-medium font-mono" amount={calculateTotalValue(transactions)} /></span>
                   </div>
                 </div>
               </TableCell>
@@ -88,12 +90,16 @@ export const DesktopTable: React.FC<Props> = ({ groupedTransactions, ...props })
                   </Badge>
                 </TableCell>
                 <TableCell>{transaction.note}</TableCell>
-                <TableCell>{moment(transaction.executedAt).format('HH:mm')}</TableCell>
+                <TableCell>{moment(transaction.executedAt).format(MOMENT_TIME_VIEW_FORMAT)}</TableCell>
                 <TableCell>
                   <Button
-                    variant="outline"
-                    onClick={() => openForm(FormType.Transaction, transaction)}>
-                    Edit
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => openForm(FormType.Transaction, transaction)}
+                    aria-label="Edit"
+                    className="h-8 w-8 p-0"
+                  >
+                    <Pencil className="h-4 w-4" />
                   </Button>
                 </TableCell>
               </TableRow>

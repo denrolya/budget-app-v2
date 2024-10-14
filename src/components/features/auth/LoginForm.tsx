@@ -21,7 +21,7 @@ interface Props {
   onSubmit: ({ username, password }: Credentials) => void;
 }
 
-export const LoginForm = ({ error, isLoading, onSubmit }: Props) => {
+export const LoginForm: React.FC<Props> = ({ error, isLoading, onSubmit }) => {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -40,7 +40,7 @@ export const LoginForm = ({ error, isLoading, onSubmit }: Props) => {
             <FormItem>
               <FormLabel htmlFor="username">Username</FormLabel>
               <FormControl>
-                <Input id="username" placeholder="username" {...field} />
+                <Input autoFocus id="username" placeholder="username" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
