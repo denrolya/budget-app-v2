@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
 import moment from 'moment';
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { toast } from 'sonner';
@@ -27,16 +27,8 @@ const formSchema = z.object({
   note: z.string().optional(),
 });
 
-interface FormState {
-  isValid: boolean;
-  isDirty: boolean;
-  values: z.infer<typeof formSchema>;
-}
-
 interface TransferFormProps {
-  onClose: () => void;
-  setFormState: React.Dispatch<React.SetStateAction<FormState>>;
-  showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+  key: string;
 }
 
 interface TransferFormRef {

@@ -9,7 +9,7 @@ import { defaultOnSubmit, useFormLogic } from '@/hooks/useFormLogic';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { useForm as useFormContext } from '@/contexts/Form';
 
 const colorScheme = {
   bank: {
@@ -17,37 +17,38 @@ const colorScheme = {
     usd: '#66FF66',
     uah: '#FFDD55',
     huf: '#FF6347',
-    btc: '#9932CC',
+    btc: '#FFB84D', // Lightest orange
   },
   cash: {
     eur: '#0099CC',
     usd: '#32CD32',
     uah: '#FFD100',
     huf: '#B22222',
-    btc: '#4B0082',
+    btc: '#FFA500', // Slightly darker orange
   },
   internet: {
     eur: '#006080',
     usd: '#228B22',
     uah: '#CCAC00',
     huf: '#8B0000',
-    btc: '#301934',
+    btc: '#FF8C00', // Darkest, most saturated orange
   },
   other: {
     eur: '#66CCCC',
     usd: '#99FF99',
     uah: '#FFEB99',
     huf: '#D2691E',
-    btc: '#B57EDC',
+    btc: '#FFDAB9', // Lighter, more pastel-like orange
   },
 };
+
 
 const currencyInfo = {
   eur: { symbol: '€', color: '#0066CC', name: 'Euro' },
   usd: { symbol: '$', color: '#008000', name: 'US Dollar' },
   uah: { symbol: '₴', color: '#FFD700', name: 'Ukrainian Hryvnia' },
   huf: { symbol: 'Ft', color: '#C41E3A', name: 'Hungarian Forint' },
-  btc: { symbol: '₿', color: '#FF9900', name: 'Bitcoin' },
+  btc: { symbol: '₿', color: '#FFA500', name: 'Bitcoin' },
 };
 
 const formSchema = z.object({
@@ -57,28 +58,23 @@ const formSchema = z.object({
   type: z.enum(['internet', 'bank', 'cash', 'other']),
   cardNumber: z.string().optional(),
   iban: z.string().optional(),
+  bankName: z.string().optional(),
+  providerName: z.string().optional(),
 });
+
+type FormSchema = z.infer<typeof formSchema>;
 
 export interface AccountFormRef {
   submitForm: () => Promise<void>;
 }
 
-interface FormState {
-  isValid: boolean;
-  isDirty: boolean;
-  values: z.infer<typeof formSchema>;
-}
-
 interface AccountFormProps {
-  data: z.infer<typeof formSchema> | undefined;
-  isEditing: boolean;
-  onClose: () => void;
-  setFormState: React.Dispatch<React.SetStateAction<FormState>>;
-  showToast: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+  key: string;
 }
 
-export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>(({ data, isEditing, setFormState, showToast }, ref) => {
-  const form = useForm<z.infer<typeof formSchema>>({
+export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref) => {
+  const { updateFormState, formState: { values: data } } = useFormContext();
+  const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: data?.name || '',
@@ -87,22 +83,29 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>(({ data,
       type: data?.type || 'cash',
       cardNumber: data?.cardNumber || '',
       iban: data?.iban || '',
+      bankName: data?.bankName || '',
+      providerName: data?.providerName || '',
     },
   });
 
   const { formRef } = useFormLogic({
     form,
+    setFormState: updateFormState,
     onSubmit: defaultOnSubmit,
-    setFormState,
-    showToast,
   });
 
-  useImperativeHandle(ref, () => formRef.current!);
+  useImperativeHandle(ref, () => ({
+    submitForm: async () => {
+      await formRef.current?.submitForm();
+    },
+  }));
 
-  const getTypeButtonStyle = (type: string) => {
+  const getButtonStyle = (value: string, field: 'currency' | 'type') => {
     const baseStyle = 'h-20 sm:h-24 transition-colors duration-200';
-    const isSelected = form.watch('type') === type;
-    const bgColor = colorScheme[type as keyof typeof colorScheme][form.watch('currency') as keyof (typeof colorScheme)['internet']];
+    const isSelected = form.watch(field) === value;
+    const bgColor = field === 'type'
+      ? colorScheme[value as keyof typeof colorScheme][form.watch('currency') as keyof (typeof colorScheme)['internet']]
+      : currencyInfo[value as keyof typeof currencyInfo].color;
     const textColor = isSelected ? 'text-primary-foreground' : 'text-primary';
     return `${baseStyle} ${isSelected ? `bg-[${bgColor}]` : 'bg-background'} ${textColor}`;
   };
@@ -117,33 +120,29 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>(({ data,
             <FormItem>
               <FormLabel>Currency</FormLabel>
               <FormControl>
-                <ToggleGroup
-                  type="single"
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  className="flex justify-between w-full"
-                >
+                <div className="grid grid-cols-5 gap-4">
                   {Object.entries(currencyInfo).map(([value, info]) => (
-                    <ToggleGroupItem
+                    <Button
                       key={value}
-                      value={value}
-                      aria-label={info.name}
+                      type="button"
+                      variant={field.value === value ? 'default' : 'outline'}
                       className={cn(
                         'flex-1 h-14 text-sm font-medium border-2 rounded-md transition-all duration-200 hover:bg-accent hover:text-accent-foreground', {
-                          'border-primary bg-primary/10': field.value === value,
+                          'bg-primary/10': field.value === value,
                           'border-transparent': field.value !== value,
                         })}
                       style={{
-                        color: field.value === value ? info.color : undefined,
+                        backgroundColor: field.value === value ? info.color : undefined,
                       }}
+                      onClick={() => field.onChange(value)}
                     >
-                      <div className="flex flex-col items-center justify-center">
+                      <div className="flex flex-col items-center justify-center space-y-2">
                         <span className="text-lg">{info.symbol}</span>
-                        <span className="text-xs mt-1">{value.toUpperCase()}</span>
+                        <span className="text-xs">{value.toUpperCase()}</span>
                       </div>
-                    </ToggleGroupItem>
+                    </Button>
                   ))}
-                </ToggleGroup>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -167,7 +166,7 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>(({ data,
                       key={option.value}
                       type="button"
                       variant={field.value === option.value ? 'default' : 'outline'}
-                      className={getTypeButtonStyle(option.value)}
+                      className={getButtonStyle(option.value, 'type')}
                       style={{
                         backgroundColor: field.value === option.value
                           ? colorScheme[option.value as keyof typeof colorScheme][form.watch('currency') as keyof (typeof colorScheme)['internet']]
@@ -211,7 +210,7 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>(({ data,
                   type="number"
                   placeholder="Enter initial balance"
                   {...field}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value))}
                 />
               </FormControl>
               <FormMessage />
@@ -220,6 +219,19 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>(({ data,
         />
         {form.watch('type') === 'bank' && (
           <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="bankName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bank Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter bank name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="cardNumber"
@@ -248,7 +260,24 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>(({ data,
             />
           </div>
         )}
+        {form.watch('type') === 'internet' && (
+          <FormField
+            control={form.control}
+            name="providerName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Provider Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter provider name (e.g., Wise, PayPal)" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
       </form>
     </Form>
   );
 });
+
+export default AccountForm;

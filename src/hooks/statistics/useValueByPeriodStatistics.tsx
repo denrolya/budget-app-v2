@@ -35,6 +35,7 @@ interface ValueByPeriodParams {
   config: CardConfig;
   after?: Moment;
   before?: Moment;
+  dependencies?: any[];
 }
 
 interface StatisticsResponseEntry {
@@ -99,7 +100,7 @@ const calculateStatValue = (
 };
 
 export const useValueByPeriod = (params: ValueByPeriodParams) => {
-  const { config, after, before } = params;
+  const { config, after, before, dependencies = [] } = params;
   const { type, categories, interval, period, comparison, statType } = config;
   const { list: categoryList } = useCategories();
 
@@ -120,7 +121,7 @@ export const useValueByPeriod = (params: ValueByPeriodParams) => {
   }, { arrayFormat: 'brackets' });
 
   const { data: currentData, isLoading: isLoadingCurrent, error: errorCurrent } = useQuery<StatisticsResponseEntry[], Error, StatisticsFormattedEntry[]>({
-    queryKey: ['valueByPeriod', { periodStart, periodEnd, interval: period || interval, type, categories }],
+    queryKey: ['valueByPeriod', { periodStart, periodEnd, interval: period || interval, type, categories }, ...dependencies],
     queryFn: () => axiosFetcher(`/api/v2/statistics/value-by-period?${queryParams}`),
     select: (data: StatisticsResponseEntry[]): StatisticsFormattedEntry[] => data.map((item: StatisticsResponseEntry) => ({
       ...item,
@@ -142,7 +143,7 @@ export const useValueByPeriod = (params: ValueByPeriodParams) => {
   }, { arrayFormat: 'brackets' });
 
   const { data: comparisonData, isLoading: isLoadingComparison, error: errorComparison } = useQuery<StatisticsResponseEntry[], Error, StatisticsFormattedEntry[]>({
-    queryKey: ['valueByPeriod', { comparisonStart, comparisonEnd, interval: period || interval, type, categories }],
+    queryKey: ['valueByPeriod', { comparisonStart, comparisonEnd, interval: period || interval, type, categories }, ...dependencies],
     queryFn: () => axiosFetcher(`/api/v2/statistics/value-by-period?${comparisonQueryParams}`),
     select: (data: StatisticsResponseEntry[]): StatisticsFormattedEntry[] => data.map((item: StatisticsResponseEntry) => ({
       ...item,

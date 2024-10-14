@@ -5,7 +5,7 @@ import { useExpenseCategories, useIncomeCategories } from '@/contexts/FinanceDat
 import Category from '@/models/Category';
 import { Type as TransactionType } from '@/models/Transaction';
 
-interface CategoryTypeaheadProps extends Omit<TypeaheadV2Props<Category>, 'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'> {
+interface CategoryTypeaheadProps extends Omit<TypeaheadV2Props<Category>, 'options' | 'labelField' | 'groupBy' | 'renderElement'> {
   className?: string;
   type?: TransactionType;
 }
@@ -14,6 +14,7 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>((
                                                                                   multiple = false,
                                                                                   value,
                                                                                   onChange,
+                                                                                  valueField = 'id',
                                                                                   className,
                                                                                   type,
                                                                                   ...props
@@ -45,8 +46,8 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>((
 
   return (
     <TypeaheadV2<Category>
-      valueField="id"
       labelField="name"
+      valueField={valueField}
       groupBy={type}
       placeholder={multiple ? 'Select categories...' : 'Select a category...'}
       multiple={multiple}

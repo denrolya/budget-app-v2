@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 
+import { useCategories } from '@/contexts/FinanceData';
+import Category from '@/models/Category.ts';
+import { generateSlug } from '@/utils/generateSlug';
 import CardStack from '@/components/common/CardStack';
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
 import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card';
@@ -7,12 +10,32 @@ import { CardConfig, cardConfigs } from '@/constants/dashboard-config';
 
 const DashboardPage: React.FC = () => {
   const [configs, setConfigs] = useState<CardConfig[]>(cardConfigs);
-  const handleConfigChange = (id: string, newConfig: Partial<CardConfig>) => {
+  const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
+  const { tree } = useCategories();
+  const extractNameAndChildren = (tree: Category): { name: string; children?: any[] } => {
+    const { name, type, children } = tree;
+
+    return {
+      name,
+      type,
+      children: children?.map(extractNameAndChildren) || []
+    };
+  };
+
+  console.log(JSON.stringify(extractNameAndChildren({ name: 'Root', children: tree })));
+
+  const handleConfigChange = (index: number, newConfig: Partial<CardConfig>) => {
+    console.log('handleConfigChange', index, newConfig);
     setConfigs(prevConfigs =>
-      prevConfigs.map(config =>
-        config.id === id ? { ...config, ...newConfig } : config,
-      ),
+      prevConfigs.map((config, i) =>
+        i === index ? { ...config, ...newConfig } : config
+      )
     );
+  };
+
+  const handleAddNewConfig = (newConfig: CardConfig) => {
+    setConfigs(prevConfigs => [...prevConfigs, newConfig]);
+    setIsAddingNew(false);
   };
 
   return (
@@ -20,12 +43,11 @@ const DashboardPage: React.FC = () => {
       {/* Mobile view: CardStack */}
       <div className="md:hidden mb-6">
         <CardStack
-          cards={configs.map(card => (
+          cards={configs.map((card, index) => (
             <StatisticsCard
-              key={card.id}
-              {...card}
-              config={configs[card.id]}
-              onConfigChange={(newConfig) => handleConfigChange(card.id, newConfig)}
+              key={`mobile-card-${generateSlug(card.title, card.type, card.statType)}`}
+              config={card}
+              onChange={(newConfig: CardConfig) => handleConfigChange(index, newConfig)}
             />
           ))}
         />
@@ -33,12 +55,11 @@ const DashboardPage: React.FC = () => {
 
       {/* Desktop view: Grid */}
       <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 justify-items-center mb-6">
-        {configs.map(card => (
+        {configs.map((card, index) => (
           <StatisticsCard
-            key={card.id}
-            {...card}
-            config={configs[card.id]}
-            onConfigChange={(newConfig) => handleConfigChange(card.id, newConfig)}
+            key={`desktop-card-${generateSlug(card.title, card.type, card.statType)}`}
+            config={card}
+            onChange={(newConfig: CardConfig) => handleConfigChange(index, newConfig)}
           />
         ))}
       </div>

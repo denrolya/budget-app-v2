@@ -22,28 +22,28 @@ const colorScheme = {
     [CURRENCIES.USD.code]: '#66FF66',
     [CURRENCIES.UAH.code]: '#FFDD55',
     [CURRENCIES.HUF.code]: '#FF6347',
-    [CURRENCIES.BTC.code]: '#9932CC',
+    [CURRENCIES.BTC.code]: '#FFB84D',
   },
   [AccountType.Cash]: {
     [CURRENCIES.EUR.code]: '#0099CC',
     [CURRENCIES.USD.code]: '#32CD32',
     [CURRENCIES.UAH.code]: '#FFD100',
     [CURRENCIES.HUF.code]: '#B22222',
-    [CURRENCIES.BTC.code]: '#4B0082',
+    [CURRENCIES.BTC.code]: '#FFA500',
   },
   [AccountType.Internet]: {
     [CURRENCIES.EUR.code]: '#006080',
     [CURRENCIES.USD.code]: '#228B22',
     [CURRENCIES.UAH.code]: '#CCAC00',
     [CURRENCIES.HUF.code]: '#8B0000',
-    [CURRENCIES.BTC.code]: '#301934',
+    [CURRENCIES.BTC.code]: '#FF8C00',
   },
   [AccountType.Other]: {
     [CURRENCIES.EUR.code]: '#66CCCC',
     [CURRENCIES.USD.code]: '#99FF99',
     [CURRENCIES.UAH.code]: '#FFEB99',
     [CURRENCIES.HUF.code]: '#D2691E',
-    [CURRENCIES.BTC.code]: '#B57EDC',
+    [CURRENCIES.BTC.code]: '#FFDAB9',
   },
 };
 
