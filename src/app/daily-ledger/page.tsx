@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment';
+import cn from 'classnames';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSwipeable } from 'react-swipeable';
@@ -14,7 +15,7 @@ import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers
 export const DailyLedgerPage = () => {
   const [currentDate, setCurrentDate] = useState(moment().startOf('day'));
   const isDesktop = useScreenSize();
-  const daysPerPage = isDesktop ? 5 : 2;
+  const daysPerPage = 5;
 
   const dateRange = useMemo(() => {
     const startDate = currentDate.clone().subtract(daysPerPage - 1, 'days');
@@ -52,7 +53,6 @@ export const DailyLedgerPage = () => {
   const swipeHandlers = useSwipeable({
     onSwipedLeft: goToNextPage,
     onSwipedRight: goToPreviousPage,
-    preventDefaultTouchmoveEvent: true,
     trackMouse: true,
   });
 
@@ -69,7 +69,7 @@ export const DailyLedgerPage = () => {
   const dates = useMemo(() => Array.from({ length: daysPerPage }, (_, i) => moment(currentDate).subtract(i, 'days')), [currentDate, daysPerPage]);
 
   return (
-    <section className="w-full mx-auto p-4 pb-16" {...swipeHandlers}>
+    <section className="w-full mx-auto md:px-4 pb-16 pt-4 md:py-4" {...swipeHandlers}>
       <h1 className="hidden sm:block text-2xl font-bold mb-4">Daily Ledger</h1>
 
       <div className="flex justify-between items-center mb-4">
@@ -103,12 +103,13 @@ export const DailyLedgerPage = () => {
         </div>
       )}
 
-
       <div className="flex flex-col md:flex-row-reverse md:-mx-2 mb-6">
         {dates.map((date, index) => (
           <React.Fragment key={date.format('YYYY-MM-DD')}>
             <div
-              className={`w-full ${isDesktop ? 'md:w-1/5' : ''} md:px-2`}
+              className={cn('w-full', 'px-0', 'md:px-2', {
+                'md:w-1/5': isDesktop
+              })}
               style={{
                 order: `${daysPerPage - index - 1} sm:${index}`,
               }}>
