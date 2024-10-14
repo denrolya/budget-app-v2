@@ -2,6 +2,7 @@ import { Check, Pencil, X, Trash2 } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
+import cn from 'classnames';
 
 import { confirm } from '@/utils/confirmation';
 import { useTransactionMutations } from '@/hooks/useTransactionMutations';
@@ -120,6 +121,29 @@ export const DesktopTable: React.FC<Props> = ({ groupedTransactions, ...props })
       inputRef.current.focus();
     }
   }, [editingCell]);
+
+  const toggleDraft = async (transaction: Transaction) => {
+    const confirmed = await confirm({
+      title: 'Are you sure you want to unmark this transaction as draft?',
+      description: `This will unmark transaction #${transaction.id} as not draft.`,
+      confirmText: 'Confirm',
+      cancelText: 'Cancel',
+    });
+
+    if (confirmed) {
+      try {
+        await updateTransaction({
+          id: transaction.id,
+          updates: { ...transaction, isDraft: false },
+          originalTransaction: transaction
+        });
+        toast.success('Transaction unmarked as not draft');
+      } catch (error) {
+        console.error('Failed to unmark transaction as not draft:', error);
+        toast.error('Failed to unmark transaction as not draft. Please try again.');
+      }
+    }
+  };
 
   const renderEditableCell = (transaction: Transaction, field: EditableField, content: React.ReactNode) => {
     const isEditing = editingCell?.transactionId === transaction.id && editingCell?.field === field;
@@ -245,7 +269,13 @@ export const DesktopTable: React.FC<Props> = ({ groupedTransactions, ...props })
               </TableCell>
             </TableRow>
             {transactions.map((transaction) => (
-              <TableRow key={transaction.id}>
+              <TableRow
+                key={transaction.id}
+                className={cn({
+                  'bg-warning/20 hover:bg-warning/30': transaction.isDraft,
+                  'hover:bg-muted/50': !transaction.isDraft
+                })}
+              >
                 <TableCell></TableCell>
                 <TableCell>
                   <Sheet>
@@ -259,6 +289,15 @@ export const DesktopTable: React.FC<Props> = ({ groupedTransactions, ...props })
                       <Details transaction={transaction} />
                     </SheetContent>
                   </Sheet>
+                  {transaction.isDraft && (
+                    <Badge
+                      variant="outline"
+                      className="ml-2 bg-warning text-warning-foreground border-warning cursor-pointer hover:bg-warning/80"
+                      onClick={() => toggleDraft(transaction)}
+                    >
+                      Draft
+                    </Badge>
+                  )}
                 </TableCell>
                 <TableCell>
                   {renderEditableCell(transaction, 'account', <AccountBadge size="sm" account={transaction.account} />)}

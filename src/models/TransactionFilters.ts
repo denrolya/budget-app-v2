@@ -23,7 +23,7 @@ export class TransactionFilters implements FilterModel {
   excludedCategories: number[] | string[];
   accounts: number[] | string[];
   withNestedCategories: boolean;
-  isDraft: boolean;
+  isDraft?: boolean;
 
   constructor({
                 searchTerm = '',
@@ -34,7 +34,7 @@ export class TransactionFilters implements FilterModel {
                 excludedCategories = [],
                 accounts = [],
                 withNestedCategories = false,
-                isDraft = false,
+                isDraft = undefined,
               }: TransactionFiltersProps = {}) {
     this.searchTerm = searchTerm;
     this.before = before;

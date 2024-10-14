@@ -326,9 +326,7 @@ export default function TransactionTable() {
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-4">
-      <h1 className="text-2xl font-bold">Transactions</h1>
-
+    <div className="mx-auto p-4 space-y-4">
       <Tabs defaultValue="view" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="view">View Transactions</TabsTrigger>

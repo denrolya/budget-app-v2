@@ -148,6 +148,12 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                             Test page
                           </Link>
                         </Button>
+                        <Button variant="ghost" className="w-full justify-start" asChild>
+                          <Link to="/transactions-new">
+                            <Airplay className="mr-2 h-4 w-4" />
+                            New Transactions
+                          </Link>
+                        </Button>
                       </div>
                     </TabsContent>
                     <TabsContent value="exchangeRates">

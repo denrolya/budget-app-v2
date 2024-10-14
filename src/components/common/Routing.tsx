@@ -13,6 +13,7 @@ import { LayoutV9 } from '@/components/layout/LayoutV9';
 import { PrivateRoute } from '@/components/common/PrivateRoute';
 import { FinanceDataProvider, useFinanceData } from '@/contexts/FinanceData';
 import { useAuth } from '@/contexts/auth';
+import NewTransactionsPage from '@/components/features/transactions/TableWithFiltersMock.tsx';
 
 const ProtectedContent: React.FC = () => {
   const { data, error } = useFinanceData();
@@ -33,6 +34,11 @@ const ProtectedContent: React.FC = () => {
         <Route path="transactions" element={
           <PrivateRoute>
             <TransactionsListPage />
+          </PrivateRoute>
+        } />
+        <Route path="transactions-new" element={
+          <PrivateRoute>
+            <NewTransactionsPage />
           </PrivateRoute>
         } />
         <Route path="transfers" element={
