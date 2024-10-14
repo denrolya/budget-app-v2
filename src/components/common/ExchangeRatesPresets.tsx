@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 
 import { CURRENCY_CODE } from '@/constants/currency';
 import MoneyValue from '@/components/common/MoneyValue';
-import { useFixerExchangeRates, useMonobankExchangeRates } from '@/contexts/FinanceData';
+import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/contexts/FinanceData';
 import { getExchangeRate } from '@/utils/getExchangeRates';
 
 interface RateComparisonProps {
@@ -15,7 +15,7 @@ interface RateComparisonProps {
 
 interface RateDisplayProps {
   value: number;
-  source: 'fx' | 'mb';
+  source: 'fx' | 'mb' | 'ws';
   from: CURRENCY_CODE;
   to: CURRENCY_CODE;
   amount: number;
@@ -25,15 +25,27 @@ interface RateDisplayProps {
 export const ExchangeRatesPresets: React.FC = () => {
   const fixerRates = useFixerExchangeRates();
   const monoRates = useMonobankExchangeRates();
+  const wiseRates = useWiseExchangeRates();
 
   const RateComparison: React.FC<RateComparisonProps> = ({ from, to, amount = 1 }) => {
     const rate = useMemo(() => ({
       fixer: getExchangeRate(from, to, fixerRates),
       mono: getExchangeRate(from, to, monoRates),
-    }), [from, to, fixerRates, monoRates]);
+      wise: getExchangeRate(from, to, wiseRates),
+    }), [from, to, fixerRates, monoRates, wiseRates]);
 
-    const diff = rate.mono && rate.fixer
-      ? ((rate.mono - rate.fixer) / rate.fixer) * 100
+    const averageRate = useMemo(() => {
+      const validRates = Object.values(rate).filter(r => r !== null) as number[];
+      return validRates.length > 0 ? validRates.reduce((a, b) => a + b, 0) / validRates.length : null;
+    }, [rate]);
+
+    const diff = averageRate !== null
+      ? Object.entries(rate).reduce((acc, [source, value]) => {
+        if (value !== null) {
+          acc[source] = ((value - averageRate) / averageRate) * 100;
+        }
+        return acc;
+      }, {} as Record<string, number>)
       : null;
 
     const maximumFractionDigits = [CURRENCY_CODE.BTC].includes(from) || [CURRENCY_CODE.HUF].includes(to) ? 0 : 2;
@@ -48,6 +60,14 @@ export const ExchangeRatesPresets: React.FC = () => {
             {source}
           </sup>
         </div>
+        {diff && diff[source] !== undefined && (
+          <span className={cn('text-[10px] font-medium', {
+            'text-success': diff[source] >= 0,
+            'text-destructive': diff[source] < 0,
+          })}>
+            {diff[source] >= 0 ? '+' : ''}{diff[source].toFixed(1)}%
+          </span>
+        )}
       </div>
     );
 
@@ -78,12 +98,16 @@ export const ExchangeRatesPresets: React.FC = () => {
             />
           </div>
         )}
-        {diff !== null && (
-          <div className={cn('absolute top-0 right-0 -mt-2 -mr-2 px-1.5 py-0.5 rounded-full text-[10px] font-medium z-10', {
-            'bg-success text-success-foreground': diff >= 0,
-            'bg-destructive text-destructive-foreground': diff < 0,
-          })}>
-            {diff >= 0 ? '+' : ''}{diff.toFixed(1)}%
+        {rate.wise !== null && (
+          <div className="mt-1 text-muted-foreground">
+            <RateDisplay
+              value={rate.wise}
+              source="ws"
+              from={from}
+              to={to}
+              amount={amount}
+              maximumFractionDigits={maximumFractionDigits}
+            />
           </div>
         )}
       </div>

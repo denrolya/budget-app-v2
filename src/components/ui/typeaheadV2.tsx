@@ -1,48 +1,54 @@
-import cn from 'classnames';
-import { Check, ChevronsUpDown, X } from 'lucide-react';
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import cn from 'classnames';
+import { Check, ChevronsUpDown, X } from 'lucide-react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
-interface Option {
-  [key: string]: any;
-}
-
-interface TypeaheadV2Props {
+export interface TypeaheadV2Props<T> extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   multiple?: boolean;
-  options: Option[];
-  valueField: string;
-  labelField: string;
-  groupBy?: string;
-  renderElement: (element: any, valueField?: string, labelField?: string) => React.ReactNode;
-  placeholder?: string;
+  options: T[];
+  valueField: keyof T;
+  labelField: keyof T;
+  groupBy?: keyof T;
+  renderElement: (element: T, valueField?: keyof T, labelField?: keyof T) => React.ReactNode;
   emptyMessage?: string;
-  value: number | number[] | string | string[] | null;
-  onChange: (value: number | number[] | string | string[] | null) => void;
-  className?: string;
+  value: string | number | readonly string[] | undefined;
+  onChange: (value: string | number | string[] | null) => void;
 }
 
-export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
-                                                                             multiple = false,
-                                                                             options,
-                                                                             valueField,
-                                                                             labelField,
-                                                                             groupBy,
-                                                                             renderElement,
-                                                                             placeholder = 'Select options...',
-                                                                             emptyMessage = 'No options found.',
-                                                                             value,
-                                                                             onChange,
-                                                                             className,
-                                                                           }, ref) => {
+export const TypeaheadV2 = <T, >({
+                                   multiple = false,
+                                   options,
+                                   valueField,
+                                   labelField,
+                                   groupBy,
+                                   renderElement,
+                                   placeholder = 'Select options...',
+                                   emptyMessage = 'No options found.',
+                                   value,
+                                   onChange,
+                                   className,
+                                   ...inputProps
+                                 }: TypeaheadV2Props<T>,
+                                 ref: React.Ref<HTMLInputElement>,
+) => {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // @ts-ignore
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current?.focus();
+    },
+    blur: () => {
+      inputRef.current?.blur();
+    },
+  }));
 
   const selectedValues = useMemo(() => {
     if (multiple) {
@@ -53,7 +59,7 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
   }, [multiple, value]);
 
   const selectedOptions = useMemo(() => {
-    return options.filter(option => selectedValues.includes(option[valueField]));
+    return options.filter(option => selectedValues.includes(option[valueField] as string | number));
   }, [options, selectedValues, valueField]);
 
   const groupedOptions = useMemo(() => {
@@ -63,12 +69,12 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
 
     const groups = options.reduce((acc, option) => {
       const groupLabel = option[groupBy] || '';
-      if (!acc[groupLabel]) {
-        acc[groupLabel] = [];
+      if (!acc[groupLabel as string]) {
+        acc[groupLabel as string] = [];
       }
-      acc[groupLabel].push(option);
+      acc[groupLabel as string].push(option);
       return acc;
-    }, {} as Record<string, Option[]>);
+    }, {} as Record<string, T[]>);
 
     return Object.entries(groups).map(([label, groupOptions]) => ({
       label,
@@ -80,14 +86,14 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
     return groupedOptions.map(group => ({
       ...group,
       options: group.options.filter(option =>
-        option[labelField].toLowerCase().includes(inputValue.toLowerCase()) &&
-        !selectedValues.includes(option[valueField])
+        String(option[labelField]).toLowerCase().includes(inputValue.toLowerCase()) &&
+        !selectedValues.includes(option[valueField] as string | number),
       ),
     })).filter(group => group.options.length > 0);
   }, [groupedOptions, inputValue, labelField, selectedValues, valueField]);
 
-  const handleSelect = useCallback((option: Option) => {
-    const optionValue = option[valueField];
+  const handleSelect = useCallback((option: T) => {
+    const optionValue = option[valueField] as string | number;
     if (multiple) {
       const newValue = selectedValues.includes(optionValue)
         ? selectedValues.filter(v => v !== optionValue)
@@ -128,7 +134,9 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
       const newValue = selectedValues.slice(0, -1);
       onChange(multiple ? newValue : null);
     }
-  }, [inputValue, multiple, onChange, selectedValues, filteredOptions, highlightedIndex, handleSelect]);
+
+    inputProps.onKeyDown?.(e);
+  }, [inputValue, multiple, onChange, selectedValues, filteredOptions, highlightedIndex, handleSelect, inputProps]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -160,54 +168,73 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
   return (
     <div className={cn('relative w-full', className)} ref={dropdownRef}>
       <div
-        className="flex items-center flex-wrap gap-1 px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+        className={cn(
+          'flex items-center gap-1 px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
+          inputProps.disabled && 'opacity-50 cursor-not-allowed',
+        )}
         onClick={() => {
-          setOpen(true);
-          inputRef.current?.focus();
+          if (!inputProps.disabled) {
+            setOpen(true);
+            inputRef.current?.focus();
+          }
         }}
       >
-        <div className="flex-1 flex flex-wrap items-center gap-1 pr-4">
-          {selectedOptions.map((option) => (
-            <Badge key={option[valueField]} variant="secondary" className="text-sm">
-              <span className="truncate max-w-[100px]">{option[labelField]}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="ml-1 h-4 w-4 p-0"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemove(option[valueField]);
-                }}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </Badge>
-          ))}
-          <input
-            ref={inputRef}
-            value={inputValue}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            onFocus={() => setOpen(true)}
-            placeholder={selectedOptions.length === 0 ? placeholder : ''}
-            className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground min-w-[50px]"
-          />
-        </div>
+        <ScrollArea>
+          <div className="flex-1 flex items-center gap-1 min-w-0">
+            {selectedOptions.map((option) => (
+              <Badge
+                variant="outline"
+                className="whitespace-nowrap text-xs shadow-md py-0 px-1 bg-background"
+                key={option[valueField] as React.Key}>
+                <span className="truncate max-w-[100px]">{String(option[labelField])}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="ml-1 h-4 w-4 p-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemove(option[valueField] as string | number);
+                  }}
+                  disabled={inputProps.disabled}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            ))}
+            <input
+              {...inputProps}
+              ref={inputRef}
+              value={inputValue}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              onFocus={(e) => {
+                setOpen(true);
+                inputProps.onFocus?.(e);
+              }}
+              placeholder={selectedOptions.length === 0 ? placeholder : ''}
+              className={cn('flex-1 bg-transparent outline-none placeholder:text-muted-foreground min-w-[50px]', { 'w-0 p-0': !multiple && selectedOptions.length > 0 })}
+            />
+          </div>
+          <ScrollBar orientation="horizontal" className="h-0.5" />
+        </ScrollArea>
         <Button
           tabIndex={-1}
           type="button"
           variant="ghost"
           size="sm"
-          className="h-4 w-4 p-0 hover:bg-transparent absolute right-3"
+          className="h-4 w-4 p-0 hover:bg-transparent ml-auto"
           onClick={(e) => {
             e.stopPropagation();
-            setOpen(!open);
+            if (!inputProps.disabled) {
+              setOpen(!open);
+            }
           }}
+          disabled={inputProps.disabled}
         >
           <ChevronsUpDown className="h-4 w-4 opacity-50" />
         </Button>
       </div>
-      {open && (
+      {open && !inputProps.disabled && (
         <div className="absolute z-50 w-full left-0 mt-1 bg-popover border border-input rounded-md shadow-md overflow-hidden">
           <ScrollArea className="max-h-[300px] overflow-y-auto">
             <div className="p-1">
@@ -223,7 +250,7 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
                     const flatIndex = filteredOptions.slice(0, groupIndex).reduce((acc, g) => acc + g.options.length, 0) + index;
                     return (
                       <div
-                        key={option[valueField]}
+                        key={option[valueField] as React.Key}
                         ref={el => optionRefs.current[flatIndex] = el}
                         className={cn('flex items-center px-2 py-1.5 text-sm cursor-pointer', {
                           'bg-accent text-accent-foreground': highlightedIndex === flatIndex,
@@ -233,8 +260,8 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
                         onMouseEnter={() => setHighlightedIndex(flatIndex)}
                       >
                         <Check className={cn('mr-2 h-4 w-4', {
-                          'opacity-0': !selectedValues.includes(option[valueField]),
-                          'opacity-100': selectedValues.includes(option[valueField]),
+                          'opacity-0': !selectedValues.includes(option[valueField] as string | number),
+                          'opacity-100': selectedValues.includes(option[valueField] as string | number),
                         })} />
                         {renderElement(option, valueField, labelField)}
                       </div>
@@ -248,8 +275,8 @@ export const TypeaheadV2 = forwardRef<HTMLInputElement, TypeaheadV2Props>(({
       )}
     </div>
   );
-});
+};
 
 TypeaheadV2.displayName = 'TypeaheadV2';
 
-export default TypeaheadV2;
+export default forwardRef(<T, >(props: TypeaheadV2Props<T>, ref: React.Ref<HTMLInputElement>) => TypeaheadV2<T>(props, ref));

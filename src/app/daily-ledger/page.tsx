@@ -1,10 +1,3 @@
-import cn from 'classnames';
-import { ArrowRightLeftIcon, CalendarIcon, ChevronLeft, ChevronRight, Receipt } from 'lucide-react';
-import moment from 'moment';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
-import { useSwipeable } from 'react-swipeable';
-
 import MoneyValue from '@/components/common/MoneyValue.tsx';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
@@ -14,6 +7,12 @@ import { useBaseCurrency } from '@/contexts/auth.tsx';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 import Transaction from '@/models/Transaction';
+import cn from 'classnames';
+import { ArrowRightLeftIcon, CalendarIcon, ChevronLeft, ChevronRight, Receipt } from 'lucide-react';
+import moment from 'moment';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { useSwipeable } from 'react-swipeable';
 
 export const DailyLedgerPage = () => {
   const [currentDate, setCurrentDate] = useState(moment().startOf('day'));
@@ -120,6 +119,7 @@ export const DailyLedgerPage = () => {
             <YearDoughnutTimeframeDisplayChart data={[{ after: dateRange.startDate, before: dateRange.endDate }]} />
           }
         >
+          <span>
           <h4 className="text-lg font-semibold flex items-center justify-center">
             <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground flex-shrink-0" />
             {formatDateRange(dateRange.startDate, dateRange.endDate)}
@@ -140,6 +140,7 @@ export const DailyLedgerPage = () => {
             </span>
             </div>
           </div>
+            </span>
         </ResponsiveTooltip>
         <Button onClick={goToNextPage} disabled={isLoading} size="sm" variant="ghost">
           <span className="hidden sm:inline">Next </span>

@@ -1,6 +1,8 @@
 import moment from 'moment';
 import { z } from 'zod';
 
+import Account from '@/models/Account.ts';
+import Category from '@/models/Category.ts';
 import { formSchema } from '@/components/features/transactions/Form.tsx';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import Transaction, { Type as TransactionType } from '@/models/Transaction';
@@ -155,11 +157,11 @@ export const transactionService = {
     return `${BASE_URL}?${query.toString()}`;
   },
 
-  formatData(values: z.infer<typeof formSchema>, existingData?: Transaction) {
+  formatData(values: Partial<Transaction>, existingData?: Transaction) {
     return {
-      account: values.account,
-      amount: values.amount.toString(),
-      category: values.category,
+      account: (values.account instanceof Account) ? values.account.id : values.account,
+      amount: values?.amount.toString(),
+      category: (values.category instanceof Category) ? values.category.id : values.category,
       executedAt: moment(values.executedAt).toISOString(),
       isDraft: values.isDraft ?? false,
       note: values.note || '',
@@ -184,11 +186,11 @@ export const transactionService = {
     });
   },
 
-  createTransaction(data: z.infer<typeof formSchema>) {
+  createTransaction(data: Partial<Transaction>) {
     return api.post(`/api/transactions/${data.type}`, this.formatData(data));
   },
 
-  updateTransaction(id: string | number, updates: z.infer<typeof formSchema>, originalTransaction: Transaction) {
+  updateTransaction(id: string | number, updates: Partial<Transaction>, originalTransaction: Transaction) {
     return api.put(`/api/transactions/${id}`, this.formatData(updates, originalTransaction));
   },
 

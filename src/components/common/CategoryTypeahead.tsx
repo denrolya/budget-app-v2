@@ -1,14 +1,11 @@
 import { forwardRef } from 'react';
 
-import TypeaheadV2 from '@/components/ui/typeaheadV2';
+import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
 import { useExpenseCategories, useIncomeCategories } from '@/contexts/FinanceData';
 import Category from '@/models/Category';
 import { Type as TransactionType } from '@/models/Transaction';
 
-interface CategoryTypeaheadProps {
-  multiple?: boolean;
-  value: number | number[] | string | string[] | null;
-  onChange: (value: number | number[] | string | string[] | null) => void;
+interface CategoryTypeaheadProps extends Omit<TypeaheadV2Props<Category>, 'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'> {
   className?: string;
   type?: TransactionType;
 }
@@ -19,6 +16,7 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>((
                                                                                   onChange,
                                                                                   className,
                                                                                   type,
+                                                                                  ...props
                                                                                 }, ref) => {
   const incomeCategories = useIncomeCategories();
   const expenseCategories = useExpenseCategories();
@@ -46,7 +44,7 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>((
   }
 
   return (
-    <TypeaheadV2
+    <TypeaheadV2<Category>
       valueField="id"
       labelField="name"
       groupBy={type}
@@ -58,8 +56,11 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>((
       onChange={onChange}
       className={className}
       ref={ref}
-    />
+      {...props}
+    ></TypeaheadV2>
   );
 });
+
+CategoryTypeahead.displayName = 'CategoryTypeahead';
 
 export default CategoryTypeahead;

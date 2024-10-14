@@ -3,23 +3,21 @@ import { forwardRef } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountAvatar from '@/components/features/accounts/Avatar';
-import Account from '@/models/Account';
-import TypeaheadV2 from '@/components/ui/typeaheadV2';
+import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
 import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
+import Account from '@/models/Account';
 
-interface AccountTypeaheadProps {
-  multiple?: boolean;
-  value: number | number[] | string | string[] | null;
-  onChange: (value: number | number[] | string | string[] | null) => void;
+interface AccountTypeaheadProps extends Omit<TypeaheadV2Props<Account>, 'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'> {
   className?: string;
 }
 
 const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
-                                                                    multiple = false,
-                                                                    value,
-                                                                    onChange,
-                                                                    className,
-                                                                  }, ref) => {
+                                                                                multiple = false,
+                                                                                value,
+                                                                                onChange,
+                                                                                className,
+                                                                                ...props
+                                                                              }, ref) => {
   const accounts = useAccountsWithDefaultOrder();
 
   const renderElement = (el: Account) => (
@@ -47,7 +45,7 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
   );
 
   return (
-    <TypeaheadV2
+    <TypeaheadV2<Account>
       valueField="id"
       labelField="nameWithCurrency"
       groupBy="type"
@@ -59,8 +57,11 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
       onChange={onChange}
       className={className}
       ref={ref}
-    />
+      {...props}
+    ></TypeaheadV2>
   );
 });
+
+AccountTypeahead.displayName = 'AccountTypeahead';
 
 export default AccountTypeahead;

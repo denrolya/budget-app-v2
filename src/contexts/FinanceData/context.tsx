@@ -20,6 +20,7 @@ export type ExchangeRates = Record<string, number>;
 export type ExchangeRatesData = {
   fixer: ExchangeRates;
   mono: ExchangeRates;
+  wise: ExchangeRates;
 }
 
 export type CategoriesData = {
@@ -61,6 +62,7 @@ const ENDPOINTS = {
   categories: '/api/v2/category',
   fixerExchangeRates: '/api/v2/exchange-rates',
   monobankExchangeRates: '/api/v2/exchange-rates/monobank',
+  wiseExchangeRates: '/api/v2/exchange-rates/wise',
 } as const;
 
 export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -82,9 +84,13 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
       const monobankExchangeRatesResponse = await axiosFetcher(ENDPOINTS.monobankExchangeRates);
       const monobankExchangeRates: Record<string, number> = monobankExchangeRatesResponse.rates;
 
+      const wiseExchangeRatesResponse = await axiosFetcher(ENDPOINTS.wiseExchangeRates);
+      const wiseExchangeRates: Record<string, number> = wiseExchangeRatesResponse.rates;
+
       return {
         fixer: fixerExchangeRates,
         mono: monobankExchangeRates,
+        wise: wiseExchangeRates,
       };
     },
     ...queryOptions,

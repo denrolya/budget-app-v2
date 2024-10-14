@@ -85,3 +85,8 @@ export const useFixerExchangeRates = (): ExchangeRates => {
   const { data } = useFinanceData();
   return data.exchangeRates.fixer;
 };
+
+export const useWiseExchangeRates = (): ExchangeRates => {
+  const { data } = useFinanceData();
+  return data.exchangeRates.wise;
+};
