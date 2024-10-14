@@ -1,21 +1,25 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import moment from 'moment';
 import cn from 'classnames';
+import { ArrowRightLeftIcon, CalendarIcon, ChevronLeft, ChevronRight, Receipt } from 'lucide-react';
+import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSwipeable } from 'react-swipeable';
 
-import { useScreenSize } from '@/hooks/useScreenSize';
+import MoneyValue from '@/components/common/MoneyValue.tsx';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
 import { Button } from '@/components/ui/button';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
+import { useBaseCurrency } from '@/contexts/auth.tsx';
+import { useScreenSize } from '@/hooks/useScreenSize';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
+import Transaction from '@/models/Transaction';
 
 export const DailyLedgerPage = () => {
   const [currentDate, setCurrentDate] = useState(moment().startOf('day'));
   const isDesktop = useScreenSize();
   const daysPerPage = 5;
+  const baseCurrency = useBaseCurrency();
 
   const dateRange = useMemo(() => {
     const startDate = currentDate.clone().subtract(daysPerPage - 1, 'days');
@@ -68,10 +72,40 @@ export const DailyLedgerPage = () => {
 
   const dates = useMemo(() => Array.from({ length: daysPerPage }, (_, i) => moment(currentDate).subtract(i, 'days')), [currentDate, daysPerPage]);
 
+  const summary = useMemo(() => {
+    if (!groupedItems) return {
+      transactionsCount: 0,
+      transfersCount: 0,
+      transactionsValue: 0,
+      transfersValue: 0,
+    };
+
+    let transactionsCount = 0;
+    let transfersCount = 0;
+    let transfersValue = 0;
+    let transactionsValue = 0;
+
+    Object.values(groupedItems).forEach(items => {
+      items.forEach(item => {
+        if (item instanceof Transaction) {
+          transactionsCount++;
+          if (item.isExpense()) {
+            transactionsValue -= item.convertedValues[baseCurrency];
+          } else if (item.isIncome()) {
+            transactionsValue += item.convertedValues[baseCurrency];
+          }
+        } else {
+          transfersCount++;
+          transfersValue += item.fromExpense.convertedValues[baseCurrency];
+        }
+      });
+    });
+
+    return { transactionsCount, transfersCount, transactionsValue, transfersValue };
+  }, [groupedItems]);
+
   return (
     <section className="w-full mx-auto md:px-4 pb-16 pt-4 md:py-4" {...swipeHandlers}>
-      <h1 className="hidden sm:block text-2xl font-bold mb-4">Daily Ledger</h1>
-
       <div className="flex justify-between items-center mb-4">
         <Button onClick={goToPreviousPage} disabled={isLoading} size="sm" variant="ghost">
           <ChevronLeft className="mr-2 h-4 w-4" />
@@ -83,12 +117,29 @@ export const DailyLedgerPage = () => {
           contentClassName="w-full max-w-sm p-4 sm:w-96 bg-transparent border-none shadow-none"
           triggerClassName="cursor-help"
           content={
-            <span>
-              <YearDoughnutTimeframeDisplayChart data={[{ after: dateRange.startDate, before: dateRange.endDate }]} />
-            </span>
+            <YearDoughnutTimeframeDisplayChart data={[{ after: dateRange.startDate, before: dateRange.endDate }]} />
           }
         >
-          <span className="text-lg font-medium">{formatDateRange(dateRange.startDate, dateRange.endDate)}</span>
+          <h4 className="text-lg font-semibold flex items-center justify-center">
+            <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground flex-shrink-0" />
+            {formatDateRange(dateRange.startDate, dateRange.endDate)}
+          </h4>
+          <div className="flex flex-wrap gap-1 text-sm justify-center">
+            <div className="flex items-center min-w-[120px]">
+              <ArrowRightLeftIcon className="mr-1 h-4 w-4 text-primary flex-shrink-0" />
+              <span className="font-medium mr-1">{summary.transfersCount}</span>
+              <span className="text-muted-foreground truncate">
+              (<MoneyValue useColors={false} amount={summary.transfersValue} />)
+            </span>
+            </div>
+            <div className="flex items-center min-w-[120px]">
+              <Receipt className="mr-1 h-4 w-4 text-primary flex-shrink-0" />
+              <span className="font-medium mr-1">{summary.transactionsCount}</span>
+              <span className="text-muted-foreground truncate">
+              (<MoneyValue amount={summary.transactionsValue} />)
+            </span>
+            </div>
+          </div>
         </ResponsiveTooltip>
         <Button onClick={goToNextPage} disabled={isLoading} size="sm" variant="ghost">
           <span className="hidden sm:inline">Next </span>
@@ -108,7 +159,7 @@ export const DailyLedgerPage = () => {
           <React.Fragment key={date.format('YYYY-MM-DD')}>
             <div
               className={cn('w-full', 'px-0', 'md:px-2', {
-                'md:w-1/5': isDesktop
+                'md:w-1/5': isDesktop,
               })}
               style={{
                 order: `${daysPerPage - index - 1} sm:${index}`,

@@ -47,10 +47,10 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
   const content = (
     <>
       <div className="flex flex-col space-y-2 pb-3 border-b border-border">
-        <h2 className="text-lg font-semibold flex items-center">
+        <h4 className="text-lg font-semibold flex items-center">
           <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground flex-shrink-0" />
           <span className="truncate">{date.format('dddd, D MMM')}</span>
-        </h2>
+        </h4>
         <div className="flex flex-wrap gap-2 text-sm">
           <div className="flex items-center min-w-[120px]">
             <ArrowRightLeftIcon className="mr-1 h-4 w-4 text-primary flex-shrink-0" />
