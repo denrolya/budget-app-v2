@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import moment, { Moment } from 'moment';
 import qs from 'qs';
 
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useCategories } from '@/contexts/FinanceData';
 import { Interval } from '@/constants/dashboard-config';
 import { axiosFetcher } from '@/services/api';
@@ -113,8 +114,8 @@ export const useValueByPeriod = (params: ValueByPeriodParams) => {
   }).filter((id): id is number => id !== null);
 
   const queryParams = qs.stringify({
-    after: periodStart.format('YYYY-MM-DD'),
-    before: periodEnd.format('YYYY-MM-DD'),
+    after: periodStart.format(BACKEND_DATE_FORMAT),
+    before: periodEnd.format(BACKEND_DATE_FORMAT),
     interval: period ? `${period.value} ${period.unit}` : `${interval.value} ${interval.unit}`,
     type,
     categories: categoryIds,
@@ -135,8 +136,8 @@ export const useValueByPeriod = (params: ValueByPeriodParams) => {
     : [periodStart.clone().subtract(1, 'year'), periodEnd.clone().subtract(1, 'year')];
 
   const comparisonQueryParams = qs.stringify({
-    after: comparisonStart.format('YYYY-MM-DD'),
-    before: comparisonEnd.format('YYYY-MM-DD'),
+    after: comparisonStart.format(BACKEND_DATE_FORMAT),
+    before: comparisonEnd.format(BACKEND_DATE_FORMAT),
     interval: period ? `${period.value} ${period.unit}` : `${interval.value} ${interval.unit}`,
     type,
     categories: categoryIds,

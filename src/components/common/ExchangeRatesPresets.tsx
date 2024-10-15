@@ -2,6 +2,7 @@ import cn from 'classnames';
 import { Equal } from 'lucide-react';
 import React, { useMemo } from 'react';
 
+import CurrencyConverter from '@/components/features/CurrencyConverter';
 import { CURRENCY_CODE } from '@/constants/currency';
 import MoneyValue from '@/components/common/MoneyValue';
 import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/contexts/FinanceData';
@@ -115,7 +116,7 @@ export const ExchangeRatesPresets: React.FC = () => {
   };
 
   return (
-    <div className="space-y-3 p-4">
+    <div className="space-y-3 p-0 md:p-4">
       <RateComparison from={CURRENCY_CODE.EUR} to={CURRENCY_CODE.USD} />
 
       <div className="grid grid-cols-2 gap-3">
@@ -129,8 +130,12 @@ export const ExchangeRatesPresets: React.FC = () => {
         <RateComparison from={CURRENCY_CODE.BTC} to={CURRENCY_CODE.EUR} />
         <RateComparison from={CURRENCY_CODE.BTC} to={CURRENCY_CODE.USD} />
       </div>
+
+      <CurrencyConverter />
     </div>
   );
 };
+
+ExchangeRatesPresets.displayName = 'ExchangeRatesPresets';
 
 export default ExchangeRatesPresets;

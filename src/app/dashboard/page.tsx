@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 
-import { useCategories } from '@/contexts/FinanceData';
-import Category from '@/models/Category.ts';
 import { generateSlug } from '@/utils/generateSlug';
 import CardStack from '@/components/common/CardStack';
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
@@ -11,21 +9,8 @@ import { CardConfig, cardConfigs } from '@/constants/dashboard-config';
 const DashboardPage: React.FC = () => {
   const [configs, setConfigs] = useState<CardConfig[]>(cardConfigs);
   const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
-  const { tree } = useCategories();
-  const extractNameAndChildren = (tree: Category): { name: string; children?: any[] } => {
-    const { name, type, children } = tree;
-
-    return {
-      name,
-      type,
-      children: children?.map(extractNameAndChildren) || []
-    };
-  };
-
-  console.log(JSON.stringify(extractNameAndChildren({ name: 'Root', children: tree })));
 
   const handleConfigChange = (index: number, newConfig: Partial<CardConfig>) => {
-    console.log('handleConfigChange', index, newConfig);
     setConfigs(prevConfigs =>
       prevConfigs.map((config, i) =>
         i === index ? { ...config, ...newConfig } : config

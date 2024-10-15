@@ -2,8 +2,8 @@ import React from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import { FormRenderer } from '@/components/common/FormRenderer';
-import { Header } from '@/components/layout/Header';
-import { MobileNavigation } from '@/components/layout/MobileNavigation';
+import Header from '@/components/layout/Header';
+import MobileNavigation from '@/components/layout/MobileNavigation';
 import Sidebar from '@/components/layout/Sidebar';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';

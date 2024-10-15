@@ -3,7 +3,7 @@ import { Check, Laptop, LogOut, Moon, Settings, Sun, User } from 'lucide-react';
 import React from 'react';
 
 import HeaderLink from '@/components/layout/HeaderLink';
-import { CurrencySelector } from '@/components/layout/CurrencySelector';
+import CurrencySelector from '@/components/layout/HeaderCurrencySelector';
 import ExchangeRatesDetails from '@/components/layout/ExchangeRatesDetails';
 import { Button } from '@/components/ui/button';
 import {
@@ -116,3 +116,7 @@ export const Header: React.FC<Props> = ({ className }) => {
     </header>
   );
 };
+
+Header.displayName = 'Header';
+
+export default Header;

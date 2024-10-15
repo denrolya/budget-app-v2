@@ -1,8 +1,8 @@
-import PercentageIndicator from '@/components/features/statistics/StatisticsCard/PercentageIndicator.tsx';
 import { SettingsIcon } from 'lucide-react';
 import { Moment } from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 
+import PercentageIndicator from '@/components/features/statistics/StatisticsCard/PercentageIndicator';
 import MoneyValue from '@/components/common/MoneyValue';
 import ConfigForm from '@/components/features/statistics/StatisticsCard/ConfigForm';
 import PercentageBadge from '@/components/features/statistics/StatisticsCard/PercentageBadge';
@@ -49,22 +49,15 @@ const StatisticsCardSkeleton = () => (
     <CardContent className="p-4">
       <Skeleton className="h-4 w-[200px]" />
       <Skeleton className="h-4 w-[150px] mt-2" />
-      <Skeleton className="h-8 w-full mt-4" />
-      <Skeleton className="h-4 w-[100px] mt-2" />
-      <Skeleton className="h-1 w-full mt-4" />
     </CardContent>
   </Card>
 );
 
-const TooltipContent: React.FC<{ label: string; date: Moment | undefined; amount: number }> = ({
-                                                                                                 label,
-                                                                                                 date,
-                                                                                                 amount,
-                                                                                               }) => (
+const TooltipContent: React.FC<{ label: string; date: Moment | undefined; amount: number }> = ({ label, date, amount }) => (
   <div className="p-2">
     <p className="font-semibold mb-1">{label}</p>
     <p className="text-sm">{date?.format('MMM D, YYYY')}</p>
-    <MoneyValue useColors={false} className="text-lg font-bold mt-1" amount={amount} />
+    <MoneyValue className="text-lg font-bold mt-1" useColors={false} amount={amount} />
   </div>
 );
 
@@ -227,10 +220,10 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                 <>
                   <div className="flex justify-between items-baseline">
                     <MoneyValue
+                      className="text-2xl font-bold tracking-tight"
                       useColors={false}
                       showSign={false}
-                      amount={currentValue}
-                      className="text-2xl font-bold tracking-tight" />
+                      amount={currentValue} />
                     <PercentageBadge percentage={percentageChange} reverted={type === TransactionType.Expense} />
                   </div>
                   <div className="flex justify-between text-xs">

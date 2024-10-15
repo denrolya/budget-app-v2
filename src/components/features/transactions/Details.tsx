@@ -1,4 +1,3 @@
-import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime.ts';
 import { Bitcoin, DollarSign, Edit, Euro, InfoIcon, Loader2, Trash2 } from 'lucide-react';
 import React from 'react';
 
@@ -12,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Separator } from '@/components/ui/separator';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
-import { useFixerExchangeRates, useMonobankExchangeRates } from '@/contexts/FinanceData';
+import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/contexts/FinanceData';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactionMutations } from '@/hooks/useTransactionMutations';
 import Transaction from '@/models/Transaction';
@@ -54,8 +53,10 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
   const { deleteTransaction, isDeleting, isUpdating: isEditing } = useTransactionMutations();
 
   const isDebt = transaction.debt && transaction.debt.debtor;
-  const currentRates = useFixerExchangeRates();
+  const fixerRates = useFixerExchangeRates();
   const monobankRates = useMonobankExchangeRates();
+  const wiseRates = useWiseExchangeRates();
+  console.log({ fixerRates });
 
   const formatExchangeRate = (convertedAmount: number, targetCurrency: CURRENCY_CODE) => {
     const transactionCurrency = CURRENCIES[transaction.account.currency];
@@ -70,7 +71,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
     if (targetCurrency === CURRENCY_CODE.BTC) {
       baseCurrencySymbol = CURRENCIES[CURRENCY_CODE.BTC].symbol;
       quoteCurrencySymbol = CURRENCIES[CURRENCY_CODE.USD].symbol;
-      const rateBTCtoUSD = currentRates[CURRENCY_CODE.USD] / currentRates[CURRENCY_CODE.BTC];
+      const rateBTCtoUSD = fixerRates[CURRENCY_CODE.USD] / fixerRates[CURRENCY_CODE.BTC];
       rate = rateBTCtoUSD;
       return `1 ${baseCurrencySymbol} = ${quoteCurrencySymbol}${rate.toFixed(8)}`;
     } else if (transactionCurrency.code === CURRENCY_CODE.EUR || transactionCurrency.code === CURRENCY_CODE.USD) {
@@ -217,7 +218,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
                             <h4 className="font-semibold">Current Rates</h4>
                             <div className="space-y-1">
                               <RateDisplay
-                                value={currentRates[currency] / currentRates[transaction.account.currency]}
+                                value={fixerRates[currency] / fixerRates[transaction.account.currency]}
                                 source="fx"
                                 from={transaction.account.currency}
                                 to={currency}
@@ -226,7 +227,15 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
                               />
                               <RateDisplay
                                 value={monobankRates[currency] / monobankRates[transaction.account.currency]}
-                                source="mb"
+                                source="mn"
+                                from={transaction.account.currency}
+                                to={currency}
+                                amount={transaction.amount}
+                                decimals={isBTC ? 8 : 2}
+                              />
+                              <RateDisplay
+                                value={wiseRates[currency] / wiseRates[transaction.account.currency]}
+                                source="ws"
                                 from={transaction.account.currency}
                                 to={currency}
                                 amount={transaction.amount}

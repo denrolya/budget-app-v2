@@ -1,25 +1,26 @@
 import cn from 'classnames';
 import {
-  Home,
-  Receipt,
-  CreditCard,
-  MoreHorizontal,
-  Plus,
   Airplay,
   ArrowLeftRight,
+  CreditCard,
   DollarSign,
+  Home,
   List,
   LogOut,
   Monitor,
   Moon,
+  MoreHorizontal,
   PieChart,
+  Plus,
+  Receipt,
   Sun,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import ExchangeRatesPresets from '@/components/common/ExchangeRatesPresets';
 import DraftTransactionForm from '@/components/features/transactions/DraftForm';
+import { CurrencyButtonSelector } from '@/components/layout/CurrencyButtonSelector.tsx';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -34,7 +35,6 @@ interface Props {
 
 export const MobileNavigation: React.FC<Props> = ({ className }) => {
   const { theme, setTheme } = useTheme();
-  const [currency, setCurrency] = useState('USD');
   const location = useLocation();
 
   const navItems = [
@@ -94,7 +94,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                 </button>
               </DrawerTrigger>
               <DrawerContent>
-                <DrawerHeader className="text-left">
+                <DrawerHeader className="sr-only">
                   <DrawerTitle>More options</DrawerTitle>
                 </DrawerHeader>
                 <div className="p-4">
@@ -156,13 +156,19 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                         </Button>
                       </div>
                     </TabsContent>
-                    <TabsContent value="exchangeRates">
+                    <TabsContent value="exchangeRates" className="p-0">
                       <ScrollArea className="mt-4">
                         <ExchangeRatesPresets />
                       </ScrollArea>
                     </TabsContent>
                     <TabsContent value="settings">
-                      <div className="space-y-4">
+                      <div className="space-y-3">
+                        <div>
+                          <h3 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2">
+                            Currency
+                          </h3>
+                          <CurrencyButtonSelector />
+                        </div>
                         <div>
                           <label className="text-sm font-medium">Theme</label>
                           <Select value={theme} onValueChange={setTheme}>
@@ -191,19 +197,6 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div>
-                          <label className="text-sm font-medium">Currency</label>
-                          <Select value={currency} onValueChange={setCurrency}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select currency" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="USD">USD</SelectItem>
-                              <SelectItem value="EUR">EUR</SelectItem>
-                              <SelectItem value="GBP">GBP</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
                         <Button variant="destructive" className="w-full">
                           <LogOut className="mr-2 h-4 w-4" />
                           Logout
@@ -220,5 +213,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
     </nav>
   );
 };
+
+MobileNavigation.displayName = 'MobileNavigation';
 
 export default MobileNavigation;

@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 import { CURRENCY_CODE } from '@/constants/currency';
-import { parseJwt } from '@/utils/parseJWT';
 import User from '@/models/User';
 import { api } from '@/services/api';
+import { parseJwt } from '@/utils/parseJWT';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -14,6 +15,7 @@ interface AuthContextType {
   login: (token: string) => void;
   logout: () => void;
   updateCurrency: (currency: CURRENCY_CODE) => Promise<void>;
+  refreshToken: () => Promise<string>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,19 +26,18 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
-
   const login = (token: string) => {
     const decodedUser = parseJwt(token);
     setToken(token);
     setUser(decodedUser);
-    sessionStorage.setItem('token', token);
+    localStorage.setItem('token', token);
     setIsLoading(false);
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
-    sessionStorage.removeItem('token');
+    localStorage.removeItem('token');
   };
 
   const updateCurrency = async (currency: CURRENCY_CODE) => {
@@ -47,14 +48,26 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       baseCurrency: currency,
     });
 
-    // Update user state
-    setUser({ ...user, baseCurrency: currency });
+    // Fetch refreshed token
+    await refreshToken();
+  };
 
-    // TODO: Fetch refreshed token here
+  const refreshToken = async (): Promise<string> => {
+    try {
+      const response = await api.get<{ token: string }>('/api/v2/auth/token/refresh');
+      const newToken = response.data.token;
+      login(newToken);
+      return newToken;
+    } catch (error) {
+      toast.error('Failed to refresh token');
+      console.error('Failed to refresh token:', error);
+      logout();
+      throw new Error('Failed to refresh token');
+    }
   };
 
   useEffect(() => {
-    const storedToken = sessionStorage.getItem('token');
+    const storedToken = localStorage.getItem('token');
     if (storedToken) {
       login(storedToken);
     } else {
@@ -64,7 +77,17 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated: !!user, isLoading, isInitialized, user, token, login, logout, updateCurrency }}>
+    <AuthContext.Provider value={{
+      isAuthenticated: !!user,
+      isLoading,
+      isInitialized,
+      user,
+      token,
+      login,
+      logout,
+      updateCurrency,
+      refreshToken,
+    }}>
       {children}
     </AuthContext.Provider>
   );

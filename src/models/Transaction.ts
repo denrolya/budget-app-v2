@@ -22,6 +22,7 @@ interface TransactionProps {
   executedAt: Moment | string;
   category: Category;
   isDraft: boolean;
+  debt?: object;
   compensations: undefined | Partial<TransactionProps>[];
   type: Type;
 }
@@ -35,6 +36,7 @@ export class Transaction {
   executedAt: Moment;
   category: Category;
   isDraft: boolean;
+  debt?: object;
   compensations: Transaction[] | undefined;
   type: Type;
 
@@ -47,6 +49,7 @@ export class Transaction {
                 executedAt,
                 category,
                 isDraft,
+                debt,
                 compensations,
                 type,
               }: TransactionProps) {
@@ -58,6 +61,7 @@ export class Transaction {
     this.executedAt = moment(executedAt);
     this.category = category;
     this.isDraft = isDraft;
+    this.debt = debt;
     this.compensations = compensations?.map(
       (comp) =>
         new Transaction({

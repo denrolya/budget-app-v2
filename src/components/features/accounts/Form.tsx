@@ -10,38 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useForm as useFormContext } from '@/contexts/Form';
-
-const colorScheme = {
-  bank: {
-    eur: '#33CCFF',
-    usd: '#66FF66',
-    uah: '#FFDD55',
-    huf: '#FF6347',
-    btc: '#FFB84D', // Lightest orange
-  },
-  cash: {
-    eur: '#0099CC',
-    usd: '#32CD32',
-    uah: '#FFD100',
-    huf: '#B22222',
-    btc: '#FFA500', // Slightly darker orange
-  },
-  internet: {
-    eur: '#006080',
-    usd: '#228B22',
-    uah: '#CCAC00',
-    huf: '#8B0000',
-    btc: '#FF8C00', // Darkest, most saturated orange
-  },
-  other: {
-    eur: '#66CCCC',
-    usd: '#99FF99',
-    uah: '#FFEB99',
-    huf: '#D2691E',
-    btc: '#FFDAB9', // Lighter, more pastel-like orange
-  },
-};
-
+import { ACCOUNT_CURRENCY_COLORSCHEME } from '@/constants/colors';
 
 const currencyInfo = {
   eur: { symbol: '€', color: '#0066CC', name: 'Euro' },
@@ -104,7 +73,7 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
     const baseStyle = 'h-20 sm:h-24 transition-colors duration-200';
     const isSelected = form.watch(field) === value;
     const bgColor = field === 'type'
-      ? colorScheme[value as keyof typeof colorScheme][form.watch('currency') as keyof (typeof colorScheme)['internet']]
+      ? ACCOUNT_CURRENCY_COLORSCHEME[value as keyof typeof ACCOUNT_CURRENCY_COLORSCHEME][form.watch('currency') as keyof (typeof ACCOUNT_CURRENCY_COLORSCHEME)['internet']]
       : currencyInfo[value as keyof typeof currencyInfo].color;
     const textColor = isSelected ? 'text-primary-foreground' : 'text-primary';
     return `${baseStyle} ${isSelected ? `bg-[${bgColor}]` : 'bg-background'} ${textColor}`;
@@ -169,7 +138,7 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
                       className={getButtonStyle(option.value, 'type')}
                       style={{
                         backgroundColor: field.value === option.value
-                          ? colorScheme[option.value as keyof typeof colorScheme][form.watch('currency') as keyof (typeof colorScheme)['internet']]
+                          ? ACCOUNT_CURRENCY_COLORSCHEME[option.value as keyof typeof ACCOUNT_CURRENCY_COLORSCHEME][form.watch('currency') as keyof (typeof ACCOUNT_CURRENCY_COLORSCHEME)['internet']]
                           : undefined,
                       }}
                       onClick={() => field.onChange(option.value)}
