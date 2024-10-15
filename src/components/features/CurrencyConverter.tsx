@@ -1,5 +1,5 @@
 import { ArrowLeftRight, ArrowRightLeft } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -14,13 +14,24 @@ import {
 } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CURRENCY_CODE } from '@/constants/currency.ts';
 import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/contexts/FinanceData';
 
-export const CurrencyConverter = () => {
-  const [fromCurrency, setFromCurrency] = useState<string>('USD');
-  const [toCurrency, setToCurrency] = useState<string>('EUR');
-  const [amount, setAmount] = useState<number>(1);
-  const [rateSource, setRateSource] = useState<'fxr' | 'mnb' | 'wse'>('fxr');
+interface Props {
+  defaultFromCurrency?: CURRENCY_CODE;
+  defaultToCurrency?: CURRENCY_CODE;
+  defaultAmount?: number;
+}
+
+export const CurrencyConverter: React.FC<Props> = ({
+                                                     defaultFromCurrency = CURRENCY_CODE.HUF,
+                                                     defaultToCurrency = CURRENCY_CODE.EUR,
+                                                     defaultAmount = 1,
+                                                   }) => {
+  const [fromCurrency, setFromCurrency] = useState<CURRENCY_CODE>(defaultFromCurrency);
+  const [toCurrency, setToCurrency] = useState<CURRENCY_CODE>(defaultToCurrency);
+  const [amount, setAmount] = useState<number>(defaultAmount);
+  const [rateSource, setRateSource] = useState<'mnb' | 'fx' | 'wse'>('mnb');
 
   const fixerRates = useFixerExchangeRates();
   const monoRates = useMonobankExchangeRates();
@@ -28,10 +39,14 @@ export const CurrencyConverter = () => {
 
   const rates = useMemo(() => {
     switch (rateSource) {
-      case 'fxr': return fixerRates;
-      case 'mnb': return monoRates;
-      case 'wse': return wiseRates;
-      default: return fixerRates;
+      case 'fx':
+        return fixerRates;
+      case 'mnb':
+        return monoRates;
+      case 'wse':
+        return wiseRates;
+      default:
+        return fixerRates;
     }
   }, [rateSource, fixerRates, monoRates, wiseRates]);
 
@@ -40,15 +55,19 @@ export const CurrencyConverter = () => {
     setToCurrency(fromCurrency);
   };
 
-  const presetAmounts = [1, 5, 10, 50, 100, 500];
+  const presetAmounts = [1, 5, 10, 50, 100, 500, 1000];
 
-  const getExchangeRate = (from: string, to: string): number => {
+  const getExchangeRate = (from: CURRENCY_CODE, to: CURRENCY_CODE): number => {
     if (from === to) return 1;
     if (!rates[from] || !rates[to]) return 0;
     return rates[to] / rates[from];
   };
 
-  const availableCurrencies = useMemo(() => Object.keys(rates).filter(currency => currency !== 'BTC' || rateSource === 'fxr'), [rates, rateSource]);
+  const availableCurrencies = useMemo(() => Object
+      .keys(rates)
+      .filter(currency => currency !== CURRENCY_CODE.BTC || rateSource === 'fx') as CURRENCY_CODE[],
+    [rates, rateSource],
+  );
 
   return (
     <Drawer>
@@ -67,17 +86,17 @@ export const CurrencyConverter = () => {
           <div className="flex space-x-2">
             <Button
               size="sm"
-              variant={rateSource === 'fxr' ? 'default' : 'outline'}
-              onClick={() => setRateSource('fxr')}
-            >
-              FXR
-            </Button>
-            <Button
-              size="sm"
               variant={rateSource === 'mnb' ? 'default' : 'outline'}
               onClick={() => setRateSource('mnb')}
             >
               MNB
+            </Button>
+            <Button
+              size="sm"
+              variant={rateSource === 'fx' ? 'default' : 'outline'}
+              onClick={() => setRateSource('fx')}
+            >
+              FX
             </Button>
             <Button
               size="sm"
@@ -94,8 +113,8 @@ export const CurrencyConverter = () => {
               onChange={(e) => setAmount(e.target.valueAsNumber || 0)}
               className="w-1/2 font-mono"
             />
-            <Select value={fromCurrency} onValueChange={setFromCurrency}>
-              <SelectTrigger className="w-1/4">
+            <Select value={fromCurrency} onValueChange={(value) => setFromCurrency(value as CURRENCY_CODE)}>
+            <SelectTrigger className="w-1/4">
                 <SelectValue placeholder="From" />
               </SelectTrigger>
               <SelectContent>
@@ -109,8 +128,8 @@ export const CurrencyConverter = () => {
             <Button size="icon" variant="ghost" onClick={swapCurrencies}>
               <ArrowLeftRight className="h-4 w-4" />
             </Button>
-            <Select value={toCurrency} onValueChange={setToCurrency}>
-              <SelectTrigger className="w-1/4">
+            <Select value={toCurrency} onValueChange={(value) => setToCurrency(value as CURRENCY_CODE)}>
+            <SelectTrigger className="w-1/4">
                 <SelectValue placeholder="To" />
               </SelectTrigger>
               <SelectContent>

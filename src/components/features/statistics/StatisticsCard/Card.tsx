@@ -1,11 +1,8 @@
-import { SettingsIcon } from 'lucide-react';
-import { Moment } from 'moment';
-import React, { memo, useMemo, useState } from 'react';
-
-import PercentageIndicator from '@/components/features/statistics/StatisticsCard/PercentageIndicator';
 import MoneyValue from '@/components/common/MoneyValue';
 import ConfigForm from '@/components/features/statistics/StatisticsCard/ConfigForm';
 import PercentageBadge from '@/components/features/statistics/StatisticsCard/PercentageBadge';
+
+import PercentageIndicator from '@/components/features/statistics/StatisticsCard/PercentageIndicator';
 import StatTypeBadge from '@/components/features/statistics/StatisticsCard/StatTypeBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,6 +15,10 @@ import { CardConfig, useValueByPeriod } from '@/hooks/statistics/useValueByPerio
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { Type as TransactionType } from '@/models/Transaction';
 import { generateSlug } from '@/utils/generateSlug';
+import isEqual from 'lodash/isEqual';
+import { SettingsIcon } from 'lucide-react';
+import { Moment } from 'moment';
+import React, { memo, useMemo, useState } from 'react';
 
 interface Props {
   onChange: (index: number, newConfig: Partial<CardConfig>) => void;
@@ -53,7 +54,11 @@ const StatisticsCardSkeleton = () => (
   </Card>
 );
 
-const TooltipContent: React.FC<{ label: string; date: Moment | undefined; amount: number }> = ({ label, date, amount }) => (
+const TooltipContent: React.FC<{ label: string; date: Moment | undefined; amount: number }> = ({
+                                                                                                 label,
+                                                                                                 date,
+                                                                                                 amount,
+                                                                                               }) => (
   <div className="p-2">
     <p className="font-semibold mb-1">{label}</p>
     <p className="text-sm">{date?.format('MMM D, YYYY')}</p>
@@ -145,17 +150,16 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
             )}
           </div>
         </div>
-        {error ? (
-          <p className="text-destructive">Error loading data</p>
-        ) : (
+        {error && <p className="text-destructive">Error loading data</p>}
+        {!error && (
           <>
             <div className="space-y-1">
-              {statType === 'min-max' ? (
+              {statType === 'min-max' && (
                 <div className="flex flex-col space-y-1">
                   <div className="flex justify-between items-baseline">
-                    <ResponsiveTooltip content={
-                      <TooltipContent label="Minimum Value" date={minDate} amount={currentValue.min} />
-                    }>
+                    <ResponsiveTooltip content={<TooltipContent label="Minimum Value"
+                                                                date={minDate}
+                                                                amount={currentValue.min} />}>
                       <div className="flex items-baseline gap-1">
                         <span className="text-xs text-muted-foreground">Min</span>
                         <MoneyValue
@@ -166,9 +170,9 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                       </div>
                     </ResponsiveTooltip>
 
-                    <ResponsiveTooltip content={
-                      <TooltipContent label="Maximum Value" date={maxDate} amount={currentValue.max} />
-                    }>
+                    <ResponsiveTooltip content={<TooltipContent label="Maximum Value"
+                                                                date={maxDate}
+                                                                amount={currentValue.max} />}>
                       <div className="flex items-baseline gap-1">
                         <span className="text-xs text-muted-foreground">Max</span>
                         <MoneyValue
@@ -186,11 +190,11 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                           <p className="font-semibold mb-1">Minimum Comparison</p>
                           <div className="flex justify-between items-center">
                             <span>Current:</span>
-                            <MoneyValue amount={currentValue.min} className="font-medium" />
+                            <MoneyValue className="font-medium" amount={currentValue.min} />
                           </div>
                           <div className="flex justify-between items-center">
                             <span>Previous:</span>
-                            <MoneyValue amount={comparisonValue.min} className="font-medium" />
+                            <MoneyValue className="font-medium" amount={comparisonValue.min} />
                           </div>
                         </div>
                       }
@@ -203,11 +207,11 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                           <p className="font-semibold mb-1">Maximum Comparison</p>
                           <div className="flex justify-between items-center">
                             <span>Current:</span>
-                            <MoneyValue amount={currentValue.max} className="font-medium" />
+                            <MoneyValue className="font-medium" amount={currentValue.max} />
                           </div>
                           <div className="flex justify-between items-center">
                             <span>Previous:</span>
-                            <MoneyValue amount={comparisonValue.max} className="font-medium" />
+                            <MoneyValue className="font-medium" amount={comparisonValue.max} />
                           </div>
                         </div>
                       }
@@ -216,7 +220,8 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                     </ResponsiveTooltip>
                   </div>
                 </div>
-              ) : (
+              )}
+              {(statType !== 'min-max') && (
                 <>
                   <div className="flex justify-between items-baseline">
                     <MoneyValue
@@ -230,7 +235,7 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                     <span className="text-muted-foreground">
                       vs {comparison === 'previous' ? 'previous' : 'last year'}
                     </span>
-                    <MoneyValue useColors={false} className="font-medium" amount={comparisonValue} />
+                    <MoneyValue className="font-medium" useColors={false} amount={comparisonValue} />
                   </div>
                 </>
               )}
@@ -250,4 +255,4 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
 
 StatisticsCard.displayName = 'StatisticsCard';
 
-export default memo(StatisticsCard);
+export default memo(StatisticsCard, (prevProps, nextProps) => isEqual(prevProps.config, nextProps.config));

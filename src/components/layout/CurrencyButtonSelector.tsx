@@ -16,11 +16,11 @@ type CurrencyType = {
   color: string;
 };
 
-interface CurrencyButtonSelectorProps {
+interface CurrencyButtonSelectorProps extends React.ComponentPropsWithoutRef<'div'> {
   className?: string;
 }
 
-export const CurrencyButtonSelector: React.FC<CurrencyButtonSelectorProps> = ({ className }) => {
+export const CurrencyButtonSelector: React.FC<CurrencyButtonSelectorProps> = ({ className, ...props }) => {
   const { updateCurrency } = useAuth();
   const baseCurrency = useBaseCurrency();
   const [selectedCurrency, setSelectedCurrency] = useState<CURRENCY_CODE>(baseCurrency || Object.values(CURRENCIES)[0].code);
@@ -42,13 +42,13 @@ export const CurrencyButtonSelector: React.FC<CurrencyButtonSelectorProps> = ({ 
 
     if (confirmed) {
       setSelectedCurrency(value);
-      updateCurrency(value);
+      await updateCurrency(value);
       toast.success(`Currency updated to ${value}`);
     }
   };
 
   return (
-    <div className={cn('space-y-4 w-full', className)}>
+    <div className={cn('space-y-4 w-full', className)} {...props}>
       <div className="flex w-full justify-between space-x-2">
         {fiatCurrencies.map(([code, info]) => (
           <Button

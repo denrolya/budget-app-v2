@@ -1,14 +1,14 @@
 import cn from 'classnames';
 import React from 'react';
 
-import { CURRENCIES } from '@/constants/currency';
+import { Badge } from '@/components/ui/badge';
+import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useBaseCurrency } from '@/contexts/auth';
 import Transaction from '@/models/Transaction';
-import { Badge } from '@/components/ui/badge';
+import { formatMoney as formatMoneyValue } from '@/utils/formatMoney';
 
-interface Props {
+interface Props extends React.ComponentPropsWithoutRef<'span'> {
   transaction: Transaction;
-  className?: string;
   maximumFractionDigits?: number;
   badge?: boolean;
 }
@@ -16,8 +16,8 @@ interface Props {
 export const TransactionValue: React.FC<Props> = ({
                                                     transaction,
                                                     className = '',
-                                                    maximumFractionDigits = 2,
-                                                    badge = false
+                                                    maximumFractionDigits,
+                                                    badge = false,
                                                   }) => {
   const baseCurrencyCode = useBaseCurrency();
   const baseCurrency = CURRENCIES[baseCurrencyCode];
@@ -25,13 +25,13 @@ export const TransactionValue: React.FC<Props> = ({
   const symbol = currency ? CURRENCIES[currency]?.symbol : baseCurrency.symbol;
   const value = convertedValues?.[baseCurrency.code];
 
-  const formatMoney = (value: number, symbol: string) => {
+  const formatMoney = (value: number, currency: CURRENCY_CODE, symbol: string) => {
     const sign = ((transaction.isIncome() && value >= 0) || (transaction.isExpense() && value < 0)) ? '+' : '-';
-    return `${sign} ${symbol} ${Math.abs(value).toLocaleString(undefined, { maximumFractionDigits })}`;
+    return `${sign} ${symbol} ${formatMoneyValue(value, currency, maximumFractionDigits)}`;
   };
 
-  const amountString = formatMoney(amount, symbol);
-  const valueString = value !== undefined ? formatMoney(value, baseCurrency.symbol) : '';
+  const amountString = formatMoney(amount, currency, symbol);
+  const valueString = value !== undefined ? formatMoney(value, baseCurrencyCode, baseCurrency.symbol) : '';
 
   const textColorClass = transaction.isExpense() ? 'text-destructive' : 'text-success';
 
@@ -39,27 +39,27 @@ export const TransactionValue: React.FC<Props> = ({
 
   const content = (
     <span className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}>
-      {shouldShowConvertedValue ? (
+      {!shouldShowConvertedValue && <span>{amountString}</span>}
+      {shouldShowConvertedValue && (
         <>
           <span>{valueString}</span>
           <span className="text-xs opacity-75 hidden md:inline ml-1">
             | {amountString}
           </span>
         </>
-      ) : (
-        <span>{amountString}</span>
       )}
     </span>
   );
 
-  return badge ? (
-    <Badge
-      className="text-xs"
-      variant={transaction.isIncome() ? 'success' : 'destructive'}
-    >
-      {content}
-    </Badge>
-  ) : (
+  if (badge) {
+    return (
+      <Badge className="text-xs" variant={transaction.isIncome() ? 'success' : 'destructive'}>
+        {content}
+      </Badge>
+    );
+  }
+
+  return (
     <span className={`${textColorClass} ${className}`}>
       {content}
     </span>

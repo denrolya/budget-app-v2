@@ -1,46 +1,22 @@
 import cn from 'classnames';
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useBaseCurrency } from '@/contexts/auth';
+import { formatMoney } from '@/utils/formatMoney';
 
-interface MoneyValueProps {
-  id?: string;
+interface MoneyValueProps extends React.ComponentPropsWithoutRef<'span'> {
   currency?: CURRENCY_CODE;
   amount: number | string;
   values?: Record<string, number>;
   showSymbol?: boolean;
   showSign?: boolean;
   maximumFractionDigits?: number;
-  className?: string;
   badge?: boolean;
   revertColors?: boolean;
   useColors?: boolean;
 }
-
-const getFractionDigits = (currencyCode?: CURRENCY_CODE, maximumFractionDigits: number = 2): number => {
-  if (!isNaN(maximumFractionDigits)) return maximumFractionDigits;
-
-  switch (currencyCode) {
-    case CURRENCY_CODE.EUR:
-    case CURRENCY_CODE.USD:
-      return 2;
-    case CURRENCY_CODE.HUF:
-      return 0;
-    case CURRENCY_CODE.BTC:
-      return 8;
-    case CURRENCY_CODE.UAH:
-      return 1;
-    default:
-      return 2;
-  }
-};
-
-const formatMoney = (value: number, currencyCode?: CURRENCY_CODE, maximumFractionDigits?: number): string => {
-  const fractionDigits = getFractionDigits(currencyCode, maximumFractionDigits);
-  return Math.abs(value).toLocaleString(undefined, { maximumFractionDigits: fractionDigits });
-};
 
 const getBadgeVariant = (value: number, useColors: boolean, revertColors: boolean): 'default' | 'destructive' | 'success' | 'outline' => {
   if (!useColors) return 'outline';
@@ -49,19 +25,19 @@ const getBadgeVariant = (value: number, useColors: boolean, revertColors: boolea
   return 'outline';
 };
 
-export const MoneyValue: React.FC<MoneyValueProps> = React.memo(({
-                                                                   id,
-                                                                   currency,
-                                                                   amount,
-                                                                   values = {},
-                                                                   showSymbol = true,
-                                                                   showSign = false,
-                                                                   maximumFractionDigits,
-                                                                   className,
-                                                                   badge = false,
-                                                                   revertColors = false,
-                                                                   useColors = true,
-                                                                 }) => {
+export const MoneyValue: React.FC<MoneyValueProps> = ({
+                                                        id,
+                                                        currency,
+                                                        amount,
+                                                        values = {},
+                                                        showSymbol = true,
+                                                        showSign = false,
+                                                        maximumFractionDigits,
+                                                        className,
+                                                        badge = false,
+                                                        revertColors = false,
+                                                        useColors = true,
+                                                      }) => {
   const baseCurrencyCode = useBaseCurrency();
   const baseCurrency = CURRENCIES[baseCurrencyCode];
   const symbol = currency ? CURRENCIES[currency]?.symbol : baseCurrency.symbol;
@@ -120,8 +96,8 @@ export const MoneyValue: React.FC<MoneyValueProps> = React.memo(({
       {content}
     </span>
   );
-});
+};
 
 MoneyValue.displayName = 'MoneyValue';
 
-export default MoneyValue;
+export default memo(MoneyValue);

@@ -35,7 +35,7 @@ export const HeaderCurrencySelector: React.FC<CurrencySelectorProps> = (props) =
 
     if (confirmed) {
       setSelectedCurrency(value);
-      updateCurrency(value);
+      await updateCurrency(value);
       toast.success(`Currency updated to ${value}`);
     }
   };
