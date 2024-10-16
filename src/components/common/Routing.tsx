@@ -1,13 +1,15 @@
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import TestingPage from '@/app/testing-page/page.tsx';
+import TestingPage from '@/app/testing-page/page';
+import BudgetingPage from '@/app/budget/page';
 import { AccountsManagementPage } from '@/app/accounts/page';
 import LoginPage from '@/app/login/page';
 import TransactionsListPage from '@/app/transactions/page';
 import TransfersListPage from '@/app/transfers/page';
 import DailyLedgerPage from '@/app/daily-ledger/page';
 import DebtsPage from '@/app/debts/page';
+import CategoriesPage from '@/app/categories/page';
 import DashboardPage from '@/app/dashboard/page';
 import { LayoutV9 } from '@/components/layout/LayoutV9';
 import { PrivateRoute } from '@/components/common/PrivateRoute';
@@ -64,6 +66,16 @@ const ProtectedContent: React.FC = () => {
         <Route path="testing" element={
           <PrivateRoute>
             <TestingPage />
+          </PrivateRoute>
+        } />
+        <Route path="budget" element={
+          <PrivateRoute>
+            <BudgetingPage />
+          </PrivateRoute>
+        } />
+        <Route path="categories" element={
+          <PrivateRoute>
+            <CategoriesPage />
           </PrivateRoute>
         } />
         <Route path="*" element={<Navigate to="/dashboard" />} />

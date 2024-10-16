@@ -13,6 +13,7 @@ export type Debt = {
   id: number;
   name: string;
   amount: number;
+  convertedValues: Record<string, number>;
 };
 
 export type ExchangeRates = Record<string, number>;

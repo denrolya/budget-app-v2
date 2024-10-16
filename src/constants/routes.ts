@@ -1,32 +1,65 @@
-import { ArrowLeftRight, LayoutDashboard, Handshake, CalendarDays, Receipt, Wallet, Airplay } from 'lucide-react';
+import {
+  ArrowLeftRight,
+  BarChart3,
+  CalendarDays,
+  Handshake,
+  LayoutDashboard,
+  PieChart,
+  Receipt,
+  Tags,
+  TestTube2,
+  Wallet,
+} from 'lucide-react';
 
 export const ROUTES = {
   DASHBOARD: {
     path: '/dashboard',
-    icon: LayoutDashboard
+    icon: LayoutDashboard,
+    label: 'Dashboard',
   },
   DAILY_LEDGER: {
     path: '/ledger',
-    icon: CalendarDays
+    icon: CalendarDays,
+    label: 'Ledger',
   },
   TRANSACTION_LIST: {
     path: '/transactions',
-    icon: Receipt
-  },
-  ACCOUNT_LIST: {
-    path: '/accounts',
-    icon: Wallet
-  },
-  DEBT_LIST: {
-    path: '/debts',
-    icon: Handshake
+    icon: Receipt,
+    label: 'Transactions',
   },
   TRANSFER_LIST: {
     path: '/transfers',
-    icon: ArrowLeftRight
+    icon: ArrowLeftRight,
+    label: 'Transfers',
+  },
+  ACCOUNT_LIST: {
+    path: '/accounts',
+    icon: Wallet,
+    label: 'Accounts',
+  },
+  DEBT_LIST: {
+    path: '/debts',
+    icon: Handshake,
+    label: 'Debts',
+  },
+  CATEGORIES_PAGE: {
+    path: '/categories',
+    icon: Tags,
+    label: 'Categories',
+  },
+  BUDGET_PAGE: {
+    path: '/budget',
+    icon: PieChart,
+    label: 'Budget Planning',
+  },
+  REPORTS_PAGE: {
+    path: '/reports',
+    icon: BarChart3,
+    label: 'Reports',
   },
   TESTING_PAGE: {
     path: '/testing',
-    icon: Airplay
-  }
+    icon: TestTube2,
+    label: 'Testing Page',
+  },
 };

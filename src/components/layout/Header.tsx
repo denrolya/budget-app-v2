@@ -1,10 +1,10 @@
 import cn from 'classnames';
-import { Check, Laptop, LogOut, Moon, Settings, Sun, User } from 'lucide-react';
+import { Check, Laptop, LogOut, Moon, Sun, User } from 'lucide-react';
 import React from 'react';
 
-import HeaderLink from '@/components/layout/HeaderLink';
-import CurrencySelector from '@/components/layout/HeaderCurrencySelector';
 import ExchangeRatesDetails from '@/components/layout/ExchangeRatesDetails';
+import CurrencySelector from '@/components/layout/HeaderCurrencySelector';
+import HeaderLink from '@/components/layout/HeaderLink';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -16,7 +16,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/auth';
 import { Theme, useTheme } from '@/contexts/theme';
 
@@ -55,8 +54,6 @@ export const Header: React.FC<Props> = ({ className }) => {
           </HeaderLink>
         </nav>
       </div>
-
-      <Separator orientation="vertical" />
 
       <div className="flex items-center space-x-2 md:space-x-4">
         <ExchangeRatesDetails />
@@ -101,10 +98,6 @@ export const Header: React.FC<Props> = ({ className }) => {
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Preferences</span>
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout}>
               <LogOut className="mr-2 h-4 w-4" />

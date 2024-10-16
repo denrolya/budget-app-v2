@@ -17,6 +17,8 @@ import { FormType, useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
 import { ACCOUNT_TYPES_ORDER, AccountType } from '@/models/Account';
 
+type RouteKey = keyof typeof ROUTES
+
 export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
   const accounts = useActiveAccountsWithDefaultOrder();
@@ -29,12 +31,12 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
     () => sumBy(
       accounts,
       ({ convertedValues }) => convertedValues?.[baseCurrency] || 0,
-    ), [accounts.length]);
+    ), [accounts, baseCurrency]);
 
   const totalDebt = useMemo(() => sumBy(
     debts,
     ({ convertedValues }) => convertedValues?.[baseCurrency] || 0,
-  ), [debts?.length]);
+  ), [baseCurrency, debts]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -110,42 +112,11 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
             {isSidebarExpanded && (
               <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1">Areas</div>
             )}
-            <SidebarLink
-              to={ROUTES.DAILY_LEDGER.path}
-              icon={ROUTES.DAILY_LEDGER.icon}
-              isSidebarExpanded={isSidebarExpanded}>
-              Daily Ledger
-            </SidebarLink>
-            <SidebarLink
-              to={ROUTES.TRANSACTION_LIST.path}
-              icon={ROUTES.TRANSACTION_LIST.icon}
-              isSidebarExpanded={isSidebarExpanded}>
-              Transactions
-            </SidebarLink>
-            <SidebarLink
-              to={ROUTES.TRANSFER_LIST.path}
-              icon={ROUTES.TRANSFER_LIST.icon}
-              isSidebarExpanded={isSidebarExpanded}>
-              Transfers
-            </SidebarLink>
-            <SidebarLink
-              to={ROUTES.ACCOUNT_LIST.path}
-              icon={ROUTES.ACCOUNT_LIST.icon}
-              isSidebarExpanded={isSidebarExpanded}>
-              Accounts
-            </SidebarLink>
-            <SidebarLink
-              to={ROUTES.DEBT_LIST.path}
-              icon={ROUTES.DEBT_LIST.icon}
-              isSidebarExpanded={isSidebarExpanded}>
-              Debts
-            </SidebarLink>
-            <SidebarLink
-              to={ROUTES.TESTING_PAGE.path}
-              icon={ROUTES.TESTING_PAGE.icon}
-              isSidebarExpanded={isSidebarExpanded}>
-              Tests
-            </SidebarLink>
+            {(Object.keys(ROUTES) as RouteKey[]).filter(key => key !== 'DASHBOARD').map((key) => (
+              <SidebarLink key={key} to={ROUTES[key].path} icon={ROUTES[key].icon} isSidebarExpanded={isSidebarExpanded}>
+                {ROUTES[key].label}
+              </SidebarLink>
+            ))}
           </div>
         </div>
 

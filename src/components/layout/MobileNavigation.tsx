@@ -1,20 +1,5 @@
 import cn from 'classnames';
-import {
-  Airplay,
-  ArrowLeftRight,
-  CreditCard,
-  DollarSign,
-  Home,
-  List,
-  LogOut,
-  Monitor,
-  Moon,
-  MoreHorizontal,
-  PieChart,
-  Plus,
-  Receipt,
-  Sun,
-} from 'lucide-react';
+import { LogOut, Monitor, Moon, MoreHorizontal, Plus, Sun } from 'lucide-react';
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -26,8 +11,10 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ROUTES } from '@/constants/routes.ts';
+import { ROUTES } from '@/constants/routes';
 import { useTheme } from '@/contexts/theme';
+
+type RouteKey = keyof typeof ROUTES
 
 interface Props {
   className?: string;
@@ -37,11 +24,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
   const { theme, setTheme } = useTheme();
   const location = useLocation();
 
-  const navItems = [
-    { path: '/dashboard', icon: Home, label: 'Home' },
-    { path: '/ledger', icon: Receipt, label: 'Ledger' },
-    { path: '/transactions', icon: CreditCard, label: 'Transactions' },
-  ];
+  const navItems = [ROUTES.DASHBOARD, ROUTES.DAILY_LEDGER, ROUTES.TRANSACTION_LIST];
 
   return (
     <nav className={cn('fixed bottom-0 left-0 right-0 md:hidden bg-background border-t border-border z-10 h-12', className)}>
@@ -50,11 +33,10 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
           {navItems.slice(0, 2).map((item) => {
             const isActive = location.pathname === item.path;
             return (
-              <li key={item.path} className="flex-1 h-full">
+              <li className="flex-1 h-full" key={item.path}>
                 <Link
-                  to={item.path}
                   className="flex flex-col items-center justify-center w-full h-full text-muted-foreground"
-                >
+                  to={item.path}>
                   <item.icon className={cn('h-5 w-5', isActive ? 'text-primary' : 'text-muted-foreground')} />
                   <span className={cn('text-[10px] mt-0.5', isActive ? 'text-primary' : 'text-muted-foreground')}>{item.label}</span>
                 </Link>
@@ -106,54 +88,17 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                     </TabsList>
                     <TabsContent value="quickAccess">
                       <div className="space-y-4">
-                        <Button variant="ghost" className="w-full justify-start" asChild>
-                          <Link to="/accounts">
-                            <DollarSign className="mr-2 h-4 w-4" />
-                            Accounts
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" className="w-full justify-start" asChild>
-                          <Link to="/debts">
-                            <DollarSign className="mr-2 h-4 w-4" />
-                            Debts
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" className="w-full justify-start" asChild>
-                          <Link to="/transfers">
-                            <ArrowLeftRight className="mr-2 h-4 w-4" />
-                            Transfers
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" className="w-full justify-start" asChild>
-                          <Link to={ROUTES.TESTING_PAGE.path}>
-                            <Airplay className="mr-2 h-4 w-4" />
-                            Categories
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" className="w-full justify-start" asChild>
-                          <Link to="/reports">
-                            <PieChart className="mr-2 h-4 w-4" />
-                            Reports
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" className="w-full justify-start" asChild>
-                          <Link to="/categories">
-                            <List className="mr-2 h-4 w-4" />
-                            Categories
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" className="w-full justify-start" asChild>
-                          <Link to="/testing">
-                            <Airplay className="mr-2 h-4 w-4" />
-                            Test page
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" className="w-full justify-start" asChild>
-                          <Link to="/transactions-new">
-                            <Airplay className="mr-2 h-4 w-4" />
-                            New Transactions
-                          </Link>
-                        </Button>
+                        {(Object.keys(ROUTES) as RouteKey[]).map((key) => {
+                          const Icon = ROUTES[key].icon;
+                          return (
+                            <Button asChild variant="ghost" className="w-full justify-start" key={key}>
+                              <Link to={ROUTES[key].path}>
+                                <Icon className="mr-2 h-4 w-4" />
+                                {ROUTES[key].label}
+                              </Link>
+                            </Button>
+                          );
+                        })}
                       </div>
                     </TabsContent>
                     <TabsContent value="exchangeRates" className="p-0">
