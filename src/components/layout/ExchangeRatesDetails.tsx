@@ -26,7 +26,7 @@ export const ExchangeRatesDetails: React.FC = () => {
           {headerCurrencyPairs.map(({ from, to }) => (
             <div className="font-mono flex flex-col items-center" key={`${from}/${to}`}>
               <span>{from}/{to}</span>
-              <MoneyValue useColors={false} showSymbol={false} amount={getExchangeRate(from, to, fixerExchangeRates) ?? 0} />
+              <MoneyValue useColors={false} showSymbol={false} amount={getExchangeRate(from, to, fixerExchangeRates) ?? 0} currency={to} />
             </div>
           ))}
           <ChevronRight className="h-4 w-4 ml-1" />
