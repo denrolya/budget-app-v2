@@ -54,7 +54,7 @@ export const MoneyFlowSkeleton: React.FC = () => (
 
 export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
-  const [timeframe, setTimeframe] = useState<TimeframeOption['value']>(TIMEFRAME_OPTIONS[4].value);
+  const [timeframe, setTimeframe] = useState<TimeframeOption['value']>(TIMEFRAME_OPTIONS[6].value);
   const [interval, setInterval] = useState(INTERVAL_OPTIONS[1].value);
   const [isBarChart, setIsBarChart] = useState<boolean>(true);
   const [showRevenue, setShowRevenue] = useState<boolean>(false);

@@ -1,7 +1,11 @@
+import isEqual from 'lodash/isEqual';
+import { SettingsIcon } from 'lucide-react';
+import { Moment } from 'moment';
+import React, { memo, useMemo, useState } from 'react';
+
 import MoneyValue from '@/components/common/MoneyValue';
 import ConfigForm from '@/components/features/statistics/StatisticsCard/ConfigForm';
 import PercentageBadge from '@/components/features/statistics/StatisticsCard/PercentageBadge';
-
 import PercentageIndicator from '@/components/features/statistics/StatisticsCard/PercentageIndicator';
 import StatTypeBadge from '@/components/features/statistics/StatisticsCard/StatTypeBadge';
 import { Button } from '@/components/ui/button';
@@ -15,10 +19,6 @@ import { CardConfig, useValueByPeriod } from '@/hooks/statistics/useValueByPerio
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { Type as TransactionType } from '@/models/Transaction';
 import { generateSlug } from '@/utils/generateSlug';
-import isEqual from 'lodash/isEqual';
-import { SettingsIcon } from 'lucide-react';
-import { Moment } from 'moment';
-import React, { memo, useMemo, useState } from 'react';
 
 interface Props {
   onChange: (index: number, newConfig: Partial<CardConfig>) => void;
@@ -46,7 +46,7 @@ const getPeriodText = (interval: Interval, period?: Interval): string => {
 };
 
 const StatisticsCardSkeleton = () => (
-  <Card className="w-full sm:min-w-[240px] h-[140px] transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25">
+  <Card className="w-[300px] h-[140px] overflow-hidden transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 relative flex-none snap-center">
     <CardContent className="p-4">
       <Skeleton className="h-4 w-[200px]" />
       <Skeleton className="h-4 w-[150px] mt-2" />
@@ -104,7 +104,7 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
 
   return (
     <Card
-      className="w-full sm:min-w-[240px] h-[140px] overflow-hidden transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 relative"
+      className="w-[300px] h-[140px] overflow-hidden transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 relative flex-none snap-center"
       id={id}
     >
       <CardContent className="p-4 flex flex-col justify-between h-full">

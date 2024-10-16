@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
-import { generateSlug } from '@/utils/generateSlug';
-import CardStack from '@/components/common/CardStack';
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
 import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card';
 import { CardConfig, cardConfigs } from '@/constants/dashboard-config';
+import { generateSlug } from '@/utils/generateSlug';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const DashboardPage: React.FC = () => {
   const [configs, setConfigs] = useState<CardConfig[]>(cardConfigs);
@@ -13,8 +13,8 @@ const DashboardPage: React.FC = () => {
   const handleConfigChange = (index: number, newConfig: Partial<CardConfig>) => {
     setConfigs(prevConfigs =>
       prevConfigs.map((config, i) =>
-        i === index ? { ...config, ...newConfig } : config
-      )
+        i === index ? { ...config, ...newConfig } : config,
+      ),
     );
   };
 
@@ -25,33 +25,43 @@ const DashboardPage: React.FC = () => {
 
   return (
     <section className="p-6">
-      {/* Mobile view: CardStack */}
-      <div className="md:hidden mb-6">
-        <CardStack
-          cards={configs.map((card, index) => (
+      <div className="w-full relative overflow-hidden mb-6">
+        <div
+          className="flex overflow-x-auto space-x-4 snap-x snap-mandatory"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+          }}
+          aria-label="Scrollable card container"
+        >
+          {configs.map((card, index) => (
             <StatisticsCard
-              key={`mobile-card-${generateSlug(card.title, card.type, card.statType)}`}
+              key={`desktop-card-${generateSlug([card.title, card.type, card.statType])}`}
               config={card}
               onChange={(newConfig: CardConfig) => handleConfigChange(index, newConfig)}
             />
           ))}
-        />
+        </div>
       </div>
 
-      {/* Desktop view: Grid */}
-      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 justify-items-center mb-6">
-        {configs.map((card, index) => (
-          <StatisticsCard
-            key={`desktop-card-${generateSlug(card.title, card.type, card.statType)}`}
-            config={card}
-            onChange={(newConfig: CardConfig) => handleConfigChange(index, newConfig)}
-          />
-        ))}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="col-span-3 md:col-span-2">
+          <MoneyFlow className="mb-6" />
+        </div>
+        <div className="col-span-3 md:col-span-1">
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle>Transactions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>Content</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      <MoneyFlow className="mb-6" />
     </section>
-  );
+);
 };
 
 export default DashboardPage;
