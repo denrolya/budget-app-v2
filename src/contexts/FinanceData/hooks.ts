@@ -66,9 +66,19 @@ export const useIncomeCategories = (): Category[] => {
   return data.categories.list.filter(({ type }) => type === TransactionType.Income);
 };
 
+export const useIncomeCategoriesTree = (): Category[] => {
+  const { data } = useFinanceData();
+  return data.categories.tree.filter(({ type }) => type === TransactionType.Income);
+};
+
 export const useExpenseCategories = (): Category[] => {
   const { data } = useFinanceData();
   return data.categories.list.filter(({ type }) => type === TransactionType.Expense);
+};
+
+export const useExpenseCategoriesTree = (): Category[] => {
+  const { data } = useFinanceData();
+  return data.categories.tree.filter(({ type }) => type === TransactionType.Expense);
 };
 
 export const useExchangeRates = (): ExchangeRatesData => {

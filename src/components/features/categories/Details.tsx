@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, ChevronLeft, Download, Edit, Plus, FolderTree } from 'lucide-react';
+import { AlertCircle, ChevronLeft, Download, Edit, Plus, Folder, FolderClosed } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,14 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-interface Category {
-  id: string
-  name: string
-  type: 'income' | 'expense'
-  parent: string | null
-  createdAt: string
-}
+import Category from '@/models/Category';
 
 interface Transaction {
   id: string
@@ -41,7 +34,7 @@ const mockTransactions: Transaction[] = [
   { id: '5', date: '2023-10-08', description: 'Food delivery', amount: 32.99, categoryId: '1' },
 ];
 
-export default function Component({ category, setSelectedCategory, allCategories }: Props) {
+export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory, allCategories }) => {
   const [activeTab, setActiveTab] = useState('transactions');
   const [editMode, setEditMode] = useState(false);
   const [editedCategory, setEditedCategory] = useState(category);
@@ -117,10 +110,14 @@ export default function Component({ category, setSelectedCategory, allCategories
           <CardHeader>
             <div className="flex items-center space-x-4 mb-2">
               <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-                <FolderTree className="h-6 w-6 text-primary-foreground" />
+                {editedCategory.children.length > 0 ? (
+                  <Folder className="h-6 w-6 text-primary-foreground" />
+                ) : (
+                  <FolderClosed className="h-6 w-6 text-primary-foreground" />
+                )}
               </div>
               <div>
-                <CardTitle>{editedCategory.name}</CardTitle>
+                <CardTitle>{category.name}</CardTitle>
                 <CardDescription>
                   Created: {new Date(editedCategory.createdAt).toLocaleDateString()}
                 </CardDescription>
@@ -268,4 +265,6 @@ export default function Component({ category, setSelectedCategory, allCategories
       </div>
     </div>
   );
-}
+};
+
+export default CategoryDetails;
