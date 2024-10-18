@@ -1,3 +1,9 @@
+import cn from 'classnames';
+import { debounce, filter, includes, sortBy, toLower } from 'lodash';
+import { ChevronRight, Folder, FolderClosed, FolderOpenDot, Home, Info, Search } from 'lucide-react';
+import moment from 'moment';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import CategoryDetails from '@/components/features/categories/Details';
 import { Button } from '@/components/ui/button';
@@ -7,11 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/contexts/FinanceData';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import Category from '@/models/Category';
-import cn from 'classnames';
-import { debounce, filter, includes, sortBy, toLower } from 'lodash';
-import { ChevronRight, Folder, FolderClosed, FolderOpenDot, Home, Search } from 'lucide-react';
-import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
+import { Type as TransactionType } from '@/models/Transaction';
 
 export const CategoryManagementPage: React.FC = () => {
   const expenseCategories = useExpenseCategoriesTree();
@@ -21,7 +23,9 @@ export const CategoryManagementPage: React.FC = () => {
   const isDesktop = useScreenSize();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-  const [activeTab, setActiveTab] = useState<'income' | 'expense'>('expense');
+  const [activeTab, setActiveTab] = useState<TransactionType>(TransactionType.Expense);
+  const [showDetails, setShowDetails] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const sortCategories = (categories: Category[]): Category[] =>
     sortBy(categories, 'name');
@@ -44,13 +48,20 @@ export const CategoryManagementPage: React.FC = () => {
     return sortCategories(filtered);
   };
 
-  const expandParents = useCallback((categories: Category[], searchTerm: string) => {
+  const expandParents = useCallback((categories: Category[], searchTerm: string, parentPath: string[] = []) => {
     categories.forEach(category => {
+      const currentPath = [...parentPath, category.id];
       if (includes(toLower(category.name), toLower(searchTerm))) {
-        setExpandedCategories(prev => ({ ...prev, [category.id]: true }));
+        setExpandedCategories(prev => {
+          const newExpanded = { ...prev };
+          currentPath.forEach(id => {
+            newExpanded[id] = true;
+          });
+          return newExpanded;
+        });
       }
       if (category.children) {
-        expandParents(category.children, searchTerm);
+        expandParents(category.children, searchTerm, currentPath);
       }
     });
   }, []);
@@ -58,7 +69,19 @@ export const CategoryManagementPage: React.FC = () => {
   const debouncedSearch = debounce((term: string) => {
     setSearchTerm(term);
     expandParents([...incomeCategories, ...expenseCategories], term);
-  }, 300);
+  }, 1000);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+    debouncedSearch(term);
+  };
+
+  useEffect(() => {
+    if (searchInputRef.current) {
+      searchInputRef.current.value = searchTerm;
+    }
+  }, [searchTerm]);
 
   const filteredIncomeCategories = useMemo(() => filterCategories(incomeCategories, searchTerm), [incomeCategories, searchTerm]);
   const filteredExpenseCategories = useMemo(() => filterCategories(expenseCategories, searchTerm), [expenseCategories, searchTerm]);
@@ -82,22 +105,23 @@ export const CategoryManagementPage: React.FC = () => {
   const CategoryTree: React.FC<{
     categories: Category[],
     expandedCategories: Record<string, boolean>,
-    setExpandedCategories: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
-  }> = ({ categories, expandedCategories, setExpandedCategories }) => {
+    setExpandedCategories: React.Dispatch<React.SetStateAction<Record<string, boolean>>>,
+    depth?: number
+  }> = ({ categories, expandedCategories, setExpandedCategories, depth = 0 }) => {
 
     const handleCategoryClick = (category: Category) => {
-      setSelectedCategory(category);
+      if (isDesktop) {
+        setSelectedCategory(category);
+      }
       if (category.children && category.children.length > 0) {
         setExpandedCategories(prev => ({ ...prev, [category.id]: !prev[category.id] }));
       }
     };
 
-    const handleStepInto = (e: React.MouseEvent, category: Category) => {
+    const handleInfoClick = (e: React.MouseEvent, category: Category) => {
       e.stopPropagation();
-      if (category.children && category.children.length > 0) {
-        setCurrentPath(prev => [...prev, category]);
-        setSelectedCategory(category);
-      }
+      setSelectedCategory(category);
+      setShowDetails(true);
     };
 
     const sortedCategories = useMemo(() => sortCategories(categories), [categories]);
@@ -107,50 +131,60 @@ export const CategoryManagementPage: React.FC = () => {
         {sortedCategories.map((category) => (
           <React.Fragment key={category.id}>
             <div
-              className={cn('border-b cursor-pointer hover:bg-accent hover:text-accent-foreground', {
-                'bg-accent text-accent-foreground': selectedCategory?.id === category.id,
-              })}
+              className={cn(
+                'border-b cursor-pointer hover:bg-accent hover:text-accent-foreground',
+                {
+                  'bg-accent text-accent-foreground': isDesktop && selectedCategory?.id === category.id,
+                },
+              )}
               onClick={() => handleCategoryClick(category)}
             >
               <div className="flex items-stretch">
                 <div className="flex-grow flex items-center gap-2 py-2 px-4">
+                  <div className="flex items-center" style={{ width: `${depth * 20}px` }}>
+                    {Array.from({ length: depth }).map((_, index) => (
+                      <div key={index} className="w-5 h-5" />
+                    ))}
+                    {depth > 0 && (
+                      <div className="w-5 h-5 border-l-2 border-b-2 border-muted-foreground rounded-bl-lg" />
+                    )}
+                  </div>
                   {category.children?.length > 0 ? (
                     expandedCategories[category.id] ? (
-                      <FolderOpenDot className="w-4 h-4" />
+                      <FolderOpenDot className="w-4 h-4 flex-shrink-0" />
                     ) : (
-                      <FolderClosed className="w-4 h-4" />
+                      <FolderClosed className="w-4 h-4 flex-shrink-0" />
                     )
                   ) : (
-                    <Folder className="w-4 h-4" />
+                    <Folder className="w-4 h-4 flex-shrink-0" />
                   )}
-                  <div>
+                  <div className="truncate">
                     <span className="text-sm">{highlightSearchTerm(category.name)}</span>
                     <div className="text-xs text-muted-foreground">
                       <RelativeDatetimeDisplay date={moment(category.updatedAt)} />
                     </div>
                   </div>
                 </div>
-                {category.children && category.children.length > 0 && (
+                {!isDesktop && (
                   <Button
                     variant="ghost"
                     size="sm"
                     className="px-2 h-auto flex items-center justify-center"
-                    onClick={(e) => handleStepInto(e, category)}
+                    onClick={(e) => handleInfoClick(e, category)}
                   >
-                    <ChevronRight className="w-4 h-4" />
-                    <span className="sr-only">Step into {category.name}</span>
+                    <Info className="w-4 h-4" />
+                    <span className="sr-only">View details for {category.name}</span>
                   </Button>
                 )}
               </div>
             </div>
             {category.children && expandedCategories[category.id] && (
-              <div className="pl-4">
-                <CategoryTree
-                  categories={category.children}
-                  expandedCategories={expandedCategories}
-                  setExpandedCategories={setExpandedCategories}
-                />
-              </div>
+              <CategoryTree
+                categories={category.children}
+                expandedCategories={expandedCategories}
+                setExpandedCategories={setExpandedCategories}
+                depth={depth + 1}
+              />
             )}
           </React.Fragment>
         ))}
@@ -167,7 +201,8 @@ export const CategoryManagementPage: React.FC = () => {
           <Input
             placeholder="Search categories"
             className="pl-8"
-            onChange={(e) => debouncedSearch(e.target.value)}
+            onChange={handleSearchChange}
+            ref={searchInputRef}
           />
         </div>
       </div>
@@ -208,36 +243,32 @@ export const CategoryManagementPage: React.FC = () => {
       <Tabs
         value={activeTab}
         onValueChange={(value) => {
-          setActiveTab(value as 'income' | 'expense');
+          setActiveTab(value as TransactionType);
           setCurrentPath([]);
           setSelectedCategory(null);
         }}
-        className="w-full flex flex-col flex-grow"
+        className="flex flex-col flex-grow overflow-hidden"
       >
         <TabsList className="grid w-full grid-cols-2 rounded-none">
           <TabsTrigger value="income">Income</TabsTrigger>
           <TabsTrigger value="expense">Expense</TabsTrigger>
         </TabsList>
-        <TabsContent value="income" className="flex-grow overflow-hidden m-0 p-0">
+        <TabsContent className="flex-grow overflow-hidden m-0 p-0" value={TransactionType.Income}>
           <ScrollArea className="h-full">
-            <div className="p-2">
-              <CategoryTree
-                categories={currentPath.length > 0 ? currentPath[currentPath.length - 1].children || [] : filteredIncomeCategories}
-                expandedCategories={expandedCategories}
-                setExpandedCategories={setExpandedCategories}
-              />
-            </div>
+            <CategoryTree
+              categories={currentPath.length > 0 ? currentPath[currentPath.length - 1].children || [] : filteredIncomeCategories}
+              expandedCategories={expandedCategories}
+              setExpandedCategories={setExpandedCategories}
+            />
           </ScrollArea>
         </TabsContent>
-        <TabsContent value="expense" className="flex-grow overflow-hidden m-0 p-0">
+        <TabsContent className="flex-grow overflow-hidden m-0 p-0" value={TransactionType.Expense}>
           <ScrollArea className="h-full">
-            <div className="p-2">
-              <CategoryTree
-                categories={currentPath.length > 0 ? currentPath[currentPath.length - 1].children || [] : filteredExpenseCategories}
-                expandedCategories={expandedCategories}
-                setExpandedCategories={setExpandedCategories}
-              />
-            </div>
+            <CategoryTree
+              categories={currentPath.length > 0 ? currentPath[currentPath.length - 1].children || [] : filteredExpenseCategories}
+              expandedCategories={expandedCategories}
+              setExpandedCategories={setExpandedCategories}
+            />
           </ScrollArea>
         </TabsContent>
       </Tabs>
@@ -247,7 +278,7 @@ export const CategoryManagementPage: React.FC = () => {
   let content;
 
   if (!isDesktop) {
-    if (selectedCategory) {
+    if (showDetails && selectedCategory) {
       content = (
         <CategoryDetails
           category={selectedCategory}
@@ -261,10 +292,10 @@ export const CategoryManagementPage: React.FC = () => {
   } else {
     content = (
       <div className="flex h-full">
-        <div className="w-80 border-r bg-background">
+        <div className="w-80 border-r bg-background overflow-hidden flex flex-col">
           <CategoryList />
         </div>
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-4 overflow-auto">
           {selectedCategory ? (
             <CategoryDetails
               category={selectedCategory}
