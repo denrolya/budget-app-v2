@@ -1,18 +1,17 @@
-import React, { useMemo, useState, useCallback } from 'react';
-import cn from 'classnames';
-import { ChevronRight, ChevronLeft, Home, Search, Folder, FolderClosed, FolderOpenDot } from 'lucide-react';
-import moment from 'moment';
-import { sortBy, filter, includes, toLower, debounce } from 'lodash';
-
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import CategoryDetails from '@/components/features/categories/Details';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/contexts/FinanceData';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import Category from '@/models/Category';
+import cn from 'classnames';
+import { debounce, filter, includes, sortBy, toLower } from 'lodash';
+import { ChevronRight, Folder, FolderClosed, FolderOpenDot, Home, Search } from 'lucide-react';
+import moment from 'moment';
+import React, { useCallback, useMemo, useState } from 'react';
 
 export const CategoryManagementPage: React.FC = () => {
   const expenseCategories = useExpenseCategoriesTree();
@@ -57,9 +56,9 @@ export const CategoryManagementPage: React.FC = () => {
   }, []);
 
   const debouncedSearch = debounce((term: string) => {
-      setSearchTerm(term);
-      expandParents([...incomeCategories, ...expenseCategories], term);
-    }, 300);
+    setSearchTerm(term);
+    expandParents([...incomeCategories, ...expenseCategories], term);
+  }, 300);
 
   const filteredIncomeCategories = useMemo(() => filterCategories(incomeCategories, searchTerm), [incomeCategories, searchTerm]);
   const filteredExpenseCategories = useMemo(() => filterCategories(expenseCategories, searchTerm), [expenseCategories, searchTerm]);
@@ -74,7 +73,7 @@ export const CategoryManagementPage: React.FC = () => {
             <span key={i} className="bg-info">{part}</span>
           ) : (
             part
-          )
+          ),
         )}
       </>
     );
@@ -250,24 +249,11 @@ export const CategoryManagementPage: React.FC = () => {
   if (!isDesktop) {
     if (selectedCategory) {
       content = (
-        <>
-          <Button
-            variant="ghost"
-            className="mb-4"
-            onClick={() => {
-              setSelectedCategory(null);
-              setCurrentPath(prev => prev.slice(0, -1));
-            }}
-          >
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Back to Categories
-          </Button>
-          <CategoryDetails
-            category={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            allCategories={[...incomeCategories, ...expenseCategories]}
-          />
-        </>
+        <CategoryDetails
+          category={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          allCategories={[...incomeCategories, ...expenseCategories]}
+        />
       );
     } else {
       content = <CategoryList />;
