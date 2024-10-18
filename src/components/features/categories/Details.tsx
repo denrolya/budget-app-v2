@@ -1,29 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { AlertCircle, ChevronLeft, Download, Edit, Plus, Folder, FolderClosed } from 'lucide-react';
+import cn from 'classnames';
+import { ChevronLeft, Download, Edit, Folder, FolderClosed, Plus } from 'lucide-react';
+import React, { useState } from 'react';
 
+import { MoneyValue } from '@/components/common/MoneyValue';
+import CategoryTypeahead from '@/components/common/CategoryTypeahead';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { useScreenSize } from '@/hooks/useScreenSize';
 import Category from '@/models/Category';
 
 interface Transaction {
-  id: string
-  date: string
-  description: string
-  amount: number
-  categoryId: string
+  id: string;
+  date: string;
+  description: string;
+  amount: number;
+  categoryId: string;
 }
 
 interface Props {
-  category: Category
-  setSelectedCategory: (category: Category | null) => void
-  allCategories: Category[]
+  category: Category;
+  setSelectedCategory: (category: Category | null) => void;
+  allCategories: Category[];
 }
 
 const mockTransactions: Transaction[] = [
@@ -39,15 +42,7 @@ export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory
   const [editMode, setEditMode] = useState(false);
   const [editedCategory, setEditedCategory] = useState(category);
   const [notes, setNotes] = useState('');
-
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const isDesktop = useScreenSize();
 
   const handleSave = () => {
     // Here you would typically save the changes to your backend
@@ -75,7 +70,7 @@ export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory
               <p className="text-sm text-muted-foreground">{new Date(transaction.date).toLocaleDateString()}</p>
             </div>
             <Badge variant={transaction.amount > 0 ? 'default' : 'destructive'}>
-              ${Math.abs(transaction.amount).toFixed(2)}
+              <MoneyValue amount={transaction.amount} />
             </Badge>
           </div>
         ))}
@@ -136,49 +131,40 @@ export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory
                   />
                 </div>
                 <div>
-                  <Label htmlFor="category-type">Category Type</Label>
-                  <Select
-                    value={editedCategory.type}
-                    onValueChange={(value) => setEditedCategory({
-                      ...editedCategory,
-                      type: value as 'income' | 'expense'
-                    })}
-                  >
-                    <SelectTrigger id="category-type">
-                      <SelectValue placeholder="Select category type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="income">Income</SelectItem>
-                      <SelectItem value="expense">Expense</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="category-parent">Parent Category</Label>
+                  <CategoryTypeahead
+                    id="category-parent"
+                    multiple={false}
+                    valueField="id"
+                    type={editedCategory.type}
+                    value={editedCategory.parent.id}
+                    onChange={(parents) => setEditedCategory({ ...editedCategory, parent: parents[0] || null })}
+                    className="h-9 w-full"
+                    categories={allCategories.filter(c => c.id !== editedCategory.id)}
+                  />
                 </div>
                 <div>
-                  <Label htmlFor="category-parent">Parent Category</Label>
-                  <Select
-                    value={editedCategory.parent || ''}
-                    onValueChange={(value) => setEditedCategory({ ...editedCategory, parent: value || null })}
-                  >
-                    <SelectTrigger id="category-parent">
-                      <SelectValue placeholder="Select parent category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">No Parent</SelectItem>
-                      {allCategories
-                        .filter((c) => c.id !== editedCategory.id)
-                        .map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))
-                      }
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="category-root">Root Category</Label>
+                  <CategoryTypeahead
+                    id="category-root"
+                    multiple={false}
+                    valueField="id"
+                    type={editedCategory.type}
+                    value={editedCategory.root.id}
+                    onChange={(roots) => setEditedCategory({ ...editedCategory, root: roots[0] || null })}
+                    className="h-9 w-full"
+                    categories={allCategories.filter(c => !c.parent)}
+                  />
                 </div>
               </div>
             ) : (
               <div className="space-y-2">
                 <p><strong>Type:</strong> {editedCategory.type}</p>
                 <p>
-                  <strong>Parent:</strong> {editedCategory.parent ? allCategories.find(c => c.id === editedCategory.parent)?.name : 'No Parent'}
+                  <strong>Parent:</strong> {editedCategory.parent ? editedCategory.parent?.name : 'No Parent'}
+                </p>
+                <p>
+                  <strong>Root:</strong> {editedCategory.root ? editedCategory.root?.name : 'No Root'}
                 </p>
               </div>
             )}
@@ -201,7 +187,7 @@ export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory
         </Card>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={isMobile ? 'grid w-full grid-cols-2' : ''}>
+          <TabsList className={cn({ 'grid w-full grid-cols-2': !isDesktop })}>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="history">Category History</TabsTrigger>
           </TabsList>
@@ -239,13 +225,13 @@ export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory
                         id: 2,
                         date: '2023-07-01',
                         action: 'Category renamed',
-                        details: 'Changed from "Food" to "Groceries"'
+                        details: 'Changed from "Food" to "Groceries"',
                       },
                       {
                         id: 3,
                         date: '2023-08-01',
                         action: 'Parent category changed',
-                        details: 'Moved under "Living Expenses"'
+                        details: 'Moved under "Living Expenses"',
                       },
                     ].map((event) => (
                       <li key={event.id} className="flex justify-between items-center">
