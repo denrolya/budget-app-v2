@@ -80,7 +80,7 @@ export const useTransactionsAndTransfers = ({
       item => item.executedAt.format(BACKEND_DATE_FORMAT),
     ),
   ).map(([date, items]) => {
-    let transactionValue = 0;
+    let transactionsValue = 0;
     let transfersValue = 0;
     let transactionsCount = 0;
     let transfersCount = 0;
@@ -89,7 +89,7 @@ export const useTransactionsAndTransfers = ({
     items.forEach(item => {
       if (item instanceof Transaction) {
         const value = item.convertedValues[baseCurrency] || 0;
-        transactionValue += item.isExpense() ? -value : value;
+        transactionsValue += item.isExpense() ? -value : value;
         transactionsCount++;
       } else if (item instanceof Transfer) {
         transfersValue += item.fromExpense.convertedValues[baseCurrency] || 0;
@@ -97,7 +97,7 @@ export const useTransactionsAndTransfers = ({
       }
     });
 
-    return [moment(date), items, transactionValue, transfersValue, transactionsCount, transfersCount];
+    return [moment(date), items, transactionsValue, transfersValue, transactionsCount, transfersCount];
   }), [combinedItems, baseCurrency]);
 
   return {

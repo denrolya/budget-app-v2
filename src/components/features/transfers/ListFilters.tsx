@@ -3,7 +3,7 @@ import { CalendarIcon, FilterIcon } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { TransactionFilters } from '@/models/TransactionFilters.ts';
+import { TransactionFilters } from '@/models/TransactionFilters';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
-import { useScreenSize } from '@/hooks/useScreenSize.ts';
+import { useScreenSize } from '@/hooks/useScreenSize';
 import { TransferFilters } from '@/models/TransferFilters';
 
 interface ListFiltersProps {

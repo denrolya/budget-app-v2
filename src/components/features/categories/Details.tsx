@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime.ts';
+import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactions } from '@/hooks/useTransactions';
 import Category from '@/models/Category';
@@ -126,7 +126,7 @@ export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory
                     isLoading={isTransactionsLoading}
                     isError={isTransactionsError}
                     error={transactionsError}
-                    groupedTransactions={groupedTransactions}
+                    groupedItems={groupedTransactions}
                     refetch={refetchTransactions}
                     onAddTransaction={onAddTransaction} />
                 </ScrollArea>

@@ -1,13 +1,12 @@
 import React from 'react';
 
-import { Pagination } from '@/components/common/Pagination';
+import Pagination from '@/components/common/Pagination';
 import FormattedListing from '@/components/features/transactions/FormattedListing';
 import ListFilters from '@/components/features/transactions/ListFilters';
-import { useForm as useFormContext } from '@/contexts/Form';
+import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactions } from '@/hooks/useTransactions';
-import { FormType } from '@/contexts/Form';
 
-export const TransactionsList: React.FC = () => {
+export const TransactionsListPage: React.FC = () => {
   const { openForm } = useFormContext();
   const {
     groupedItems,
@@ -15,12 +14,13 @@ export const TransactionsList: React.FC = () => {
     isError,
     error,
     refetch,
-    pagination: { currentPage, totalPages, perPage, setCurrentPage },
+    pagination: { currentPage, totalPages, perPage, totalItems, setCurrentPage, setPerPage },
     filters,
     setFilter,
     resetFilters,
     isFetching,
   } = useTransactions();
+  const onAddTransaction = () => openForm(FormType.Transaction);
 
   return (
     <section className="w-full p-4 md:p-0 mx-auto pb-20 md:pb-0">
@@ -29,13 +29,16 @@ export const TransactionsList: React.FC = () => {
           isLoading={isLoading}
           isError={isError}
           error={error}
-          groupedTransactions={groupedItems}
+          groupedItems={groupedItems}
           refetch={refetch}
-          onAddTransaction={() => openForm(FormType.Transaction)} />
-
-        <div className="mt-4">
-          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-        </div>
+          onAdd={onAddTransaction}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          onPerPageChange={setPerPage}
+          perPage={perPage}
+          totalItems={totalItems}
+        />
 
         <ListFilters data={filters} onChange={setFilter} onReset={resetFilters} />
 
@@ -49,4 +52,6 @@ export const TransactionsList: React.FC = () => {
   );
 };
 
-export default TransactionsList;
+TransactionsListPage.displayName = 'TransactionsListPage';
+
+export default TransactionsListPage;

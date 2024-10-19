@@ -1,22 +1,18 @@
-import cn from 'classnames';
+import MoneyValue from '@/components/common/MoneyValue';
+import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
+import DailyList from '@/components/features/daily-ledger/DailyList';
+import TableListing from '@/components/features/daily-ledger/TableListing';
+import { Button } from '@/components/ui/button';
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
+import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 import { ArrowRightLeftIcon, CalendarIcon, ChevronLeft, ChevronRight, Receipt } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSwipeable } from 'react-swipeable';
 
-import MoneyValue from '@/components/common/MoneyValue.tsx';
-import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
-import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
-import { Button } from '@/components/ui/button';
-import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { BACKEND_DATE_FORMAT } from '@/constants/datetime.ts';
-import { useScreenSize } from '@/hooks/useScreenSize';
-import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
-
 export const DailyLedgerPage = () => {
   const [currentDate, setCurrentDate] = useState(moment().startOf('day'));
-  const isDesktop = useScreenSize();
   const daysPerPage = 5;
   const dateRange = useMemo(() => {
     const startDate = currentDate.clone().subtract(daysPerPage - 1, 'days');
@@ -67,8 +63,6 @@ export const DailyLedgerPage = () => {
     }
   };
 
-  const dates = useMemo(() => Array.from({ length: daysPerPage }, (_, i) => moment(currentDate).subtract(i, 'days')), [currentDate, daysPerPage]);
-
 
   const summary = useMemo(() => {
     if (!groupedItems) return {
@@ -94,7 +88,7 @@ export const DailyLedgerPage = () => {
   }, [groupedItems]);
 
   return (
-    <section className="w-full mx-auto md:px-4 pb-16 pt-4 md:py-4" {...swipeHandlers}>
+    <section className="w-full mx-auto p-0 pb-16 pt-4 md:py-4" {...swipeHandlers}>
       <div className="flex justify-between items-center mb-4">
         <Button onClick={goToPreviousPage} disabled={isLoading} size="sm" variant="ghost">
           <ChevronLeft className="mr-2 h-4 w-4" />
@@ -145,35 +139,20 @@ export const DailyLedgerPage = () => {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row-reverse md:-mx-2 mb-6">
-        {dates.map((date, index) => {
-          const foundGroup = groupedItems?.find((group) => group[0].isSame(date, 'day'));
+      <div className="md:hidden">
+        <DailyList
+          isLoading={isLoading}
+          groupedItems={groupedItems}
+          daysPerPage={daysPerPage}
+          currentDate={currentDate} />
+      </div>
 
-          return (
-            <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
-              <div
-                className={cn('w-full', 'px-0', 'md:px-2', {
-                  'md:w-1/5': isDesktop,
-                })}
-                style={{
-                  order: `${daysPerPage - index - 1} sm:${index}`,
-                }}
-              >
-                {isLoading && (
-                  <DateCardSkeleton index={index} totalDays={daysPerPage} />
-                )}
-                {!isLoading && (
-                  <DateCard
-                    date={date}
-                    items={foundGroup ? foundGroup[1] : []}
-                    index={index}
-                    totalDays={daysPerPage}
-                  />
-                )}
-              </div>
-            </React.Fragment>
-          );
-        })}
+      <div className="hidden md:block">
+        <TableListing
+          isLoading={isLoading}
+          groupedItems={groupedItems}
+          daysPerPage={daysPerPage}
+          currentDate={currentDate} />
       </div>
     </section>
   );

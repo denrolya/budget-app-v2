@@ -3,17 +3,17 @@ import sumBy from 'lodash/sumBy';
 import { Archive, Calendar, Search } from 'lucide-react';
 import React, { useCallback, useRef, useState } from 'react';
 
-import { useScreenSize } from '@/hooks/useScreenSize.ts';
+import { useScreenSize } from '@/hooks/useScreenSize';
 import MoneyValue from '@/components/common/MoneyValue';
-import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay.tsx';
+import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountAvatar from '@/components/features/accounts/Avatar';
 import AccountDetails from '@/components/features/accounts/Details';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useBaseCurrency } from '@/contexts/auth.tsx';
+import { useBaseCurrency } from '@/contexts/auth';
 import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
-import Account, { AccountType } from '@/models/Account.ts';
+import Account, { AccountType } from '@/models/Account';
 
 export const AccountsManagementPage: React.FC = () => {
   const baseCurrency = useBaseCurrency();

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CalendarIcon, ChevronDownIcon, PlusCircleIcon, LineChartIcon, ListIcon, MenuIcon } from 'lucide-react';
 
-import { useScreenSize } from '@/hooks/useScreenSize.ts';
+import { useScreenSize } from '@/hooks/useScreenSize';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

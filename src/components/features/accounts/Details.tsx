@@ -2,7 +2,7 @@ import { AlertCircle, ArrowUpDown, ChevronLeft, Download, Edit, Plus } from 'luc
 import moment from 'moment/moment';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { BACKEND_DATE_FORMAT } from '@/constants/datetime.ts';
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountAvatar from '@/components/features/accounts/Avatar';

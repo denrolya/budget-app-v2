@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CURRENCY_CODE } from '@/constants/currency.ts';
+import { CURRENCY_CODE } from '@/constants/currency';
 import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/contexts/FinanceData';
 
 interface Props {

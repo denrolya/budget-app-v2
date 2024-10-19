@@ -3,17 +3,17 @@ import groupBy from 'lodash/groupBy';
 import sortBy from 'lodash/sortBy';
 import sumBy from 'lodash/sumBy';
 import toPairs from 'lodash/toPairs';
+import moment, { Moment } from 'moment';
 import { useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
-import moment, { Moment } from 'moment';
 
-import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
-import { useBaseCurrency } from '@/contexts/auth';
-import { FormType, useFormSubmitListener } from '@/contexts/Form';
-import { useListState } from '@/hooks/useListState';
-import Transaction, { TransactionFactory } from '@/models/Transaction';
-import { TransactionFilters } from '@/models/TransactionFilters';
 import { FetchResponse as FetchTransactionsResponse, transactionService } from '@/services/api/transaction';
+import { TransactionFilters } from '@/models/TransactionFilters';
+import Transaction, { TransactionFactory } from '@/models/Transaction';
+import { useListState } from '@/hooks/useListState';
+import { FormType, useFormSubmitListener } from '@/contexts/Form';
+import { useBaseCurrency } from '@/contexts/auth';
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 
 interface UseTransactionsOptions {
   initialPerPage?: number;
@@ -25,13 +25,15 @@ interface UseTransactionsOptions {
 }
 
 interface TransformedResponse {
-  list: Transaction[];
-  count: number;
+  items: Transaction[];
+  totalItems: number;
+  totalValue: number;
 }
 
 export const useTransactions = (options: UseTransactionsOptions = {}): {
   transactions: Transaction[];
   groupedItems: [Moment, Transaction[], number, number][];
+  totalValue: number;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
@@ -40,7 +42,9 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
     currentPage: number;
     perPage: number;
     totalPages: number;
+    totalItems: number;
     setCurrentPage: (page: number) => void;
+    setPerPage: (perPage: number) => void;
   };
   filters: TransactionFilters;
   setFilter: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => void;
@@ -51,7 +55,7 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
 } => {
   const baseCurrency = useBaseCurrency();
   const {
-    initialPerPage = 30,
+    initialPerPage = 20,
     initialFilters = new TransactionFilters(),
     initialSort = { field: 'executedAt', direction: 'desc' },
     updateUrl = true,
@@ -64,6 +68,7 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
     filters,
     sort,
     setCurrentPage,
+    setPerPage,
     setFilter,
     resetFilters,
     setSort,
@@ -111,8 +116,9 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
         excludeTransfers,
       }),
     select: (data: FetchTransactionsResponse): TransformedResponse => ({
-      ...data,
-      list: data.list.map((item) => createTransaction(item)),
+      totalValue: data?.totalValue || 0,
+      totalItems: data?.totalItems || 0,
+      items: data.items?.map((item) => createTransaction(item)) || [],
     }),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -134,27 +140,28 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
 
   useMemo(handleError, [handleError]);
 
-  const totalPages = useMemo(() => Math.ceil((data?.count ?? 0) / perPage) || 0, [data?.count, perPage]);
-
-  const transactions = data?.list ?? [];
+  const transactions = useMemo(() => data?.items ?? [], [data]);
+  const totalItems = data?.totalItems ?? 0;
+  const totalPages = useMemo(() => Math.ceil(totalItems / perPage) || 0, [totalItems, perPage]);
+  const totalValue = data?.totalValue || 0;
 
   const groupedItems: [Moment, Transaction[], number, number][] = useMemo(() => toPairs(
     groupBy(
       sortBy(transactions, item => -item.executedAt.valueOf()),
       item => item.executedAt.format(BACKEND_DATE_FORMAT),
     ),
-  ).map(([date, transactions]) => {
-    const totalValue = sumBy(transactions, item => {
+  ).map(([date, items]) => {
+    const totalValue = sumBy(items, item => {
       const value = item.convertedValues[baseCurrency] || 0;
       return item.isExpense() ? -value : value;
     });
-    const totalCount = transactions.length;
-    return [moment(date), transactions, totalValue, totalCount];
+    const totalItems = items.length;
+    return [moment(date), items, totalValue, totalItems];
   }), [transactions, baseCurrency]);
-
 
   return {
     transactions,
+    totalValue,
     groupedItems,
     isLoading: isPending,
     isError,
@@ -164,7 +171,9 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
       currentPage,
       perPage,
       totalPages,
+      totalItems,
       setCurrentPage,
+      setPerPage,
     },
     filters,
     setFilter,

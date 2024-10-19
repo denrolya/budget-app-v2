@@ -1,7 +1,7 @@
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
-import { TransferFilters } from '@/models/TransferFilters.ts';
+import { TransferFilters } from '@/models/TransferFilters';
 import { axiosFetcher } from '@/services/api';
-import { TransactionDTO } from '@/services/api/transaction.ts';
+import { TransactionDTO } from '@/services/api/transaction';
 
 interface FetchTransfersParams {
   page: number;
@@ -44,8 +44,8 @@ export interface TransferDTO {
 }
 
 export interface FetchResponse {
-  list: TransferDTO[];
-  count: number;
+  items: TransferDTO[];
+  totalItems: number;
 }
 
 
@@ -58,19 +58,17 @@ export const transferService = {
     const result: TransferResponse = await axiosFetcher(url);
 
     return {
-      list: result['hydra:member'],
-      count: result['hydra:totalItems'],
+      items: result['hydra:member'],
+      totalItems: result['hydra:totalItems'],
     };
   },
 
   buildUrl({ page, perPage, filters, sort }: FetchTransfersParams): string {
     const query = new URLSearchParams();
 
-    // Add pagination parameters
     query.set('page', String(page));
     query.set('perPage', String(perPage));
 
-    // Add filter parameters
     if (filters.searchTerm) {
       query.set('searchTerm', filters.searchTerm);
     }

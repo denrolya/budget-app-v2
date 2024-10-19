@@ -8,7 +8,7 @@ import { formatMoney } from '@/utils/formatMoney';
 
 interface MoneyValueProps extends React.ComponentPropsWithoutRef<'span'> {
   currency?: CURRENCY_CODE;
-  amount: number | string;
+  amount: number;
   values?: Record<string, number>;
   showSymbol?: boolean;
   showSign?: boolean;
@@ -67,7 +67,7 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
 
   const renderMoneyElement = (value: number, currencySymbol: string, currencyCode?: CURRENCY_CODE) => (
     <>
-      {showSign && value !== 0 && <span>{value < 0 ? '- ' : '+ '}</span>}
+      {showSign && amount !== 0 && <span>{amount < 0 ? '- ' : '+ '}</span>}
       {showSymbol && <span className="mr-1">{currencySymbol}</span>}
       <span>{formatMoney(value, currencyCode, maximumFractionDigits)}</span>
     </>
@@ -78,8 +78,9 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
       {shouldShowConvertedValue ? (
         <>
           {renderMoneyElement(baseValue, baseCurrency.symbol, baseCurrency.code)}
-          <span className="mx-1">|</span>
-          {renderMoneyElement(numericAmount, symbol, currency)}
+          <span className="text-xs opacity-75 hidden md:inline ml-1">
+            {' | '}{renderMoneyElement(numericAmount, symbol, currency)}
+          </span>
         </>
       ) : (
         renderMoneyElement(numericAmount, symbol, currency || baseCurrency.code)

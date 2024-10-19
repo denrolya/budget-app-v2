@@ -1,9 +1,9 @@
 import moment from 'moment';
 import { z } from 'zod';
 
-import Account from '@/models/Account.ts';
-import Category from '@/models/Category.ts';
-import { formSchema } from '@/components/features/transactions/Form.tsx';
+import Account from '@/models/Account';
+import Category from '@/models/Category';
+import { formSchema } from '@/components/features/transactions/Form';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import Transaction, { Type as TransactionType } from '@/models/Transaction';
 import { TransactionFilters } from '@/models/TransactionFilters';
@@ -53,6 +53,7 @@ export interface TransactionDTO {
 interface TransactionResponse {
   list: TransactionDTO[];
   count: number;
+  totalValue: number;
 }
 
 interface CompensationData {
@@ -63,8 +64,9 @@ interface CompensationData {
 }
 
 export interface FetchResponse {
-  list: TransactionDTO[];
-  count: number;
+  items: TransactionDTO[];
+  totalItems: number;
+  totalValue: number;
 }
 
 const BASE_URL = '/api/v2/transaction';
@@ -86,8 +88,9 @@ export const transactionService = {
       : result.list;
 
     return {
-      list: filteredList,
-      count: result.count,
+      items: filteredList,
+      totalItems: result.count,
+      totalValue: result.totalValue
     };
   },
 

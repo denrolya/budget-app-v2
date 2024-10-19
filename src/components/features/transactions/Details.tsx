@@ -56,7 +56,6 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
   const fixerRates = useFixerExchangeRates();
   const monobankRates = useMonobankExchangeRates();
   const wiseRates = useWiseExchangeRates();
-  console.log({ fixerRates });
 
   const formatExchangeRate = (convertedAmount: number, targetCurrency: CURRENCY_CODE) => {
     const transactionCurrency = CURRENCIES[transaction.account.currency];

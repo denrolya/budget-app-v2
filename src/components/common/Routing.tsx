@@ -15,7 +15,7 @@ import { LayoutV9 } from '@/components/layout/LayoutV9';
 import { PrivateRoute } from '@/components/common/PrivateRoute';
 import { FinanceDataProvider, useFinanceData } from '@/contexts/FinanceData';
 import { useAuth } from '@/contexts/auth';
-import NewTransactionsPage from '@/components/features/transactions/TableWithFiltersMock.tsx';
+import NewTransactionsPage from '@/components/features/transactions/TableWithFiltersMock';
 
 const ProtectedContent: React.FC = () => {
   const { data, error } = useFinanceData();

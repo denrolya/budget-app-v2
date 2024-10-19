@@ -10,8 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { Skeleton } from '@/components/ui/skeleton.tsx';
-import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime.ts';
+import { Skeleton } from '@/components/ui/skeleton';
+import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import Transaction, { Type } from '@/models/Transaction';
 

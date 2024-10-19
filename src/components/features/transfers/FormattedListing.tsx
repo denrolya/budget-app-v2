@@ -2,18 +2,18 @@ import { Moment } from 'moment';
 import React from 'react';
 
 import Pagination from '@/components/common/Pagination';
-import TableListing from '@/components/features/transactions/TableListing';
-import TableListingSkeleton from '@/components/features/transactions/TableListingSkeleton';
-import EmptyTransactionState from '@/components/features/transactions/EmptyTransactionState';
-import List, { ListSkeleton } from '@/components/features/transactions/List';
+import EmptyTransferState from '@/components/features/transfers/EmptyTransferState';
+import List, { ListSkeleton } from '@/components/features/transfers/List';
+import TableListing from '@/components/features/transfers/TableListing';
+import TableListingSkeleton from '@/components/features/transfers/TableListingSkeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import Transaction from '@/models/Transaction';
+import Transfer from '@/models/Transfer';
 
 interface Props {
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  groupedItems: [Moment, Transaction[], number, number][];
+  groupedItems: [Moment, Transfer[], number, number][];
   refetch: () => void;
   onAdd: () => void;
   currentPage: number;
@@ -70,7 +70,9 @@ const FormattedListing: React.FC<Props> = ({
           </>
         )}
         {groupedItems.length === 0 && (
-          <EmptyTransactionState onRefresh={refetch} onAddTransaction={onAdd} />
+          <EmptyTransferState
+            onRefresh={refetch}
+            onAddTransfer={onAdd} />
         )}
       </>
     )}
@@ -89,6 +91,6 @@ const FormattedListing: React.FC<Props> = ({
   </>
 );
 
-FormattedListing.displayName = 'FormattedTransactionsListing';
+FormattedListing.displayName = 'FormattedTransfersListing';
 
 export default FormattedListing;

@@ -1,33 +1,67 @@
 import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import groupBy from 'lodash/groupBy';
+import sortBy from 'lodash/sortBy';
+import sumBy from 'lodash/sumBy';
+import toPairs from 'lodash/toPairs';
+import moment, { Moment } from 'moment/moment';
 import { useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 
+import { useBaseCurrency } from '@/contexts/auth';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { FormType, useFormSubmitListener } from '@/contexts/Form';
 import { useListState } from '@/hooks/useListState';
-import { TransactionFactory } from '@/models/Transaction.ts';
+import { TransactionFactory } from '@/models/Transaction';
 import Transfer from '@/models/Transfer';
 import { TransferFilters } from '@/models/TransferFilters';
 import { transferService, FetchResponse as FetchTransfersResponse } from '@/services/api/transfer';
 
+interface Sorting {
+  field: string;
+  direction: 'asc' | 'desc';
+}
+
 interface UseTransfersOptions {
   initialPerPage?: number;
   initialFilters?: TransferFilters;
-  initialSort?: { field: string; direction: 'asc' | 'desc' };
+  initialSort?: Sorting;
   updateUrl?: boolean;
   queryKey?: string;
 }
 
 interface TransformedResponse {
-  list: Transfer[];
-  count: number;
+  items: Transfer[];
+  totalItems: number;
 }
 
-export const useTransfers = (options: UseTransfersOptions = {}) => {
+export const useTransfers = (options: UseTransfersOptions = {}): {
+  transfers: Transfer[];
+  groupedItems: [Moment, Transfer[], number, number][];
+  isLoading: boolean;
+  isError: boolean;
+  error: Error | null;
+  refetch: () => void;
+  pagination: {
+    currentPage: number;
+    perPage: number;
+    totalPages: number;
+    totalItems: number;
+    setCurrentPage: (page: number) => void;
+    setPerPage: (perPage: number) => void;
+  };
+  filters: TransferFilters;
+  setFilter: <K extends keyof TransferFilters>(key: K, value: TransferFilters[K] | undefined | null) => void;
+  resetFilters: () => void;
+  sort: Sorting;
+  setSort: (sort: Sorting) => void;
+  isFetching: boolean;
+} => {
+  const baseCurrency = useBaseCurrency();
+
   const {
-    initialPerPage = 30,
+    initialPerPage = 20,
     initialFilters = new TransferFilters(),
-    initialSort = { field: 'executedAt', direction: 'desc' },
+    initialSort = { field: 'executedAt', direction: 'desc' } as Sorting,
     updateUrl = true,
     queryKey = 'transfers',
   } = options;
@@ -37,6 +71,7 @@ export const useTransfers = (options: UseTransfersOptions = {}) => {
     filters,
     sort,
     setCurrentPage,
+    setPerPage,
     setFilter,
     resetFilters,
     setSort,
@@ -71,11 +106,11 @@ export const useTransfers = (options: UseTransfersOptions = {}) => {
       sort,
     }),
     select: (data: FetchTransfersResponse): TransformedResponse => ({
-      ...data,
-      list: data.list.map((item) => new Transfer({
+      totalItems: data?.totalItems || 0,
+      items: data.items?.map((item) => new Transfer({
         ...item,
         transactions: item.transactions.map((transaction) => createTransaction(transaction)),
-      })),
+      })) || [],
     }),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
@@ -97,10 +132,24 @@ export const useTransfers = (options: UseTransfersOptions = {}) => {
 
   useMemo(handleError, [handleError]);
 
-  const totalPages = useMemo(() => Math.ceil((data?.count ?? 0) / perPage) || 0, [data?.count, perPage]);
+  const transfers = useMemo(() => data?.items ?? [], [data]);
+  const totalItems = data?.totalItems ?? 0;
+  const totalPages = useMemo(() => Math.ceil(totalItems / perPage) || 0, [totalItems, perPage]);
+
+  const groupedItems: [Moment, Transfer[], number, number][] = useMemo(() => toPairs(
+    groupBy(
+      sortBy(transfers, item => -item.executedAt.valueOf()),
+      item => item.executedAt.format(BACKEND_DATE_FORMAT),
+    ),
+  ).map(([date, items]) => {
+    const totalValue = sumBy(items, ({ fromExpense }) => fromExpense.convertedValues[baseCurrency] || 0);
+    const totalItems = items.length;
+    return [moment(date), items, totalValue, totalItems];
+  }), [transfers, baseCurrency]);
 
   return {
-    transfers: data?.list ?? [],
+    transfers,
+    groupedItems,
     isLoading: isPending,
     isError,
     error: error || null,
@@ -109,7 +158,9 @@ export const useTransfers = (options: UseTransfersOptions = {}) => {
       currentPage,
       perPage,
       totalPages,
+      totalItems,
       setCurrentPage,
+      setPerPage,
     },
     filters,
     setFilter,

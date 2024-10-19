@@ -1,8 +1,8 @@
 import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
-import { useCallback, useEffect, useState, useMemo, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import moment from 'moment';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 export interface FilterModel {
   setFilter<K extends keyof this>(key: K, value: this[K]): void;
@@ -39,7 +39,7 @@ interface UseListStateOptions<FilterType extends FilterModel, ItemType> {
 }
 
 export const useListState = <FilterType extends FilterModel, ItemType>({
-                                                                         initialPerPage = 30,
+                                                                         initialPerPage = 20,
                                                                          initialFilters,
                                                                          initialSort = {
                                                                            field: null,
@@ -75,6 +75,13 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
     }));
   }, []);
 
+  const setPerPage = useCallback((perPage: number) => {
+    setState(prev => ({
+      ...prev,
+      pagination: { ...prev.pagination, totalPages: 0, currentPage: 1, perPage: perPage },
+    }));
+  }, []);
+
   const setTotalPages = useCallback((count: number) => {
     setState(prev => ({
       ...prev,
@@ -84,7 +91,7 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
 
   const setFilter: SetFilterFunction<FilterType> = useCallback((key, value) => {
     setState((prev) => {
-      const updatedFilters = new (prev.filters.constructor as { new (): FilterType })();
+      const updatedFilters = new (prev.filters.constructor as { new(): FilterType })();
       Object.assign(updatedFilters, prev.filters);
       updatedFilters.setFilter(key, value);
 
@@ -122,7 +129,7 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
         setSearchParams(params);
       }
     }, 300),
-    [setSearchParams, updateUrl]
+    [setSearchParams, updateUrl],
   );
 
   useEffect(() => {
@@ -131,11 +138,11 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
     const hasStateChanged = !isEqual({
       pagination: state.pagination,
       filters: state.filters,
-      sort: state.sort
+      sort: state.sort,
     }, {
       pagination: prevStateRef.current.pagination,
       filters: prevStateRef.current.filters,
-      sort: prevStateRef.current.sort
+      sort: prevStateRef.current.sort,
     });
 
     if (!hasStateChanged) return;
@@ -177,9 +184,10 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
   return useMemo(() => ({
     ...state,
     setCurrentPage,
+    setPerPage,
     setFilter,
     resetFilters,
     setSort,
     setTotalPages,
-  }), [state, setCurrentPage, setFilter, setSort, setTotalPages, resetFilters]);
+  }), [state, setCurrentPage, setPerPage, setFilter, setSort, setTotalPages, resetFilters]);
 };

@@ -1,4 +1,4 @@
-import { CURRENCY_CODE } from '@/constants/currency.ts';
+import { CURRENCY_CODE } from '@/constants/currency';
 
 export const formatMoney = (value: number, currencyCode?: CURRENCY_CODE, decimals?: number): string => {
   const fractionDigits = getFractionDigits(currencyCode, decimals);

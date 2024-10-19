@@ -17,7 +17,6 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
   const toCurrency = transfer.toIncome.account.currency;
   const rate = transfer.rate;
 
-
   const renderRate = () => {
     if ((fromCurrency === 'UAH' && toCurrency === 'USD') || (fromCurrency === 'USD' && toCurrency === 'UAH')) {
       return (
@@ -65,9 +64,9 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
   };
 
   return (
-    <>
-      <div className="grid gap-4 py-4">
-        <div className="grid gap-2">
+    <div className="w-full">
+      <div className="flex flex-col space-y-4 py-4">
+        <div className="flex flex-col space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-sm">Date</span>
             <RelativeDatetimeDisplay date={transfer.executedAt} className="font-medium" />
@@ -94,7 +93,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
           </div>
         </div>
         <Separator />
-        <div className="grid gap-2">
+        <div className="flex flex-col space-y-2">
           <h3 className="font-semibold">Related Transactions</h3>
           <div className="flex justify-between items-center">
             <span className="text-sm">Sender</span>
@@ -107,7 +106,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
               ) : (
                 <MoneyValue amount={-transfer.fromExpense.amount} currency={transfer.fromExpense.account.currency} />
               )}
-          </span>
+            </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm">Recipient</span>
@@ -120,7 +119,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
               ) : (
                 <MoneyValue amount={transfer.toIncome.amount} currency={transfer.toIncome.account.currency} />
               )}
-          </span>
+            </span>
           </div>
         </div>
         <TransactionListItem transaction={transfer.fromExpense} />
@@ -128,7 +127,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
         {transfer.hasFee() && (
           <>
             <Separator />
-            <div className="grid gap-2">
+            <div className="flex flex-col space-y-2">
               <h3 className="font-semibold">Fees</h3>
               <div className="flex justify-between items-center">
                 <span className="text-sm">Transfer Fee</span>
@@ -150,7 +149,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
           Transfer completed successfully
         </p>
       </div>
-    </>
+    </div>
   );
 };
 

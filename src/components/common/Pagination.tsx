@@ -1,123 +1,119 @@
-import {
-  Pagination as PaginationComponent,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import debounce from 'lodash/debounce';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface PaginationProps {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-  maxVisiblePages?: number;
+  currentPage: number
+  totalPages: number
+  totalItems: number
+  perPage: number
+  onPageChange: (page: number) => void
+  onPerPageChange: (perPage: number) => void
+  isLoading: boolean
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
                                                         currentPage,
                                                         totalPages,
+                                                        totalItems,
+                                                        perPage,
                                                         onPageChange,
-                                                        maxVisiblePages = 5,
+                                                        onPerPageChange,
+                                                        isLoading,
                                                       }) => {
-  const PaginationLinkWrapper: React.FC<{ page: number }> = ({ page }) => (
-    <PaginationLink
-      href="#"
-      onClick={(e) => {
-        e.preventDefault();
-        onPageChange(page);
-      }}
-      isActive={page === currentPage}
-    >
-      {page}
-    </PaginationLink>
+  const [inputPage, setInputPage] = useState(currentPage.toString());
+
+  useEffect(() => {
+    setInputPage(currentPage.toString());
+  }, [currentPage]);
+
+  const debouncedPageChange = useCallback(
+    debounce((newPage: number) => {
+      if (newPage >= 1 && newPage <= totalPages) {
+        onPageChange(newPage);
+      }
+    }, 300),
+    [onPageChange, totalPages]
   );
 
-  const renderPaginationItems = () => {
-    const items = [];
-
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLinkWrapper page={i} />
-          </PaginationItem>,
-        );
-      }
-    } else {
-      items.push(
-        <PaginationItem key={1}>
-          <PaginationLinkWrapper page={1} />
-        </PaginationItem>,
-      );
-
-      if (currentPage > 3) {
-        items.push(
-          <PaginationItem key="ellipsis-start">
-            <PaginationEllipsis />
-          </PaginationItem>,
-        );
-      }
-
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(totalPages - 1, currentPage + 1);
-
-      for (let i = start; i <= end; i++) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLinkWrapper page={i} />
-          </PaginationItem>,
-        );
-      }
-
-      if (currentPage < totalPages - 2) {
-        items.push(
-          <PaginationItem key="ellipsis-end">
-            <PaginationEllipsis />
-          </PaginationItem>,
-        );
-      }
-
-      items.push(
-        <PaginationItem key={totalPages}>
-          <PaginationLinkWrapper page={totalPages} />
-        </PaginationItem>,
-      );
+  const handlePageInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newInputPage = e.target.value;
+    setInputPage(newInputPage);
+    const newPage = parseInt(newInputPage, 10);
+    if (!isNaN(newPage)) {
+      debouncedPageChange(newPage);
     }
-
-    return items;
   };
+
+  const startItem = (currentPage - 1) * perPage + 1;
+  const endItem = Math.min(currentPage * perPage, totalItems);
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-      <PaginationComponent>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                if (currentPage > 1) onPageChange(currentPage - 1);
-              }}
-              aria-disabled={currentPage === 1}
-            />
-          </PaginationItem>
-
-          {renderPaginationItems()}
-
-          <PaginationItem>
-            <PaginationNext
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                if (currentPage < totalPages) onPageChange(currentPage + 1);
-              }}
-              aria-disabled={currentPage === totalPages}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </PaginationComponent>
+      <div className="flex items-center space-x-2">
+        <Select
+          value={perPage.toString()}
+          onValueChange={(value) => onPerPageChange(parseInt(value, 10))}
+          disabled={isLoading}
+        >
+          <SelectTrigger className="w-[130px]">
+            <SelectValue placeholder="Per page" />
+          </SelectTrigger>
+          <SelectContent>
+            {[10, 20, 30, 40, 50].map((value) => (
+              <SelectItem key={value} value={value.toString()}>
+                {value} items
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <span className="text-sm text-muted-foreground">
+          {startItem}-{endItem} of {totalItems} items
+        </span>
+      </div>
+      <div className="flex items-center space-x-2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1 || isLoading}
+          aria-label="Previous page"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex items-center space-x-2">
+          <Input
+            type="number"
+            min={1}
+            max={totalPages}
+            value={inputPage}
+            onChange={handlePageInput}
+            className="w-16 text-center"
+            aria-label="Go to page"
+            disabled={isLoading}
+          />
+          <span className="text-sm text-muted-foreground">
+            of {totalPages}
+          </span>
+        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages || isLoading}
+          aria-label="Next page"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 };
+
+Pagination.displayName = 'Pagination';
+
+export default Pagination;

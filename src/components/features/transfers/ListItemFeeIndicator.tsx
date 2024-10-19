@@ -2,7 +2,7 @@ import React from 'react';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { CURRENCY_CODE } from '@/constants/currency.ts';
+import { CURRENCY_CODE } from '@/constants/currency';
 
 interface FeeIndicatorProps {
   feeAmount: number;
