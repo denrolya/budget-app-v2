@@ -1,13 +1,15 @@
 import { AlertCircle, ArrowUpDown, ChevronLeft, Download, Edit, Plus } from 'lucide-react';
-import moment from 'moment/moment';
+import moment from 'moment';
+import cn from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
+import { useScreenSize } from '@/hooks/useScreenSize';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountAvatar from '@/components/features/accounts/Avatar';
-import TransactionListItem, { ListItemSkeleton as TransactionListItemSkeleton } from '@/components/features/transactions/ListItemV3';
-import TransferListItem, { ListItemSkeleton as TransferListItemSkeleton } from '@/components/features/transfers/ListItem';
+import DailyList from '@/components/features/daily-ledger/DailyList';
+import TableListing from '@/components/features/daily-ledger/TableListing';
+import TableListingSkeleton from '@/components/features/daily-ledger/TableListingSkeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +18,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 import Account from '@/models/Account';
-import Transaction from '@/models/Transaction';
 
 interface Props {
   account: Account;
@@ -24,6 +25,7 @@ interface Props {
 }
 
 const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
+  const isDesktop = useScreenSize();
   const { openForm } = useFormContext();
   const currentDate = moment().startOf('day');
   const daysPerPage = 15;
@@ -54,30 +56,7 @@ const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
     setFilter('accounts', [account.id]);
   }, [account, setFilter]);
 
-  const [isMobile, setIsMobile] = useState<boolean>(false);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
   const renderActivityContent = () => {
-    if (isLoading) {
-      return (
-        <div className="space-y-4 animate-pulse">
-          {[...Array(5)].map((_, index) => (
-            <div key={index} className="space-y-2">
-              <div className="h-5 bg-muted rounded w-1/4"></div>
-              <TransactionListItemSkeleton />
-              <TransferListItemSkeleton />
-            </div>
-          ))}
-        </div>
-      );
-    }
-
     if (isError) {
       return (
         <div className="flex flex-col items-center justify-center h-[200px] text-center">
@@ -88,34 +67,36 @@ const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
       );
     }
 
-    if (groupedItems.length === 0) {
+    if (!isLoading && groupedItems.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center h-[200px] text-center">
-          <p className="text-lg font-semibold">No transactions found</p>
-          <p className="text-sm text-muted-foreground">There are no transactions for the selected period.</p>
+          <p className="text-lg font-semibold">No activity found</p>
+          <p className="text-sm text-muted-foreground">No transactions or transfers for the selected period.</p>
         </div>
       );
     }
 
     return (
-      <div className="space-y-6">
-        {groupedItems.map(([date, items]) => (
-          <div key={date.format(BACKEND_DATE_FORMAT)}>
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">{moment(date).format('dddd, D MMM')}</h3>
-            <ul className="space-y-2">
-              {items.map((item) => (
-                <li key={item.id}>
-                  {item instanceof Transaction ? (
-                    <TransactionListItem transaction={item} />
-                  ) : (
-                    <TransferListItem transfer={item} />
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
+      <>
+        <div className="md:hidden">
+          <DailyList
+            isLoading={isLoading}
+            groupedItems={groupedItems}
+            daysPerPage={daysPerPage}
+            currentDate={currentDate} />
+        </div>
+
+        <div className="hidden md:block">
+          {isLoading && <TableListingSkeleton daysPerPage={daysPerPage} currentDate={currentDate} />}
+          {!isLoading && (
+            <TableListing
+              isLoading={isLoading}
+              groupedItems={groupedItems}
+              daysPerPage={daysPerPage}
+              currentDate={currentDate} />
+          )}
+        </div>
+      </>
     );
   };
 
@@ -174,7 +155,9 @@ const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
         </Card>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={isMobile ? 'grid w-full grid-cols-2' : ''}>
+          <TabsList className={cn({
+            'grid w-full grid-cols-2' : isDesktop
+          })}>
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="history">Account History</TabsTrigger>
           </TabsList>

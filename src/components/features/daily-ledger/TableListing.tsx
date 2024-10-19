@@ -24,10 +24,6 @@ import Transaction from '@/models/Transaction';
 import Transfer from '@/models/Transfer';
 import { confirm } from '@/utils/confirmation';
 
-interface TableListingProps {
-  groupedItems: [Moment, (Transaction | Transfer)[], number, number, number, number][];
-}
-
 type EditableField = 'account' | 'amount' | 'category' | 'note' | 'executedAt';
 
 interface Props {
@@ -293,6 +289,13 @@ const TableListing: React.FC<Props> = ({ isLoading, daysPerPage, groupedItems, c
                     </div>
                   </TableCell>
                 </TableRow>
+                {items.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-4 text-muted-foreground">
+                      No transactions or transfers for this day.
+                    </TableCell>
+                  </TableRow>
+                )}
                 {items.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="w-4"></TableCell>

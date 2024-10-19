@@ -1,3 +1,10 @@
+import { ArrowRightLeftIcon, CalendarIcon, ChevronLeft, ChevronRight, Receipt } from 'lucide-react';
+import moment from 'moment';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { useSwipeable } from 'react-swipeable';
+
+import TableListingSkeleton from '@/components/features/daily-ledger/TableListingSkeleton';
 import MoneyValue from '@/components/common/MoneyValue';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import DailyList from '@/components/features/daily-ledger/DailyList';
@@ -5,13 +12,8 @@ import TableListing from '@/components/features/daily-ledger/TableListing';
 import { Button } from '@/components/ui/button';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
-import { ArrowRightLeftIcon, CalendarIcon, ChevronLeft, ChevronRight, Receipt } from 'lucide-react';
-import moment from 'moment';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
-import { useSwipeable } from 'react-swipeable';
 
-export const DailyLedgerPage = () => {
+export const DailyLedgerPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(moment().startOf('day'));
   const daysPerPage = 5;
   const dateRange = useMemo(() => {
@@ -148,11 +150,14 @@ export const DailyLedgerPage = () => {
       </div>
 
       <div className="hidden md:block">
-        <TableListing
-          isLoading={isLoading}
-          groupedItems={groupedItems}
-          daysPerPage={daysPerPage}
-          currentDate={currentDate} />
+        {isLoading && <TableListingSkeleton daysPerPage={daysPerPage} currentDate={currentDate} />}
+        {!isLoading && (
+          <TableListing
+            isLoading={isLoading}
+            groupedItems={groupedItems}
+            daysPerPage={daysPerPage}
+            currentDate={currentDate} />
+        )}
       </div>
     </section>
   );
