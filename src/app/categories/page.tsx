@@ -291,7 +291,7 @@ export const CategoryManagementPage: React.FC = () => {
     }
   } else {
     content = (
-      <div className="flex h-full flex-1">
+      <div className="flex h-full">
         <div className="w-80 border-r bg-background overflow-hidden flex flex-col">
           <CategoryList />
         </div>
@@ -313,7 +313,7 @@ export const CategoryManagementPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen md:h-[calc(100vh-2rem)] overflow-hidden pb-16 md:pb-0">
+    <div className="h-screen md:h-[calc(100vh-2rem)] overflow-hidden pb-16 md:pb-0">
       {content}
     </div>
   );
