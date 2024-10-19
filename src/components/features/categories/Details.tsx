@@ -40,6 +40,7 @@ export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory
     error: transactionsError,
     refetch: refetchTransactions,
     setFilter,
+    pagination: { currentPage, totalPages, perPage, totalItems, setCurrentPage, setPerPage },
   } = useTransactions({
     updateUrl: false,
     initialFilters: new TransactionFilters({
@@ -128,7 +129,14 @@ export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory
                     error={transactionsError}
                     groupedItems={groupedTransactions}
                     refetch={refetchTransactions}
-                    onAddTransaction={onAddTransaction} />
+                    onAdd={onAddTransaction}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    onPerPageChange={setPerPage}
+                    perPage={perPage}
+                    totalItems={totalItems}
+                  />
                 </ScrollArea>
               </CardContent>
               <CardFooter>
