@@ -38,7 +38,7 @@ export const LayoutV9: React.FC<{ children: React.ReactNode }> = ({ children }) 
             <div className="flex flex-1 md:pt-8">
               <Sidebar className="hidden md:block overflow-y-auto fixed top-8 left-0 w-16" />
 
-              <main className="flex-1 overflow-y-auto md:ml-16 pb-0" id="main-content" tabIndex={-1}>
+              <main className="flex-1 overflow-hidden md:ml-16 pb-0" id="main-content" tabIndex={-1}>
                 {children}
 
                 <MobileNavigation />

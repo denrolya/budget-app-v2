@@ -295,7 +295,7 @@ export const CategoryManagementPage: React.FC = () => {
         <div className="w-80 border-r bg-background overflow-hidden flex flex-col">
           <CategoryList />
         </div>
-        <div className="flex-1 p-4 overflow-auto">
+        <div className="flex-1 overflow-auto">
           {selectedCategory ? (
             <CategoryDetails
               category={selectedCategory}

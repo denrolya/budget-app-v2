@@ -1,3 +1,5 @@
+import moment, { Moment } from 'moment';
+
 interface CategoryData {
   id: number;
   name: string;
@@ -19,7 +21,7 @@ export default class Category {
   root: Category | null;
   type: 'income' | 'expense';
   color: string;
-  createdAt: string;
+  createdAt: Moment;
   icon: string;
   isAffectingProfit: boolean;
   isTechnical: boolean;
@@ -33,7 +35,7 @@ export default class Category {
     this.root = null; // We will link the root later
     this.type = data.type;
     this.color = data.color;
-    this.createdAt = data.createdAt;
+    this.createdAt = moment(data.createdAt);
     this.icon = data.icon;
     this.isAffectingProfit = data.isAffectingProfit;
     this.isTechnical = data.isTechnical;
