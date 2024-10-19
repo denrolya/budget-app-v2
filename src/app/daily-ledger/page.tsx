@@ -1,12 +1,3 @@
-import MoneyValue from '@/components/common/MoneyValue.tsx';
-import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
-import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
-import { Button } from '@/components/ui/button';
-import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { useBaseCurrency } from '@/contexts/auth.tsx';
-import { useScreenSize } from '@/hooks/useScreenSize';
-import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
-import Transaction from '@/models/Transaction';
 import cn from 'classnames';
 import { ArrowRightLeftIcon, CalendarIcon, ChevronLeft, ChevronRight, Receipt } from 'lucide-react';
 import moment from 'moment';
@@ -14,12 +5,19 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSwipeable } from 'react-swipeable';
 
+import MoneyValue from '@/components/common/MoneyValue.tsx';
+import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
+import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
+import { Button } from '@/components/ui/button';
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime.ts';
+import { useScreenSize } from '@/hooks/useScreenSize';
+import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
+
 export const DailyLedgerPage = () => {
   const [currentDate, setCurrentDate] = useState(moment().startOf('day'));
   const isDesktop = useScreenSize();
   const daysPerPage = 5;
-  const baseCurrency = useBaseCurrency();
-
   const dateRange = useMemo(() => {
     const startDate = currentDate.clone().subtract(daysPerPage - 1, 'days');
     const endDate = currentDate.clone();
@@ -71,6 +69,7 @@ export const DailyLedgerPage = () => {
 
   const dates = useMemo(() => Array.from({ length: daysPerPage }, (_, i) => moment(currentDate).subtract(i, 'days')), [currentDate, daysPerPage]);
 
+
   const summary = useMemo(() => {
     if (!groupedItems) return {
       transactionsCount: 0,
@@ -84,20 +83,11 @@ export const DailyLedgerPage = () => {
     let transfersValue = 0;
     let transactionsValue = 0;
 
-    Object.values(groupedItems).forEach(items => {
-      items.forEach(item => {
-        if (item instanceof Transaction) {
-          transactionsCount++;
-          if (item.isExpense()) {
-            transactionsValue -= item.convertedValues[baseCurrency];
-          } else if (item.isIncome()) {
-            transactionsValue += item.convertedValues[baseCurrency];
-          }
-        } else {
-          transfersCount++;
-          transfersValue += item.fromExpense.convertedValues[baseCurrency];
-        }
-      });
+    groupedItems.forEach(([, , groupTransactionsValue, groupTransfersValue, groupTransactionsCount, groupTransfersCount]) => {
+      transactionsCount += groupTransactionsCount;
+      transfersCount += groupTransfersCount;
+      transactionsValue += groupTransactionsValue;
+      transfersValue += groupTransfersValue;
     });
 
     return { transactionsCount, transfersCount, transactionsValue, transfersValue };
@@ -156,28 +146,34 @@ export const DailyLedgerPage = () => {
       )}
 
       <div className="flex flex-col md:flex-row-reverse md:-mx-2 mb-6">
-        {dates.map((date, index) => (
-          <React.Fragment key={date.format('YYYY-MM-DD')}>
-            <div
-              className={cn('w-full', 'px-0', 'md:px-2', {
-                'md:w-1/5': isDesktop,
-              })}
-              style={{
-                order: `${daysPerPage - index - 1} sm:${index}`,
-              }}>
-              {isLoading ? (
-                <DateCardSkeleton index={index} totalDays={dates.length} />
-              ) : (
-                <DateCard
-                  date={date}
-                  items={groupedItems[date.format('YYYY-MM-DD')] || []}
-                  index={index}
-                  totalDays={dates.length}
-                />
-              )}
-            </div>
-          </React.Fragment>
-        ))}
+        {dates.map((date, index) => {
+          const foundGroup = groupedItems?.find((group) => group[0].isSame(date, 'day'));
+
+          return (
+            <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
+              <div
+                className={cn('w-full', 'px-0', 'md:px-2', {
+                  'md:w-1/5': isDesktop,
+                })}
+                style={{
+                  order: `${daysPerPage - index - 1} sm:${index}`,
+                }}
+              >
+                {isLoading && (
+                  <DateCardSkeleton index={index} totalDays={daysPerPage} />
+                )}
+                {!isLoading && (
+                  <DateCard
+                    date={date}
+                    items={foundGroup ? foundGroup[1] : []}
+                    index={index}
+                    totalDays={daysPerPage}
+                  />
+                )}
+              </div>
+            </React.Fragment>
+          );
+        })}
       </div>
     </section>
   );

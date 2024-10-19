@@ -1,9 +1,9 @@
 import cn from 'classnames';
 import { ChevronLeft, Download, Edit, Folder, FolderClosed, Plus } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { MoneyValue } from '@/components/common/MoneyValue';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
+import FormattedListing from '@/components/features/transactions/FormattedListing';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,16 +12,11 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useScreenSize } from '@/hooks/useScreenSize';
+import { useTransactions } from '@/hooks/useTransactions';
 import Category from '@/models/Category';
-
-interface Transaction {
-  id: string;
-  date: string;
-  description: string;
-  amount: number;
-  categoryId: string;
-}
+import { TransactionFilters } from '@/models/TransactionFilters';
 
 interface Props {
   category: Category;
@@ -29,20 +24,29 @@ interface Props {
   allCategories: Category[];
 }
 
-const mockTransactions: Transaction[] = [
-  { id: '1', date: '2023-10-15', description: 'Grocery shopping', amount: 120.50, categoryId: '1' },
-  { id: '2', date: '2023-10-14', description: 'Restaurant dinner', amount: 85.00, categoryId: '1' },
-  { id: '3', date: '2023-10-12', description: 'Supermarket', amount: 65.75, categoryId: '1' },
-  { id: '4', date: '2023-10-10', description: 'Local cafe', amount: 12.30, categoryId: '1' },
-  { id: '5', date: '2023-10-08', description: 'Food delivery', amount: 32.99, categoryId: '1' },
-];
-
 export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory, allCategories }) => {
-  const [activeTab, setActiveTab] = useState('transactions');
+  const { openForm } = useFormContext();
+  const [activeTab, setActiveTab] = useState('activity');
   const [editMode, setEditMode] = useState(false);
   const [editedCategory, setEditedCategory] = useState(category);
   const [notes, setNotes] = useState('');
   const isDesktop = useScreenSize();
+  const {
+    groupedItems: groupedTransactions,
+    isLoading: isTransactionsLoading,
+    isError: isTransactionsError,
+    error: transactionsError,
+    refetch: refetchTransactions,
+    setFilter,
+  } = useTransactions({
+    initialFilters: new TransactionFilters({
+      withNestedCategories: true,
+    }),
+  });
+
+  useEffect(() => {
+    setFilter('categories', [category?.id]);
+  }, [category, setFilter]);
 
   const handleSave = () => {
     // Here you would typically save the changes to your backend
@@ -51,32 +55,7 @@ export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory
     setSelectedCategory(editedCategory);
   };
 
-  const renderTransactionContent = () => {
-    if (mockTransactions.length === 0) {
-      return (
-        <div className="flex flex-col items-center justify-center h-[200px] text-center">
-          <p className="text-lg font-semibold">No transactions found</p>
-          <p className="text-sm text-muted-foreground">There are no transactions for this category.</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-4">
-        {mockTransactions.map((transaction) => (
-          <div key={transaction.id} className="flex justify-between items-center p-2 border-b">
-            <div>
-              <p className="font-medium">{transaction.description}</p>
-              <p className="text-sm text-muted-foreground">{new Date(transaction.date).toLocaleDateString()}</p>
-            </div>
-            <Badge variant={transaction.amount > 0 ? 'default' : 'destructive'}>
-              <MoneyValue amount={transaction.amount} />
-            </Badge>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  const onAddTransaction = () => openForm(FormType.Transaction, { category });
 
   return (
     <div className="h-full flex flex-col">
@@ -188,22 +167,28 @@ export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className={cn({ 'grid w-full grid-cols-2': !isDesktop })}>
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="activity">Transactions</TabsTrigger>
             <TabsTrigger value="history">Category History</TabsTrigger>
           </TabsList>
-          <TabsContent value="transactions">
+          <TabsContent value="activity">
             <Card>
               <CardHeader>
-                <CardTitle>Transactions</CardTitle>
-                <CardDescription>List of all transactions in this category</CardDescription>
+                <CardTitle>Activity</CardTitle>
+                <CardDescription className="sr-only">Activity fro the past month</CardDescription>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[300px]">
-                  {renderTransactionContent()}
+                <ScrollArea className="h-[400px]">
+                  <FormattedListing
+                    isLoading={isTransactionsLoading}
+                    isError={isTransactionsError}
+                    error={transactionsError}
+                    groupedTransactions={groupedTransactions}
+                    refetch={refetchTransactions}
+                    onAddTransaction={onAddTransaction} />
                 </ScrollArea>
               </CardContent>
               <CardFooter>
-                <Button>
+                <Button onClick={onAddTransaction}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add Transaction
                 </Button>

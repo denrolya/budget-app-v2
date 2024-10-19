@@ -1,5 +1,5 @@
 import { Check, Pencil, X, Trash2 } from 'lucide-react';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import cn from 'classnames';
@@ -19,13 +19,12 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
-import { useBaseCurrency } from '@/contexts/auth';
+import { BACKEND_DATE_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import Transaction from '@/models/Transaction';
 
 interface Props extends React.ComponentPropsWithoutRef<'div'> {
-  groupedTransactions: [string, Transaction[]][];
+  groupedTransactions: [Moment, Transaction[], number, number][];
 }
 
 type EditableField = 'account' | 'amount' | 'category' | 'note' | 'executedAt';
@@ -33,17 +32,9 @@ type EditableField = 'account' | 'amount' | 'category' | 'note' | 'executedAt';
 export const DesktopTable: React.FC<Props> = ({ groupedTransactions, ...props }) => {
   const { updateTransaction, deleteTransaction, isUpdating } = useTransactionMutations();
   const { openForm } = useFormContext();
-  const baseCurrency = useBaseCurrency();
   const [editingCell, setEditingCell] = useState<{ transactionId: number; field: EditableField } | null>(null);
   const [editValue, setEditValue] = useState<any>('');
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const calculateTotalValue = (transactions: Transaction[]) => transactions
-    .filter(t => !t.isTransfer())
-    .reduce((total, transaction) => {
-      const value = transaction.isIncome() ? transaction.convertedValues[baseCurrency] : -transaction.convertedValues[baseCurrency];
-      return total + value;
-    }, 0);
 
   const handleEdit = (transactionId: number, field: EditableField, value: string) => {
     setEditingCell({ transactionId, field });
@@ -180,6 +171,7 @@ export const DesktopTable: React.FC<Props> = ({ groupedTransactions, ...props })
           inputElement = (
             <CategoryTypeahead
               autoFocus
+              valueField="id"
               multiple={false}
               disabled={isUpdating}
               type={transaction.type}
@@ -253,16 +245,16 @@ export const DesktopTable: React.FC<Props> = ({ groupedTransactions, ...props })
         </TableRow>
       </TableHeader>
       <TableBody>
-        {groupedTransactions.map(([date, transactions]) => (
-          <React.Fragment key={date}>
+        {groupedTransactions.map(([date, transactions, totalValue, count]) => (
+          <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
             <TableRow>
               <TableCell colSpan={8} className="font-semibold bg-muted">
                 <div className="flex justify-between items-center">
-                  <RelativeDatetimeDisplay showTime={false} date={moment(date)} />
+                  <RelativeDatetimeDisplay showTime={false} date={date} />
                   <div className="text-sm font-normal">
-                    <span className="mr-4">{transactions.length} transactions</span>
+                    <span className="mr-4">{count} transactions</span>
                     <span>
-                      Total: <MoneyValue className="font-medium font-mono" amount={calculateTotalValue(transactions)} />
+                      Total: <MoneyValue className="font-medium font-mono" amount={totalValue} />
                     </span>
                   </div>
                 </div>

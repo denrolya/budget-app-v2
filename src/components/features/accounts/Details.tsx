@@ -2,6 +2,7 @@ import { AlertCircle, ArrowUpDown, ChevronLeft, Download, Edit, Plus } from 'luc
 import moment from 'moment/moment';
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime.ts';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountAvatar from '@/components/features/accounts/Avatar';
@@ -25,8 +26,8 @@ interface Props {
 const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
   const { openForm } = useFormContext();
   const currentDate = moment().startOf('day');
-  const daysPerPage = 7;
-  const [activeTab, setActiveTab] = useState('transactions');
+  const daysPerPage = 15;
+  const [activeTab, setActiveTab] = useState('activity');
   const dateRange = useMemo(() => {
     const startDate = currentDate.clone().subtract(daysPerPage - 1, 'days');
     const endDate = currentDate.clone();
@@ -35,7 +36,6 @@ const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
 
   const {
     groupedItems,
-    combinedItems,
     isLoading,
     isError,
     error,
@@ -63,7 +63,7 @@ const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const renderTransactionContent = () => {
+  const renderActivityContent = () => {
     if (isLoading) {
       return (
         <div className="space-y-4 animate-pulse">
@@ -88,7 +88,7 @@ const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
       );
     }
 
-    if (combinedItems.length === 0) {
+    if (groupedItems.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center h-[200px] text-center">
           <p className="text-lg font-semibold">No transactions found</p>
@@ -99,11 +99,11 @@ const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
 
     return (
       <div className="space-y-6">
-        {Object.keys(groupedItems).map((date) => (
-          <div key={date}>
+        {groupedItems.map(([date, items]) => (
+          <div key={date.format(BACKEND_DATE_FORMAT)}>
             <h3 className="text-sm font-medium text-muted-foreground mb-2">{moment(date).format('dddd, D MMM')}</h3>
             <ul className="space-y-2">
-              {groupedItems[date].map((item) => (
+              {items.map((item) => (
                 <li key={item.id}>
                   {item instanceof Transaction ? (
                     <TransactionListItem transaction={item} />
@@ -175,18 +175,18 @@ const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className={isMobile ? 'grid w-full grid-cols-2' : ''}>
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="history">Account History</TabsTrigger>
           </TabsList>
-          <TabsContent value="transactions">
+          <TabsContent value="activity">
             <Card>
               <CardHeader>
-                <CardTitle>Transactions</CardTitle>
-                <CardDescription>List of all transactions for past 7 days</CardDescription>
+                <CardTitle>Activity</CardTitle>
+                <CardDescription className="sr-only">List of all transactions for past 7 days</CardDescription>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[300px]">
-                  {renderTransactionContent()}
+                <ScrollArea className="h-[400px]">
+                  {renderActivityContent()}
                 </ScrollArea>
               </CardContent>
               <CardFooter>

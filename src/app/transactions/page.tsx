@@ -1,41 +1,16 @@
-import moment from 'moment';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { Pagination } from '@/components/common/Pagination';
-import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
-import DesktopTable, { DesktopTableSkeleton } from '@/components/features/transactions/DesktopTable';
-import EmptyTransactionState from '@/components/features/transactions/EmptyTransactionState';
+import FormattedListing from '@/components/features/transactions/FormattedListing';
 import ListFilters from '@/components/features/transactions/ListFilters';
-import TransactionListItemV3, { ListItemSkeleton } from '@/components/features/transactions/ListItemV3';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { BACKEND_DATE_FORMAT } from '@/constants/datetime.ts';
-import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import { useForm as useFormContext } from '@/contexts/Form';
 import { useTransactions } from '@/hooks/useTransactions';
-import Transaction from '@/models/Transaction';
-
-const GroupedTransactions: React.FC<{ groupedTransactions: [string, Transaction[]][] }> = ({ groupedTransactions }) => (
-  <div>
-    {groupedTransactions.map(([date, transactions]) => (
-      <div key={date} className="mb-6">
-        <h5 className="text-lg font-semibold mb-2">
-          <RelativeDatetimeDisplay showTime={false} date={moment(date)} />
-        </h5>
-        <ul className="space-y-2">
-          {transactions.map((transaction) => (
-            <li key={transaction.id} className="relative">
-              <TransactionListItemV3 transaction={transaction} />
-            </li>
-          ))}
-        </ul>
-      </div>
-    ))}
-  </div>
-);
+import { FormType } from '@/contexts/Form';
 
 export const TransactionsList: React.FC = () => {
   const { openForm } = useFormContext();
   const {
-    transactions,
+    groupedItems,
     isLoading,
     isError,
     error,
@@ -47,59 +22,16 @@ export const TransactionsList: React.FC = () => {
     isFetching,
   } = useTransactions();
 
-  const groupedAndSortedTransactions = useMemo(() => {
-    if (!transactions) return [];
-
-    const grouped = transactions.reduce((groups, transaction) => {
-      const date = moment(transaction.executedAt).format(BACKEND_DATE_FORMAT);
-      return { ...groups, [date]: [...(groups[date] || []), transaction] };
-    }, {} as Record<string, Transaction[]>);
-
-    return Object.entries(grouped).sort(([dateA, dateB]) => moment(dateB).diff(moment(dateA)));
-  }, [transactions]);
-
   return (
     <section className="w-full p-4 md:p-0 mx-auto pb-20 md:pb-0">
       <div className="flex-grow overflow-hidden flex flex-col mb-6">
-        {isError && (
-          <Alert variant="destructive">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error?.message || 'An unexpected error occurred.'}</AlertDescription>
-          </Alert>
-        )}
-
-        {isLoading && (
-          <>
-            <div className="md:hidden">
-              <ul className="space-y-2 md:hidden">
-                {Array.from({ length: perPage }, (_, index) => (
-                  <li key={index}><ListItemSkeleton /></li>
-                ))}
-              </ul>
-            </div>
-            <div className="hidden md:block">
-              <DesktopTableSkeleton rowsPerGroup={4} numberOfGroups={5} />
-            </div>
-          </>
-        )}
-
-        {(!isLoading && !isError && transactions) && (
-          <>
-            {groupedAndSortedTransactions.length > 0 && (
-              <>
-                <div className="hidden md:block">
-                  <DesktopTable groupedTransactions={groupedAndSortedTransactions} />
-                </div>
-                <div className="md:hidden">
-                  <GroupedTransactions groupedTransactions={groupedAndSortedTransactions} />
-                </div>
-              </>
-            )}
-            {groupedAndSortedTransactions.length === 0 && (
-              <EmptyTransactionState onRefresh={refetch} onAddTransaction={() => openForm(FormType.Transaction)} />
-            )}
-          </>
-        )}
+        <FormattedListing
+          isLoading={isLoading}
+          isError={isError}
+          error={error}
+          groupedTransactions={groupedItems}
+          refetch={refetch}
+          onAddTransaction={() => openForm(FormType.Transaction)} />
 
         <div className="mt-4">
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />

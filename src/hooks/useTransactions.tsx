@@ -1,13 +1,19 @@
 import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import groupBy from 'lodash/groupBy';
+import sortBy from 'lodash/sortBy';
+import sumBy from 'lodash/sumBy';
+import toPairs from 'lodash/toPairs';
 import { useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
+import moment, { Moment } from 'moment';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
+import { useBaseCurrency } from '@/contexts/auth';
 import { FormType, useFormSubmitListener } from '@/contexts/Form';
 import { useListState } from '@/hooks/useListState';
 import Transaction, { TransactionFactory } from '@/models/Transaction';
 import { TransactionFilters } from '@/models/TransactionFilters';
-import { transactionService, FetchResponse as FetchTransactionsResponse } from '@/services/api/transaction';
+import { FetchResponse as FetchTransactionsResponse, transactionService } from '@/services/api/transaction';
 
 interface UseTransactionsOptions {
   initialPerPage?: number;
@@ -25,6 +31,7 @@ interface TransformedResponse {
 
 export const useTransactions = (options: UseTransactionsOptions = {}): {
   transactions: Transaction[];
+  groupedItems: [Moment, Transaction[], number, number][];
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
@@ -42,6 +49,7 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
   setSort: (sort: { field: string; direction: 'asc' | 'desc' }) => void;
   isFetching: boolean;
 } => {
+  const baseCurrency = useBaseCurrency();
   const {
     initialPerPage = 30,
     initialFilters = new TransactionFilters(),
@@ -128,8 +136,26 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
 
   const totalPages = useMemo(() => Math.ceil((data?.count ?? 0) / perPage) || 0, [data?.count, perPage]);
 
+  const transactions = data?.list ?? [];
+
+  const groupedItems: [Moment, Transaction[], number, number][] = useMemo(() => toPairs(
+    groupBy(
+      sortBy(transactions, item => -item.executedAt.valueOf()),
+      item => item.executedAt.format(BACKEND_DATE_FORMAT),
+    ),
+  ).map(([date, transactions]) => {
+    const totalValue = sumBy(transactions, item => {
+      const value = item.convertedValues[baseCurrency] || 0;
+      return item.isExpense() ? -value : value;
+    });
+    const totalCount = transactions.length;
+    return [moment(date), transactions, totalValue, totalCount];
+  }), [transactions, baseCurrency]);
+
+
   return {
-    transactions: data?.list ?? [],
+    transactions,
+    groupedItems,
     isLoading: isPending,
     isError,
     error: error || null,
