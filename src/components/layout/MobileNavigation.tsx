@@ -1,6 +1,6 @@
 import cn from 'classnames';
 import { LogOut, Monitor, Moon, MoreHorizontal, Plus, Sun } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import ExchangeRatesPresets from '@/components/common/ExchangeRatesPresets';
@@ -22,7 +22,12 @@ interface Props {
 
 export const MobileNavigation: React.FC<Props> = ({ className }) => {
   const { theme, setTheme } = useTheme();
+  const [isDrawerOpen, setDrawerOpen] = useState<boolean>(false);
   const location = useLocation();
+
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [location.pathname]);
 
   const navItems = [ROUTES.DASHBOARD, ROUTES.DAILY_LEDGER, ROUTES.TRANSACTION_LIST];
 
@@ -68,7 +73,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
             );
           })}
           <li className="flex-1 h-full">
-            <Drawer>
+            <Drawer open={isDrawerOpen} onOpenChange={setDrawerOpen}>
               <DrawerTrigger asChild>
                 <button className="flex flex-col items-center justify-center w-full h-full text-muted-foreground">
                   <MoreHorizontal className="h-5 w-5" />
