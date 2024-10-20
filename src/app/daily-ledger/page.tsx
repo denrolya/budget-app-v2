@@ -135,7 +135,7 @@ export const DailyLedgerPage: React.FC = () => {
     initialTransactionFilters: new TransactionFilters(),
     initialTransferFilters: new TransferFilters(),
     updateUrl: false,
-    excludeTransfers: false,
+    excludeTransfers: true,
   });
 
   useEffect(() => {
