@@ -4,6 +4,8 @@ import moment from 'moment';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
+
 export interface FilterModel {
   setFilter<K extends keyof this>(key: K, value: this[K]): void;
 }
@@ -46,7 +48,7 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
                                                                            direction: null,
                                                                          },
                                                                          searchParamKeys = {},
-                                                                         formatMoment = 'YYYY-MM-DD',
+                                                                         formatMoment = BACKEND_DATE_FORMAT,
                                                                          updateUrl = true,
                                                                        }: UseListStateOptions<FilterType, ItemType>) => {
   const [searchParams, setSearchParams] = useSearchParams();

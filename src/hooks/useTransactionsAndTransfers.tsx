@@ -2,7 +2,7 @@ import groupBy from 'lodash/groupBy';
 import sortBy from 'lodash/sortBy';
 import toPairs from 'lodash/toPairs';
 import moment, { Moment } from 'moment';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
@@ -20,27 +20,23 @@ interface UseTransactionsAndTransfersOptions {
   excludeTransfers?: boolean;
 }
 
+type CombinedFilters = TransactionFilters & TransferFilters;
+
 export const useTransactionsAndTransfers = ({
                                               initialTransactionFilters = new TransactionFilters(),
                                               initialTransferFilters = new TransferFilters(),
                                               updateUrl = false,
                                               excludeTransfers = true,
-                                            }: UseTransactionsAndTransfersOptions): {
-  transactions: Transaction[];
-  transfers: Transfer[];
-  combinedItems: (Transaction | Transfer)[];
-  groupedItems: [Moment, (Transaction | Transfer)[], number, number, number, number][];
-  isLoading: boolean;
-  isError: boolean;
-  error: Error | null;
-  setFilter: <K extends keyof TransferFilters>(type: K, value: TransferFilters[K] | undefined | null) => void;
-} => {
+                                            }: UseTransactionsAndTransfersOptions) => {
+  const [showTransactions, setShowTransactions] = useState<boolean>(true);
+  const [showTransfers, setShowTransfers] = useState<boolean>(true);
   const baseCurrency = useBaseCurrency();
   const {
     transactions,
     isLoading: isLoadingTransactions,
     isError: isErrorTransactions,
     error: errorTransactions,
+    filters: transactionFilters,
     setFilter: setTransactionFilter,
   } = useTransactions({
     initialPerPage: 99999,
@@ -53,6 +49,7 @@ export const useTransactionsAndTransfers = ({
     isLoading: isLoadingTransfers,
     isError: isErrorTransfers,
     error: errorTransfers,
+    filters: transferFilters,
     setFilter: setTransferFilter,
   } = useTransfers({
     initialPerPage: 99999,
@@ -64,19 +61,30 @@ export const useTransactionsAndTransfers = ({
   const isError = isErrorTransactions || isErrorTransfers;
   const error = errorTransactions || errorTransfers;
 
-  const setFilter = useCallback((type: keyof TransferFilters, value: any) => {
-    setTransactionFilter(type, value);
-    setTransferFilter(type, value);
+  const setFilter = useCallback((type: keyof CombinedFilters, value: any) => {
+    console.log(type, value);
+
+    if (TransactionFilters.isApplicable(type)) {
+      setTransactionFilter(type as keyof TransactionFilters, value);
+      if (type === 'categories' && value.length > 0) {
+        setShowTransfers(false);
+      }
+    }
+    if (TransferFilters.isApplicable(type)) {
+      setTransferFilter(type as keyof TransferFilters, value);
+    }
   }, [setTransactionFilter, setTransferFilter]);
 
-  const combinedItems = useMemo(() => {
-    const items = [...transactions, ...transfers];
+  const filteredItems = useMemo(() => {
+    let items: (Transaction | Transfer)[] = [];
+    if (showTransactions) items = items.concat(transactions);
+    if (showTransfers) items = items.concat(transfers);
     return items.sort((a, b) => b.executedAt.valueOf() - a.executedAt.valueOf());
-  }, [transactions, transfers]);
+  }, [transactions, transfers, showTransactions, showTransfers]);
 
   const groupedItems: [Moment, (Transaction | Transfer)[], number, number, number, number][] = useMemo(() => toPairs(
     groupBy(
-      sortBy(combinedItems, item => -item.executedAt.valueOf()),
+      sortBy(filteredItems, item => -item.executedAt.valueOf()),
       item => item.executedAt.format(BACKEND_DATE_FORMAT),
     ),
   ).map(([date, items]) => {
@@ -85,7 +93,6 @@ export const useTransactionsAndTransfers = ({
     let transactionsCount = 0;
     let transfersCount = 0;
 
-    // Iterate through items once to calculate everything
     items.forEach(item => {
       if (item instanceof Transaction) {
         const value = item.convertedValues[baseCurrency] || 0;
@@ -98,16 +105,22 @@ export const useTransactionsAndTransfers = ({
     });
 
     return [moment(date), items, transactionsValue, transfersValue, transactionsCount, transfersCount];
-  }), [combinedItems, baseCurrency]);
+  }), [filteredItems, baseCurrency]);
 
   return {
     transactions,
     transfers,
-    combinedItems,
+    filteredItems,
     groupedItems,
     isLoading,
     isError,
     error,
     setFilter,
+    transactionFilters,
+    transferFilters,
+    showTransactions,
+    setShowTransactions,
+    showTransfers,
+    setShowTransfers,
   };
 };

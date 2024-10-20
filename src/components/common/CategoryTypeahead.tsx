@@ -5,10 +5,10 @@ import { useExpenseCategories, useIncomeCategories } from '@/contexts/FinanceDat
 import Category from '@/models/Category';
 import { Type as TransactionType } from '@/models/Transaction';
 
-interface CategoryTypeaheadProps extends Omit<TypeaheadV2Props<Category>, 'options' | 'labelField' | 'groupBy' | 'renderElement'> {
+type CategoryTypeaheadProps = Omit<TypeaheadV2Props<Category, string>, 'options' | 'labelField' | 'groupBy' | 'renderElement'> & {
   className?: string;
   type?: TransactionType;
-}
+};
 
 const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(({
                                                                                   multiple = false,
@@ -22,7 +22,7 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>((
   const incomeCategories = useIncomeCategories();
   const expenseCategories = useExpenseCategories();
 
-  const renderElement = (el: Category) => (
+  const renderElement: TypeaheadV2Props<Category, string>['renderElement'] = (el) => (
     <>
       <div className="flex flex-col">
         <span>{el.name}</span>
@@ -45,10 +45,10 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>((
   }
 
   return (
-    <TypeaheadV2<Category>
+    <TypeaheadV2
       labelField="name"
-      valueField={valueField}
-      groupBy={type}
+      valueField={valueField as keyof Category}
+      groupBy={type as TransactionType}
       placeholder={multiple ? 'Select categories...' : 'Select a category...'}
       multiple={multiple}
       options={options}
@@ -58,7 +58,7 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>((
       className={className}
       ref={ref}
       {...props}
-    ></TypeaheadV2>
+    />
   );
 });
 

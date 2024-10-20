@@ -4,14 +4,17 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSwipeable } from 'react-swipeable';
 
-import TableListingSkeleton from '@/components/features/daily-ledger/TableListingSkeleton';
 import MoneyValue from '@/components/common/MoneyValue';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import DailyList from '@/components/features/daily-ledger/DailyList';
+import ListFilters from '@/components/features/daily-ledger/ListFilters';
 import TableListing from '@/components/features/daily-ledger/TableListing';
+import TableListingSkeleton from '@/components/features/daily-ledger/TableListingSkeleton';
 import { Button } from '@/components/ui/button';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
+import TransactionFilters from '@/models/TransactionFilters';
+import TransferFilters from '@/models/TransferFilters';
 
 export const DailyLedgerPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(moment().startOf('day'));
@@ -28,9 +31,17 @@ export const DailyLedgerPage: React.FC = () => {
     isError,
     error,
     setFilter,
+    transactionFilters,
+    transferFilters,
+    showTransactions,
+    setShowTransactions,
+    showTransfers,
+    setShowTransfers,
   } = useTransactionsAndTransfers({
+    initialTransactionFilters: new TransactionFilters(),
+    initialTransferFilters: new TransferFilters(),
     updateUrl: false,
-    excludeTransfers: true,
+    excludeTransfers: false,
   });
 
   useEffect(() => {
@@ -88,6 +99,8 @@ export const DailyLedgerPage: React.FC = () => {
 
     return { transactionsCount, transfersCount, transactionsValue, transfersValue };
   }, [groupedItems]);
+
+  console.log('ledger');
 
   return (
     <section className="w-full mx-auto p-0 pb-16 pt-4 md:py-4" {...swipeHandlers}>
@@ -159,6 +172,16 @@ export const DailyLedgerPage: React.FC = () => {
             currentDate={currentDate} />
         )}
       </div>
+
+      <ListFilters
+        transactionFilters={transactionFilters}
+        transferFilters={transferFilters}
+        setFilter={setFilter}
+        showTransactions={showTransactions}
+        setShowTransactions={setShowTransactions}
+        showTransfers={showTransfers}
+        setShowTransfers={setShowTransfers}
+      />
     </section>
   );
 };

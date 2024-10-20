@@ -5,33 +5,33 @@ import cn from 'classnames';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
-export interface TypeaheadV2Props<T> extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+export interface TypeaheadV2Props<T, V extends string | number> extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
   multiple?: boolean;
   options: T[];
-  valueField: keyof T;
-  labelField: keyof T;
-  groupBy?: keyof T;
+  valueField: string;
+  labelField: string;
+  groupBy?: string;
   renderElement: (element: T, valueField?: keyof T, labelField?: keyof T) => React.ReactNode;
   emptyMessage?: string;
-  value: string | number | readonly string[] | undefined;
-  onChange: (value: string | number | string[] | null) => void;
+  value: V | V[] | null | undefined;
+  onChange: (value: V | V[] | null) => void;
 }
 
-export const TypeaheadV2 = <T, >({
-                                   multiple = false,
-                                   options,
-                                   valueField,
-                                   labelField,
-                                   groupBy,
-                                   renderElement,
-                                   placeholder = 'Select options...',
-                                   emptyMessage = 'No options found.',
-                                   value,
-                                   onChange,
-                                   className,
-                                   ...inputProps
-                                 }: TypeaheadV2Props<T>,
-                                 ref: React.Ref<HTMLInputElement>,
+export const TypeaheadV2 = <T, V extends string | number>({
+                                                            multiple = false,
+                                                            options,
+                                                            valueField,
+                                                            labelField,
+                                                            groupBy,
+                                                            renderElement,
+                                                            placeholder = 'Select options...',
+                                                            emptyMessage = 'No options found.',
+                                                            value,
+                                                            onChange,
+                                                            className,
+                                                            ...inputProps
+                                                          }: TypeaheadV2Props<T, V>,
+                                                          ref: React.Ref<HTMLInputElement>,
 ) => {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -50,16 +50,17 @@ export const TypeaheadV2 = <T, >({
     },
   }));
 
-  const selectedValues = useMemo(() => {
+  // @ts-ignore
+  const selectedValues = useMemo<V[]>(() => {
     if (multiple) {
-      return Array.isArray(value) ? value : [];
+      return Array.isArray(value) ? value : (value != null ? [value] : []);
     } else {
-      return value ? [value] : [];
+      return value != null ? [value] : [];
     }
   }, [multiple, value]);
 
   const selectedOptions = useMemo(() => {
-    return options.filter(option => selectedValues.includes(option[valueField] as string | number));
+    return options.filter(option => selectedValues.includes(option[valueField] as V));
   }, [options, selectedValues, valueField]);
 
   const groupedOptions = useMemo(() => {
@@ -87,13 +88,13 @@ export const TypeaheadV2 = <T, >({
       ...group,
       options: group.options.filter(option =>
         String(option[labelField]).toLowerCase().includes(inputValue.toLowerCase()) &&
-        !selectedValues.includes(option[valueField] as string | number),
+        !selectedValues.includes(option[valueField] as V),
       ),
     })).filter(group => group.options.length > 0);
   }, [groupedOptions, inputValue, labelField, selectedValues, valueField]);
 
   const handleSelect = useCallback((option: T) => {
-    const optionValue = option[valueField] as string | number;
+    const optionValue = option[valueField] as V;
     if (multiple) {
       const newValue = selectedValues.includes(optionValue)
         ? selectedValues.filter(v => v !== optionValue)
@@ -107,7 +108,7 @@ export const TypeaheadV2 = <T, >({
     setHighlightedIndex(-1);
   }, [multiple, onChange, selectedValues, valueField]);
 
-  const handleRemove = useCallback((optionValue: string | number) => {
+  const handleRemove = useCallback((optionValue: V) => {
     if (multiple) {
       const newValue = selectedValues.filter(v => v !== optionValue);
       onChange(newValue);
@@ -132,7 +133,7 @@ export const TypeaheadV2 = <T, >({
       setOpen(false);
     } else if (e.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
       const newValue = selectedValues.slice(0, -1);
-      onChange(multiple ? newValue : null);
+      onChange(multiple ? newValue : (newValue[0] || null));
     }
 
     inputProps.onKeyDown?.(e);
@@ -193,7 +194,7 @@ export const TypeaheadV2 = <T, >({
                   className="ml-1 h-4 w-4 p-0"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleRemove(option[valueField] as string | number);
+                    handleRemove(option[valueField] as V);
                   }}
                   disabled={inputProps.disabled}
                 >
@@ -260,8 +261,8 @@ export const TypeaheadV2 = <T, >({
                         onMouseEnter={() => setHighlightedIndex(flatIndex)}
                       >
                         <Check className={cn('mr-2 h-4 w-4', {
-                          'opacity-0': !selectedValues.includes(option[valueField] as string | number),
-                          'opacity-100': selectedValues.includes(option[valueField] as string | number),
+                          'opacity-0': !selectedValues.includes(option[valueField] as V),
+                          'opacity-100': selectedValues.includes(option[valueField] as V),
                         })} />
                         {renderElement(option, valueField, labelField)}
                       </div>
@@ -279,4 +280,4 @@ export const TypeaheadV2 = <T, >({
 
 TypeaheadV2.displayName = 'TypeaheadV2';
 
-export default forwardRef(<T, >(props: TypeaheadV2Props<T>, ref: React.Ref<HTMLInputElement>) => TypeaheadV2<T>(props, ref));
+export default forwardRef(<T, V extends string | number>(props: TypeaheadV2Props<T, V>, ref: React.Ref<HTMLInputElement>) => TypeaheadV2<T, V>(props, ref));

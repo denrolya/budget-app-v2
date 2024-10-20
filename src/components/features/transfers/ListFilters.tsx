@@ -15,7 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize';
-import { TransferFilters } from '@/models/TransferFilters';
+import TransferFilters from '@/models/TransferFilters';
 
 interface ListFiltersProps {
   data: TransferFilters;

@@ -1,6 +1,6 @@
 import moment, { Moment } from 'moment';
 
-import { FilterModel } from '@/hooks/useListState';
+import BaseFilters from '@/models/BaseFilters';
 
 interface TransferFiltersProps {
   searchTerm?: string;
@@ -11,30 +11,31 @@ interface TransferFiltersProps {
   accounts?: string[];
 }
 
-export class TransferFilters implements FilterModel {
-  searchTerm: string;
-  before: Moment;
-  after: Moment;
-  amountRange: number[];
-  accounts: string[];
+export class TransferFilters extends BaseFilters {
+  searchTerm!: string;
+  before!: Moment;
+  after!: Moment;
+  status?: string;
+  amountRange!: number[];
+  accounts!: string[];
 
-  constructor({
-                searchTerm = '',
-                before = moment(),
-                after = moment().subtract(30, 'days'),
-                amountRange = [],
-                accounts = [],
-              }: TransferFiltersProps = {}) {
-    this.searchTerm = searchTerm;
-    this.before = before;
-    this.after = after;
-    this.amountRange = amountRange;
-    this.accounts = accounts;
+  constructor(props: TransferFiltersProps = {}) {
+    super({
+      searchTerm: '',
+      before: moment(),
+      after: moment().subtract(30, 'days'),
+      amountRange: [],
+      accounts: [],
+      ...props
+    });
   }
 
-  setFilter<K extends keyof this>(key: K, value: this[K]): void {
-    if (key in this) {
-      (this as any)[key] = value;
+  static isApplicable(key: unknown): key is keyof TransferFilters {
+    if (typeof key !== 'string') {
+      return false;
     }
+    return key in TransferFilters.prototype || key in new TransferFilters();
   }
 }
+
+export default TransferFilters;

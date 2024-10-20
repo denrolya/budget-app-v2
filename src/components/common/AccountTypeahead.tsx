@@ -7,9 +7,9 @@ import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
 import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
 import Account from '@/models/Account';
 
-interface AccountTypeaheadProps extends Omit<TypeaheadV2Props<Account>, 'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'> {
+type AccountTypeaheadProps = Omit<TypeaheadV2Props<Account, string>, 'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'> & {
   className?: string;
-}
+};
 
 const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
                                                                                 multiple = false,
@@ -20,7 +20,7 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
                                                                               }, ref) => {
   const accounts = useAccountsWithDefaultOrder();
 
-  const renderElement = (el: Account) => (
+  const renderElement: TypeaheadV2Props<Account, string>['renderElement'] = (el, valueField, labelField) => (
     <>
       <div className={cn('flex items-center justify-center rounded-full mr-2', el.archivedAt ? 'text-muted' : el.color)}>
         <AccountAvatar account={el} size="sm" />
@@ -45,7 +45,7 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
   );
 
   return (
-    <TypeaheadV2<Account>
+    <TypeaheadV2
       valueField="id"
       labelField="nameWithCurrency"
       groupBy="type"
@@ -58,7 +58,7 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
       className={className}
       ref={ref}
       {...props}
-    ></TypeaheadV2>
+    />
   );
 });
 

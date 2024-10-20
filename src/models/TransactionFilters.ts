@@ -1,6 +1,6 @@
 import moment, { Moment } from 'moment';
 
-import { FilterModel } from '@/hooks/useListState';
+import BaseFilters from '@/models/BaseFilters';
 
 interface TransactionFiltersProps {
   searchTerm?: string;
@@ -14,42 +14,37 @@ interface TransactionFiltersProps {
   isDraft?: boolean;
 }
 
-export class TransactionFilters implements FilterModel {
-  searchTerm: string;
-  before: Moment;
-  after: Moment;
-  amountRange: number[];
-  categories: number[] | string[];
-  excludedCategories: number[] | string[];
-  accounts: number[] | string[];
-  withNestedCategories: boolean;
+export class TransactionFilters extends BaseFilters {
+  searchTerm!: string;
+  before!: Moment;
+  after!: Moment;
+  amountRange!: number[];
+  categories!: number[] | string[];
+  excludedCategories!: number[] | string[];
+  accounts!: string[];
+  withNestedCategories!: boolean;
   isDraft?: boolean;
 
-  constructor({
-                searchTerm = '',
-                before = moment(),
-                after = moment().subtract(30, 'days'),
-                amountRange = [],
-                categories = [],
-                excludedCategories = [],
-                accounts = [],
-                withNestedCategories = false,
-                isDraft = undefined,
-              }: TransactionFiltersProps = {}) {
-    this.searchTerm = searchTerm;
-    this.before = before;
-    this.after = after;
-    this.amountRange = amountRange;
-    this.categories = categories;
-    this.excludedCategories = excludedCategories;
-    this.accounts = accounts;
-    this.withNestedCategories = withNestedCategories;
-    this.isDraft = isDraft;
+  constructor(props: TransactionFiltersProps = {}) {
+    super({
+      searchTerm: '',
+      before: moment(),
+      after: moment().subtract(30, 'days'),
+      amountRange: [],
+      categories: [],
+      excludedCategories: [],
+      accounts: [],
+      withNestedCategories: false,
+      ...props
+    });
   }
 
-  setFilter<K extends keyof this>(key: K, value: this[K]): void {
-    if (key in this) {
-      (this as any)[key] = value;
+  static isApplicable(key: unknown): key is keyof TransactionFilters {
+    if (typeof key !== 'string') {
+      return false;
     }
+    return key in TransactionFilters.prototype || key in new TransactionFilters();
   }
 }
+
+export default TransactionFilters;
