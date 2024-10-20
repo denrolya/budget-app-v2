@@ -2,6 +2,7 @@ import { ArrowRightLeftIcon, CalendarIcon, CalendarX, Receipt } from 'lucide-rea
 import { Moment } from 'moment';
 import React from 'react';
 
+import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import MoneyValue from '@/components/common/MoneyValue';
 import TransactionListItem, {
   ListItemSkeleton as TransactionListItemSkeleton,
@@ -49,7 +50,7 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
       <div className="flex flex-col space-y-2 pb-3 border-b border-border">
         <h4 className="text-lg font-semibold flex items-center">
           <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground flex-shrink-0" />
-          <span className="truncate">{date.format('dddd, D MMM')}</span>
+          <RelativeDatetimeDisplay showTime={false} date={date} />
         </h4>
         <div className="flex flex-wrap gap-2 text-sm">
           <div className="flex items-center min-w-[120px]">

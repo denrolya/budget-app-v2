@@ -13,7 +13,7 @@ const RelativeDatetimeDisplay: React.FC<Props> = ({ showTime = true, date, class
     if (showTime) {
       return isCurrentYear ? date.format('MMM D, HH:mm') : date.format('MMM D, YYYY HH:mm');
     } else {
-      return isCurrentYear ? date.format('MMM D') : date.format('MMM D, YYYY');
+      return isCurrentYear ? date.format('dddd, D MMM') : date.format('dddd, D MMM, YYYY');
     }
   }, [date, isCurrentYear, showTime]);
 
@@ -21,9 +21,9 @@ const RelativeDatetimeDisplay: React.FC<Props> = ({ showTime = true, date, class
 
   return (
     <span className={className}>
-      <span className="font-light">{relativeTime}</span>
+      <span className="font-light">{formattedDate}</span>
       {' '}
-      <span className="font-medium">({formattedDate})</span>
+      <span className="font-medium">({relativeTime})</span>
     </span>
   );
 };

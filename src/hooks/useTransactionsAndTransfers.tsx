@@ -1,9 +1,3 @@
-import groupBy from 'lodash/groupBy';
-import sortBy from 'lodash/sortBy';
-import toPairs from 'lodash/toPairs';
-import moment, { Moment } from 'moment';
-import { useCallback, useMemo, useState } from 'react';
-
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useTransactions } from '@/hooks/useTransactions';
@@ -12,6 +6,11 @@ import Transaction from '@/models/Transaction';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import Transfer from '@/models/Transfer';
 import { TransferFilters } from '@/models/TransferFilters';
+import groupBy from 'lodash/groupBy';
+import sortBy from 'lodash/sortBy';
+import toPairs from 'lodash/toPairs';
+import moment, { Moment } from 'moment';
+import { useCallback, useMemo, useState } from 'react';
 
 interface UseTransactionsAndTransfersOptions {
   initialTransactionFilters?: TransactionFilters;
@@ -62,8 +61,6 @@ export const useTransactionsAndTransfers = ({
   const error = errorTransactions || errorTransfers;
 
   const setFilter = useCallback((type: keyof CombinedFilters, value: any) => {
-    console.log(type, value);
-
     if (TransactionFilters.isApplicable(type)) {
       setTransactionFilter(type as keyof TransactionFilters, value);
       if (type === 'categories' && value.length > 0) {

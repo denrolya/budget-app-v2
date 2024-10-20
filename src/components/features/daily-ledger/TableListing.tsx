@@ -1,6 +1,5 @@
 import { ArrowRight, Check, Eye, Pencil, Trash2, X } from 'lucide-react';
-import { Moment } from 'moment';
-import moment from 'moment/moment';
+import moment, { Moment } from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -24,16 +23,16 @@ import Transaction from '@/models/Transaction';
 import Transfer from '@/models/Transfer';
 import { confirm } from '@/utils/confirmation';
 
-type EditableField = 'account' | 'amount' | 'category' | 'note' | 'executedAt';
+type EditableField = 'account' | 'amount' | 'category' | 'note' | 'executedAt'
 
 interface Props {
   isLoading: boolean;
-  daysPerPage: number;
   groupedItems: [Moment, (Transaction | Transfer)[], number, number, number, number][];
-  currentDate: Moment;
+  startDate: Moment;
+  endDate: Moment;
 }
 
-const TableListing: React.FC<Props> = ({ isLoading, daysPerPage, groupedItems, currentDate }) => {
+const TableListing: React.FC<Props> = ({ isLoading, groupedItems, startDate, endDate }) => {
   const { updateTransaction, deleteTransaction, isUpdating } = useTransactionMutations();
   const { openForm } = useFormContext();
   const [editingCell, setEditingCell] = useState<{ itemId: number; field: EditableField } | null>(null);
@@ -223,7 +222,15 @@ const TableListing: React.FC<Props> = ({ isLoading, daysPerPage, groupedItems, c
     );
   };
 
-  const dates = useMemo(() => Array.from({ length: daysPerPage }, (_, i) => moment(currentDate).subtract(i, 'days')), [currentDate, daysPerPage]);
+  const dates = useMemo(() => {
+    const dates = [];
+    const currentDate = startDate.clone();
+    while (currentDate.isSameOrBefore(endDate)) {
+      dates.push(currentDate.clone());
+      currentDate.add(1, 'day');
+    }
+    return dates.reverse();
+  }, [startDate, endDate]);
 
   const renderTransferAmounts = (transfer: Transfer) => (
     <>
@@ -280,11 +287,11 @@ const TableListing: React.FC<Props> = ({ isLoading, daysPerPage, groupedItems, c
                       <div className="text-sm font-normal">
                         <span className="mr-4">{transactionsCount} transactions, {transfersCount} transfers</span>
                         <span>
-                        Transactions: <MoneyValue className="font-medium font-mono" amount={transactionsValue} />
-                      </span>
+                          Transactions: <MoneyValue className="font-medium font-mono" amount={transactionsValue} />
+                        </span>
                         <span className="ml-2">
-                        Transfers: <MoneyValue className="font-medium font-mono" amount={transfersValue} />
-                      </span>
+                          Transfers: <MoneyValue className="font-medium font-mono" amount={transfersValue} />
+                        </span>
                       </div>
                     </div>
                   </TableCell>
@@ -354,6 +361,7 @@ const TableListing: React.FC<Props> = ({ isLoading, daysPerPage, groupedItems, c
                     <TableCell>
                       {item instanceof Transfer && (
                         <>
+
                           <div>Rate: {Number(item.rate.toFixed(4))}</div>
                           <div className="text-xs text-muted-foreground">
                             1 {item.fromExpense.account.currency} = {Number(item.rate.toFixed(4))} {item.toIncome.account.currency}

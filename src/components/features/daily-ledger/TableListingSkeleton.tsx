@@ -1,19 +1,26 @@
-
-import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay.tsx';
 import { ArrowRight } from 'lucide-react';
-import moment, { Moment } from 'moment';
-import React from 'react';
+import { Moment } from 'moment';
+import React, { useMemo } from 'react';
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface Props {
-  daysPerPage: number;
-  currentDate: Moment;
+  startDate: Moment;
+  endDate: Moment;
 }
 
-export const TableListingSkeleton: React.FC<Props> = ({ daysPerPage, currentDate }) => {
-  const dates = Array.from({ length: daysPerPage }, (_, i) => moment(currentDate).subtract(i, 'days'));
+export const TableListingSkeleton: React.FC<Props> = ({ startDate, endDate }) => {
+  const dates = useMemo(() => {
+    const dates = [];
+    const currentDate = startDate.clone();
+    while (currentDate.isSameOrBefore(endDate)) {
+      dates.push(currentDate.clone());
+      currentDate.add(1, 'day');
+    }
+    return dates.reverse(); // Reverse to show most recent dates first
+  }, [startDate, endDate]);
 
   return (
     <div className="overflow-x-auto">
