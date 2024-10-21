@@ -2,13 +2,20 @@
   "files": [],
   "exclude": ["src/components/ui"],
   "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
   ],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "jsx": "react-jsx", // or "react" depending on your React setup
+    "esModuleInterop": true, // This solves the moment.js import issue
+    "allowSyntheticDefaultImports": true // Optional but recommended for compatibility
   }
 }

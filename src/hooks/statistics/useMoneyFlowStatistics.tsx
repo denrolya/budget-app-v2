@@ -49,6 +49,8 @@ interface UseMoneyFlowReturn {
   incomeChangePercent: number
   expensesChange: number
   expensesChangePercent: number
+  previousAvgIntervalIncome: number
+  previousAvgIntervalExpenses: number
   avgIntervalIncome: number
   avgIntervalExpenses: number
 }
@@ -185,6 +187,8 @@ export const useMoneyFlow = ({
     expensesChangePercent,
     avgIntervalIncome,
     avgIntervalExpenses,
+    previousAvgIntervalIncome,
+    previousAvgIntervalExpenses,
   } = useMemo(() => {
     const currentIncome = transformedData.reduce((sum, d) => sum + d.income, 0);
     const currentExpenses = transformedData.reduce((sum, d) => sum + d.expenses, 0);
@@ -209,6 +213,8 @@ export const useMoneyFlow = ({
     // Calculate average per interval
     const avgIntervalIncome = intervalCount > 0 ? currentIncome / intervalCount : 0;
     const avgIntervalExpenses = intervalCount > 0 ? currentExpenses / intervalCount : 0;
+    const previousAvgIntervalIncome = intervalCount > 0 ? previousIncome / intervalCount : 0;
+    const previousAvgIntervalExpenses = intervalCount > 0 ? previousExpenses / intervalCount : 0;
 
     return {
       revenueChange,
@@ -225,6 +231,8 @@ export const useMoneyFlow = ({
       expensesChangePercent,
       avgIntervalIncome,
       avgIntervalExpenses,
+      previousAvgIntervalIncome,
+      previousAvgIntervalExpenses,
     };
   }, [transformedData]);
 
@@ -251,5 +259,7 @@ export const useMoneyFlow = ({
     expensesChangePercent,
     avgIntervalIncome,
     avgIntervalExpenses,
+    previousAvgIntervalIncome,
+    previousAvgIntervalExpenses,
   };
 };

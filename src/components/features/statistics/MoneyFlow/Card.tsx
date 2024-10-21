@@ -1,5 +1,6 @@
 import cn from 'classnames';
 import {
+  ArrowUpDownIcon,
   BarChartIcon,
   Calendar,
   DollarSignIcon,
@@ -18,7 +19,7 @@ import Chart from '@/components/features/statistics/MoneyFlow/Chart';
 import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem';
 import VeryInformativeTooltip from '@/components/features/statistics/MoneyFlow/VeryInformativeTooltip';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -55,7 +56,7 @@ export const MoneyFlowSkeleton: React.FC = () => (
 export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
   const [timeframe, setTimeframe] = useState<TimeframeOption['value']>(TIMEFRAME_OPTIONS[6].value);
-  const [interval, setInterval] = useState(INTERVAL_OPTIONS[1].value);
+  const [interval, setInterval] = useState(INTERVAL_OPTIONS[2].value);
   const [isBarChart, setIsBarChart] = useState<boolean>(true);
   const [showRevenue, setShowRevenue] = useState<boolean>(false);
 
@@ -113,6 +114,8 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
     expensesChangePercent,
     avgIntervalIncome,
     avgIntervalExpenses,
+    previousAvgIntervalIncome,
+    previousAvgIntervalExpenses,
   } = useMoneyFlow({
     interval,
     currentTimeframe,
@@ -127,11 +130,11 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
 
   const getSummaryText = () => {
     const formatChange = (change: number, percent: number) => `${change >= 0 ? 'up' : 'down'} ${Math.abs(percent).toFixed(0)}%`;
-    return `Income ${formatChange(incomeChange, incomeChangePercent)}, Expenses ${formatChange(expensesChange, expensesChangePercent)}, Revenue ${formatChange(revenueChange, revenueChangePercent)}`;
+    return `Income ${formatChange(incomeChange, incomeChangePercent)}, Expenses ${formatChange(expensesChange, expensesChangePercent)}, Revenue ${formatChange(revenueChange, revenueChangePercent)}, Income per Expense: ${(totalIncome / totalExpenses).toFixed(2)}, Expense Ratio: ${((totalExpenses / totalIncome) * 100).toFixed(1)}%`;
   };
 
   return (
-    <Card className={cn('w-full transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25', className)}>
+    <Card className={cn('w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25', className)}>
       <CardContent className="p-3">
         <div className="flex justify-between items-start mb-2">
           <div className="flex flex-col">
@@ -141,8 +144,8 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
               contentClassName="w-full max-w-sm p-4 sm:w-96 bg-transparent border-none shadow-none"
               triggerClassName="cursor-help"
               content={
-              <span>
-                <YearDoughnutTimeframeDisplayChart data={[previousTimeframe, currentTimeframe]} />
+                <span>
+                  <YearDoughnutTimeframeDisplayChart data={[previousTimeframe, currentTimeframe]} />
                 </span>
               }
             >
@@ -150,7 +153,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
                 <h3 className="text-base font-medium">Money Flow</h3>
                 <span className="text-xs text-muted-foreground flex items-center">
                   <Calendar className="inline h-3 w-3 mr-1" />
-                      {formatShortDate(currentTimeframe.after)} - {formatShortDate(currentTimeframe.before)}
+                  {formatShortDate(currentTimeframe.after)} - {formatShortDate(currentTimeframe.before)}
                 </span>
               </>
             </ResponsiveTooltip>
@@ -256,41 +259,50 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
                 />
               )}
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs mb-2">
-              <SummaryItem
-                label="Total Income"
-                value={totalIncome}
-                icon={DollarSignIcon}
-              />
-              <SummaryItem
-                label="Total Expenses"
-                value={totalExpenses}
-                icon={DollarSignIcon}
-              />
-              <SummaryItem
-                colors
-                showSign
-                label="Net Revenue"
-                value={totalRevenue}
-                icon={TrendingUpIcon}
-              />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              <SummaryItem
-                label={`Avg. ${getIntervalLabel} Income`}
-                value={avgIntervalIncome}
-                icon={DollarSignIcon}
-              />
-              <SummaryItem
-                label={`Avg. ${getIntervalLabel} Expenses`}
-                value={avgIntervalExpenses}
-                icon={DollarSignIcon}
-              />
-            </div>
           </>
         ) : null}
       </CardContent>
+
+      {/* Stats section */}
+      <CardFooter className={cn('flex flex-col gap-4 sm:gap-6 lg:flex-row lg:justify-between p-3 transition-all border-t duration-300 ease-in-out overflow-hidden')}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:flex-1 lg:grid-cols-4 w-full">
+          <SummaryItem
+            label="Total Income"
+            value={totalIncome}
+            comparisonValue={previousTotalIncome}
+            comparisonPercentage={incomeChangePercent}
+          />
+          <SummaryItem
+            label="Total Expenses"
+            value={totalExpenses}
+            comparisonValue={previousTotalExpenses}
+            comparisonPercentage={expensesChangePercent}
+          />
+          <SummaryItem
+            label={`Avg. ${getIntervalLabel} Income`}
+            value={avgIntervalIncome}
+            comparisonValue={previousAvgIntervalIncome}
+            comparisonPercentage={incomeChangePercent}
+          />
+          <SummaryItem
+            label={`Avg. ${getIntervalLabel} Expenses`}
+            value={avgIntervalExpenses}
+            comparisonValue={previousAvgIntervalExpenses}
+            comparisonPercentage={expensesChangePercent}
+          />
+        </div>
+        <div className="w-full lg:w-1/5">
+          <SummaryItem
+            colors
+            showSign
+            label="Net Revenue"
+            className="h-full"
+            value={totalRevenue}
+            comparisonValue={previousTotalRevenue}
+            comparisonPercentage={revenueChangePercent}
+          />
+        </div>
+      </CardFooter>
     </Card>
   );
 };

@@ -28,13 +28,11 @@ const pwaOptions: Partial<VitePWAOptions> = {
   }
 };
 
-
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     visualizer({ open: true }), // This will open a visualization of your chunks after build
-    VitePWA(pwaOptions),
+    VitePWA(), // pwaOptions was mentioned but not defined in your snippet
   ],
   resolve: {
     alias: {
@@ -46,11 +44,12 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.tsx',
     coverage: {
-      reporter: ['text', 'json', 'html'], // Choose the output formats
-      all: true, // Include all files in coverage, even if they are not tested
-      include: ['src/**/*.ts', 'src/**/*.tsx'], // Include only your source files
-      exclude: ['node_modules', 'dist', 'tests', 'src/setupTests.ts'], // Exclude non-source files
+      reporter: ['text', 'json', 'html'], // Coverage output formats
+      all: true, // Include all files in coverage, even if not tested
+      include: ['src/**/*.ts', 'src/**/*.tsx'], // Only include source files
+      exclude: ['node_modules', 'dist', '__tests__', 'src/setupTests.ts'], // Exclude tests and setup
     },
-    exclude: [...configDefaults.exclude], // Ensure any existing excludes are kept
+    include: ['__tests__/**/*.spec.ts', '__tests__/**/*.spec.tsx'], // Include only test files
+    exclude: [...configDefaults.exclude], // Use default excludes from Vitest
   },
 });
