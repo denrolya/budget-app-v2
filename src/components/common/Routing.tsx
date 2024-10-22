@@ -1,21 +1,21 @@
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import TestingPage from '@/app/testing-page/page';
-import BudgetingPage from '@/app/budget/page';
 import { AccountsManagementPage } from '@/app/accounts/page';
+import BudgetingPage from '@/app/budget/page';
+import CategoriesPage from '@/app/categories/page';
+import DailyLedgerPage from '@/app/daily-ledger/page';
+import DashboardPage from '@/app/dashboard/page';
+import DebtsPage from '@/app/debts/page';
 import LoginPage from '@/app/login/page';
+import TestingPage from '@/app/testing-page/page';
 import TransactionsListPage from '@/app/transactions/page';
 import TransfersListPage from '@/app/transfers/page';
-import DailyLedgerPage from '@/app/daily-ledger/page';
-import DebtsPage from '@/app/debts/page';
-import CategoriesPage from '@/app/categories/page';
-import DashboardPage from '@/app/dashboard/page';
-import { LayoutV9 } from '@/components/layout/LayoutV9';
 import { PrivateRoute } from '@/components/common/PrivateRoute';
-import { FinanceDataProvider, useFinanceData } from '@/contexts/FinanceData';
-import { useAuth } from '@/contexts/auth';
 import NewTransactionsPage from '@/components/features/transactions/TableWithFiltersMock';
+import { LayoutV9 } from '@/components/layout/LayoutV9';
+import { useAuth } from '@/contexts/auth';
+import { FinanceDataProvider, useFinanceData } from '@/contexts/FinanceData';
 
 const ProtectedContent: React.FC = () => {
   const { data, error } = useFinanceData();
@@ -94,13 +94,14 @@ const Routing: React.FC = () => {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      {isAuthenticated ? (
+      {isAuthenticated && (
         <Route path="/*" element={
           <FinanceDataProvider>
             <ProtectedContent />
           </FinanceDataProvider>
         } />
-      ) : (
+      )}
+      {!isAuthenticated && (
         <Route path="*" element={<Navigate to="/login" replace />} />
       )}
       <Route path="*" element={<Navigate to="/login" />} />

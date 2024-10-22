@@ -1,9 +1,8 @@
-import { AlertCircle, ArrowUpDown, ChevronLeft, Download, Edit, Plus } from 'lucide-react';
-import moment from 'moment';
 import cn from 'classnames';
+import { AlertCircle, ArrowUpDown, Plus } from 'lucide-react';
+import moment from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { useScreenSize } from '@/hooks/useScreenSize';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountAvatar from '@/components/features/accounts/Avatar';
@@ -16,15 +15,15 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import { useScreenSize } from '@/hooks/useScreenSize';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 import Account from '@/models/Account';
 
 interface Props {
   account: Account;
-  setSelectedAccount: (account: Account | null) => void;
 }
 
-const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
+const AccountDetail: React.FC<Props> = ({ account }) => {
   const isDesktop = useScreenSize();
   const { openForm } = useFormContext();
   const currentDate = moment().startOf('day');
@@ -82,18 +81,20 @@ const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
           <DailyList
             isLoading={isLoading}
             groupedItems={groupedItems}
-            daysPerPage={daysPerPage}
-            currentDate={currentDate} />
+            startDate={dateRange.startDate}
+            endDate={dateRange.endDate}
+          />
         </div>
 
         <div className="hidden md:block">
-          {isLoading && <TableListingSkeleton daysPerPage={daysPerPage} currentDate={currentDate} />}
+          {isLoading && <TableListingSkeleton startDate={dateRange.startDate} endDate={dateRange.endDate} />}
           {!isLoading && (
             <TableListing
               isLoading={isLoading}
               groupedItems={groupedItems}
-              daysPerPage={daysPerPage}
-              currentDate={currentDate} />
+              startDate={dateRange.startDate}
+              endDate={dateRange.endDate}
+            />
           )}
         </div>
       </>
@@ -101,115 +102,94 @@ const AccountDetail: React.FC<Props> = ({ account, setSelectedAccount }) => {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <header className="bg-background border-b p-4 flex justify-between items-center">
-        <div className="flex items-center">
-          <Button variant="ghost" size="icon" className="mr-2" onClick={() => setSelectedAccount(null)}>
-            <ChevronLeft className="h-6 w-6" />
-            <span className="sr-only">Back to list</span>
-          </Button>
-          <h1 className="text-xl font-bold">Account Details</h1>
-        </div>
-        <div className="flex space-x-2">
-          <Button variant="outline" size="icon">
-            <Download className="h-4 w-4" />
-            <span className="sr-only">Export</span>
-          </Button>
-          <Button variant="outline" size="icon">
-            <Edit className="h-4 w-4" />
-            <span className="sr-only">Edit</span>
-          </Button>
-        </div>
-      </header>
-      <div className="flex-1 overflow-auto p-4">
-        <Card className="mb-4">
-          <CardHeader>
-            <div className="flex items-center space-x-4 mb-2">
-              <AccountAvatar account={account} />
-              <div>
-                <CardTitle className="flex space-x-2 items-center">
-                  <span>{account.nameWithCurrency}</span>
-                  <MoneyValue
-                    badge
-                    showSign
-                    amount={account.balance}
-                    currency={account.currency}
-                    values={account.convertedValues}
-                  />
-                </CardTitle>
-                <CardDescription>
-                  Created: <RelativeDatetimeDisplay date={account.createdAt} />
-                </CardDescription>
-              </div>
+    <>
+      <Card className="mb-4">
+        <CardHeader>
+          <div className="flex items-center space-x-4 mb-2">
+            <AccountAvatar account={account} />
+            <div>
+              <CardTitle className="flex space-x-2 items-center">
+                <span>{account.nameWithCurrency}</span>
+                <MoneyValue
+                  badge
+                  showSign
+                  amount={account.balance}
+                  currency={account.currency}
+                  values={account.convertedValues}
+                />
+              </CardTitle>
+              <CardDescription>
+                Created: <RelativeDatetimeDisplay date={account.createdAt} />
+              </CardDescription>
             </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Notes here</p>
-          </CardContent>
-          <CardFooter>
-            <Button variant="outline" size="sm">
-              <ArrowUpDown className="mr-2 h-4 w-4" />
-              Edit Balance
-            </Button>
-          </CardFooter>
-        </Card>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">Notes here</p>
+        </CardContent>
+        <CardFooter>
+          <Button variant="outline" size="sm">
+            <ArrowUpDown className="mr-2 h-4 w-4" />
+            Edit Balance
+          </Button>
+        </CardFooter>
+      </Card>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={cn({
-            'grid w-full grid-cols-2' : isDesktop
-          })}>
-            <TabsTrigger value="activity">Activity</TabsTrigger>
-            <TabsTrigger value="history">Account History</TabsTrigger>
-          </TabsList>
-          <TabsContent value="activity">
-            <Card>
-              <CardHeader>
-                <CardTitle>Activity</CardTitle>
-                <CardDescription className="sr-only">List of all transactions for past 7 days</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[400px]">
-                  {renderActivityContent()}
-                </ScrollArea>
-              </CardContent>
-              <CardFooter>
-                <Button onClick={() => openForm(FormType.Transaction, { account })}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Transaction
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-          <TabsContent value="history">
-            <Card>
-              <CardHeader>
-                <CardTitle>Account History</CardTitle>
-                <CardDescription>Timeline of actions and changes related to this account</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[300px]">
-                  <ul className="space-y-4">
-                    {[
-                      { id: 1, date: '2023-06-15', action: 'Debt created', details: 'Initial loan of $1000' },
-                      { id: 2, date: '2023-07-01', action: 'Repayment received', details: 'Repayment of $250' },
-                      { id: 3, date: '2023-08-01', action: 'Repayment received', details: 'Repayment of $250' },
-                    ].map((event) => (
-                      <li key={event.id} className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">{event.action}</p>
-                          <p className="text-sm text-muted-foreground">{event.details}</p>
-                        </div>
-                        <Badge variant="secondary">{moment(event.date).format('LLL')}</Badge>
-                      </li>
-                    ))}
-                  </ul>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className={cn({
+          'grid w-full grid-cols-2': !isDesktop,
+        })}>
+          <TabsTrigger value="activity">Activity</TabsTrigger>
+          <TabsTrigger value="history">Account History</TabsTrigger>
+        </TabsList>
+        <TabsContent value="activity">
+          <Card>
+            <CardHeader>
+              <CardTitle>Activity</CardTitle>
+              <CardDescription className="sr-only">List of all transactions for past 7 days</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[400px]">
+                {renderActivityContent()}
+              </ScrollArea>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={() => openForm(FormType.Transaction, { account })}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Transaction
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+        <TabsContent value="history">
+          <Card>
+            <CardHeader>
+              <CardTitle>Account History</CardTitle>
+              <CardDescription>Timeline of actions and changes related to this account</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[300px]">
+                <ul className="space-y-4">
+                  {[
+                    { id: 1, date: '2023-06-15', action: 'Debt created', details: 'Initial loan of $1000' },
+                    { id: 2, date: '2023-07-01', action: 'Repayment received', details: 'Repayment of $250' },
+                    { id: 3, date: '2023-08-01', action: 'Repayment received', details: 'Repayment of $250' },
+                  ].map((event) => (
+                    <li key={event.id} className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">{event.action}</p>
+                        <p className="text-sm text-muted-foreground">{event.details}</p>
+                      </div>
+                      <Badge variant="secondary">{moment(event.date).format('LLL')}</Badge>
+                    </li>
+                  ))}
+                </ul>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </>
   );
 };
 

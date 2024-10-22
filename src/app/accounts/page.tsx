@@ -1,25 +1,26 @@
 import cn from 'classnames';
 import sumBy from 'lodash/sumBy';
-import { Archive, Calendar, Search } from 'lucide-react';
+import { Archive, Calendar, Download, Edit, Search } from 'lucide-react';
 import React, { useCallback, useRef, useState } from 'react';
 
-import { useScreenSize } from '@/hooks/useScreenSize';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountAvatar from '@/components/features/accounts/Avatar';
 import AccountDetails from '@/components/features/accounts/Details';
+import PageWithSidebar from '@/components/layout/PageWithSidebar.tsx';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
+import { useScreenSize } from '@/hooks/useScreenSize';
 import Account, { AccountType } from '@/models/Account';
 
 export const AccountsManagementPage: React.FC = () => {
   const baseCurrency = useBaseCurrency();
   const accounts = useAccountsWithDefaultOrder();
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
-  const isDesktop = useScreenSize();
   const [showArchived, setShowArchived] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const selectedAccountRef = useRef<HTMLDivElement>(null);
@@ -84,13 +85,12 @@ export const AccountsManagementPage: React.FC = () => {
                       <AccountAvatar account={account} size="sm" />
                       <h3 className="font-medium">{account.nameWithCurrency}</h3>
                     </div>
-                    <Badge variant={account.balance > 0 ? 'success' : 'destructive'} className="text-xs">
                       <MoneyValue
-                        useColors={false}
+                        badge
                         amount={account.balance}
                         currency={account.currency}
-                        values={account.convertedValues} />
-                    </Badge>
+                        values={account.convertedValues}
+                      />
                   </div>
                   <div className="flex justify-between items-center text-xs text-muted-foreground">
                     {account.archivedAt && (
@@ -122,25 +122,34 @@ export const AccountsManagementPage: React.FC = () => {
   );
 
   return (
-    <div className="flex h-screen md:h-[calc(100vh-2rem)] overflow-hidden pb-16 md:pb-0">
-      {isDesktop && (
-        <div className="w-80 border-r bg-background">
-          <AccountList />
-        </div>
+    <PageWithSidebar contentScrollable={true}>
+      <PageWithSidebar.Sidebar>
+        <AccountList />
+      </PageWithSidebar.Sidebar>
+      {selectedAccount && (
+        <PageWithSidebar.Header title="Account Details" onBack={() => setSelectedAccount(null)}>
+          <Button variant="outline" size="icon">
+            <Download className="h-4 w-4" />
+            <span className="sr-only">Export</span>
+          </Button>
+          <Button variant="outline" size="icon">
+            <Edit className="h-4 w-4" />
+            <span className="sr-only">Edit</span>
+          </Button>
+        </PageWithSidebar.Header>
       )}
-
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
-        {!isDesktop ? (
-          selectedAccount ? <AccountDetails account={selectedAccount} setSelectedAccount={setSelectedAccount} /> :
-            <AccountList />
-        ) : (
-          selectedAccount ? <AccountDetails account={selectedAccount} setSelectedAccount={setSelectedAccount} /> :
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              Select an account to view details
-            </div>
+      <PageWithSidebar.Content className="p-4">
+        {(selectedAccount) && (
+          <AccountDetails account={selectedAccount} setSelectedAccount={setSelectedAccount} />
         )}
-      </div>
-    </div>
+
+        {(!selectedAccount) && (
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            Select an account to view details
+          </div>
+        )}
+      </PageWithSidebar.Content>
+    </PageWithSidebar>
   );
 };
 

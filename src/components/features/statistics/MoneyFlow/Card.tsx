@@ -1,17 +1,3 @@
-import cn from 'classnames';
-import {
-  ArrowUpDownIcon,
-  BarChartIcon,
-  Calendar,
-  DollarSignIcon,
-  InfoIcon,
-  LineChartIcon,
-  PieChartIcon,
-  TrendingUpIcon,
-} from 'lucide-react';
-import moment from 'moment';
-import React, { memo, useMemo, useState } from 'react';
-
 import ArrowChangeIndicator from '@/components/common/ArrowChangeIndicator';
 import MoneyValue from '@/components/common/MoneyValue';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
@@ -27,30 +13,60 @@ import { INTERVAL_OPTIONS, TIMEFRAME_OPTIONS, TimeframeOption } from '@/constant
 import { useBaseCurrency } from '@/contexts/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
 import { formatShortDate } from '@/utils/formatShortDate';
+import cn from 'classnames';
+import { BarChartIcon, Calendar, InfoIcon, LineChartIcon, PieChartIcon } from 'lucide-react';
+import moment from 'moment';
+import React, { memo, useMemo, useState } from 'react';
 
 interface Props {
   className?: string;
 }
 
-export const MoneyFlowSkeleton: React.FC = () => (
-  <div className="w-full">
-    <div className="mb-2">
-      <Skeleton className="h-6 w-32 mb-1" />
-      <Skeleton className="h-4 w-48" />
-    </div>
-    <div className="h-[250px] mb-2">
-      <Skeleton className="w-full h-full" />
-    </div>
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs mb-2">
-      <Skeleton className="h-12" />
-      <Skeleton className="h-12" />
-      <Skeleton className="h-12" />
-    </div>
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-      <Skeleton className="h-12" />
-      <Skeleton className="h-12" />
-    </div>
-  </div>
+const MoneyFlowSkeleton = () => (
+  <Card className="w-full">
+    <CardContent className="p-3">
+      <div className="flex justify-between items-start mb-2">
+        <div className="flex flex-col">
+          <Skeleton className="h-5 w-24 mb-1" />
+          <Skeleton className="h-3 w-32" />
+        </div>
+        <div className="flex items-center gap-1">
+          <Skeleton className="h-7 w-[60px]" />
+          <Skeleton className="h-7 w-[70px]" />
+          <Skeleton className="h-7 w-7" />
+          <Skeleton className="h-7 w-7" />
+        </div>
+      </div>
+
+      <div className="mb-2">
+        <Skeleton className="h-8 w-32 mb-1" />
+        <Skeleton className="h-4 w-48" />
+      </div>
+
+      <div className="h-[250px] mb-2">
+        <Skeleton className="w-full h-full" />
+      </div>
+    </CardContent>
+
+    <CardFooter className="flex flex-col gap-4 sm:gap-6 lg:flex-row lg:justify-between p-3 border-t">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:flex-1 lg:grid-cols-4 w-full">
+        {[...Array(4)].map((_, index) => (
+          <div key={index} className="flex flex-col">
+            <Skeleton className="h-4 w-24 mb-1" />
+            <Skeleton className="h-6 w-32 mb-1" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+        ))}
+      </div>
+      <div className="w-full lg:w-1/5">
+        <div className="flex flex-col">
+          <Skeleton className="h-4 w-24 mb-1" />
+          <Skeleton className="h-6 w-32 mb-1" />
+          <Skeleton className="h-3 w-20" />
+        </div>
+      </div>
+    </CardFooter>
+  </Card>
 );
 
 export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
@@ -133,6 +149,10 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
     return `Income ${formatChange(incomeChange, incomeChangePercent)}, Expenses ${formatChange(expensesChange, expensesChangePercent)}, Revenue ${formatChange(revenueChange, revenueChangePercent)}, Income per Expense: ${(totalIncome / totalExpenses).toFixed(2)}, Expense Ratio: ${((totalExpenses / totalIncome) * 100).toFixed(1)}%`;
   };
 
+  if (isLoading) {
+    return <MoneyFlowSkeleton />;
+  }
+
   return (
     <Card className={cn('w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25', className)}>
       <CardContent className="p-3">
@@ -200,9 +220,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
           </div>
         </div>
 
-        {isLoading ? (
-          <MoneyFlowSkeleton />
-        ) : totalRevenue ? (
+        {(!isLoading && totalRevenue) && (
           <>
             <ResponsiveTooltip
               openDelay={0}
@@ -260,7 +278,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
               )}
             </div>
           </>
-        ) : null}
+        )}
       </CardContent>
 
       {/* Stats section */}
