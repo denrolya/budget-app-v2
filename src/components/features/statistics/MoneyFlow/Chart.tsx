@@ -1,7 +1,8 @@
-import CustomTooltip from '@/components/features/statistics/MoneyFlow/Tooltip';
-import moment from 'moment/moment';
+import moment, { Moment } from 'moment/moment';
 import React from 'react';
 import { Bar, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+
+import CustomTooltip from '@/components/features/statistics/MoneyFlow/Tooltip';
 
 interface Props {
   data: {
@@ -9,16 +10,19 @@ interface Props {
     income: number;
     expenses: number;
     revenue: number;
-    date: moment.Moment;
+    date: Moment;
     previousIncome: number;
     previousExpenses: number;
     previousRevenue: number;
   }[];
   interval: string;
-  currentTimeframe: { after: moment.Moment; before: moment.Moment };
-  previousTimeframe: { after: moment.Moment; before: moment.Moment };
-  isBarChart: boolean;
+  currentTimeframe: { after: Moment; before: Moment };
+  previousTimeframe: { after: Moment; before: Moment };
+  chartType: 'bar' | 'line';
+  showIncome: boolean;
+  showExpenses: boolean;
   showRevenue: boolean;
+  showPreviousPeriod: boolean;
 }
 
 const MoneyFlowChart: React.FC<Props> = ({
@@ -26,8 +30,11 @@ const MoneyFlowChart: React.FC<Props> = ({
                                            previousTimeframe,
                                            interval,
                                            data,
-                                           isBarChart,
+                                           chartType,
+                                           showIncome,
+                                           showExpenses,
                                            showRevenue,
+                                           showPreviousPeriod,
                                          }) => {
   const transformedData = data.map(item => ({
     ...item,
@@ -40,11 +47,98 @@ const MoneyFlowChart: React.FC<Props> = ({
       item.income,
       item.expenses,
       item.revenue,
-      item.previousIncome,
-      item.previousExpenses,
-      item.previousRevenue,
+      showPreviousPeriod ? item.previousIncome : 0,
+      showPreviousPeriod ? item.previousExpenses : 0,
+      showPreviousPeriod ? item.previousRevenue : 0,
     ]),
   );
+
+  const renderChart = (isCurrentTimeframe: boolean) => {
+    if (isCurrentTimeframe || showPreviousPeriod) {
+      const xAxisId = isCurrentTimeframe ? 1 : 0;
+      const opacity = isCurrentTimeframe ? 1 : 0.1;
+      const dataKeys = {
+        income: isCurrentTimeframe ? 'income' : 'previousIncome',
+        expenses: isCurrentTimeframe ? 'expenses' : 'previousExpenses',
+        revenue: isCurrentTimeframe ? 'revenue' : 'previousRevenue',
+      };
+
+      return (
+        <>
+          {chartType === 'bar' ? (
+            <>
+              {showIncome && (
+                <Bar
+                  dataKey={dataKeys.income}
+                  xAxisId={xAxisId}
+                  fill={`hsl(var(--success)${opacity < 1 ? ` / ${opacity})` : ')'}`}
+                  stackId={isCurrentTimeframe ? 'currentStack' : 'previousStack'}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={60}
+                />
+              )}
+              {showExpenses && (
+                <Bar
+                  dataKey={dataKeys.expenses}
+                  xAxisId={xAxisId}
+                  fill={`hsl(var(--destructive)${opacity < 1 ? ` / ${opacity})` : ')'}`}
+                  stackId={isCurrentTimeframe ? 'currentStack' : 'previousStack'}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={60}
+                />
+              )}
+              {showRevenue && (
+                <Bar
+                  dataKey={dataKeys.revenue}
+                  xAxisId={xAxisId}
+                  fill={`hsl(var(--secondary)${opacity < 1 ? ` / ${opacity})` : ')'}`}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={60}
+                />
+              )}
+            </>
+          ) : (
+            <>
+              {showIncome && (
+                <Line
+                  type="monotone"
+                  xAxisId={xAxisId}
+                  dataKey={dataKeys.income}
+                  stroke={`hsl(var(--success)${opacity < 1 ? ` / ${opacity})` : ')'}`}
+                  strokeWidth={2}
+                  dot={false}
+                  strokeDasharray={isCurrentTimeframe ? undefined : '5 5'}
+                />
+              )}
+              {showExpenses && (
+                <Line
+                  type="monotone"
+                  xAxisId={xAxisId}
+                  dataKey={dataKeys.expenses}
+                  stroke={`hsl(var(--destructive)${opacity < 1 ? ` / ${opacity})` : ')'}`}
+                  strokeWidth={2}
+                  dot={false}
+                  strokeDasharray={isCurrentTimeframe ? undefined : '5 5'}
+                />
+              )}
+              {showRevenue && (
+                <Line
+                  type="monotone"
+                  xAxisId={xAxisId}
+                  dataKey={dataKeys.revenue}
+                  stroke={`hsl(var(--secondary)${opacity < 1 ? ` / ${opacity})` : ')'}`}
+                  strokeWidth={2}
+                  dot={false}
+                  strokeDasharray={isCurrentTimeframe ? undefined : '5 5'}
+                />
+              )}
+            </>
+          )}
+        </>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="min-w-[600px]">
@@ -61,13 +155,10 @@ const MoneyFlowChart: React.FC<Props> = ({
               <stop offset="50%" stopColor="hsl(var(--destructive) / 0.6)" />
               <stop offset="100%" stopColor="hsl(var(--destructive) / 0.2)" />
             </linearGradient>
-            <linearGradient id="previousIncomeGradient" x1="0" y1="1" x2="0" y2="0">
-              <stop offset="0%" stopColor="hsl(var(--success) / 0.1)" />
-              <stop offset="100%" stopColor="hsl(var(--success) / 0.3)" />
-            </linearGradient>
-            <linearGradient id="previousExpensesGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(var(--destructive) / 0.3)" />
-              <stop offset="100%" stopColor="hsl(var(--destructive) / 0.1)" />
+            <linearGradient id="revenueGradient" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stopColor="hsl(var(--secondary) / 0.2)" />
+              <stop offset="50%" stopColor="hsl(var(--secondary) / 0.6)" />
+              <stop offset="100%" stopColor="hsl(var(--secondary))" />
             </linearGradient>
           </defs>
           <XAxis
@@ -96,89 +187,17 @@ const MoneyFlowChart: React.FC<Props> = ({
                 data={data}
                 interval={interval}
                 currentTimeframe={currentTimeframe}
-                previousTimeframe={previousTimeframe} />)} />
+                previousTimeframe={previousTimeframe}
+                showIncome={showIncome}
+                showExpenses={showExpenses}
+                showRevenue={showRevenue}
+                showPreviousPeriod={showPreviousPeriod}
+              />
+            )}
+          />
           <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeOpacity={0.2} />
-          {showRevenue && (
-            <>
-              <Line
-                type="monotone"
-                xAxisId={1}
-                dataKey="revenue"
-                stroke="hsl(var(--secondary))"
-                strokeWidth={2}
-                dot={false}
-              />
-              <Line
-                type="monotone"
-                xAxisId={1}
-                dataKey="previousRevenue"
-                stroke="hsl(var(--secondary))"
-                strokeWidth={2}
-                strokeDasharray="5 5"
-                dot={false}
-              />
-            </>
-          )}
-          {isBarChart && (
-            <>
-              {/* Previous timeframe bars */}
-              <Bar
-                dataKey="previousIncome"
-                xAxisId={0}
-                fill="hsl(var(--success))"
-                stackId="previousStack"
-                fillOpacity={0.1}
-                radius={[4, 4, 0, 0]}
-                maxBarSize={60}
-              />
-              <Bar
-                dataKey="previousExpenses"
-                xAxisId={0}
-                fill="hsl(var(--destructive))"
-                stackId="previousStack"
-                fillOpacity={0.1}
-                radius={[4, 4, 0, 0]}
-                maxBarSize={60}
-              />
-              {/* Current timeframe bars */}
-              <Bar
-                dataKey="expenses"
-                xAxisId={1}
-                fill="hsl(var(--destructive))"
-                stackId="currentStack"
-                radius={[4, 4, 0, 0]}
-                maxBarSize={60}
-              />
-              <Bar
-                dataKey="income"
-                xAxisId={1}
-                fill="hsl(var(--success))"
-                stackId="currentStack"
-                radius={[4, 4, 0, 0]}
-                maxBarSize={60}
-              />
-            </>
-          )}
-          {!isBarChart && (
-            <>
-              <Line
-                type="monotone"
-                xAxisId={1}
-                dataKey="income"
-                stroke="hsl(var(--success))"
-                dot={false}
-                animationDuration={1000}
-              />
-              <Line
-                type="monotone"
-                xAxisId={1}
-                dataKey="expenses"
-                stroke="hsl(var(--destructive))"
-                dot={false}
-                animationDuration={1000}
-              />
-            </>
-          )}
+          {renderChart(false)} {/* Previous timeframe */}
+          {renderChart(true)}  {/* Current timeframe */}
         </ComposedChart>
       </ResponsiveContainer>
     </div>

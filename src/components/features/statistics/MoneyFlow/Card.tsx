@@ -1,80 +1,129 @@
+import cn from 'classnames';
+import { BarChart, Calendar, InfoIcon, LineChart, PieChart, Settings, TrendingDown, TrendingUp } from 'lucide-react';
+import moment from 'moment';
+import React, { memo, useMemo, useState } from 'react';
+
 import ArrowChangeIndicator from '@/components/common/ArrowChangeIndicator';
 import MoneyValue from '@/components/common/MoneyValue';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
+import MoneyFlowSkeleton from '@/components/features/statistics/MoneyFlow/Skeleton';
 import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem';
 import VeryInformativeTooltip from '@/components/features/statistics/MoneyFlow/VeryInformativeTooltip';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
 import { INTERVAL_OPTIONS, TIMEFRAME_OPTIONS, TimeframeOption } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
 import { formatShortDate } from '@/utils/formatShortDate';
-import cn from 'classnames';
-import { BarChartIcon, Calendar, InfoIcon, LineChartIcon, PieChartIcon } from 'lucide-react';
-import moment from 'moment';
-import React, { memo, useMemo, useState } from 'react';
+
+interface ChartOptionsDropdownProps {
+  chartType: 'bar' | 'line';
+  setChartType: (type: 'bar' | 'line') => void;
+  showIncome: boolean;
+  setShowIncome: (show: boolean) => void;
+  showExpenses: boolean;
+  setShowExpenses: (show: boolean) => void;
+  showRevenue: boolean;
+  setShowRevenue: (show: boolean) => void;
+  showPreviousPeriod: boolean;
+  setShowPreviousPeriod: (show: boolean) => void;
+}
+
+export const ChartOptionsDropdown: React.FC<ChartOptionsDropdownProps> = ({
+                                                                            chartType,
+                                                                            setChartType,
+                                                                            showIncome,
+                                                                            setShowIncome,
+                                                                            showExpenses,
+                                                                            setShowExpenses,
+                                                                            showRevenue,
+                                                                            setShowRevenue,
+                                                                            showPreviousPeriod,
+                                                                            setShowPreviousPeriod,
+                                                                          }) => (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="outline" size="icon">
+        <Settings className="h-4 w-4" />
+        <span className="sr-only">Open chart options</span>
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent className="w-56">
+      <DropdownMenuLabel>Chart Options</DropdownMenuLabel>
+      <DropdownMenuSeparator />
+      <DropdownMenuLabel>Chart Type</DropdownMenuLabel>
+      <DropdownMenuRadioGroup value={chartType} onValueChange={(value) => setChartType(value as 'bar' | 'line')}>
+        <DropdownMenuRadioItem value="bar">
+          <BarChart className="mr-2 h-4 w-4" />
+          <span>Bar Chart</span>
+        </DropdownMenuRadioItem>
+        <DropdownMenuRadioItem value="line">
+          <LineChart className="mr-2 h-4 w-4" />
+          <span>Line Chart</span>
+        </DropdownMenuRadioItem>
+      </DropdownMenuRadioGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuLabel>Display Options</DropdownMenuLabel>
+      <DropdownMenuCheckboxItem
+        checked={showIncome}
+        onCheckedChange={setShowIncome}
+      >
+        <TrendingUp className="mr-2 h-4 w-4 text-success" />
+        <span>Income</span>
+      </DropdownMenuCheckboxItem>
+      <DropdownMenuCheckboxItem
+        checked={showExpenses}
+        onCheckedChange={setShowExpenses}
+      >
+        <TrendingDown className="mr-2 h-4 w-4 text-destructive" />
+        <span>Expenses</span>
+      </DropdownMenuCheckboxItem>
+      <DropdownMenuCheckboxItem
+        checked={showRevenue}
+        onCheckedChange={setShowRevenue}
+      >
+        <PieChart className="mr-2 h-4 w-4 text-secondary" />
+        <span>Revenue</span>
+      </DropdownMenuCheckboxItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuCheckboxItem
+        checked={showPreviousPeriod}
+        onCheckedChange={setShowPreviousPeriod}
+      >
+        <TrendingUp className="mr-2 h-4 w-4 text-success" />
+        <span>Previous Period</span>
+      </DropdownMenuCheckboxItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+);
 
 interface Props {
   className?: string;
 }
 
-const MoneyFlowSkeleton = () => (
-  <Card className="w-full">
-    <CardContent className="p-3">
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex flex-col">
-          <Skeleton className="h-5 w-24 mb-1" />
-          <Skeleton className="h-3 w-32" />
-        </div>
-        <div className="flex items-center gap-1">
-          <Skeleton className="h-7 w-[60px]" />
-          <Skeleton className="h-7 w-[70px]" />
-          <Skeleton className="h-7 w-7" />
-          <Skeleton className="h-7 w-7" />
-        </div>
-      </div>
-
-      <div className="mb-2">
-        <Skeleton className="h-8 w-32 mb-1" />
-        <Skeleton className="h-4 w-48" />
-      </div>
-
-      <div className="h-[250px] mb-2">
-        <Skeleton className="w-full h-full" />
-      </div>
-    </CardContent>
-
-    <CardFooter className="flex flex-col gap-4 sm:gap-6 lg:flex-row lg:justify-between p-3 border-t">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:flex-1 lg:grid-cols-4 w-full">
-        {[...Array(4)].map((_, index) => (
-          <div key={index} className="flex flex-col">
-            <Skeleton className="h-4 w-24 mb-1" />
-            <Skeleton className="h-6 w-32 mb-1" />
-            <Skeleton className="h-3 w-20" />
-          </div>
-        ))}
-      </div>
-      <div className="w-full lg:w-1/5">
-        <div className="flex flex-col">
-          <Skeleton className="h-4 w-24 mb-1" />
-          <Skeleton className="h-6 w-32 mb-1" />
-          <Skeleton className="h-3 w-20" />
-        </div>
-      </div>
-    </CardFooter>
-  </Card>
-);
-
 export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
   const [timeframe, setTimeframe] = useState<TimeframeOption['value']>(TIMEFRAME_OPTIONS[6].value);
   const [interval, setInterval] = useState(INTERVAL_OPTIONS[2].value);
-  const [isBarChart, setIsBarChart] = useState<boolean>(true);
-  const [showRevenue, setShowRevenue] = useState<boolean>(false);
+  const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
+  const [showIncome, setShowIncome] = useState<boolean>(false);
+  const [showExpenses, setShowExpenses] = useState<boolean>(false);
+  const [showRevenue, setShowRevenue] = useState<boolean>(true);
+  const [showPreviousPeriod, setShowPreviousPeriod] = useState<boolean>(true);
+
 
   const selectedTimeframeOption = useMemo(() =>
       TIMEFRAME_OPTIONS.find((t) => t.value === timeframe) || TIMEFRAME_OPTIONS[2]
@@ -199,24 +248,18 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
                 ))}
               </SelectContent>
             </Select>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-7 w-7"
-              onClick={() => setIsBarChart(!isBarChart)}
-              aria-label={isBarChart ? 'Switch to line chart' : 'Switch to bar chart'}
-            >
-              {isBarChart ? <LineChartIcon className="h-3 w-3" /> : <BarChartIcon className="h-3 w-3" />}
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-7 w-7"
-              onClick={() => setShowRevenue(!showRevenue)}
-              aria-label={showRevenue ? 'Hide revenue' : 'Show revenue'}
-            >
-              <PieChartIcon className={cn('h-3 w-3', showRevenue ? 'text-primary' : 'text-muted-foreground')} />
-            </Button>
+            <ChartOptionsDropdown
+              chartType={chartType}
+              setChartType={setChartType}
+              showIncome={showIncome}
+              setShowIncome={setShowIncome}
+              showExpenses={showExpenses}
+              setShowExpenses={setShowExpenses}
+              showRevenue={showRevenue}
+              setShowRevenue={setShowRevenue}
+              showPreviousPeriod={showPreviousPeriod}
+              setShowPreviousPeriod={setShowPreviousPeriod}
+            />
           </div>
         </div>
 
@@ -270,10 +313,13 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
                 <Chart
                   data={transformedData}
                   interval={interval}
-                  isBarChart={isBarChart}
+                  chartType={chartType}
+                  showIncome={showIncome}
+                  showExpenses={showExpenses}
                   showRevenue={showRevenue}
                   currentTimeframe={currentTimeframe}
                   previousTimeframe={previousTimeframe}
+                  showPreviousPeriod={showPreviousPeriod}
                 />
               )}
             </div>
@@ -281,7 +327,6 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
         )}
       </CardContent>
 
-      {/* Stats section */}
       <CardFooter className={cn('flex flex-col gap-4 sm:gap-6 lg:flex-row lg:justify-between p-3 transition-all border-t duration-300 ease-in-out overflow-hidden')}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:flex-1 lg:grid-cols-4 w-full">
           <SummaryItem
