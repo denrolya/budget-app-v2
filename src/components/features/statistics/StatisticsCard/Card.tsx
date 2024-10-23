@@ -76,7 +76,7 @@ const TooltipContent: React.FC<{
       {' - '}
       {formatShortDate(selectedTimeframe.before)}
     </p>
-    <p className="text-xs text-muted-foreground">
+    <p className="text-xs font-medium">
       Comparison period: {formatShortDate(comparisonTimeframe.after)}
       {' - '}
       {formatShortDate(comparisonTimeframe.before)}

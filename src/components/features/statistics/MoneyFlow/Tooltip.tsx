@@ -89,9 +89,16 @@ export const Tooltip: React.FC<Props> = ({
   if (!active || !dataPoint) return null;
 
   const formattedCurrentDate = formatDate(dataPoint.date, interval);
+  const intervalMapping: Record<'1 day' | '1 week' | '1 month', moment.unitOfTime.DurationConstructor> = {
+    '1 day': 'day',
+    '1 week': 'week',
+    '1 month': 'month',
+  };
+
   const formattedComparisonDate = comparisonData
     ? formatDate(comparisonData.date, interval)
-    : formatDate(moment(dataPoint.date).subtract(1, interval), interval);
+    : formatDate(moment(dataPoint.date).subtract(1, intervalMapping[interval]), interval);
+
 
   return createPortal(
     <Card
