@@ -35,13 +35,6 @@ const DashboardPage: React.FC = () => {
           }}
           aria-label="Scrollable card container"
         >
-          {configs.map((card, index) => (
-            <StatisticsCard
-              key={`desktop-card-${generateSlug([card.title, card.type, card.statType])}`}
-              config={card}
-              onChange={(newConfig: CardConfig) => handleConfigChange(index, newConfig)}
-            />
-          ))}
         </div>
       </div>
 

@@ -1,19 +1,15 @@
 import cn from 'classnames';
-import { Calendar, InfoIcon } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import moment from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 
-import ArrowChangeIndicator from '@/components/common/ArrowChangeIndicator';
-import MoneyValue from '@/components/common/MoneyValue';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
 import ConfigurationMenu from '@/components/features/statistics/MoneyFlow/ConfigurationMenu';
-import IncomeExpensesComparison from '@/components/features/statistics/MoneyFlow/IncomeExpensesComparison';
 import MoneyFlowSkeleton from '@/components/features/statistics/MoneyFlow/Skeleton';
 import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { Separator } from '@/components/ui/separator';
 import { INTERVAL_OPTIONS, TIMEFRAME_OPTIONS, TimeframeOption } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
@@ -34,9 +30,10 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
   const [showPreviousPeriod, setShowPreviousPeriod] = useState<boolean>(true);
 
 
-  const selectedTimeframeOption = useMemo(() =>
-      TIMEFRAME_OPTIONS.find((t) => t.value === timeframe) || TIMEFRAME_OPTIONS[2]
-    , [timeframe]);
+  const selectedTimeframeOption = useMemo(() => TIMEFRAME_OPTIONS
+      .find((t) => t.value === timeframe) || TIMEFRAME_OPTIONS[2],
+    [timeframe],
+  );
 
   const now = moment();
   const { currentTimeframe, previousTimeframe } = useMemo(() => {
@@ -45,8 +42,8 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
 
     if (selectedTimeframeOption.value === 'WTD') {
       previousTimeframe = {
-        after: currentTimeframe.after.clone().subtract(1, 'isoWeek').startOf('isoWeek'),
-        before: currentTimeframe.after.clone().subtract(1, 'isoWeek').endOf('isoWeek'),
+        after: currentTimeframe.after.clone().subtract(1, 'week').startOf('isoWeek'),
+        before: currentTimeframe.after.clone().subtract(1, 'week').endOf('isoWeek'),
       };
     } else if (selectedTimeframeOption.value === 'MTD') {
       previousTimeframe = {
@@ -74,7 +71,6 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
     transformedData,
     isLoading,
     error,
-    revenueChange,
     revenueChangePercent,
     totalIncome,
     totalExpenses,
@@ -82,9 +78,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
     previousTotalIncome,
     previousTotalExpenses,
     previousTotalRevenue,
-    incomeChange,
     incomeChangePercent,
-    expensesChange,
     expensesChangePercent,
     avgIntervalIncome,
     avgIntervalExpenses,
@@ -102,105 +96,56 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
     return intervalOption ? intervalOption.label.toLowerCase() : 'interval';
   }, [interval]);
 
-  const getSummaryText = () => {
-    const formatChange = (change: number, percent: number) => `${change >= 0 ? 'up' : 'down'} ${Math.abs(percent).toFixed(0)}%`;
-    return `Income ${formatChange(incomeChange, incomeChangePercent)}, Expenses ${formatChange(expensesChange, expensesChangePercent)}, Revenue ${formatChange(revenueChange, revenueChangePercent)}, Income per Expense: ${(totalIncome / totalExpenses).toFixed(2)}, Expense Ratio: ${((totalExpenses / totalIncome) * 100).toFixed(1)}%`;
-  };
-
-  if (isLoading) {
-    return <MoneyFlowSkeleton />;
-  }
-
   return (
     <Card className={cn('w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25', className)}>
-      <CardContent className="p-3">
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex flex-col">
-            <ResponsiveTooltip
-              openDelay={1}
-              desktopComponent="hovercard"
-              contentClassName="w-full max-w-sm p-4 sm:w-96 bg-transparent border-none shadow-none"
-              triggerClassName="cursor-help"
-              content={
-                <span>
-                  <YearDoughnutTimeframeDisplayChart data={[previousTimeframe, currentTimeframe]} />
-                </span>
-              }
-            >
-              <>
-                <h3 className="text-base font-medium">Money Flow</h3>
-                <span className="text-xs text-muted-foreground flex items-center">
-                  <Calendar className="inline h-3 w-3 mr-1" />
-                  {formatShortDate(currentTimeframe.after)} - {formatShortDate(currentTimeframe.before)}
-                </span>
-              </>
-            </ResponsiveTooltip>
-          </div>
-          <div className="flex items-center gap-1">
-            <ConfigurationMenu
-              chartType={chartType}
-              setChartType={setChartType}
-              showIncome={showIncome}
-              setShowIncome={setShowIncome}
-              showExpenses={showExpenses}
-              setShowExpenses={setShowExpenses}
-              showRevenue={showRevenue}
-              setShowRevenue={setShowRevenue}
-              showPreviousPeriod={showPreviousPeriod}
-              setShowPreviousPeriod={setShowPreviousPeriod}
-              availableIntervals={availableIntervals}
-              interval={interval}
-              setInterval={setInterval}
-              setTimeframe={setTimeframe}
-              timeframe={timeframe}
-              timeframeOptions={TIMEFRAME_OPTIONS}
-            />
-          </div>
+      <CardHeader className="p-4 space-y-0.2">
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-base font-medium">Money Flow</CardTitle>
+          <ConfigurationMenu
+            chartType={chartType}
+            setChartType={setChartType}
+            showIncome={showIncome}
+            setShowIncome={setShowIncome}
+            showExpenses={showExpenses}
+            setShowExpenses={setShowExpenses}
+            showRevenue={showRevenue}
+            setShowRevenue={setShowRevenue}
+            showPreviousPeriod={showPreviousPeriod}
+            setShowPreviousPeriod={setShowPreviousPeriod}
+            availableIntervals={availableIntervals}
+            interval={interval}
+            setInterval={setInterval}
+            setTimeframe={(value: string) => setTimeframe(value as TimeframeOption['value'])}
+            timeframe={timeframe}
+          />
         </div>
-
+        <CardDescription>
+          <ResponsiveTooltip
+            openDelay={1}
+            desktopComponent="hovercard"
+            contentClassName="w-full max-w-sm p-4 sm:w-96 bg-transparent border-none shadow-none"
+            triggerClassName="cursor-help"
+            content={<YearDoughnutTimeframeDisplayChart data={[previousTimeframe, currentTimeframe]} />}
+          >
+            <p className="flex flex-row">
+              <span className="text-xs flex items-center">
+                <Calendar className="inline h-3 w-3 mr-1" />
+                {formatShortDate(currentTimeframe.after)} - {formatShortDate(currentTimeframe.before)}
+              </span>
+              <span className="ml-1 text-xs text-muted-foreground flex items-center">
+                {' vs '}
+                <Calendar className="inline h-3 w-3 mx-1" />
+                {formatShortDate(previousTimeframe.after)} - {formatShortDate(previousTimeframe.before)}
+              </span>
+            </p>
+          </ResponsiveTooltip>
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-3 pt-0">
+        {isLoading && <MoneyFlowSkeleton />}
         {(!isLoading && totalRevenue) && (
           <>
-            <ResponsiveTooltip
-              openDelay={0}
-              desktopComponent="hovercard"
-              contentClassName="w-[350px] shadow-lg p-4"
-              triggerClassName="cursor-help inline-block"
-              content={
-                <>
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="text-xs font-medium">
-                      {formatShortDate(currentTimeframe.after)} - {formatShortDate(currentTimeframe.before)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatShortDate(previousTimeframe.after)} - {formatShortDate(previousTimeframe.before)}
-                    </p>
-                  </div>
-                  <Separator className="mb-2" />
-                  <IncomeExpensesComparison
-                    currentIncome={totalIncome}
-                    currentExpenses={totalExpenses}
-                    previousIncome={previousTotalIncome}
-                    previousExpenses={previousTotalExpenses}
-                  />
-                </>
-              }
-            >
-              <div className="inline-flex flex-col items-start mb-2">
-                <h2 className="text-xl sm:text-2xl font-bold">
-                  <MoneyValue showSign useColors amount={totalRevenue} />
-                </h2>
-                <span className={cn('flex items-center text-xs', {
-                  'text-success': revenueChange >= 0,
-                  'text-destructive': revenueChange < 0,
-                })}>
-                  {getSummaryText()}
-                  <ArrowChangeIndicator className="ml-1" value={revenueChange} />
-                  <InfoIcon className="h-3 w-3 ml-1" />
-                </span>
-              </div>
-            </ResponsiveTooltip>
-
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto -mx-3">
               {error ? (
                 <div className="w-full h-full flex items-center justify-center text-destructive text-xs">
                   Error loading data: {error.message}
@@ -223,45 +168,47 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
         )}
       </CardContent>
 
-      <CardFooter className={cn('flex flex-col gap-4 sm:gap-6 lg:flex-row lg:justify-between p-3 transition-all border-t duration-300 ease-in-out overflow-hidden')}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:flex-1 lg:grid-cols-4 w-full">
-          <SummaryItem
-            label="Total Income"
-            value={totalIncome}
-            comparisonValue={previousTotalIncome}
-            comparisonPercentage={incomeChangePercent}
-          />
-          <SummaryItem
-            label="Total Expenses"
-            value={totalExpenses}
-            comparisonValue={previousTotalExpenses}
-            comparisonPercentage={expensesChangePercent}
-          />
-          <SummaryItem
-            label={`Avg. ${getIntervalLabel} Income`}
-            value={avgIntervalIncome}
-            comparisonValue={previousAvgIntervalIncome}
-            comparisonPercentage={incomeChangePercent}
-          />
-          <SummaryItem
-            label={`Avg. ${getIntervalLabel} Expenses`}
-            value={avgIntervalExpenses}
-            comparisonValue={previousAvgIntervalExpenses}
-            comparisonPercentage={expensesChangePercent}
-          />
-        </div>
-        <div className="w-full lg:w-1/5">
-          <SummaryItem
-            colors
-            showSign
-            label="Net Revenue"
-            className="h-full"
-            value={totalRevenue}
-            comparisonValue={previousTotalRevenue}
-            comparisonPercentage={revenueChangePercent}
-          />
-        </div>
-      </CardFooter>
+      {(!isLoading && totalRevenue) && (
+        <CardFooter className={cn('flex flex-col gap-4 sm:gap-6 lg:flex-row lg:justify-between p-3 transition-all border-t duration-300 ease-in-out overflow-hidden')}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:flex-1 lg:grid-cols-4 w-full">
+            <SummaryItem
+              label="Total Income"
+              value={totalIncome}
+              comparisonValue={previousTotalIncome}
+              comparisonPercentage={incomeChangePercent}
+            />
+            <SummaryItem
+              label="Total Expenses"
+              value={totalExpenses}
+              comparisonValue={previousTotalExpenses}
+              comparisonPercentage={expensesChangePercent}
+            />
+            <SummaryItem
+              label={`Avg. ${getIntervalLabel} Income`}
+              value={avgIntervalIncome}
+              comparisonValue={previousAvgIntervalIncome}
+              comparisonPercentage={incomeChangePercent}
+            />
+            <SummaryItem
+              label={`Avg. ${getIntervalLabel} Expenses`}
+              value={avgIntervalExpenses}
+              comparisonValue={previousAvgIntervalExpenses}
+              comparisonPercentage={expensesChangePercent}
+            />
+          </div>
+          <div className="w-full lg:w-1/5">
+            <SummaryItem
+              colors
+              showSign
+              label="Net Revenue"
+              className="h-full"
+              value={totalRevenue}
+              comparisonValue={previousTotalRevenue}
+              comparisonPercentage={revenueChangePercent}
+            />
+          </div>
+        </CardFooter>
+      )}
     </Card>
   );
 };

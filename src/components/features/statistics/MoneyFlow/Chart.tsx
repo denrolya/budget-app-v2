@@ -153,7 +153,7 @@ const MoneyFlowChart: React.FC<Props> = ({
   return (
     <div className="min-w-[600px]">
       <ResponsiveContainer width="100%" height={250}>
-        <ComposedChart stackOffset="sign" data={transformedData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+        <ComposedChart stackOffset="sign" data={transformedData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id="incomeGradient" x1="0" y1="1" x2="0" y2="0">
               <stop offset="0%" stopColor="hsl(var(--success) / 0.2)" />

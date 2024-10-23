@@ -1,15 +1,22 @@
 import { BarChart, LineChart, PieChart, SettingsIcon, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
 
-import { useScreenSize } from '@/hooks/useScreenSize';
 import { Button } from '@/components/ui/button';
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
+import { useScreenSize } from '@/hooks/useScreenSize';
+import { TIMEFRAME_OPTIONS } from '@/constants/datetime';
 
 interface UnifiedChartMenuProps {
   timeframe: string;
@@ -26,46 +33,54 @@ interface UnifiedChartMenuProps {
   setShowRevenue: (value: boolean) => void;
   showPreviousPeriod: boolean;
   setShowPreviousPeriod: (value: boolean) => void;
-  timeframeOptions: { value: string; label: string }[];
   availableIntervals: { value: string; label: string }[];
 }
 
 export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
   const isDesktop = useScreenSize();
 
+  const OptionButton = ({ value, label, currentValue, onChange }) => (
+    <Button
+      variant={currentValue === value ? 'default' : 'outline'}
+      size="sm"
+      onClick={() => onChange(value)}
+      className="px-2 py-1 h-8 text-xs"
+    >
+      {label}
+    </Button>
+  );
+
   const MenuContent = () => (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label className="text-xs font-medium">Timeframe</Label>
-        <Select value={props.timeframe} onValueChange={props.setTimeframe}>
-          <SelectTrigger className="h-8 text-xs">
-            <SelectValue placeholder="Select timeframe" />
-          </SelectTrigger>
-          <SelectContent>
-            {props.timeframeOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap gap-2">
+          {TIMEFRAME_OPTIONS.map((option) => (
+            <OptionButton
+              key={option.value}
+              value={option.value}
+              label={option.label}
+              currentValue={props.timeframe}
+              onChange={props.setTimeframe}
+            />
+          ))}
+        </div>
       </div>
-
-      <Separator className="my-2" />
 
       <div className="space-y-2">
         <Label className="text-xs font-medium">Interval</Label>
-        <Select value={props.interval} onValueChange={props.setInterval}>
-          <SelectTrigger className="h-8 text-xs">
-            <SelectValue placeholder="Select interval" />
-          </SelectTrigger>
-          <SelectContent>
-            {props.availableIntervals.map((option) => (
-              <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap gap-2">
+          {props.availableIntervals.map((option) => (
+            <OptionButton
+              key={option.value}
+              value={option.value}
+              label={option.label}
+              currentValue={props.interval}
+              onChange={props.setInterval}
+            />
+          ))}
+        </div>
       </div>
-
-      <Separator className="my-2" />
 
       <div className="space-y-2">
         <Label className="text-xs font-medium">Chart Type</Label>
@@ -91,8 +106,6 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
           ))}
         </RadioGroup>
       </div>
-
-      <Separator className="my-2" />
 
       <div className="space-y-2">
         <Label className="text-xs font-medium">Display Options</Label>
@@ -139,8 +152,10 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
             <SettingsIcon className="h-4 w-4" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-56 p-3">
-          <MenuContent />
+        <PopoverContent className="w-72 p-3">
+          <ScrollArea className="h-[calc(100vh-100px)]">
+            <MenuContent />
+          </ScrollArea>
         </PopoverContent>
       </Popover>
     );
@@ -153,7 +168,10 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
           </Button>
         </DrawerTrigger>
         <DrawerContent className="p-6">
-          <h2 className="text-lg font-semibold mb-4">Chart Options</h2>
+          <DrawerHeader>
+            <DrawerTitle>Chart Options</DrawerTitle>
+            <DrawerDescription className="sr-only">MoneyFlow configuration</DrawerDescription>
+          </DrawerHeader>
           <MenuContent />
         </DrawerContent>
       </Drawer>
