@@ -123,7 +123,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
           <ResponsiveTooltip
             openDelay={1}
             desktopComponent="hovercard"
-            contentClassName="w-full max-w-sm p-4 sm:w-96 bg-transparent border-none shadow-none"
+            contentClassName="bg-transparent border-none shadow-none"
             triggerClassName="cursor-help"
             content={<YearDoughnutTimeframeDisplayChart data={[previousTimeframe, currentTimeframe]} />}
           >
@@ -143,6 +143,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
       </CardHeader>
       <CardContent className="p-3 pt-0">
         {isLoading && <MoneyFlowSkeleton />}
+
         {(!isLoading && totalRevenue) && (
           <>
             <div className="overflow-x-auto -mx-3">

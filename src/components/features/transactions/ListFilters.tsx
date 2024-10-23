@@ -231,8 +231,8 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (data.after || data.before) count++;
-    if (data.categories.length > 0) count++;
-    if (data.accounts.length > 0) count++;
+    if (data.categories?.length > 0) count++;
+    if (data.accounts?.length > 0) count++;
     if (data.amountRange[0] !== 0 || data.amountRange[1] !== Infinity) count++;
     if (data.withNestedCategories) count++;
     if (data.isDraft) count++;

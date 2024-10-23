@@ -1,6 +1,5 @@
 import React from 'react';
 
-import Pagination from '@/components/common/Pagination';
 import FormattedListing from '@/components/features/transactions/FormattedListing';
 import ListFilters from '@/components/features/transactions/ListFilters';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';

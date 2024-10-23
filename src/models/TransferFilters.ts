@@ -20,14 +20,13 @@ export class TransferFilters extends BaseFilters {
   accounts!: string[];
 
   constructor(props: TransferFiltersProps = {}) {
-    super({
-      searchTerm: '',
-      before: moment(),
-      after: moment().subtract(30, 'days'),
-      amountRange: [],
-      accounts: [],
-      ...props
-    });
+    super();
+
+    this.searchTerm = props.searchTerm ?? '';
+    this.before = props.before ?? moment();
+    this.after = props.after ?? moment().subtract(30, 'days');
+    this.amountRange = props.amountRange ?? [];
+    this.accounts = props.accounts ?? [];
   }
 
   static isApplicable(key: unknown): key is keyof TransferFilters {

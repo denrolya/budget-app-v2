@@ -36,25 +36,25 @@ const timePresets: TimePreset[] = [
       startDate: moment().startOf('isoWeek'),
       endDate: moment().endOf('isoWeek'),
     }),
-    step: { unit: 'isoWeek', amount: 1 },
+    step: { unit: 'week', amount: 1 },
   },
   {
     label: 'Last Week',
     value: 'last-week',
     getDateRange: () => ({
-      startDate: moment().subtract(1, 'isoWeek').startOf('isoWeek'),
-      endDate: moment().subtract(1, 'isoWeek').endOf('isoWeek'),
+      startDate: moment().subtract(1, 'week').startOf('isoWeek'),
+      endDate: moment().subtract(1, 'week').endOf('isoWeek'),
     }),
-    step: { unit: 'isoWeek', amount: 1 },
+    step: { unit: 'week', amount: 1 },
   },
   {
     label: 'Last 2 Weeks',
     value: '2-weeks',
     getDateRange: () => ({
-      startDate: moment().subtract(1, 'isoWeek').startOf('isoWeek'),
+      startDate: moment().subtract(1, 'week').startOf('isoWeek'),
       endDate: moment().endOf('isoWeek'),
     }),
-    step: { unit: 'isoWeek', amount: 2 },
+    step: { unit: 'week', amount: 2 },
   },
   {
     label: 'Current Month',
@@ -221,7 +221,7 @@ export const DailyLedgerPage: React.FC = () => {
           <ResponsiveTooltip
             openDelay={1}
             desktopComponent="hovercard"
-            contentClassName="w-full max-w-sm p-4 sm:w-96 bg-transparent border-none shadow-none"
+            contentClassName="bg-transparent border-none shadow-none"
             triggerClassName="cursor-help"
             content={
               <YearDoughnutTimeframeDisplayChart data={[{

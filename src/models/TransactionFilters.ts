@@ -1,5 +1,4 @@
 import moment, { Moment } from 'moment';
-
 import BaseFilters from '@/models/BaseFilters';
 
 interface TransactionFiltersProps {
@@ -26,17 +25,17 @@ export class TransactionFilters extends BaseFilters {
   isDraft?: boolean;
 
   constructor(props: TransactionFiltersProps = {}) {
-    super({
-      searchTerm: '',
-      before: moment(),
-      after: moment().subtract(30, 'days'),
-      amountRange: [],
-      categories: [],
-      excludedCategories: [],
-      accounts: [],
-      withNestedCategories: false,
-      ...props
-    });
+    super();
+
+    this.searchTerm = props.searchTerm ?? '';
+    this.before = props.before ?? moment();
+    this.after = props.after ?? moment().subtract(30, 'days');
+    this.amountRange = props.amountRange ?? [];
+    this.categories = props.categories ?? [];
+    this.excludedCategories = props.excludedCategories ?? [];
+    this.accounts = props.accounts ?? [];
+    this.withNestedCategories = props.withNestedCategories ?? false;
+    this.isDraft = props.isDraft ?? undefined;
   }
 
   static isApplicable(key: unknown): key is keyof TransactionFilters {
