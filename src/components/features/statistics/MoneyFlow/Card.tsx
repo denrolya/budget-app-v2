@@ -1,124 +1,23 @@
 import cn from 'classnames';
-import {
-  BarChart,
-  Calendar,
-  InfoIcon,
-  LineChart,
-  PieChart,
-  SettingsIcon,
-  TrendingDown,
-  TrendingUp,
-} from 'lucide-react';
+import { Calendar, InfoIcon } from 'lucide-react';
 import moment from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 
-import { Separator } from '@/components/ui/separator';
 import ArrowChangeIndicator from '@/components/common/ArrowChangeIndicator';
 import MoneyValue from '@/components/common/MoneyValue';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
+import ConfigurationMenu from '@/components/features/statistics/MoneyFlow/ConfigurationMenu';
+import IncomeExpensesComparison from '@/components/features/statistics/MoneyFlow/IncomeExpensesComparison';
 import MoneyFlowSkeleton from '@/components/features/statistics/MoneyFlow/Skeleton';
 import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem';
-import IncomeExpensesComparison from '@/components/features/statistics/MoneyFlow/IncomeExpensesComparison.tsx';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { INTERVAL_OPTIONS, TIMEFRAME_OPTIONS, TimeframeOption } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
 import { formatShortDate } from '@/utils/formatShortDate';
-
-interface ChartOptionsDropdownProps {
-  chartType: 'bar' | 'line';
-  setChartType: (type: 'bar' | 'line') => void;
-  showIncome: boolean;
-  setShowIncome: (show: boolean) => void;
-  showExpenses: boolean;
-  setShowExpenses: (show: boolean) => void;
-  showRevenue: boolean;
-  setShowRevenue: (show: boolean) => void;
-  showPreviousPeriod: boolean;
-  setShowPreviousPeriod: (show: boolean) => void;
-}
-
-export const ChartOptionsDropdown: React.FC<ChartOptionsDropdownProps> = ({
-                                                                            chartType,
-                                                                            setChartType,
-                                                                            showIncome,
-                                                                            setShowIncome,
-                                                                            showExpenses,
-                                                                            setShowExpenses,
-                                                                            showRevenue,
-                                                                            setShowRevenue,
-                                                                            showPreviousPeriod,
-                                                                            setShowPreviousPeriod,
-                                                                          }) => (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
-        <SettingsIcon className="h-4 w-4" />
-        <span className="sr-only">Open settings</span>
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent className="w-56">
-      <DropdownMenuLabel>Chart Options</DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <DropdownMenuLabel>Chart Type</DropdownMenuLabel>
-      <DropdownMenuRadioGroup value={chartType} onValueChange={(value) => setChartType(value as 'bar' | 'line')}>
-        <DropdownMenuRadioItem value="bar">
-          <BarChart className="mr-2 h-4 w-4" />
-          <span>Bar Chart</span>
-        </DropdownMenuRadioItem>
-        <DropdownMenuRadioItem value="line">
-          <LineChart className="mr-2 h-4 w-4" />
-          <span>Line Chart</span>
-        </DropdownMenuRadioItem>
-      </DropdownMenuRadioGroup>
-      <DropdownMenuSeparator />
-      <DropdownMenuLabel>Display Options</DropdownMenuLabel>
-      <DropdownMenuCheckboxItem
-        checked={showIncome}
-        onCheckedChange={setShowIncome}
-      >
-        <TrendingUp className="mr-2 h-4 w-4 text-success" />
-        <span>Income</span>
-      </DropdownMenuCheckboxItem>
-      <DropdownMenuCheckboxItem
-        checked={showExpenses}
-        onCheckedChange={setShowExpenses}
-      >
-        <TrendingDown className="mr-2 h-4 w-4 text-destructive" />
-        <span>Expenses</span>
-      </DropdownMenuCheckboxItem>
-      <DropdownMenuCheckboxItem
-        checked={showRevenue}
-        onCheckedChange={setShowRevenue}
-      >
-        <PieChart className="mr-2 h-4 w-4 text-secondary" />
-        <span>Revenue</span>
-      </DropdownMenuCheckboxItem>
-      <DropdownMenuSeparator />
-      <DropdownMenuCheckboxItem
-        checked={showPreviousPeriod}
-        onCheckedChange={setShowPreviousPeriod}
-      >
-        <TrendingUp className="mr-2 h-4 w-4 text-success" />
-        <span>Previous Period</span>
-      </DropdownMenuCheckboxItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-);
 
 interface Props {
   className?: string;
@@ -238,27 +137,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
             </ResponsiveTooltip>
           </div>
           <div className="flex items-center gap-1">
-            <Select value={timeframe} onValueChange={setTimeframe}>
-              <SelectTrigger className="w-[60px] h-7 text-xs">
-                <SelectValue placeholder="Time" />
-              </SelectTrigger>
-              <SelectContent>
-                {TIMEFRAME_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={interval} onValueChange={setInterval}>
-              <SelectTrigger className="w-[70px] h-7 text-xs">
-                <SelectValue placeholder="Interval" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableIntervals.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <ChartOptionsDropdown
+            <ConfigurationMenu
               chartType={chartType}
               setChartType={setChartType}
               showIncome={showIncome}
@@ -269,6 +148,12 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
               setShowRevenue={setShowRevenue}
               showPreviousPeriod={showPreviousPeriod}
               setShowPreviousPeriod={setShowPreviousPeriod}
+              availableIntervals={availableIntervals}
+              interval={interval}
+              setInterval={setInterval}
+              setTimeframe={setTimeframe}
+              timeframe={timeframe}
+              timeframeOptions={TIMEFRAME_OPTIONS}
             />
           </div>
         </div>

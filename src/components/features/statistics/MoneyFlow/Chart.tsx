@@ -1,4 +1,4 @@
-import moment, { Moment } from 'moment/moment';
+import { Moment } from 'moment/moment';
 import React from 'react';
 import { Bar, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
@@ -104,8 +104,9 @@ const MoneyFlowChart: React.FC<Props> = ({
                   type="monotone"
                   xAxisId={xAxisId}
                   dataKey={dataKeys.income}
-                  stroke={`hsl(var(--success)${opacity < 1 ? ` / ${opacity})` : ')'}`}
-                  strokeWidth={2}
+                  stroke={'hsl(var(--success))'}
+                  strokeWidth={isCurrentTimeframe ? 3 : 2}
+                  strokeOpacity={isCurrentTimeframe ? 1 : 0.7}
                   dot={false}
                   strokeDasharray={isCurrentTimeframe ? undefined : '5 5'}
                 />
@@ -115,8 +116,9 @@ const MoneyFlowChart: React.FC<Props> = ({
                   type="monotone"
                   xAxisId={xAxisId}
                   dataKey={dataKeys.expenses}
-                  stroke={`hsl(var(--destructive)${opacity < 1 ? ` / ${opacity})` : ')'}`}
-                  strokeWidth={2}
+                  stroke={'hsl(var(--destructive))'}
+                  strokeWidth={isCurrentTimeframe ? 3 : 2}
+                  strokeOpacity={isCurrentTimeframe ? 1 : 0.7}
                   dot={false}
                   strokeDasharray={isCurrentTimeframe ? undefined : '5 5'}
                 />
@@ -126,8 +128,9 @@ const MoneyFlowChart: React.FC<Props> = ({
                   type="monotone"
                   xAxisId={xAxisId}
                   dataKey={dataKeys.revenue}
-                  stroke={`hsl(var(--secondary)${opacity < 1 ? ` / ${opacity})` : ')'}`}
-                  strokeWidth={2}
+                  stroke={'hsl(var(--secondary))'}
+                  strokeWidth={isCurrentTimeframe ? 3 : 2}
+                  strokeOpacity={isCurrentTimeframe ? 1 : 0.7}
                   dot={false}
                   strokeDasharray={isCurrentTimeframe ? undefined : '5 5'}
                 />
@@ -138,6 +141,13 @@ const MoneyFlowChart: React.FC<Props> = ({
       );
     }
     return null;
+  };
+
+  const formatXAxisTick = (time: number) => {
+    if (interval === '1 month') {
+      return new Date(time).toLocaleString('default', { month: 'short' });
+    }
+    return '';
   };
 
   return (
@@ -162,12 +172,15 @@ const MoneyFlowChart: React.FC<Props> = ({
             </linearGradient>
           </defs>
           <XAxis
-            hide
             xAxisId={1}
             dataKey="time"
             scale="time"
             type="number"
             domain={['dataMin', 'dataMax']}
+            tickFormatter={formatXAxisTick}
+            tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))', opacity: 0.5 }}
+            tickLine={false}
+            axisLine={false}
           />
           <XAxis
             hide
@@ -197,7 +210,7 @@ const MoneyFlowChart: React.FC<Props> = ({
           />
           <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeOpacity={0.2} />
           {renderChart(false)} {/* Previous timeframe */}
-          {renderChart(true)}  {/* Current timeframe */}
+          {renderChart(true)} {/* Current timeframe */}
         </ComposedChart>
       </ResponsiveContainer>
     </div>
