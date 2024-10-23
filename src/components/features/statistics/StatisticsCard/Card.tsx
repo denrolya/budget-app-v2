@@ -3,6 +3,7 @@ import { SettingsIcon } from 'lucide-react';
 import { Moment } from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 
+import { formatShortDate } from '@/utils/formatShortDate.ts';
 import MoneyValue from '@/components/common/MoneyValue';
 import ConfigForm from '@/components/features/statistics/StatisticsCard/ConfigForm';
 import PercentageBadge from '@/components/features/statistics/StatisticsCard/PercentageBadge';
@@ -70,13 +71,15 @@ const TooltipContent: React.FC<{
         Date: {date.format('MMM D, YYYY')}
       </p>
     )}
-    <p className="text-xs mt-2">
-      Current period: {selectedTimeframe.after.format('MMM D, YYYY')} -{' '}
-      {selectedTimeframe.before.format('MMM D, YYYY')}
+    <p className="text-xs font-medium">
+      Current period: {formatShortDate(selectedTimeframe.after)}
+      {' - '}
+      {formatShortDate(selectedTimeframe.before)}
     </p>
-    <p className="text-xs">
-      Previous period: {comparisonTimeframe.after.format('MMM D, YYYY')} -{' '}
-      {comparisonTimeframe.before.format('MMM D, YYYY')}
+    <p className="text-xs text-muted-foreground">
+      Comparison period: {formatShortDate(comparisonTimeframe.after)}
+      {' - '}
+      {formatShortDate(comparisonTimeframe.before)}
     </p>
     <p className="text-xs mt-1">
       Comparison: vs {comparison === 'previous' ? 'previous period' : 'same period last year'}
@@ -179,6 +182,8 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                 <div className="flex flex-col space-y-1">
                   <div className="flex justify-between items-baseline">
                     <ResponsiveTooltip
+                      openDelay={0}
+                      desktopComponent="tooltip"
                       content={
                         <TooltipContent
                           label="Minimum Value"
@@ -202,6 +207,8 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                     </ResponsiveTooltip>
 
                     <ResponsiveTooltip
+                      openDelay={0}
+                      desktopComponent="tooltip"
                       content={
                         <TooltipContent
                           label="Maximum Value"
@@ -226,6 +233,8 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                   </div>
                   <div className="flex justify-between items-center text-xs">
                     <ResponsiveTooltip
+                      openDelay={0}
+                      desktopComponent="tooltip"
                       content={
                         <TooltipContent
                           label="Minimum Comparison"
@@ -239,6 +248,8 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                       <PercentageBadge percentage={percentageChange.min} reverted />
                     </ResponsiveTooltip>
                     <ResponsiveTooltip
+                      openDelay={0}
+                      desktopComponent="tooltip"
                       content={
                         <TooltipContent
                           label="Maximum Comparison"
@@ -258,6 +269,8 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                 <>
                   <div className="flex justify-between items-baseline">
                     <ResponsiveTooltip
+                      openDelay={0}
+                      desktopComponent="tooltip"
                       content={
                         <TooltipContent
                           label="Current Value"
@@ -285,6 +298,8 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                       vs {comparison === 'previous' ? 'previous' : 'last year'}
                     </span>
                     <ResponsiveTooltip
+                      openDelay={0}
+                      desktopComponent="tooltip"
                       content={
                         <TooltipContent
                           label="Comparison Value"
@@ -295,7 +310,9 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                         />
                       }
                     >
+                      <span>
                       <MoneyValue className="font-medium" useColors={false} amount={comparisonValue as number} />
+                        </span>
                     </ResponsiveTooltip>
                   </div>
                 </>

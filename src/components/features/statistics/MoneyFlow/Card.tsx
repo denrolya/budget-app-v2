@@ -1,15 +1,25 @@
 import cn from 'classnames';
-import { BarChart, Calendar, InfoIcon, LineChart, PieChart, Settings, TrendingDown, TrendingUp } from 'lucide-react';
+import {
+  BarChart,
+  Calendar,
+  InfoIcon,
+  LineChart,
+  PieChart,
+  SettingsIcon,
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react';
 import moment from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 
+import { Separator } from '@/components/ui/separator';
 import ArrowChangeIndicator from '@/components/common/ArrowChangeIndicator';
 import MoneyValue from '@/components/common/MoneyValue';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
 import MoneyFlowSkeleton from '@/components/features/statistics/MoneyFlow/Skeleton';
 import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem';
-import VeryInformativeTooltip from '@/components/features/statistics/MoneyFlow/VeryInformativeTooltip';
+import IncomeExpensesComparison from '@/components/features/statistics/MoneyFlow/IncomeExpensesComparison.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import {
@@ -56,9 +66,9 @@ export const ChartOptionsDropdown: React.FC<ChartOptionsDropdownProps> = ({
                                                                           }) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
-      <Button variant="outline" size="icon">
-        <Settings className="h-4 w-4" />
-        <span className="sr-only">Open chart options</span>
+      <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+        <SettingsIcon className="h-4 w-4" />
+        <span className="sr-only">Open settings</span>
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent className="w-56">
@@ -268,25 +278,26 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
             <ResponsiveTooltip
               openDelay={0}
               desktopComponent="hovercard"
-              contentClassName="w-full max-w-sm p-4 sm:w-96"
+              contentClassName="w-[350px] shadow-lg p-4"
               triggerClassName="cursor-help inline-block"
               content={
-                <VeryInformativeTooltip
-                  currentTimeframe={currentTimeframe}
-                  previousTimeframe={previousTimeframe}
-                  totalIncome={totalIncome}
-                  totalExpenses={totalExpenses}
-                  totalRevenue={totalRevenue}
-                  previousTotalIncome={previousTotalIncome}
-                  previousTotalExpenses={previousTotalExpenses}
-                  previousTotalRevenue={previousTotalRevenue}
-                  incomeChange={incomeChange}
-                  incomeChangePercent={incomeChangePercent}
-                  expensesChange={expensesChange}
-                  expensesChangePercent={expensesChangePercent}
-                  revenueChange={revenueChange}
-                  revenueChangePercent={revenueChangePercent}
-                />
+                <>
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-xs font-medium">
+                      {formatShortDate(currentTimeframe.after)} - {formatShortDate(currentTimeframe.before)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatShortDate(previousTimeframe.after)} - {formatShortDate(previousTimeframe.before)}
+                    </p>
+                  </div>
+                  <Separator className="mb-2" />
+                  <IncomeExpensesComparison
+                    currentIncome={totalIncome}
+                    currentExpenses={totalExpenses}
+                    previousIncome={previousTotalIncome}
+                    previousExpenses={previousTotalExpenses}
+                  />
+                </>
               }
             >
               <div className="inline-flex flex-col items-start mb-2">
