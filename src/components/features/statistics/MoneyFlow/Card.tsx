@@ -127,7 +127,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
             triggerClassName="cursor-help"
             content={<YearDoughnutTimeframeDisplayChart data={[previousTimeframe, currentTimeframe]} />}
           >
-            <p className="flex flex-row">
+            <span className="flex flex-row">
               <span className="text-xs flex items-center">
                 <Calendar className="inline h-3 w-3 mr-1" />
                 {formatShortDate(currentTimeframe.after)} - {formatShortDate(currentTimeframe.before)}
@@ -137,7 +137,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
                 <Calendar className="inline h-3 w-3 mx-1" />
                 {formatShortDate(previousTimeframe.after)} - {formatShortDate(previousTimeframe.before)}
               </span>
-            </p>
+            </span>
           </ResponsiveTooltip>
         </CardDescription>
       </CardHeader>
