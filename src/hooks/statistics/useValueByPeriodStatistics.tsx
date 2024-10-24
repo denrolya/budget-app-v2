@@ -1,67 +1,76 @@
-import { useEffect, useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import moment, { Moment } from 'moment';
+import { useMemo } from 'react';
 
-import { ComparisonType, Interval, StatisticsType } from '@/constants/dashboard-config';
 import { useCategories } from '@/contexts/FinanceData';
-import { useStatistics } from '@/hooks/useStatistics'; // Import the generic hook
-import { Type as TransactionType } from '@/models/Transaction';
+import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
+import { ComparisonType, Interval, StatisticsType } from '@/types/statistics';
+import { Type as TransactionType } from '@/types/transaction';
+import {
+  IsIncrease,
+  PercentageChange,
+  StatisticsData,
+  ValueByPeriodData,
+  ValueByPeriodParams,
+} from '@/types/valueByPeriodStatistics';
 import { generatePreviousTimeframe } from '@/utils/generatePreviousTimeframe';
 
-interface StatisticsFormattedEntry {
-  after: Moment;
-  before: Moment;
-  income: number;
-  expense: number;
-}
-
-export interface CardConfig {
-  title: string;
-  type: TransactionType;
-  categories?: string[];
-  timeframe: Interval; // Timeframe
-  period?: Interval; // Used for grouping
-  comparison: ComparisonType;
-  statType: StatisticsType;
-}
-
-interface ValueByPeriodParams {
-  config: CardConfig;
-  after?: Moment;
-  before?: Moment;
-  dependencies?: unknown[]; // Allow any type for dependencies
-}
-
-interface MinMaxStatistics {
-  min: number;
-  max: number;
-  minDate?: Moment;
-  maxDate?: Moment;
-}
-
-type StatisticsData = number | MinMaxStatistics;
-type PercentageChange = number | { min: number; max: number };
-type IsIncrease = boolean | { min: boolean; max: boolean };
-
-const getDateRange = (
-  timeframe: Interval,
-  after?: Moment,
-  before?: Moment,
-): [Moment, Moment] => {
+const getDateRange = (timeframe: Interval, after?: Moment, before?: Moment): [Moment, Moment] => {
   const { value, unit } = timeframe;
   const end = before || moment().endOf(unit);
   const start = after || end.clone().subtract(value - 1, unit).startOf(unit);
   return [start, end];
 };
 
-export const useValueByPeriod = ({
-                                   config,
-                                   after,
-                                   before,
-                                   dependencies = [],
-                                 }: ValueByPeriodParams): {
-  currentData: StatisticsFormattedEntry[] | undefined;
-  comparisonData: StatisticsFormattedEntry[] | undefined;
+const calculateStatisticsValues = (
+  data: ValueByPeriodData[],
+  type: TransactionType,
+  statType: StatisticsType,
+  after: Moment,
+  before: Moment,
+  isCurrentPeriod: boolean,
+): StatisticsData => {
+  if (!data || data.length === 0) {
+    return statType === StatisticsType.MinMax ? { min: 0, max: 0 } : 0;
+  }
+
+  const values = data.map((item) => (type === TransactionType.Expense ? item.expense : item.income));
+  const nonZeroValues = values.filter((v) => v > 0);
+
+  // Adjust the end date to today if it is in the future
+  const adjustedEnd = before.isAfter(moment()) ? moment() : before;
+
+  switch (statType) {
+    case StatisticsType.Sum:
+      return values.reduce((a, b) => a + b, 0);
+    case StatisticsType.Daily: {
+      const totalDays = adjustedEnd.diff(after, 'days') + 1; // Calculate the total number of days
+      return totalDays > 0 ? values.reduce((a, b) => a + b, 0) / totalDays : 0;
+    }
+    case StatisticsType.Avg:
+      return nonZeroValues.length > 0 ? nonZeroValues.reduce((a, b) => a + b, 0) / nonZeroValues.length : 0;
+    case StatisticsType.MinMax: {
+      if (isCurrentPeriod && nonZeroValues.length === 0) {
+        return { min: 0, max: 0 };
+      }
+      const minValue = Math.min(...nonZeroValues);
+      const maxValue = Math.max(...values);
+      const minIndex = values.indexOf(minValue);
+      const maxIndex = values.indexOf(maxValue);
+      return {
+        min: minValue,
+        max: maxValue,
+        minDate: data[minIndex].after,
+        maxDate: data[maxIndex].after,
+      };
+    }
+    default:
+      return 0;
+  }
+};
+
+export const useValueByPeriod = ({ config, after, before }: ValueByPeriodParams, dependencies: any[] = [], queryKey: string = 'value-by-period'): {
+  currentData: ValueByPeriodData[] | undefined;
+  comparisonData: ValueByPeriodData[] | undefined;
   currentValue: StatisticsData;
   comparisonValue: StatisticsData;
   percentageChange: PercentageChange;
@@ -75,7 +84,6 @@ export const useValueByPeriod = ({
   maxDate: Moment | undefined;
   isCurrentPeriod: boolean;
 } => {
-  const queryClient = useQueryClient();
   const { type, categories, timeframe, period, comparison, statType } = config;
   const { list: categoryList } = useCategories();
 
@@ -84,17 +92,20 @@ export const useValueByPeriod = ({
 
   const categoryIds = useMemo(() =>
       categories
-        ?.map((categoryName) => categoryList.find((cat) => cat.name === categoryName)?.id)
-        .filter((id): id is number => id !== null) ?? [],
+        ?.map((categoryName: string) => categoryList.find((cat) => cat.name === categoryName)?.id)
+        .filter((id: number): id is number => id !== null) ?? [],
     [categories, categoryList],
   );
 
+  const periodString = useMemo(() => period ? `${period.value} ${period.unit}` : `${timeframe.value} ${timeframe.unit}`, [period, timeframe]);
+
   // Fetch current period data
-  const { data: currentData, isLoading: isLoadingCurrent, error: errorCurrent } = useStatistics({
+  const { data: currentData, isLoading: isLoadingCurrent, error: errorCurrent } = useValueByPeriodStatisticsRequest({
+    type,
+    queryKey: `${queryKey}-selected`,
     after: periodStart,
     before: periodEnd,
-    interval: period ? `${period.value} ${period.unit}` : `${timeframe.value} ${timeframe.unit}`,
-    type,
+    period: periodString,
     accounts: [], // Add accounts if necessary
     categories: categoryIds,
   });
@@ -114,21 +125,22 @@ export const useValueByPeriod = ({
   }, [comparison, timeframe, periodStart, periodEnd]);
 
   // Fetch comparison period data
-  const { data: comparisonData, isLoading: isLoadingComparison, error: errorComparison } = useStatistics({
+  const {
+    data: comparisonData,
+    isLoading: isLoadingComparison,
+    error: errorComparison,
+  } = useValueByPeriodStatisticsRequest({
+    type,
+    queryKey: `${queryKey}-comparison`,
     after: comparisonStart,
     before: comparisonEnd,
-    interval: period ? `${period.value} ${period.unit}` : `${timeframe.value} ${timeframe.unit}`,
-    type,
+    period: periodString,
     accounts: [], // Add accounts if necessary
     categories: categoryIds,
   });
 
-  useEffect(() => () => {
-      queryClient.cancelQueries({ queryKey: ['value-by-period'] });
-    }, [queryClient]);
-
-  const currentValue = calculateStatValue(currentData || [], type, statType, periodStart, periodEnd, isCurrentPeriod);
-  const comparisonValue = calculateStatValue(comparisonData || [], type, statType, comparisonStart, comparisonEnd, false);
+  const currentValue = calculateStatisticsValues(currentData || [], type, statType, periodStart, periodEnd, isCurrentPeriod);
+  const comparisonValue = calculateStatisticsValues(comparisonData || [], type, statType, comparisonStart, comparisonEnd, false);
 
   const calculateChange = (current: number, comparison: number): number => {
     if (comparison === 0) return current === 0 ? 0 : 100;
@@ -175,51 +187,4 @@ export const useValueByPeriod = ({
     maxDate: typeof currentValue === 'object' ? currentValue.maxDate : undefined,
     isCurrentPeriod,
   };
-};
-
-const calculateStatValue = (
-  data: StatisticsFormattedEntry[],
-  type: TransactionType,
-  statType: StatisticsType,
-  start: Moment,
-  end: Moment,
-  isCurrentPeriod: boolean,
-): StatisticsData => {
-  if (!data || data.length === 0) {
-    return statType === StatisticsType.MinMax ? { min: 0, max: 0 } : 0;
-  }
-
-  const values = data.map((item) => (type === TransactionType.Expense ? item.expense : item.income));
-  const nonZeroValues = values.filter((v) => v > 0);
-
-  // Adjust the end date to today if it is in the future
-  const adjustedEnd = end.isAfter(moment()) ? moment() : end;
-
-  switch (statType) {
-    case StatisticsType.Sum:
-      return values.reduce((a, b) => a + b, 0);
-    case StatisticsType.Daily: {
-      const totalDays = adjustedEnd.diff(start, 'days') + 1; // Calculate the total number of days
-      return totalDays > 0 ? values.reduce((a, b) => a + b, 0) / totalDays : 0;
-    }
-    case StatisticsType.Avg:
-      return nonZeroValues.length > 0 ? nonZeroValues.reduce((a, b) => a + b, 0) / nonZeroValues.length : 0;
-    case StatisticsType.MinMax: {
-      if (isCurrentPeriod && nonZeroValues.length === 0) {
-        return { min: 0, max: 0 };
-      }
-      const minValue = Math.min(...nonZeroValues);
-      const maxValue = Math.max(...values);
-      const minIndex = values.indexOf(minValue);
-      const maxIndex = values.indexOf(maxValue);
-      return {
-        min: minValue,
-        max: maxValue,
-        minDate: data[minIndex].after,
-        maxDate: data[maxIndex].after,
-      };
-    }
-    default:
-      return 0; // Fallback in case of an unknown statType
-  }
 };

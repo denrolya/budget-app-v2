@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/contexts/FinanceData';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import Category from '@/models/Category';
-import { Type as TransactionType } from '@/models/Transaction';
+import { Type as TransactionType } from '@/types/transaction';
 
 export const CategoryManagementPage: React.FC = () => {
   const expenseCategories = useExpenseCategoriesTree();

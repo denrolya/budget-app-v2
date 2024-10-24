@@ -13,7 +13,8 @@ import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import Transaction, { Type } from '@/models/Transaction';
+import Transaction from '@/models/Transaction';
+import { Type } from '@/types/transaction';
 
 interface TransactionItemProps {
   transaction: Transaction;

@@ -13,16 +13,15 @@ import {
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import { TIMEFRAME_OPTIONS } from '@/constants/datetime';
+import { useScreenSize } from '@/hooks/useScreenSize';
 
 interface UnifiedChartMenuProps {
   timeframe: string;
   setTimeframe: (value: string) => void;
-  interval: string;
-  setInterval: (value: string) => void;
+  period: string;
+  setPeriod: (value: string) => void;
   chartType: 'bar' | 'line';
   setChartType: (value: 'bar' | 'line') => void;
   showIncome: boolean;
@@ -33,7 +32,7 @@ interface UnifiedChartMenuProps {
   setShowRevenue: (value: boolean) => void;
   showPreviousPeriod: boolean;
   setShowPreviousPeriod: (value: boolean) => void;
-  availableIntervals: { value: string; label: string }[];
+  availablePeriods: { value: string; label: string }[];
 }
 
 export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
@@ -68,15 +67,15 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-medium">Interval</Label>
+        <Label className="text-xs font-medium">Period</Label>
         <div className="flex flex-wrap gap-2">
-          {props.availableIntervals.map((option) => (
+          {props.availablePeriods.map((option) => (
             <OptionButton
               key={option.value}
               value={option.value}
               label={option.label}
-              currentValue={props.interval}
-              onChange={props.setInterval}
+              currentValue={props.period}
+              onChange={props.setPeriod}
             />
           ))}
         </div>
@@ -154,9 +153,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-72 p-3">
-          <ScrollArea className="h-[calc(100vh-100px)]">
-            <MenuContent />
-          </ScrollArea>
+          <MenuContent />
         </PopoverContent>
       </Popover>
     );

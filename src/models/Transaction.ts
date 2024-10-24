@@ -2,30 +2,8 @@ import moment, { Moment } from 'moment';
 
 import { useAccounts, useCategories } from '@/contexts/FinanceData';
 import Category from '@/models/Category';
+import { ConvertedValues, Type, TransactionModelProps, RawTransactionDTO } from '@/types/transaction';
 import Account from '@/models/Account';
-
-interface ConvertedValues {
-  [key: string]: number;
-}
-
-export enum Type {
-  Expense = 'expense',
-  Income = 'income',
-}
-
-interface TransactionProps {
-  id: number;
-  account: Account;
-  amount: number;
-  convertedValues: ConvertedValues;
-  note: string;
-  executedAt: Moment | string;
-  category: Category;
-  isDraft: boolean;
-  debt?: object;
-  compensations: undefined | Partial<TransactionProps>[];
-  type: Type;
-}
 
 export class Transaction {
   id: number;
@@ -37,7 +15,7 @@ export class Transaction {
   category: Category;
   isDraft: boolean;
   debt?: object;
-  compensations: Transaction[] | undefined;
+  compensations?: undefined | Transaction[];
   type: Type;
 
   constructor({
@@ -52,7 +30,7 @@ export class Transaction {
                 debt,
                 compensations,
                 type,
-              }: TransactionProps) {
+              }: TransactionModelProps) {
     this.id = id;
     this.account = account;
     this.amount = amount;
@@ -97,19 +75,6 @@ export class Transaction {
   }
 }
 
-export interface RawTransaction {
-  id: number;
-  account: Account;
-  amount: number;
-  convertedValues: ConvertedValues;
-  note: string;
-  executedAt: string;
-  category: Category;
-  isDraft: boolean;
-  compensations?: RawTransaction[];
-  type: Type;
-}
-
 export const TransactionFactory = () => {
   const { list: categories } = useCategories();
   const accounts = useAccounts();
@@ -118,7 +83,7 @@ export const TransactionFactory = () => {
     throw new Error('Finance data is not available');
   }
 
-  const createTransaction = (rawTransaction: RawTransaction): Transaction => {
+  const createTransaction = (rawTransaction: RawTransactionDTO): Transaction => {
     const account = accounts.find((acc: Account) => acc.id === rawTransaction.account.id);
     const category = categories.find((cat: Category) => cat.id === rawTransaction.category.id);
 

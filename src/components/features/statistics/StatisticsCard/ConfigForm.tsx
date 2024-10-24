@@ -12,7 +12,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CardConfig } from '@/constants/dashboard-config';
-import { Type as TransactionType } from '@/models/Transaction';
+import { Type as TransactionType } from '@/types/transaction';
 
 
 const comparisons = [

@@ -6,7 +6,7 @@ import CustomTooltip from '@/components/features/statistics/MoneyFlow/Tooltip';
 
 interface Props {
   data: {
-    time: number;
+    timestamp: number;
     income: number;
     expenses: number;
     revenue: number;
@@ -15,7 +15,7 @@ interface Props {
     previousExpenses: number;
     previousRevenue: number;
   }[];
-  interval: string;
+  period: '1 day' | '1 week' | '1 month';
   currentTimeframe: { after: Moment; before: Moment };
   previousTimeframe: { after: Moment; before: Moment };
   chartType: 'bar' | 'line';
@@ -28,7 +28,7 @@ interface Props {
 const MoneyFlowChart: React.FC<Props> = ({
                                            currentTimeframe,
                                            previousTimeframe,
-                                           interval,
+                                           period,
                                            data,
                                            chartType,
                                            showIncome,
@@ -143,9 +143,9 @@ const MoneyFlowChart: React.FC<Props> = ({
     return null;
   };
 
-  const formatXAxisTick = (time: number) => {
-    if (interval === '1 month') {
-      return new Date(time).toLocaleString('default', { month: 'short' });
+  const formatXAxisTick = (timestamp: number) => {
+    if (period === '1 month') {
+      return new Date(timestamp).toLocaleString('default', { month: 'short' });
     }
     return '';
   };
@@ -173,7 +173,7 @@ const MoneyFlowChart: React.FC<Props> = ({
           </defs>
           <XAxis
             xAxisId={1}
-            dataKey="time"
+            dataKey="timestamp"
             scale="time"
             type="number"
             domain={['dataMin', 'dataMax']}
@@ -185,7 +185,7 @@ const MoneyFlowChart: React.FC<Props> = ({
           <XAxis
             hide
             xAxisId={0}
-            dataKey="time"
+            dataKey="timestamp"
             scale="time"
             type="number"
             domain={['dataMin', 'dataMax']}
@@ -198,13 +198,9 @@ const MoneyFlowChart: React.FC<Props> = ({
               <CustomTooltip
                 {...props}
                 data={data}
-                interval={interval}
+                period={period}
                 currentTimeframe={currentTimeframe}
                 previousTimeframe={previousTimeframe}
-                showIncome={showIncome}
-                showExpenses={showExpenses}
-                showRevenue={showRevenue}
-                showPreviousPeriod={showPreviousPeriod}
               />
             )}
           />

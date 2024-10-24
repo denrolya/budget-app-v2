@@ -23,7 +23,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAccountsWithDefaultOrder, useCategories, useFinanceData } from '@/contexts/FinanceData';
 import Category from '@/models/Category';
-import { Type as TransactionType } from '@/models/Transaction';
+import { Type as TransactionType } from '@/types/transaction';
 import { transactionService } from '@/services/api/transaction';
 
 interface Props {

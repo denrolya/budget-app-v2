@@ -1,41 +1,7 @@
-import { Type as TransactionType } from '@/models/Transaction';
+import { Type as TransactionType } from '@/types/transaction';
+import { StatisticsConfig, ComparisonType, IntervalUnit, StatisticsType } from '@/types/statistics';
 
-export enum IntervalUnit {
-  Day = 'day',
-  Week = 'week',
-  Month = 'month',
-  Quarter = 'quarter',
-  Year = 'year',
-}
-
-export interface Interval {
-  unit: IntervalUnit;
-  value: number;
-}
-
-export enum ComparisonType {
-  Previous = 'previous',
-  SameLastYear = 'same-last-year',
-}
-
-export enum StatisticsType {
-  Sum = 'sum',
-  Daily = 'daily',
-  Avg = 'avg',
-  MinMax = 'min-max',
-}
-
-export interface CardConfig {
-  title: string;
-  type: TransactionType;
-  categories?: string[];
-  timeframe: Interval;
-  period?: Interval;
-  comparison: ComparisonType;
-  statType: StatisticsType;
-}
-
-export const cardConfigs: CardConfig[] = [
+export const cardConfigs: StatisticsConfig[] = [
   // Yearly Income and Expenses
   {
     title: 'Yearly Income',

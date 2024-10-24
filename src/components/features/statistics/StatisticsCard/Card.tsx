@@ -22,15 +22,15 @@ import {
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Interval } from '@/constants/dashboard-config';
-import { CardConfig, useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
+import { StatisticsConfig, Interval } from '@/types/statistics';
+import { useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
 import { useScreenSize } from '@/hooks/useScreenSize';
-import { Type as TransactionType } from '@/models/Transaction';
+import { Type as TransactionType } from '@/types/transaction';
 import { generateSlug } from '@/utils/generateSlug';
 
 interface Props {
-  onChange: (index: number, newConfig: Partial<CardConfig>) => void;
-  config: CardConfig;
+  onChange: (index: number, newConfig: Partial<StatisticsConfig>) => void;
+  config: StatisticsConfig;
 }
 
 const getPeriodText = (timeframe: Interval, period?: Interval): string => {
@@ -106,17 +106,7 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
     maxDate,
     selectedTimeframe,
     comparisonTimeframe,
-  } = useValueByPeriod({
-    config: {
-      title,
-      type,
-      categories,
-      timeframe,
-      period,
-      comparison,
-      statType,
-    },
-  }, [title, type, categories, timeframe, period, comparison, statType]);
+  } = useValueByPeriod({ config }, [title, type, categories, timeframe, period, comparison, statType]);
 
   const id = useMemo(() => generateSlug([title, type, statType, comparison]), [title, type, statType, comparison]);
 

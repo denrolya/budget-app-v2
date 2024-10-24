@@ -5,7 +5,8 @@ import Account from '@/models/Account';
 import Category from '@/models/Category';
 import { formSchema } from '@/components/features/transactions/Form';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
-import Transaction, { Type as TransactionType } from '@/models/Transaction';
+import Transaction from '@/models/Transaction';
+import { Type as TransactionType } from '@/types/transaction';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { api, axiosFetcher } from '@/services/api';
 

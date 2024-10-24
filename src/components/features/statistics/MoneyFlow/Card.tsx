@@ -10,7 +10,7 @@ import MoneyFlowSkeleton from '@/components/features/statistics/MoneyFlow/Skelet
 import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { INTERVAL_OPTIONS, TIMEFRAME_OPTIONS, TimeframeOption } from '@/constants/datetime';
+import { PERIOD_OPTIONS, TIMEFRAME_OPTIONS, TimeframeOption } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
 import { formatShortDate } from '@/utils/formatShortDate';
@@ -22,7 +22,7 @@ interface Props {
 export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
   const [timeframe, setTimeframe] = useState<TimeframeOption['value']>(TIMEFRAME_OPTIONS[6].value);
-  const [interval, setInterval] = useState(INTERVAL_OPTIONS[2].value);
+  const [period, setPeriod] = useState(PERIOD_OPTIONS[2].value);
   const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
   const [showIncome, setShowIncome] = useState<boolean>(false);
   const [showExpenses, setShowExpenses] = useState<boolean>(false);
@@ -67,7 +67,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
   }, [selectedTimeframeOption, now]);
 
   const {
-    availableIntervals,
+    availablePeriods,
     transformedData,
     isLoading,
     error,
@@ -80,21 +80,21 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
     previousTotalRevenue,
     incomeChangePercent,
     expensesChangePercent,
-    avgIntervalIncome,
-    avgIntervalExpenses,
-    previousAvgIntervalIncome,
-    previousAvgIntervalExpenses,
+    avgPeriodIncome,
+    avgPeriodExpenses,
+    previousAvgPeriodIncome,
+    previousAvgPeriodExpenses,
   } = useMoneyFlow({
-    interval,
+    period,
     currentTimeframe,
     previousTimeframe,
     baseCurrency,
   });
 
-  const getIntervalLabel = useMemo(() => {
-    const intervalOption = INTERVAL_OPTIONS.find(option => option.value === interval);
-    return intervalOption ? intervalOption.label.toLowerCase() : 'interval';
-  }, [interval]);
+  const getPeriodLabel = useMemo(() => {
+    const periodOption = PERIOD_OPTIONS.find(option => option.value === period);
+    return periodOption ? periodOption.label.toLowerCase() : 'period';
+  }, [period]);
 
   return (
     <Card className={cn('w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25', className)}>
@@ -112,9 +112,9 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
             setShowRevenue={setShowRevenue}
             showPreviousPeriod={showPreviousPeriod}
             setShowPreviousPeriod={setShowPreviousPeriod}
-            availableIntervals={availableIntervals}
-            interval={interval}
-            setInterval={setInterval}
+            availablePeriods={availablePeriods}
+            period={period}
+            setPeriod={setPeriod}
             setTimeframe={(value: string) => setTimeframe(value as TimeframeOption['value'])}
             timeframe={timeframe}
           />
@@ -154,7 +154,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
               ) : transformedData.length > 0 && (
                 <Chart
                   data={transformedData}
-                  interval={interval}
+                  period={period}
                   chartType={chartType}
                   showIncome={showIncome}
                   showExpenses={showExpenses}
@@ -185,15 +185,15 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
               comparisonPercentage={expensesChangePercent}
             />
             <SummaryItem
-              label={`Avg. ${getIntervalLabel} Income`}
-              value={avgIntervalIncome}
-              comparisonValue={previousAvgIntervalIncome}
+              label={`Avg. ${getPeriodLabel} Income`}
+              value={avgPeriodIncome}
+              comparisonValue={previousAvgPeriodIncome}
               comparisonPercentage={incomeChangePercent}
             />
             <SummaryItem
-              label={`Avg. ${getIntervalLabel} Expenses`}
-              value={avgIntervalExpenses}
-              comparisonValue={previousAvgIntervalExpenses}
+              label={`Avg. ${getPeriodLabel} Expenses`}
+              value={avgPeriodExpenses}
+              comparisonValue={previousAvgPeriodExpenses}
               comparisonPercentage={expensesChangePercent}
             />
           </div>

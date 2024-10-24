@@ -94,7 +94,7 @@ export const COMMON_TIMEFRAMES = ['WTD', 'MTD', '3M', 'YTD'] as const;
 
 export type TimeframeOption = typeof TIMEFRAME_OPTIONS[number]
 
-export const INTERVAL_OPTIONS = [
+export const PERIOD_OPTIONS = [
   { label: '1 Day', value: '1 day' },
   { label: '1 Week', value: '1 week' },
   { label: '1 Month', value: '1 month' },

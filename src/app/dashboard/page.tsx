@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
 import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card';
-import { CardConfig, cardConfigs } from '@/constants/dashboard-config';
-import { generateSlug } from '@/utils/generateSlug';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cardConfigs } from '@/constants/dashboard-config';
+import { StatisticsConfig } from '@/types/statistics';
+import { generateSlug } from '@/utils/generateSlug';
 
 const DashboardPage: React.FC = () => {
-  const [configs, setConfigs] = useState<CardConfig[]>(cardConfigs);
+  const [configs, setConfigs] = useState<StatisticsConfig[]>(cardConfigs);
   const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
 
-  const handleConfigChange = (index: number, newConfig: Partial<CardConfig>) => {
+  const handleConfigChange = (index: number, newConfig: Partial<StatisticsConfig>) => {
     setConfigs(prevConfigs =>
       prevConfigs.map((config, i) =>
         i === index ? { ...config, ...newConfig } : config,
@@ -18,7 +19,7 @@ const DashboardPage: React.FC = () => {
     );
   };
 
-  const handleAddNewConfig = (newConfig: CardConfig) => {
+  const handleAddNewConfig = (index: number, newConfig: Partial<StatisticsConfig>) => {
     setConfigs(prevConfigs => [...prevConfigs, newConfig]);
     setIsAddingNew(false);
   };
@@ -35,11 +36,11 @@ const DashboardPage: React.FC = () => {
           }}
           aria-label="Scrollable card container"
         >
-          {configs.map((card, index) => (
+          {configs.map((card) => (
             <StatisticsCard
               key={`desktop-card-${generateSlug([card.title, card.type, card.statType])}`}
               config={card}
-              onChange={(newConfig: CardConfig) => handleConfigChange(index, newConfig)}
+              onChange={(index: number, newConfig: Partial<StatisticsConfig>) => handleConfigChange(index, newConfig)}
             />
           ))}
         </div>
@@ -61,7 +62,7 @@ const DashboardPage: React.FC = () => {
         </div>
       </div>
     </section>
-);
+  );
 };
 
 export default DashboardPage;

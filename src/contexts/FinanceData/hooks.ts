@@ -2,7 +2,7 @@ import orderBy from 'lodash/orderBy';
 import { useContext } from 'react';
 
 import Category from '@/models/Category';
-import { Type as TransactionType } from '@/models/Transaction';
+import { Type as TransactionType } from '@/types/transaction';
 import Account from '@/models/Account';
 import {
   CategoriesData,

@@ -1,65 +1,19 @@
-import { useQuery } from '@tanstack/react-query';
-import moment from 'moment';
-import { useMemo, useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
-import { api } from '@/services/api';
-import { BACKEND_DATE_FORMAT, INTERVAL_OPTIONS } from '@/constants/datetime';
-
-interface BackendData {
-  after: number;
-  before: number;
-  expense: number;
-  income: number;
-}
-
-interface TransformedData {
-  time: number;
-  income: number;
-  expenses: number;
-  revenue: number;
-  date: moment.Moment;
-  previousIncome: number;
-  previousExpenses: number;
-  previousRevenue: number;
-}
-
-interface UseMoneyFlowProps {
-  interval: string;
-  currentTimeframe: { after: moment.Moment; before: moment.Moment };
-  previousTimeframe: { after: moment.Moment; before: moment.Moment };
-  baseCurrency: string;
-}
-
-interface UseMoneyFlowReturn {
-  availableIntervals: typeof INTERVAL_OPTIONS;
-  transformedData: TransformedData[];
-  isLoading: boolean;
-  error: Error | null;
-  refetchData: () => void;
-  revenueChangePercent: number;
-  totalIncome: number;
-  totalExpenses: number;
-  totalRevenue: number;
-  previousTotalIncome: number;
-  previousTotalExpenses: number;
-  previousTotalRevenue: number;
-  avgIntervalIncome: number;
-  avgIntervalExpenses: number;
-  incomeChangePercent: number;
-  expensesChangePercent: number;
-  previousAvgIntervalIncome: number;
-  previousAvgIntervalExpenses: number;
-}
+import { PERIOD_OPTIONS } from '@/constants/datetime';
+import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
+import { TransformedData, UseMoneyFlowParams, UseMoneyFlowReturn } from '@/types/statistics/moneyFlow';
 
 export const useMoneyFlow = ({
-                               interval,
+                               period,
                                currentTimeframe,
                                previousTimeframe,
                                baseCurrency,
-                             }: UseMoneyFlowProps): UseMoneyFlowReturn => {
-  const availableIntervals = useMemo(() => {
+                             }: UseMoneyFlowParams): UseMoneyFlowReturn => {
+
+  const availablePeriods = useMemo(() => {
     const durationInDays = currentTimeframe.before.diff(currentTimeframe.after, 'days');
-    return INTERVAL_OPTIONS.filter(option => {
+    return PERIOD_OPTIONS.filter(option => {
       if (durationInDays <= 1) return option.value === '1 day';
       if (durationInDays <= 7) return ['1 hour', '1 day'].includes(option.value);
       if (durationInDays <= 31) return ['1 day', '1 week'].includes(option.value);
@@ -72,20 +26,11 @@ export const useMoneyFlow = ({
     isLoading: isCurrentLoading,
     error: currentError,
     refetch: refetchCurrentPeriodData,
-  } = useQuery<BackendData[]>({
-    queryKey: ['currentData', currentTimeframe, interval],
-    queryFn: async () => {
-      const response = await api.get('/api/v2/statistics/value-by-period', {
-        params: {
-          after: currentTimeframe.after.format(BACKEND_DATE_FORMAT),
-          before: currentTimeframe.before.format(BACKEND_DATE_FORMAT),
-          interval,
-        },
-      });
-      return response.data;
-    },
-    refetchOnWindowFocus: false,
-    staleTime: 60 * 60 * 1000, // 1h
+  } = useValueByPeriodStatisticsRequest({
+    period,
+    after: currentTimeframe.after,
+    before: currentTimeframe.before,
+    queryKey: 'money-flow-selected',
   });
 
   const {
@@ -93,78 +38,52 @@ export const useMoneyFlow = ({
     isLoading: isPreviousLoading,
     error: previousError,
     refetch: refetchPreviousPeriodData,
-  } = useQuery<BackendData[]>({
-    queryKey: ['previousData', previousTimeframe, interval],
-    queryFn: async () => {
-      const response = await api.get('/api/v2/statistics/value-by-period', {
-        params: {
-          after: previousTimeframe.after.format(BACKEND_DATE_FORMAT),
-          before: previousTimeframe.before.format(BACKEND_DATE_FORMAT),
-          interval,
-        },
-      });
-      return response.data;
-    },
-    refetchOnWindowFocus: false,
-    staleTime: 240 * 60 * 1000, // Example: data is fresh for 4 hours
+  } = useValueByPeriodStatisticsRequest({
+    period,
+    after: previousTimeframe.after,
+    before: previousTimeframe.before,
+    queryKey: 'money-flow-comparison',
   });
 
-  const refetchData = () => {
+  useEffect(() => {
     refetchCurrentPeriodData();
     refetchPreviousPeriodData();
-  };
-
-  useEffect(() => {
-    refetchData();
   }, [baseCurrency]);
 
   const transformedData: TransformedData[] = useMemo(() => {
-    if (!currentDataBackend || !previousDataBackend) return [];
+    if (!currentDataBackend?.length || !previousDataBackend?.length) return [];
 
-    const getIntervalUnit = (interval: string) => {
-      if (interval.includes('day')) return 'days';
-      if (interval.includes('week')) return 'weeks';
-      if (interval.includes('month')) return 'months';
-      return 'days'; // default to days if unknown
-    };
+    const periodUnit = period.includes('day') ? 'days' : period.includes('week') ? 'weeks' : 'months';
 
-    const intervalUnit = getIntervalUnit(interval);
-
-    const currentStartDate = moment.unix(currentDataBackend[0].after);
-    const previousStartDate = moment.unix(previousDataBackend[0].after);
-
-    const maxPeriods = Math.max(
-      currentDataBackend.length,
-      previousDataBackend.length
-    );
+    const maxPeriods = Math.max(currentDataBackend.length, previousDataBackend.length);
 
     return Array.from({ length: maxPeriods }, (_, index) => {
-      const currentDate = currentStartDate.clone().add(index, intervalUnit);
-      const previousDate = previousStartDate.clone().add(index, intervalUnit);
+      const currentDate = currentDataBackend[0].after.clone().add(index, periodUnit);
+      const previousDate = previousDataBackend[0].after.clone().add(index, periodUnit);
 
-      const currentItem = currentDataBackend.find(item =>
-        moment.unix(item.after).isSame(currentDate, intervalUnit)
-      ) || { income: 0, expense: 0, after: currentDate.unix() };
-
-      const previousItem = previousDataBackend.find(item =>
-        moment.unix(item.after).isSame(previousDate, intervalUnit)
-      ) || { income: 0, expense: 0, after: previousDate.unix() };
-
-      const currentRevenue = currentItem.income - currentItem.expense;
-      const previousRevenue = previousItem.income - previousItem.expense;
+      const currentItem = currentDataBackend.find(item => item.after.isSame(currentDate, periodUnit)) || {
+        income: 0,
+        expense: 0,
+        after: currentDate,
+      };
+      const previousItem = previousDataBackend.find(item => item.after.isSame(previousDate, periodUnit)) || {
+        income: 0,
+        expense: 0,
+        after: previousDate,
+      };
 
       return {
-        time: currentItem.after * 1000, // Convert to milliseconds
+        timestamp: currentItem.after.unix(),
         income: currentItem.income,
         expenses: currentItem.expense,
-        revenue: currentRevenue,
-        date: moment.unix(currentItem.after),
+        revenue: currentItem.income - currentItem.expense,
+        date: currentItem.after,
         previousIncome: previousItem.income,
         previousExpenses: previousItem.expense,
-        previousRevenue: previousRevenue,
+        previousRevenue: previousItem.income - previousItem.expense,
       };
     });
-  }, [currentDataBackend, previousDataBackend, interval]);
+  }, [currentDataBackend, previousDataBackend, period]);
 
   const {
     totalIncome,
@@ -173,45 +92,51 @@ export const useMoneyFlow = ({
     previousTotalIncome,
     previousTotalExpenses,
     previousTotalRevenue,
-    avgIntervalIncome,
-    avgIntervalExpenses,
+    avgPeriodIncome,
+    avgPeriodExpenses,
     incomeChangePercent,
     expensesChangePercent,
-    previousAvgIntervalIncome,
-    previousAvgIntervalExpenses,
+    previousAvgPeriodIncome,
+    previousAvgPeriodExpenses,
   } = useMemo(() => {
+    if (!transformedData.length) {
+      return {
+        totalIncome: 0,
+        totalExpenses: 0,
+        totalRevenue: 0,
+        previousTotalIncome: 0,
+        previousTotalExpenses: 0,
+        previousTotalRevenue: 0,
+        avgPeriodIncome: 0,
+        avgPeriodExpenses: 0,
+        incomeChangePercent: 0,
+        expensesChangePercent: 0,
+        previousAvgPeriodIncome: 0,
+        previousAvgPeriodExpenses: 0,
+      };
+    }
+
     const currentIncome = transformedData.reduce((sum, d) => sum + d.income, 0);
     const currentExpenses = transformedData.reduce((sum, d) => sum + d.expenses, 0);
-    const currentRevenue = currentIncome - currentExpenses;
-
     const previousIncome = transformedData.reduce((sum, d) => sum + d.previousIncome, 0);
     const previousExpenses = transformedData.reduce((sum, d) => sum + d.previousExpenses, 0);
-    const previousRevenue = previousIncome - previousExpenses;
-
-    const avgIntervalIncome = transformedData.length > 0 ? currentIncome / transformedData.length : 0;
-    const avgIntervalExpenses = transformedData.length > 0 ? currentExpenses / transformedData.length : 0;
-    const previousAvgIntervalIncome = transformedData.length > 0 ? previousIncome / transformedData.length : 0;
-    const previousAvgIntervalExpenses = transformedData.length > 0 ? previousExpenses / transformedData.length : 0;
 
     const incomeChange = currentIncome - previousIncome;
-    const incomeChangePercent = previousIncome !== 0 ? (incomeChange / Math.abs(previousIncome)) * 100 : 0;
-
     const expensesChange = currentExpenses - previousExpenses;
-    const expensesChangePercent = previousExpenses !== 0 ? (expensesChange / Math.abs(previousExpenses)) * 100 : 0;
 
     return {
       totalIncome: currentIncome,
       totalExpenses: currentExpenses,
-      totalRevenue: currentRevenue,
+      totalRevenue: currentIncome - currentExpenses,
       previousTotalIncome: previousIncome,
       previousTotalExpenses: previousExpenses,
-      previousTotalRevenue: previousRevenue,
-      avgIntervalIncome,
-      avgIntervalExpenses,
-      incomeChangePercent,
-      expensesChangePercent,
-      previousAvgIntervalIncome,
-      previousAvgIntervalExpenses,
+      previousTotalRevenue: previousIncome - previousExpenses,
+      avgPeriodIncome: currentIncome / transformedData.length,
+      avgPeriodExpenses: currentExpenses / transformedData.length,
+      incomeChangePercent: previousIncome !== 0 ? (incomeChange / Math.abs(previousIncome)) * 100 : 0,
+      expensesChangePercent: previousExpenses !== 0 ? (expensesChange / Math.abs(previousExpenses)) * 100 : 0,
+      previousAvgPeriodIncome: previousIncome / transformedData.length,
+      previousAvgPeriodExpenses: previousExpenses / transformedData.length,
     };
   }, [transformedData]);
 
@@ -220,11 +145,14 @@ export const useMoneyFlow = ({
     : 0;
 
   return {
-    availableIntervals,
+    availablePeriods,
     transformedData,
     isLoading: isCurrentLoading || isPreviousLoading,
     error: currentError || previousError,
-    refetchData,
+    refetchData: () => {
+      refetchCurrentPeriodData();
+      refetchPreviousPeriodData();
+    },
     revenueChangePercent,
     totalIncome,
     totalExpenses,
@@ -232,11 +160,11 @@ export const useMoneyFlow = ({
     previousTotalIncome,
     previousTotalExpenses,
     previousTotalRevenue,
-    avgIntervalIncome,
-    avgIntervalExpenses,
+    avgPeriodIncome,
+    avgPeriodExpenses,
     incomeChangePercent,
     expensesChangePercent,
-    previousAvgIntervalIncome,
-    previousAvgIntervalExpenses,
+    previousAvgPeriodIncome,
+    previousAvgPeriodExpenses,
   };
 };

@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import IncomeExpensesComparison from '@/components/features/statistics/MoneyFlow/IncomeExpensesComparison';
 
 interface TransformedData {
-  time: number;
+  timestamp: number;
   income: number;
   expenses: number;
   revenue: number;
@@ -23,12 +23,12 @@ interface Props extends TooltipProps<ValueType, NameType> {
   data: TransformedData[];
   currentTimeframe: { after: Moment; before: Moment };
   previousTimeframe: { after: Moment; before: Moment };
-  interval: '1 day' | '1 week' | '1 month';
-  comparisonMode?: 'previousInterval' | 'previousTimeframe';
+  period: '1 day' | '1 week' | '1 month';
+  comparisonMode?: 'previousPeriod' | 'previousTimeframe';
 }
 
-const formatDate = (date: Moment, interval: '1 day' | '1 week' | '1 month'): string => {
-  switch (interval) {
+const formatDate = (date: Moment, period: '1 day' | '1 week' | '1 month'): string => {
+  switch (period) {
     case '1 day':
       return date.format('MMM D, YYYY');
     case '1 week':
@@ -43,20 +43,20 @@ export const Tooltip: React.FC<Props> = ({
                                            payload,
                                            label,
                                            data,
-                                           interval,
+                                           period,
                                            coordinate,
-                                           comparisonMode = 'previousInterval',
+                                           comparisonMode = 'previousPeriod',
                                          }) => {
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const { x, y } = coordinate || { x: 0, y: 0 };
 
-  const dataPoint = useMemo(() => data.find((item) => item.time === label), [data, label]);
+  const dataPoint = useMemo(() => data.find((item) => item.timestamp === label), [data, label]);
 
   const comparisonData = useMemo(() => {
     if (!dataPoint) return null;
 
-    if (comparisonMode === 'previousInterval') {
-      const currentIndex = data.findIndex((item) => item.time === label);
+    if (comparisonMode === 'previousPeriod') {
+      const currentIndex = data.findIndex((item) => item.timestamp === label);
       if (currentIndex > 0) {
         return data[currentIndex - 1];
       } else {
@@ -88,16 +88,16 @@ export const Tooltip: React.FC<Props> = ({
 
   if (!active || !dataPoint) return null;
 
-  const formattedCurrentDate = formatDate(dataPoint.date, interval);
-  const intervalMapping: Record<'1 day' | '1 week' | '1 month', moment.unitOfTime.DurationConstructor> = {
+  const formattedCurrentDate = formatDate(dataPoint.date, period);
+  const periodMapping: Record<'1 day' | '1 week' | '1 month', moment.unitOfTime.DurationConstructor> = {
     '1 day': 'day',
     '1 week': 'week',
     '1 month': 'month',
   };
 
   const formattedComparisonDate = comparisonData
-    ? formatDate(comparisonData.date, interval)
-    : formatDate(moment(dataPoint.date).subtract(1, intervalMapping[interval]), interval);
+    ? formatDate(comparisonData.date, period)
+    : formatDate(moment(dataPoint.date).subtract(1, periodMapping[period]), period);
 
 
   return createPortal(

@@ -3,7 +3,7 @@ import { forwardRef } from 'react';
 import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
 import { useExpenseCategories, useIncomeCategories } from '@/contexts/FinanceData';
 import Category from '@/models/Category';
-import { Type as TransactionType } from '@/models/Transaction';
+import { Type as TransactionType } from '@/types/transaction';
 
 type CategoryTypeaheadProps = Omit<TypeaheadV2Props<Category, string>, 'options' | 'labelField' | 'groupBy' | 'renderElement'> & {
   className?: string;
