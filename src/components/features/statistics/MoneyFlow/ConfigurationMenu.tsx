@@ -150,6 +150,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
         <PopoverTrigger asChild>
           <Button variant="ghost" size="icon" className="h-7 w-7 p-0">
             <SettingsIcon className="h-4 w-4" />
+            <span className="sr-only">Open settings</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-72 p-3">

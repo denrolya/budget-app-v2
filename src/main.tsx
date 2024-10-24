@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { StrictMode } from 'react';
+import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -21,31 +21,69 @@ if (typeof global !== 'undefined') {
   global.logger = logger;
 }
 
-createRoot(document.getElementById('root')!).render(
+const PWAWrapper = ({ children }: { children: React.ReactNode }) => {
+  const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
+  const [newVersionAvailable, setNewVersionAvailable] = useState(false);
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator && import.meta.env.MODE === 'production') {
+      navigator.serviceWorker.register('/sw.js').then((registration) => {
+        console.log('Service Worker registered with scope:', registration.scope);
+
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                setWaitingWorker(newWorker);
+                setNewVersionAvailable(true);
+              }
+            });
+          }
+        });
+      }).catch((error: Error) => {
+        console.error('Service Worker registration failed:', error);
+      });
+    }
+  }, []);
+
+  const reloadPage = () => {
+    waitingWorker?.postMessage({ type: 'SKIP_WAITING' });
+    setNewVersionAvailable(false);
+    window.location.reload();
+  };
+
+  return (
+    <>
+      {children}
+      {newVersionAvailable && (
+        <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground p-4 rounded-md shadow-lg">
+          <p>New version available!</p>
+          <button onClick={reloadPage} className="mt-2 bg-secondary text-secondary-foreground px-4 py-2 rounded">
+            Update and Reload
+          </button>
+        </div>
+      )}
+    </>
+  );
+};
+
+const App = () => (
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme={Theme.System}>
         <AuthProvider>
           <Provider store={store}>
             <Router>
-              <Routing />
+              <PWAWrapper>
+                <Routing />
+              </PWAWrapper>
             </Router>
           </Provider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
-  </StrictMode>,
+  </StrictMode>
 );
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(
-      (registration) => {
-        console.log('Service Worker registered with scope:', registration.scope);
-      },
-      (error: Error) => {
-        console.error('Service Worker registration failed:', error);
-      }
-    );
-  });
-}
+createRoot(document.getElementById('root')!).render(<App />);

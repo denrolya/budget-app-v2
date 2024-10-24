@@ -1,23 +1,30 @@
 /// <reference lib="webworker" />
 
-import { precacheAndRoute } from 'workbox-precaching';
+import { clientsClaim } from 'workbox-core';
+import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
 
-declare let self: ServiceWorkerGlobalScope;
+declare const self: ServiceWorkerGlobalScope;
 
-// Extend the ServiceWorkerGlobalScope interface to include __WB_MANIFEST
-declare global {
-  interface ServiceWorkerGlobalScope {
-    __WB_MANIFEST: Array<{
-      revision: string | null
-      url: string
-    }>
-  }
-}
-
+// Use the correct event listener for service workers
 self.addEventListener('message', (event: ExtendableMessageEvent) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
+    void self.skipWaiting();
   }
 });
 
+cleanupOutdatedCaches();
+
+// Precache and route assets
 precacheAndRoute(self.__WB_MANIFEST);
+
+// This allows the web app to trigger skipWaiting via registration.waiting.postMessage({type: 'SKIP_WAITING'})
+self.addEventListener('install', (event: ExtendableEvent) => {
+  event.waitUntil(self.skipWaiting());
+});
+
+// Claim any clients immediately
+self.addEventListener('activate', (event: ExtendableEvent) => {
+  event.waitUntil(
+    clientsClaim(),
+  );
+});

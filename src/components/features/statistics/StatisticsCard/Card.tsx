@@ -11,9 +11,16 @@ import PercentageIndicator from '@/components/features/statistics/StatisticsCard
 import StatTypeBadge from '@/components/features/statistics/StatisticsCard/StatTypeBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+  DrawerDescription,
+} from '@/components/ui/drawer';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Interval } from '@/constants/dashboard-config';
 import { CardConfig, useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
@@ -141,14 +148,15 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
             {isDesktop && (
               <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                  <Button variant="ghost" size="icon" className="h-7 w-7 p-0">
                     <SettingsIcon className="h-4 w-4" />
                     <span className="sr-only">Open settings</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                <SheetContent className="max-w-md overflow-y-auto">
                   <SheetHeader>
                     <SheetTitle>{config.title}</SheetTitle>
+                    <SheetDescription className="sr-only">Adjust card settings</SheetDescription>
                   </SheetHeader>
                   <ConfigForm initialConfig={config} onSubmit={onChange} />
                 </SheetContent>
@@ -162,9 +170,10 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                     <span className="sr-only">Open settings</span>
                   </Button>
                 </DrawerTrigger>
-                <DrawerContent>
+                <DrawerContent className="max-h-[85vh] flex flex-col">
                   <DrawerHeader className="text-left">
                     <DrawerTitle>{config.title}</DrawerTitle>
+                    <DrawerDescription className="sr-only">Adjust card settings</DrawerDescription>
                   </DrawerHeader>
                   <div className="px-4 pb-4 overflow-y-auto">
                     <ConfigForm initialConfig={config} onSubmit={onChange} />
@@ -184,6 +193,7 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                     <ResponsiveTooltip
                       openDelay={0}
                       desktopComponent="tooltip"
+                      contentClassName="z-20"
                       content={
                         <TooltipContent
                           label="Minimum Value"
@@ -311,8 +321,8 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                       }
                     >
                       <span>
-                      <MoneyValue className="font-medium" useColors={false} amount={comparisonValue as number} />
-                        </span>
+                        <MoneyValue className="font-medium" useColors={false} amount={comparisonValue as number} />
+                      </span>
                     </ResponsiveTooltip>
                   </div>
                 </>
