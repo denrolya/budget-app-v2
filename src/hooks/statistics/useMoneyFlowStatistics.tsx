@@ -6,53 +6,49 @@ import { api } from '@/services/api';
 import { BACKEND_DATE_FORMAT, INTERVAL_OPTIONS } from '@/constants/datetime';
 
 interface BackendData {
-  after: number
-  before: number
-  expense: number
-  income: number
+  after: number;
+  before: number;
+  expense: number;
+  income: number;
 }
 
 interface TransformedData {
-  time: number
-  income: number
-  expenses: number
-  revenue: number
-  date: moment.Moment
-  previousIncome: number
-  previousExpenses: number
-  previousRevenue: number
+  time: number;
+  income: number;
+  expenses: number;
+  revenue: number;
+  date: moment.Moment;
+  previousIncome: number;
+  previousExpenses: number;
+  previousRevenue: number;
 }
 
 interface UseMoneyFlowProps {
-  interval: string
-  currentTimeframe: { after: moment.Moment; before: moment.Moment }
-  previousTimeframe: { after: moment.Moment; before: moment.Moment }
-  baseCurrency: string
+  interval: string;
+  currentTimeframe: { after: moment.Moment; before: moment.Moment };
+  previousTimeframe: { after: moment.Moment; before: moment.Moment };
+  baseCurrency: string;
 }
 
 interface UseMoneyFlowReturn {
-  availableIntervals: typeof INTERVAL_OPTIONS
-  transformedData: TransformedData[]
-  isLoading: boolean
-  error: Error | null
-  refetchData: () => void
-  setInterval: (newInterval: string) => void
-  revenueChange: number
-  revenueChangePercent: number
-  totalIncome: number
-  totalExpenses: number
-  totalRevenue: number
-  previousTotalIncome: number
-  previousTotalExpenses: number
-  previousTotalRevenue: number
-  incomeChange: number
-  incomeChangePercent: number
-  expensesChange: number
-  expensesChangePercent: number
-  previousAvgIntervalIncome: number
-  previousAvgIntervalExpenses: number
-  avgIntervalIncome: number
-  avgIntervalExpenses: number
+  availableIntervals: typeof INTERVAL_OPTIONS;
+  transformedData: TransformedData[];
+  isLoading: boolean;
+  error: Error | null;
+  refetchData: () => void;
+  revenueChangePercent: number;
+  totalIncome: number;
+  totalExpenses: number;
+  totalRevenue: number;
+  previousTotalIncome: number;
+  previousTotalExpenses: number;
+  previousTotalRevenue: number;
+  avgIntervalIncome: number;
+  avgIntervalExpenses: number;
+  incomeChangePercent: number;
+  expensesChangePercent: number;
+  previousAvgIntervalIncome: number;
+  previousAvgIntervalExpenses: number;
 }
 
 export const useMoneyFlow = ({
@@ -98,7 +94,7 @@ export const useMoneyFlow = ({
     error: previousError,
     refetch: refetchPreviousPeriodData,
   } = useQuery<BackendData[]>({
-    queryKey: ['previousData', currentTimeframe, interval],
+    queryKey: ['previousData', previousTimeframe, interval],
     queryFn: async () => {
       const response = await api.get('/api/v2/statistics/value-by-period', {
         params: {
@@ -135,13 +131,11 @@ export const useMoneyFlow = ({
     const intervalUnit = getIntervalUnit(interval);
 
     const currentStartDate = moment.unix(currentDataBackend[0].after);
-    const currentEndDate = moment.unix(currentDataBackend[currentDataBackend.length - 1].before);
     const previousStartDate = moment.unix(previousDataBackend[0].after);
-    const previousEndDate = moment.unix(previousDataBackend[previousDataBackend.length - 1].before);
 
     const maxPeriods = Math.max(
-      currentEndDate.diff(currentStartDate, intervalUnit) + 1,
-      previousEndDate.diff(previousStartDate, intervalUnit) + 1
+      currentDataBackend.length,
+      previousDataBackend.length
     );
 
     return Array.from({ length: maxPeriods }, (_, index) => {
@@ -150,11 +144,11 @@ export const useMoneyFlow = ({
 
       const currentItem = currentDataBackend.find(item =>
         moment.unix(item.after).isSame(currentDate, intervalUnit)
-      ) || { income: 0, expense: 0, after: currentDate.unix(), before: currentDate.clone().endOf(intervalUnit).unix() };
+      ) || { income: 0, expense: 0, after: currentDate.unix() };
 
       const previousItem = previousDataBackend.find(item =>
         moment.unix(item.after).isSame(previousDate, intervalUnit)
-      ) || { income: 0, expense: 0, after: previousDate.unix(), before: previousDate.clone().endOf(intervalUnit).unix() };
+      ) || { income: 0, expense: 0, after: previousDate.unix() };
 
       const currentRevenue = currentItem.income - currentItem.expense;
       const previousRevenue = previousItem.income - previousItem.expense;
@@ -173,20 +167,16 @@ export const useMoneyFlow = ({
   }, [currentDataBackend, previousDataBackend, interval]);
 
   const {
-    revenueChange,
-    revenueChangePercent,
     totalIncome,
     totalExpenses,
     totalRevenue,
     previousTotalIncome,
     previousTotalExpenses,
     previousTotalRevenue,
-    incomeChange,
-    incomeChangePercent,
-    expensesChange,
-    expensesChangePercent,
     avgIntervalIncome,
     avgIntervalExpenses,
+    incomeChangePercent,
+    expensesChangePercent,
     previousAvgIntervalIncome,
     previousAvgIntervalExpenses,
   } = useMemo(() => {
@@ -198,8 +188,10 @@ export const useMoneyFlow = ({
     const previousExpenses = transformedData.reduce((sum, d) => sum + d.previousExpenses, 0);
     const previousRevenue = previousIncome - previousExpenses;
 
-    const revenueChange = currentRevenue - previousRevenue;
-    const revenueChangePercent = previousRevenue !== 0 ? (revenueChange / Math.abs(previousRevenue)) * 100 : 0;
+    const avgIntervalIncome = transformedData.length > 0 ? currentIncome / transformedData.length : 0;
+    const avgIntervalExpenses = transformedData.length > 0 ? currentExpenses / transformedData.length : 0;
+    const previousAvgIntervalIncome = transformedData.length > 0 ? previousIncome / transformedData.length : 0;
+    const previousAvgIntervalExpenses = transformedData.length > 0 ? previousExpenses / transformedData.length : 0;
 
     const incomeChange = currentIncome - previousIncome;
     const incomeChangePercent = previousIncome !== 0 ? (incomeChange / Math.abs(previousIncome)) * 100 : 0;
@@ -207,34 +199,25 @@ export const useMoneyFlow = ({
     const expensesChange = currentExpenses - previousExpenses;
     const expensesChangePercent = previousExpenses !== 0 ? (expensesChange / Math.abs(previousExpenses)) * 100 : 0;
 
-    // Calculate the number of intervals in the current period
-    const intervalCount = transformedData.length;
-
-    // Calculate average per interval
-    const avgIntervalIncome = intervalCount > 0 ? currentIncome / intervalCount : 0;
-    const avgIntervalExpenses = intervalCount > 0 ? currentExpenses / intervalCount : 0;
-    const previousAvgIntervalIncome = intervalCount > 0 ? previousIncome / intervalCount : 0;
-    const previousAvgIntervalExpenses = intervalCount > 0 ? previousExpenses / intervalCount : 0;
-
     return {
-      revenueChange,
-      revenueChangePercent,
       totalIncome: currentIncome,
       totalExpenses: currentExpenses,
       totalRevenue: currentRevenue,
       previousTotalIncome: previousIncome,
       previousTotalExpenses: previousExpenses,
       previousTotalRevenue: previousRevenue,
-      incomeChange,
-      incomeChangePercent,
-      expensesChange,
-      expensesChangePercent,
       avgIntervalIncome,
       avgIntervalExpenses,
+      incomeChangePercent,
+      expensesChangePercent,
       previousAvgIntervalIncome,
       previousAvgIntervalExpenses,
     };
   }, [transformedData]);
+
+  const revenueChangePercent = previousTotalRevenue !== 0
+    ? ((totalRevenue - previousTotalRevenue) / Math.abs(previousTotalRevenue)) * 100
+    : 0;
 
   return {
     availableIntervals,
@@ -242,10 +225,6 @@ export const useMoneyFlow = ({
     isLoading: isCurrentLoading || isPreviousLoading,
     error: currentError || previousError,
     refetchData,
-    setInterval: (newInterval: string) => {
-      // This function is a placeholder. The actual setInterval function should be implemented in the component using this hook.
-    },
-    revenueChange,
     revenueChangePercent,
     totalIncome,
     totalExpenses,
@@ -253,12 +232,10 @@ export const useMoneyFlow = ({
     previousTotalIncome,
     previousTotalExpenses,
     previousTotalRevenue,
-    incomeChange,
-    incomeChangePercent,
-    expensesChange,
-    expensesChangePercent,
     avgIntervalIncome,
     avgIntervalExpenses,
+    incomeChangePercent,
+    expensesChangePercent,
     previousAvgIntervalIncome,
     previousAvgIntervalExpenses,
   };

@@ -33,11 +33,11 @@ interface Props {
   config: CardConfig;
 }
 
-const getPeriodText = (interval: Interval, period?: Interval): string => {
+const getPeriodText = (timeframe: Interval, period?: Interval): string => {
   if (period) {
-    return `${interval.value} ${interval.unit}${interval.value > 1 ? 's' : ''} by ${period.value} ${period.unit}${period.value > 1 ? 's' : ''}`;
+    return `${timeframe.value} ${timeframe.unit}${timeframe.value > 1 ? 's' : ''} by ${period.value} ${period.unit}${period.value > 1 ? 's' : ''}`;
   }
-  switch (interval.unit) {
+  switch (timeframe.unit) {
     case 'day':
       return 'Today';
     case 'week':
@@ -95,7 +95,7 @@ const TooltipContent: React.FC<{
 );
 
 export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
-  const { title, type, categories, interval, period, comparison, statType } = config;
+  const { title, type, categories, timeframe, period, comparison, statType } = config;
   const {
     currentValue,
     comparisonValue,
@@ -111,12 +111,12 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
       title,
       type,
       categories,
-      interval,
+      timeframe,
       period,
       comparison,
       statType,
     },
-  }, [title, type, categories, interval, period, comparison, statType]);
+  }, [title, type, categories, timeframe, period, comparison, statType]);
 
   const id = useMemo(() => generateSlug([title, type, statType, comparison]), [title, type, statType, comparison]);
 
@@ -124,7 +124,7 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
       title || (categories?.length ? categories.join(', ') : (type === TransactionType.Income ? 'Income' : 'Expenses')),
     [title, categories, type]);
 
-  const periodText = useMemo(() => getPeriodText(interval, period), [interval, period]);
+  const periodText = useMemo(() => getPeriodText(timeframe, period), [timeframe, period]);
   const [open, setOpen] = useState(false);
   const isDesktop = useScreenSize();
 

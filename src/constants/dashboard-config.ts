@@ -1,24 +1,38 @@
 import { Type as TransactionType } from '@/models/Transaction';
 
-export type PeriodUnit = 'day' | 'week' | 'month' | 'quarter' | 'year';
+export enum IntervalUnit {
+  Day = 'day',
+  Week = 'week',
+  Month = 'month',
+  Quarter = 'quarter',
+  Year = 'year',
+}
 
 export interface Interval {
-  unit: PeriodUnit;
+  unit: IntervalUnit;
   value: number;
 }
 
-export type ComparisonType = 'previous' | 'same-last-year';
+export enum ComparisonType {
+  Previous = 'previous',
+  SameLastYear = 'same-last-year',
+}
 
-export type StatType = 'sum' | 'daily' | 'avg' | 'min-max';
+export enum StatisticsType {
+  Sum = 'sum',
+  Daily = 'daily',
+  Avg = 'avg',
+  MinMax = 'min-max',
+}
 
 export interface CardConfig {
   title: string;
   type: TransactionType;
   categories?: string[];
-  interval: Interval;
+  timeframe: Interval;
   period?: Interval;
   comparison: ComparisonType;
-  statType: StatType;
+  statType: StatisticsType;
 }
 
 export const cardConfigs: CardConfig[] = [
@@ -26,67 +40,67 @@ export const cardConfigs: CardConfig[] = [
   {
     title: 'Yearly Income',
     type: TransactionType.Income,
-    interval: { unit: 'year', value: 1 },
-    comparison: 'previous',
-    statType: 'sum',
+    timeframe: { unit: IntervalUnit.Year, value: 1 },
+    comparison: ComparisonType.Previous,
+    statType: StatisticsType.Sum,
   },
   {
     title: 'Avg Monthly Income',
     type: TransactionType.Income,
-    interval: { unit: 'year', value: 1 },
-    period: { unit: 'month', value: 1 },
-    comparison: 'previous',
-    statType: 'avg',
+    timeframe: { unit: IntervalUnit.Year, value: 1 },
+    period: { unit: IntervalUnit.Month, value: 1 },
+    comparison: ComparisonType.Previous,
+    statType: StatisticsType.Avg,
   },
   {
     title: 'Yearly Expenses',
     type: TransactionType.Expense,
-    interval: { unit: 'year', value: 1 },
-    comparison: 'previous',
-    statType: 'sum',
+    timeframe: { unit: IntervalUnit.Year, value: 1 },
+    comparison: ComparisonType.Previous,
+    statType: StatisticsType.Sum,
   },
   {
     title: 'Avg Monthly Expenses',
     type: TransactionType.Expense,
-    interval: { unit: 'year', value: 1 },
-    period: { unit: 'month', value: 1 },
-    comparison: 'previous',
-    statType: 'avg',
+    timeframe: { unit: IntervalUnit.Year, value: 1 },
+    period: { unit: IntervalUnit.Month, value: 1 },
+    comparison: ComparisonType.Previous,
+    statType: StatisticsType.Avg,
   },
 
   // Monthly Expenses
   {
     title: 'Monthly Expenses',
     type: TransactionType.Expense,
-    interval: { unit: 'month', value: 1 },
-    comparison: 'previous',
-    statType: 'sum',
+    timeframe: { unit: IntervalUnit.Month, value: 1 },
+    comparison: ComparisonType.Previous,
+    statType: StatisticsType.Sum,
   },
   {
     title: 'Avg Groceries',
     type: TransactionType.Expense,
     categories: ['Groceries'],
-    interval: { unit: 'month', value: 1 },
-    period: { unit: 'week', value: 1 },
-    comparison: 'previous',
-    statType: 'avg',
+    timeframe: { unit: IntervalUnit.Month, value: 1 },
+    period: { unit: IntervalUnit.Week, value: 1 },
+    comparison: ComparisonType.Previous,
+    statType: StatisticsType.Avg,
   },
 
   // Daily Statistics
   {
     title: 'Daily Expenses',
     type: TransactionType.Expense,
-    interval: { unit: 'year', value: 1 },
-    comparison: 'same-last-year',
-    statType: 'daily',
+    timeframe: { unit: IntervalUnit.Year, value: 1 },
+    comparison: ComparisonType.SameLastYear,
+    statType: StatisticsType.Daily,
   },
   {
     title: 'Daily Food Expenses',
     type: TransactionType.Expense,
     categories: ['Food & Drinks'],
-    interval: { unit: 'year', value: 1 },
-    comparison: 'previous',
-    statType: 'daily',
+    timeframe: { unit: IntervalUnit.Year, value: 1 },
+    comparison: ComparisonType.Previous,
+    statType: StatisticsType.Daily,
   },
 
   // Category-Specific Statistics
@@ -94,17 +108,17 @@ export const cardConfigs: CardConfig[] = [
     title: 'Food Expenses',
     type: TransactionType.Expense,
     categories: ['Food & Drinks'],
-    interval: { unit: 'year', value: 1 },
-    comparison: 'previous',
-    statType: 'sum',
+    timeframe: { unit: IntervalUnit.Year, value: 1 },
+    comparison: ComparisonType.Previous,
+    statType: StatisticsType.Sum,
   },
   {
     title: 'Groceries',
     type: TransactionType.Expense,
     categories: ['Food & Drinks'],
-    interval: { unit: 'year', value: 1 },
-    period: { unit: 'month', value: 1 },
-    comparison: 'previous',
-    statType: 'min-max',
+    timeframe: { unit: IntervalUnit.Year, value: 1 },
+    period: { unit: IntervalUnit.Month, value: 1 },
+    comparison: ComparisonType.Previous,
+    statType: StatisticsType.MinMax,
   },
 ];
