@@ -35,6 +35,11 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+
+    --chart-text-color: #6b7280;
+    --chart-crosshair-color: #7c3aed;
+    --chart-tooltip-background: #ffffff;
+    --chart-tooltip-text-color: #1f2937;
   }
 
   .dark {
@@ -68,6 +73,11 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    --chart-text-color: #9ca3af;
+    --chart-crosshair-color: #8b5cf6;
+    --chart-tooltip-background: #1f2937;
+    --chart-tooltip-text-color: #f3f4f6;
   }
 }
 

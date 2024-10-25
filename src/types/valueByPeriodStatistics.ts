@@ -17,6 +17,13 @@ export interface ValueByPeriodData {
   before: Moment;
 }
 
+export interface UseStatisticsReturn {
+  data: ValueByPeriodData[] | undefined;
+  isLoading: boolean;
+  error: Error | null;
+  refetch: () => void;
+}
+
 export interface UseStatisticsParams {
   after?: Moment;
   before?: Moment;
@@ -26,7 +33,6 @@ export interface UseStatisticsParams {
   categories?: (number | string)[];
   queryKey?: string;
 }
-
 
 export interface UseValueByPeriodReturn<T extends StatisticsType> {
   currentData: ValueByPeriodData[] | undefined;

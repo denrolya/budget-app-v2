@@ -2,17 +2,32 @@ import React from 'react';
 
 import MonthExpensesRadialBarChart from '@/components/features/dashboard/MonthExpensesRadialBarChart';
 import ExpenseSunburstChart from '@/components/features/dashboard/Sunburst';
+import TimelineChart from '@/components/features/statistics/TimelineChart.Example';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const TestingPage: React.FC = () => (
   <section className="p-4">
-    <div className="mb-6 grid grid-cols-1 md:grid-cols-2 space-x-2">
-      <ExpenseSunburstChart type="expense" />
-      <ExpenseSunburstChart type="income" />
-    </div>
+    <Tabs defaultValue="nivo-charts">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="nivo-charts">Nivo Charts</TabsTrigger>
+        <TabsTrigger value="other">Other stuff</TabsTrigger>
+      </TabsList>
+      <TabsContent value="nivo-charts">
+        <h1>New Nivo Charts</h1>
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 space-x-2">
+          <ExpenseSunburstChart type="expense" />
+          <ExpenseSunburstChart type="income" />
+        </div>
 
-    <div className="mb-6">
-      <MonthExpensesRadialBarChart />
-    </div>
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 space-x-2">
+          <MonthExpensesRadialBarChart />
+          <TimelineChart />
+        </div>
+      </TabsContent>
+      <TabsContent value="other">
+        <h1>Other random stuff</h1>
+      </TabsContent>
+    </Tabs>
   </section>
 );
 
