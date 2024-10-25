@@ -8,20 +8,10 @@ import { StatisticsConfig } from '@/types/statistics';
 import { generateSlug } from '@/utils/generateSlug';
 
 const DashboardPage: React.FC = () => {
-  const [configs, setConfigs] = useState<StatisticsConfig[]>(cardConfigs);
-  const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
+  const [configs] = useState<StatisticsConfig[]>(cardConfigs);
 
-  const handleConfigChange = (index: number, newConfig: Partial<StatisticsConfig>) => {
-    setConfigs(prevConfigs =>
-      prevConfigs.map((config, i) =>
-        i === index ? { ...config, ...newConfig } : config,
-      ),
-    );
-  };
-
-  const handleAddNewConfig = (index: number, newConfig: Partial<StatisticsConfig>) => {
-    setConfigs(prevConfigs => [...prevConfigs, newConfig]);
-    setIsAddingNew(false);
+  const handleConfigChange = (newConfig: Partial<StatisticsConfig>) => {
+    console.log(newConfig);
   };
 
   return (
@@ -40,7 +30,7 @@ const DashboardPage: React.FC = () => {
             <StatisticsCard
               key={`desktop-card-${generateSlug([card.title, card.type, card.statType])}`}
               config={card}
-              onChange={(index: number, newConfig: Partial<StatisticsConfig>) => handleConfigChange(index, newConfig)}
+              onChange={handleConfigChange}
             />
           ))}
         </div>

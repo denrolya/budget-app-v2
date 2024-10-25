@@ -35,7 +35,7 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
   const { openForm } = useFormContext();
   const isCompensated = transaction.type === Type.Expense && transaction.compensations && transaction.compensations?.length > 0;
   const isCompensation = transaction.category.name === 'Compensation';
-  const isDebt = transaction.debt && transaction.debt.debtor;
+  const isDebt = transaction.debt && transaction.debt?.debtor;
 
   const onEdit = () => openForm(FormType.Transaction, transaction);
 
@@ -85,7 +85,7 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
                 {isDebt && (
                   <Badge variant="outline" className="text-xs flex items-center">
                     <User className="h-3 w-3 mr-1" />
-                    {transaction.debt.debtor}
+                    {transaction.debt?.debtor}
                   </Badge>
                 )}
                 {transaction.note && (

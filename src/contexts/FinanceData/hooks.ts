@@ -1,13 +1,12 @@
 import orderBy from 'lodash/orderBy';
 import { useContext } from 'react';
 
+import Debt from '@/models/Debt';
 import Category from '@/models/Category';
-import { Type as TransactionType } from '@/types/transaction';
+import { ConvertedValues, Type as TransactionType } from '@/types/transaction';
 import Account from '@/models/Account';
 import {
   CategoriesData,
-  Debt,
-  ExchangeRates,
   ExchangeRatesData,
   FinanceDataContext,
   FinanceDataContextType,
@@ -86,17 +85,17 @@ export const useExchangeRates = (): ExchangeRatesData => {
   return data.exchangeRates;
 };
 
-export const useMonobankExchangeRates = (): ExchangeRates => {
+export const useMonobankExchangeRates = (): ConvertedValues => {
   const { data } = useFinanceData();
   return data.exchangeRates.mono;
 };
 
-export const useFixerExchangeRates = (): ExchangeRates => {
+export const useFixerExchangeRates = (): ConvertedValues => {
   const { data } = useFinanceData();
   return data.exchangeRates.fixer;
 };
 
-export const useWiseExchangeRates = (): ExchangeRates => {
+export const useWiseExchangeRates = (): ConvertedValues => {
   const { data } = useFinanceData();
   return data.exchangeRates.wise;
 };

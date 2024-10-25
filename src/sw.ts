@@ -23,8 +23,5 @@ self.addEventListener('install', (event: ExtendableEvent) => {
 });
 
 // Claim any clients immediately
-self.addEventListener('activate', (event: ExtendableEvent) => {
-  event.waitUntil(
-    clientsClaim(),
-  );
-});
+// @ts-expect-error expects return value
+self.addEventListener('activate', (event: ExtendableEvent) => event.waitUntil(clientsClaim()));

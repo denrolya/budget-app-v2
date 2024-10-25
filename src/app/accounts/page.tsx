@@ -138,7 +138,7 @@ export const AccountsManagementPage: React.FC = () => {
       )}
       <PageWithSidebar.Content className="p-4">
         {(selectedAccount) && (
-          <AccountDetails account={selectedAccount} setSelectedAccount={setSelectedAccount} />
+          <AccountDetails account={selectedAccount} />
         )}
 
         {(!selectedAccount) && (

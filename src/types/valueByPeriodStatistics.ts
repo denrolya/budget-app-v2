@@ -1,6 +1,6 @@
 import { Moment } from 'moment';
 
-import { StatisticsConfig } from '@/types/statistics';
+import { StatisticsConfig, StatisticsType } from '@/types/statistics';
 import { Type as TransactionType } from '@/types/transaction';
 
 export interface ValueByPeriodDataDTO {
@@ -22,16 +22,27 @@ export interface UseStatisticsParams {
   before?: Moment;
   period?: string;
   type?: TransactionType | null;
-  accounts?: (number| string)[];
+  accounts?: (number | string)[];
   categories?: (number | string)[];
   queryKey?: string;
 }
 
-export interface UseStatisticsReturn {
-  data: ValueByPeriodData[]; // Define the expected response type here
+
+export interface UseValueByPeriodReturn<T extends StatisticsType> {
+  currentData: ValueByPeriodData[] | undefined;
+  comparisonData: ValueByPeriodData[] | undefined;
+  currentValue: StatisticsData<T>;
+  comparisonValue: StatisticsData<T>;
+  percentageChange: PercentageChange<T>;
+  isIncrease: IsIncrease<T>;
+  isPositive: boolean | { min: boolean; max: boolean };
+  selectedTimeframe: { after: Moment; before: Moment };
+  comparisonTimeframe: { after: Moment; before: Moment };
   isLoading: boolean;
   error: Error | null;
-  refetch: () => void;
+  minDate: Moment | undefined;
+  maxDate: Moment | undefined;
+  isCurrentPeriod: boolean;
 }
 
 export interface ValueByPeriodParams {
@@ -47,6 +58,12 @@ export interface MinMaxStatistics {
   maxDate?: Moment;
 }
 
-export type StatisticsData = number | MinMaxStatistics;
-export type PercentageChange = number | { min: number; max: number };
-export type IsIncrease = boolean | { min: boolean; max: boolean };
+export type StatisticsData<T extends StatisticsType> = T extends StatisticsType.MinMax ? MinMaxStatistics : number;
+export type PercentageChange<T extends StatisticsType> = T extends StatisticsType.MinMax ? {
+  min: number;
+  max: number
+} : number;
+export type IsIncrease<T extends StatisticsType> = T extends StatisticsType.MinMax ? {
+  min: boolean;
+  max: boolean
+} : boolean;

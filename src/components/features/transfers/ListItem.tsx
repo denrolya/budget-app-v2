@@ -32,7 +32,7 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
             <ArrowRightLeft className="h-3 w-3 flex-shrink-0" />
             <AccountBadge account={transfer.toIncome.account} size="sm" className="flex-shrink-0" />
           </span>
-          {transfer.hasFee() && (
+          {transfer.feeExpense && transfer.hasFee() && (
             <FeeIndicator
               feeAmount={transfer.feeExpense.amount}
               feeCurrency={transfer.feeExpense.account.currency}

@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 import { useAuth } from '@/contexts/auth';
 import { LoginForm } from '@/components/features/auth/LoginForm';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { api } from '@/services/api';
 
 export interface Credentials {

@@ -3,6 +3,7 @@ import { Calendar } from 'lucide-react';
 import moment from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 
+import { PeriodValue, TimeframeValue } from '@/types/global';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
 import ConfigurationMenu from '@/components/features/statistics/MoneyFlow/ConfigurationMenu';
@@ -10,7 +11,7 @@ import MoneyFlowSkeleton from '@/components/features/statistics/MoneyFlow/Skelet
 import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { PERIOD_OPTIONS, TIMEFRAME_OPTIONS, TimeframeOption } from '@/constants/datetime';
+import { PERIOD_OPTIONS, TIMEFRAME_OPTIONS } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
 import { formatShortDate } from '@/utils/formatShortDate';
@@ -21,8 +22,8 @@ interface Props {
 
 export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
-  const [timeframe, setTimeframe] = useState<TimeframeOption['value']>(TIMEFRAME_OPTIONS[6].value);
-  const [period, setPeriod] = useState(PERIOD_OPTIONS[2].value);
+  const [timeframe, setTimeframe] = useState<TimeframeValue>(TIMEFRAME_OPTIONS[6].value);
+  const [period, setPeriod] = useState<PeriodValue>(PERIOD_OPTIONS[2].value);
   const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
   const [showIncome, setShowIncome] = useState<boolean>(false);
   const [showExpenses, setShowExpenses] = useState<boolean>(false);
@@ -114,8 +115,8 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
             setShowPreviousPeriod={setShowPreviousPeriod}
             availablePeriods={availablePeriods}
             period={period}
-            setPeriod={setPeriod}
-            setTimeframe={(value: string) => setTimeframe(value as TimeframeOption['value'])}
+            setPeriod={(value: PeriodValue) => setPeriod(value)}
+            setTimeframe={(value: TimeframeValue) => setTimeframe(value)}
             timeframe={timeframe}
           />
         </div>

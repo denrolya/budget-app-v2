@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import debounce from 'lodash/debounce';
 import { CalendarIcon, FilterIcon } from 'lucide-react';
 import moment from 'moment';

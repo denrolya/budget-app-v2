@@ -16,7 +16,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>
 
 interface Props {
-  error: string;
+  error: string | null;
   isLoading: boolean;
   onSubmit: ({ username, password }: Credentials) => void;
 }

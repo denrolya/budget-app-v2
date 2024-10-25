@@ -6,11 +6,12 @@ import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueBy
 import { ComparisonType, Interval, StatisticsType } from '@/types/statistics';
 import { Type as TransactionType } from '@/types/transaction';
 import {
-  ValueByPeriodParams,
   IsIncrease,
   PercentageChange,
   StatisticsData,
+  UseValueByPeriodReturn,
   ValueByPeriodData,
+  ValueByPeriodParams,
 } from '@/types/valueByPeriodStatistics';
 import { generatePreviousTimeframe } from '@/utils/generatePreviousTimeframe';
 
@@ -21,36 +22,34 @@ const getDateRange = (timeframe: Interval, after?: Moment, before?: Moment): [Mo
   return [start, end];
 };
 
-const calculateStatisticsValues = (
+const calculateStatisticsValues = <T extends StatisticsType>(
   data: ValueByPeriodData[],
   type: TransactionType,
-  statType: StatisticsType,
+  statType: T,
   after: Moment,
   before: Moment,
   isCurrentPeriod: boolean,
-): StatisticsData => {
+): StatisticsData<T> => {
   if (!data || data.length === 0) {
-    return statType === StatisticsType.MinMax ? { min: 0, max: 0 } : 0;
+    return (statType === StatisticsType.MinMax ? { min: 0, max: 0 } : 0) as StatisticsData<T>;
   }
 
   const values = data.map((item) => (type === TransactionType.Expense ? item.expense : item.income));
   const nonZeroValues = values.filter((v) => v > 0);
-
-  // Adjust the end date to today if it is in the future
   const adjustedEnd = before.isAfter(moment()) ? moment() : before;
 
   switch (statType) {
     case StatisticsType.Sum:
-      return values.reduce((a, b) => a + b, 0);
+      return values.reduce((a, b) => a + b, 0) as StatisticsData<T>;
     case StatisticsType.Daily: {
-      const totalDays = adjustedEnd.diff(after, 'days') + 1; // Calculate the total number of days
-      return totalDays > 0 ? values.reduce((a, b) => a + b, 0) / totalDays : 0;
+      const totalDays = adjustedEnd.diff(after, 'days') + 1;
+      return (totalDays > 0 ? values.reduce((a, b) => a + b, 0) / totalDays : 0) as StatisticsData<T>;
     }
     case StatisticsType.Avg:
-      return nonZeroValues.length > 0 ? nonZeroValues.reduce((a, b) => a + b, 0) / nonZeroValues.length : 0;
+      return (nonZeroValues.length > 0 ? nonZeroValues.reduce((a, b) => a + b, 0) / nonZeroValues.length : 0) as StatisticsData<T>;
     case StatisticsType.MinMax: {
       if (isCurrentPeriod && nonZeroValues.length === 0) {
-        return { min: 0, max: 0 };
+        return { min: 0, max: 0 } as StatisticsData<T>;
       }
       const minValue = Math.min(...nonZeroValues);
       const maxValue = Math.max(...values);
@@ -61,74 +60,59 @@ const calculateStatisticsValues = (
         max: maxValue,
         minDate: data[minIndex].after,
         maxDate: data[maxIndex].after,
-      };
+      } as StatisticsData<T>;
     }
     default:
-      return 0;
+      return 0 as StatisticsData<T>;
   }
 };
 
-export const useValueByPeriod = ({ config, after, before }: ValueByPeriodParams, dependencies: any[] = [], queryKey: string = 'value-by-period'): {
-  currentData: ValueByPeriodData[] | undefined;
-  comparisonData: ValueByPeriodData[] | undefined;
-  currentValue: StatisticsData;
-  comparisonValue: StatisticsData;
-  percentageChange: PercentageChange;
-  isIncrease: IsIncrease;
-  isPositive: boolean | { min: boolean; max: boolean };
-  selectedTimeframe: { after: Moment; before: Moment };
-  comparisonTimeframe: { after: Moment; before: Moment };
-  isLoading: boolean;
-  error: Error | null;
-  minDate: Moment | undefined;
-  maxDate: Moment | undefined;
-  isCurrentPeriod: boolean;
-} => {
+export const useValueByPeriod = <T extends StatisticsType>(
+  { config, after, before }: ValueByPeriodParams & { config: { statType: T } },
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _dependencies: any[] = [],
+  queryKey: string = 'value-by-period',
+): UseValueByPeriodReturn<T> => {
   const { type, categories, timeframe, period, comparison, statType } = config;
   const { list: categoryList } = useCategories();
 
   const [periodStart, periodEnd] = getDateRange(timeframe, after, before);
   const isCurrentPeriod = periodEnd.isAfter(moment());
 
-  const categoryIds = useMemo(() =>
+  const categoryIds = useMemo(
+    () =>
       categories
         ?.map((category) =>
           typeof category === 'string'
             ? categoryList.find((cat) => cat.name === category)?.id
-            : categoryList.find((cat) => cat.id === category)?.id
+            : categoryList.find((cat) => cat.id === category)?.id,
         )
         .filter((id): id is number => id !== null && id !== undefined) ?? [],
     [categories, categoryList],
   );
 
-  const periodString = useMemo(() => period ? `${period.value} ${period.unit}` : `${timeframe.value} ${timeframe.unit}`, [period, timeframe]);
+  const periodString = useMemo(() => (period ? `${period.value} ${period.unit}` : `${timeframe.value} ${timeframe.unit}`), [period, timeframe]);
 
-  // Fetch current period data
   const { data: currentData, isLoading: isLoadingCurrent, error: errorCurrent } = useValueByPeriodStatisticsRequest({
     type,
     queryKey: `${queryKey}-selected`,
     after: periodStart,
     before: periodEnd,
     period: periodString,
-    accounts: [], // Add accounts if necessary
+    accounts: [],
     categories: categoryIds,
   });
 
-  // Determine comparison start and end dates
   const [comparisonStart, comparisonEnd] = useMemo((): [Moment, Moment] => {
     if (comparison === ComparisonType.Previous) {
       const { previousStart, previousEnd } = generatePreviousTimeframe(periodStart, periodEnd, timeframe.unit);
       return [previousStart, previousEnd];
     } else if (comparison === ComparisonType.SameLastYear) {
-      return [
-        periodStart.clone().subtract(1, 'year'),
-        periodEnd.clone().subtract(1, 'year'),
-      ];
+      return [periodStart.clone().subtract(1, 'year'), periodEnd.clone().subtract(1, 'year')];
     }
     throw new Error('Invalid comparison type');
   }, [comparison, timeframe, periodStart, periodEnd]);
 
-  // Fetch comparison period data
   const {
     data: comparisonData,
     isLoading: isLoadingComparison,
@@ -139,38 +123,38 @@ export const useValueByPeriod = ({ config, after, before }: ValueByPeriodParams,
     after: comparisonStart,
     before: comparisonEnd,
     period: periodString,
-    accounts: [], // Add accounts if necessary
+    accounts: [],
     categories: categoryIds,
   });
 
-  const currentValue = calculateStatisticsValues(currentData || [], type, statType, periodStart, periodEnd, isCurrentPeriod);
-  const comparisonValue = calculateStatisticsValues(comparisonData || [], type, statType, comparisonStart, comparisonEnd, false);
+  const currentValue = calculateStatisticsValues<T>(currentData || [], type, statType, periodStart, periodEnd, isCurrentPeriod);
+  const comparisonValue = calculateStatisticsValues<T>(comparisonData || [], type, statType, comparisonStart, comparisonEnd, false);
 
   const calculateChange = (current: number, comparison: number): number => {
     if (comparison === 0) return current === 0 ? 0 : 100;
     return ((current - comparison) / Math.abs(comparison)) * 100;
   };
 
-  const { percentageChange, isIncrease } = useMemo((): {
-    percentageChange: PercentageChange;
-    isIncrease: IsIncrease;
-  } => {
+  const { percentageChange, isIncrease } = useMemo(() => {
     if (typeof currentValue === 'number' && typeof comparisonValue === 'number') {
       const change = calculateChange(currentValue, comparisonValue);
-      return { percentageChange: change, isIncrease: currentValue > comparisonValue };
+      return {
+        percentageChange: change as PercentageChange<T>,
+        isIncrease: (currentValue > comparisonValue) as IsIncrease<T>,
+      };
     } else if (typeof currentValue === 'object' && typeof comparisonValue === 'object') {
       return {
         percentageChange: {
           min: calculateChange(currentValue.min, comparisonValue.min),
           max: calculateChange(currentValue.max, comparisonValue.max),
-        },
+        } as PercentageChange<T>,
         isIncrease: {
           min: currentValue.min > comparisonValue.min,
           max: currentValue.max > comparisonValue.max,
-        },
+        } as IsIncrease<T>,
       };
     }
-    return { percentageChange: 0, isIncrease: false };
+    return { percentageChange: 0 as PercentageChange<T>, isIncrease: false as IsIncrease<T> };
   }, [currentValue, comparisonValue]);
 
   const isPositive = type === TransactionType.Income ? isIncrease : !isIncrease;

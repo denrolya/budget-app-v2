@@ -136,9 +136,10 @@ const AccountDetail: React.FC<Props> = ({ account }) => {
       </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className={cn({
-          'grid w-full grid-cols-2': !isDesktop,
-        })}>
+        <TabsList
+          className={cn({
+            'grid w-full grid-cols-2': !isDesktop,
+          })}>
           <TabsTrigger value="activity">Activity</TabsTrigger>
           <TabsTrigger value="history">Account History</TabsTrigger>
         </TabsList>

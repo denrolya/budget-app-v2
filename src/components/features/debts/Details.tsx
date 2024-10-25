@@ -1,3 +1,11 @@
+import groupBy from 'lodash/groupBy';
+import sortBy from 'lodash/sortBy';
+import sumBy from 'lodash/sumBy';
+import toPairs from 'lodash/toPairs';
+import { ArrowUpDown, Plus } from 'lucide-react';
+import moment, { Moment } from 'moment/moment';
+import React, { useMemo, useState } from 'react';
+
 import { MoneyValue } from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import List from '@/components/features/transactions/List';
@@ -12,27 +20,19 @@ import { useBaseCurrency } from '@/contexts/auth';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import Debt from '@/models/Debt';
 import Transaction from '@/models/Transaction';
-import groupBy from 'lodash/groupBy';
-import sortBy from 'lodash/sortBy';
-import sumBy from 'lodash/sumBy';
-import toPairs from 'lodash/toPairs';
-import { ArrowUpDown, Plus } from 'lucide-react';
-import moment, { Moment } from 'moment/moment';
-import React, { useMemo, useState } from 'react';
 
 interface Props {
-  selectedDebt: Debt;
-  setSelectedDebt: (debt: Debt | null) => void;
+  debt: Debt;
 }
 
-const DebtDetails: React.FC<Props> = ({ selectedDebt, setSelectedDebt }) => {
+const DebtDetails: React.FC<Props> = ({ debt }) => {
   const [activeTab, setActiveTab] = useState('transactions');
   const baseCurrency = useBaseCurrency();
   const isDesktop = useScreenSize();
 
   const groupedTransactions: [Moment, Transaction[], number, number][] = useMemo(() => toPairs(
     groupBy(
-      sortBy(selectedDebt.transactions, item => -item.executedAt.valueOf()),
+      sortBy(debt.transactions, item => -item.executedAt.valueOf()),
       item => item.executedAt.format(BACKEND_DATE_FORMAT),
     ),
   ).map(([date, items]) => {
@@ -42,10 +42,10 @@ const DebtDetails: React.FC<Props> = ({ selectedDebt, setSelectedDebt }) => {
     });
     const totalItems = items.length;
     return [moment(date), items, totalValue, totalItems];
-  }), [selectedDebt.transactions, baseCurrency]);
+  }), [debt.transactions, baseCurrency]);
 
   const totalTransactionsValue = groupedTransactions.reduce((acc, [, , totalValue]) => acc + totalValue, 0);
-  const totalTransactionsCount = selectedDebt.transactions.length;
+  const totalTransactionsCount = debt.transactions.length;
 
   return (
     <div className="h-full flex flex-col">
@@ -53,19 +53,19 @@ const DebtDetails: React.FC<Props> = ({ selectedDebt, setSelectedDebt }) => {
         <Card className="mb-4">
           <CardHeader>
             <CardTitle className="flex flex-row justify-between items-center">
-              <span>{selectedDebt?.debtor}</span>
+              <span>{debt?.debtor}</span>
               <MoneyValue
                 badge
-                amount={selectedDebt.balance}
-                currency={selectedDebt.currency}
-                values={selectedDebt.convertedValues} />
+                amount={debt.balance}
+                currency={debt.currency}
+                values={debt.convertedValues} />
             </CardTitle>
             <CardDescription>
-              Opened on <RelativeDatetimeDisplay date={selectedDebt.createdAt} />
+              Opened on <RelativeDatetimeDisplay date={debt.createdAt} />
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">{selectedDebt?.note}</p>
+            <p className="text-sm text-muted-foreground">{debt?.note}</p>
           </CardContent>
           <CardFooter>
             <Button variant="outline" size="sm">

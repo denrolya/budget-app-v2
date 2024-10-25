@@ -1,6 +1,7 @@
 import { BarChart, LineChart, PieChart, SettingsIcon, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
 
+import { PeriodValue } from '@/types/global';
 import { Button } from '@/components/ui/button';
 import {
   Drawer,
@@ -21,7 +22,7 @@ interface UnifiedChartMenuProps {
   timeframe: string;
   setTimeframe: (value: string) => void;
   period: string;
-  setPeriod: (value: string) => void;
+  setPeriod: (value: PeriodValue) => void;
   chartType: 'bar' | 'line';
   setChartType: (value: 'bar' | 'line') => void;
   showIncome: boolean;
@@ -35,10 +36,17 @@ interface UnifiedChartMenuProps {
   availablePeriods: { value: string; label: string }[];
 }
 
+interface OptionButtonProps {
+  value: string;
+  label: string;
+  currentValue: string;
+  onChange: (value: any) => void;
+}
+
 export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
   const isDesktop = useScreenSize();
 
-  const OptionButton = ({ value, label, currentValue, onChange }) => (
+  const OptionButton: React.FC<OptionButtonProps> = ({ value, label, currentValue, onChange }) => (
     <Button
       variant={currentValue === value ? 'default' : 'outline'}
       size="sm"

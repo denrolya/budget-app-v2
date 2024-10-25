@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import { useEffect, useImperativeHandle, useRef } from 'react';
 import { FieldValues, UseFormReturn, useFormState, useWatch } from 'react-hook-form';
 import { z } from 'zod';

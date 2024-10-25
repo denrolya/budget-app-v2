@@ -1,7 +1,7 @@
 import { CURRENCY_CODE } from '@/constants/currency';
-import { ExchangeRates } from '@/contexts/FinanceData';
+import { ConvertedValues } from '@/types/transaction';
 
-export const getExchangeRate = (from: string, to: string, rates: ExchangeRates | null): number | null => {
+export const getExchangeRate = (from: string, to: string, rates: ConvertedValues | null): number | null => {
   if (!rates) return null;
   if (from === to) return 1;
 

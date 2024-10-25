@@ -1,5 +1,7 @@
 import { Moment } from 'moment/moment';
 
+import { PeriodOption, TimeframeOption } from '@/types/global';
+
 export const BACKEND_DATE_FORMAT = 'YYYY-MM-DD';
 export const MOMENT_TIME_VIEW_FORMAT = 'HH:mm';
 export const MOMENT_DATE_VIEW_FORMAT = 'MMM Do, YYYY';
@@ -8,7 +10,7 @@ export const MOMENT_DATETIME_VIEW_FORMAT = `${MOMENT_DATE_VIEW_FORMAT} ${MOMENT_
 
 export const MOMENT_DATEPICKER_FORMAT = 'MMM D, YYYY';
 
-export const TIMEFRAME_OPTIONS = [
+export const TIMEFRAME_OPTIONS: TimeframeOption[] = [
   {
     label: '1D',
     value: '1D',
@@ -92,9 +94,7 @@ export const TIMEFRAME_OPTIONS = [
 ] as const;
 export const COMMON_TIMEFRAMES = ['WTD', 'MTD', '3M', 'YTD'] as const;
 
-export type TimeframeOption = typeof TIMEFRAME_OPTIONS[number]
-
-export const PERIOD_OPTIONS = [
+export const PERIOD_OPTIONS: PeriodOption[] = [
   { label: '1 Day', value: '1 day' },
   { label: '1 Week', value: '1 week' },
   { label: '1 Month', value: '1 month' },

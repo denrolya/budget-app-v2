@@ -16,7 +16,7 @@ interface Transaction {
 
 export const InputForm: React.FC = () => {
   const [input, setInput] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string>('');
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -46,6 +46,7 @@ export const InputForm: React.FC = () => {
       setError('');
       setIsModalOpen(true);
     } catch (err) {
+      // @ts-expect-error FIXME: add correct type
       setError(err.message);
     }
   };
@@ -107,6 +108,6 @@ export const InputForm: React.FC = () => {
       </Dialog>
     </div>
   );
-}
+};
 
 export default InputForm;

@@ -2,6 +2,7 @@ import path from 'path';
 
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { PluginOption } from 'vite';
 import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa';
 import { configDefaults, defineConfig } from 'vitest/config';
 
@@ -119,7 +120,7 @@ const pwaOptions: Partial<VitePWAOptions> = {
 export default defineConfig({
   plugins: [
     react(),
-    visualizer({ open: true }), // This will open a visualization of your chunks after build
+    visualizer({ open: true }) as unknown as PluginOption, // This will open a visualization of your chunks after build
     VitePWA(pwaOptions),
   ],
   resolve: {

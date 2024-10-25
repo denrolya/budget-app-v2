@@ -48,7 +48,7 @@ export const CategoryManagementPage: React.FC = () => {
     return sortCategories(filtered);
   };
 
-  const expandParents = useCallback((categories: Category[], searchTerm: string, parentPath: string[] = []) => {
+  const expandParents = useCallback((categories: Category[], searchTerm: string, parentPath: number[] = []) => {
     categories.forEach(category => {
       const currentPath = [...parentPath, category.id];
       if (includes(toLower(category.name), toLower(searchTerm))) {
@@ -161,7 +161,7 @@ export const CategoryManagementPage: React.FC = () => {
                   <div className="truncate">
                     <span className="text-sm">{highlightSearchTerm(category.name)}</span>
                     <div className="text-xs text-muted-foreground">
-                      <RelativeDatetimeDisplay date={moment(category.updatedAt)} />
+                      <RelativeDatetimeDisplay date={moment()} />
                     </div>
                   </div>
                 </div>
@@ -207,7 +207,7 @@ export const CategoryManagementPage: React.FC = () => {
         </div>
       </div>
       <div className="p-2 border-b">
-        <ScrollArea className="w-full" orientation="horizontal">
+        <ScrollArea className="w-full">
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"

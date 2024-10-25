@@ -7,6 +7,7 @@ import moment, { Moment } from 'moment';
 import { useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 
+import { Sorting } from '@/types/pagination';
 import { FetchResponse as FetchTransactionsResponse, transactionService } from '@/services/api/transaction';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import Transaction, { TransactionFactory } from '@/models/Transaction';
@@ -18,7 +19,7 @@ import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 interface UseTransactionsOptions {
   initialPerPage?: number;
   initialFilters?: TransactionFilters;
-  initialSort?: { field: string; direction: 'asc' | 'desc' };
+  initialSort?: Sorting;
   updateUrl?: boolean;
   queryKey?: string;
   excludeTransfers?: boolean;
@@ -49,15 +50,15 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
   filters: TransactionFilters;
   setFilter: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => void;
   resetFilters: () => void;
-  sort: { field: string; direction: 'asc' | 'desc' };
-  setSort: (sort: { field: string; direction: 'asc' | 'desc' }) => void;
+  sort: Sorting;
+  setSort: (sort: Sorting) => void;
   isFetching: boolean;
 } => {
   const baseCurrency = useBaseCurrency();
   const {
     initialPerPage = 20,
     initialFilters = new TransactionFilters(),
-    initialSort = { field: 'executedAt', direction: 'desc' },
+    initialSort = { field: 'executedAt', direction: 'desc' } as Sorting,
     updateUrl = true,
     queryKey = 'transactions',
     excludeTransfers = false,

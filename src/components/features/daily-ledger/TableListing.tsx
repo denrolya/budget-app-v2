@@ -32,7 +32,7 @@ interface Props {
   endDate: Moment;
 }
 
-const TableListing: React.FC<Props> = ({ isLoading, groupedItems, startDate, endDate }) => {
+const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate }) => {
   const { updateTransaction, deleteTransaction, isUpdating } = useTransactionMutations();
   const { openForm } = useFormContext();
   const [editingCell, setEditingCell] = useState<{ itemId: number; field: EditableField } | null>(null);
@@ -44,7 +44,7 @@ const TableListing: React.FC<Props> = ({ isLoading, groupedItems, startDate, end
     setEditValue(value);
   };
 
-  const handleSave = useCallback(async (item: Transaction | Transfer) => {
+  const handleSave = useCallback(async (item: Transaction) => {
     if (!editingCell || !('id' in item)) return;
 
     const updatedItem = { ...item };
@@ -71,7 +71,7 @@ const TableListing: React.FC<Props> = ({ isLoading, groupedItems, startDate, end
 
     try {
       await updateTransaction({
-        id: item.id,
+        id: Number(item.id),
         updates: updatedItem,
         originalTransaction: item as Transaction,
       });
@@ -102,7 +102,7 @@ const TableListing: React.FC<Props> = ({ isLoading, groupedItems, startDate, end
         // Handle transfer deletion
         console.log('Delete transfer:', item.id);
       } else {
-        deleteTransaction(item.id);
+        deleteTransaction(Number(item.id));
       }
     }
   };
@@ -111,7 +111,7 @@ const TableListing: React.FC<Props> = ({ isLoading, groupedItems, startDate, end
     setOpenSheetId(prevId => prevId === itemId ? null : itemId);
   };
 
-  const renderEditableCell = (item: Transaction | Transfer, field: EditableField, content: React.ReactNode) => {
+  const renderEditableCell = (item: Transaction, field: EditableField, content: React.ReactNode) => {
     const isEditing = editingCell?.itemId === item.id && editingCell?.field === field;
 
     if (isEditing) {
@@ -215,7 +215,7 @@ const TableListing: React.FC<Props> = ({ isLoading, groupedItems, startDate, end
     return (
       <div
         className="cursor-pointer hover:bg-muted/50 p-1 rounded transition-colors"
-        onClick={() => handleEdit(item.id, field, item[field] as string)}
+        onClick={() => handleEdit(Number(item.id), field, item[field] as string)}
       >
         {content}
       </div>
@@ -309,9 +309,9 @@ const TableListing: React.FC<Props> = ({ isLoading, groupedItems, startDate, end
                     <TableCell>
                       <Sheet
                         open={openSheetId === item.id}
-                        onOpenChange={(open) => setOpenSheetId(open ? item.id : null)}>
+                        onOpenChange={(open) => setOpenSheetId(open ? Number(item.id) : null)}>
                         <SheetTrigger asChild>
-                          <code className="cursor-help" onClick={() => toggleSheet(item.id)}>#{item.id}</code>
+                          <code className="cursor-help" onClick={() => toggleSheet(Number(item.id))}>#{item.id}</code>
                         </SheetTrigger>
                         <SheetContent side="right" className="w-full sm:max-w-3xl p-0 overflow-y-auto">
                           <div className="h-full flex flex-col">
@@ -370,15 +370,20 @@ const TableListing: React.FC<Props> = ({ isLoading, groupedItems, startDate, end
                       )}
                       {item instanceof Transaction && (
                         renderEditableCell(item, 'category',
-                          <Badge variant="outline"
-                                 className="text-xs px-1 py-0 whitespace-nowrap bg-background shadow-md">
+                          <Badge
+                            variant="outline"
+                            className="text-xs px-1 py-0 whitespace-nowrap bg-background shadow-md">
                             {item.category.name}
                           </Badge>,
                         )
                       )}
                     </TableCell>
-                    <TableCell>{renderEditableCell(item, 'note', item.note)}</TableCell>
-                    <TableCell>{renderEditableCell(item, 'executedAt', item.executedAt.format(MOMENT_TIME_VIEW_FORMAT))}</TableCell>
+                    <TableCell>{item instanceof Transaction ? renderEditableCell(item, 'note', item.note) : item.note}</TableCell>
+                    <TableCell>
+                      {item instanceof Transaction
+                        ? renderEditableCell(item, 'executedAt', item.executedAt.format(MOMENT_TIME_VIEW_FORMAT))
+                        : item.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
                         <Button
@@ -386,7 +391,7 @@ const TableListing: React.FC<Props> = ({ isLoading, groupedItems, startDate, end
                           size="icon"
                           aria-label="View Details"
                           className="h-8 w-8 p-0"
-                          onClick={() => toggleSheet(item.id)}
+                          onClick={() => toggleSheet(Number(item.id))}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>

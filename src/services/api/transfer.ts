@@ -1,13 +1,14 @@
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { TransferFilters } from '@/models/TransferFilters';
 import { axiosFetcher } from '@/services/api';
-import { TransactionDTO } from '@/services/api/transaction';
+import { Sorting } from '@/types/pagination';
+import { RawTransactionDTO } from '@/types/transaction';
 
 interface FetchTransfersParams {
   page: number;
   perPage: number;
   filters: TransferFilters;
-  sort: { field: string; direction: 'asc' | 'desc' };
+  sort: Sorting;
 }
 
 interface TransferResponse {
@@ -40,7 +41,7 @@ export interface TransferDTO {
   fee: number;
   note: string;
   executedAt: string;
-  transactions: TransactionDTO[];
+  transactions: RawTransactionDTO[];
 }
 
 export interface FetchResponse {

@@ -1,6 +1,5 @@
 import cn from 'classnames';
 import { Archive, Calendar, Download, Edit, Search } from 'lucide-react';
-import moment from 'moment';
 import React, { useState } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
@@ -54,7 +53,7 @@ export const DebtsManagementPage: React.FC = () => {
             </div>
             <div className="text-xs text-muted-foreground mt-1">
               <Calendar className="w-3 h-3 inline mr-1" />
-              Last updated: {moment(debt.updatedAt).fromNow()}
+              Last updated: {debt.updatedAt?.fromNow()}
             </div>
           </div>
         ))}
@@ -90,7 +89,7 @@ export const DebtsManagementPage: React.FC = () => {
 
       <PageWithSidebar.Content>
         {(selectedDebt) && (
-          <DebtDetails selectedDebt={selectedDebt} setSelectedDebt={setSelectedDebt} />
+          <DebtDetails debt={selectedDebt} />
         )}
 
         {(!selectedDebt) && (

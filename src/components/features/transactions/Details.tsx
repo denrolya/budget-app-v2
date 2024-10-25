@@ -19,6 +19,7 @@ import { confirm } from '@/utils/confirmation';
 
 interface TransactionDetailsProps {
   transaction: Transaction;
+  onEdit?: () => void;
 }
 
 const currencyOrder = [CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.HUF, CURRENCY_CODE.UAH, CURRENCY_CODE.BTC];

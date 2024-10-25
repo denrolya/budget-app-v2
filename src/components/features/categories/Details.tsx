@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Download, Edit, Folder, FolderClosed, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Edit, Plus } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import FormattedListing from '@/components/features/transactions/FormattedListing';
@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactions } from '@/hooks/useTransactions';
 import Category from '@/models/Category';
@@ -30,7 +29,7 @@ const generateBreadcrumbs = (category: Category): Category[] => {
   return breadcrumbs;
 };
 
-export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory })=> {
+export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory }) => {
   const { openForm } = useFormContext();
   const [activeTab, setActiveTab] = useState('activity');
   const {
@@ -74,8 +73,9 @@ export const CategoryDetails: React.FC<Props> = ({ category, setSelectedCategory
                 {category.name}
               </h1>
               {breadcrumbs.length > 1 && (
-                <nav aria-label="Breadcrumbs"
-                     className="flex items-center space-x-1 text-sm text-muted-foreground overflow-x-auto mt-1">
+                <nav
+                  aria-label="Breadcrumbs"
+                  className="flex items-center space-x-1 text-sm text-muted-foreground overflow-x-auto mt-1">
                   {breadcrumbs.map((breadcrumb, index) => (
                     <React.Fragment key={breadcrumb.id}>
                       {index > 0 && <ChevronRight className="h-4 w-4 flex-shrink-0" />}

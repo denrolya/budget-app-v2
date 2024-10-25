@@ -1,9 +1,11 @@
 import moment, { Moment } from 'moment';
 
+import { IntervalUnit } from '@/types/statistics';
+
 export const generatePreviousTimeframe = (
   startDate: Moment,
   endDate: Moment,
-  unit: 'day' | 'week' | 'month' | 'year' = 'day',
+  unit: IntervalUnit = IntervalUnit.Day,
 ): { previousStart: Moment; previousEnd: Moment } => {
 
   if (!moment.isMoment(startDate) || !startDate.isValid()) {

@@ -1,12 +1,13 @@
 import moment, { Moment } from 'moment';
 
+import Debt from '@/models/Debt';
 import { useAccounts, useCategories } from '@/contexts/FinanceData';
 import Category from '@/models/Category';
 import { ConvertedValues, Type, TransactionModelProps, RawTransactionDTO } from '@/types/transaction';
 import Account from '@/models/Account';
 
 export class Transaction {
-  id: number;
+  id: number | string | undefined;
   account: Account;
   amount: number;
   convertedValues: ConvertedValues;
@@ -14,7 +15,7 @@ export class Transaction {
   executedAt: Moment;
   category: Category;
   isDraft: boolean;
-  debt?: object;
+  debt?: undefined | Debt;
   compensations?: undefined | Transaction[];
   type: Type;
 

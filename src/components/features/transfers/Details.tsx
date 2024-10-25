@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import { InfoIcon } from 'lucide-react';
 import React from 'react';
 

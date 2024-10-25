@@ -19,8 +19,6 @@ import {
 } from '@/contexts/FinanceData/hooks';
 
 export type {
-  Debt,
-  ExchangeRates,
   FinanceData,
   FinanceDataContextType,
 } from '@/contexts/FinanceData/context';

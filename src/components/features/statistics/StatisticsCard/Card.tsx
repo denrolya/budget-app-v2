@@ -3,7 +3,6 @@ import { SettingsIcon } from 'lucide-react';
 import { Moment } from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 
-import { formatShortDate } from '@/utils/formatShortDate.ts';
 import MoneyValue from '@/components/common/MoneyValue';
 import ConfigForm from '@/components/features/statistics/StatisticsCard/ConfigForm';
 import PercentageBadge from '@/components/features/statistics/StatisticsCard/PercentageBadge';
@@ -14,22 +13,26 @@ import { Card, CardContent } from '@/components/ui/card';
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-  DrawerDescription,
 } from '@/components/ui/drawer';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
-import { StatisticsConfig, Interval } from '@/types/statistics';
 import { useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
 import { useScreenSize } from '@/hooks/useScreenSize';
+import { ComparisonType, Interval, StatisticsConfig, StatisticsType } from '@/types/statistics';
 import { Type as TransactionType } from '@/types/transaction';
+import { MinMaxStatistics, PercentageChange, StatisticsData } from '@/types/valueByPeriodStatistics';
+import { formatShortDate } from '@/utils/formatShortDate.ts';
 import { generateSlug } from '@/utils/generateSlug';
 
+const isMinMaxStatistics = (value: any): value is MinMaxStatistics => value && typeof value.min === 'number' && typeof value.max === 'number';
+
 interface Props {
-  onChange: (index: number, newConfig: Partial<StatisticsConfig>) => void;
+  onChange: (newConfig: Partial<StatisticsConfig>) => void;
   config: StatisticsConfig;
 }
 
@@ -68,7 +71,7 @@ const TooltipContent: React.FC<{
   date?: Moment;
   selectedTimeframe: { after: Moment; before: Moment };
   comparisonTimeframe: { after: Moment; before: Moment };
-  comparison: 'previous' | 'year';
+  comparison: ComparisonType;
 }> = ({ label, amount, date, selectedTimeframe, comparisonTimeframe, comparison }) => (
   <div className="p-2">
     <p className="font-semibold mb-1">{label}</p>
@@ -117,6 +120,115 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
   const periodText = useMemo(() => getPeriodText(timeframe, period), [timeframe, period]);
   const [open, setOpen] = useState(false);
   const isDesktop = useScreenSize();
+
+  const renderMinMaxSection = (
+    currentValue: StatisticsData<StatisticsType>,
+    comparisonValue: StatisticsData<StatisticsType>,
+    percentageChange: PercentageChange<StatisticsType>,
+    selectedTimeframe: { after: Moment; before: Moment },
+    comparisonTimeframe: { after: Moment; before: Moment },
+    minDate: Moment | undefined,
+    maxDate: Moment | undefined,
+  ) => {
+    if (
+      statType === StatisticsType.MinMax &&
+      isMinMaxStatistics(currentValue) &&
+      isMinMaxStatistics(comparisonValue) &&
+      typeof percentageChange === 'object' &&
+      'min' in percentageChange &&
+      'max' in percentageChange
+    ) {
+      return (
+        <div className="flex flex-col space-y-1">
+          <div className="flex justify-between items-baseline">
+            <ResponsiveTooltip
+              openDelay={0}
+              desktopComponent="tooltip"
+              contentClassName="z-20"
+              content={
+                <TooltipContent
+                  label="Minimum Value"
+                  amount={currentValue.min}
+                  date={minDate}
+                  selectedTimeframe={selectedTimeframe}
+                  comparisonTimeframe={comparisonTimeframe}
+                  comparison={comparison}
+                />
+              }
+            >
+              <div className="flex items-baseline gap-1">
+                <span className="text-xs text-muted-foreground">Min</span>
+                <MoneyValue
+                  className="text-lg font-bold"
+                  useColors={false}
+                  showSign={false}
+                  amount={currentValue.min}
+                />
+              </div>
+            </ResponsiveTooltip>
+
+            <ResponsiveTooltip
+              openDelay={0}
+              desktopComponent="tooltip"
+              content={
+                <TooltipContent
+                  label="Maximum Value"
+                  amount={currentValue.max}
+                  date={maxDate}
+                  selectedTimeframe={selectedTimeframe}
+                  comparisonTimeframe={comparisonTimeframe}
+                  comparison={comparison}
+                />
+              }
+            >
+              <div className="flex items-baseline gap-1">
+                <span className="text-xs text-muted-foreground">Max</span>
+                <MoneyValue
+                  className="text-lg font-bold"
+                  useColors={false}
+                  showSign={false}
+                  amount={currentValue.max}
+                />
+              </div>
+            </ResponsiveTooltip>
+          </div>
+          <div className="flex justify-between items-center text-xs">
+            <ResponsiveTooltip
+              openDelay={0}
+              desktopComponent="tooltip"
+              content={
+                <TooltipContent
+                  label="Minimum Comparison"
+                  amount={comparisonValue.min}
+                  selectedTimeframe={selectedTimeframe}
+                  comparisonTimeframe={comparisonTimeframe}
+                  comparison={comparison}
+                />
+              }
+            >
+              <PercentageBadge percentage={percentageChange.min} reverted />
+            </ResponsiveTooltip>
+            <ResponsiveTooltip
+              openDelay={0}
+              desktopComponent="tooltip"
+              content={
+                <TooltipContent
+                  label="Maximum Comparison"
+                  amount={comparisonValue.max}
+                  selectedTimeframe={selectedTimeframe}
+                  comparisonTimeframe={comparisonTimeframe}
+                  comparison={comparison}
+                />
+              }
+            >
+              <PercentageBadge percentage={percentageChange.max} reverted />
+            </ResponsiveTooltip>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   if (isLoading) {
     return <StatisticsCardSkeleton />;
@@ -177,95 +289,8 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
         {!error && (
           <>
             <div className="space-y-1">
-              {(statType === 'min-max' && currentValue && typeof currentValue === 'object') && (
-                <div className="flex flex-col space-y-1">
-                  <div className="flex justify-between items-baseline">
-                    <ResponsiveTooltip
-                      openDelay={0}
-                      desktopComponent="tooltip"
-                      contentClassName="z-20"
-                      content={
-                        <TooltipContent
-                          label="Minimum Value"
-                          amount={currentValue.min}
-                          date={minDate}
-                          selectedTimeframe={selectedTimeframe}
-                          comparisonTimeframe={comparisonTimeframe}
-                          comparison={comparison}
-                        />
-                      }
-                    >
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-xs text-muted-foreground">Min</span>
-                        <MoneyValue
-                          className="text-lg font-bold"
-                          useColors={false}
-                          showSign={false}
-                          amount={currentValue.min}
-                        />
-                      </div>
-                    </ResponsiveTooltip>
-
-                    <ResponsiveTooltip
-                      openDelay={0}
-                      desktopComponent="tooltip"
-                      content={
-                        <TooltipContent
-                          label="Maximum Value"
-                          amount={currentValue.max}
-                          date={maxDate}
-                          selectedTimeframe={selectedTimeframe}
-                          comparisonTimeframe={comparisonTimeframe}
-                          comparison={comparison}
-                        />
-                      }
-                    >
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-xs text-muted-foreground">Max</span>
-                        <MoneyValue
-                          className="text-lg font-bold"
-                          useColors={false}
-                          showSign={false}
-                          amount={currentValue.max}
-                        />
-                      </div>
-                    </ResponsiveTooltip>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <ResponsiveTooltip
-                      openDelay={0}
-                      desktopComponent="tooltip"
-                      content={
-                        <TooltipContent
-                          label="Minimum Comparison"
-                          amount={comparisonValue.min}
-                          selectedTimeframe={selectedTimeframe}
-                          comparisonTimeframe={comparisonTimeframe}
-                          comparison={comparison}
-                        />
-                      }
-                    >
-                      <PercentageBadge percentage={percentageChange.min} reverted />
-                    </ResponsiveTooltip>
-                    <ResponsiveTooltip
-                      openDelay={0}
-                      desktopComponent="tooltip"
-                      content={
-                        <TooltipContent
-                          label="Maximum Comparison"
-                          amount={comparisonValue.max}
-                          selectedTimeframe={selectedTimeframe}
-                          comparisonTimeframe={comparisonTimeframe}
-                          comparison={comparison}
-                        />
-                      }
-                    >
-                      <PercentageBadge percentage={percentageChange.max} reverted />
-                    </ResponsiveTooltip>
-                  </div>
-                </div>
-              )}
-              {statType !== 'min-max' && (
+              {renderMinMaxSection(currentValue, comparisonValue, percentageChange, selectedTimeframe, comparisonTimeframe, minDate, maxDate)}
+              {statType !== StatisticsType.MinMax && (
                 <>
                   <div className="flex justify-between items-baseline">
                     <ResponsiveTooltip

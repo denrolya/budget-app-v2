@@ -13,6 +13,7 @@ export interface DebtRawData {
   transactions: Transaction[];
   convertedValues: ConvertedValues;
   createdAt: string;
+  updatedAt?: string | undefined;
   closedAt: string | null;
 }
 
@@ -25,6 +26,7 @@ export default class Debt {
   transactions: Transaction[];
   convertedValues: Record<string, number>;
   createdAt: Moment;
+  updatedAt?: Moment | undefined;
   closedAt: Moment | null;
 
   constructor(data: DebtRawData) {
@@ -36,6 +38,7 @@ export default class Debt {
     this.transactions = data.transactions;
     this.convertedValues = data.convertedValues;
     this.createdAt = moment(data.createdAt);
+    this.updatedAt = data.updatedAt ? moment(data.updatedAt) : undefined;
     this.closedAt = data.closedAt ? moment(data.closedAt) : null;
   }
 

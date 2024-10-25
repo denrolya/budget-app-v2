@@ -1,58 +1,24 @@
 import moment from 'moment';
-import { z } from 'zod';
 
+import { Sorting } from '@/types/pagination';
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import Account from '@/models/Account';
 import Category from '@/models/Category';
-import { formSchema } from '@/components/features/transactions/Form';
-import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import Transaction from '@/models/Transaction';
-import { Type as TransactionType } from '@/types/transaction';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { api, axiosFetcher } from '@/services/api';
+import { RawTransactionDTO, Type as TransactionType } from '@/types/transaction';
 
 interface FetchTransactionsParams {
   page: number;
   perPage: number;
   filters: TransactionFilters;
-  sort: { field: string; direction: 'asc' | 'desc' };
+  sort: Sorting;
   excludeTransfers: boolean;
 }
 
-export interface TransactionDTO {
-  id: number | string;
-  account: {
-    icon: string;
-    id: number | string;
-    name: string;
-    currency: string;
-    color: string;
-  };
-  amount: number;
-  convertedValues: {
-    BTC: number;
-    EUR: number;
-    HUF: number;
-    UAH: number;
-    USD: number;
-  };
-  note: string;
-  executedAt: string;
-  category: {
-    id: number | string;
-    name: string;
-    icon: string;
-    color: string | null;
-  };
-  isDraft: boolean;
-  transfer: {
-    id: number;
-  } | undefined;
-  compensations: TransactionDTO[] | undefined;
-  type: 'expense' | 'income'; // Assuming these are the possible types
-}
-
 interface TransactionResponse {
-  list: TransactionDTO[];
+  list: RawTransactionDTO[];
   count: number;
   totalValue: number;
 }
@@ -65,7 +31,7 @@ interface CompensationData {
 }
 
 export interface FetchResponse {
-  items: TransactionDTO[];
+  items: RawTransactionDTO[];
   totalItems: number;
   totalValue: number;
 }
@@ -91,7 +57,7 @@ export const transactionService = {
     return {
       items: filteredList,
       totalItems: result.count,
-      totalValue: result.totalValue
+      totalValue: result.totalValue,
     };
   },
 
@@ -161,10 +127,10 @@ export const transactionService = {
     return `${BASE_URL}?${query.toString()}`;
   },
 
-  formatData(values: Partial<Transaction>, existingData?: Transaction) {
+  formatData(values: Partial<RawTransactionDTO | Transaction>, existingData?: Transaction) {
     return {
       account: (values.account instanceof Account) ? values.account.id : values.account,
-      amount: values?.amount.toString(),
+      amount: values?.amount?.toString(),
       category: (values.category instanceof Category) ? values.category.id : values.category,
       executedAt: moment(values.executedAt).toISOString(),
       isDraft: values.isDraft ?? false,
@@ -174,7 +140,8 @@ export const transactionService = {
     };
   },
 
-  formatCompensations(values: z.infer<typeof formSchema>, existingData?: Transaction) {
+  formatCompensations(values: Partial<RawTransactionDTO | Transaction>, existingData?: Transaction | undefined) {
+    // @ts-expect-error CompensationData somehow is not a good type here
     return values.compensations?.map((comp: CompensationData, index: number) => {
       const existingComp = existingData?.compensations?.[index];
       return {
@@ -190,11 +157,11 @@ export const transactionService = {
     });
   },
 
-  createTransaction(data: Partial<Transaction>) {
+  createTransaction(data: Partial<RawTransactionDTO | Transaction>) {
     return api.post(`/api/transactions/${data.type}`, this.formatData(data));
   },
 
-  updateTransaction(id: string | number, updates: Partial<Transaction>, originalTransaction: Transaction) {
+  updateTransaction(id: string | number, updates: Partial<RawTransactionDTO | Transaction>, originalTransaction: Transaction) {
     return api.put(`/api/transactions/${id}`, this.formatData(updates, originalTransaction));
   },
 

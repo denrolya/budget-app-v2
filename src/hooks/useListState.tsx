@@ -4,6 +4,7 @@ import moment from 'moment';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import { Sorting } from '@/types/pagination';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 
 export interface FilterModel {
@@ -16,23 +17,18 @@ export interface PaginationState {
   totalPages: number;
 }
 
-export interface SortState<T> {
-  field: keyof T | null;
-  direction: 'asc' | 'desc' | null;
-}
-
-export interface UseListState<FilterType, ItemType> {
+export interface UseListState<FilterType> {
   pagination: PaginationState;
   filters: FilterType;
-  sort: SortState<ItemType>;
+  sort: Sorting;
 }
 
 type SetFilterFunction<T> = <K extends keyof T>(key: K, value: T[K]) => void;
 
-interface UseListStateOptions<FilterType extends FilterModel, ItemType> {
+interface UseListStateOptions<FilterType extends FilterModel> {
   initialPerPage?: number;
   initialFilters: FilterType;
-  initialSort?: SortState<ItemType>;
+  initialSort?: Sorting;
   searchParamKeys?: {
     [K in keyof FilterType]?: string;
   };
@@ -43,17 +39,14 @@ interface UseListStateOptions<FilterType extends FilterModel, ItemType> {
 export const useListState = <FilterType extends FilterModel, ItemType>({
                                                                          initialPerPage = 20,
                                                                          initialFilters,
-                                                                         initialSort = {
-                                                                           field: null,
-                                                                           direction: null,
-                                                                         },
+                                                                         initialSort,
                                                                          searchParamKeys = {},
                                                                          formatMoment = BACKEND_DATE_FORMAT,
                                                                          updateUrl = true,
-                                                                       }: UseListStateOptions<FilterType, ItemType>) => {
+                                                                       }: UseListStateOptions<FilterType>) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const getInitialState = useCallback((): UseListState<FilterType, ItemType> => ({
+  const getInitialState = useCallback((): UseListState<FilterType> => ({
     pagination: {
       currentPage: parseInt(searchParams.get('page') || '1', 10),
       perPage: parseInt(searchParams.get('perPage') || initialPerPage.toString(), 10),
@@ -61,12 +54,12 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
     },
     filters: initialFilters,
     sort: {
-      field: (searchParams.get('sortField') as keyof ItemType) || initialSort.field,
-      direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || initialSort.direction,
+      field: (searchParams.get('sortField') as keyof ItemType) || initialSort?.field,
+      direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || initialSort?.direction,
     },
   }), [searchParams, initialPerPage, initialFilters, initialSort]);
 
-  const [state, setState] = useState<UseListState<FilterType, ItemType>>(getInitialState);
+  const [state, setState] = useState<UseListState<FilterType>>(getInitialState);
 
   const prevStateRef = useRef(state);
 
@@ -113,7 +106,7 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
     }));
   }, [initialFilters]);
 
-  const setSort = useCallback((field: keyof ItemType | null, direction: 'asc' | 'desc' | null) => {
+  const setSort = useCallback(({ field, direction }: Sorting) => {
     setState(prev => ({
       ...prev,
       sort: { field, direction },

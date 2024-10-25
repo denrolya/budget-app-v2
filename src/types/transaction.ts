@@ -1,5 +1,6 @@
 import { Moment } from 'moment';
 
+import Debt from '@/models/Debt';
 import Account from '@/models/Account';
 import Category from '@/models/Category';
 
@@ -13,15 +14,30 @@ export enum Type {
 }
 
 export interface RawTransactionDTO {
-  id: number;
-  account: Account;
+  id: number | string | undefined;
+  account: {
+    icon: string;
+    id: number | string;
+    name: string;
+    currency: string;
+    color: string;
+  };
   amount: number;
   convertedValues: ConvertedValues;
   note: string;
   executedAt: string;
-  category: Category;
+  category: {
+    id: number | string;
+    name: string;
+    icon: string;
+    color: string | null;
+  };
   isDraft: boolean;
-  compensations?: undefined | Partial<RawTransactionDTO>[];
+  debt: any;
+  transfer: {
+    id: number;
+  } | undefined;
+  compensations: Partial<RawTransactionDTO>[] | undefined;
   type: Type;
 }
 
@@ -34,7 +50,7 @@ export interface TransactionModelProps {
   executedAt: Moment | string;
   category: Category;
   isDraft: boolean;
-  debt?: object;
+  debt?: Debt | undefined;
   compensations: undefined | Partial<TransactionModelProps>[];
   type: Type;
 }

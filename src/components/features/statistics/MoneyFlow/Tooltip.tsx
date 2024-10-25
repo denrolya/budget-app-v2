@@ -48,7 +48,7 @@ export const Tooltip: React.FC<Props> = ({
                                            comparisonMode = 'previousPeriod',
                                          }) => {
   const [position, setPosition] = useState({ top: 0, left: 0 });
-  const { x, y } = coordinate || { x: 0, y: 0 };
+  const { x = 0, y = 0 } = coordinate || { x: 0, y: 0 };
 
   const dataPoint = useMemo(() => data.find((item) => item.timestamp === label), [data, label]);
 

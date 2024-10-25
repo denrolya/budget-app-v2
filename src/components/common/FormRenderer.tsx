@@ -30,7 +30,7 @@ interface FormContentProps {
   formType: FormType;
   values: any;
   onClose: () => void;
-  setFormState: React.Dispatch<React.SetStateAction<FormState>>;
+  setFormState: (updates: Partial<FormState>) => void;
   key: string;
 }
 

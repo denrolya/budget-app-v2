@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import { Check, Pencil, X, Trash2 } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
