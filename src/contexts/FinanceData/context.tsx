@@ -1,27 +1,23 @@
 import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { AlertCircle } from 'lucide-react';
 import React, { createContext, ReactNode, useCallback, useEffect, useState } from 'react';
+import moment from 'moment';
 
+import Transaction from '@/models/Transaction';
+import { DebtDTO } from '@/types/debt';
 import MainLoadingScreen from '@/components/layout/MainLoadingScreen';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import Account, { AccountRawData } from '@/models/Account';
 import Category, { CategoryTreeBuilder } from '@/models/Category';
 import { axiosFetcher } from '@/services/api';
-
-export type Debt = {
-  id: number;
-  name: string;
-  amount: number;
-  convertedValues: Record<string, number>;
-};
-
-export type ExchangeRates = Record<string, number>;
+import Debt from '@/models/Debt';
+import { RawTransactionDTO, ConvertedValues } from '@/types/transaction';
 
 export type ExchangeRatesData = {
-  fixer: ExchangeRates;
-  mono: ExchangeRates;
-  wise: ExchangeRates;
+  fixer: ConvertedValues;
+  mono: ConvertedValues;
+  wise: ConvertedValues;
 }
 
 export type CategoriesData = {
@@ -49,7 +45,7 @@ const INITIAL_STATE: FinanceData = {
   accounts: [],
   debts: [],
   categories: { tree: [], list: [] },
-  exchangeRates: { fixer: {}, mono: {} },
+  exchangeRates: { fixer: {}, mono: {}, wise: {} },
 };
 
 export const FinanceDataContext = createContext<FinanceDataContextType | undefined>(undefined);
@@ -61,7 +57,7 @@ const ENDPOINTS = {
   accounts: '/api/v2/account',
   debts: '/api/v2/debt',
   categories: '/api/v2/category',
-  fixerExchangeRates: '/api/v2/exchange-rates',
+  fixerExchangeRates: '/api/v2/exchange-rates/fixer',
   monobankExchangeRates: '/api/v2/exchange-rates/monobank',
   wiseExchangeRates: '/api/v2/exchange-rates/wise',
 } as const;
@@ -79,19 +75,16 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
   const exchangeRatesQuery: UseQueryResult<ExchangeRatesData, Error> = useQuery({
     queryKey: ['exchangeRates'],
     queryFn: async () => {
-      const fixerExchangeRatesResponse = await axiosFetcher(ENDPOINTS.fixerExchangeRates);
-      const fixerExchangeRates: Record<string, number> = fixerExchangeRatesResponse.rates;
-
-      const monobankExchangeRatesResponse = await axiosFetcher(ENDPOINTS.monobankExchangeRates);
-      const monobankExchangeRates: Record<string, number> = monobankExchangeRatesResponse.rates;
-
-      const wiseExchangeRatesResponse = await axiosFetcher(ENDPOINTS.wiseExchangeRates);
-      const wiseExchangeRates: Record<string, number> = wiseExchangeRatesResponse.rates;
+      const [fixer, mono, wise] = await Promise.all([
+        axiosFetcher(ENDPOINTS.fixerExchangeRates),
+        axiosFetcher(ENDPOINTS.monobankExchangeRates),
+        axiosFetcher(ENDPOINTS.wiseExchangeRates),
+      ]);
 
       return {
-        fixer: fixerExchangeRates,
-        mono: monobankExchangeRates,
-        wise: wiseExchangeRates,
+        fixer: fixer.rates,
+        mono: mono.rates,
+        wise: wise.rates,
       };
     },
     ...queryOptions,
@@ -125,12 +118,6 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
     ...queryOptions,
   });
 
-  const debtsQuery: UseQueryResult<Debt[], Error> = useQuery({
-    queryKey: ['debts'],
-    queryFn: () => axiosFetcher(ENDPOINTS.debts),
-    ...queryOptions,
-  });
-
   const categoriesQuery: UseQueryResult<CategoriesData, Error> = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
@@ -143,6 +130,64 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       return { tree, list: plainList };
     },
+    enabled: !!exchangeRatesQuery.data,
+    ...queryOptions,
+  });
+
+  const debtsQuery: UseQueryResult<Debt[], Error> = useQuery({
+    queryKey: ['debts'],
+    queryFn: async () => {
+      const rawDebts: DebtDTO[] = await axiosFetcher(ENDPOINTS.debts);
+
+      if (!accountsQuery.data || !categoriesQuery.data) {
+        throw new Error('Accounts and categories not available');
+      }
+
+      const accounts = accountsQuery.data;
+      const categories = categoriesQuery.data.list;
+
+      return rawDebts.map((rawDebt: DebtDTO) => {
+        const transactions = rawDebt.transactions.map((rawTransaction: RawTransactionDTO) => {
+          const account = accounts.find((acc: Account) => acc.id === rawTransaction.account.id);
+          const category = categories.find((cat: Category) => cat.id === rawTransaction.category.id);
+
+          if (!account) {
+            throw new Error(`Account with ID ${rawTransaction.account.id} not found`);
+          }
+
+          if (!category) {
+            throw new Error(`Category with ID ${rawTransaction.category.id} not found`);
+          }
+
+          return new Transaction({
+            ...rawTransaction,
+            account,
+            category,
+            executedAt: moment(rawTransaction.executedAt),
+            compensations: rawTransaction.compensations?.map((comp) =>
+              new Transaction({
+                id: comp.id!,
+                account: comp.account!,
+                amount: comp.amount!,
+                convertedValues: comp.convertedValues!,
+                note: comp.note!,
+                executedAt: moment(comp.executedAt)!,
+                category: comp.category!,
+                isDraft: comp.isDraft!,
+                compensations: comp.compensations,
+                type: comp.type!,
+              })
+            )
+          });
+        });
+
+        return new Debt({
+          ...rawDebt,
+          transactions,
+        });
+      });
+    },
+    enabled: !!accountsQuery.data && !!categoriesQuery.data,
     ...queryOptions,
   });
 

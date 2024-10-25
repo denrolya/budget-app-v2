@@ -20,8 +20,8 @@ export const generateQueryParamsString = ({
   beforeFormat?: string;
   period?: string;
   type?: TransactionType | null;
-  categories?: string[] | number[];
-  accounts?: string[] | number[];
+  categories?: (string | number)[];
+  accounts?: (string | number)[];
 }):
   string => qs.stringify(
   {

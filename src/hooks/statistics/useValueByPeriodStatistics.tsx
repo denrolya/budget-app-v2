@@ -6,11 +6,11 @@ import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueBy
 import { ComparisonType, Interval, StatisticsType } from '@/types/statistics';
 import { Type as TransactionType } from '@/types/transaction';
 import {
+  ValueByPeriodParams,
   IsIncrease,
   PercentageChange,
   StatisticsData,
   ValueByPeriodData,
-  ValueByPeriodParams,
 } from '@/types/valueByPeriodStatistics';
 import { generatePreviousTimeframe } from '@/utils/generatePreviousTimeframe';
 
@@ -92,8 +92,12 @@ export const useValueByPeriod = ({ config, after, before }: ValueByPeriodParams,
 
   const categoryIds = useMemo(() =>
       categories
-        ?.map((categoryName: string) => categoryList.find((cat) => cat.name === categoryName)?.id)
-        .filter((id: number): id is number => id !== null) ?? [],
+        ?.map((category) =>
+          typeof category === 'string'
+            ? categoryList.find((cat) => cat.name === category)?.id
+            : categoryList.find((cat) => cat.id === category)?.id
+        )
+        .filter((id): id is number => id !== null && id !== undefined) ?? [],
     [categories, categoryList],
   );
 

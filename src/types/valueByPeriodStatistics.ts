@@ -22,8 +22,8 @@ export interface UseStatisticsParams {
   before?: Moment;
   period?: string;
   type?: TransactionType | null;
-  accounts?: number[];
-  categories?: number[];
+  accounts?: (number| string)[];
+  categories?: (number | string)[];
   queryKey?: string;
 }
 
@@ -34,11 +34,13 @@ export interface UseStatisticsReturn {
   refetch: () => void;
 }
 
-interface ValueByPeriodParams {
+export interface ValueByPeriodParams {
   config: StatisticsConfig;
+  after?: Moment;
+  before?: Moment;
 }
 
-interface MinMaxStatistics {
+export interface MinMaxStatistics {
   min: number;
   max: number;
   minDate?: Moment;

@@ -17,7 +17,7 @@ export class Transfer {
   executedAt: Moment;
   fromExpense: Transaction;
   toIncome: Transaction;
-  feeExpense: Transaction;
+  feeExpense: Transaction | undefined;
 
   constructor({
                 id,

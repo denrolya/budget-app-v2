@@ -7,14 +7,12 @@ import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountAvatar from '@/components/features/accounts/Avatar';
 import AccountDetails from '@/components/features/accounts/Details';
-import PageWithSidebar from '@/components/layout/PageWithSidebar.tsx';
-import { Badge } from '@/components/ui/badge';
+import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import Account, { AccountType } from '@/models/Account';
 
 export const AccountsManagementPage: React.FC = () => {
@@ -85,12 +83,12 @@ export const AccountsManagementPage: React.FC = () => {
                       <AccountAvatar account={account} size="sm" />
                       <h3 className="font-medium">{account.nameWithCurrency}</h3>
                     </div>
-                      <MoneyValue
-                        badge
-                        amount={account.balance}
-                        currency={account.currency}
-                        values={account.convertedValues}
-                      />
+                    <MoneyValue
+                      badge
+                      amount={account.balance}
+                      currency={account.currency}
+                      values={account.convertedValues}
+                    />
                   </div>
                   <div className="flex justify-between items-center text-xs text-muted-foreground">
                     {account.archivedAt && (

@@ -46,10 +46,10 @@ describe('generateQueryParamsString', () => {
     }, { arrayFormat: 'brackets' }));
   });
 
-  it('should handle interval, type, categories, and accounts', () => {
+  it('should handle period, type, categories, and accounts', () => {
     const after = moment('2023-01-01');
     const before = moment('2023-12-31');
-    const interval = 'monthly';
+    const period = 'monthly';
     const type: TransactionType = TransactionType.Expense;
     const categories = ['food', 'transport'];
     const accounts = [1, 2];
@@ -57,7 +57,7 @@ describe('generateQueryParamsString', () => {
     const result = generateQueryParamsString({
       after,
       before,
-      interval,
+      period,
       type,
       categories,
       accounts,
@@ -66,7 +66,7 @@ describe('generateQueryParamsString', () => {
     expect(result).toBe(qs.stringify({
       after: after.format(BACKEND_DATE_FORMAT),
       before: before.format(BACKEND_DATE_FORMAT),
-      interval,
+      interval: period,
       type,
       categories,
       accounts,

@@ -28,8 +28,8 @@ export enum StatisticsType {
 export interface StatisticsConfig {
   title: string;
   type: TransactionType;
-  categories?: number[] | string[];
-  accounts?: number[] | string[];
+  categories?: (number | string)[]
+  accounts?: (number | string)[];
   timeframe: Interval;
   period?: Interval;
   comparison: ComparisonType;
