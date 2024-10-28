@@ -4,10 +4,10 @@ export const logCategoriesTree = (categories: Category[], fields: string[]): str
   const simplifyCategory = (category: Category): any => {
     const result: any = {};
 
-    // Include only the specified fields
     fields.forEach((field) => {
-      if (field in category) {
-        result[field] = category[field];
+      const key = field as keyof Category;
+      if (key in category) {
+        result[key] = category[key];
       }
     });
 

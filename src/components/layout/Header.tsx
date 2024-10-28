@@ -33,27 +33,6 @@ export const Header: React.FC<Props> = ({ className }) => {
     <header className={cn('bg-accent/10 backdrop-blur-xl border-b border-accent h-10 md:h-8 flex items-center px-4 justify-between', className)}>
       <div className="flex items-center space-x-2">
         <nav className="hidden md:flex space-x-4">
-          <HeaderLink to="/dashboard">
-            Dashboard
-          </HeaderLink>
-          <HeaderLink to="/transactions">
-            Transactions
-          </HeaderLink>
-          <HeaderLink to="/ledger">
-            Ledger
-          </HeaderLink>
-          <HeaderLink to="/debts">
-            Debts
-          </HeaderLink>
-          <HeaderLink to="/accounts">
-            Accounts
-          </HeaderLink>
-          <HeaderLink to="/reports">
-            Reports
-          </HeaderLink>
-          <HeaderLink to="/categories">
-            Categories
-          </HeaderLink>
         </nav>
       </div>
 

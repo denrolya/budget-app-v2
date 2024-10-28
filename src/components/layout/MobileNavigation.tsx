@@ -2,7 +2,9 @@ import cn from 'classnames';
 import { LogOut, Monitor, Moon, MoreHorizontal, Plus, Sun } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useSwipeable } from 'react-swipeable';
 
+import { useAuth } from '@/contexts/auth';
 import ExchangeRatesPresets from '@/components/common/ExchangeRatesPresets';
 import DraftTransactionForm from '@/components/features/transactions/DraftForm';
 import { CurrencyButtonSelector } from '@/components/layout/CurrencyButtonSelector';
@@ -14,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ROUTES } from '@/constants/routes';
 import { useTheme } from '@/contexts/theme';
 
+
 type RouteKey = keyof typeof ROUTES
 
 interface Props {
@@ -21,9 +24,35 @@ interface Props {
 }
 
 export const MobileNavigation: React.FC<Props> = ({ className }) => {
+  const { logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const [isDrawerOpen, setDrawerOpen] = useState<boolean>(false);
   const location = useLocation();
+  const [activeTab, setActiveTab] = useState<string>('quickAccess');
+
+
+  const tabOptions = ['quickAccess', 'exchangeRates', 'settings'];
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+  };
+
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => {
+      const currentIndex = tabOptions.indexOf(activeTab);
+      if (currentIndex < tabOptions.length - 1) {
+        handleTabChange(tabOptions[currentIndex + 1]);
+      }
+    },
+    onSwipedRight: () => {
+      const currentIndex = tabOptions.indexOf(activeTab);
+      if (currentIndex > 0) {
+        handleTabChange(tabOptions[currentIndex - 1]);
+      }
+    },
+    preventDefaultTouchmoveEvent: true,
+    trackMouse: true,
+  });
 
   useEffect(() => {
     setDrawerOpen(false);
@@ -84,8 +113,8 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                 <DrawerHeader className="sr-only">
                   <DrawerTitle>More options</DrawerTitle>
                 </DrawerHeader>
-                <div className="p-4">
-                  <Tabs defaultValue="quickAccess" className="w-full">
+                <div className="p-4" {...swipeHandlers}>
+                  <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                     <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="quickAccess">Quick Access</TabsTrigger>
                       <TabsTrigger value="exchangeRates">Rates</TabsTrigger>
@@ -147,7 +176,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="destructive" className="w-full">
+                        <Button variant="destructive" className="w-full" onClick={logout}>
                           <LogOut className="mr-2 h-4 w-4" />
                           Logout
                         </Button>

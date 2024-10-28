@@ -27,3 +27,4 @@ dist-ssr
 # Other
 stats.html
 *.tsbuildinfo
+vite.config.ts.*.mjs

@@ -13,7 +13,7 @@ type PageWithSidebarProps = React.ComponentPropsWithoutRef<'div'> & {
 }
 
 type PageWithSidebarComponent = React.FC<PageWithSidebarProps> & {
-  Header: React.FC<React.ComponentPropsWithoutRef<'header'> & { title?: string, onBack?: () => void }>
+  Header: React.FC<React.ComponentPropsWithoutRef<'header'> & { title?: string, onBack?: () => void, overrideContent?: boolean }>
   Sidebar: React.FC<React.ComponentPropsWithoutRef<'aside'>>
   Content: React.FC<React.ComponentPropsWithoutRef<'main'>>
 }
@@ -65,23 +65,33 @@ const PageWithSidebar: PageWithSidebarComponent = ({
   );
 };
 
-const Header: React.FC<React.ComponentPropsWithoutRef<'header'> & { title?: string, onBack?: () => void }> = ({
-                                                                                                                children,
-                                                                                                                className = '',
-                                                                                                                title,
-                                                                                                                onBack,
-                                                                                                                ...props
-                                                                                                              }) => (
+const Header: React.FC<React.ComponentPropsWithoutRef<'header'> & {
+  title?: string,
+  onBack?: () => void,
+  overrideContent?: boolean
+}> = ({
+        children,
+        className = '',
+        title,
+        onBack,
+        overrideContent = false,
+        ...props
+      }) => (
   <header className={cn('bg-background border-b p-4 flex justify-between items-center', className)} {...props}>
-    <div className="flex items-center">
-      <Button variant="ghost" size="icon" className="mr-2" onClick={onBack} aria-label="Back to list">
-        <ChevronLeft className="h-6 w-6" />
-      </Button>
-      <h1 className="text-xl font-bold">{title}</h1>
-    </div>
-    <div className="flex space-x-2">
-      {children}
-    </div>
+    {!overrideContent && (
+      <>
+        <div className="flex items-center">
+          <Button variant="ghost" size="icon" className="mr-2" onClick={onBack} aria-label="Back to list">
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+          <h1 className="text-xl font-bold">{title}</h1>
+        </div>
+        <div className="flex space-x-2">
+          {children}
+        </div>
+      </>
+    )}
+    {overrideContent && children}
   </header>
 );
 
