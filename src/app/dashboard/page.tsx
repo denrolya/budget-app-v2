@@ -44,7 +44,7 @@ const DashboardPage: React.FC = () => {
         <div className="col-span-3 md:col-span-1">
           <Card className="h-full">
             <CardHeader>
-              <CardTitle>Transactions</CardTitle>
+              <CardTitle>Categories Timeline</CardTitle>
             </CardHeader>
             <CardContent>
               <TimelineChart />

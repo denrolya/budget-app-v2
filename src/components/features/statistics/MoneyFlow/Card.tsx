@@ -3,7 +3,6 @@ import { Calendar } from 'lucide-react';
 import moment from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 
-import { PeriodValue, TimeframeValue } from '@/types/global';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
 import ConfigurationMenu from '@/components/features/statistics/MoneyFlow/ConfigurationMenu';
@@ -14,6 +13,7 @@ import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { PERIOD_OPTIONS, TIMEFRAME_OPTIONS } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
+import { PeriodValue, TimeframeValue } from '@/types/global';
 import { formatShortDate } from '@/utils/formatShortDate';
 
 interface Props {
@@ -99,7 +99,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
 
   return (
     <Card className={cn('w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25', className)}>
-      <CardHeader className="p-4 space-y-0.2">
+      <CardHeader className="p-4 space-y-0.2 pb-0">
         <div className="flex justify-between items-start">
           <CardTitle className="text-base font-medium">Money Flow</CardTitle>
           <ConfigurationMenu
@@ -120,29 +120,27 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
             timeframe={timeframe}
           />
         </div>
-        <CardDescription>
-          <ResponsiveTooltip
-            openDelay={1}
-            desktopComponent="hovercard"
-            contentClassName="bg-transparent border-none shadow-none"
-            triggerClassName="cursor-help"
-            content={<YearDoughnutTimeframeDisplayChart data={[previousTimeframe, currentTimeframe]} />}
-          >
-            <span className="flex flex-row">
-              <span className="text-xs flex items-center">
-                <Calendar className="inline h-3 w-3 mr-1" />
-                {formatShortDate(currentTimeframe.after)} - {formatShortDate(currentTimeframe.before)}
-              </span>
-              <span className="ml-1 text-xs text-muted-foreground flex items-center">
-                {' vs '}
-                <Calendar className="inline h-3 w-3 mx-1" />
-                {formatShortDate(previousTimeframe.after)} - {formatShortDate(previousTimeframe.before)}
-              </span>
-            </span>
-          </ResponsiveTooltip>
-        </CardDescription>
+        <CardDescription className="sr-only">Money flow statistics for the selected period.</CardDescription>
       </CardHeader>
       <CardContent className="p-3 pt-0">
+        <ResponsiveTooltip
+          openDelay={1}
+          desktopComponent="hovercard"
+          contentClassName="bg-transparent border-none shadow-none"
+          triggerClassName="cursor-help px-1 inline-flex flex-row"
+          content={<YearDoughnutTimeframeDisplayChart data={[previousTimeframe, currentTimeframe]} />}
+        >
+          <span className="text-xs flex items-center">
+            <Calendar className="inline h-3 w-3 mr-1" />
+            {formatShortDate(currentTimeframe.after)} - {formatShortDate(currentTimeframe.before)}
+          </span>
+          <span className="ml-1 text-xs text-muted-foreground flex items-center">
+            {' vs '}
+            <Calendar className="inline h-3 w-3 mx-1" />
+            {formatShortDate(previousTimeframe.after)} - {formatShortDate(previousTimeframe.before)}
+          </span>
+        </ResponsiveTooltip>
+
         {isLoading && <MoneyFlowSkeleton />}
 
         {(!isLoading && totalRevenue) && (

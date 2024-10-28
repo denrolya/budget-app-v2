@@ -47,7 +47,8 @@ interface Props {
   onSelect: (budget: Budget) => void;
 }
 
-const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
+const SidebarListing: React.FC<Props>
+  = ({ selected, onSelect }) => {
   const [budgets] = useState<Budget[]>(INITIAL_BUDGETS);
 
   return (

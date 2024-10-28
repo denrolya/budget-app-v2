@@ -5,10 +5,10 @@ import {
   Handshake,
   LayoutDashboard,
   PieChart,
-  Receipt,
+  PiggyBank,
+  Repeat,
   Tags,
   TestTube2,
-  Wallet,
 } from 'lucide-react';
 
 export const ROUTES = {
@@ -24,17 +24,17 @@ export const ROUTES = {
   },
   TRANSACTION_LIST: {
     path: '/transactions',
-    icon: Receipt,
+    icon: ArrowLeftRight,
     label: 'Transactions',
   },
   TRANSFER_LIST: {
     path: '/transfers',
-    icon: ArrowLeftRight,
+    icon: Repeat,
     label: 'Transfers',
   },
   ACCOUNT_LIST: {
     path: '/accounts',
-    icon: Wallet,
+    icon: PiggyBank,
     label: 'Accounts',
   },
   DEBT_LIST: {

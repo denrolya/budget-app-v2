@@ -4,6 +4,7 @@ import sumBy from 'lodash/sumBy';
 import { Plus } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { percentage } from '@/utils/percentage';
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountLink from '@/components/layout/SidebarAccountLink';
 import SidebarLink from '@/components/layout/SidebarLink';
@@ -37,6 +38,8 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
     debts,
     ({ convertedValues }) => convertedValues?.[baseCurrency] || 0,
   ), [baseCurrency, debts]);
+
+  const debtPercentage = useMemo(() => percentage(totalDebt, totalDebt + totalBalance), [percentage, totalBalance, totalDebt]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -143,7 +146,12 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
                 currency={baseCurrency} />
             </div>
             <div className="w-full flex justify-between items-center">
-              <span className="text-xs font-semibold text-accent-foreground/60">Total Debt</span>
+              <span className="text-xs font-semibold text-accent-foreground/60">
+                Total Debt
+                <span className="ml-1 text-[10px] text-destructive">
+                  ({debtPercentage.toFixed(0)}%)
+                </span>
+              </span>
               <MoneyValue
                 className="font-medium text-sm text-destructive text-mono"
                 amount={totalDebt}
