@@ -18,7 +18,7 @@ const iconMap: Record<AccountType, React.ElementType> = {
   internet: Globe,
   cash: Wallet,
   bank: CreditCard,
-  other: HelpCircle,
+  basic: HelpCircle,
 };
 
 const sizeMap = {

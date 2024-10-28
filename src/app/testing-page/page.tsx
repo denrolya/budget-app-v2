@@ -6,6 +6,7 @@ import TimelineChart from '@/components/features/statistics/TimelineChart.Exampl
 import BarChartWithDrawer from '@/components/features/statistics/BarChartWithDrawer.Example';
 import FunnelWithDrawer from '@/components/features/statistics/FunnelWithDrawer.Example';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import CardWithChart from '@/components/features/statistics/CardWithChart.Example';
 
 const TestingPage: React.FC = () => (
   <section className="p-4">
@@ -16,6 +17,7 @@ const TestingPage: React.FC = () => (
       </TabsList>
       <TabsContent value="nivo-charts">
         <h1>New Nivo Charts</h1>
+
         <div className="mb-6 grid grid-cols-1 md:grid-cols-2 space-x-2">
           <ExpenseSunburstChart type="expense" />
           <ExpenseSunburstChart type="income" />

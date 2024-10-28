@@ -6,14 +6,14 @@ export enum AccountType {
   Bank = 'bank',
   Cash = 'cash',
   Internet = 'internet',
-  Other = 'other',
+  Basic = 'basic',
 }
 
 export const ACCOUNT_TYPES_ORDER: AccountType[] = [
   AccountType.Bank,
   AccountType.Cash,
   AccountType.Internet,
-  AccountType.Other,
+  AccountType.Basic,
 ];
 
 const colorScheme = {
@@ -38,7 +38,7 @@ const colorScheme = {
     [CURRENCIES.HUF.code]: '#8B0000',
     [CURRENCIES.BTC.code]: '#FF8C00',
   },
-  [AccountType.Other]: {
+  [AccountType.Basic]: {
     [CURRENCIES.EUR.code]: '#66CCCC',
     [CURRENCIES.USD.code]: '#99FF99',
     [CURRENCIES.UAH.code]: '#FFEB99',

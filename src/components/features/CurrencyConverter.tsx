@@ -1,17 +1,7 @@
-import { ArrowLeftRight, ArrowRightLeft } from 'lucide-react';
+import { ArrowLeftRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CURRENCY_CODE } from '@/constants/currency';
@@ -26,7 +16,7 @@ interface Props {
 export const CurrencyConverter: React.FC<Props> = ({
                                                      defaultFromCurrency = CURRENCY_CODE.HUF,
                                                      defaultToCurrency = CURRENCY_CODE.EUR,
-                                                     defaultAmount = 1,
+                                                     defaultAmount = 1000,
                                                    }) => {
   const [fromCurrency, setFromCurrency] = useState<CURRENCY_CODE>(defaultFromCurrency);
   const [toCurrency, setToCurrency] = useState<CURRENCY_CODE>(defaultToCurrency);
@@ -46,7 +36,7 @@ export const CurrencyConverter: React.FC<Props> = ({
       case 'wse':
         return wiseRates;
       default:
-        return fixerRates;
+        return wiseRates;
     }
   }, [rateSource, fixerRates, monoRates, wiseRates]);
 
@@ -63,111 +53,103 @@ export const CurrencyConverter: React.FC<Props> = ({
     return rates[to] / rates[from];
   };
 
-  const availableCurrencies = useMemo(() => Object
-      .keys(rates)
-      .filter(currency => currency !== CURRENCY_CODE.BTC || rateSource === 'fx') as CURRENCY_CODE[],
+  const availableCurrencies = useMemo(() =>
+      Object.keys(rates).filter(currency => currency !== CURRENCY_CODE.BTC || rateSource === 'fx') as CURRENCY_CODE[],
     [rates, rateSource],
   );
 
+  const convertedAmount = (amount * getExchangeRate(fromCurrency, toCurrency)).toFixed(2);
+
   return (
-    <Drawer>
-      <DrawerTrigger asChild>
-        <Button variant="outline" className="w-full">
-          <ArrowRightLeft className="h-4 w-4 mr-2" />
-          Currency Converter
+    <div className="p-4 space-y-4">
+      <div className="flex space-x-2">
+        <Button
+          size="sm"
+          variant={rateSource === 'mnb' ? 'default' : 'outline'}
+          onClick={() => setRateSource('mnb')}
+        >
+          MNB
         </Button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader className="space-y-1">
-          <DrawerTitle>Currency Converter</DrawerTitle>
-          <DrawerDescription>Convert between different currencies</DrawerDescription>
-        </DrawerHeader>
-        <div className="p-4 space-y-3">
-          <div className="flex space-x-2">
-            <Button
-              size="sm"
-              variant={rateSource === 'mnb' ? 'default' : 'outline'}
-              onClick={() => setRateSource('mnb')}
-            >
-              MNB
-            </Button>
-            <Button
-              size="sm"
-              variant={rateSource === 'fx' ? 'default' : 'outline'}
-              onClick={() => setRateSource('fx')}
-            >
-              FX
-            </Button>
-            <Button
-              size="sm"
-              variant={rateSource === 'wse' ? 'default' : 'outline'}
-              onClick={() => setRateSource('wse')}
-            >
-              WSE
-            </Button>
-          </div>
-          <div className="flex items-center space-x-2">
+        <Button
+          size="sm"
+          variant={rateSource === 'fx' ? 'default' : 'outline'}
+          onClick={() => setRateSource('fx')}
+        >
+          FX
+        </Button>
+        <Button
+          size="sm"
+          variant={rateSource === 'wse' ? 'default' : 'outline'}
+          onClick={() => setRateSource('wse')}
+        >
+          WSE
+        </Button>
+      </div>
+      <div className="flex items-center space-x-2">
+        <div className="flex-1">
+          <div className="relative">
             <Input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.valueAsNumber || 0)}
-              className="w-1/2 font-mono"
+              className="w-full pr-20 font-mono text-lg"
             />
             <Select value={fromCurrency} onValueChange={(value) => setFromCurrency(value as CURRENCY_CODE)}>
-            <SelectTrigger className="w-1/4">
-                <SelectValue placeholder="From" />
+              <SelectTrigger className="absolute inset-y-0 right-0 w-20">
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {availableCurrencies.map((currency) => (
-                  <SelectItem key={currency} value={currency}>
-                    {currency}
-                  </SelectItem>
+                  <SelectItem key={currency} value={currency}>{currency}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Button size="icon" variant="ghost" onClick={swapCurrencies}>
-              <ArrowLeftRight className="h-4 w-4" />
-            </Button>
-            <Select value={toCurrency} onValueChange={(value) => setToCurrency(value as CURRENCY_CODE)}>
-            <SelectTrigger className="w-1/4">
-                <SelectValue placeholder="To" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableCurrencies.map((currency) => (
-                  <SelectItem key={currency} value={currency}>
-                    {currency}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="text-2xl font-bold font-mono">
-            {(amount * getExchangeRate(fromCurrency, toCurrency)).toFixed(2)} {toCurrency}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {presetAmounts.map((preset) => (
-              <Button
-                key={preset}
-                variant="outline"
-                size="sm"
-                onClick={() => setAmount(preset)}
-                className="font-mono"
-              >
-                {preset}
-              </Button>
-            ))}
-          </div>
-          <div className="text-xs text-muted-foreground font-mono">
-            1 {fromCurrency} = {getExchangeRate(fromCurrency, toCurrency).toFixed(4)} {toCurrency}
           </div>
         </div>
-        <DrawerFooter>
-          <DrawerClose asChild>
-            <Button variant="outline">Close</Button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+        <Button size="icon" variant="ghost" onClick={swapCurrencies}>
+          <ArrowLeftRight className="h-4 w-4" />
+        </Button>
+        <div className="flex-1">
+          <div className="relative">
+            <Input
+              type="number"
+              value={convertedAmount}
+              readOnly
+              className="w-full pr-20 font-mono text-lg"
+            />
+            <Select value={toCurrency} onValueChange={(value) => setToCurrency(value as CURRENCY_CODE)}>
+              <SelectTrigger className="absolute inset-y-0 right-0 w-20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {availableCurrencies.map((currency) => (
+                  <SelectItem key={currency} value={currency}>{currency}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+      <div className="text-sm text-muted-foreground">
+        {amount} {fromCurrency} = {convertedAmount} {toCurrency}
+      </div>
+      <div className="text-xs text-muted-foreground">
+        1 {fromCurrency} = {getExchangeRate(fromCurrency, toCurrency).toFixed(4)} {toCurrency}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {presetAmounts.map((preset) => (
+          <Button
+            key={preset}
+            variant="outline"
+            size="sm"
+            onClick={() => setAmount(preset)}
+            className="font-mono"
+          >
+            {preset}
+          </Button>
+        ))}
+      </div>
+    </div>
   );
 };
 

@@ -224,10 +224,11 @@ export const DailyLedgerPage: React.FC = () => {
             contentClassName="bg-transparent border-none shadow-none"
             triggerClassName="cursor-help"
             content={
-              <YearDoughnutTimeframeDisplayChart data={[{
-                after: dateRange.startDate,
-                before: dateRange.endDate,
-              }]} />
+              <YearDoughnutTimeframeDisplayChart
+                data={[{
+                  after: dateRange.startDate,
+                  before: dateRange.endDate,
+                }]} />
             }
           >
             <div className="flex flex-col">
@@ -289,40 +290,37 @@ export const DailyLedgerPage: React.FC = () => {
       )}
 
       <div className="flex-grow overflow-hidden">
-        {isLoading && (
+        {activeView === 'table' && isLoading && (
           <div className="h-full overflow-auto">
             <TableListingSkeleton startDate={dateRange.startDate} endDate={dateRange.endDate} />
           </div>
         )}
-        {!isLoading && (
-          <>
-            <div className="md:hidden h-full overflow-auto">
-              <DailyList
-                isLoading={isLoading}
-                groupedItems={groupedItems}
-                startDate={dateRange.startDate}
-                endDate={dateRange.endDate}
-              />
-            </div>
-            <div className="hidden md:block h-full overflow-auto">
-              {activeView === 'table' ? (
-                <TableListing
-                  isLoading={isLoading}
-                  groupedItems={groupedItems}
-                  startDate={dateRange.startDate}
-                  endDate={dateRange.endDate}
-                />
-              ) : (
-                <DailyList
-                  isLoading={isLoading}
-                  groupedItems={groupedItems}
-                  startDate={dateRange.startDate}
-                  endDate={dateRange.endDate}
-                />
-              )}
-            </div>
-          </>
-        )}
+
+        <div className="md:hidden h-full overflow-auto">
+          <DailyList
+            isLoading={isLoading}
+            groupedItems={groupedItems}
+            startDate={dateRange.startDate}
+            endDate={dateRange.endDate}
+          />
+        </div>
+        <div className="hidden md:block h-full overflow-auto">
+          {activeView === 'table' ? (
+            <TableListing
+              isLoading={isLoading}
+              groupedItems={groupedItems}
+              startDate={dateRange.startDate}
+              endDate={dateRange.endDate}
+            />
+          ) : (
+            <DailyList
+              isLoading={isLoading}
+              groupedItems={groupedItems}
+              startDate={dateRange.startDate}
+              endDate={dateRange.endDate}
+            />
+          )}
+        </div>
       </div>
 
       <div className="p-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
