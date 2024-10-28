@@ -145,11 +145,11 @@ const AccountDetail: React.FC<Props> = ({ account }) => {
         </TabsList>
         <TabsContent value="activity">
           <Card>
-            <CardHeader>
+            <CardHeader className="sr-only">
               <CardTitle>Activity</CardTitle>
               <CardDescription className="sr-only">List of all transactions for past 7 days</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               <ScrollArea className="h-[400px]">
                 {renderActivityContent()}
               </ScrollArea>

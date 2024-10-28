@@ -1,12 +1,11 @@
 import cn from 'classnames';
-import { Check, Laptop, LogOut, Moon, Sun, User, Command } from 'lucide-react';
+import { Check, Command, Laptop, LogOut, Moon, Sun, User } from 'lucide-react';
 import React from 'react';
 
+import { useHotkeys } from '@/components/common/HotkeysDialog';
 import ExchangeRatesDetails from '@/components/layout/ExchangeRatesDetails';
 import CurrencySelector from '@/components/layout/HeaderCurrencySelector';
-import HeaderLink from '@/components/layout/HeaderLink';
 import { Button } from '@/components/ui/button';
-import { useHotkeys } from '@/components/common/HotkeysDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,

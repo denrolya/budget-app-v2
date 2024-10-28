@@ -1,78 +1,21 @@
-import cn from 'classnames';
-import { Archive, Calendar, Download, Edit, Search } from 'lucide-react';
+import { Download, Edit } from 'lucide-react';
 import React, { useState } from 'react';
 
-import MoneyValue from '@/components/common/MoneyValue';
 import DebtDetails from '@/components/features/debts/Details';
+import SidebarListing from '@/components/features/debts/SidebarListing';
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useDebts } from '@/contexts/FinanceData';
+import { ROUTES } from '@/constants/routes';
+import Debt from '@/models/Debt';
 
 export const DebtsManagementPage: React.FC = () => {
-  const debts = useDebts();
-  const [selectedDebt, setSelectedDebt] = useState<any | null>(null);
-  const [showArchived, setShowArchived] = useState<boolean>(false);
-
-  const DebtList = () => (
-    <div className="flex flex-col h-full">
-      <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold mb-2">Debts</h2>
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search accounts" className="pl-8" />
-        </div>
-      </div>
-      <ScrollArea className="flex-1">
-        {debts.map((debt) => (
-          <div
-            key={debt.id}
-            className={cn('p-4 border-b cursor-pointer hover:bg-accent hover:text-accent-foreground', {
-              'bg-accent text-accent-foreground': selectedDebt?.id === debt.id,
-            })}
-            onClick={() => setSelectedDebt(debt)}
-          >
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center gap-2">
-                <h3 className="font-medium">{debt.debtor}</h3>
-              </div>
-              <MoneyValue
-                badge
-                amount={debt.balance}
-                currency={debt.currency}
-                values={debt.convertedValues} />
-            </div>
-            <div className="flex justify-between items-center text-xs text-muted-foreground">
-              {debt.closedAt && (
-                <span className="flex items-center gap-1">
-                  <Archive className="w-3 h-3" />
-                  Closed
-                </span>
-              )}
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">
-              <Calendar className="w-3 h-3 inline mr-1" />
-              Last updated: {debt.updatedAt?.fromNow()}
-            </div>
-          </div>
-        ))}
-        <div className="p-4">
-          <button
-            className="text-sm text-muted-foreground hover:text-foreground"
-            onClick={() => setShowArchived(!showArchived)}
-          >
-            {showArchived ? 'Hide Archived' : 'Show Archived'}
-          </button>
-        </div>
-      </ScrollArea>
-    </div>
-  );
+  const [selectedDebt, setSelectedDebt] = useState<Debt | null>(null);
+  const { icon: Icon } = ROUTES.DEBT_LIST;
 
   return (
     <PageWithSidebar contentScrollable>
       <PageWithSidebar.Sidebar>
-        <DebtList />
+        <SidebarListing selected={selectedDebt} onSelect={setSelectedDebt} />
       </PageWithSidebar.Sidebar>
       {selectedDebt && (
         <PageWithSidebar.Header title="Debt Details" onBack={() => setSelectedDebt(null)}>
@@ -93,8 +36,15 @@ export const DebtsManagementPage: React.FC = () => {
         )}
 
         {(!selectedDebt) && (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            Select an debt to view details
+          <div className="flex items-center justify-center h-full bg-muted -m-4">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                <Icon className="h-8 w-8 text-primary/60" />
+              </div>
+              <p className="text-muted-foreground max-w-[250px]">
+                Select a category from the sidebar to view details
+              </p>
+            </div>
           </div>
         )}
       </PageWithSidebar.Content>

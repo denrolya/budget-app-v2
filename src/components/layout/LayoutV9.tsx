@@ -1,32 +1,15 @@
 import React from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
 
 import { FormRenderer } from '@/components/common/FormRenderer';
+import { HotkeysProvider } from '@/components/common/HotkeysDialog';
 import Header from '@/components/layout/Header';
 import MobileNavigation from '@/components/layout/MobileNavigation';
 import Sidebar from '@/components/layout/Sidebar';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { FinanceDataProvider } from '@/contexts/FinanceData';
-import { FormProvider, FormType, useForm as useFormContext } from '@/contexts/Form';
+import FinanceDataProvider from '@/contexts/FinanceData';
+import { FormProvider } from '@/contexts/Form';
 import { SidebarProvider } from '@/contexts/sidebar';
-import { HotkeysProvider } from '@/components/common/HotkeysDialog';
-
-const HotkeyHandler: React.FC = () => {
-  const { openForm } = useFormContext();
-
-  useHotkeys(['shift+t'], (event) => {
-    event.preventDefault();
-    openForm(FormType.Transaction);
-  }, [openForm]);
-
-  useHotkeys(['shift+r'], (event) => {
-    event.preventDefault();
-    openForm(FormType.Transfer);
-  }, [openForm]);
-
-  return null;
-};
 
 export const LayoutV9: React.FC<React.PropsWithChildren> = ({ children }) => (
   <FinanceDataProvider>
@@ -44,7 +27,6 @@ export const LayoutV9: React.FC<React.PropsWithChildren> = ({ children }) => (
                   {children}
 
                   <MobileNavigation />
-                  <HotkeyHandler />
                   <FormRenderer />
                   <Toaster />
                 </main>

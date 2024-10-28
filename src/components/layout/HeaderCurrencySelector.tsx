@@ -54,7 +54,7 @@ export const HeaderCurrencySelector: React.FC<CurrencySelectorProps> = (props) =
       onValueChange={handleCurrencyChange}
       {...props}
     >
-      <SelectTrigger className="w-[100px] text-xs border-none shadow-none bg-transparent hover:bg-transparent focus:ring-0 p-0 h-auto hover:text-accent-foreground transition-colors">
+      <SelectTrigger className="w-[80px] text-xs border-none shadow-none bg-transparent hover:bg-transparent focus:ring-0 p-0 h-auto hover:text-accent-foreground transition-colors">
         <SelectValue>
           <div className="flex items-center">
             {renderCurrencyIcon(CURRENCIES[selectedCurrency] as CurrencyType)}

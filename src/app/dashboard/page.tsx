@@ -1,3 +1,4 @@
+import TimelineChart from '@/components/features/statistics/TimelineChart.Example';
 import React, { useState } from 'react';
 
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
@@ -46,7 +47,7 @@ const DashboardPage: React.FC = () => {
               <CardTitle>Transactions</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>Content</p>
+              <TimelineChart />
             </CardContent>
           </Card>
         </div>

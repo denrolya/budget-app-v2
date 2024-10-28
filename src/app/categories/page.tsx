@@ -1,22 +1,23 @@
-import { Tags } from 'lucide-react';
 import React, { useState } from 'react';
 
 import CategoryDetails from '@/components/features/categories/Details';
 import DetailsHeader from '@/components/features/categories/DetailsHeader';
-import SidebarTreeView from '@/components/features/categories/SidebarTreeView';
+import SidebarListing from '@/components/features/categories/SidebarListing';
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
+import { ROUTES } from '@/constants/routes';
 import Category from '@/models/Category';
 
 export const CategoryManagementPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const { icon: Icon } = ROUTES.CATEGORIES_PAGE;
 
   return (
     <PageWithSidebar>
       <PageWithSidebar.Sidebar>
-        <SidebarTreeView
-          selectedCategory={selectedCategory}
-          onCategorySelect={setSelectedCategory}
+        <SidebarListing
+          selected={selectedCategory}
+          onSelect={setSelectedCategory}
           setShowDetails={setShowDetails}
         />
       </PageWithSidebar.Sidebar>
@@ -29,16 +30,16 @@ export const CategoryManagementPage: React.FC = () => {
           <DetailsHeader selectedCategory={selectedCategory} onCategorySelect={setSelectedCategory} />
         </PageWithSidebar.Header>
       )}
-      <PageWithSidebar.Content>
+      <PageWithSidebar.Content className="p-4">
         {(selectedCategory && showDetails) && (
           <CategoryDetails category={selectedCategory} />
         )}
 
         {(!selectedCategory || !showDetails) && (
-          <div className="flex items-center justify-center h-full bg-muted/10">
+          <div className="flex items-center justify-center h-full bg-muted -m-4">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <Tags className="h-8 w-8 text-primary/60" />
+                <Icon className="h-8 w-8 text-primary/60" />
               </div>
               <p className="text-muted-foreground max-w-[250px]">
                 Select a category from the sidebar to view details

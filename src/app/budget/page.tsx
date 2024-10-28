@@ -1,8 +1,10 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-import { CalendarIcon, ChevronDownIcon, LineChartIcon, ListIcon, MenuIcon, PlusCircleIcon } from 'lucide-react';
+import { ChevronDownIcon, LineChartIcon, ListIcon, PlusCircleIcon } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { ROUTES } from '@/constants/routes';
+import SidebarListing from '@/components/features/budget/SidebarListing';
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
@@ -10,10 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { useScreenSize } from '@/hooks/useScreenSize';
 
-type Budget = {
+export type Budget = {
   id: string
   name: string
   startDate: Date
@@ -21,7 +21,7 @@ type Budget = {
   categories: Category[]
 }
 
-type Category = {
+export type Category = {
   id: string
   name: string
   budgeted: number
@@ -29,51 +29,9 @@ type Category = {
   children?: Category[]
 }
 
-export default function Component() {
+export const BudgetManagementPage = () => {
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
-  const [budgets, setBudgets] = useState<Budget[]>([
-    {
-      id: 'monthly',
-      name: 'Monthly Budget',
-      startDate: new Date(),
-      endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-      categories: [
-        { id: 'income', name: 'Income', budgeted: 5000, actual: 4800 },
-        {
-          id: 'expenses', name: 'Expenses', budgeted: 4000, actual: 3800, children: [
-            { id: 'housing', name: 'Housing', budgeted: 1500, actual: 1500 },
-            { id: 'food', name: 'Food', budgeted: 500, actual: 450 },
-            { id: 'transportation', name: 'Transportation', budgeted: 300, actual: 280 },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'yearly',
-      name: 'Yearly Budget',
-      startDate: new Date(new Date().getFullYear(), 0, 1),
-      endDate: new Date(new Date().getFullYear(), 11, 31),
-      categories: [
-        { id: 'income', name: 'Income', budgeted: 60000, actual: 30000 },
-        { id: 'expenses', name: 'Expenses', budgeted: 50000, actual: 25000 },
-      ],
-    },
-    {
-      id: 'lambo',
-      name: 'Lambo Savings',
-      startDate: new Date(),
-      categories: [
-        { id: 'savings', name: 'Savings', budgeted: 200000, actual: 50000 },
-      ],
-    },
-  ]);
-
-  const isDesktop = useScreenSize();
-
-  const handleBudgetSelect = (budgetId: string) => {
-    const budget = budgets.find(b => b.id === budgetId);
-    setSelectedBudget(budget || null);
-  };
+  const { icon: Icon } = ROUTES.BUDGETS_PAGE;
 
   const calculateProgress = (budgeted: number, actual: number) => Math.min((actual / budgeted) * 100, 100);
 
@@ -87,76 +45,43 @@ export default function Component() {
     }
   };
 
-  const Sidebar = () => (
-    <div className="flex flex-col h-full">
-      <ScrollArea className="flex-grow">
-        <div className="space-y-1 p-2">
-          {budgets.map(budget => (
-            <Button
-              key={budget.id}
-              variant={selectedBudget?.id === budget.id ? "secondary" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => handleBudgetSelect(budget.id)}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" aria-hidden="true" />
-              <span>{budget.name}</span>
-            </Button>
-          ))}
-        </div>
-      </ScrollArea>
-      <div className="p-2 border-t border-border">
-        <Button className="w-full">
-          <PlusCircleIcon className="mr-2 h-4 w-4" aria-hidden="true" />
-          <span>New Budget</span>
-        </Button>
-      </div>
-    </div>
-  );
-
   return (
-    <PageWithSidebar contentScrollable={false}>
+    <PageWithSidebar contentScrollable>
       <PageWithSidebar.Sidebar>
-        <Sidebar />
+        <SidebarListing selected={selectedBudget} onSelect={setSelectedBudget} />
       </PageWithSidebar.Sidebar>
-      <PageWithSidebar.Header title="Budget Details" onBack={() => setSelectedBudget(null)}>
-        <div className="flex items-center">
-          {!isDesktop && (
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="mr-2" aria-label="Open menu">
-                  <MenuIcon className="h-4 w-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-64 p-0">
-                <Sidebar />
-              </SheetContent>
-            </Sheet>
-          )}
-          <h1 className="text-xl md:text-2xl font-bold mr-4">
-            {selectedBudget ? selectedBudget.name : 'Select a Budget'}
-          </h1>
-          <Select>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select view" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="estimates">Estimates</SelectItem>
-              <SelectItem value="actuals">Actuals</SelectItem>
-              <SelectItem value="comparison">Comparison</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex space-x-2 mt-2 md:mt-0">
-          <Button variant="outline" size="sm" className="md:size-md">
-            <LineChartIcon className="mr-2 h-4 w-4" aria-hidden="true" />
-            <span>Statistics</span>
-          </Button>
-          <Button variant="outline" size="sm" className="md:size-md">
-            <ListIcon className="mr-2 h-4 w-4" aria-hidden="true" />
-            <span>Logs</span>
-          </Button>
-        </div>
-      </PageWithSidebar.Header>
+      {selectedBudget && (
+        <PageWithSidebar.Header
+          overrideContent
+          title={`${selectedBudget.name} Budget`}
+          onBack={() => setSelectedBudget(null)}>
+          <div className="flex items-center">
+            <h1 className="text-xl md:text-2xl font-bold mr-4">
+              {selectedBudget ? selectedBudget.name : 'Select a Budget'}
+            </h1>
+            <Select>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select view" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="estimates">Estimates</SelectItem>
+                <SelectItem value="actuals">Actuals</SelectItem>
+                <SelectItem value="comparison">Comparison</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex space-x-2 mt-2 md:mt-0">
+            <Button variant="outline" size="sm" className="md:size-md">
+              <LineChartIcon className="mr-2 h-4 w-4" aria-hidden="true" />
+              <span>Statistics</span>
+            </Button>
+            <Button variant="outline" size="sm" className="md:size-md">
+              <ListIcon className="mr-2 h-4 w-4" aria-hidden="true" />
+              <span>Logs</span>
+            </Button>
+          </div>
+        </PageWithSidebar.Header>
+      )}
       <PageWithSidebar.Content>
         <ScrollArea className="h-full">
           <div className="p-4 md:p-6 space-y-6">
@@ -196,8 +121,15 @@ export default function Component() {
                 </section>
               </>
             ) : (
-              <div className="text-center text-muted-foreground">
-                Select a budget from the sidebar to view details
+              <div className="flex items-center justify-center h-full bg-muted -m-4">
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                    <Icon className="h-8 w-8 text-primary/60" />
+                  </div>
+                  <p className="text-muted-foreground max-w-[250px]">
+                    Select a category from the sidebar to view details
+                  </p>
+                </div>
               </div>
             )}
           </div>
@@ -205,7 +137,7 @@ export default function Component() {
       </PageWithSidebar.Content>
     </PageWithSidebar>
   );
-}
+};
 
 const CategoryItem = ({ category, calculateProgress, depth = 0 }: {
   category: Category,
@@ -240,7 +172,8 @@ const CategoryItem = ({ category, calculateProgress, depth = 0 }: {
           <Input
             type="number"
             value={category.budgeted}
-            onChange={(e) => {/* Handle budget update */}}
+            onChange={(e) => {/* Handle budget update */
+            }}
             className="w-24"
             aria-label={`Budgeted amount for ${category.name}`}
           />
@@ -270,4 +203,6 @@ const CategoryItem = ({ category, calculateProgress, depth = 0 }: {
     </div>
   );
 };
+
+export default BudgetManagementPage;
 

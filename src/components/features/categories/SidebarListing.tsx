@@ -1,34 +1,34 @@
 import cn from 'classnames';
 import { debounce, filter, includes, sortBy, toLower } from 'lodash';
-import { ChevronRight, Folder, FolderClosed, FolderOpenDot, Home, Info, Search } from 'lucide-react';
+import { ChevronRight, Folder, FolderClosed, FolderOpenDot, Info, Search } from 'lucide-react';
 import moment from 'moment/moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { useScreenSize } from '@/hooks/useScreenSize';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/contexts/FinanceData';
+import { useScreenSize } from '@/hooks/useScreenSize';
 import Category from '@/models/Category';
 import { Type as TransactionType } from '@/types/transaction';
 
 interface Props {
-  selectedCategory: Category | null;
-  onCategorySelect: (category: Category | null) => void;
+  selected: Category | null;
+  onSelect: (category: Category | null) => void;
   setShowDetails: (show: boolean) => void;
 }
 
-const SidebarTreeView: React.FC<Props> = ({ selectedCategory, onCategorySelect, setShowDetails }) => {
-  const expenseCategories = useExpenseCategoriesTree();
-  const incomeCategories = useIncomeCategoriesTree();
-  const [currentPath, setCurrentPath] = useState<Category[]>([]);
+const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails }) => {
+  const isDesktop = useScreenSize();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [currentPath, setCurrentPath] = useState<Category[]>([]);
   const [activeTab, setActiveTab] = useState<TransactionType>(TransactionType.Expense);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const isDesktop = useScreenSize();
+  const expenseCategories = useExpenseCategoriesTree();
+  const incomeCategories = useIncomeCategoriesTree();
 
   const sortCategories = (categories: Category[]): Category[] =>
     sortBy(categories, 'name');
@@ -114,7 +114,7 @@ const SidebarTreeView: React.FC<Props> = ({ selectedCategory, onCategorySelect, 
 
     const handleCategoryClick = (category: Category) => {
       if (isDesktop) {
-        onCategorySelect(category);
+        onSelect(category);
         setShowDetails(true);
       }
       if (category.children && category.children.length > 0) {
@@ -124,7 +124,7 @@ const SidebarTreeView: React.FC<Props> = ({ selectedCategory, onCategorySelect, 
 
     const handleInfoClick = (e: React.MouseEvent, category: Category) => {
       e.stopPropagation();
-      onCategorySelect(category);
+      onSelect(category);
       setShowDetails(true);
     };
 
@@ -138,7 +138,7 @@ const SidebarTreeView: React.FC<Props> = ({ selectedCategory, onCategorySelect, 
               className={cn(
                 'border-b cursor-pointer hover:bg-accent hover:text-accent-foreground',
                 {
-                  'bg-accent text-accent-foreground': isDesktop && selectedCategory?.id === category.id,
+                  'bg-accent text-accent-foreground': isDesktop && selected?.id === category.id,
                 },
               )}
               onClick={() => handleCategoryClick(category)}
@@ -210,38 +210,23 @@ const SidebarTreeView: React.FC<Props> = ({ selectedCategory, onCategorySelect, 
           />
         </div>
       </div>
-      <div className="p-2 border-b">
-        <ScrollArea className="w-full">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setCurrentPath([]);
-                setSearchTerm('');
-                onCategorySelect(null);
-                setExpandedCategories({});
-              }}
-            >
-              <Home className="w-4 h-4 mr-1" />
-              Root
-            </Button>
-            {currentPath.map((category, index) => (
-              <React.Fragment key={category.id}>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setCurrentPath(prev => prev.slice(0, index + 1));
-                    onCategorySelect(category);
-                  }}
-                >
-                  {category.name}
-                </Button>
-              </React.Fragment>
-            ))}
-          </div>
+      <div className="border-b">
+        <ScrollArea className="w-full flex items-center gap-2">
+          {currentPath.map((category, index) => (
+            <React.Fragment key={category.id}>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setCurrentPath(prev => prev.slice(0, index + 1));
+                  onSelect(category);
+                }}
+              >
+                {category.name}
+              </Button>
+            </React.Fragment>
+          ))}
         </ScrollArea>
       </div>
       <Tabs
@@ -249,7 +234,7 @@ const SidebarTreeView: React.FC<Props> = ({ selectedCategory, onCategorySelect, 
         onValueChange={(value) => {
           setActiveTab(value as TransactionType);
           setCurrentPath([]);
-          onCategorySelect(null);
+          onSelect(null);
         }}
         className="flex flex-col flex-grow overflow-hidden"
       >
@@ -280,4 +265,4 @@ const SidebarTreeView: React.FC<Props> = ({ selectedCategory, onCategorySelect, 
   );
 };
 
-export default SidebarTreeView;
+export default SidebarListing;

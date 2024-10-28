@@ -2,7 +2,8 @@ import cn from 'classnames';
 import { Equal } from 'lucide-react';
 import React, { useMemo } from 'react';
 
-import CurrencyConverter from '@/components/features/CurrencyConverter';
+import { Button } from '@/components/ui/button';
+import { useFinanceData } from '@/contexts/FinanceData';
 import { CURRENCY_CODE } from '@/constants/currency';
 import MoneyValue from '@/components/common/MoneyValue';
 import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/contexts/FinanceData';
@@ -24,6 +25,7 @@ interface RateDisplayProps {
 }
 
 export const ExchangeRatesPresets: React.FC = () => {
+  const { toggleCurrencyConverter } = useFinanceData();
   const fixerRates = useFixerExchangeRates();
   const monoRates = useMonobankExchangeRates();
   const wiseRates = useWiseExchangeRates();
@@ -131,7 +133,9 @@ export const ExchangeRatesPresets: React.FC = () => {
         <RateComparison from={CURRENCY_CODE.BTC} to={CURRENCY_CODE.USD} />
       </div>
 
-      <CurrencyConverter />
+      <Button variant="outline" className="w-full" onClick={toggleCurrencyConverter}>
+        Currency Converter
+      </Button>
     </div>
   );
 };

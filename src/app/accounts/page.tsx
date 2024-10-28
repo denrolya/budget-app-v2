@@ -1,128 +1,21 @@
-import cn from 'classnames';
-import sumBy from 'lodash/sumBy';
-import { Archive, Calendar, Download, Edit, Search } from 'lucide-react';
-import React, { useCallback, useRef, useState } from 'react';
+import { Download, Edit } from 'lucide-react';
+import React, { useState } from 'react';
 
-import MoneyValue from '@/components/common/MoneyValue';
-import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
-import AccountAvatar from '@/components/features/accounts/Avatar';
 import AccountDetails from '@/components/features/accounts/Details';
+import SidebarListing from '@/components/features/accounts/SidebarListing';
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useBaseCurrency } from '@/contexts/auth';
-import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
-import Account, { AccountType } from '@/models/Account';
+import { ROUTES } from '@/constants/routes';
+import Account from '@/models/Account';
 
 export const AccountsManagementPage: React.FC = () => {
-  const baseCurrency = useBaseCurrency();
-  const accounts = useAccountsWithDefaultOrder();
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
-  const [showArchived, setShowArchived] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const selectedAccountRef = useRef<HTMLDivElement>(null);
-
-  const handleAccountSelect = useCallback((account: Account) => {
-    setSelectedAccount(account);
-    setTimeout(() => {
-      selectedAccountRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      });
-    }, 0);
-  }, []);
-
-  const filteredAccounts = accounts.filter(account =>
-    (showArchived || !account.isArchived()) &&
-    account.nameWithCurrency.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
-  const groupedAccounts = Object.values(AccountType).reduce((acc, type) => {
-    acc[type] = filteredAccounts.filter(account => account.type === type);
-    return acc;
-  }, {} as Record<AccountType, Account[]>);
-
-  const AccountList: React.FC = () => (
-    <div className="flex flex-col h-full">
-      <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold mb-2">Accounts</h2>
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search accounts"
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-      <ScrollArea className="flex-1">
-        {Object.values(AccountType).map((type) => {
-          if (groupedAccounts[type].length === 0) return null;
-
-          const groupTotal = sumBy(groupedAccounts[type], ({ convertedValues }) => convertedValues?.[baseCurrency] || 0);
-
-          return (
-            <div key={type} className="mb-4">
-              <h3 className="px-4 py-2 text-sm font-semibold text-muted-foreground capitalize flex justify-between">
-                <span>{type}</span>
-                <MoneyValue amount={groupTotal} currency={baseCurrency} />
-              </h3>
-              {groupedAccounts[type].map((account) => (
-                <div
-                  key={account.id}
-                  ref={selectedAccount?.id === account.id ? selectedAccountRef : null}
-                  className={cn('p-4 border-b cursor-pointer hover:bg-accent hover:text-accent-foreground', {
-                    'bg-accent text-accent-foreground': selectedAccount?.id === account.id,
-                  })}
-                  onClick={() => handleAccountSelect(account)}
-                >
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="flex items-center gap-2">
-                      <AccountAvatar account={account} size="sm" />
-                      <h3 className="font-medium">{account.nameWithCurrency}</h3>
-                    </div>
-                    <MoneyValue
-                      badge
-                      amount={account.balance}
-                      currency={account.currency}
-                      values={account.convertedValues}
-                    />
-                  </div>
-                  <div className="flex justify-between items-center text-xs text-muted-foreground">
-                    {account.archivedAt && (
-                      <span className="flex items-center gap-1">
-                        <Archive className="w-3 h-3" />
-                        Archived
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    <Calendar className="w-3 h-3 inline mr-1" />
-                    Last updated: <RelativeDatetimeDisplay date={account.updatedAt} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          );
-        })}
-        <div className="p-4">
-          <button
-            className="text-sm text-muted-foreground hover:text-foreground"
-            onClick={() => setShowArchived(!showArchived)}
-          >
-            {showArchived ? 'Hide Archived' : 'Show Archived'}
-          </button>
-        </div>
-      </ScrollArea>
-    </div>
-  );
+  const { icon: Icon } = ROUTES.ACCOUNT_LIST;
 
   return (
     <PageWithSidebar contentScrollable={true}>
       <PageWithSidebar.Sidebar>
-        <AccountList />
+        <SidebarListing selected={selectedAccount} onSelect={setSelectedAccount} />
       </PageWithSidebar.Sidebar>
       {selectedAccount && (
         <PageWithSidebar.Header title="Account Details" onBack={() => setSelectedAccount(null)}>
@@ -142,8 +35,15 @@ export const AccountsManagementPage: React.FC = () => {
         )}
 
         {(!selectedAccount) && (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            Select an account to view details
+          <div className="flex items-center justify-center h-full bg-muted -m-4">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                <Icon className="h-8 w-8 text-primary/60" />
+              </div>
+              <p className="text-muted-foreground max-w-[250px]">
+                Select an account from the sidebar to view details
+              </p>
+            </div>
           </div>
         )}
       </PageWithSidebar.Content>

@@ -15,6 +15,7 @@ import Category, { CategoryTreeBuilder } from '@/models/Category';
 import { axiosFetcher } from '@/services/api';
 import Debt from '@/models/Debt';
 import { RawTransactionDTO, ConvertedValues } from '@/types/transaction';
+import CurrencyConverter from '@/components/features/CurrencyConverter';
 
 export type ExchangeRatesData = {
   fixer: ConvertedValues;
@@ -41,6 +42,7 @@ export interface FinanceDataContextType {
   retry: () => void;
   updateAccount: (updatedAccount: Account) => void;
   refetchAccounts: () => Promise<void>;
+  toggleCurrencyConverter: () => void;
 }
 
 const INITIAL_STATE: FinanceData = {
@@ -67,6 +69,8 @@ const ENDPOINTS = {
 export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [progress, setProgress] = useState<number>(0);
   const queryClient = useQueryClient();
+  const [currencyConverterOpen, setCurrencyConverterOpen] = useState<boolean>(false);
+  const toggleCurrencyConverter = useCallback(() => setCurrencyConverterOpen((prev) => !prev), []);
 
   const queryOptions = {
     retry: MAX_RETRIES,
@@ -246,8 +250,11 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
   }
 
   return (
-    <FinanceDataContext.Provider value={{ data: financeData, isLoading, error, retry, updateAccount, refetchAccounts }}>
+    <FinanceDataContext.Provider value={{ data: financeData, isLoading, error, retry, updateAccount, refetchAccounts, toggleCurrencyConverter }}>
       {children}
+      {(!isLoading && !error && financeData.exchangeRates) && (
+        <CurrencyConverter open={currencyConverterOpen} onOpenChange={setCurrencyConverterOpen} />
+      )}
     </FinanceDataContext.Provider>
   );
 };

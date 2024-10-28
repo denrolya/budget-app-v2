@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useHotkeys as useReactHotkeysHook } from 'react-hotkeys-hook';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useFinanceData } from '@/contexts/FinanceData';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -22,6 +23,7 @@ const globalHotkeys: HotkeyCategory = {
     { windows: 'Shift+A', mac: 'Shift+A', description: 'Open Account Form' },
     { windows: 'Shift+T', mac: 'Shift+T', description: 'Open Transaction Form' },
     { windows: 'Shift+R', mac: 'Shift+R', description: 'Open Transfer Form' },
+    { windows: 'Shift+C', mac: 'Shift+C', description: 'Open Currency Converter' },
   ],
 };
 
@@ -41,6 +43,7 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
   const [currentPage, setCurrentPage] = useState<string>('Global');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { openForm } = useFormContext();
+  const { toggleCurrencyConverter } = useFinanceData();
 
   useReactHotkeysHook('shift+t', (event) => {
     event.preventDefault();
@@ -56,6 +59,11 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
     event.preventDefault();
     openForm(FormType.Account);
   }, [openForm]);
+
+  useReactHotkeysHook('shift+c', (event) => {
+    event.preventDefault();
+    toggleCurrencyConverter();
+  }, [toggleCurrencyConverter]);
 
   const addPageHotkeys = (pageName: string, hotkeys: Hotkey[]) => {
     setPageHotkeys(prev => ({
@@ -135,13 +143,16 @@ export const HotkeysDialog: React.FC<HotkeysDialogProps> = ({ isOpen, onClose })
         ))}
       </div>
     </div>
-  )
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="w-[60vw] max-w-3xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center mb-4">Keyboard Shortcuts</DialogTitle>
+          <DialogDescription className="sr-only">
+            A list of keyboard shortcuts available in the application
+          </DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-[60vh] pr-4">
           {allCategories.map(renderHotkeyList)}

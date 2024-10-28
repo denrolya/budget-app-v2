@@ -1,9 +1,10 @@
-import { ChevronLeft, ChevronRight, Download, Edit, Plus } from 'lucide-react';
+import { Plus } from "lucide-react"
 import React, { useEffect, useState } from 'react';
 
+import CategoriesSunburst from '@/components/features/statistics/Sunburst.Example';
 import FormattedListing from '@/components/features/transactions/FormattedListing';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
@@ -41,19 +42,26 @@ export const CategoryDetails: React.FC<Props> = ({ category }) => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex-1 overflow-auto p-4">
+      <div className="flex-1 overflow-auto">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList>
             <TabsTrigger value="activity">Transactions</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
+            <TabsTrigger value="data">Data</TabsTrigger>
           </TabsList>
           <TabsContent value="activity">
             <Card>
-              <CardHeader>
+              <CardHeader className="sr-only">
                 <CardTitle>Activity</CardTitle>
-                <CardDescription className="sr-only">Activity for the past month</CardDescription>
+                <CardDescription>Activity for the past month</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
+                <div className="flex flex-row justify-between p-4">
+                  <span />
+                  <Button size="icon" className="rounded-full" onClick={onAddTransaction}>
+                    <Plus className="h-4 w-4" />
+                    <span className="sr-only">Add item</span>
+                  </Button>
+                </div>
                 <ScrollArea className="h-[400px]">
                   <FormattedListing
                     isLoading={isTransactionsLoading}
@@ -71,22 +79,16 @@ export const CategoryDetails: React.FC<Props> = ({ category }) => {
                   />
                 </ScrollArea>
               </CardContent>
-              <CardFooter>
-                <Button onClick={onAddTransaction}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Transaction
-                </Button>
-              </CardFooter>
             </Card>
           </TabsContent>
-          <TabsContent value="history">
+          <TabsContent value="data">
             <Card>
               <CardHeader>
-                <CardTitle>Category History</CardTitle>
+                <CardTitle>Data</CardTitle>
                 <CardDescription className="sr-only">Timeline of changes related to this category</CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Empty content for now */}
+                <CategoriesSunburst categories={[category]} />
               </CardContent>
             </Card>
           </TabsContent>

@@ -82,13 +82,13 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
           </TabsList>
           <TabsContent value="transactions">
             <Card>
-              <CardHeader>
+              <CardHeader className="sr-only">
                 <CardTitle>Transactions</CardTitle>
                 <CardDescription>
                   {totalTransactionsCount} transactions of total value <MoneyValue amount={totalTransactionsValue} />
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 <ScrollArea className="h-[300px]">
                   {groupedTransactions.length > 0 && (
                     <>

@@ -4,14 +4,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
 import { ArrowDownCircle, ArrowUpCircle, X } from 'lucide-react';
 import moment from 'moment';
-import { forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useImperativeHandle, useState, useRef } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import * as z from 'zod';
+import z from 'zod';
 
 import { useTransactionMutations } from '@/hooks/useTransactionMutations';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -92,9 +93,41 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
   });
   useImperativeHandle(ref, () => formRef.current!);
 
+  const [noteHeight, setNoteHeight] = useState('auto');
+  const noteRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (noteRef.current) {
+      noteRef.current.style.height = 'auto';
+      noteRef.current.style.height = `${noteRef.current.scrollHeight}px`;
+    }
+  }, [form.watch('note')]);
+
+
   return (
     <Form {...form}>
       <form className="space-y-2">
+        <FormField
+          control={form.control}
+          name="isDraft"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>Draft</FormLabel>
+                <p className="text-sm text-muted-foreground">
+                  This transaction will be saved as a draft.
+                </p>
+              </div>
+            </FormItem>
+          )}
+        />
+
         <FormField
           name="type"
           control={form.control}
@@ -214,30 +247,19 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
             <FormItem>
               <FormLabel>Note</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Add a note..." />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="isDraft"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
+                <Textarea
+                  {...field}
+                  ref={noteRef}
+                  placeholder="Add a note..."
+                  className="min-h-[2.5rem] resize-none overflow-hidden"
+                  style={{ height: noteHeight }}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setNoteHeight(`${e.target.scrollHeight}px`);
+                  }}
                 />
               </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel>Draft</FormLabel>
-                <p className="text-sm text-muted-foreground">
-                  This transaction will be saved as a draft.
-                </p>
-              </div>
+              <FormMessage />
             </FormItem>
           )}
         />

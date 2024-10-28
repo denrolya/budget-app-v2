@@ -7,8 +7,8 @@ import AccountForm from '@/components/features/accounts/Form';
 import TransactionForm from '@/components/features/transactions/Form';
 import TransferForm from '@/components/features/transfers/Form';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { Separator } from '@/components/ui/separator';
 
@@ -127,9 +127,10 @@ export const FormRenderer: React.FC = () => {
   if (isDesktop) {
     return (
       <Dialog open={formState.isOpen} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
+            <DialogDescription className="sr-only">Form: {title}</DialogDescription>
           </DialogHeader>
           {content}
           <DialogFooter className="border-t pt-2">
@@ -145,6 +146,7 @@ export const FormRenderer: React.FC = () => {
       <DrawerContent>
         <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>
+          <DrawerDescription className="sr-only">Form: {title}</DrawerDescription>
         </DrawerHeader>
         <div className="px-4 pb-4 overflow-y-auto">
           {content}

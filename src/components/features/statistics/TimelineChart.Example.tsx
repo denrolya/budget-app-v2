@@ -1,17 +1,15 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+import CategoryTypeahead from '@/components/common/CategoryTypeahead';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useTimelineStatistics } from '@/hooks/statistics/useTimelineStatisticsRequest';
+import { Type as TransactionType } from '@/types/transaction';
 // @ts-nocheck
 import { ResponsiveLine, Serie } from '@nivo/line';
 import debounce from 'lodash/debounce';
 import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
-import CategoryTypeahead from '@/components/common/CategoryTypeahead';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useTimelineStatistics } from '@/hooks/statistics/useTimelineStatisticsRequest';
-import { Type as TransactionType } from '@/types/transaction';
 
 type Period = 'P1D' | 'P1W' | 'P1M' | 'P1Y'
 
@@ -66,7 +64,7 @@ const CustomTooltip: React.FC<TooltipProps> = ({ point, serie }) => {
 
 const professionalColors = [
   '#4e79a7', '#f28e2c', '#e15759', '#76b7b2', '#59a14f',
-  '#edc949', '#af7aa1', '#ff9da7', '#9c755f', '#bab0ab'
+  '#edc949', '#af7aa1', '#ff9da7', '#9c755f', '#bab0ab',
 ];
 
 export default function CategoryTimelineChart() {
@@ -117,105 +115,107 @@ export default function CategoryTimelineChart() {
   };
 
   return (
-    <Card className="w-full max-w-4xl">
-      <CardHeader>
-        <CardTitle>Categories Timeline</CardTitle>
-        <CardDescription>Linechart showing expenses over time for selected categories</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between gap-4">
-          <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Select period" />
-            </SelectTrigger>
-            <SelectContent>
-              {periodOptions.map(option => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <CategoryTypeahead
-            multiple
-            valueField="id"
-            value={selectedCategories}
-            onChange={handleCategoriesChange}
-            type={TransactionType.Expense}
+    <>
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Select period" />
+          </SelectTrigger>
+          <SelectContent>
+            {periodOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <CategoryTypeahead
+          multiple
+          valueField="id"
+          value={selectedCategories}
+          onChange={handleCategoriesChange}
+          type={TransactionType.Expense}
+        />
+      </div>
+      <div className="h-[400px] relative" aria-live="polite">
+        {isLoading ? (
+          <Skeleton className="w-full h-full" />
+        ) : error ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <p className="text-red-500 dark:text-red-400">Error: {error.message}</p>
+          </div>
+        ) : chartData.length === 0 ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <p className="text-gray-500 dark:text-gray-400">No data available for the selected period and categories.
+            </p>
+          </div>
+        ) : (
+          <ResponsiveLine
+            data={chartData}
+            margin={{ top: 10, right: 10, bottom: 30, left: 0 }}
+            xScale={{
+              type: 'time',
+              format: 'native',
+              precision: 'day',
+            }}
+            xFormat="time:%Y-%m-%d"
+            yScale={{
+              type: 'linear',
+              min: 'auto',
+              max: 'auto',
+              stacked: false,
+              reverse: false,
+            }}
+            axisBottom={{
+              format: (value) => {
+                const date = new Date(value);
+                return selectedPeriod === 'P1D' ? date.getDate().toString() :
+                  selectedPeriod === 'P1W' ? `W${moment(date).isoWeek()}` :
+                    selectedPeriod === 'P1M' ? moment(date).format('MMM') :
+                      moment(date).format('YYYY');
+              },
+              tickValues: 5,
+              tickSize: 0,
+              tickPadding: 10,
+            }}
+            axisLeft={null}
+            enableGridX={false}
+            enableGridY={false}
+            enablePoints={false}
+            enableSlices="x"
+            curve="monotoneX"
+            useMesh={true}
+            theme={{
+              axis: {
+                ticks: { text: { fontSize: 12, fill: 'var(--chart-text-color)' } },
+                domain: { line: { stroke: 'transparent' } },
+              },
+              crosshair: {
+                line: {
+                  stroke: 'var(--chart-crosshair-color)',
+                  strokeWidth: 1,
+                  strokeOpacity: 0.75,
+                  strokeDasharray: '6 6',
+                },
+              },
+              tooltip: {
+                container: {
+                  background: 'var(--chart-tooltip-background)',
+                  color: 'var(--chart-tooltip-text-color)',
+                  fontSize: 12,
+                },
+              },
+            }}
+            colors={professionalColors}
+            lineWidth={2}
+            tooltip={({ point }) => (
+              <CustomTooltip point={point} serie={chartData.find(d => d.id === point.serieId) as Serie} />
+            )}
+            role="img"
+            ariaLabel="Category expenses timeline chart"
           />
-        </div>
-        <div className="h-[400px] relative" aria-live="polite">
-          {isLoading ? (
-            <Skeleton className="w-full h-full" />
-          ) : error ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-red-500 dark:text-red-400">Error: {error.message}</p>
-            </div>
-          ) : chartData.length === 0 ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-gray-500 dark:text-gray-400">No data available for the selected period and categories.</p>
-            </div>
-          ) : (
-            <ResponsiveLine
-              data={chartData}
-              margin={{ top: 10, right: 10, bottom: 30, left: 0 }}
-              xScale={{
-                type: 'time',
-                format: 'native',
-                precision: 'day',
-              }}
-              xFormat="time:%Y-%m-%d"
-              yScale={{
-                type: 'linear',
-                min: 'auto',
-                max: 'auto',
-                stacked: false,
-                reverse: false,
-              }}
-              axisBottom={{
-                format: (value) => {
-                  const date = new Date(value);
-                  return selectedPeriod === 'P1D' ? date.getDate().toString() :
-                    selectedPeriod === 'P1W' ? `W${moment(date).isoWeek()}` :
-                      selectedPeriod === 'P1M' ? moment(date).format('MMM') :
-                        moment(date).format('YYYY');
-                },
-                tickValues: 5,
-                tickSize: 0,
-                tickPadding: 10,
-              }}
-              axisLeft={null}
-              enableGridX={false}
-              enableGridY={false}
-              enablePoints={false}
-              enableSlices="x"
-              curve="monotoneX"
-              useMesh={true}
-              theme={{
-                axis: {
-                  ticks: { text: { fontSize: 12, fill: 'var(--chart-text-color)' } },
-                  domain: { line: { stroke: 'transparent' } },
-                },
-                crosshair: { line: { stroke: 'var(--chart-crosshair-color)', strokeWidth: 1, strokeOpacity: 0.75, strokeDasharray: '6 6' } },
-                tooltip: {
-                  container: {
-                    background: 'var(--chart-tooltip-background)',
-                    color: 'var(--chart-tooltip-text-color)',
-                    fontSize: 12,
-                  },
-                },
-              }}
-              colors={professionalColors}
-              lineWidth={2}
-              tooltip={({ point }) => (
-                <CustomTooltip point={point} serie={chartData.find(d => d.id === point.serieId) as Serie} />
-              )}
-              role="img"
-              ariaLabel="Category expenses timeline chart"
-            />
-          )}
-        </div>
-      </CardContent>
-    </Card>
+        )}
+      </div>
+    </>
   );
 }

@@ -1,27 +1,50 @@
-import { ArrowLeftRight } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { ArrowUpDown } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CURRENCY_CODE } from '@/constants/currency';
 import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/contexts/FinanceData';
 
+type RATE_SOURCE = 'mnb' | 'fx' | 'wse'
+
+const rateSources: RATE_SOURCE[] = ['mnb', 'wse', 'fx'];
+const presetAmounts = [10, 50, 100, 500, 1000, 5000, 10000];
+
+const CurrencyFlag = ({ code }: { code: CURRENCY_CODE }) => {
+  const flagEmoji = {
+    [CURRENCY_CODE.USD]: '🇺🇸',
+    [CURRENCY_CODE.EUR]: '🇪🇺',
+    [CURRENCY_CODE.HUF]: '🇭🇺',
+    [CURRENCY_CODE.UAH]: '🇺🇦',
+    [CURRENCY_CODE.BTC]: '₿',
+    [CURRENCY_CODE.ETH]: 'Ξ',
+  }[code];
+
+  return <span className="mr-2">{flagEmoji}</span>;
+};
+
 interface Props {
   defaultFromCurrency?: CURRENCY_CODE;
   defaultToCurrency?: CURRENCY_CODE;
   defaultAmount?: number;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export const CurrencyConverter: React.FC<Props> = ({
                                                      defaultFromCurrency = CURRENCY_CODE.HUF,
                                                      defaultToCurrency = CURRENCY_CODE.EUR,
                                                      defaultAmount = 1000,
+                                                     open,
+                                                     onOpenChange,
                                                    }) => {
   const [fromCurrency, setFromCurrency] = useState<CURRENCY_CODE>(defaultFromCurrency);
   const [toCurrency, setToCurrency] = useState<CURRENCY_CODE>(defaultToCurrency);
   const [amount, setAmount] = useState<number>(defaultAmount);
-  const [rateSource, setRateSource] = useState<'mnb' | 'fx' | 'wse'>('mnb');
+  const [rateSource, setRateSource] = useState<RATE_SOURCE>('mnb');
 
   const fixerRates = useFixerExchangeRates();
   const monoRates = useMonobankExchangeRates();
@@ -45,13 +68,15 @@ export const CurrencyConverter: React.FC<Props> = ({
     setToCurrency(fromCurrency);
   };
 
-  const presetAmounts = [1, 5, 10, 50, 100, 500, 1000];
-
   const getExchangeRate = (from: CURRENCY_CODE, to: CURRENCY_CODE): number => {
     if (from === to) return 1;
     if (!rates[from] || !rates[to]) return 0;
     return rates[to] / rates[from];
   };
+
+  useEffect(() => {
+    setAmount((prevAmount) => Math.min(Math.max(prevAmount, 0), 10000));
+  }, [fromCurrency, toCurrency]);
 
   const availableCurrencies = useMemo(() =>
       Object.keys(rates).filter(currency => currency !== CURRENCY_CODE.BTC || rateSource === 'fx') as CURRENCY_CODE[],
@@ -60,96 +85,108 @@ export const CurrencyConverter: React.FC<Props> = ({
 
   const convertedAmount = (amount * getExchangeRate(fromCurrency, toCurrency)).toFixed(2);
 
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setAmount(Number(value));
+    }
+  };
+
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex space-x-2">
-        <Button
-          size="sm"
-          variant={rateSource === 'mnb' ? 'default' : 'outline'}
-          onClick={() => setRateSource('mnb')}
-        >
-          MNB
-        </Button>
-        <Button
-          size="sm"
-          variant={rateSource === 'fx' ? 'default' : 'outline'}
-          onClick={() => setRateSource('fx')}
-        >
-          FX
-        </Button>
-        <Button
-          size="sm"
-          variant={rateSource === 'wse' ? 'default' : 'outline'}
-          onClick={() => setRateSource('wse')}
-        >
-          WSE
-        </Button>
-      </div>
-      <div className="flex items-center space-x-2">
-        <div className="flex-1">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[700px] p-4">
+        <DialogHeader className="sr-only">
+          <DialogTitle className="text-2xl font-bold">Currency Converter</DialogTitle>
+          <DialogDescription>
+            Convert between currencies using the latest exchange rates
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex space-x-1 mb-4">
+          {rateSources.map((source) => (
+            <Button
+              key={source}
+              size="sm"
+              variant={rateSource === source ? 'default' : 'outline'}
+              onClick={() => setRateSource(source)}
+            >
+              {source}
+            </Button>
+          ))}
+        </div>
+        <div className="space-y-2">
           <div className="relative">
             <Input
-              type="number"
+              type="text"
               value={amount}
-              onChange={(e) => setAmount(e.target.valueAsNumber || 0)}
-              className="w-full pr-20 font-mono text-lg"
+              onChange={handleAmountChange}
+              className="pr-20 text-2xl font-semibold h-16 rounded-xl"
             />
             <Select value={fromCurrency} onValueChange={(value) => setFromCurrency(value as CURRENCY_CODE)}>
-              <SelectTrigger className="absolute inset-y-0 right-0 w-20">
+              <SelectTrigger className="absolute inset-y-0 right-0 w-30 h-full rounded-r-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {availableCurrencies.map((currency) => (
-                  <SelectItem key={currency} value={currency}>{currency}</SelectItem>
+                  <SelectItem key={currency} value={currency}>
+                    <CurrencyFlag code={currency} />{currency}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-        </div>
-        <Button size="icon" variant="ghost" onClick={swapCurrencies}>
-          <ArrowLeftRight className="h-4 w-4" />
-        </Button>
-        <div className="flex-1">
+          <div className="flex justify-center">
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={swapCurrencies}
+              className="rounded-full bg-muted"
+              aria-label="Swap currencies"
+            >
+              <ArrowUpDown className="h-6 w-6" />
+            </Button>
+          </div>
           <div className="relative">
             <Input
-              type="number"
+              type="text"
               value={convertedAmount}
               readOnly
-              className="w-full pr-20 font-mono text-lg"
+              className="pr-20 text-2xl font-semibold h-16 rounded-xl"
             />
             <Select value={toCurrency} onValueChange={(value) => setToCurrency(value as CURRENCY_CODE)}>
-              <SelectTrigger className="absolute inset-y-0 right-0 w-20">
+              <SelectTrigger className="absolute inset-y-0 right-0 w-30 h-full rounded-r-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {availableCurrencies.map((currency) => (
-                  <SelectItem key={currency} value={currency}>{currency}</SelectItem>
+                  <SelectItem key={currency} value={currency}>
+                    <CurrencyFlag code={currency} />{currency}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
         </div>
-      </div>
-      <div className="text-sm text-muted-foreground">
-        {amount} {fromCurrency} = {convertedAmount} {toCurrency}
-      </div>
-      <div className="text-xs text-muted-foreground">
-        1 {fromCurrency} = {getExchangeRate(fromCurrency, toCurrency).toFixed(4)} {toCurrency}
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {presetAmounts.map((preset) => (
-          <Button
-            key={preset}
-            variant="outline"
-            size="sm"
-            onClick={() => setAmount(preset)}
-            className="font-mono"
-          >
-            {preset}
-          </Button>
-        ))}
-      </div>
-    </div>
+        <div className="text-sm text-muted-foreground">
+          {amount} {fromCurrency} = {convertedAmount} {toCurrency}
+        </div>
+        <div className="text-xs text-muted-foreground">
+          1 {fromCurrency} = {getExchangeRate(fromCurrency, toCurrency).toFixed(4)} {toCurrency}
+        </div>
+        <div className="flex flex-wrap gap-2 justify-center">
+          {presetAmounts.map((preset) => (
+            <Button
+              key={preset}
+              variant="outline"
+              size="sm"
+              onClick={() => setAmount(preset)}
+              className="flex-grow"
+            >
+              {preset}
+            </Button>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
