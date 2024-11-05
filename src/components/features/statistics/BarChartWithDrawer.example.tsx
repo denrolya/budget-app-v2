@@ -1,7 +1,7 @@
 import { ResponsiveBar } from '@nivo/bar';
 import { useCallback, useRef, useState } from 'react';
 
-import MonthDataDrawer from '@/components/features/statistics/MonthDataDrawer.Example';
+import MonthDataDrawer from '@/components/features/statistics/MonthDataDrawer.example';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 

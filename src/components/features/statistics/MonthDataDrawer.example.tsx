@@ -3,9 +3,9 @@ import { ResponsiveTreeMap } from '@nivo/treemap';
 import { eachDayOfInterval, endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 import React, { useMemo } from 'react';
 
-import MonthExpensesRadialBarChart from '@/components/features/statistics/MonthExpensesRadialBarChart.Example';
-import ExpenseSunburstChart from '@/components/features/statistics/Sunburst.Example';
-import TimelineChart from '@/components/features/statistics/TimelineChart.Example';
+import MonthExpensesRadialBarChart from '@/components/features/statistics/MonthExpensesRadialBarChart.example';
+import ExpenseSunburstChart from '@/components/features/statistics/Sunburst.example';
+import TimelineChart from '@/components/features/statistics/TimelineChart.example';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Drawer,

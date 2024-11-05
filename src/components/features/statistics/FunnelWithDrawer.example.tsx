@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from 'react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import MonthDataDrawer from '@/components/features/statistics/MonthDataDrawer.Example';
+import MonthDataDrawer from '@/components/features/statistics/MonthDataDrawer.example';
 
 const monthlyData = [
   { id: 'Jan', value: 1000, expenses: 7000 },

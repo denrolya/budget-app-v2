@@ -1,6 +1,6 @@
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
 import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card';
-import TimelineChart from '@/components/features/statistics/TimelineChart.Example';
+import TimelineChart from '@/components/features/statistics/TimelineChart.example';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cardConfigs } from '@/constants/dashboard-config';
 import { StatisticsConfig } from '@/types/statistics';

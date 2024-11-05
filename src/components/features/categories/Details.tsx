@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react"
 import React, { useEffect, useState } from 'react';
 
-import CategoriesSunburst from '@/components/features/statistics/Sunburst.Example';
+import CategoriesSunburst from '@/components/features/statistics/Sunburst.example';
 import FormattedListing from '@/components/features/transactions/FormattedListing';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
