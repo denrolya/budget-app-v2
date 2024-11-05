@@ -1,12 +1,11 @@
-import TimelineChart from '@/components/features/statistics/TimelineChart.Example';
-import React, { useState } from 'react';
-
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
 import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card';
+import TimelineChart from '@/components/features/statistics/TimelineChart.Example';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cardConfigs } from '@/constants/dashboard-config';
 import { StatisticsConfig } from '@/types/statistics';
 import { generateSlug } from '@/utils/generateSlug';
+import React, { useState } from 'react';
 
 const DashboardPage: React.FC = () => {
   const [configs] = useState<StatisticsConfig[]>(cardConfigs);
@@ -37,20 +36,19 @@ const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-3 md:col-span-2">
-          <MoneyFlow className="mb-6" />
-        </div>
-        <div className="col-span-3 md:col-span-1">
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle>Categories Timeline</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TimelineChart />
-            </CardContent>
-          </Card>
-        </div>
+      <div className="w-full">
+        <MoneyFlow className="mb-6" />
+      </div>
+
+      <div className="w-full">
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle>Categories Timeline</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TimelineChart />
+          </CardContent>
+        </Card>
       </div>
     </section>
   );

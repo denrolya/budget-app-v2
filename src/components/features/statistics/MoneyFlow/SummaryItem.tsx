@@ -27,9 +27,9 @@ const SummaryItem: React.FC<Props> = ({
       {label}
     </p>
     <div className="flex items-center justify-start md:justify-center">
-      <MoneyValue className="font-medium" useColors={colors} showSign={showSign} amount={value} />
+      <MoneyValue className="font-medium font-mono" useColors={colors} showSign={showSign} amount={value} />
       {comparisonValue && comparisonPercentage && (
-        <div className={cn('ml-2 text-xs flex items-center', {
+        <div className={cn('ml-2 text-xs flex items-center font-mono', {
           'text-success': comparisonPercentage >= 0,
           'text-destructive': comparisonPercentage < 0,
         })}>
@@ -41,7 +41,7 @@ const SummaryItem: React.FC<Props> = ({
     {comparisonValue && (
       <p className="text-xs text-muted-foreground flex justify-start md:justify-center">
         {'vs'}
-        <MoneyValue className="ml-1" useColors={colors} showSign={showSign} amount={comparisonValue} />
+        <MoneyValue className="ml-1 font-medium font-mono" useColors={colors} showSign={showSign} amount={comparisonValue} />
       </p>
     )}
   </div>

@@ -19,6 +19,7 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
+import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
@@ -72,29 +73,30 @@ const TooltipContent: React.FC<{
   selectedTimeframe: { after: Moment; before: Moment };
   comparisonTimeframe: { after: Moment; before: Moment };
   comparison: ComparisonType;
-}> = ({ label, amount, date, selectedTimeframe, comparisonTimeframe, comparison }) => (
-  <div className="p-2">
-    <p className="font-semibold mb-1">{label}</p>
-    <MoneyValue className="text-lg font-bold mt-1" useColors={false} amount={amount} />
-    {date && (
-      <p className="text-xs mt-1">
-        Date: {date.format('MMM D, YYYY')}
-      </p>
-    )}
-    <p className="text-xs font-medium">
-      Current period: {formatShortDate(selectedTimeframe.after)}
-      {' - '}
-      {formatShortDate(selectedTimeframe.before)}
+}> = ({
+        label,
+        amount,
+        date,
+        selectedTimeframe,
+        comparisonTimeframe,
+        comparison,
+      }) => (
+  <>
+    <div className="flex justify-between items-center">
+      <p className="text-xs font-medium">{formatShortDate(selectedTimeframe.after)} - {formatShortDate(selectedTimeframe.before)}</p>
+      <p className="text-xs text-muted-foreground">{formatShortDate(comparisonTimeframe.after)} - {formatShortDate(comparisonTimeframe.before)}</p>
+    </div>
+    <Separator className="my-2" />
+    <h3 className="font-semibold text-sm">{label}</h3>
+    <p className="text-base font-bold">
+      <MoneyValue className="font-medium font-mono" useColors={false} amount={amount} />
     </p>
-    <p className="text-xs font-medium">
-      Comparison period: {formatShortDate(comparisonTimeframe.after)}
-      {' - '}
-      {formatShortDate(comparisonTimeframe.before)}
+    {date && <p className="text-muted-foreground">Date: {date.format('MMM D, YYYY')}</p>}
+    <Separator className="my-2" />
+    <p className="pt-1">
+      vs {comparison === 'previous' ? 'previous period' : 'same period last year'}
     </p>
-    <p className="text-xs mt-1">
-      Comparison: vs {comparison === 'previous' ? 'previous period' : 'same period last year'}
-    </p>
-  </div>
+  </>
 );
 
 export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
@@ -143,8 +145,8 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
           <div className="flex justify-between items-baseline">
             <ResponsiveTooltip
               openDelay={0}
-              desktopComponent="tooltip"
-              contentClassName="z-20"
+              desktopComponent="hovercard"
+              contentClassName="shadow-lg p-4"
               content={
                 <TooltipContent
                   label="Minimum Value"
@@ -169,7 +171,8 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
 
             <ResponsiveTooltip
               openDelay={0}
-              desktopComponent="tooltip"
+              desktopComponent="hovercard"
+              contentClassName="shadow-lg p-4"
               content={
                 <TooltipContent
                   label="Maximum Value"
@@ -195,7 +198,8 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
           <div className="flex justify-between items-center text-xs">
             <ResponsiveTooltip
               openDelay={0}
-              desktopComponent="tooltip"
+              desktopComponent="hovercard"
+              contentClassName="shadow-lg p-4"
               content={
                 <TooltipContent
                   label="Minimum Comparison"
@@ -210,7 +214,8 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
             </ResponsiveTooltip>
             <ResponsiveTooltip
               openDelay={0}
-              desktopComponent="tooltip"
+              desktopComponent="hovercard"
+              contentClassName="shadow-lg p-4"
               content={
                 <TooltipContent
                   label="Maximum Comparison"
@@ -295,7 +300,7 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                   <div className="flex justify-between items-baseline">
                     <ResponsiveTooltip
                       openDelay={0}
-                      desktopComponent="tooltip"
+                      desktopComponent="hovercard"
                       content={
                         <TooltipContent
                           label="Current Value"
@@ -324,7 +329,7 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                     </span>
                     <ResponsiveTooltip
                       openDelay={0}
-                      desktopComponent="tooltip"
+                      desktopComponent="hovercard"
                       content={
                         <TooltipContent
                           label="Comparison Value"

@@ -2,11 +2,11 @@ import { Type as TransactionType } from '@/types/transaction';
 import { StatisticsConfig, ComparisonType, IntervalUnit, StatisticsType } from '@/types/statistics';
 
 export const cardConfigs: StatisticsConfig[] = [
-  // Yearly Income and Expenses
+  // Monthly Expenses and Income (Current spending/earning overview)
   {
-    title: 'Yearly Income',
-    type: TransactionType.Income,
-    timeframe: { unit: IntervalUnit.Year, value: 1 },
+    title: 'Monthly Expenses',
+    type: TransactionType.Expense,
+    timeframe: { unit: IntervalUnit.Month, value: 1 },
     comparison: ComparisonType.Previous,
     statType: StatisticsType.Sum,
   },
@@ -19,13 +19,6 @@ export const cardConfigs: StatisticsConfig[] = [
     statType: StatisticsType.Avg,
   },
   {
-    title: 'Yearly Expenses',
-    type: TransactionType.Expense,
-    timeframe: { unit: IntervalUnit.Year, value: 1 },
-    comparison: ComparisonType.Previous,
-    statType: StatisticsType.Sum,
-  },
-  {
     title: 'Avg Monthly Expenses',
     type: TransactionType.Expense,
     timeframe: { unit: IntervalUnit.Year, value: 1 },
@@ -34,25 +27,23 @@ export const cardConfigs: StatisticsConfig[] = [
     statType: StatisticsType.Avg,
   },
 
-  // Monthly Expenses
+  // Yearly Summary
   {
-    title: 'Monthly Expenses',
-    type: TransactionType.Expense,
-    timeframe: { unit: IntervalUnit.Month, value: 1 },
+    title: 'Yearly Income',
+    type: TransactionType.Income,
+    timeframe: { unit: IntervalUnit.Year, value: 1 },
     comparison: ComparisonType.Previous,
     statType: StatisticsType.Sum,
   },
   {
-    title: 'Avg Groceries',
+    title: 'Yearly Expenses',
     type: TransactionType.Expense,
-    categories: ['Groceries'],
-    timeframe: { unit: IntervalUnit.Month, value: 1 },
-    period: { unit: IntervalUnit.Week, value: 1 },
+    timeframe: { unit: IntervalUnit.Year, value: 1 },
     comparison: ComparisonType.Previous,
-    statType: StatisticsType.Avg,
+    statType: StatisticsType.Sum,
   },
 
-  // Daily Statistics
+  // Daily Spending Overview
   {
     title: 'Daily Expenses',
     type: TransactionType.Expense,
@@ -69,7 +60,16 @@ export const cardConfigs: StatisticsConfig[] = [
     statType: StatisticsType.Daily,
   },
 
-  // Category-Specific Statistics
+  // Category-Specific Expenses (Focus on key spending areas)
+  {
+    title: 'Avg Groceries',
+    type: TransactionType.Expense,
+    categories: ['Groceries'],
+    timeframe: { unit: IntervalUnit.Month, value: 1 },
+    period: { unit: IntervalUnit.Week, value: 1 },
+    comparison: ComparisonType.Previous,
+    statType: StatisticsType.Avg,
+  },
   {
     title: 'Food Expenses',
     type: TransactionType.Expense,

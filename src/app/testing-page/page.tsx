@@ -1,11 +1,12 @@
 import React from 'react';
 
-import BarChartWithDrawer from '@/components/features/statistics/BarChartWithDrawer.Example';
-import FunnelWithDrawer from '@/components/features/statistics/FunnelWithDrawer.Example';
-import MonthExpensesRadialBarChart from '@/components/features/statistics/MonthExpensesRadialBarChart.Example';
-import ExpenseSunburstChart from '@/components/features/statistics/Sunburst.Example';
+import BarChartWithDrawer from '@/components/features/statistics/BarChartWithDrawer.example';
+import FunnelWithDrawer from '@/components/features/statistics/FunnelWithDrawer.example';
+import MonthExpensesRadialBarChart from '@/components/features/statistics/MonthExpensesRadialBarChart.example';
+import ExpenseSunburstChart from '@/components/features/statistics/Sunburst.example';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/contexts/FinanceData';
+import TreeDND from '@/components/features/categories/TreeDND.example';
 
 const TestingPage: React.FC = () => {
   const expenseCategoriesTree = useExpenseCategoriesTree();
@@ -37,7 +38,7 @@ const TestingPage: React.FC = () => {
         </TabsContent>
         <TabsContent value="other">
           <h1>Other random stuff</h1>
-
+          <TreeDND />
         </TabsContent>
       </Tabs>
     </section>
