@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
 import { ArrowDownCircle, ArrowUpCircle, X } from 'lucide-react';
@@ -9,6 +7,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import z from 'zod';
 
+import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
 import { useTransactionMutations } from '@/hooks/useTransactionMutations';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
@@ -59,14 +58,14 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
       account: data?.account?.id,
       amount: data?.amount,
       category: data?.category?.id,
-      executedAt: moment(data?.executedAt).format('YYYY-MM-DDTHH:mm') || moment().format('YYYY-MM-DDTHH:mm'),
+      executedAt: moment(data?.executedAt).format(MOMENT_DATETIME_FORM_FORMAT) || moment().format(MOMENT_DATETIME_FORM_FORMAT),
       note: data?.note,
       isDraft: data?.isDraft ?? false,
       compensations: data?.compensations?.map((comp: Transaction) => ({
         ...comp,
         account: comp?.account?.id,
         amount: comp.amount,
-        executedAt: moment(comp.executedAt).format('YYYY-MM-DDTHH:mm'),
+        executedAt: moment(comp.executedAt).format(MOMENT_DATETIME_FORM_FORMAT),
       })) || [],
     },
     mode: 'onChange',
@@ -166,8 +165,8 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
         />
 
         <FormField
-          control={form.control}
           name="category"
+          control={form.control}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
@@ -186,8 +185,8 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
 
         <div className="flex space-x-4">
           <FormField
-            control={form.control}
             name="amount"
+            control={form.control}
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel>Amount</FormLabel>
@@ -208,6 +207,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
           />
 
           <FormField
+            name="account"
             control={form.control}
             render={({ field }) => (
               <FormItem className="flex-1">
@@ -222,7 +222,6 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                 <FormMessage />
               </FormItem>
             )}
-            name="account"
           />
         </div>
 
@@ -277,10 +276,10 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                       <FormItem className="flex-1">
                         <FormControl>
                           <Input
+                            {...field}
                             type="number"
                             placeholder="Amount"
                             className="w-full"
-                            {...field}
                             onChange={e => field.onChange(e.target.valueAsNumber)}
                           />
                         </FormControl>
@@ -335,7 +334,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               onClick={() => append({
                 account: -1,
                 amount: 0,
-                executedAt: moment().format('YYYY-MM-DDTHH:mm'),
+                executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
               })}
             >
               Add Compensation

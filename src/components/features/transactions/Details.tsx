@@ -159,7 +159,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
           {isDebt && (
             <div className="flex justify-between items-center">
               <span className="text-sm">Debtor</span>
-              <span className="font-medium">{transaction.debt.debtor}</span>
+              <span className="font-medium">{transaction.debt?.debtor}</span>
             </div>
           )}
           <div className="flex justify-between items-center">

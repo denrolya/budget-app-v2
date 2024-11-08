@@ -40,6 +40,7 @@ export const TypeaheadV2 = <T, V extends string | number>({
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // @ts-ignore
@@ -169,10 +170,10 @@ export const TypeaheadV2 = <T, V extends string | number>({
   };
 
   return (
-    <div className={cn('relative w-full', className)} ref={dropdownRef}>
+    <div className={cn('relative w-full', className)} ref={containerRef}>
       <div
         className={cn(
-          'flex items-center gap-1 px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
+          'flex items-center gap-1 px-3 py-2 rounded-md border border-input bg-input text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
           inputProps.disabled && 'opacity-50 cursor-not-allowed',
         )}
         onClick={() => {
@@ -187,7 +188,7 @@ export const TypeaheadV2 = <T, V extends string | number>({
             {selectedOptions.map((option) => (
               <Badge
                 variant="outline"
-                className="whitespace-nowrap text-xs shadow-md py-0 px-1 bg-background"
+                className="whitespace-nowrap text-xs shadow-md py-0 px-1 bg-input"
                 key={option[valueField] as React.Key}>
                 <span className="truncate max-w-[100px]">{String(option[labelField])}</span>
                 <Button
@@ -206,6 +207,7 @@ export const TypeaheadV2 = <T, V extends string | number>({
             ))}
             <input
               {...inputProps}
+              autoComplete="off"
               ref={inputRef}
               value={inputValue}
               onChange={handleInputChange}
@@ -238,7 +240,9 @@ export const TypeaheadV2 = <T, V extends string | number>({
         </Button>
       </div>
       {open && !inputProps.disabled && (
-        <div className="absolute z-50 w-full left-0 mt-1 bg-popover border border-input rounded-md shadow-md overflow-hidden">
+        <div
+          className="absolute z-50 w-full left-0 mt-1 bg-popover border border-input rounded-md shadow-md overflow-hidden"
+          ref={dropdownRef}>
           <ScrollArea className="max-h-[300px] overflow-y-auto">
             <div className="p-1">
               {filteredOptions.length === 0 && (
@@ -262,10 +266,11 @@ export const TypeaheadV2 = <T, V extends string | number>({
                         onClick={() => handleSelect(option)}
                         onMouseEnter={() => setHighlightedIndex(flatIndex)}
                       >
-                        <Check className={cn('mr-2 h-4 w-4', {
-                          'opacity-0': !selectedValues.includes(option[valueField] as V),
-                          'opacity-100': selectedValues.includes(option[valueField] as V),
-                        })} />
+                        <Check
+                          className={cn('mr-2 h-4 w-4', {
+                            'opacity-0': !selectedValues.includes(option[valueField] as V),
+                            'opacity-100': selectedValues.includes(option[valueField] as V),
+                          })} />
                         {renderElement(option, valueField, labelField)}
                       </div>
                     );

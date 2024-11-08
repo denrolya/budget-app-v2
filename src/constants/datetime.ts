@@ -1,4 +1,4 @@
-import { Moment } from 'moment/moment';
+import moment, { Moment } from 'moment/moment';
 
 import { PeriodOption, TimeframeOption } from '@/types/global';
 
@@ -7,6 +7,8 @@ export const MOMENT_TIME_VIEW_FORMAT = 'HH:mm';
 export const MOMENT_DATE_VIEW_FORMAT = 'MMM Do, YYYY';
 export const MOMENT_DATE_VIEW_FORMAT_2 = 'MMM D, YYYY';
 export const MOMENT_DATETIME_VIEW_FORMAT = `${MOMENT_DATE_VIEW_FORMAT} ${MOMENT_TIME_VIEW_FORMAT}`;
+
+export const MOMENT_DATETIME_FORM_FORMAT = 'YYYY-MM-DDTHH:mm';
 
 export const MOMENT_DATEPICKER_FORMAT = 'MMM D, YYYY';
 
