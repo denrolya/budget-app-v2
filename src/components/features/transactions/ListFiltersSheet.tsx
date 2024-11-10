@@ -1,13 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
+import debounce from 'lodash/debounce';
 import { CalendarIcon, FileText, FilterIcon, Layers } from 'lucide-react';
 import moment from 'moment';
-import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
-import debounce from 'lodash/debounce';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
@@ -20,9 +17,8 @@ import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { TransactionFilters } from '@/models/TransactionFilters';
 
-interface ListFiltersProps {
+interface ListFiltersProps extends React.PropsWithChildren {
   data: TransactionFilters;
-  className?: string;
   onChange: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => void;
   onReset: () => void;
 }
@@ -45,12 +41,12 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
   const debouncedOnChange = useRef(
     debounce(<K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => {
       onChange(key, value);
-    }, 300)
+    }, 300),
   ).current;
 
   useEffect(() => () => {
-      debouncedOnChange.cancel();
-    }, [debouncedOnChange]);
+    debouncedOnChange.cancel();
+  }, [debouncedOnChange]);
 
   useEffect(() => {
     setLocalAmountRange(data.amountRange);
@@ -215,13 +211,12 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
   );
 };
 
-export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onChange, onReset }) => {
+export const ListFiltersSheet: React.FC<ListFiltersProps> = ({ data, onChange, onReset, children }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const isDesktop = useScreenSize();
 
   const handleChange = useCallback(<K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => {
     onChange(key, value);
-    // Do not close the sheet/drawer when filters change
   }, [onChange]);
 
   const FilterWrapper = isDesktop ? Sheet : Drawer;
@@ -230,35 +225,15 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
   const FilterTrigger = isDesktop ? SheetTrigger : DrawerTrigger;
   const FilterContent = isDesktop ? SheetContent : DrawerContent;
 
-  const activeFiltersCount = useMemo(() => {
-    let count = 0;
-    if (data.after || data.before) count++;
-    if (data.categories?.length > 0) count++;
-    if (data.accounts?.length > 0) count++;
-    if (data.amountRange[0] !== 0 || data.amountRange[1] !== Infinity) count++;
-    if (data.withNestedCategories) count++;
-    if (data.isDraft) count++;
-    return count;
-  }, [data]);
 
   return (
     <FilterWrapper open={isOpen} onOpenChange={setIsOpen}>
       <FilterTrigger asChild>
-        <Button
-          variant="default"
-          size="icon"
-          className="h-14 w-14 rounded-full shadow-lg fixed bottom-20 right-4 z-50"
-        >
-          <FilterIcon className="h-6 w-6" />
-          {activeFiltersCount > 0 && (
-            <Badge className="absolute -top-2 -right-2 px-2 py-1 text-xs">
-              {activeFiltersCount}
-            </Badge>
-          )}
-        </Button>
+        {children}
       </FilterTrigger>
-      <FilterContent side={isDesktop ? 'right' : undefined}
-                     className={isDesktop ? 'w-[400px] sm:w-[540px]' : undefined}>
+      <FilterContent
+        side={isDesktop ? 'right' : undefined}
+        className={isDesktop ? 'w-[400px] sm:w-[540px]' : undefined}>
         <FilterHeader>
           <FilterTitle>Transaction Filters</FilterTitle>
         </FilterHeader>
@@ -270,4 +245,4 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, className, onCha
   );
 };
 
-export default ListFilters;
+export default ListFiltersSheet;

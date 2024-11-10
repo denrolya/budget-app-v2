@@ -1,19 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import debounce from 'lodash/debounce';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import debounce from 'lodash/debounce';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 interface PaginationProps {
-  currentPage: number
-  totalPages: number
-  totalItems: number
-  perPage: number
-  onPageChange: (page: number) => void
-  onPerPageChange: (perPage: number) => void
-  isLoading: boolean
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  perPage: number;
+  onPageChange: (page: number) => void;
+  onPerPageChange: (perPage: number) => void;
+  isLoading: boolean;
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
@@ -37,7 +36,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         onPageChange(newPage);
       }
     }, 300),
-    [onPageChange, totalPages]
+    [onPageChange, totalPages],
   );
 
   const handlePageInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,29 +52,29 @@ export const Pagination: React.FC<PaginationProps> = ({
   const endItem = Math.min(currentPage * perPage, totalItems);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div className="flex items-center space-x-2">
-        <Select
-          value={perPage.toString()}
-          onValueChange={(value) => onPerPageChange(parseInt(value, 10))}
-          disabled={isLoading}
-        >
-          <SelectTrigger className="w-[130px]">
-            <SelectValue placeholder="Per page" />
-          </SelectTrigger>
-          <SelectContent>
-            {[10, 20, 30, 40, 50].map((value) => (
-              <SelectItem key={value} value={value.toString()}>
-                {value} items
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <span className="text-sm text-muted-foreground">
-          {startItem}-{endItem} of {totalItems} items
-        </span>
-      </div>
-      <div className="flex items-center space-x-2">
+    <div className="flex flex-wrap items-center justify-between gap-2 w-full text-sm">
+      <Select
+        value={perPage.toString()}
+        onValueChange={(value) => onPerPageChange(parseInt(value, 10))}
+        disabled={isLoading}
+      >
+        <SelectTrigger className="w-[100px]" aria-label="Items per page">
+          <SelectValue placeholder="Per page" />
+        </SelectTrigger>
+        <SelectContent>
+          {[10, 20, 30, 40, 50].map((value) => (
+            <SelectItem key={value} value={value.toString()}>
+              {value} items
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <span className="text-muted-foreground whitespace-nowrap hidden sm:inline">
+        {startItem}-{endItem} of {totalItems} items
+      </span>
+
+      <div className="flex items-center gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -85,21 +84,22 @@ export const Pagination: React.FC<PaginationProps> = ({
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <div className="flex items-center space-x-2">
-          <Input
-            type="number"
-            min={1}
-            max={totalPages}
-            value={inputPage}
-            onChange={handlePageInput}
-            className="w-16 text-center"
-            aria-label="Go to page"
-            disabled={isLoading}
-          />
-          <span className="text-sm text-muted-foreground">
-            of {totalPages}
-          </span>
-        </div>
+
+        <Input
+          type="number"
+          min={1}
+          max={totalPages}
+          value={inputPage}
+          onChange={handlePageInput}
+          className="w-14 text-center"
+          aria-label="Go to page"
+          disabled={isLoading}
+        />
+
+        <span className="text-muted-foreground whitespace-nowrap">
+          of {totalPages}
+        </span>
+
         <Button
           variant="outline"
           size="icon"

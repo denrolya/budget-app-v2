@@ -1,13 +1,9 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import debounce from 'lodash/debounce';
 import { CalendarIcon, FilterIcon } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { TransactionFilters } from '@/models/TransactionFilters';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
@@ -17,9 +13,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize';
+import { TransactionFilters } from '@/models/TransactionFilters';
 import TransferFilters from '@/models/TransferFilters';
 
-interface ListFiltersProps {
+interface ListFiltersProps extends React.PropsWithChildren {
   data: TransferFilters;
   className?: string;
   onChange: <K extends keyof TransferFilters>(key: K, value: TransferFilters[K] | undefined | null) => void;
@@ -44,7 +41,7 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
   const debouncedOnChange = useRef(
     debounce(<K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => {
       onChange(key, value);
-    }, 300)
+    }, 300),
   ).current;
 
   useEffect(() => () => {
@@ -168,13 +165,12 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
   );
 };
 
-export const ListFilters: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
+export const ListFiltersSheet: React.FC<ListFiltersProps> = ({ data, onChange, onReset, children }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const isDesktop = useScreenSize();
 
   const handleChange = useCallback(<K extends keyof TransferFilters>(key: K, value: TransferFilters[K]) => {
     onChange(key, value);
-    // Do not close the sheet/drawer when filters change
   }, [onChange]);
 
   const FilterWrapper = isDesktop ? Sheet : Drawer;
@@ -194,18 +190,7 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, onChange, onRese
   return (
     <FilterWrapper open={isOpen} onOpenChange={setIsOpen}>
       <FilterTrigger asChild>
-        <Button
-          variant="default"
-          size="icon"
-          className="h-14 w-14 rounded-full shadow-lg fixed bottom-20 right-4 z-50"
-        >
-          <FilterIcon className="h-6 w-6" />
-          {activeFiltersCount > 0 && (
-            <Badge className="absolute -top-2 -right-2 px-2 py-1 text-xs">
-              {activeFiltersCount}
-            </Badge>
-          )}
-        </Button>
+        {children}
       </FilterTrigger>
       <FilterContent
         side={isDesktop ? 'right' : undefined}
@@ -221,4 +206,4 @@ export const ListFilters: React.FC<ListFiltersProps> = ({ data, onChange, onRese
   );
 };
 
-export default ListFilters;
+export default ListFiltersSheet;

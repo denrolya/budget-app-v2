@@ -286,9 +286,11 @@ export const BulkCreateTableForm: React.FC = () => {
               ))}
             </TableBody>
           </Table>
-          <div className="mt-4 flex justify-between">
+          <div className="flex justify-end items-center space-x-2 mt-4">
             <Button
               type="button"
+              variant="outline"
+              className="h-10 px-4 py-2 text-sm font-medium"
               onClick={() => append({
                 isDraft: true,
                 account: '',
@@ -298,12 +300,16 @@ export const BulkCreateTableForm: React.FC = () => {
                 note: '',
                 executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
               })}
-              variant="outline"
             >
               <Plus className="mr-2 h-4 w-4" /> Add Transaction
             </Button>
-            <Button type="submit" size="sm" disabled={isSubmitting}>
-              <Save className="h-4 w-4 mr-2" /> {isSubmitting ? 'Saving...' : 'Save All'}
+            <Button
+              type="submit"
+              variant="default"
+              className="h-10 px-4 py-2 text-sm font-medium"
+              disabled={isSubmitting}
+            >
+              <Save className="mr-2 h-4 w-4" /> {isSubmitting ? 'Saving...' : 'Save All'}
             </Button>
           </div>
         </form>

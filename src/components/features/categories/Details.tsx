@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react"
+import { Plus } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import CategoriesSunburst from '@/components/features/statistics/Sunburst.example';
@@ -26,7 +26,6 @@ export const CategoryDetails: React.FC<Props> = ({ category }) => {
     error: transactionsError,
     refetch: refetchTransactions,
     setFilter,
-    pagination: { currentPage, totalPages, perPage, totalItems, setCurrentPage, setPerPage },
   } = useTransactions({
     updateUrl: false,
     initialFilters: new TransactionFilters({
@@ -62,7 +61,7 @@ export const CategoryDetails: React.FC<Props> = ({ category }) => {
                     <span className="sr-only">Add item</span>
                   </Button>
                 </div>
-                <ScrollArea className="h-[400px]">
+                <ScrollArea className="h-[400px] p-0">
                   <FormattedListing
                     isLoading={isTransactionsLoading}
                     isError={isTransactionsError}
@@ -70,12 +69,6 @@ export const CategoryDetails: React.FC<Props> = ({ category }) => {
                     groupedItems={groupedTransactions}
                     refetch={refetchTransactions}
                     onAdd={onAddTransaction}
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                    onPerPageChange={setPerPage}
-                    perPage={perPage}
-                    totalItems={totalItems}
                   />
                 </ScrollArea>
               </CardContent>

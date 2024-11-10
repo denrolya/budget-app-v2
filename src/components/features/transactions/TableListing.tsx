@@ -1,13 +1,9 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-import { Check, Pencil, X, Trash2 } from 'lucide-react';
-import moment, { Moment } from 'moment';
-import React, { useCallback, useState, useRef, useEffect } from 'react';
-import { toast } from 'sonner';
 import cn from 'classnames';
+import { Check, Pencil, Trash2, X } from 'lucide-react';
+import moment, { Moment } from 'moment';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
-import { confirm } from '@/utils/confirmation';
-import { useTransactionMutations } from '@/hooks/useTransactionMutations';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import MoneyValue from '@/components/common/MoneyValue';
@@ -22,7 +18,9 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BACKEND_DATE_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import { useTransactionMutations } from '@/hooks/useTransactionMutations';
 import Transaction from '@/models/Transaction';
+import { confirm } from '@/utils/confirmation';
 
 interface Props extends React.ComponentPropsWithoutRef<'div'> {
   groupedItems: [Moment, Transaction[], number, number][];
@@ -69,7 +67,7 @@ export const TableListing: React.FC<Props> = ({ groupedItems, ...props }) => {
       await updateTransaction({
         id: transaction.id,
         updates: updatedTransaction,
-        originalTransaction: transaction
+        originalTransaction: transaction,
       });
       toast.success('Transaction updated successfully');
     } catch (error) {
@@ -105,7 +103,7 @@ export const TableListing: React.FC<Props> = ({ groupedItems, ...props }) => {
         handleSave(transaction);
       }
     },
-    [handleCancel, handleSave]
+    [handleCancel, handleSave],
   );
 
   useEffect(() => {
@@ -127,7 +125,7 @@ export const TableListing: React.FC<Props> = ({ groupedItems, ...props }) => {
         await updateTransaction({
           id: transaction.id,
           updates: { ...transaction, isDraft: false },
-          originalTransaction: transaction
+          originalTransaction: transaction,
         });
         toast.success('Transaction unmarked as not draft');
       } catch (error) {
@@ -266,7 +264,7 @@ export const TableListing: React.FC<Props> = ({ groupedItems, ...props }) => {
                 key={transaction.id}
                 className={cn({
                   'bg-warning/20 hover:bg-warning/30': transaction.isDraft,
-                  'hover:bg-muted/50': !transaction.isDraft
+                  'hover:bg-muted/50': !transaction.isDraft,
                 })}
               >
                 <TableCell></TableCell>
