@@ -1,3 +1,4 @@
+import cn from 'classnames';
 import { ArrowRight, Check, Eye, Pencil, Trash2, X } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -232,6 +233,29 @@ const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate }) => 
     return dates.reverse();
   }, [startDate, endDate]);
 
+  const toggleDraft = async (transaction: Transaction) => {
+    const confirmed = await confirm({
+      title: 'Are you sure you want to unmark this transaction as draft?',
+      description: `This will unmark transaction #${transaction.id} as not draft.`,
+      confirmText: 'Confirm',
+      cancelText: 'Cancel',
+    });
+
+    if (confirmed) {
+      try {
+        await updateTransaction({
+          id: transaction.id,
+          updates: { ...transaction, isDraft: false },
+          originalTransaction: transaction,
+        });
+        toast.success('Transaction unmarked as not draft');
+      } catch (error) {
+        console.error('Failed to unmark transaction as not draft:', error);
+        toast.error('Failed to unmark transaction as not draft. Please try again.');
+      }
+    }
+  };
+
   const renderTransferAmounts = (transfer: Transfer) => (
     <>
       <div className="flex flex-row items-center">
@@ -304,7 +328,9 @@ const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate }) => 
                   </TableRow>
                 )}
                 {items.map((item) => (
-                  <TableRow key={item.id}>
+                  <TableRow key={item.id} className={cn({
+                    'bg-warning/20 hover:bg-warning/30': (item instanceof Transaction && item.isDraft),
+                  })}>
                     <TableCell className="w-4"></TableCell>
                     <TableCell>
                       <Sheet
@@ -329,6 +355,15 @@ const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate }) => 
                           </div>
                         </SheetContent>
                       </Sheet>
+                      {(item instanceof Transaction && item.isDraft) && (
+                        <Badge
+                          variant="outline"
+                          className="ml-2 bg-warning text-warning-foreground border-warning cursor-pointer hover:bg-warning/80"
+                          onClick={() => toggleDraft(item)}
+                        >
+                          Draft
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell>
                       {'fromExpense' in item ? (

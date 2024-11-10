@@ -15,22 +15,22 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSwipeable } from 'react-swipeable';
 
-import BulkCreateTableForm from '@/components/features/transactions/BulkCreateTableForm';
-import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
-import { Badge } from '@/components/ui/badge';
 import MoneyValue from '@/components/common/MoneyValue';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import DailyList from '@/components/features/daily-ledger/DailyList';
 import ListFiltersSheet from '@/components/features/daily-ledger/ListFiltersSheet';
 import TableListing from '@/components/features/daily-ledger/TableListing';
 import TableListingSkeleton from '@/components/features/daily-ledger/TableListingSkeleton';
+import BulkCreateTableForm from '@/components/features/transactions/BulkCreateTableForm';
 import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 import TransactionFilters from '@/models/TransactionFilters';
 import TransferFilters from '@/models/TransferFilters';
@@ -361,6 +361,7 @@ export const DailyLedgerPage: React.FC = () => {
                 </div>
               </div>
             )}
+
             {isError && (
               <div className="p-4 bg-destructive/10 text-destructive rounded-md m-4">
                 <p className="font-medium">Error:</p>
@@ -369,7 +370,7 @@ export const DailyLedgerPage: React.FC = () => {
             )}
 
             <div className="flex-grow overflow-hidden">
-              {activeView === 'table' && isLoading && (
+              {(isLoading && activeView === 'table') && (
                 <div className="h-full overflow-auto">
                   <TableListingSkeleton startDate={dateRange.startDate} endDate={dateRange.endDate} />
                 </div>
@@ -384,14 +385,15 @@ export const DailyLedgerPage: React.FC = () => {
                 />
               </div>
               <div className="hidden md:block h-full overflow-auto">
-                {activeView === 'table' ? (
+                {activeView === 'table' && (
                   <TableListing
                     isLoading={isLoading}
                     groupedItems={groupedItems}
                     startDate={dateRange.startDate}
                     endDate={dateRange.endDate}
                   />
-                ) : (
+                )}
+                {activeView === 'list' && (
                   <DailyList
                     isLoading={isLoading}
                     groupedItems={groupedItems}
