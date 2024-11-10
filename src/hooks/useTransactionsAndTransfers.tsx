@@ -1,3 +1,9 @@
+import groupBy from 'lodash/groupBy';
+import sortBy from 'lodash/sortBy';
+import toPairs from 'lodash/toPairs';
+import moment, { Moment } from 'moment';
+import { useCallback, useMemo, useState } from 'react';
+
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useTransactions } from '@/hooks/useTransactions';
@@ -6,11 +12,6 @@ import Transaction from '@/models/Transaction';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import Transfer from '@/models/Transfer';
 import { TransferFilters } from '@/models/TransferFilters';
-import groupBy from 'lodash/groupBy';
-import sortBy from 'lodash/sortBy';
-import toPairs from 'lodash/toPairs';
-import moment, { Moment } from 'moment';
-import { useCallback, useMemo, useState } from 'react';
 
 interface UseTransactionsAndTransfersOptions {
   initialTransactionFilters?: TransactionFilters;
@@ -37,6 +38,7 @@ export const useTransactionsAndTransfers = ({
     error: errorTransactions,
     filters: transactionFilters,
     setFilter: setTransactionFilter,
+    refetch: refetchTransactions,
   } = useTransactions({
     initialPerPage: 99999,
     initialFilters: initialTransactionFilters,
@@ -50,6 +52,7 @@ export const useTransactionsAndTransfers = ({
     error: errorTransfers,
     filters: transferFilters,
     setFilter: setTransferFilter,
+    refetch: refetchTransfers,
   } = useTransfers({
     initialPerPage: 99999,
     initialFilters: initialTransferFilters,
@@ -104,6 +107,11 @@ export const useTransactionsAndTransfers = ({
     return [moment(date), items, transactionsValue, transfersValue, transactionsCount, transfersCount];
   }), [filteredItems, baseCurrency]);
 
+  const refetch = useCallback(() => {
+    refetchTransactions();
+    refetchTransfers();
+  }, [refetchTransactions, refetchTransfers]);
+
   return {
     transactions,
     transfers,
@@ -119,5 +127,6 @@ export const useTransactionsAndTransfers = ({
     setShowTransactions,
     showTransfers,
     setShowTransfers,
+    refetch,
   };
 };

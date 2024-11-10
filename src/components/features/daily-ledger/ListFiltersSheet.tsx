@@ -1,13 +1,9 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import { CalendarIcon, FilterIcon, X } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useState } from 'react';
 
-import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
@@ -19,9 +15,10 @@ import { useScreenSize } from '@/hooks/useScreenSize';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { TransferFilters } from '@/models/TransferFilters';
 
+
 type CombinedFilters = TransactionFilters & TransferFilters
 
-interface ListFiltersProps {
+interface ListFiltersProps extends React.PropsWithChildren {
   transactionFilters: TransactionFilters;
   transferFilters: TransferFilters;
   setFilter: (type: keyof CombinedFilters, value: any) => void;
@@ -164,20 +161,21 @@ const ListFiltersContent: React.FC<ListFiltersProps> = ({
         </div>
       </div>
 
-      <Button onClick={() => {
-        setFilter('amountRange', [undefined, undefined]);
-        setFilter('categories', []);
-        setFilter('accounts', []);
-        setFilter('isDraft', null);
-        setCustomDateRange(null);
-      }} variant="outline" className="w-full">
+      <Button
+        onClick={() => {
+          setFilter('amountRange', [undefined, undefined]);
+          setFilter('categories', []);
+          setFilter('accounts', []);
+          setFilter('isDraft', null);
+          setCustomDateRange(null);
+        }} variant="outline" className="w-full">
         Reset All Filters
       </Button>
     </div>
   );
 };
 
-export default function ListFilters(props: ListFiltersProps) {
+export const ListFiltersSheet: React.FC<ListFiltersProps> = ({ children, ...props }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const isDesktop = useScreenSize();
 
@@ -187,35 +185,10 @@ export default function ListFilters(props: ListFiltersProps) {
   const FilterTrigger = isDesktop ? SheetTrigger : DrawerTrigger;
   const FilterContent = isDesktop ? SheetContent : DrawerContent;
 
-  const activeFiltersCount = React.useMemo(() => {
-    let count = 0;
-    const { transactionFilters, transferFilters, dateRange } = props;
-
-    if (dateRange.startDate.format(BACKEND_DATE_FORMAT) !== moment().startOf('week').format(BACKEND_DATE_FORMAT) ||
-      dateRange.endDate.format(BACKEND_DATE_FORMAT) !== moment().endOf('week').format(BACKEND_DATE_FORMAT)) count++;
-    if (transactionFilters.categories.length > 0) count++;
-    if (transactionFilters.accounts.length > 0 || transferFilters.accounts.length > 0) count++;
-    if (transactionFilters.amountRange[0] !== undefined || transactionFilters.amountRange[1] !== undefined) count++;
-    if (transactionFilters.isDraft !== null) count++;
-
-    return count;
-  }, [props.transactionFilters, props.transferFilters, props.dateRange]);
-
   return (
     <FilterWrapper open={isOpen} onOpenChange={setIsOpen}>
       <FilterTrigger asChild>
-        <Button
-          variant="default"
-          size="icon"
-          className="h-14 w-14 rounded-full shadow-lg fixed bottom-20 right-4 z-50"
-        >
-          <FilterIcon className="h-6 w-6" />
-          {activeFiltersCount > 0 && (
-            <Badge className="absolute -top-2 -right-2 px-2 py-1 text-xs">
-              {activeFiltersCount}
-            </Badge>
-          )}
-        </Button>
+        {children}
       </FilterTrigger>
       <FilterContent side={isDesktop ? 'right' : undefined} className={isDesktop ? 'sm:max-w-[425px]' : undefined}>
         <FilterHeader>
@@ -230,4 +203,6 @@ export default function ListFilters(props: ListFiltersProps) {
       </FilterContent>
     </FilterWrapper>
   );
-}
+};
+
+export default ListFiltersSheet;
