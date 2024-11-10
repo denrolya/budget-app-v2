@@ -86,6 +86,10 @@ export const transactionService = {
       query.set('after', filters.after.format(BACKEND_DATE_FORMAT));
     }
 
+    if (filters.type) {
+      query.set('type', filters.type);
+    }
+
     if (filters.amountRange && filters.amountRange.length > 0) {
       const [min, max] = filters.amountRange;
       if (!isNaN(min)) {

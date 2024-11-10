@@ -68,7 +68,7 @@ export const YearDoughnut: React.FC<Props> = ({ data, colors = ['fill-blue-500 d
     const startAngle = getAngle(getDayOfYear(after));
     const endAngle = getAngle(getDayOfYear(before));
     const path = makeSectorPath(startAngle, endAngle, innerRadius, outerRadius);
-    return <path key={after.toISOString()} d={path} className={color} />;
+    return <path key={`${after.toISOString()}-${before.toISOString()}-${innerRadius}-${outerRadius}`} d={path} className={color} />;
   };
 
   const seasons = [

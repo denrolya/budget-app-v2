@@ -52,6 +52,28 @@ export const TransactionsListPage: React.FC = () => {
             <div className="flex flex-wrap gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
+                  <Button variant="outline" size="icon" onClick={onAddTransaction}>
+                    <Plus className="h-4 w-4" />
+                    <span className="sr-only">New Transaction</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>New Transaction</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="hidden md:flex"
+                    onClick={() => setShowBulkCreate(!showBulkCreate)}>
+                    <ListIcon className="h-4 w-4" />
+                    <span className="sr-only">Bulk Create</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Bulk Create</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
                   <Button variant="outline" size="icon" onClick={refetch}>
                     <RefreshCw className="h-4 w-4" />
                     <span className="sr-only">Refresh</span>
@@ -74,28 +96,6 @@ export const TransactionsListPage: React.FC = () => {
                   </ListFiltersSheet>
                 </TooltipTrigger>
                 <TooltipContent>Filter</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="hidden md:flex"
-                    onClick={() => setShowBulkCreate(!showBulkCreate)}>
-                    <ListIcon className="h-4 w-4" />
-                    <span className="sr-only">Bulk Create</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Bulk Create</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon" onClick={onAddTransaction}>
-                    <Plus className="h-4 w-4" />
-                    <span className="sr-only">New Transaction</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>New Transaction</TooltipContent>
               </Tooltip>
             </div>
           </div>

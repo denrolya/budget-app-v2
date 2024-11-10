@@ -45,7 +45,7 @@ const DailyList: React.FC<Props> = ({ isLoading, groupedItems, startDate, endDat
           <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
             <div
               className={cn('w-full px-0 md:px-2', {
-                'md:w-1/5': isDesktop,
+                'md:w-1/7': isDesktop,
               })}
             >
               {isLoading && (

@@ -180,7 +180,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
           </>
         )}
 
-        {transaction.convertedValues && Object.keys(transaction.convertedValues).length > 0 && (
+        {(transaction.convertedValues && Object.keys(transaction.convertedValues).length > 0) && (
           <>
             <Separator />
             <div className="grid gap-2">
@@ -266,14 +266,12 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
           </>
         )}
 
-        {transaction.compensations && transaction.compensations.length > 0 && (
+        {(transaction.compensations && transaction.compensations.length > 0) && (
           <>
             <Separator />
             <div className="grid gap-2">
               <h3 className="font-semibold">Compensation Transactions</h3>
-              {transaction.compensations.map(comp => (
-                comp && <TransactionListItem key={comp.id} transaction={comp} isCompensationView />
-              ))}
+              {transaction.compensations.map(comp => <TransactionListItem isCompensationView key={comp.id} transaction={comp} />)}
             </div>
           </>
         )}
@@ -292,12 +290,13 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
             size="sm"
             disabled={isEditing || isDeleting}
             onClick={() => openForm(FormType.Transaction, transaction)}>
-            {isEditing ? (
+            {isEditing && (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Updating...
               </>
-            ) : (
+            )}
+            {!isEditing && (
               <>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
@@ -310,12 +309,13 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
             className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
             disabled={isEditing || isDeleting}
             onClick={() => handleDelete(transaction)}>
-            {isDeleting ? (
+            {isDeleting && (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Deleting...
               </>
-            ) : (
+            )}
+            {!isDeleting && (
               <>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete

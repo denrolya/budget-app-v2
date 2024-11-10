@@ -6,6 +6,7 @@ import {
   Filter,
   LayoutList,
   ListIcon,
+  Plus,
   Receipt,
   RefreshCw,
   Table,
@@ -31,6 +32,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
+import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 import TransactionFilters from '@/models/TransactionFilters';
 import TransferFilters from '@/models/TransferFilters';
@@ -129,6 +131,7 @@ export const DailyLedgerPage: React.FC = () => {
     startDate: moment.Moment
     endDate: moment.Moment
   } | null>(null);
+  const { openForm } = useFormContext();
 
   const dateRange = useMemo(() => {
     if (customDateRange) {
@@ -162,6 +165,8 @@ export const DailyLedgerPage: React.FC = () => {
     setFilter('after', dateRange.startDate);
     setFilter('before', dateRange.endDate.clone().endOf('day'));
   }, [dateRange, setFilter]);
+
+  const onAddTransaction = () => openForm(FormType.Transaction);
 
   const navigatePeriod = useCallback((direction: 'next' | 'previous') => {
     const preset = timePresets.find(p => p.value === selectedPreset);
@@ -288,7 +293,42 @@ export const DailyLedgerPage: React.FC = () => {
                 </div>
               </div>
             </ResponsiveTooltip>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap justify-between gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="hidden md:flex"
+                    onClick={() => setActiveView(activeView === 'table' ? 'list' : 'table')}>
+                    {activeView === 'table' && <LayoutList className="h-4 w-4" />}
+                    {activeView === 'list' && <Table className="h-4 w-4" />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Toggle {activeView === 'table' ? 'List' : 'Table'} View</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="icon" onClick={onAddTransaction}>
+                    <Plus className="h-4 w-4" />
+                    <span className="sr-only">New Transaction</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>New Transaction</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="hidden md:flex"
+                    onClick={() => setShowBulkCreate(!showBulkCreate)}>
+                    <ListIcon className="h-4 w-4" />
+                    <span className="sr-only">Bulk Create</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Bulk Create</TooltipContent>
+              </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button size="icon" variant="outline" onClick={refetch}>
@@ -324,31 +364,6 @@ export const DailyLedgerPage: React.FC = () => {
                 </TooltipTrigger>
                 <TooltipContent>Filters</TooltipContent>
               </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="hidden md:flex"
-                    onClick={() => setShowBulkCreate(!showBulkCreate)}>
-                    <ListIcon className="h-4 w-4" />
-                    <span className="sr-only">Bulk Create</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Bulk Create</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => setActiveView(activeView === 'table' ? 'list' : 'table')}>
-                    {activeView === 'table' && <LayoutList className="h-4 w-4" />}
-                    {activeView === 'list' && <Table className="h-4 w-4" />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Toggle {activeView === 'table' ? 'List' : 'Table'} View</TooltipContent>
-              </Tooltip>
             </div>
           </div>
         </CardHeader>
@@ -370,30 +385,27 @@ export const DailyLedgerPage: React.FC = () => {
             )}
 
             <div className="flex-grow overflow-hidden">
-              {(isLoading && activeView === 'table') && (
-                <div className="h-full overflow-auto">
-                  <TableListingSkeleton startDate={dateRange.startDate} endDate={dateRange.endDate} />
-                </div>
-              )}
-
-              <div className="md:hidden h-full overflow-auto">
-                <DailyList
-                  isLoading={isLoading}
-                  groupedItems={groupedItems}
-                  startDate={dateRange.startDate}
-                  endDate={dateRange.endDate}
-                />
-              </div>
+              {/* Desktop View */}
               <div className="hidden md:block h-full overflow-auto">
-                {activeView === 'table' && (
-                  <TableListing
-                    isLoading={isLoading}
-                    groupedItems={groupedItems}
-                    startDate={dateRange.startDate}
-                    endDate={dateRange.endDate}
-                  />
+                {(activeView === 'table') && (
+                  <>
+                    {isLoading && (
+                      <TableListingSkeleton
+                        startDate={dateRange.startDate}
+                        endDate={dateRange.endDate}
+                      />
+                    )}
+                    {(!isLoading) && (
+                      <TableListing
+                        isLoading={isLoading}
+                        groupedItems={groupedItems}
+                        startDate={dateRange.startDate}
+                        endDate={dateRange.endDate}
+                      />
+                    )}
+                  </>
                 )}
-                {activeView === 'list' && (
+                {(activeView === 'list') && (
                   <DailyList
                     isLoading={isLoading}
                     groupedItems={groupedItems}
@@ -402,12 +414,22 @@ export const DailyLedgerPage: React.FC = () => {
                   />
                 )}
               </div>
+
+              {/* Mobile View (always uses DailyList) */}
+              <div className="md:hidden h-full overflow-auto">
+                <DailyList
+                  isLoading={isLoading}
+                  groupedItems={groupedItems}
+                  startDate={dateRange.startDate}
+                  endDate={dateRange.endDate}
+                />
+              </div>
             </div>
           </ScrollArea>
         </CardContent>
         <CardFooter>
           <div className="flex items-center justify-end gap-2">
-            <Button onClick={goToPreviousPeriod} disabled={isLoading} size="icon" variant="outline">
+            <Button size="icon" variant="outline" onClick={goToPreviousPeriod} disabled={isLoading}>
               <ChevronLeft className="h-4 w-4" />
               <span className="sr-only">Previous</span>
             </Button>
@@ -429,7 +451,7 @@ export const DailyLedgerPage: React.FC = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={goToNextPeriod} disabled={isLoading} size="icon" variant="outline">
+            <Button size="icon" variant="outline" onClick={goToNextPeriod} disabled={isLoading}>
               <ChevronRight className="h-4 w-4" />
               <span className="sr-only">Next</span>
             </Button>

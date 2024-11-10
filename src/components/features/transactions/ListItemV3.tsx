@@ -8,7 +8,7 @@ import Details from '@/components/features/transactions/Details';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
@@ -36,8 +36,8 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
         <CardContent className="p-2 flex flex-col space-y-1">
           <div className="flex flex-row items-center justify-between">
             <div className="flex-grow flex items-center space-x-2 overflow-x-auto">
-              <TransactionValue transaction={transaction} className="text-xs" />
-              <AccountBadge account={transaction.account} size="sm" />
+              <TransactionValue className="text-xs" transaction={transaction} />
+              <AccountBadge size="sm" account={transaction.account} />
               {transaction?.debt?.debtor && (
                 <Badge variant="outline" className="text-[10px] flex items-center px-1">
                   <User className="h-3 w-3 mr-1" />
@@ -47,7 +47,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
               {transaction.isDraft && (
                 <Badge variant="outline" className="bg-primary text-primary-foreground text-[10px] px-1">Draft</Badge>
               )}
-              {transaction.compensations && transaction.compensations.length > 0 && (
+              {(transaction.compensations && transaction.compensations.length > 0) && (
                 <Badge variant="outline" className="bg-secondary text-secondary-foreground text-[10px] px-1">
                   Compensated
                 </Badge>
@@ -68,6 +68,9 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
                   <SheetContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
                     <SheetHeader>
                       <SheetTitle>Transaction Details</SheetTitle>
+                      <SheetDescription classname="sr-only">
+                          Transaction details for {transaction.id}
+                      </SheetDescription>
                     </SheetHeader>
                     <Details transaction={transaction} />
                   </SheetContent>

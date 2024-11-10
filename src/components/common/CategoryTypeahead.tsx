@@ -1,26 +1,24 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-import { forwardRef } from 'react';
-
 import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
 import { useExpenseCategories, useIncomeCategories } from '@/contexts/FinanceData';
 import Category from '@/models/Category';
 import { Type as TransactionType } from '@/types/transaction';
 
-type CategoryTypeaheadProps = Omit<TypeaheadV2Props<Category, string>, 'options' | 'labelField' | 'groupBy' | 'renderElement'> & {
+type CategoryTypeaheadProps =
+  Omit<TypeaheadV2Props<Category, string>, 'options' | 'labelField' | 'groupBy' | 'renderElement'>
+  & {
   className?: string;
   type?: TransactionType;
 };
 
-const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(({
-                                                                                  multiple = false,
-                                                                                  value,
-                                                                                  onChange,
-                                                                                  valueField = 'id',
-                                                                                  className,
-                                                                                  type,
-                                                                                  ...props
-                                                                                }, ref) => {
+const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
+                                                               multiple = false,
+                                                               value,
+                                                               onChange,
+                                                               valueField = 'id',
+                                                               className,
+                                                               type,
+                                                               ...props
+                                                             }) => {
   const incomeCategories = useIncomeCategories();
   const expenseCategories = useExpenseCategories();
 
@@ -58,11 +56,10 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>((
       value={value}
       onChange={onChange}
       className={className}
-      ref={ref}
       {...props}
     />
   );
-});
+};
 
 CategoryTypeahead.displayName = 'CategoryTypeahead';
 

@@ -1,8 +1,9 @@
 import debounce from 'lodash/debounce';
-import { CalendarIcon, FileText, FilterIcon, Layers } from 'lucide-react';
+import { CalendarIcon, FileText, FilterIcon, Layers, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import { Type as TransactionType } from '@/types/transaction';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
@@ -69,6 +70,10 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
     onChange('before', range.to ? moment(range.to) : undefined);
   }, [onChange]);
 
+  const handleTransactionTypeChange = useCallback((type: TransactionType | undefined) => {
+    onChange('type', data.type === type ? undefined : type);
+  }, [onChange, data.type]);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
@@ -81,12 +86,37 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
               onClick={() => debouncedOnChange('isDraft', !data.isDraft)}
             >
               <FileText className="h-4 w-4" />
+              <span className="sr-only">Only Drafts</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Show draft transactions</p>
+            <p>Show only draft transactions</p>
           </TooltipContent>
         </Tooltip>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="transaction-type">Transaction Type</Label>
+        <div className="flex space-x-2">
+          <Button
+            variant={data.type === TransactionType.Income ? 'success' : 'outline'}
+            size="sm"
+            className="flex-1"
+            onClick={() => handleTransactionTypeChange(TransactionType.Income)}
+          >
+            <ArrowDownCircle className="mr-2 h-4 w-4" />
+            Income
+          </Button>
+          <Button
+            variant={data.type === TransactionType.Expense ? 'destructive' : 'outline'}
+            size="sm"
+            className="flex-1"
+            onClick={() => handleTransactionTypeChange(TransactionType.Expense)}
+          >
+            <ArrowUpCircle className="mr-2 h-4 w-4" />
+            Expense
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-2">

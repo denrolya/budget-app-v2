@@ -1,4 +1,4 @@
-import { ArrowRightLeftIcon, CalendarIcon, CalendarX, Receipt } from 'lucide-react';
+import { ArrowRightLeftIcon, CalendarDays, CalendarX, Receipt } from 'lucide-react';
 import { Moment } from 'moment';
 import React from 'react';
 
@@ -49,7 +49,7 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
     <>
       <div className="flex flex-col space-y-2 pb-3 border-b border-border">
         <h4 className="text-lg font-semibold flex items-center">
-          <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground flex-shrink-0" />
+          <CalendarDays className="mr-2 h-5 w-5 text-muted-foreground flex-shrink-0" />
           <RelativeDatetimeDisplay showTime={false} date={date} />
         </h4>
         <div className="flex flex-wrap gap-2 text-sm">
@@ -97,15 +97,23 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
 
   return (
     <div
-      className={cn('flex flex-col w-full', {
+      className={cn('flex flex-col w-full md:w-[calc(100%/2)] lg:w-[calc(100%/3)] xl:w-[calc(100%/4)] min-w-[470px] max-h-[calc(100vh-2rem)]', {
         'order-first md:order-last': index === 0,
         'order-last md:order-first': index === totalDays - 1,
       })}
     >
-      <div className="md:hidden w-full bg-background p-4 rounded-lg shadow-sm">{content}</div>
+      <div className="md:hidden w-full h-full max-h-full bg-background rounded-lg shadow-sm flex flex-col">
+        <div className="p-4 flex-grow overflow-y-auto">
+          {content}
+        </div>
+      </div>
 
-      <Card className="hidden md:flex md:flex-col transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25">
-        <CardHeader className="pb-2">{content}</CardHeader>
+      <Card className="hidden md:flex md:flex-col h-full max-h-full transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 overflow-hidden">
+        <CardHeader className="pb-2 flex flex-col h-full overflow-hidden">
+          <div className="flex-grow overflow-y-auto">
+            {content}
+          </div>
+        </CardHeader>
       </Card>
     </div>
   );
@@ -151,7 +159,7 @@ export const DateCardSkeleton: React.FC<{ index: number; totalDays: number }> = 
         'order-last md:order-first': index === totalDays - 1,
       })}
     >
-      <div className="md:hidden w-full bg-background p-4 rounded-lg shadow-sm">{content}</div>
+      <div className="md:hidden w-full bg-background rounded-lg shadow-sm">{content}</div>
 
       <Card className="hidden md:flex md:flex-col transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25">
         <CardHeader className="pb-2">{content}</CardHeader>

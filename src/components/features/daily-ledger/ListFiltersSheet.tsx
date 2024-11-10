@@ -1,7 +1,8 @@
-import { CalendarIcon, FilterIcon, X } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, CalendarIcon, FilterIcon, X } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useState } from 'react';
 
+import { Type as TransactionType } from '@/types/transaction';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
@@ -61,6 +62,13 @@ const ListFiltersContent: React.FC<ListFiltersProps> = ({
     setFilter('isDraft', transactionFilters.isDraft === null ? true : transactionFilters.isDraft ? false : null);
   }, [setFilter, transactionFilters.isDraft]);
 
+  const handleTransactionTypeChange = useCallback((type: TransactionType | undefined) => {
+    setFilter('type', transactionFilters.type === type ? undefined : type);
+    if (transactionFilters.type) {
+      setShowTransfers(false);
+    }
+  }, [setFilter, setShowTransfers, transactionFilters.type]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-2">
@@ -82,6 +90,30 @@ const ListFiltersContent: React.FC<ListFiltersProps> = ({
         >
           {transactionFilters.isDraft === true ? 'Drafts' : transactionFilters.isDraft === false ? 'No Drafts' : 'All'}
         </Button>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="transaction-type">Transaction Type</Label>
+        <div className="flex space-x-2">
+          <Button
+            variant={transactionFilters.type === TransactionType.Income ? 'success' : 'outline'}
+            size="sm"
+            className="flex-1"
+            onClick={() => handleTransactionTypeChange(TransactionType.Income)}
+          >
+            <ArrowDownCircle className="mr-2 h-4 w-4" />
+            Income
+          </Button>
+          <Button
+            variant={transactionFilters.type === TransactionType.Expense ? 'destructive' : 'outline'}
+            size="sm"
+            className="flex-1"
+            onClick={() => handleTransactionTypeChange(TransactionType.Expense)}
+          >
+            <ArrowUpCircle className="mr-2 h-4 w-4" />
+            Expense
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -114,8 +146,9 @@ const ListFiltersContent: React.FC<ListFiltersProps> = ({
       <div className="space-y-2">
         <Label htmlFor="categories">Categories (Transactions)</Label>
         <CategoryTypeahead
-          id="categories"
           multiple
+          id="categories"
+          valueField="id"
           value={transactionFilters.categories}
           onChange={(categories) => setFilter('categories', categories)}
           className="w-full"

@@ -1,5 +1,6 @@
 import moment, { Moment } from 'moment';
 
+import { Type as TransactionType } from '@/types/transaction';
 import BaseFilters from '@/models/BaseFilters';
 
 interface TransactionFiltersProps {
@@ -12,6 +13,7 @@ interface TransactionFiltersProps {
   accounts?: string[];
   withNestedCategories?: boolean;
   isDraft?: boolean;
+  type?: TransactionType;
 }
 
 export class TransactionFilters extends BaseFilters {
@@ -24,6 +26,7 @@ export class TransactionFilters extends BaseFilters {
   accounts!: string[];
   withNestedCategories!: boolean;
   isDraft?: boolean;
+  type?: TransactionType;
 
   constructor(props: TransactionFiltersProps = {}) {
     super();
@@ -37,6 +40,7 @@ export class TransactionFilters extends BaseFilters {
     this.accounts = props.accounts ?? [];
     this.withNestedCategories = props.withNestedCategories ?? false;
     this.isDraft = props.isDraft ?? undefined;
+    this.type = props.type ?? undefined;
   }
 
   static isApplicable(key: unknown): key is keyof TransactionFilters {

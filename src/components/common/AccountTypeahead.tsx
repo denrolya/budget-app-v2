@@ -1,7 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import cn from 'classnames';
-import { forwardRef, ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountAvatar from '@/components/features/accounts/Avatar';
@@ -9,17 +7,19 @@ import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
 import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
 import Account from '@/models/Account';
 
-type AccountTypeaheadProps = Omit<TypeaheadV2Props<Account, string>, 'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'> & {
+type AccountTypeaheadProps =
+  Omit<TypeaheadV2Props<Account, string>, 'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'>
+  & {
   className?: string;
 };
 
-const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
-                                                                                multiple = false,
-                                                                                value,
-                                                                                onChange,
-                                                                                className,
-                                                                                ...props
-                                                                              }, ref) => {
+const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
+                                                             multiple = false,
+                                                             value,
+                                                             onChange,
+                                                             className,
+                                                             ...props
+                                                           }) => {
   const accounts = useAccountsWithDefaultOrder();
 
   const renderElement = (el: Account, _valueField?: keyof Account, labelField?: keyof Account): ReactNode => (
@@ -63,11 +63,10 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(({
       value={value}
       onChange={onChange}
       className={className}
-      ref={ref}
       {...props}
     />
   );
-});
+};
 
 AccountTypeahead.displayName = 'AccountTypeahead';
 
