@@ -2,8 +2,10 @@ import {
   ArrowRightLeftIcon,
   CalendarIcon,
   ChevronLeft,
-  ChevronRight, Filter, FilterIcon,
+  ChevronRight,
+  Filter,
   LayoutList,
+  ListIcon,
   Receipt,
   RefreshCw,
   Table,
@@ -13,6 +15,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSwipeable } from 'react-swipeable';
 
+import BulkCreateTableForm from '@/components/features/transactions/BulkCreateTableForm';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { Badge } from '@/components/ui/badge';
 import MoneyValue from '@/components/common/MoneyValue';
@@ -120,6 +123,7 @@ const timePresets: TimePreset[] = [
 
 export const DailyLedgerPage: React.FC = () => {
   const [activeView, setActiveView] = useState<'table' | 'list'>('table');
+  const [showBulkCreate, setShowBulkCreate] = useState<boolean>(false);
   const [selectedPreset, setSelectedPreset] = useState<string>('current-week');
   const [customDateRange, setCustomDateRange] = useState<{
     startDate: moment.Moment
@@ -323,6 +327,19 @@ export const DailyLedgerPage: React.FC = () => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
+                    variant="outline"
+                    size="icon"
+                    className="hidden md:flex"
+                    onClick={() => setShowBulkCreate(!showBulkCreate)}>
+                    <ListIcon className="h-4 w-4" />
+                    <span className="sr-only">Bulk Create</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Bulk Create</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
                     size="icon"
                     variant="outline"
                     onClick={() => setActiveView(activeView === 'table' ? 'list' : 'table')}>
@@ -337,6 +354,13 @@ export const DailyLedgerPage: React.FC = () => {
         </CardHeader>
         <CardContent className="p-0 bg-background md:bg-card flex-grow overflow-hidden">
           <ScrollArea className="h-full">
+            {showBulkCreate && (
+              <div className="border-b bg-muted/50 supports-[backdrop-filter]:bg-muted/50">
+                <div className="px-4 py-3">
+                  <BulkCreateTableForm />
+                </div>
+              </div>
+            )}
             {isError && (
               <div className="p-4 bg-destructive/10 text-destructive rounded-md m-4">
                 <p className="font-medium">Error:</p>

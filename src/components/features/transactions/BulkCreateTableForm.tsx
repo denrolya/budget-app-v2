@@ -101,6 +101,18 @@ export const BulkCreateTableForm: React.FC = () => {
       await handleRemove(successfulIndices[i]);
     }
 
+    form.reset({
+      transactions: [{
+        account: '',
+        amount: '',
+        isExpense: true,
+        category: '',
+        note: '',
+        executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
+        isDraft: true,
+      }],
+    });
+
     if (failedIndices.length > 0) {
       toast.warning(`${failedIndices.length} transaction(s) failed to submit. Please review and try again.`);
     }

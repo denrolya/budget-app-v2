@@ -1,4 +1,4 @@
-import { Download, Edit, Filter, ListIcon, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { Edit, Filter, ListIcon, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 
 import Pagination from '@/components/common/Pagination';
@@ -30,7 +30,7 @@ export const TransactionsListPage: React.FC = () => {
   } = useTransactions();
   const onAddTransaction = () => openForm(FormType.Transaction);
   const [selectedTransactions, setSelectedTransactions] = useState<number[]>([]);
-  const [showBulkCreate, setShowBulkCreate] = useState(false);
+  const [showBulkCreate, setShowBulkCreate] = useState<boolean>(false);
 
   const activeFiltersCount = useMemo(() => {
     let count = 0;
@@ -127,7 +127,7 @@ export const TransactionsListPage: React.FC = () => {
         </CardHeader>
         <CardContent className="p-0 bg-background md:bg-card flex-grow overflow-hidden">
           {showBulkCreate && (
-            <div className="border-b bg-muted/50 backdrop-blur supports-[backdrop-filter]:bg-muted/50">
+            <div className="border-b bg-muted/50 supports-[backdrop-filter]:bg-muted/50">
               <div className="px-4 py-3">
                 <BulkCreateTableForm />
               </div>
