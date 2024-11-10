@@ -298,17 +298,17 @@ export const TableListing: React.FC<Props> = ({ groupedItems, ...props }) => {
                   )}
                 </TableCell>
                 <TableCell>
-                  {renderEditableCell(transaction, 'account', <AccountBadge size="sm" account={transaction.account} />)}
-                </TableCell>
-                <TableCell>
-                  {renderEditableCell(transaction, 'amount', <TransactionValue transaction={transaction} />)}
-                </TableCell>
-                <TableCell>
                   {renderEditableCell(transaction, 'category',
                     <Badge variant="outline" className="text-xs px-1 py-0 whitespace-nowrap bg-background shadow-md">
                       {transaction.category.name}
                     </Badge>,
                   )}
+                </TableCell>
+                <TableCell>
+                  {renderEditableCell(transaction, 'amount', <TransactionValue transaction={transaction} />)}
+                </TableCell>
+                <TableCell>
+                  {renderEditableCell(transaction, 'account', <AccountBadge size="sm" account={transaction.account} />)}
                 </TableCell>
                 <TableCell>
                   {renderEditableCell(transaction, 'note', transaction.note)}

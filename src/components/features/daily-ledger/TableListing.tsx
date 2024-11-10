@@ -1,9 +1,3 @@
-import cn from 'classnames';
-import { ArrowRight, Check, Eye, Pencil, Trash2, X } from 'lucide-react';
-import moment, { Moment } from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
-import { toast } from 'sonner';
-
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import MoneyValue from '@/components/common/MoneyValue';
@@ -23,6 +17,11 @@ import { useTransactionMutations } from '@/hooks/useTransactionMutations';
 import Transaction from '@/models/Transaction';
 import Transfer from '@/models/Transfer';
 import { confirm } from '@/utils/confirmation';
+import cn from 'classnames';
+import { ArrowRight, Check, Eye, Pencil, Trash2, X } from 'lucide-react';
+import moment, { Moment } from 'moment';
+import React, { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 type EditableField = 'account' | 'amount' | 'category' | 'note' | 'executedAt'
 
@@ -328,7 +327,8 @@ const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate }) => 
                   </TableRow>
                 )}
                 {items.map((item) => (
-                  <TableRow key={item.id} className={cn({
+                  <TableRow
+                    key={item.id} className={cn({
                     'bg-warning/20 hover:bg-warning/30': (item instanceof Transaction && item.isDraft),
                   })}>
                     <TableCell className="w-4"></TableCell>
@@ -366,7 +366,7 @@ const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate }) => 
                       )}
                     </TableCell>
                     <TableCell>
-                      {'fromExpense' in item ? (
+                      {(item instanceof Transfer) && (
                         <div className="flex items-center space-x-2">
                           <AccountBadge
                             size="sm"
@@ -380,7 +380,8 @@ const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate }) => 
                             className={item.feeExpense?.account.id === item.toIncome.account.id ? 'ring-2 ring-destructive' : ''}
                           />
                         </div>
-                      ) : (
+                      )}
+                      {(item instanceof Transaction) && (
                         renderEditableCell(item, 'account', <AccountBadge size="sm" account={item.account} />)
                       )}
                     </TableCell>
@@ -394,15 +395,6 @@ const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate }) => 
                       )}
                     </TableCell>
                     <TableCell>
-                      {item instanceof Transfer && (
-                        <>
-
-                          <div>Rate: {Number(item.rate.toFixed(4))}</div>
-                          <div className="text-xs text-muted-foreground">
-                            1 {item.fromExpense.account.currency} = {Number(item.rate.toFixed(4))} {item.toIncome.account.currency}
-                          </div>
-                        </>
-                      )}
                       {item instanceof Transaction && (
                         renderEditableCell(item, 'category',
                           <Badge
@@ -411,6 +403,14 @@ const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate }) => 
                             {item.category.name}
                           </Badge>,
                         )
+                      )}
+                      {item instanceof Transfer && (
+                        <>
+                          <div>Rate: {Number(item.rate.toFixed(4))}</div>
+                          <div className="text-xs text-muted-foreground">
+                            1 {item.fromExpense.account.currency} = {Number(item.rate.toFixed(4))} {item.toIncome.account.currency}
+                          </div>
+                        </>
                       )}
                     </TableCell>
                     <TableCell>{item instanceof Transaction ? renderEditableCell(item, 'note', item.note) : item.note}</TableCell>

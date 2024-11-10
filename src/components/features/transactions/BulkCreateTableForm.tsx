@@ -43,7 +43,7 @@ export const BulkCreateTableForm: React.FC = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       transactions: [{
-        isDraft: true,
+        isDraft: false,
         account: undefined,
         amount: 0,
         type: TransactionType.Expense,
@@ -64,13 +64,13 @@ export const BulkCreateTableForm: React.FC = () => {
     if (currentTransactions.length === 1) {
       form.reset({
         transactions: [{
+          isDraft: false,
           account: '',
           amount: '',
           isExpense: true,
           category: '',
           note: '',
           executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
-          isDraft: true,
         }],
       });
     } else {
@@ -109,7 +109,7 @@ export const BulkCreateTableForm: React.FC = () => {
         category: '',
         note: '',
         executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
-        isDraft: true,
+        isDraft: false,
       }],
     });
 
@@ -136,9 +136,9 @@ export const BulkCreateTableForm: React.FC = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Draft</TableHead>
-                <TableHead>Account</TableHead>
-                <TableHead>Amount</TableHead>
                 <TableHead>Category</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Account</TableHead>
                 <TableHead>Note</TableHead>
                 <TableHead>Executed At</TableHead>
                 <TableHead className="w-[50px]">Actions</TableHead>
@@ -165,13 +165,14 @@ export const BulkCreateTableForm: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <FormField
-                      name={`transactions.${index}.account`}
+                      name={`transactions.${index}.category`}
                       control={form.control}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="sr-only">Account</FormLabel>
-                          <AccountTypeahead
+                          <FormLabel className="sr-only">Category</FormLabel>
+                          <CategoryTypeahead
                             {...field}
+                            type={form.watch(`transactions.${index}.type`)}
                             multiple={false}
                             className={cn('w-full justify-between', {
                               'text-muted-foreground': !field.value,
@@ -231,14 +232,13 @@ export const BulkCreateTableForm: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <FormField
-                      name={`transactions.${index}.category`}
+                      name={`transactions.${index}.account`}
                       control={form.control}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="sr-only">Category</FormLabel>
-                          <CategoryTypeahead
+                          <FormLabel className="sr-only">Account</FormLabel>
+                          <AccountTypeahead
                             {...field}
-                            type={form.watch(`transactions.${index}.type`)}
                             multiple={false}
                             className={cn('w-full justify-between', {
                               'text-muted-foreground': !field.value,
@@ -304,7 +304,7 @@ export const BulkCreateTableForm: React.FC = () => {
               variant="outline"
               className="h-10 px-4 py-2 text-sm font-medium"
               onClick={() => append({
-                isDraft: true,
+                isDraft: false,
                 account: '',
                 amount: 0,
                 type: TransactionType.Expense,
