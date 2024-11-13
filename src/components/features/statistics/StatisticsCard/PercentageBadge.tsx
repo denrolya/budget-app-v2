@@ -2,21 +2,29 @@ import cn from 'classnames';
 import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 import React from 'react';
 
+import { Type as TransactionType } from '@/types/transaction';
+
 interface Props {
   percentage: number;
-  reverted?: boolean;
+  type: TransactionType;
+  decimals?: number;
 }
 
-export const PercentageBadge: React.FC<Props> = ({ percentage, reverted = false }) => (
-  <span className={cn('px-2 py-1 rounded-full text-xs font-medium flex items-center', {
-    'bg-success/20 text-success': (!reverted && percentage >= 0) || (reverted && percentage < 0),
-    'bg-destructive/20 text-destructive': (!reverted && percentage < 100) || (reverted && percentage > 0),
-  })}>
-    {((percentage >= 100 && !reverted) || (reverted && percentage > 0))
-      ? <ArrowUpIcon className="h-3 w-3 mr-1" />
-      : <ArrowDownIcon className="h-3 w-3 mr-1" />}
-    {Math.abs(percentage).toFixed(1)}%
-  </span>
-);
+export const PercentageBadge: React.FC<Props> = ({ percentage, type, decimals = 1 }) => {
+  const isIncrease = percentage >= 0;
+  const Icon = isIncrease ? ArrowUpIcon : ArrowDownIcon;
+
+  return (
+    <span
+      className={cn('px-2 py-1 rounded-full text-xs font-medium flex items-center', {
+        'bg-destructive/20 text-destructive': (type === TransactionType.Expense && isIncrease) || (type === TransactionType.Income && !isIncrease),
+        'bg-success/20 text-success': (type === TransactionType.Expense && !isIncrease) || (type === TransactionType.Income && isIncrease),
+      })}
+    >
+      <Icon className="mr-1 h-3 w-3" />
+      {Math.abs(percentage).toFixed(decimals)}%
+    </span>
+  );
+};
 
 export default PercentageBadge;

@@ -1,3 +1,5 @@
+import React, { useState } from 'react';
+
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
 import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card';
 import TimelineChart from '@/components/features/statistics/TimelineChart.example';
@@ -5,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cardConfigs } from '@/constants/dashboard-config';
 import { StatisticsConfig } from '@/types/statistics';
 import { generateSlug } from '@/utils/generateSlug';
-import React, { useState } from 'react';
 
 const DashboardPage: React.FC = () => {
   const [configs] = useState<StatisticsConfig[]>(cardConfigs);
@@ -19,7 +20,7 @@ const DashboardPage: React.FC = () => {
       <div className="w-full">
         <MoneyFlow className="mb-6" />
       </div>
-      
+
       <div className="w-full relative overflow-hidden mb-6">
         <div
           className="flex overflow-x-auto space-x-4 snap-x snap-mandatory"

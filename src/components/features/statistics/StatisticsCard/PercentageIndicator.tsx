@@ -1,73 +1,51 @@
 import cn from 'classnames';
 import React from 'react';
 
+import { StatisticsType } from '@/types/statistics';
+import { Type as TransactionType } from '@/types/transaction';
+
 interface Props {
-  currentValue: number | { min: number; max: number };
-  previousValue: number | { min: number; max: number };
-  type: 'income' | 'expense';
-  statType: 'sum' | 'daily' | 'avg' | 'min-max';
+  percentageChange: number | { min: number; max: number };
+  type: TransactionType;
+  statType: StatisticsType;
 }
 
-const calculatePercentage = (current: number, previous: number, type: 'income' | 'expense'): number => {
-  if (previous === 0) return current === 0 ? 0 : 100;
-  const ratio = (current / previous) * 100;
+const getWidth = (percentage: number): string =>
+   percentage >= 0 ? '100%' : `${100 - Math.abs(percentage)}%`
+;
 
-  if (type === 'expense') {
-    return current > previous ? 100 - ratio : ratio;
+const getColor = (percentage: number, type: TransactionType): string => {
+  if (type === TransactionType.Expense) {
+    return percentage >= 0 ? 'bg-destructive' : 'bg-success';
   } else {
-    return current > previous ? ratio - 100 : ratio;
+    return percentage >= 0 ? 'bg-success' : 'bg-destructive';
   }
 };
 
-const getWidth = (percentage: number): string => `${Math.max(Math.min(percentage, 100), 0)}%`;
-
-const getColor = (current: number, previous: number, type: 'income' | 'expense'): string => {
-  if (type === 'expense') {
-    return current > previous ? 'bg-destructive' : 'bg-success';
-  } else {
-    return current > previous ? 'bg-success' : 'bg-destructive';
-  }
-};
-
-export const PercentageIndicator: React.FC<Props> = ({
-                                              currentValue,
-                                              previousValue,
-                                              type,
-                                              statType,
-                                            }) => {
-  if (typeof currentValue === 'number' && typeof previousValue === 'number') {
-    const percentage = calculatePercentage(currentValue, previousValue, type);
-    const width = getWidth(percentage);
-    const color = getColor(currentValue, previousValue, type);
+export const PercentageIndicator: React.FC<Props> = ({ percentageChange, type, statType }) => {
+  // Case for single values (not min-max)
+  if (typeof percentageChange === 'number') {
+    const width = getWidth(percentageChange);
+    const color = getColor(percentageChange, type);
 
     return (
       <div className="absolute bottom-0 left-0 w-full h-1 bg-muted">
-        <div
-          className={cn('absolute bottom-0 left-0 h-1', color)}
-          style={{ width }}
-        />
+        <div className={cn('absolute bottom-0 left-0 h-1', color)} style={{ width }} />
       </div>
     );
   }
 
-  if (statType === 'min-max' && typeof currentValue === 'object' && typeof previousValue === 'object') {
-    const minPercentage = calculatePercentage(currentValue.min, previousValue.min, type);
-    const maxPercentage = calculatePercentage(currentValue.max, previousValue.max, type);
-    const minWidth = getWidth(minPercentage);
-    const maxWidth = getWidth(maxPercentage);
-    const minColor = getColor(currentValue.min, previousValue.min, type);
-    const maxColor = getColor(currentValue.max, previousValue.max, type);
+  // Case for min-max values
+  if (statType === 'min-max' && typeof percentageChange === 'object') {
+    const minWidth = getWidth(percentageChange.min);
+    const maxWidth = getWidth(percentageChange.max);
+    const minColor = getColor(percentageChange.min, type);
+    const maxColor = getColor(percentageChange.max, type);
 
     return (
       <div className="absolute bottom-0 left-0 w-full h-1 bg-muted">
-        <div
-          className={cn('absolute bottom-0 left-0 h-1', minColor)}
-          style={{ width: minWidth }}
-        />
-        <div
-          className={cn('absolute bottom-0 right-0 h-1', maxColor)}
-          style={{ width: maxWidth }}
-        />
+        <div className={cn('absolute bottom-0 left-0 h-1', minColor)} style={{ width: minWidth }} />
+        <div className={cn('absolute bottom-0 right-0 h-1', maxColor)} style={{ width: maxWidth }} />
       </div>
     );
   }

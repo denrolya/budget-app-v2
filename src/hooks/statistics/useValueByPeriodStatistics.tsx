@@ -138,6 +138,7 @@ export const useValueByPeriod = <T extends StatisticsType>(
   const { percentageChange, isIncrease } = useMemo(() => {
     if (typeof currentValue === 'number' && typeof comparisonValue === 'number') {
       const change = calculateChange(currentValue, comparisonValue);
+      console.log({ change });
       return {
         percentageChange: change as PercentageChange<T>,
         isIncrease: (currentValue > comparisonValue) as IsIncrease<T>,

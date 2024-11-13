@@ -7,11 +7,11 @@ import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerTrigger } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { TransferFilters } from '@/models/TransferFilters';
@@ -212,29 +212,31 @@ export const ListFiltersSheet: React.FC<ListFiltersProps> = ({ children, ...prop
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const isDesktop = useScreenSize();
 
-  const FilterWrapper = isDesktop ? Sheet : Drawer;
-  const FilterHeader = isDesktop ? SheetHeader : DrawerHeader;
-  const FilterTitle = isDesktop ? SheetTitle : DrawerTitle;
-  const FilterTrigger = isDesktop ? SheetTrigger : DrawerTrigger;
-  const FilterContent = isDesktop ? SheetContent : DrawerContent;
+  const ContentWrapper = isDesktop ? Sheet : Drawer;
+  const ContentHeader = isDesktop ? SheetHeader : DrawerHeader;
+  const ContentTitle = isDesktop ? SheetTitle : DrawerTitle;
+  const ContentDescription = isDesktop ? SheetDescription : DrawerDescription;
+  const ContentTrigger = isDesktop ? SheetTrigger : DrawerTrigger;
+  const ContentContent = isDesktop ? SheetContent : DrawerContent;
 
   return (
-    <FilterWrapper open={isOpen} onOpenChange={setIsOpen}>
-      <FilterTrigger asChild>
+    <ContentWrapper open={isOpen} onOpenChange={setIsOpen}>
+      <ContentTrigger asChild>
         {children}
-      </FilterTrigger>
-      <FilterContent side={isDesktop ? 'right' : undefined} className={isDesktop ? 'sm:max-w-[425px]' : undefined}>
-        <FilterHeader>
-          <FilterTitle>Filters</FilterTitle>
+      </ContentTrigger>
+      <ContentContent side={isDesktop ? 'right' : undefined} className={isDesktop ? 'sm:max-w-[425px]' : undefined}>
+        <ContentHeader>
+          <ContentTitle>Filters</ContentTitle>
+          <ContentDescription className="sr-only">Adjust list filters</ContentDescription>
           <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="absolute right-4 top-4">
             <X className="h-4 w-4" />
           </Button>
-        </FilterHeader>
+        </ContentHeader>
         <div className="mt-4 px-4">
           <ListFiltersContent {...props} />
         </div>
-      </FilterContent>
-    </FilterWrapper>
+      </ContentContent>
+    </ContentWrapper>
   );
 };
 
