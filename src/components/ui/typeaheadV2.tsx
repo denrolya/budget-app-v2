@@ -173,7 +173,7 @@ export const TypeaheadV2 = <T, V extends string | number>({
     <div className={cn('relative w-full', className)} ref={containerRef}>
       <div
         className={cn(
-          'flex items-center gap-1 px-3 py-2 rounded-md border border-input bg-input text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
+          'flex items-center gap-1 px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
           inputProps.disabled && 'opacity-50 cursor-not-allowed',
         )}
         onClick={() => {
@@ -188,7 +188,7 @@ export const TypeaheadV2 = <T, V extends string | number>({
             {selectedOptions.map((option) => (
               <Badge
                 variant="outline"
-                className="whitespace-nowrap text-xs shadow-md py-0 px-1 bg-input"
+                className="whitespace-nowrap text-xs shadow-md py-0 px-1 bg-background"
                 key={option[valueField] as React.Key}>
                 <span className="truncate max-w-[100px]">{String(option[labelField])}</span>
                 <Button

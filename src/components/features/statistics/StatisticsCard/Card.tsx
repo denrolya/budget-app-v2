@@ -3,6 +3,7 @@ import { SettingsIcon } from 'lucide-react';
 import { Moment } from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 
+import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import MoneyValue from '@/components/common/MoneyValue';
 import ConfigForm from '@/components/features/statistics/StatisticsCard/ConfigForm';
 import PercentageBadge from '@/components/features/statistics/StatisticsCard/PercentageBadge';
@@ -91,7 +92,7 @@ const TooltipContent: React.FC<{
     <p className="text-base font-bold">
       <MoneyValue className="font-medium font-mono" useColors={false} amount={amount} />
     </p>
-    {date && <p className="text-muted-foreground">Date: {date.format('MMM D, YYYY')}</p>}
+    {date && <p className="text-muted-foreground">Date: {date.format(MOMENT_DATE_VIEW_FORMAT)}</p>}
     <Separator className="my-2" />
     <p className="pt-1">
       vs {comparison === 'previous' ? 'previous period' : 'same period last year'}
@@ -122,6 +123,10 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
   const periodText = useMemo(() => getPeriodText(timeframe, period), [timeframe, period]);
   const [open, setOpen] = useState(false);
   const isDesktop = useScreenSize();
+
+  if (isLoading) {
+    return <StatisticsCardSkeleton />;
+  }
 
   const renderMinMaxSection = (
     currentValue: StatisticsData<StatisticsType>,
@@ -210,7 +215,7 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                 />
               }
             >
-              <PercentageBadge percentage={percentageChange.min} reverted />
+              <PercentageBadge reverted percentage={percentageChange.min} />
             </ResponsiveTooltip>
             <ResponsiveTooltip
               openDelay={0}
@@ -234,10 +239,6 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
     }
     return null;
   };
-
-  if (isLoading) {
-    return <StatisticsCardSkeleton />;
-  }
 
   return (
     <Card
@@ -319,8 +320,8 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                       />
                     </ResponsiveTooltip>
                     <PercentageBadge
-                      percentage={percentageChange as number}
                       reverted={type === TransactionType.Expense}
+                      percentage={percentageChange as number}
                     />
                   </div>
                   <div className="flex justify-between text-xs">

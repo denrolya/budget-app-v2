@@ -25,9 +25,9 @@ export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
   const [timeframe, setTimeframe] = useState<TimeframeValue>(TIMEFRAME_OPTIONS[6].value);
   const [period, setPeriod] = useState<PeriodValue>(PERIOD_OPTIONS[2].value);
   const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
-  const [showIncome, setShowIncome] = useState<boolean>(false);
-  const [showExpenses, setShowExpenses] = useState<boolean>(false);
-  const [showRevenue, setShowRevenue] = useState<boolean>(true);
+  const [showIncome, setShowIncome] = useState<boolean>(true);
+  const [showExpenses, setShowExpenses] = useState<boolean>(true);
+  const [showRevenue, setShowRevenue] = useState<boolean>(false);
   const [showPreviousPeriod, setShowPreviousPeriod] = useState<boolean>(true);
 
 

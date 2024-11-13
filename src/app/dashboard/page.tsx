@@ -16,6 +16,10 @@ const DashboardPage: React.FC = () => {
 
   return (
     <section className="p-6">
+      <div className="w-full">
+        <MoneyFlow className="mb-6" />
+      </div>
+      
       <div className="w-full relative overflow-hidden mb-6">
         <div
           className="flex overflow-x-auto space-x-4 snap-x snap-mandatory"
@@ -34,10 +38,6 @@ const DashboardPage: React.FC = () => {
             />
           ))}
         </div>
-      </div>
-
-      <div className="w-full">
-        <MoneyFlow className="mb-6" />
       </div>
 
       <div className="w-full">

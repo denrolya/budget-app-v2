@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useHotkeys as useReactHotkeysHook } from 'react-hotkeys-hook';
 
-import { useFinanceData } from '@/contexts/FinanceData';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useFinanceData } from '@/contexts/FinanceData';
+import { FormType, useForm as useFormContext } from '@/contexts/Form';
 
 type Hotkey = {
   windows: string
@@ -24,6 +24,7 @@ const globalHotkeys: HotkeyCategory = {
     { windows: 'Shift+T', mac: 'Shift+T', description: 'Open Transaction Form' },
     { windows: 'Shift+R', mac: 'Shift+R', description: 'Open Transfer Form' },
     { windows: 'Shift+C', mac: 'Shift+C', description: 'Open Currency Converter' },
+    { windows: 'H', mac: 'H', description: 'Open/Close this window' },
   ],
 };
 
@@ -45,6 +46,10 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
   const { openForm } = useFormContext();
   const { toggleCurrencyConverter } = useFinanceData();
 
+  const toggleHotkeysDialog = () => setIsDialogOpen(prev => !prev);
+  const openHotkeysDialog = () => setIsDialogOpen(true);
+  const closeHotkeysDialog = () => setIsDialogOpen(false);
+
   useReactHotkeysHook('shift+t', (event) => {
     event.preventDefault();
     openForm(FormType.Transaction);
@@ -65,6 +70,11 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
     toggleCurrencyConverter();
   }, [toggleCurrencyConverter]);
 
+  useReactHotkeysHook('h', (event) => {
+    event.preventDefault();
+    toggleHotkeysDialog();
+  }, []);
+
   const addPageHotkeys = (pageName: string, hotkeys: Hotkey[]) => {
     setPageHotkeys(prev => ({
       ...prev,
@@ -79,9 +89,6 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
       return newPageHotkeys;
     });
   };
-
-  const openHotkeysDialog = () => setIsDialogOpen(true);
-  const closeHotkeysDialog = () => setIsDialogOpen(false);
 
   return (
     <HotkeysContext.Provider
