@@ -1,4 +1,4 @@
-import moment, { Moment } from 'moment/moment';
+import { Moment } from 'moment/moment';
 
 import { PeriodOption, TimeframeOption } from '@/types/global';
 

@@ -1,7 +1,8 @@
-import { Moment } from 'moment/moment';
+import moment, { Moment } from 'moment';
 import React from 'react';
 import { Bar, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
+import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import CustomTooltip from '@/components/features/statistics/MoneyFlow/Tooltip';
 
 interface Props {
@@ -144,16 +145,35 @@ const MoneyFlowChart: React.FC<Props> = ({
   };
 
   const formatXAxisTick = (timestamp: number) => {
-    if (period === '1 month') {
-      return new Date(timestamp).toLocaleString('default', { month: 'short' });
+    const date = moment.unix(timestamp);
+    let label = '';
+
+    switch (period) {
+      case '1 month':
+        label = date.format('MMM');
+        break;
+      case '1 week':
+        label = date.week() % 3 === 0 ? `W${date.week()}` : '';
+        break;
+      case '1 day':
+        label = date.week() % 3 === 0 ? date.format('D MMM') : '';
+        break;
+      default:
+        label = date.format(MOMENT_DATE_VIEW_FORMAT);
     }
-    return '';
+
+    return label;
   };
+
 
   return (
     <div className="min-w-[600px]">
       <ResponsiveContainer width="100%" height={250}>
-        <ComposedChart stackOffset="sign" data={transformedData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+        <ComposedChart
+          stackOffset="sign"
+          data={transformedData}
+          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+        >
           <defs>
             <linearGradient id="incomeGradient" x1="0" y1="1" x2="0" y2="0">
               <stop offset="0%" stopColor="hsl(var(--success) / 0.2)" />
@@ -205,8 +225,8 @@ const MoneyFlowChart: React.FC<Props> = ({
             )}
           />
           <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeOpacity={0.2} />
-          {renderChart(false)} {/* Previous timeframe */}
-          {renderChart(true)} {/* Current timeframe */}
+          {renderChart(false)}
+          {renderChart(true)}
         </ComposedChart>
       </ResponsiveContainer>
     </div>
