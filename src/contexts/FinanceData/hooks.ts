@@ -1,6 +1,8 @@
 import orderBy from 'lodash/orderBy';
-import { useContext } from 'react';
+import sumBy from 'lodash/sumBy';
+import { useContext, useMemo } from 'react';
 
+import { useBaseCurrency } from '@/contexts/auth';
 import Debt from '@/models/Debt';
 import Category from '@/models/Category';
 import { ConvertedValues, Type as TransactionType } from '@/types/transaction';
@@ -24,6 +26,17 @@ export const useAccounts = (): Account[] => {
   const { data } = useFinanceData();
 
   return data.accounts;
+};
+
+export const useTotalBalance = (): number => {
+  const accounts = useAccounts();
+  const baseCurrency = useBaseCurrency();
+
+  return useMemo(
+    () => sumBy(
+      accounts,
+      ({ convertedValues }) => convertedValues?.[baseCurrency] || 0,
+    ), [accounts, baseCurrency]);
 };
 
 export const useActiveAccounts = (): Account[] => {
@@ -53,6 +66,16 @@ export const useAccountsWithDefaultOrder = (): Account[] => {
 export const useDebts = (): Debt[] => {
   const { data } = useFinanceData();
   return data.debts;
+};
+
+export const useTotalDebt = (): number => {
+  const debts = useDebts();
+  const baseCurrency = useBaseCurrency();
+
+  return useMemo(() => sumBy(
+    debts,
+    ({ convertedValues }) => convertedValues?.[baseCurrency] || 0,
+  ), [baseCurrency, debts]);
 };
 
 export const useCategories = (): CategoriesData => {

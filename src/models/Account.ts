@@ -1,13 +1,7 @@
 import moment, { Moment } from 'moment';
 
 import { CURRENCIES } from '@/constants/currency';
-
-export enum AccountType {
-  Bank = 'bank',
-  Cash = 'cash',
-  Internet = 'internet',
-  Basic = 'basic',
-}
+import { Type as AccountType } from '@/types/account';
 
 export const ACCOUNT_TYPES_ORDER: AccountType[] = [
   AccountType.Bank,

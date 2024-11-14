@@ -1,3 +1,4 @@
+import { ResponsiveLine } from '@nivo/line';
 import isEqual from 'lodash/isEqual';
 import { SettingsIcon } from 'lucide-react';
 import React, { memo, useMemo, useState } from 'react';
@@ -14,7 +15,7 @@ import { useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics'
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { Interval, StatisticsConfig, StatisticsType } from '@/types/statistics';
 import { Type as TransactionType } from '@/types/transaction';
-import { PercentageChange, StatisticsData } from '@/types/valueByPeriodStatistics';
+import { PercentageChange, StatisticsData, ValueByPeriodData } from '@/types/valueByPeriodStatistics';
 import { generateSlug } from '@/utils/generateSlug';
 
 interface Props {
@@ -54,6 +55,8 @@ const StatisticsCardSkeleton = () => (
 export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
   const { title, type, categories, timeframe, period, comparison, statType } = config;
   const {
+    currentData,
+    comparisonData,
     currentValue,
     comparisonValue,
     percentageChange,
@@ -75,6 +78,19 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
   const [open, setOpen] = useState(false);
   const isDesktop = useScreenSize();
 
+  const chartData = useMemo(() => {
+    if (statType !== StatisticsType.Avg || (!currentData && !comparisonData)) return null;
+
+    const data = currentData || [];
+    return [{
+      id: type,
+      data: data.map((item: ValueByPeriodData) => ({
+        x: item.after.format('YYYY-MM-DD'),
+        y: item[type]
+      }))
+    }];
+  }, [currentData, comparisonData, statType, type]);
+
   if (isLoading) {
     return <StatisticsCardSkeleton />;
   }
@@ -84,7 +100,32 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
       className="w-[300px] h-[140px] overflow-hidden transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 relative flex-none snap-center"
       id={id}
     >
-      <CardContent className="p-4 flex flex-col justify-between h-full">
+      {chartData && (
+        <div className="absolute inset-0 z-0 opacity-15">
+          <ResponsiveLine
+            data={chartData}
+            margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+            xScale={{ type: 'point' }}
+            yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
+            curve="natural"
+            axisTop={null}
+            axisRight={null}
+            axisBottom={null}
+            axisLeft={null}
+            enableGridX={false}
+            enableGridY={false}
+            enablePoints={false}
+            enableArea={true}
+            areaOpacity={0.3}
+            useMesh={false}
+            colors={[`hsl(var(--${type === TransactionType.Income ? 'success' : 'destructive'}))`]}
+            theme={{
+              background: 'transparent',
+            }}
+          />
+        </div>
+      )}
+      <CardContent className="p-4 flex flex-col justify-between h-full z-1 relative">
         <div className="flex justify-between items-start">
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-sm text-primary truncate">{cardTitle}</h3>

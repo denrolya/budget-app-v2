@@ -7,6 +7,7 @@ import ExpenseSunburstChart from '@/components/features/statistics/Sunburst.exam
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/contexts/FinanceData';
 import TreeDND from '@/components/features/categories/TreeDND.example';
+import ExpensesBySeasons from '@/components/features/statistics/ExpensesBySeasons.example';
 
 const TestingPage: React.FC = () => {
   const expenseCategoriesTree = useExpenseCategoriesTree();
@@ -35,6 +36,8 @@ const TestingPage: React.FC = () => {
             <BarChartWithDrawer />
             <FunnelWithDrawer />
           </div>
+
+          <ExpensesBySeasons />
         </TabsContent>
         <TabsContent value="other">
           <h1>Other random stuff</h1>

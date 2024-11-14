@@ -2,7 +2,8 @@ import cn from 'classnames';
 import { CreditCard, Globe, HelpCircle, Wallet } from 'lucide-react';
 import React from 'react';
 
-import Account, { AccountType } from '@/models/Account';
+import { Type as AccountType } from '@/types/account';
+import Account from '@/models/Account';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface AccountAvatarProps {

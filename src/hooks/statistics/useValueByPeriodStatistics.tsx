@@ -93,7 +93,11 @@ export const useValueByPeriod = <T extends StatisticsType>(
 
   const periodString = useMemo(() => (period ? `${period.value} ${period.unit}` : `${timeframe.value} ${timeframe.unit}`), [period, timeframe]);
 
-  const { data: currentData, isLoading: isLoadingCurrent, error: errorCurrent } = useValueByPeriodStatisticsRequest({
+  const {
+    data: currentData,
+    isLoading: isLoadingCurrent,
+    error: errorCurrent,
+  } = useValueByPeriodStatisticsRequest({
     type,
     queryKey: `${queryKey}-selected`,
     after: periodStart,

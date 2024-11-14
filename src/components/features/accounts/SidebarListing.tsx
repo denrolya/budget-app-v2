@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
-import Account, { AccountType } from '@/models/Account';
+import Account from '@/models/Account';
+import { Type as AccountType } from '@/types/account';
 
 interface Props {
   selected: Account | null;

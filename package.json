@@ -27,6 +27,7 @@
         "@nivo/core": "^0.87.0",
         "@nivo/funnel": "^0.87.0",
         "@nivo/line": "^0.87.0",
+        "@nivo/pie": "^0.88.0",
         "@nivo/radial-bar": "^0.87.0",
         "@nivo/sunburst": "^0.87.0",
         "@nivo/tree": "^0.87.0",

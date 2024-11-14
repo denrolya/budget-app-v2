@@ -16,11 +16,7 @@ import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
 import { PeriodValue, TimeframeValue } from '@/types/global';
 import { formatShortDate } from '@/utils/formatShortDate';
 
-interface Props {
-  className?: string;
-}
-
-export const MoneyFlowCard: React.FC<Props> = ({ className }) => {
+export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
   const [timeframe, setTimeframe] = useState<TimeframeValue>(TIMEFRAME_OPTIONS[6].value);
   const [period, setPeriod] = useState<PeriodValue>(PERIOD_OPTIONS[2].value);

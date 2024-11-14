@@ -2,8 +2,10 @@ import cn from 'classnames';
 import groupBy from 'lodash/groupBy';
 import sumBy from 'lodash/sumBy';
 import { Plus } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
+import { useScreenSize } from '@/hooks/useScreenSize';
+import { useTotalDebt } from '@/contexts/FinanceData/hooks';
 import { percentage } from '@/utils/percentage';
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountLink from '@/components/layout/SidebarAccountLink';
@@ -13,52 +15,34 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { ROUTES } from '@/constants/routes';
 import { useBaseCurrency } from '@/contexts/auth';
-import { useActiveAccountsWithDefaultOrder, useDebts } from '@/contexts/FinanceData';
+import { useActiveAccountsWithDefaultOrder, useTotalBalance } from '@/contexts/FinanceData';
 import { FormType, useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
-import { ACCOUNT_TYPES_ORDER, AccountType } from '@/models/Account';
+import { ACCOUNT_TYPES_ORDER } from '@/models/Account';
+import { Type as AccountType } from '@/types/account';
 
 type RouteKey = keyof typeof ROUTES
 
 export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className }) => {
+  const totalBalance = useTotalBalance();
+  const totalDebt = useTotalDebt();
   const baseCurrency = useBaseCurrency();
   const accounts = useActiveAccountsWithDefaultOrder();
-  const debts = useDebts();
-  const [isMobile, setIsMobile] = useState(false);
+  const isDesktop = useScreenSize();
   const { isSidebarExpanded, setIsSidebarExpanded } = useSidebar();
   const { openForm } = useForm();
 
-  const totalBalance = useMemo(
-    () => sumBy(
-      accounts,
-      ({ convertedValues }) => convertedValues?.[baseCurrency] || 0,
-    ), [accounts, baseCurrency]);
 
-  const totalDebt = useMemo(() => sumBy(
-    debts,
-    ({ convertedValues }) => convertedValues?.[baseCurrency] || 0,
-  ), [baseCurrency, debts]);
-
-  const debtPercentage = useMemo(() => percentage(totalDebt, totalDebt + totalBalance), [percentage, totalBalance, totalDebt]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const debtPercentage = useMemo(() => percentage(totalDebt, totalDebt + totalBalance), [totalBalance, totalDebt]);
 
   const handleMouseEnter = () => {
-    if (!isMobile) {
+    if (isDesktop) {
       setIsSidebarExpanded(true);
     }
   };
 
   const handleMouseLeave = () => {
-    if (!isMobile) {
+    if (isDesktop) {
       setIsSidebarExpanded(false);
     }
   };
@@ -92,10 +76,10 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
   return (
     <aside
       className={cn('bg-background border-r border-accent flex flex-col h-[calc(100vh-2rem)] transition-all duration-300 ease-in-out z-40', {
-        'fixed inset-y-0 left-0 w-64': isMobile && isSidebarExpanded,
-        'fixed inset-y-0 -left-64 w-64': isMobile && !isSidebarExpanded,
-        'w-64': !isMobile && isSidebarExpanded,
-        'w-16': !isMobile && !isSidebarExpanded,
+        'fixed inset-y-0 left-0 w-64': !isDesktop && isSidebarExpanded,
+        'fixed inset-y-0 -left-64 w-64': !isDesktop && !isSidebarExpanded,
+        'w-64': isDesktop && isSidebarExpanded,
+        'w-16': isDesktop && !isSidebarExpanded,
       }, className)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

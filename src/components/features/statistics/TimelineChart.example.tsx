@@ -1,15 +1,15 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-import CategoryTypeahead from '@/components/common/CategoryTypeahead';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useTimelineStatistics } from '@/hooks/statistics/useTimelineStatisticsRequest';
-import { Type as TransactionType } from '@/types/transaction';
-// @ts-nocheck
 import { ResponsiveLine, Serie } from '@nivo/line';
 import debounce from 'lodash/debounce';
 import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
+import CategoryTypeahead from '@/components/common/CategoryTypeahead';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useTimelineStatistics } from '@/hooks/statistics/useTimelineStatisticsRequest';
+import { Type as TransactionType } from '@/types/transaction';
+
 
 type Period = 'P1D' | 'P1W' | 'P1M' | 'P1Y'
 
@@ -116,7 +116,7 @@ export default function CategoryTimelineChart() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-2">
         <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
           <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Select period" />
@@ -132,24 +132,27 @@ export default function CategoryTimelineChart() {
         <CategoryTypeahead
           multiple
           valueField="id"
+          type={TransactionType.Expense}
           value={selectedCategories}
           onChange={handleCategoriesChange}
-          type={TransactionType.Expense}
         />
       </div>
       <div className="h-[400px] relative" aria-live="polite">
-        {isLoading ? (
+        {isLoading && (
           <Skeleton className="w-full h-full" />
-        ) : error ? (
+        )}
+        {(!isLoading && error) && (
           <div className="absolute inset-0 flex items-center justify-center">
             <p className="text-red-500 dark:text-red-400">Error: {error.message}</p>
           </div>
-        ) : chartData.length === 0 ? (
+        )}
+        {(!isLoading && chartData.length === 0) && (
           <div className="absolute inset-0 flex items-center justify-center">
             <p className="text-gray-500 dark:text-gray-400">No data available for the selected period and categories.
             </p>
           </div>
-        ) : (
+        )}
+        {(!isLoading && chartData.length > 0) && (
           <ResponsiveLine
             data={chartData}
             margin={{ top: 10, right: 10, bottom: 30, left: 0 }}
