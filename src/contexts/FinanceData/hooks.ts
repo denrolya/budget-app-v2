@@ -29,7 +29,7 @@ export const useAccounts = (): Account[] => {
 };
 
 export const useTotalBalance = (): number => {
-  const accounts = useAccounts();
+  const accounts = useActiveAccounts();
   const baseCurrency = useBaseCurrency();
 
   return useMemo(
