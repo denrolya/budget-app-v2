@@ -2,10 +2,13 @@ import sumBy from 'lodash/sumBy';
 import { CreditCard, Globe, HelpCircle, Wallet } from 'lucide-react';
 import React from 'react';
 
+import { StatisticsType } from '@/types/statistics';
+import PercentageIndicator from '@/components/features/statistics/StatisticsCard/PercentageIndicator';
+import { Type as TransactionType } from '@/types/transaction';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { Card, CardContent } from '@/components/ui/card';
 import { useBaseCurrency } from '@/contexts/auth';
-import { useActiveAccounts } from '@/contexts/FinanceData';
+import { useActiveAccounts, useTotalBalance } from '@/contexts/FinanceData';
 import { Type as AccountType } from '@/types/account';
 
 interface Props {
@@ -31,7 +34,11 @@ export const AccountTypeBalanceCard: React.FC<Props> = ({ type }) => {
   const accounts = useActiveAccounts();
 
   const filteredAccounts = accounts.filter(account => account.type === type);
-  const totalBalance = sumBy(filteredAccounts, ({ convertedValues }) => convertedValues?.[baseCurrency] || 0);
+  const balance = sumBy(filteredAccounts, ({ convertedValues }) => convertedValues?.[baseCurrency] || 0);
+  const totalBalance = useTotalBalance();
+
+  const percentage = totalBalance > 0 ? ((balance / totalBalance) * 100) - 100 : 0;
+
 
   const Icon = typeIcons[type];
 
@@ -57,14 +64,19 @@ export const AccountTypeBalanceCard: React.FC<Props> = ({ type }) => {
           <div className="flex flex-col flex-grow">
             <p
               className="text-2xl font-bold text-primary"
-              aria-label={`Total ${typeLabels[type]} balance: ${baseCurrency} ${totalBalance}`}>
-              <MoneyValue useColors={false} amount={totalBalance} />
+              aria-label={`Total ${typeLabels[type]} balance: ${baseCurrency} ${balance}`}>
+              <MoneyValue useColors={false} amount={balance} />
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {filteredAccounts.length} account{filteredAccounts.length !== 1 ? 's' : ''}
             </p>
           </div>
         </div>
+        <PercentageIndicator
+          percentageChange={percentage}
+          type={TransactionType.Expense}
+          statType={StatisticsType.Sum}
+        />
       </CardContent>
     </Card>
   );
