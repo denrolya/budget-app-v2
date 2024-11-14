@@ -1,10 +1,11 @@
+import sumBy from 'lodash/sumBy';
 import { CreditCard, Globe, HelpCircle, Wallet } from 'lucide-react';
 import React from 'react';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { Card, CardContent } from '@/components/ui/card';
 import { useBaseCurrency } from '@/contexts/auth';
-import { useAccounts } from '@/contexts/FinanceData';
+import { useActiveAccounts } from '@/contexts/FinanceData';
 import { Type as AccountType } from '@/types/account';
 
 interface Props {
@@ -27,10 +28,10 @@ const typeLabels: Record<AccountType, string> = {
 
 export const AccountTypeBalanceCard: React.FC<Props> = ({ type }) => {
   const baseCurrency = useBaseCurrency();
-  const accounts = useAccounts();
+  const accounts = useActiveAccounts();
 
   const filteredAccounts = accounts.filter(account => account.type === type);
-  const totalBalance = filteredAccounts.reduce((sum, account) => sum + account.balance, 0);
+  const totalBalance = sumBy(filteredAccounts, ({ convertedValues }) => convertedValues?.[baseCurrency] || 0);
 
   const Icon = typeIcons[type];
 
