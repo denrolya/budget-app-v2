@@ -116,6 +116,7 @@ export const CurrencyConverter: React.FC<Props> = ({
         <div className="space-y-2">
           <div className="relative">
             <Input
+              autoFocus
               type="text"
               value={amount}
               onChange={handleAmountChange}
