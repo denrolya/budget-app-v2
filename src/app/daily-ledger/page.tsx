@@ -1,8 +1,9 @@
+import { ROUTES } from '@/constants/routes';
 import {
   ArrowRightLeftIcon,
   CalendarIcon,
   ChevronLeft,
-  ChevronRight,
+  ChevronRight, CreditCardIcon,
   Filter,
   LayoutList,
   ListIcon,
@@ -16,6 +17,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSwipeable } from 'react-swipeable';
 
+import SummaryBadge from '@/components/common/SummaryBadge';
 import MoneyValue from '@/components/common/MoneyValue';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import DailyList from '@/components/features/daily-ledger/DailyList';
@@ -301,26 +303,12 @@ export const DailyLedgerPage: React.FC = () => {
               }
             >
               <div className="flex flex-col">
-                <CardTitle className="text-xl font-semibold flex items-center">
+                <CardTitle className="text-xl font-semibold flex items-center space-x-4">
                   <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground flex-shrink-0" />
                   {formatDateRange(dateRange.startDate, dateRange.endDate)}
+                  <SummaryBadge icon={ROUTES.TRANSACTION_LIST.icon} count={summary.transactionsCount} value={summary.transactionsValue} />
+                  <SummaryBadge useColors={false} icon={ROUTES.TRANSFER_LIST.icon} count={summary.transfersCount} value={summary.transfersValue} />
                 </CardTitle>
-                <div className="flex flex-wrap gap-4 text-sm justify-center">
-                  <div className="flex items-center">
-                    <ArrowRightLeftIcon className="mr-1 h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="font-medium mr-1">{summary.transfersCount}</span>
-                    <span className="text-muted-foreground truncate">
-                      (<MoneyValue useColors={false} amount={summary.transfersValue} />)
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <Receipt className="mr-1 h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="font-medium mr-1">{summary.transactionsCount}</span>
-                    <span className="text-muted-foreground truncate">
-                      (<MoneyValue amount={summary.transactionsValue} />)
-                    </span>
-                  </div>
-                </div>
               </div>
             </ResponsiveTooltip>
             <div className="flex flex-wrap justify-between gap-2">
@@ -378,7 +366,7 @@ export const DailyLedgerPage: React.FC = () => {
                     <Filter className="h-4 w-4" />
                     <span className="sr-only">Filter</span>
                     {activeFiltersCount > 0 && (
-                      <Badge className="absolute -top-1 -right-1 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
+                      <Badge className="absolute -top-2 -right-2 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
                         {activeFiltersCount}
                       </Badge>
                     )}

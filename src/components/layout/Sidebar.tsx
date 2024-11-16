@@ -4,9 +4,6 @@ import sumBy from 'lodash/sumBy';
 import { Plus } from 'lucide-react';
 import React, { useMemo } from 'react';
 
-import { useScreenSize } from '@/hooks/useScreenSize';
-import { useTotalDebt } from '@/contexts/FinanceData/hooks';
-import { percentage } from '@/utils/percentage';
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountLink from '@/components/layout/SidebarAccountLink';
 import SidebarLink from '@/components/layout/SidebarLink';
@@ -16,10 +13,13 @@ import { Separator } from '@/components/ui/separator';
 import { ROUTES } from '@/constants/routes';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useActiveAccountsWithDefaultOrder, useTotalBalance } from '@/contexts/FinanceData';
+import { useTotalDebt } from '@/contexts/FinanceData/hooks';
 import { FormType, useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
+import { useScreenSize } from '@/hooks/useScreenSize';
 import { ACCOUNT_TYPES_ORDER } from '@/models/Account';
 import { Type as AccountType } from '@/types/account';
+import { percentage } from '@/utils/percentage';
 
 type RouteKey = keyof typeof ROUTES
 
@@ -87,20 +87,12 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
       <div className="flex flex-col h-full">
         <div className="flex-shrink-0 p-4 space-y-4">
           <div className="space-y-1">
-            <SidebarLink
-              to={ROUTES.DASHBOARD.path}
-              icon={ROUTES.DASHBOARD.icon}
-              isSidebarExpanded={isSidebarExpanded}>
-              Dashboard
-            </SidebarLink>
-          </div>
-          <Separator />
-          <div className="space-y-1">
-            {isSidebarExpanded && (
-              <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1">Areas</div>
-            )}
-            {(Object.keys(ROUTES) as RouteKey[]).filter(key => key !== 'DASHBOARD').map((key) => (
-              <SidebarLink key={key} to={ROUTES[key].path} icon={ROUTES[key].icon} isSidebarExpanded={isSidebarExpanded}>
+            {(Object.keys(ROUTES) as RouteKey[]).map((key) => (
+              <SidebarLink
+                key={key}
+                to={ROUTES[key].path}
+                icon={ROUTES[key].icon}
+                isSidebarExpanded={isSidebarExpanded}>
                 {ROUTES[key].label}
               </SidebarLink>
             ))}
@@ -118,10 +110,11 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
         </div>
 
         <div className="flex-shrink-0 mt-auto p-4 border-t border-accent space-y-2">
-          <div className={cn('flex flex-col items-start space-y-1 overflow-hidden transition-all duration-300 ease-in-out', {
-            'max-h-20 opacity-100': isSidebarExpanded,
-            'max-h-0 opacity-0': !isSidebarExpanded,
-          })}>
+          <div
+            className={cn('flex flex-col items-start space-y-1 overflow-hidden transition-all duration-300 ease-in-out', {
+              'max-h-20 opacity-100': isSidebarExpanded,
+              'max-h-0 opacity-0': !isSidebarExpanded,
+            })}>
             <div className="w-full flex justify-between items-center">
               <span className="text-xs font-semibold text-accent-foreground/60">Total Balance</span>
               <MoneyValue

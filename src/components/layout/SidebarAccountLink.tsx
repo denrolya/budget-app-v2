@@ -51,7 +51,6 @@ export const SidebarAccountLink: React.FC<SidebarAccountLinkProps> = ({ account,
       align="start"
       sideOffset={5}
       alignOffset={-8}
-      className="p-0 bg-transparent border-none shadow-none"
     >
       <AccountDetailsHoverCard account={account} />
     </TooltipContent>

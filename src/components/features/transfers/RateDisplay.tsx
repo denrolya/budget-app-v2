@@ -12,23 +12,23 @@ const TransferRateComponent: React.FC<TransferRateProps> = ({ transfer, ...props
   const toCurrency = transfer.toIncome.account.currency;
   const displayRate = transfer.displayRate;
 
-  let rateDisplay = `1 ${fromCurrency} = ${displayRate.toFixed(4)} ${toCurrency}`;
+  let rateDisplay = `1 ${fromCurrency} = ${Number(displayRate.toFixed(4))} ${toCurrency}`;
 
   if (
     fromCurrency === CURRENCY_CODE.UAH &&
     [CURRENCY_CODE.USD, CURRENCY_CODE.EUR, CURRENCY_CODE.BTC].includes(toCurrency)
   ) {
-    rateDisplay = `1 ${toCurrency} = ${displayRate.toFixed(4)} UAH`;
+    rateDisplay = `1 ${toCurrency} = ${Number(displayRate.toFixed(4))} UAH`;
   } else if (
     fromCurrency === CURRENCY_CODE.UAH &&
     toCurrency === CURRENCY_CODE.HUF
   ) {
-    rateDisplay = `1000 HUF = ${displayRate.toFixed(2)} UAH`;
+    rateDisplay = `1000 HUF = ${Number(displayRate.toFixed(2))} UAH`;
   } else if (
     fromCurrency === CURRENCY_CODE.HUF &&
     [CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.BTC].includes(toCurrency)
   ) {
-    rateDisplay = `1 ${toCurrency} = ${displayRate.toFixed(4)} HUF`;
+    rateDisplay = `1 ${toCurrency} = ${Number(displayRate.toFixed(4))} HUF`;
   }
 
   return <span {...props}>{rateDisplay}</span>;

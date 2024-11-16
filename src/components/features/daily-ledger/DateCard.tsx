@@ -1,9 +1,9 @@
-import { ArrowRightLeftIcon, CalendarDays, CalendarX, Receipt } from 'lucide-react';
+import { CalendarX } from 'lucide-react';
 import { Moment } from 'moment';
 import React from 'react';
 
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
-import MoneyValue from '@/components/common/MoneyValue';
+import SummaryBadge from '@/components/common/SummaryBadge';
 import TransactionListItem, {
   ListItemSkeleton as TransactionListItemSkeleton,
 } from '@/components/features/transactions/ListItemV3';
@@ -12,6 +12,7 @@ import TransferListItem, {
 } from '@/components/features/transfers/ListItem';
 import { Card, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ROUTES } from '@/constants/routes';
 import { useBaseCurrency } from '@/contexts/auth';
 import { cn } from '@/lib/utils';
 import Transaction from '@/models/Transaction';
@@ -28,8 +29,8 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
   const baseCurrency = useBaseCurrency();
   const transactions = items.filter(item => item instanceof Transaction) as Transaction[];
   const transfers = items.filter(item => item instanceof Transfer) as Transfer[];
-  const transactionCount = transactions.length;
-  const transferCount = transfers.length;
+  const transactionsCount = transactions.length;
+  const transfersCount = transfers.length;
 
   const { totalIncome, totalExpense } = transactions.reduce((acc, transaction) => {
     if (transaction.isIncome()) {
@@ -49,24 +50,11 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
     <>
       <div className="flex flex-col space-y-2 pb-3 border-b border-border">
         <h4 className="text-lg font-semibold flex items-center">
-          <CalendarDays className="mr-2 h-5 w-5 text-muted-foreground flex-shrink-0" />
           <RelativeDatetimeDisplay showTime={false} date={date} />
         </h4>
         <div className="flex flex-wrap gap-2 text-sm">
-          <div className="flex items-center min-w-[120px]">
-            <ArrowRightLeftIcon className="mr-1 h-4 w-4 text-primary flex-shrink-0" />
-            <span className="font-medium mr-1">{transferCount}</span>
-            <span className="text-muted-foreground truncate">
-              (<MoneyValue useColors={false} amount={transferAmount} />)
-            </span>
-          </div>
-          <div className="flex items-center min-w-[120px]">
-            <Receipt className="mr-1 h-4 w-4 text-primary flex-shrink-0" />
-            <span className="font-medium mr-1">{transactionCount}</span>
-            <span className="text-muted-foreground truncate">
-              (<MoneyValue amount={netAmount} />)
-            </span>
-          </div>
+          <SummaryBadge icon={ROUTES.TRANSACTION_LIST.icon} count={transactionsCount} value={netAmount} />
+          <SummaryBadge icon={ROUTES.TRANSFER_LIST.icon} count={transfersCount} value={transferAmount} />
         </div>
       </div>
       <div className="flex-grow overflow-auto max-w-full pt-3">

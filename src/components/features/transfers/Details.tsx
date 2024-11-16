@@ -71,7 +71,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
         <div className="flex flex-col space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-sm">Date</span>
-            <RelativeDatetimeDisplay date={transfer.executedAt} className="font-medium" />
+            <RelativeDatetimeDisplay showRelative showDayBadge badgeSize="sm" variant="default" date={transfer.executedAt} />
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm">Amount</span>

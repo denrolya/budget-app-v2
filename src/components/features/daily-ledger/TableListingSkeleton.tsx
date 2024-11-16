@@ -1,3 +1,4 @@
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ArrowRight } from 'lucide-react';
 import { Moment } from 'moment';
 import React, { useMemo } from 'react';
@@ -39,13 +40,14 @@ export const TableListingSkeleton: React.FC<Props> = ({ startDate, endDate }) =>
         </TableHeader>
         <TableBody>
           {dates.map((date) => (
-            <React.Fragment key={date.format('YYYY-MM-DD')}>
+            <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
               <TableRow>
-                <TableCell colSpan={8} className="font-semibold bg-muted">
+                <TableCell colSpan={8} className="font-semibold bg-muted px-4">
                   <div className="flex flex-wrap justify-between items-center">
                     <RelativeDatetimeDisplay showTime={false} date={date} />
-                    <div className="text-sm font-normal">
-                      <Skeleton className="w-64 h-6" />
+                    <div className="text-sm flex flex-row space-x-4 font-normal">
+                      <Skeleton className="h-6 w-32" />
+                      <Skeleton className="h-6 w-32" />
                     </div>
                   </div>
                 </TableCell>

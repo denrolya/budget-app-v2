@@ -12,12 +12,11 @@ export const TableListingSkeleton: React.FC<SkeletonProps> = ({ rowsPerGroup = 3
   const renderSkeletonGroup = (groupIndex: number) => (
     <React.Fragment key={groupIndex}>
       <TableRow>
-        <TableCell colSpan={8} className="bg-muted">
+        <TableCell colSpan={8} className="bg-muted px-4">
           <div className="flex justify-between items-center">
             <Skeleton className="h-6 w-32" />
             <div className="flex items-center space-x-4">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-6 w-32" />
             </div>
           </div>
         </TableCell>

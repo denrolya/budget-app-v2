@@ -137,7 +137,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
           <h3 className="font-semibold">Transaction Data</h3>
           <div className="flex justify-between items-center">
             <span className="text-sm">Date</span>
-            <RelativeDatetimeDisplay date={transaction.executedAt} className="font-medium" />
+            <RelativeDatetimeDisplay showRelative showDayBadge badgeSize="sm" variant="default" date={transaction.executedAt} />
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm">Category</span>

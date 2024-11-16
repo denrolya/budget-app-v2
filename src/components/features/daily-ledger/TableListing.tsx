@@ -1,18 +1,20 @@
+import { ROUTES } from '@/constants/routes';
 import cn from 'classnames';
-import { ArrowRight, Check, Eye, Pencil, Trash2, X } from 'lucide-react';
+import { ArrowRight, ArrowRightLeft, Check, CreditCardIcon, Eye, Pencil, Trash2, X } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import RateDisplay from '@/components/features/transfers/RateDisplay';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
+import SummaryBadge from '@/components/common/SummaryBadge';
 import TransactionValue from '@/components/common/TransactionValue';
 import AccountBadge from '@/components/features/accounts/Badge';
 import TransactionDetails from '@/components/features/transactions/Details';
 import TransferDetails from '@/components/features/transfers/Details';
+import RateDisplay from '@/components/features/transfers/RateDisplay';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -306,17 +308,16 @@ const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate }) => 
             return (
               <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
                 <TableRow>
-                  <TableCell colSpan={8} className="font-semibold bg-muted">
-                    <div className="flex flex-wrap justify-between items-center">
-                      <RelativeDatetimeDisplay showTime={false} date={date} />
-                      <div className="text-sm font-normal">
-                        <span className="mr-4">{transactionsCount} transactions, {transfersCount} transfers</span>
-                        <span>
-                          Transactions: <MoneyValue className="font-medium font-mono" amount={transactionsValue} />
+                  <TableCell colSpan={8} className="bg-muted px-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <span className="font-semibold">
+                          <RelativeDatetimeDisplay showDayBadge badgeSize="sm" variant="default" showTime={false} date={date} />
                         </span>
-                        <span className="ml-2">
-                          Transfers: <MoneyValue className="font-medium font-mono" amount={transfersValue} />
-                        </span>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <SummaryBadge icon={ROUTES.TRANSACTION_LIST.icon} count={transactionsCount} value={transactionsValue} />
+                        <SummaryBadge useColors={false} icon={ROUTES.TRANSFER_LIST.icon} count={transfersCount} value={transfersValue} />
                       </div>
                     </div>
                   </TableCell>

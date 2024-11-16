@@ -82,7 +82,7 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
                 >
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-2">
-                      <AccountAvatar account={account} size="sm" />
+                      <AccountAvatar size="sm" account={account} />
                       <h3 className="font-medium">{account.nameWithCurrency}</h3>
                     </div>
                     <MoneyValue

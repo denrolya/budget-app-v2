@@ -86,7 +86,7 @@ export const TransfersListPage: React.FC = () => {
                     <Filter className="h-4 w-4" />
                     <span className="sr-only">Filter</span>
                     {activeFiltersCount > 0 && (
-                      <Badge className="absolute -top-1 -right-1 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
+                      <Badge className="absolute -top-2 -right-2 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
                         {activeFiltersCount}
                       </Badge>
                     )}

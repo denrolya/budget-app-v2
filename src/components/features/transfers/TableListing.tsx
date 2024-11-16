@@ -1,4 +1,6 @@
+import SummaryBadge from '@/components/common/SummaryBadge';
 import RateDisplay from '@/components/features/transfers/RateDisplay';
+import { ROUTES } from '@/constants/routes';
 import { ArrowRight, Eye, Trash2 } from 'lucide-react';
 import { Moment } from 'moment';
 import React, { useState } from 'react';
@@ -48,15 +50,10 @@ export const TableListing: React.FC<Props> = ({ groupedItems }) => {
           {groupedItems.map(([date, transfers, totalValue, totalItems]) => (
             <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
               <TableRow>
-                <TableCell className="font-semibold bg-muted" colSpan={8}>
+                <TableCell className="font-semibold bg-muted px-4" colSpan={8}>
                   <div className="flex flex-wrap justify-between items-center">
-                    <RelativeDatetimeDisplay showTime={false} date={date} />
-                    <div className="text-sm font-normal">
-                      <span className="mr-4">{totalItems} transfers</span>
-                      <span>
-                        Total: <MoneyValue className="font-medium font-mono" useColors={false} amount={totalValue} />
-                      </span>
-                    </div>
+                    <RelativeDatetimeDisplay showDayBadge badgeSize="sm" variant="default" showTime={false} date={date} />
+                    <SummaryBadge useColors={false} icon={ROUTES.TRANSFER_LIST.icon} count={totalItems} value={totalValue} />
                   </div>
                 </TableCell>
               </TableRow>

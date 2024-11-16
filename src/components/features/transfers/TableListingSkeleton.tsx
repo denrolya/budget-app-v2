@@ -12,12 +12,11 @@ export const TableListingSkeleton: React.FC<SkeletonProps> = ({ rowsPerGroup = 3
   const renderSkeletonGroup = (groupIndex: number) => (
     <React.Fragment key={groupIndex}>
       <TableRow>
-        <TableCell colSpan={10} className="bg-muted">
+        <TableCell colSpan={10} className="bg-muted px-4">
           <div className="flex justify-between items-center">
             <Skeleton className="h-6 w-32" />
             <div className="flex items-center space-x-4">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-6 w-32" />
             </div>
           </div>
         </TableCell>
@@ -53,15 +52,13 @@ export const TableListingSkeleton: React.FC<SkeletonProps> = ({ rowsPerGroup = 3
   return (
     <div className="overflow-x-auto">
       <Table {...props}>
-        <TableHeader>
+        <TableHeader className="sr-only">
           <TableRow>
             <TableHead className="w-4"></TableHead>
             <TableHead className="w-1/12">ID</TableHead>
             <TableHead className="w-3/12">Transfer</TableHead>
-            <TableHead className="w-1/12">Rate</TableHead>
-            <TableHead className="w-1/12">Amount</TableHead>
-            <TableHead className="w-1/12">Result</TableHead>
-            <TableHead className="w-2/12">Fee</TableHead>
+            <TableHead className="w-2/12">Amount</TableHead>
+            <TableHead className="w-2/12">Rate</TableHead>
             <TableHead className="w-2/12">Note</TableHead>
             <TableHead className="w-1/12">Time</TableHead>
             <TableHead className="w-1/12 text-right">Actions</TableHead>

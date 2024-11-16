@@ -1,9 +1,11 @@
 import cn from 'classnames';
-import { Check, Pencil, Trash2, X } from 'lucide-react';
+import { Check, CreditCardIcon, Pencil, Trash2, X } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
+import { ROUTES } from '@/constants/routes';
+import SummaryBadge from '@/components/common/SummaryBadge';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import MoneyValue from '@/components/common/MoneyValue';
@@ -247,15 +249,10 @@ export const TableListing: React.FC<Props> = ({ groupedItems, ...props }) => {
         {groupedItems.map(([date, transactions, totalValue, count]) => (
           <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
             <TableRow>
-              <TableCell colSpan={8} className="font-semibold bg-muted">
+              <TableCell colSpan={8} className="font-semibold bg-muted px-4">
                 <div className="flex justify-between items-center">
-                  <RelativeDatetimeDisplay showTime={false} date={date} />
-                  <div className="text-sm font-normal">
-                    <span className="mr-4">{count} transactions</span>
-                    <span>
-                      Total: <MoneyValue className="font-medium font-mono" amount={totalValue} />
-                    </span>
-                  </div>
+                  <RelativeDatetimeDisplay showDayBadge badgeSize="sm" variant="default" showTime={false} date={date} />
+                  <SummaryBadge icon={ROUTES.TRANSACTION_LIST.icon} count={count} value={totalValue} />
                 </div>
               </TableCell>
             </TableRow>

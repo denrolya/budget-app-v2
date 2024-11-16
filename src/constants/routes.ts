@@ -1,7 +1,7 @@
 import {
   ArrowLeftRight,
   BarChart3,
-  CalendarDays,
+  CalendarDays, CreditCardIcon,
   Handshake,
   LayoutDashboard,
   PieChart,
@@ -24,7 +24,7 @@ export const ROUTES = {
   },
   TRANSACTION_LIST: {
     path: '/transactions',
-    icon: ArrowLeftRight,
+    icon: CreditCardIcon,
     label: 'Transactions',
   },
   TRANSFER_LIST: {
@@ -52,11 +52,11 @@ export const ROUTES = {
     icon: PieChart,
     label: 'Budget Planning',
   },
-  REPORTS_PAGE: {
-    path: '/reports',
-    icon: BarChart3,
-    label: 'Reports',
-  },
+  // REPORTS_PAGE: {
+  //   path: '/reports',
+  //   icon: BarChart3,
+  //   label: 'Reports',
+  // },
   TESTING_PAGE: {
     path: '/testing',
     icon: TestTube2,
