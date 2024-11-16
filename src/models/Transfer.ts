@@ -1,6 +1,7 @@
 import moment, { Moment } from 'moment';
 
 import Transaction from '@/models/Transaction';
+import { CURRENCY_CODE } from '@/constants/currency';
 
 export interface TransferProps {
   id: number;
@@ -49,6 +50,34 @@ export class Transfer {
 
   hasFee(): boolean {
     return !!this.feeExpense;
+  }
+
+  get displayRate(): number {
+    const fromCurrency = this.fromExpense.account.currency;
+    const toCurrency = this.toIncome.account.currency;
+
+    if (
+      (fromCurrency === CURRENCY_CODE.UAH && [CURRENCY_CODE.USD, CURRENCY_CODE.EUR, CURRENCY_CODE.BTC].includes(toCurrency)) ||
+      ([CURRENCY_CODE.USD, CURRENCY_CODE.EUR, CURRENCY_CODE.BTC].includes(fromCurrency) && toCurrency === CURRENCY_CODE.UAH)
+    ) {
+      return fromCurrency === CURRENCY_CODE.UAH ? 1 / this.rate : this.rate;
+    }
+
+    if (
+      (fromCurrency === CURRENCY_CODE.UAH && toCurrency === CURRENCY_CODE.HUF) ||
+      (fromCurrency === CURRENCY_CODE.HUF && toCurrency === CURRENCY_CODE.UAH)
+    ) {
+      return fromCurrency === CURRENCY_CODE.UAH ? this.rate * 1000 : (1 / this.rate) * 1000;
+    }
+
+    if (
+      (fromCurrency === CURRENCY_CODE.HUF && [CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.BTC].includes(toCurrency)) ||
+      ([CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.BTC].includes(fromCurrency) && toCurrency === CURRENCY_CODE.HUF)
+    ) {
+      return fromCurrency === CURRENCY_CODE.HUF ? 1 / this.rate : this.rate;
+    }
+
+    return this.rate;
   }
 }
 

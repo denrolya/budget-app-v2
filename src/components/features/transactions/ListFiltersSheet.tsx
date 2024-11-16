@@ -1,24 +1,26 @@
 import debounce from 'lodash/debounce';
-import { CalendarIcon, FileText, FilterIcon, Layers, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, CalendarIcon, FileText, FilterIcon, Layers } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Type as TransactionType } from '@/types/transaction';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { TransactionFilters } from '@/models/TransactionFilters';
+import { Type as TransactionType } from '@/types/transaction';
 
-interface ListFiltersProps extends React.PropsWithChildren {
+interface ListFiltersProps {
+  isOpen?: boolean;
+  setIsOpen: (open: boolean) => void;
   data: TransactionFilters;
   onChange: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => void;
   onReset: () => void;
@@ -126,13 +128,10 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
             <Button id="date-range" variant="outline" size="sm" className="h-9 text-sm w-full justify-start">
               <CalendarIcon className="mr-2 h-4 w-4" />
               <span>
-                {data.after && data.before
-                  ? `${data.after.format(MOMENT_DATEPICKER_FORMAT)} - ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`
-                  : data.after
-                    ? `After ${data.after.format(MOMENT_DATEPICKER_FORMAT)}`
-                    : data.before
-                      ? `Before ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`
-                      : 'Select date range'}
+                {data.after && data.before && `${data.after.format(MOMENT_DATEPICKER_FORMAT)} - ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`}
+                {!data.after && data.before && `Before ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`}
+                {data.after && !data.before && `After ${data.after.format(MOMENT_DATEPICKER_FORMAT)}`}
+                {!data.after && !data.before && 'Select date range'}
               </span>
             </Button>
           </PopoverTrigger>
@@ -241,8 +240,13 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
   );
 };
 
-export const ListFiltersSheet: React.FC<ListFiltersProps> = ({ data, onChange, onReset, children }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+export const ListFiltersSheet: React.FC<ListFiltersProps> = ({
+                                                               isOpen = false,
+                                                               setIsOpen,
+                                                               data,
+                                                               onChange,
+                                                               onReset,
+                                                             }) => {
   const isDesktop = useScreenSize();
 
   const handleChange = useCallback(<K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => {
@@ -252,15 +256,10 @@ export const ListFiltersSheet: React.FC<ListFiltersProps> = ({ data, onChange, o
   const FilterWrapper = isDesktop ? Sheet : Drawer;
   const FilterHeader = isDesktop ? SheetHeader : DrawerHeader;
   const FilterTitle = isDesktop ? SheetTitle : DrawerTitle;
-  const FilterTrigger = isDesktop ? SheetTrigger : DrawerTrigger;
   const FilterContent = isDesktop ? SheetContent : DrawerContent;
-
 
   return (
     <FilterWrapper open={isOpen} onOpenChange={setIsOpen}>
-      <FilterTrigger asChild>
-        {children}
-      </FilterTrigger>
       <FilterContent
         side={isDesktop ? 'right' : undefined}
         className={isDesktop ? 'w-[400px] sm:w-[540px]' : undefined}>

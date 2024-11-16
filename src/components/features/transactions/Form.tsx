@@ -172,6 +172,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               <FormLabel>Category</FormLabel>
               <CategoryTypeahead
                 {...field}
+                autoFocus
                 type={form.watch('type')}
                 multiple={false}
                 className={cn('w-full justify-between', {
@@ -192,9 +193,9 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                 <FormLabel>Amount</FormLabel>
                 <FormControl>
                   <Input
+                    {...field}
                     type="number"
                     placeholder="Enter amount"
-                    {...field}
                     value={field.value ?? ''}
                     onChange={e => {
                       field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber);

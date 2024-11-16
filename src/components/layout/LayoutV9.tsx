@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { FormRenderer } from '@/components/common/FormRenderer';
-import { HotkeysProvider } from '@/components/common/HotkeysDialog';
+import HotkeysProvider from '@/contexts/Hotkeys';
 import Header from '@/components/layout/Header';
 import MobileNavigation from '@/components/layout/MobileNavigation';
 import Sidebar from '@/components/layout/Sidebar';

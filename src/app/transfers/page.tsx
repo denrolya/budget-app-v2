@@ -1,5 +1,6 @@
 import { Edit, Filter, Plus, RefreshCw, Trash2 } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import Pagination from '@/components/common/Pagination';
 import FormattedListing from '@/components/features/transfers/FormattedListing';
@@ -11,9 +12,11 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
 import { useTransfers } from '@/hooks/useTransfers';
 
 export const TransfersListPage: React.FC = () => {
+  const [isFiltersOpen, setIsFiltersOpen] = useState<boolean>(false);
   const {
     groupedItems,
     isLoading,
@@ -29,6 +32,7 @@ export const TransfersListPage: React.FC = () => {
   const { openForm } = useFormContext();
   const onAddTransfer = () => openForm(FormType.Transfer);
   const [selectedTransfers, setSelectedTransfers] = useState<number[]>([]);
+  const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
 
   const activeFiltersCount = useMemo(() => {
     let count = 0;
@@ -40,6 +44,21 @@ export const TransfersListPage: React.FC = () => {
     if (filters.isDraft) count++;
     return count;
   }, [filters]);
+
+  useHotkeys('f', () => setIsFiltersOpen(!isFiltersOpen), {}, [isFiltersOpen]);
+
+  useEffect(() => {
+    const hotkeys = [{
+      windows: 'F',
+      mac: 'F',
+      description: 'Toggle Filters Dialog',
+    }];
+    addPageHotkeys('Transfers', hotkeys);
+
+    return () => {
+      removePageHotkeys('Transfers');
+    };
+  }, [addPageHotkeys, removePageHotkeys]);
 
   return (
     <FullHeightPageContent>
@@ -59,17 +78,19 @@ export const TransfersListPage: React.FC = () => {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <ListFiltersSheet data={filters} onChange={setFilter} onReset={resetFilters}>
-                    <Button variant="outline" size="icon" className="relative">
-                      <Filter className="h-4 w-4" />
-                      <span className="sr-only">Filter</span>
-                      {activeFiltersCount > 0 && (
-                        <Badge className="absolute -top-1 -right-1 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
-                          {activeFiltersCount}
-                        </Badge>
-                      )}
-                    </Button>
-                  </ListFiltersSheet>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="relative"
+                    onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
+                    <Filter className="h-4 w-4" />
+                    <span className="sr-only">Filter</span>
+                    {activeFiltersCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
+                        {activeFiltersCount}
+                      </Badge>
+                    )}
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent>Filter</TooltipContent>
               </Tooltip>
@@ -140,6 +161,13 @@ export const TransfersListPage: React.FC = () => {
           Updating...
         </div>
       )}
+
+      <ListFiltersSheet
+        isOpen={isFiltersOpen}
+        setIsOpen={setIsFiltersOpen}
+        data={filters}
+        onChange={setFilter}
+        onReset={resetFilters} />
     </FullHeightPageContent>
   );
 };

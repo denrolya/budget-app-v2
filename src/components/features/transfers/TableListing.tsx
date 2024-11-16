@@ -1,7 +1,9 @@
+import RateDisplay from '@/components/features/transfers/RateDisplay';
 import { ArrowRight, Eye, Trash2 } from 'lucide-react';
 import { Moment } from 'moment';
 import React, { useState } from 'react';
 
+import { CURRENCY_CODE } from '@/constants/currency';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountBadge from '@/components/features/accounts/Badge';
@@ -127,7 +129,7 @@ export const TableListing: React.FC<Props> = ({ groupedItems }) => {
                   <TableCell>
                     <div>Rate: {Number(transfer.rate.toFixed(4))}</div>
                     <div className="text-xs text-muted-foreground">
-                      1 {transfer.fromExpense.account.currency} = {Number(transfer.rate.toFixed(4))} {transfer.toIncome.account.currency}
+                      <RateDisplay transfer={transfer} />
                     </div>
                   </TableCell>
                   <TableCell className="max-w-xs truncate">{transfer.note}</TableCell>

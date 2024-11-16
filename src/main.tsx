@@ -10,7 +10,7 @@ import { Theme, ThemeProvider } from '@/contexts/theme';
 import store from '@/store';
 import { logger } from '@/utils/DebugLogger';
 
-import '@/assets/styles/index.css';
+import '@/assets/styles/index.scss';
 
 const queryClient = new QueryClient();
 

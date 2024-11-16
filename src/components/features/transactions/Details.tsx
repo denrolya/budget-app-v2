@@ -153,7 +153,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
           <div className="flex justify-between items-center">
             <span className="text-sm">Account</span>
             <span className="font-medium">
-              <AccountBadge account={transaction.account} size="md" />
+              <AccountBadge size="md" account={transaction.account} />
             </span>
           </div>
           {isDebt && (

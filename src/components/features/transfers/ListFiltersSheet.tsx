@@ -6,17 +6,19 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import TransferFilters from '@/models/TransferFilters';
 
-interface ListFiltersProps extends React.PropsWithChildren {
+interface ListFiltersProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
   data: TransferFilters;
   className?: string;
   onChange: <K extends keyof TransferFilters>(key: K, value: TransferFilters[K] | undefined | null) => void;
@@ -78,13 +80,10 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
             <Button id="date-range" variant="outline" size="sm" className="h-9 text-sm w-full justify-start">
               <CalendarIcon className="mr-2 h-4 w-4" />
               <span>
-                {data.after && data.before
-                  ? `${data.after.format(MOMENT_DATEPICKER_FORMAT)} - ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`
-                  : data.after
-                    ? `After ${data.after.format(MOMENT_DATEPICKER_FORMAT)}`
-                    : data.before
-                      ? `Before ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`
-                      : 'Select date range'}
+                {data.after && data.before && `${data.after.format(MOMENT_DATEPICKER_FORMAT)} - ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`}
+                {!data.after && data.before && `Before ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`}
+                {data.after && !data.before && `After ${data.after.format(MOMENT_DATEPICKER_FORMAT)}`}
+                {!data.after && !data.before && 'Select date range'}
               </span>
             </Button>
           </PopoverTrigger>
@@ -165,8 +164,13 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
   );
 };
 
-export const ListFiltersSheet: React.FC<ListFiltersProps> = ({ data, onChange, onReset, children }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+export const ListFiltersSheet: React.FC<ListFiltersProps> = ({
+                                                               isOpen = false,
+                                                               setIsOpen,
+                                                               data,
+                                                               onChange,
+                                                               onReset,
+                                                             }) => {
   const isDesktop = useScreenSize();
 
   const handleChange = useCallback(<K extends keyof TransferFilters>(key: K, value: TransferFilters[K]) => {
@@ -176,7 +180,7 @@ export const ListFiltersSheet: React.FC<ListFiltersProps> = ({ data, onChange, o
   const FilterWrapper = isDesktop ? Sheet : Drawer;
   const FilterHeader = isDesktop ? SheetHeader : DrawerHeader;
   const FilterTitle = isDesktop ? SheetTitle : DrawerTitle;
-  const FilterTrigger = isDesktop ? SheetTrigger : DrawerTrigger;
+  const FilterDescription = isDesktop ? SheetDescription : DrawerDescription;
   const FilterContent = isDesktop ? SheetContent : DrawerContent;
 
   const activeFiltersCount = useMemo(() => {
@@ -189,14 +193,14 @@ export const ListFiltersSheet: React.FC<ListFiltersProps> = ({ data, onChange, o
 
   return (
     <FilterWrapper open={isOpen} onOpenChange={setIsOpen}>
-      <FilterTrigger asChild>
-        {children}
-      </FilterTrigger>
       <FilterContent
         side={isDesktop ? 'right' : undefined}
         className={isDesktop ? 'w-[400px] sm:w-[540px]' : undefined}>
         <FilterHeader>
           <FilterTitle>Transaction Filters</FilterTitle>
+          <FilterDescription className="sr-only">
+            Filter transfers by date, accounts, and amount range.
+          </FilterDescription>
         </FilterHeader>
         <div className={isDesktop ? 'mt-4' : 'px-4 pb-4'}>
           <Content data={data} onChange={handleChange} onReset={onReset} />

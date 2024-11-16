@@ -2,7 +2,7 @@ import cn from 'classnames';
 import { Check, Command, Laptop, LogOut, Moon, Sun, User } from 'lucide-react';
 import React from 'react';
 
-import { useHotkeys } from '@/components/common/HotkeysDialog';
+import { useHotkeys } from '@/contexts/Hotkeys';
 import ExchangeRatesDetails from '@/components/layout/ExchangeRatesDetails';
 import CurrencySelector from '@/components/layout/HeaderCurrencySelector';
 import { Button } from '@/components/ui/button';

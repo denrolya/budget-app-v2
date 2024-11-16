@@ -1,25 +1,26 @@
 import { ArrowDownCircle, ArrowUpCircle, CalendarIcon, FilterIcon, X } from 'lucide-react';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import React, { useCallback, useState } from 'react';
 
-import { Type as TransactionType } from '@/types/transaction';
+import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerTrigger } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { TransferFilters } from '@/models/TransferFilters';
+import { Type as TransactionType } from '@/types/transaction';
 
 
 type CombinedFilters = TransactionFilters & TransferFilters
 
-interface ListFiltersProps extends React.PropsWithChildren {
+interface ListFiltersContentProps {
   transactionFilters: TransactionFilters;
   transferFilters: TransferFilters;
   setFilter: (type: keyof CombinedFilters, value: any) => void;
@@ -27,11 +28,16 @@ interface ListFiltersProps extends React.PropsWithChildren {
   setShowTransactions: (value: boolean) => void;
   showTransfers: boolean;
   setShowTransfers: (value: boolean) => void;
-  dateRange: { startDate: moment.Moment; endDate: moment.Moment };
-  setCustomDateRange: (range: { startDate: moment.Moment; endDate: moment.Moment } | null) => void;
+  dateRange: { startDate: Moment; endDate: Moment };
+  setCustomDateRange: (range: { startDate: Moment; endDate: Moment } | null) => void;
 }
 
-const ListFiltersContent: React.FC<ListFiltersProps> = ({
+interface ListFiltersProps extends ListFiltersContentProps {
+  isOpen?: boolean;
+  setIsOpen: (value: boolean) => void;
+}
+
+const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
                                                           transactionFilters,
                                                           transferFilters,
                                                           setFilter,
@@ -123,7 +129,7 @@ const ListFiltersContent: React.FC<ListFiltersProps> = ({
             <Button id="date-range" variant="outline" className="w-full justify-start">
               <CalendarIcon className="mr-2 h-4 w-4" />
               <span>
-                {dateRange.startDate.format('MMM D, YYYY')} - {dateRange.endDate.format('MMM D, YYYY')}
+                {dateRange.startDate.format(MOMENT_DATEPICKER_FORMAT)} - {dateRange.endDate.format(MOMENT_DATEPICKER_FORMAT)}
               </span>
             </Button>
           </PopoverTrigger>
@@ -208,22 +214,17 @@ const ListFiltersContent: React.FC<ListFiltersProps> = ({
   );
 };
 
-export const ListFiltersSheet: React.FC<ListFiltersProps> = ({ children, ...props }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+export const ListFiltersSheet: React.FC<ListFiltersProps> = ({ isOpen = false, setIsOpen, ...props }) => {
   const isDesktop = useScreenSize();
 
   const ContentWrapper = isDesktop ? Sheet : Drawer;
   const ContentHeader = isDesktop ? SheetHeader : DrawerHeader;
   const ContentTitle = isDesktop ? SheetTitle : DrawerTitle;
   const ContentDescription = isDesktop ? SheetDescription : DrawerDescription;
-  const ContentTrigger = isDesktop ? SheetTrigger : DrawerTrigger;
   const ContentContent = isDesktop ? SheetContent : DrawerContent;
 
   return (
     <ContentWrapper open={isOpen} onOpenChange={setIsOpen}>
-      <ContentTrigger asChild>
-        {children}
-      </ContentTrigger>
       <ContentContent side={isDesktop ? 'right' : undefined} className={isDesktop ? 'sm:max-w-[425px]' : undefined}>
         <ContentHeader>
           <ContentTitle>Filters</ContentTitle>

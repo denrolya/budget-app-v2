@@ -1,3 +1,10 @@
+import cn from 'classnames';
+import { ArrowRight, Check, Eye, Pencil, Trash2, X } from 'lucide-react';
+import moment, { Moment } from 'moment';
+import React, { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+
+import RateDisplay from '@/components/features/transfers/RateDisplay';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import MoneyValue from '@/components/common/MoneyValue';
@@ -17,11 +24,6 @@ import { useTransactionMutations } from '@/hooks/useTransactionMutations';
 import Transaction from '@/models/Transaction';
 import Transfer from '@/models/Transfer';
 import { confirm } from '@/utils/confirmation';
-import cn from 'classnames';
-import { ArrowRight, Check, Eye, Pencil, Trash2, X } from 'lucide-react';
-import moment, { Moment } from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
-import { toast } from 'sonner';
 
 type EditableField = 'account' | 'amount' | 'category' | 'note' | 'executedAt'
 
@@ -408,7 +410,7 @@ const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate }) => 
                         <>
                           <div>Rate: {Number(item.rate.toFixed(4))}</div>
                           <div className="text-xs text-muted-foreground">
-                            1 {item.fromExpense.account.currency} = {Number(item.rate.toFixed(4))} {item.toIncome.account.currency}
+                            <RateDisplay transfer={item} />
                           </div>
                         </>
                       )}

@@ -1,9 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
-import { Plus, Save, ArrowUpCircle, ArrowDownCircle, Trash2, Loader2 } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
@@ -16,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
+import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
 import { useTransactionMutations } from '@/hooks/useTransactionMutations';
 import { Type as TransactionType } from '@/types/transaction';
 
@@ -36,7 +38,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>
 
 export const BulkCreateTableForm: React.FC = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
 
   const { createTransaction } = useTransactionMutations();
   const form = useForm<FormValues>({
@@ -120,6 +123,51 @@ export const BulkCreateTableForm: React.FC = () => {
     setIsSubmitting(false);
   };
 
+  const addAnotherTransaction = () => append({
+    isDraft: false,
+    account: '',
+    amount: 0,
+    type: TransactionType.Expense,
+    category: '',
+    note: '',
+    executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
+  });
+
+
+  useHotkeys('ctrl+n', (event) => {
+    event.preventDefault();
+    addAnotherTransaction();
+  });
+  useHotkeys('ctrl+s', (event) => {
+    event.preventDefault();
+    form.handleSubmit(onSubmit)();
+  });
+  useHotkeys('ctrl+x', (event) => {
+    event.preventDefault();
+    handleRemove(fields.length - 1);
+  });
+
+  useEffect(() => {
+    const hotkeys = [{
+      windows: 'Ctrl+N',
+      mac: 'Ctrl+N',
+      description: 'Add another transaction when in bulk creation mode',
+    }, {
+      windows: 'Ctrl+S',
+      mac: 'Cmd+S',
+      description: 'Save all transactions',
+    }, {
+      windows: 'Ctrl+X',
+      mac: 'Ctrl+X',
+      description: 'Remove last transaction from the list',
+    }];
+    addPageHotkeys('Bulk Transaction Creation', hotkeys);
+
+    return () => {
+      removePageHotkeys('Bulk Transaction Creation');
+    };
+  }, [addPageHotkeys, removePageHotkeys]);
+
   return (
     <>
       {isSubmitting && (
@@ -152,10 +200,12 @@ export const BulkCreateTableForm: React.FC = () => {
                       control={form.control}
                       name={`transactions.${index}.isDraft`}
                       render={({ field }) => (
-                        <FormItem className="flex items-center space-x-2">
-                          <FormControl>
+                        <FormItem className="flex flex-row items-center space-x-2">
+                          <FormLabel><code>#{index}</code></FormLabel>
+                          <FormControl className="p-0 m-0">
                             <Checkbox
                               checked={field.value}
+                              className="p-0 m-0"
                               onCheckedChange={field.onChange}
                             />
                           </FormControl>
@@ -172,8 +222,9 @@ export const BulkCreateTableForm: React.FC = () => {
                           <FormLabel className="sr-only">Category</FormLabel>
                           <CategoryTypeahead
                             {...field}
-                            type={form.watch(`transactions.${index}.type`)}
+                            autoFocus
                             multiple={false}
+                            type={form.watch(`transactions.${index}.type`)}
                             className={cn('w-full justify-between', {
                               'text-muted-foreground': !field.value,
                             })}
@@ -189,16 +240,19 @@ export const BulkCreateTableForm: React.FC = () => {
                         <FormField
                           control={form.control}
                           name={`transactions.${index}.amount`}
-
                           render={({ field }) => (
                             <FormItem>
                               <FormControl>
                                 <Input
                                   {...field}
+                                  autoFocus={false}
                                   type="number"
                                   placeholder="Amount"
                                   className="w-full"
-                                  onChange={e => field.onChange(e.target.valueAsNumber)}
+                                  value={field.value ?? ''}
+                                  onChange={e => {
+                                    field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber);
+                                  }}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -303,15 +357,7 @@ export const BulkCreateTableForm: React.FC = () => {
               type="button"
               variant="outline"
               className="h-10 px-4 py-2 text-sm font-medium"
-              onClick={() => append({
-                isDraft: false,
-                account: '',
-                amount: 0,
-                type: TransactionType.Expense,
-                category: '',
-                note: '',
-                executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
-              })}
+              onClick={addAnotherTransaction}
             >
               <Plus className="mr-2 h-4 w-4" /> Add Transaction
             </Button>

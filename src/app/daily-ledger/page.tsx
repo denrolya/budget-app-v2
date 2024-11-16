@@ -33,6 +33,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 import TransactionFilters from '@/models/TransactionFilters';
 import TransferFilters from '@/models/TransferFilters';
@@ -125,6 +126,7 @@ const timePresets: TimePreset[] = [
 
 export const DailyLedgerPage: React.FC = () => {
   const [activeView, setActiveView] = useState<'table' | 'list'>('table');
+  const [isFiltersOpen, setIsFiltersOpen] = useState<boolean>(false);
   const [showBulkCreate, setShowBulkCreate] = useState<boolean>(false);
   const [selectedPreset, setSelectedPreset] = useState<string>('current-week');
   const [customDateRange, setCustomDateRange] = useState<{
@@ -132,6 +134,7 @@ export const DailyLedgerPage: React.FC = () => {
     endDate: moment.Moment
   } | null>(null);
   const { openForm } = useFormContext();
+  const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
 
   const dateRange = useMemo(() => {
     if (customDateRange) {
@@ -197,9 +200,6 @@ export const DailyLedgerPage: React.FC = () => {
   const goToNextPeriod = useCallback(() => navigatePeriod('next'), [navigatePeriod]);
   const goToPreviousPeriod = useCallback(() => navigatePeriod('previous'), [navigatePeriod]);
 
-  useHotkeys('arrowleft', goToPreviousPeriod);
-  useHotkeys('arrowright', goToNextPeriod);
-
   const swipeHandlers = useSwipeable({
     onSwipedLeft: goToNextPeriod,
     onSwipedRight: goToPreviousPeriod,
@@ -251,6 +251,36 @@ export const DailyLedgerPage: React.FC = () => {
 
     return count;
   }, [transactionFilters, transferFilters, dateRange]);
+
+  useHotkeys('arrowleft', goToPreviousPeriod);
+  useHotkeys('arrowright', goToNextPeriod);
+  useHotkeys('b', () => setShowBulkCreate(!showBulkCreate));
+  useHotkeys('f', () => setIsFiltersOpen(!isFiltersOpen), {}, [isFiltersOpen]);
+
+  useEffect(() => {
+    const hotkeys = [{
+      windows: 'ArrowLeft',
+      mac: 'ArrowLeft',
+      description: 'Go to previous period',
+    }, {
+      windows: 'ArrowRight',
+      mac: 'ArrowRight',
+      description: 'Go to next period',
+    }, {
+      windows: 'B',
+      mac: 'B',
+      description: 'Toggle Bulk Create',
+    }, {
+      windows: 'F',
+      mac: 'F',
+      description: 'Toggle Filters Dialog',
+    }];
+    addPageHotkeys('Daily Ledger', hotkeys);
+
+    return () => {
+      removePageHotkeys('Daily Ledger');
+    };
+  }, [addPageHotkeys, removePageHotkeys]);
 
   return (
     <FullHeightPageContent {...swipeHandlers}>
@@ -340,27 +370,19 @@ export const DailyLedgerPage: React.FC = () => {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <ListFiltersSheet
-                    transactionFilters={transactionFilters}
-                    transferFilters={transferFilters}
-                    setFilter={setFilter}
-                    showTransactions={showTransactions}
-                    setShowTransactions={setShowTransactions}
-                    showTransfers={showTransfers}
-                    setShowTransfers={setShowTransfers}
-                    dateRange={dateRange}
-                    setCustomDateRange={setCustomDateRange}
-                  >
-                    <Button variant="outline" size="icon" className="relative">
-                      <Filter className="h-4 w-4" />
-                      <span className="sr-only">Filter</span>
-                      {activeFiltersCount > 0 && (
-                        <Badge className="absolute -top-1 -right-1 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
-                          {activeFiltersCount}
-                        </Badge>
-                      )}
-                    </Button>
-                  </ListFiltersSheet>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="relative"
+                    onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
+                    <Filter className="h-4 w-4" />
+                    <span className="sr-only">Filter</span>
+                    {activeFiltersCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
+                        {activeFiltersCount}
+                      </Badge>
+                    )}
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent>Filters</TooltipContent>
               </Tooltip>
@@ -458,6 +480,20 @@ export const DailyLedgerPage: React.FC = () => {
           </div>
         </CardFooter>
       </Card>
+
+      <ListFiltersSheet
+        isOpen={isFiltersOpen}
+        setIsOpen={setIsFiltersOpen}
+        transactionFilters={transactionFilters}
+        transferFilters={transferFilters}
+        setFilter={setFilter}
+        showTransactions={showTransactions}
+        setShowTransactions={setShowTransactions}
+        showTransfers={showTransfers}
+        setShowTransfers={setShowTransfers}
+        dateRange={dateRange}
+        setCustomDateRange={setCustomDateRange}
+      />
     </FullHeightPageContent>
   );
 };

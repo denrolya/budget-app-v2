@@ -1,20 +1,23 @@
 import { Edit, Filter, ListIcon, Plus, RefreshCw, Trash2 } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import Pagination from '@/components/common/Pagination';
 import BulkCreateTableForm from '@/components/features/transactions/BulkCreateTableForm';
 import FormattedListing from '@/components/features/transactions/FormattedListing';
 import ListFiltersSheet from '@/components/features/transactions/ListFiltersSheet';
+import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
 import { useTransactions } from '@/hooks/useTransactions';
-import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
 
 export const TransactionsListPage: React.FC = () => {
+  const [isFiltersOpen, setIsFiltersOpen] = useState<boolean>(false);
   const { openForm } = useFormContext();
   const {
     groupedItems,
@@ -31,6 +34,7 @@ export const TransactionsListPage: React.FC = () => {
   const onAddTransaction = () => openForm(FormType.Transaction);
   const [selectedTransactions, setSelectedTransactions] = useState<number[]>([]);
   const [showBulkCreate, setShowBulkCreate] = useState<boolean>(false);
+  const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
 
   const activeFiltersCount = useMemo(() => {
     let count = 0;
@@ -42,6 +46,37 @@ export const TransactionsListPage: React.FC = () => {
     if (filters.isDraft) count++;
     return count;
   }, [filters]);
+
+
+  useHotkeys('arrowleft', () => currentPage > 1 && setCurrentPage(currentPage - 1));
+  useHotkeys('arrowright', () => currentPage < totalPages && setCurrentPage(currentPage + 1));
+  useHotkeys('b', () => setShowBulkCreate(!showBulkCreate));
+  useHotkeys('f', () => setIsFiltersOpen(!isFiltersOpen), {}, [isFiltersOpen]);
+
+  useEffect(() => {
+    const hotkeys = [{
+      windows: 'ArrowLeft',
+      mac: 'ArrowLeft',
+      description: 'Go to previous page',
+    }, {
+      windows: 'ArrowRight',
+      mac: 'ArrowRight',
+      description: 'Go to next page',
+    }, {
+      windows: 'B',
+      mac: 'B',
+      description: 'Toggle Bulk Create',
+    }, {
+      windows: 'F',
+      mac: 'F',
+      description: 'Toggle Filters Dialog',
+    }];
+    addPageHotkeys('Daily Ledger', hotkeys);
+
+    return () => {
+      removePageHotkeys('Daily Ledger');
+    };
+  }, [addPageHotkeys, removePageHotkeys]);
 
   return (
     <FullHeightPageContent>
@@ -83,17 +118,19 @@ export const TransactionsListPage: React.FC = () => {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <ListFiltersSheet data={filters} onChange={setFilter} onReset={resetFilters}>
-                    <Button variant="outline" size="icon" className="relative">
-                      <Filter className="h-4 w-4" />
-                      <span className="sr-only">Filter</span>
-                      {activeFiltersCount > 0 && (
-                        <Badge className="absolute -top-1 -right-1 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
-                          {activeFiltersCount}
-                        </Badge>
-                      )}
-                    </Button>
-                  </ListFiltersSheet>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="relative"
+                    onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
+                    <Filter className="h-4 w-4" />
+                    <span className="sr-only">Filter</span>
+                    {activeFiltersCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
+                        {activeFiltersCount}
+                      </Badge>
+                    )}
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent>Filter</TooltipContent>
               </Tooltip>
@@ -162,6 +199,13 @@ export const TransactionsListPage: React.FC = () => {
           Updating...
         </div>
       )}
+
+      <ListFiltersSheet
+        isOpen={isFiltersOpen}
+        setIsOpen={setIsFiltersOpen}
+        data={filters}
+        onChange={setFilter}
+        onReset={resetFilters} />
     </FullHeightPageContent>
   );
 };
