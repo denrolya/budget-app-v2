@@ -1,6 +1,6 @@
 import moment, { Moment } from 'moment';
 import React from 'react';
-import { Bar, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, ComposedChart, Line, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import CustomTooltip from '@/components/features/statistics/MoneyFlow/Tooltip';
@@ -165,6 +165,13 @@ const MoneyFlowChart: React.FC<Props> = ({
     return label;
   };
 
+  const formatYAxisTick = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      notation: 'compact',
+      compactDisplay: 'short',
+    }).format(value);
+  };
+
 
   return (
     <div className="min-w-[600px]">
@@ -211,7 +218,14 @@ const MoneyFlowChart: React.FC<Props> = ({
             domain={['dataMin', 'dataMax']}
             fillOpacity={0.2}
           />
-          <YAxis hide domain={[-maxValue, maxValue]} />
+          <YAxis
+            domain={[-maxValue, maxValue]}
+            tickCount={8}
+            tickFormatter={formatYAxisTick}
+            tick={{ fontSize: 11, fill: 'hsl(var(--primary))', opacity: 0.5 }}
+            tickLine={false}
+            axisLine={false}
+          />
           <Tooltip
             cursor={false}
             content={(props) => (
@@ -224,7 +238,8 @@ const MoneyFlowChart: React.FC<Props> = ({
               />
             )}
           />
-          <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeOpacity={0.2} />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground) / 0.3)" vertical={false} />
+          <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeOpacity={0.3} />
           {renderChart(false)}
           {renderChart(true)}
         </ComposedChart>

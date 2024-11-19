@@ -1,4 +1,3 @@
-import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ArrowRight } from 'lucide-react';
 import { Moment } from 'moment';
 import React, { useMemo } from 'react';
@@ -6,6 +5,7 @@ import React, { useMemo } from 'react';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 
 interface Props {
   startDate: Moment;
@@ -44,7 +44,12 @@ export const TableListingSkeleton: React.FC<Props> = ({ startDate, endDate }) =>
               <TableRow>
                 <TableCell colSpan={8} className="font-semibold bg-muted px-4">
                   <div className="flex flex-wrap justify-between items-center">
-                    <RelativeDatetimeDisplay showTime={false} date={date} />
+                    <RelativeDatetimeDisplay
+                      showDayBadge
+                      badgeSize="sm"
+                      variant="default"
+                      showTime={false}
+                      date={date} />
                     <div className="text-sm flex flex-row space-x-4 font-normal">
                       <Skeleton className="h-6 w-32" />
                       <Skeleton className="h-6 w-32" />

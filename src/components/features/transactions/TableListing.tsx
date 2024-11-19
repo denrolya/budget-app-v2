@@ -1,15 +1,13 @@
 import cn from 'classnames';
-import { Check, CreditCardIcon, Pencil, Trash2, X } from 'lucide-react';
+import { Check, Pencil, Trash2, X } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
-import { ROUTES } from '@/constants/routes';
-import SummaryBadge from '@/components/common/SummaryBadge';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
-import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
+import SummaryBadge from '@/components/common/SummaryBadge';
 import TransactionValue from '@/components/common/TransactionValue';
 import AccountBadge from '@/components/features/accounts/Badge';
 import Details from '@/components/features/transactions/Details';
@@ -19,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BACKEND_DATE_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
+import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactionMutations } from '@/hooks/useTransactionMutations';
 import Transaction from '@/models/Transaction';

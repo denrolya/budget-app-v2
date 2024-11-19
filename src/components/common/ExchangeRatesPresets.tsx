@@ -2,11 +2,15 @@ import cn from 'classnames';
 import { Equal } from 'lucide-react';
 import React, { useMemo } from 'react';
 
-import { Button } from '@/components/ui/button';
-import { useFinanceData } from '@/contexts/FinanceData';
-import { CURRENCY_CODE } from '@/constants/currency';
 import MoneyValue from '@/components/common/MoneyValue';
-import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/contexts/FinanceData';
+import { Button } from '@/components/ui/button';
+import { CURRENCY_CODE } from '@/constants/currency';
+import {
+  useFinanceData,
+  useFixerExchangeRates,
+  useMonobankExchangeRates,
+  useWiseExchangeRates,
+} from '@/contexts/FinanceData';
 import { getExchangeRate } from '@/utils/getExchangeRates';
 
 interface RateComparisonProps {
@@ -58,16 +62,21 @@ export const ExchangeRatesPresets: React.FC = () => {
         <MoneyValue useColors={false} amount={amount} currency={from} />
         <Equal className="h-3 w-3 text-muted-foreground" />
         <div className="flex-1 flex items-start">
-          <MoneyValue useColors={false} amount={amount * value} currency={to} maximumFractionDigits={maximumFractionDigits} />
+          <MoneyValue
+            useColors={false}
+            amount={amount * value}
+            currency={to}
+            maximumFractionDigits={maximumFractionDigits} />
           <sup className="ml-1 mt-2 text-[8px] font-medium text-muted-foreground">
             {source}
           </sup>
         </div>
         {diff && diff[source] !== undefined && (
-          <span className={cn('text-[10px] font-medium', {
-            'text-success': diff[source] >= 0,
-            'text-destructive': diff[source] < 0,
-          })}>
+          <span
+            className={cn('text-[10px] font-medium', {
+              'text-success': diff[source] >= 0,
+              'text-destructive': diff[source] < 0,
+            })}>
             {diff[source] >= 0 ? '+' : ''}{diff[source].toFixed(1)}%
           </span>
         )}
@@ -119,16 +128,13 @@ export const ExchangeRatesPresets: React.FC = () => {
 
   return (
     <div className="space-y-3 p-0 md:p-4">
-      <RateComparison from={CURRENCY_CODE.EUR} to={CURRENCY_CODE.USD} />
-
       <div className="grid grid-cols-2 gap-3">
         <RateComparison from={CURRENCY_CODE.EUR} to={CURRENCY_CODE.HUF} />
         <RateComparison from={CURRENCY_CODE.USD} to={CURRENCY_CODE.HUF} />
-        <RateComparison from={CURRENCY_CODE.EUR} to={CURRENCY_CODE.UAH} />
+        <RateComparison from={CURRENCY_CODE.EUR} to={CURRENCY_CODE.USD} />
         <RateComparison from={CURRENCY_CODE.HUF} to={CURRENCY_CODE.UAH} amount={1000} />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
+        <RateComparison from={CURRENCY_CODE.EUR} to={CURRENCY_CODE.UAH} />
+        <RateComparison from={CURRENCY_CODE.USD} to={CURRENCY_CODE.UAH} />
         <RateComparison from={CURRENCY_CODE.BTC} to={CURRENCY_CODE.EUR} />
         <RateComparison from={CURRENCY_CODE.BTC} to={CURRENCY_CODE.USD} />
       </div>
