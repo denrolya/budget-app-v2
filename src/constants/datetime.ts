@@ -104,6 +104,7 @@ export const PERIOD_OPTIONS: PeriodOption[] = [
 
 
 export const FILTER_PRESETS = [
+  { label: 'Prev Month', range: { from: moment().subtract(1, 'month').startOf('month'), to: moment().subtract(1, 'month').endOf('month') } },
   { label: 'This Month', range: { from: moment().startOf('month'), to: moment().endOf('month') } },
   { label: 'Last 30 Days', range: { from: moment().subtract(30, 'days'), to: moment() } },
   { label: 'This Year', range: { from: moment().startOf('year'), to: moment().endOf('year') } },

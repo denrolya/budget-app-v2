@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
-import CategoriesDoughnut from '@/components/features/statistics/CategoriesDoughnut.example';
-import { Type as TransactionType } from '@/types/transaction';
+import CategoriesDoughnut from '@/components/features/statistics/CategoriesDoughnut/Card';
 import BalanceByAccountType from '@/components/features/statistics/BalanceByAccountType';
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
 import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card';
@@ -47,18 +46,17 @@ const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-wrap md:flex-nowrap">
-        <div className="w-full md:w-1/3 mb-6">
-          <CategoriesDoughnut type={TransactionType.Expense} />
-        </div>
-
-        <div className="w-full md:w-2/3 mb-6">
+      <div className="flex flex-wrap md:flex-nowrap gap-4 mb-6">
+        <div className="w-full md:w-2/3">
           <MoneyFlow />
+        </div>
+        <div className="w-full md:w-1/3">
+          <CategoriesDoughnut />
         </div>
       </div>
 
       <div className="flex-1 overflow-auto">
-        <Tabs className="space-y-4" defaultValue={tabGroups[0]}>
+      <Tabs className="space-y-4" defaultValue={tabGroups[0]}>
           <TabsList>
             {tabGroups.map((group, index) => (
               <TabsTrigger className="capitalize" value={group} key={index}>

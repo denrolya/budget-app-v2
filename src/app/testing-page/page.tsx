@@ -1,6 +1,7 @@
 import React from 'react';
 import moment from 'moment';
 
+import SpendingHeatmap from '@/components/features/statistics/SpendingHeatmap.example';
 import BarChartWithDrawer from '@/components/features/statistics/BarChartWithDrawer.example';
 import FunnelWithDrawer from '@/components/features/statistics/FunnelWithDrawer.example';
 import MonthExpensesRadialBarChart from '@/components/features/statistics/MonthExpensesRadialBarChart.example';
@@ -28,6 +29,7 @@ const TestingPage: React.FC = () => {
 
           <div>
             <CategoryValueWithinTimeframeSunburstChart type={TransactionType.Expense} after={moment().startOf('month')} before={moment().endOf('month')} />
+            <SpendingHeatmap />
           </div>
 
           <div className="mb-6 grid grid-cols-1 md:grid-cols-2 space-x-2">
