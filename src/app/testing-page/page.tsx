@@ -1,4 +1,5 @@
 import React from 'react';
+import moment from 'moment';
 
 import BarChartWithDrawer from '@/components/features/statistics/BarChartWithDrawer.example';
 import FunnelWithDrawer from '@/components/features/statistics/FunnelWithDrawer.example';
@@ -8,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/contexts/FinanceData';
 import TreeDND from '@/components/features/categories/TreeDND.example';
 import ExpensesBySeasons from '@/components/features/statistics/ExpensesBySeasons.example';
+import CategoryValueWithinTimeframeSunburstChart from '@/components/features/statistics/CategoryValueWithinTimeframeSunburstChart.example';
+import { Type as TransactionType } from '@/types/transaction';
 
 const TestingPage: React.FC = () => {
   const expenseCategoriesTree = useExpenseCategoriesTree();
@@ -22,6 +25,10 @@ const TestingPage: React.FC = () => {
         </TabsList>
         <TabsContent value="nivo-charts">
           <h1>New Nivo Charts</h1>
+
+          <div>
+            <CategoryValueWithinTimeframeSunburstChart type={TransactionType.Expense} after={moment().startOf('month')} before={moment().endOf('month')} />
+          </div>
 
           <div className="mb-6 grid grid-cols-1 md:grid-cols-2 space-x-2">
             <ExpenseSunburstChart categories={expenseCategoriesTree} />
