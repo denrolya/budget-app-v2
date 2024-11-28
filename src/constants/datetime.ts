@@ -1,4 +1,4 @@
-import { Moment } from 'moment/moment';
+import moment, { Moment } from 'moment/moment';
 
 import { PeriodOption, TimeframeOption } from '@/types/global';
 
@@ -100,4 +100,15 @@ export const PERIOD_OPTIONS: PeriodOption[] = [
   { label: '1 Day', value: '1 day' },
   { label: '1 Week', value: '1 week' },
   { label: '1 Month', value: '1 month' },
+];
+
+
+export const FILTER_PRESETS = [
+  { label: 'This Month', range: { from: moment().startOf('month'), to: moment().endOf('month') } },
+  { label: 'Last 30 Days', range: { from: moment().subtract(30, 'days'), to: moment() } },
+  { label: 'This Year', range: { from: moment().startOf('year'), to: moment().endOf('year') } },
+  {
+    label: 'Last Year',
+    range: { from: moment().subtract(1, 'year').startOf('year'), to: moment().subtract(1, 'year').endOf('year') },
+  },
 ];

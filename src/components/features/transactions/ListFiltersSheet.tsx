@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
+import { MOMENT_DATEPICKER_FORMAT, FILTER_PRESETS } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { Type as TransactionType } from '@/types/transaction';
@@ -25,16 +25,6 @@ interface ListFiltersProps {
   onChange: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => void;
   onReset: () => void;
 }
-
-const datePresets = [
-  { label: 'This Month', range: { from: moment().startOf('month'), to: moment().endOf('month') } },
-  { label: 'Last 30 Days', range: { from: moment().subtract(30, 'days'), to: moment() } },
-  { label: 'This Year', range: { from: moment().startOf('year'), to: moment().endOf('year') } },
-  {
-    label: 'Last Year',
-    range: { from: moment().subtract(1, 'year').startOf('year'), to: moment().subtract(1, 'year').endOf('year') },
-  },
-];
 
 const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
@@ -151,7 +141,7 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
             <div className="p-3 space-y-3">
               <h4 className="font-medium text-sm text-primary">Presets</h4>
               <div className="grid grid-cols-2 gap-2">
-                {datePresets.map((preset) => (
+                {FILTER_PRESETS.map((preset) => (
                   <Button
                     key={preset.label}
                     size="sm"

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import CategoriesDoughnut from '@/components/features/statistics/CategoriesDoughnut.example';
+import { Type as TransactionType } from '@/types/transaction';
 import BalanceByAccountType from '@/components/features/statistics/BalanceByAccountType';
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
 import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card';
@@ -45,8 +47,14 @@ const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="w-full">
-        <MoneyFlow className="mb-6" />
+      <div className="flex flex-wrap md:flex-nowrap">
+        <div className="w-full md:w-1/3 mb-6">
+          <CategoriesDoughnut type={TransactionType.Expense} />
+        </div>
+
+        <div className="w-full md:w-2/3 mb-6">
+          <MoneyFlow />
+        </div>
       </div>
 
       <div className="flex-1 overflow-auto">
