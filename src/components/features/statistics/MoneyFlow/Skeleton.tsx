@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export const MoneyFlowSkeleton: React.FC = () => (
   <>
-    <div className="h-[250px] mb-2">
+    <div className="h-[390px] mb-2">
       <Skeleton className="w-full h-full" />
     </div>
 

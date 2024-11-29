@@ -48,11 +48,6 @@ export const AccountTypeBalanceCard: React.FC<Props> = ({ type }) => {
         <div className="flex justify-between items-start mb-0">
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-sm text-primary truncate">{typeLabels[type]} Balance</h3>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">
-                Updated just now
-              </span>
-            </div>
           </div>
           <div className="flex items-center space-x-2 ml-2">
             <div className="text-primary rounded-full p-1">

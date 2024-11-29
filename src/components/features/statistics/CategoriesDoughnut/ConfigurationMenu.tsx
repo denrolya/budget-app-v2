@@ -45,6 +45,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({ type, setTyp
   const MenuContent = () => (
     <div className="space-y-4">
       <div className="space-y-2">
+        <Label className="text-xs font-medium">Transaction Type</Label>
         <div className="flex space-x-2">
           <Button
             type="button"

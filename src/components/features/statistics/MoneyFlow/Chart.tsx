@@ -174,12 +174,12 @@ const MoneyFlowChart: React.FC<Props> = ({
 
 
   return (
-    <div className="min-w-[600px] h-full min-h-[300px]">
-      <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+    <div className="w-full h-full min-w-[600px]">
+      <ResponsiveContainer width="100%" height={385}>
         <ComposedChart
           stackOffset="sign"
           data={transformedData}
-          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+          margin={{ top: 0, right: 30, bottom: 0, left: -30 }}
         >
           <defs>
             <linearGradient id="incomeGradient" x1="0" y1="1" x2="0" y2="0">
@@ -203,6 +203,7 @@ const MoneyFlowChart: React.FC<Props> = ({
             dataKey="timestamp"
             scale="time"
             type="number"
+            orientation="bottom"
             domain={['dataMin', 'dataMax']}
             tickFormatter={formatXAxisTick}
             tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))', opacity: 0.5 }}

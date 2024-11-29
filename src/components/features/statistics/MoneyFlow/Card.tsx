@@ -1,8 +1,3 @@
-import cn from 'classnames';
-import { Calendar } from 'lucide-react';
-import moment from 'moment';
-import React, { memo, useMemo, useState } from 'react';
-
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
 import ConfigurationMenu from '@/components/features/statistics/MoneyFlow/ConfigurationMenu';
@@ -15,6 +10,10 @@ import { useBaseCurrency } from '@/contexts/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
 import { PeriodValue, TimeframeValue } from '@/types/global';
 import { formatShortDate } from '@/utils/formatShortDate';
+import cn from 'classnames';
+import { Calendar } from 'lucide-react';
+import moment from 'moment';
+import React, { memo, useMemo, useState } from 'react';
 
 export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
@@ -118,7 +117,7 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
         </div>
         <CardDescription className="sr-only">Money flow statistics for the selected period.</CardDescription>
       </CardHeader>
-      <CardContent className="p-3 flex-grow overflow-hidden flex flex-col">
+      <CardContent className="p-0 flex-grow overflow-hidden flex flex-col">
         <ResponsiveTooltip
           openDelay={1}
           desktopComponent="hovercard"
@@ -140,8 +139,8 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
         {isLoading && <MoneyFlowSkeleton />}
 
         {(!isLoading && totalRevenue) && (
-          <div className="flex-grow overflow-hidden flex flex-col min-h-[300px]">
-            <div className="flex-grow overflow-x-auto overflow-y-hidden -mx-3">
+          <div className="flex-grow overflow-hidden flex flex-col mt-2">
+            <div className="flex-grow overflow-x-auto overflow-y-hidden h-[375px]">
               {error ? (
                 <div className="w-full h-full flex items-center justify-center text-destructive text-xs">
                   Error loading data: {error.message}
@@ -162,6 +161,7 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
             </div>
           </div>
         )}
+
       </CardContent>
 
       {(!isLoading && totalRevenue) && (

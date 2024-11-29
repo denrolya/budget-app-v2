@@ -15,6 +15,7 @@ export const ExchangeRatesDetails: React.FC = () => {
   const headerCurrencyPairs = [
     { from: CURRENCY_CODE.EUR, to: CURRENCY_CODE.USD },
     { from: CURRENCY_CODE.EUR, to: CURRENCY_CODE.HUF },
+    { from: CURRENCY_CODE.USD, to: CURRENCY_CODE.HUF },
     { from: CURRENCY_CODE.EUR, to: CURRENCY_CODE.UAH },
     { from: CURRENCY_CODE.USD, to: CURRENCY_CODE.UAH },
   ];

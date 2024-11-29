@@ -22,7 +22,7 @@ export const TotalBalanceCard: React.FC = () => {
             <h3 className="font-semibold text-sm text-primary truncate">Net Worth</h3>
             <div className="flex justify-between text-xs">
               <span className="text-muted-foreground">
-                Updated just now
+                Cash vs Debt
               </span>
             </div>
           </div>
