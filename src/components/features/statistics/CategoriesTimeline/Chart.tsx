@@ -1,103 +1,50 @@
-
-import { MoneyValue } from '@/components/common/MoneyValue';
-import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import { ResponsiveLine } from '@nivo/line';
-import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { useTheme } from 'next-themes';
 import React, { useMemo } from 'react';
 
-import { useBaseCurrency } from '@/contexts/auth';
+import ChartTooltip from '@/components/features/statistics/CategoriesTimeline/ChartTooltip';
 import { CURRENCIES } from '@/constants/currency';
-import { Separator } from '@/components/ui/separator';
-import { Card, CardContent } from '@/components/ui/card';
+import { useBaseCurrency } from '@/contexts/auth';
+import { ISO8601Period } from '@/types/global';
 
-interface CustomTooltipProps {
-  point: {
-    data: PointData;
-    serieId: string;
-  };
-  data: Array<{
-    id: string;
-    data: PointData[];
-  }>;
-  selectedPeriod: string;
+interface CategoryData {
+  date: Moment;
+  value: number;
 }
 
-const CustomTooltip: React.FC<CustomTooltipProps> = ({ point, data, selectedPeriod }) => {
-  const baseCurrencyCode = useBaseCurrency();
-  const currentDate = moment(point.data.x);
+interface Props {
+  data: Array<{
+    [category: string]: CategoryData[];
+  }>;
+  selectedPeriod: ISO8601Period;
+}
 
-  const formattedDate = useMemo(() => {
-    switch (selectedPeriod) {
-      case 'P1D':
-        return currentDate.format('MMMM D, YYYY');
-      case 'P1W':
-        const startOfWeek = currentDate.clone().startOf('isoWeek');
-        const endOfWeek = currentDate.clone().endOf('isoWeek');
-
-        const startFormat = 'MMM D';
-        const endFormat = startOfWeek.year() !== endOfWeek.year()
-          ? 'MMM D, YYYY'
-          : startOfWeek.month() !== endOfWeek.month()
-            ? 'MMM D'
-            : 'D';
-
-        return `Week ${currentDate.isoWeek()}: ${startOfWeek.format('MMM D, YYYY')} - ${endOfWeek.format(endFormat)}`;
-      case 'P1M':
-        return currentDate.format('MMMM YYYY');
-      default:
-        return currentDate.format(MOMENT_DATE_VIEW_FORMAT);
-    }
-  }, [currentDate, selectedPeriod]);
-
-  const allSeriesData = useMemo(() => data.map(serie => ({
-      id: serie.id,
-      value: serie.data.find(d => moment(d.x).isSame(currentDate, 'day'))?.y || 0
-    })), [data, currentDate]);
-
-  return (
-    <Card className="w-[320px] shadow-lg">
-      <CardContent className="p-4">
-        <div className="flex justify-between items-center mb-2">
-          <p className="text-sm font-medium">{formattedDate}</p>
-        </div>
-        <Separator className="mb-2" />
-        <div className="space-y-2">
-          {allSeriesData.map((serie) => (
-            <div key={serie.id} className="flex justify-between items-center">
-              <span className="text-sm font-medium">{serie.id}</span>
-              <MoneyValue className="font-mono text-xs" useColors={false} amount={serie.value} />
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-export const CategoryTimelineChart: React.FC<{ data: any; selectedPeriod: string }> = ({ data, selectedPeriod }) => {
+export const CategoryTimelineChart: React.FC<Props> = ({ data, selectedPeriod }) => {
   const baseCurrencyCode = useBaseCurrency();
   const { theme } = useTheme();
 
   const chartData = useMemo(() => {
     if (!data) return [];
 
-    return Object.entries(data).map(([category, values]) => ({
-      id: category,
-      data: values
-        .filter((item) => item.date && moment(item.date).isValid() && !isNaN(item.value))
-        .map((item) => ({
-          x: moment(item.date).toDate(),
-          y: item.value,
-          originalDate: item.date,
-        })),
-    })).filter((series) => series.data.length > 0);
+    return Object
+      .entries(data)
+      .map(([category, values]) => ({
+        id: category,
+        data: (values as unknown as CategoryData[])
+          .filter((item: CategoryData) => item.date && moment(item.date).isValid() && !isNaN(item.value))
+          .map((item: CategoryData) => ({
+            x: moment(item.date).toDate(),
+            y: item.value,
+            originalDate: item.date,
+          })),
+      }))
+      .filter((series) => series.data.length > 0);
   }, [data]);
 
   const getSeriesInterval = (serieId: string) => {
     const hash = serieId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return (hash % 5) + 1;
+    return (hash % 6) + 1;
   };
 
   const formatMoney = ({ data, serieId, index }) => {
@@ -148,6 +95,11 @@ export const CategoryTimelineChart: React.FC<{ data: any; selectedPeriod: string
           tickValues: 5,
           format: (value) => `${CURRENCIES[baseCurrencyCode].symbol}${value}`,
         }}
+        tooltip={({ point }) => (<ChartTooltip
+          point={point}
+          data={chartData}
+          selectedPeriod={selectedPeriod}
+        />)}
         enableGridX={false}
         enableGridY={true}
         axisTop={null}
@@ -212,7 +164,6 @@ export const CategoryTimelineChart: React.FC<{ data: any; selectedPeriod: string
             },
           },
         }}
-        tooltip={({ point }) => (<CustomTooltip point={point} data={chartData} selectedPeriod={selectedPeriod} />)}
       />
     </div>
   );

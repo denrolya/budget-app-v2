@@ -1,3 +1,7 @@
+import { CalendarIcon, SettingsIcon } from 'lucide-react';
+import moment, { Moment } from 'moment';
+import React, { useCallback, useState } from 'react';
+
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -11,15 +15,12 @@ import {
 } from '@/components/ui/drawer';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { FILTER_PRESETS, MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
+import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize';
+import { ISO8601Period } from '@/types/global';
 import { Type as TransactionType } from '@/types/transaction';
-import { CalendarIcon, SettingsIcon } from 'lucide-react';
-import moment, { Moment } from 'moment';
-import React, { useCallback, useState } from 'react';
 
-type Period = 'P1D' | 'P1W' | 'P1M' | 'P1Y'
-const periodOptions: { value: Period; label: string }[] = [
+const periodOptions: { value: ISO8601Period; label: string }[] = [
   { value: 'P1D', label: 'Daily' },
   { value: 'P1W', label: 'Weekly' },
   { value: 'P1M', label: 'Monthly' },
@@ -32,16 +33,19 @@ interface Timeframe {
 }
 
 interface UnifiedChartMenuProps {
-  selectedPeriod: Period;
-  setSelectedPeriod: (value: Period) => void;
+  selectedPeriod: ISO8601Period;
+  setSelectedPeriod: (value: ISO8601Period) => void;
   selectedCategories: number[];
   setSelectedCategories: (categories: number[]) => void;
   timeframe: Timeframe;
   setTimeframe: (timeframe: Timeframe) => void;
 }
 
-export const TIMEFRAME_PRESETS = [
-  { label: 'Prev Month', range: { from: moment().subtract(1, 'month').startOf('month'), to: moment().subtract(1, 'month').endOf('month') } },
+const TIMEFRAME_PRESETS = [
+  {
+    label: 'Prev Month',
+    range: { from: moment().subtract(1, 'month').startOf('month'), to: moment().subtract(1, 'month').endOf('month') },
+  },
   { label: 'This Month', range: { from: moment().startOf('month'), to: moment().endOf('month') } },
   {
     label: 'Summer',

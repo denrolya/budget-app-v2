@@ -10,6 +10,7 @@ declare global {
   };
 }
 
+
 export interface DateRange {
   after: Moment;
   before: Moment;
@@ -22,6 +23,8 @@ export interface TimeframeOption {
 }
 
 export type TimeframeValue = typeof COMMON_TIMEFRAMES[number] | typeof TIMEFRAME_VALUES[number];
+
+export type ISO8601Period = `P${number}Y` | `P${number}W` | `P${number}D` | `P${number}H` | `P${number}M` | `P${number}S`;
 
 export interface PeriodOption {
   label: string;

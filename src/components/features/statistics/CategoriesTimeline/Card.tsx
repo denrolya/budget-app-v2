@@ -1,3 +1,4 @@
+import { Skeleton } from '@/components/ui/skeleton';
 import moment from 'moment/moment';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -6,12 +7,11 @@ import ConfigurationMenu from '@/components/features/statistics/CategoriesTimeli
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTimelineStatistics } from '@/hooks/statistics/useTimelineStatisticsRequest';
 import { cn } from '@/lib/utils';
-
-type Period = 'P1D' | 'P1W' | 'P1M' | 'P1Y'
+import { ISO8601Period } from '@/types/global';
 
 export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({ className }) => {
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>('P1M');
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([1, 80, 3]);
+  const [selectedPeriod, setSelectedPeriod] = useState<ISO8601Period>('P1M');
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([1, 25, 66]);
   const [debouncedCategories, setDebouncedCategories] = useState<number[]>(selectedCategories);
   const [timeframe, setTimeframe] = useState({
     after: moment().subtract(2, 'year'),
@@ -36,6 +36,7 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
   );
 
   useEffect(() => {
+    console.log(selectedCategories);
     debouncedSetCategories(selectedCategories);
   }, [selectedCategories, debouncedSetCategories]);
 
@@ -54,11 +55,14 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
           />
         </div>
       </CardHeader>
-      <CardContent>
-        <Chart data={data} selectedPeriod={selectedPeriod} />
+      <CardContent className="p-0">
+        {isLoading && <Skeleton className="h-[450px] w-full" />}
+        {!isLoading && !error && data && (
+          <Chart data={data} selectedPeriod={selectedPeriod} />
+        )}
       </CardContent>
     </Card>
-);
+  );
 };
 
 export default CategoriesTimelineCard;

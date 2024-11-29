@@ -130,7 +130,7 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {/* Desktop view: Right sidebar with inset styling */}
-      <aside className="hidden lg:block bg-muted/30 shadow-[inset_0_1px_4px_rgba(0,0,0,0.1)] backdrop-blur-xs">
+      <aside className="hidden lg:block bg-muted/30 shadow-[inset_0_1px_4px_rgba(0,0,0,0.1)] backdrop-blur-xs z-1">
         <ScrollArea className="h-[calc(100vh-2rem)] px-4">
           <div className="py-6 space-y-6">
             <div className="space-y-4">
