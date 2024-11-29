@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ResponsivePie } from '@nivo/pie';
 import { ChevronRightIcon, CreditCard } from 'lucide-react';
 import moment from 'moment';
+import sortBy from 'lodash/sortBy';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
 import ConfigurationMenu from '@/components/features/statistics/CategoriesDoughnut/ConfigurationMenu';
@@ -37,8 +38,6 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
     before: timeframe.before,
   });
 
-  // useEffect()
-
   const processData = (data: any[]): ProcessedCategory[] =>
     data?.map((category) => ({
       id: category.id,
@@ -63,9 +62,9 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
         name: `${currentCategory.name} (Direct)`,
         value: directSpending,
       }] : [];
-      return [...directSpendingCategory, ...currentCategories];
+      return sortBy([...directSpendingCategory, ...currentCategories], 'value').reverse();
     }
-    return currentCategories;
+    return sortBy(currentCategories, 'value').reverse();
   }, [currentCategory, currentCategories]);
 
   const handleCategoryStep = (category: ProcessedCategory) => {
@@ -137,71 +136,79 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
           </Breadcrumb>
         </CardHeader>
         <CardContent className="p-4 pt-0">
-          <div className="h-48 mb-4">
-            <ResponsivePie
-              data={chartData}
-              margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-              innerRadius={0.6}
-              padAngle={0.7}
-              cornerRadius={3}
-              activeOuterRadiusOffset={8}
-              borderWidth={1}
-              borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
-              enableArcLinkLabels={false}
-              enableArcLabels={false}
-              tooltip={({ datum: { id, data, value } }) => (
-                <div className="bg-popover text-popover-foreground p-2 rounded shadow-md text-xs">
-                  <strong>{data.name}</strong>
-                  <div><MoneyValue className="font-mono" useColors={false} amount={value} /></div>
-                  <div>{((value / (currentCategory ? currentCategory.value : totalCurrent)) * 100).toFixed(1)}%</div>
-                </div>
-              )}
-              onClick={(node) => handleCategoryStep(node.data as ProcessedCategory)}
-            />
-          </div>
-          <ScrollArea className="h-48">
-            <div className="space-y-1">
-              {chartData.map((category) => (
-                <div
-                  key={category.id}
-                  className="flex items-center justify-between text-sm p-1 rounded hover:bg-muted/50 transition-colors"
-                >
-                  <span className="truncate flex-1">{category.name}</span>
-                  <div className="flex items-center space-x-2">
-                    <span className="font-mono text-sm whitespace-nowrap">
-                      <MoneyValue className="font-medium" useColors={false} amount={category.value} />
-                      <span className="ml-1 text-xs text-muted-foreground">{((category.value / (currentCategory ? currentCategory.value : totalCurrent)) * 100).toFixed(1)}%</span>
-                    </span>
-                    <div className="flex">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleCategoryClick(category)}
-                        className="h-6 w-6"
-                      >
-                        <CreditCard className="h-4 w-4" />
-                        <span className="sr-only">View transactions</span>
-                      </Button>
-                      {category.children && category.children.length > 0 && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleCategoryStep(category)}
-                          className="h-6 w-6"
-                        >
-                          <ChevronRightIcon className="h-4 w-4" />
-                          <span className="sr-only">View subcategories</span>
-                        </Button>
-                      )}
+          <div className="flex flex-col md:flex-row">
+            <div className="w-full md:w-1/2 h-64 md:h-96">
+              <ResponsivePie
+                data={chartData}
+                margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                innerRadius={0.6}
+                padAngle={0.7}
+                cornerRadius={3}
+                activeOuterRadiusOffset={8}
+                borderWidth={1}
+                borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
+                enableArcLinkLabels={false}
+                enableArcLabels={false}
+                tooltip={({ datum: { id, data, value } }) => (
+                  <div className="bg-popover text-popover-foreground p-2 rounded shadow-md">
+                    <strong>{data.name}</strong>
+                    <div>
+                      <MoneyValue className="font-mono" useColors={false} amount={value} />
+                      <span className="ml-1 text-xs text-muted-foreground">
+                        {((value / (currentCategory ? currentCategory.value : totalCurrent)) * 100).toFixed(1)}%
+                      </span>
                     </div>
                   </div>
-                </div>
-              ))}
+                )}
+                onClick={(node) => handleCategoryStep(node.data as ProcessedCategory)}
+              />
             </div>
-          </ScrollArea>
+            <div className="w-full md:w-1/2 mt-4 md:mt-0 md:ml-4">
+              <ScrollArea className="h-64 md:h-96">
+                <div className="space-y-1">
+                  {chartData.map((category) => (
+                    <div
+                      key={category.id}
+                      className="flex items-center justify-between text-sm p-1 rounded hover:bg-muted/50 transition-colors"
+                    >
+                      <span className="truncate flex-1">{category.name}</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-mono text-sm whitespace-nowrap">
+                          <MoneyValue className="font-medium" useColors={false} amount={category.value} />
+                          <span className="ml-1 text-xs text-muted-foreground">{((category.value / (currentCategory ? currentCategory.value : totalCurrent)) * 100).toFixed(1)}%</span>
+                        </span>
+                        <div className="flex">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleCategoryClick(category)}
+                            className="h-6 w-6"
+                          >
+                            <CreditCard className="h-4 w-4" />
+                            <span className="sr-only">View transactions</span>
+                          </Button>
+                          {category.children && category.children.length > 0 && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleCategoryStep(category)}
+                              className="h-6 w-6"
+                            >
+                              <ChevronRightIcon className="h-4 w-4" />
+                              <span className="sr-only">View subcategories</span>
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          </div>
         </CardContent>
         <CardFooter className="p-4 border-t">
-          <div className="w-full flex justify-between items-center">
+          <div className="w-full flex items-center justify-between min-h-[48px]">
             <span className="text-sm font-medium">Total</span>
             <span className="text-lg font-semibold">
               <MoneyValue

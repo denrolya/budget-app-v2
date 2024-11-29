@@ -94,8 +94,8 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
   }, [period]);
 
   return (
-    <Card className={cn('w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25', className)}>
-      <CardHeader className="p-4 space-y-0.2 pb-0">
+    <Card className={cn('w-full min-h-[550px] flex flex-col transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25', className)}>
+      <CardHeader className="p-4 space-y-0.2">
         <div className="flex justify-between items-start">
           <CardTitle className="text-base font-medium">Money Flow</CardTitle>
           <ConfigurationMenu
@@ -118,7 +118,7 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
         </div>
         <CardDescription className="sr-only">Money flow statistics for the selected period.</CardDescription>
       </CardHeader>
-      <CardContent className="p-3 pt-0">
+      <CardContent className="p-3 flex-grow overflow-hidden flex flex-col">
         <ResponsiveTooltip
           openDelay={1}
           desktopComponent="hovercard"
@@ -140,8 +140,8 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
         {isLoading && <MoneyFlowSkeleton />}
 
         {(!isLoading && totalRevenue) && (
-          <>
-            <div className="overflow-x-auto -mx-3">
+          <div className="flex-grow overflow-hidden flex flex-col min-h-[300px]">
+            <div className="flex-grow overflow-x-auto overflow-y-hidden -mx-3">
               {error ? (
                 <div className="w-full h-full flex items-center justify-center text-destructive text-xs">
                   Error loading data: {error.message}
@@ -160,12 +160,12 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
                 />
               )}
             </div>
-          </>
+          </div>
         )}
       </CardContent>
 
       {(!isLoading && totalRevenue) && (
-        <CardFooter className={cn('flex flex-col gap-4 sm:gap-6 lg:flex-row lg:justify-between p-3 transition-all border-t duration-300 ease-in-out overflow-hidden')}>
+        <CardFooter className={cn('flex flex-col gap-4 sm:gap-6 lg:flex-row lg:justify-between p-3 transition-all border-t duration-300 ease-in-out')}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:flex-1 lg:grid-cols-4 w-full">
             <SummaryItem
               label="Total Income"

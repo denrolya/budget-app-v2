@@ -174,8 +174,8 @@ const MoneyFlowChart: React.FC<Props> = ({
 
 
   return (
-    <div className="min-w-[600px]">
-      <ResponsiveContainer width="100%" height={250}>
+    <div className="min-w-[600px] h-full min-h-[300px]">
+      <ResponsiveContainer width="100%" height="100%" minHeight={300}>
         <ComposedChart
           stackOffset="sign"
           data={transformedData}

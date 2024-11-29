@@ -1,14 +1,13 @@
-import { useCategories } from '@/contexts/FinanceData';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import moment, { Moment } from 'moment';
+import { Moment } from 'moment';
 import { DependencyList, useEffect } from 'react';
-import sortBy from 'lodash/sortBy';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
+import { useCategories } from '@/contexts/FinanceData';
+import Category from '@/models/Category';
 import { axiosFetcher } from '@/services/api';
 import { Type as TransactionType } from '@/types/transaction';
 import { generateQueryParamsString } from '@/utils/generateQueryParamsString';
-import Category from '@/models/Category'; // Import the Category model
 
 const URL = '/api/v2/statistics/category/tree';
 
@@ -59,7 +58,7 @@ export const useCategoryTreeStatistics = (
       ...category,
       total: node.total,
       value: node.value,
-      children: node.children.map(transformCategoryNode)
+      children: node.children.map(transformCategoryNode),
     };
   };
 
@@ -81,7 +80,7 @@ export const useCategoryTreeStatistics = (
       before,
       type,
     })}`) as CategoryNode[],
-    select: (data) => sortBy(data.map(transformCategoryNode), 'total').reverse(),
+    select: (data) => data.map(transformCategoryNode),
     refetchOnWindowFocus: false,
     staleTime: 60 * 60 * 1000, // 1h
   });

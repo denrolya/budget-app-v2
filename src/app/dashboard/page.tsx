@@ -51,7 +51,7 @@ const DashboardPage: React.FC = () => {
           <MoneyFlow />
         </div>
         <div className="w-full md:w-1/3">
-          <CategoriesDoughnut />
+          <CategoriesDoughnut className="h-full"/>
         </div>
       </div>
 
