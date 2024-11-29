@@ -1,3 +1,9 @@
+import { ResponsivePie } from '@nivo/pie';
+import sortBy from 'lodash/sortBy';
+import { CreditCard } from 'lucide-react';
+import moment from 'moment';
+import React, { useMemo, useState } from 'react';
+
 import { MoneyValue } from '@/components/common/MoneyValue';
 import ConfigurationMenu from '@/components/features/statistics/CategoriesDoughnut/ConfigurationMenu';
 import Skeleton from '@/components/features/statistics/CategoriesDoughnut/Skeleton';
@@ -15,11 +21,6 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCategoryTreeStatistics } from '@/hooks/statistics/useCategoryTreeStatistics';
 import { Type as TransactionType } from '@/types/transaction';
-import { ResponsivePie } from '@nivo/pie';
-import sortBy from 'lodash/sortBy';
-import { ChevronRightIcon, CreditCard } from 'lucide-react';
-import moment from 'moment';
-import React, { useMemo, useState } from 'react';
 
 interface ProcessedCategory {
   id: number;

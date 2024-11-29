@@ -1,14 +1,11 @@
-'use client';
-
 import React, { useEffect, useRef, useState } from 'react';
 
 import BalanceByAccountType from '@/components/features/statistics/BalanceByAccountType';
 import CategoriesDoughnut from '@/components/features/statistics/CategoriesDoughnut/Card';
+import CategoriesTimeline from '@/components/features/statistics/CategoriesTimeline/Card';
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
 import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card';
-import TimelineChart from '@/components/features/statistics/TimelineChart.example';
 import TotalBalanceCard from '@/components/features/statistics/TotalBalanceCard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cardConfigs } from '@/constants/dashboard-config';
@@ -76,16 +73,7 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {groups.includes('categorySpecific') && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Categories Timeline</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TimelineChart />
-            </CardContent>
-          </Card>
-        )}
+        <CategoriesTimeline />
       </main>
 
       {/* Mobile view: Bottom-fixed horizontal scroll above the menu bar */}

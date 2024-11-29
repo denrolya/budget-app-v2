@@ -145,7 +145,7 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
                   <Button
                     key={preset.label}
                     size="sm"
-                    variant="secondary"
+                    variant="oultine"
                     className="w-full justify-start text-left text-xs"
                     onClick={() => handleDateRangeChange(preset.range)}
                   >
