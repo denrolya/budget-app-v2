@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCategoryTreeStatistics } from '@/hooks/statistics/useCategoryTreeStatistics';
 import { Type as TransactionType } from '@/types/transaction';
@@ -178,26 +179,39 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
                   <div className="space-y-1">
                     {chartData.map((category) => (
                       <div
-                        key={category.id}
                         className="flex items-center justify-between text-sm p-1 rounded hover:bg-muted/50 transition-colors cursor-pointer"
+                        key={category.id}
                         onClick={() => handleCategoryStep(category)}
                       >
-                        <span className="truncate flex-1">{category.name}</span>
+                        <ResponsiveTooltip
+                          openDelay={1}
+                          triggerClassName="truncate flex-1"
+                          content={<>
+                            <code className="font-mono text-xs">#{category.id}</code>: <span className="font-medium">{category.name}</span>
+                          </>}>
+                          <span className="truncate flex-1">{category.name}</span>
+                        </ResponsiveTooltip>
                         <div className="flex items-center space-x-2">
                           <span className="font-mono text-sm whitespace-nowrap">
                             <MoneyValue className="font-medium" useColors={false} amount={category.value} />
                             <span className="ml-1 text-xs text-muted-foreground">{((category.value / (currentCategory ? currentCategory.value : totalCurrent)) * 100).toFixed(1)}%</span>
                           </span>
                           <div className="flex">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleCategoryClick(category)}
-                              className="h-6 w-6"
-                            >
-                              <CreditCard className="h-4 w-4" />
-                              <span className="sr-only">View transactions</span>
-                            </Button>
+                            <ResponsiveTooltip
+                              openDelay={1}
+                              triggerClassName="m-0 p-0"
+                              content="View transactions for this category within selected timeframe">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                aria-label="View transactions"
+                                onClick={() => handleCategoryClick(category)}
+                              >
+                                <CreditCard className="h-4 w-4" />
+                                <span className="sr-only">View transactions</span>
+                              </Button>
+                            </ResponsiveTooltip>
                           </div>
                         </div>
                       </div>

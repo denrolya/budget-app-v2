@@ -97,9 +97,9 @@ export const TIMEFRAME_OPTIONS: TimeframeOption[] = [
 export const COMMON_TIMEFRAMES = ['WTD', 'MTD', '3M', 'YTD'] as const;
 
 export const PERIOD_OPTIONS: PeriodOption[] = [
-  { label: '1 Day', value: '1 day' },
-  { label: '1 Week', value: '1 week' },
-  { label: '1 Month', value: '1 month' },
+  { label: '1 Day', value: 'P1D' },
+  { label: '1 Week', value: 'P1W' },
+  { label: '1 Month', value: 'P1M' },
 ];
 
 

@@ -1,11 +1,11 @@
+import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import moment from 'moment';
 import { toast } from 'sonner';
 
-import { useAuth } from '@/contexts/auth';
 import { LoginForm } from '@/components/features/auth/LoginForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/auth';
 import { api } from '@/services/api';
 
 export interface Credentials {
@@ -28,10 +28,10 @@ export const Page = () => {
       if (isExpired) {
         toast.warning('Session expired. Please log in again.');
       } else {
-        navigate(from);
+        navigate(from, { replace: true });
       }
     }
-  }, [navigate, from]);
+  }, [isAuthenticated, user, navigate, from]);
 
   const handleLogin = async (values: Credentials) => {
     setIsLoading(true);
@@ -40,9 +40,10 @@ export const Page = () => {
       const response = await api.post('/api/login_check', values);
       const { token } = response.data;
       login(token);
-      navigate(from);
+      navigate(from, { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
+      toast.error('Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }

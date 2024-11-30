@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { TooltipProps } from 'recharts';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
+import { ISO8601Period } from '@/types/global';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
 import IncomeExpensesComparison from '@/components/features/statistics/MoneyFlow/IncomeExpensesComparison';
@@ -27,13 +28,13 @@ interface Props extends TooltipProps<ValueType, NameType> {
   comparisonMode?: 'previousPeriod' | 'previousTimeframe';
 }
 
-const formatDate = (date: Moment, period: '1 day' | '1 week' | '1 month'): string => {
+const formatDate = (date: Moment, period: ISO8601Period): string => {
   switch (period) {
-    case '1 day':
+    case 'P1D':
       return date.format('MMM D, YYYY');
-    case '1 week':
+    case 'P1W':
       return date.format('MMM D');
-    case '1 month':
+    case 'P1M':
       return date.format('MMM YYYY');
   }
 };

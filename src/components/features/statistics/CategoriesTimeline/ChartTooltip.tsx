@@ -19,9 +19,12 @@ interface CustomTooltipProps {
   selectedPeriod: ISO8601Period;
 }
 
-const ChartTooltip: React.FC<CustomTooltipProps> = ({ point, data, selectedPeriod }) => {
-  const currentDate = moment(point.data.x);
+const ChartTooltip = ({ active, payload, label, selectedPeriod }) => {
+  if (!active || !payload || !payload.length) {
+    return null;
+  }
 
+  const currentDate = moment(label);
   const formattedDate = useMemo(() => {
     switch (selectedPeriod) {
       case 'P1D':
@@ -29,7 +32,6 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({ point, data, selectedPerio
       case 'P1W':
         const startOfWeek = currentDate.clone().startOf('isoWeek');
         const endOfWeek = currentDate.clone().endOf('isoWeek');
-        const startFormat = 'MMM D';
         const endFormat = startOfWeek.year() !== endOfWeek.year()
           ? 'MMM D, YYYY'
           : startOfWeek.month() !== endOfWeek.month()
@@ -44,23 +46,18 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({ point, data, selectedPerio
     }
   }, [currentDate, selectedPeriod]);
 
-  const allSeriesData = useMemo(() => data.map(serie => ({
-    id: serie.id,
-    value: serie.data.find(d => moment(d.x).isSame(currentDate, 'day'))?.y || 0,
-  })), [data, currentDate]);
-
   return (
-    <Card className="w-[320px] shadow-lg z-10">
-      <CardContent className="p-4">
+    <Card className="w-[320px] shadow-lg z-10 p-4">
+      <CardContent className="p-0">
         <div className="flex justify-between items-center mb-2">
-          <p className="text-sm font-medium">{formattedDate}</p>
+          <p className="text-xs font-medium">{formattedDate}</p>
         </div>
         <Separator className="mb-2" />
-        <div className="space-y-2">
-          {allSeriesData.map((serie) => (
-            <div key={serie.id} className="flex justify-between items-center">
-              <span className="text-sm font-medium">{serie.id}</span>
-              <MoneyValue className="font-mono text-xs" useColors={false} amount={serie.value} />
+        <div className="space-y-1">
+        {payload.map((entry, index) => (
+            <div key={index} className="flex justify-between items-center" style={{ color: entry.color }}>
+              <span className="text-sm font-medium">{entry.name}</span>
+              <MoneyValue className="font-mono font-medium text-xs" useColors={false} amount={entry.value} />
             </div>
           ))}
         </div>

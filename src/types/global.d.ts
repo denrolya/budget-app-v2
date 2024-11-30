@@ -28,7 +28,7 @@ export type ISO8601Period = `P${number}Y` | `P${number}W` | `P${number}D` | `P${
 
 export interface PeriodOption {
   label: string;
-  value: PeriodValue;
+  value: ISO8601Period;
 }
 
 export type PeriodValue = '1 day' | '1 week' | '1 month';

@@ -1,7 +1,20 @@
+
 import moment, { Moment } from 'moment';
 import React from 'react';
-import { Bar, ComposedChart, Line, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
+import { ISO8601Period } from '@/types/global';
+import { CHART_STYLES } from '@/constants/recharts';
 import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import CustomTooltip from '@/components/features/statistics/MoneyFlow/Tooltip';
 
@@ -16,7 +29,7 @@ interface Props {
     previousExpenses: number;
     previousRevenue: number;
   }[];
-  period: '1 day' | '1 week' | '1 month';
+  period: ISO8601Period;
   currentTimeframe: { after: Moment; before: Moment };
   previousTimeframe: { after: Moment; before: Moment };
   chartType: 'bar' | 'line';
@@ -149,13 +162,13 @@ const MoneyFlowChart: React.FC<Props> = ({
     let label = '';
 
     switch (period) {
-      case '1 month':
+      case 'P1M':
         label = date.format('MMM');
         break;
-      case '1 week':
+      case 'P1W':
         label = date.week() % 3 === 0 ? `W${date.week()}` : '';
         break;
-      case '1 day':
+      case 'P1D':
         label = date.week() % 3 === 0 ? date.format('D MMM') : '';
         break;
       default:
@@ -164,14 +177,6 @@ const MoneyFlowChart: React.FC<Props> = ({
 
     return label;
   };
-
-  const formatYAxisTick = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      notation: 'compact',
-      compactDisplay: 'short',
-    }).format(value);
-  };
-
 
   return (
     <div className="w-full h-full min-w-[600px]">
@@ -203,12 +208,8 @@ const MoneyFlowChart: React.FC<Props> = ({
             dataKey="timestamp"
             scale="time"
             type="number"
-            orientation="bottom"
-            domain={['dataMin', 'dataMax']}
             tickFormatter={formatXAxisTick}
-            tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))', opacity: 0.5 }}
-            tickLine={false}
-            axisLine={false}
+            {...CHART_STYLES.xAxis}
           />
           <XAxis
             hide
@@ -216,16 +217,11 @@ const MoneyFlowChart: React.FC<Props> = ({
             dataKey="timestamp"
             scale="time"
             type="number"
-            domain={['dataMin', 'dataMax']}
-            fillOpacity={0.2}
+            {...CHART_STYLES.xAxis}
           />
           <YAxis
             domain={[-maxValue, maxValue]}
-            tickCount={8}
-            tickFormatter={formatYAxisTick}
-            tick={{ fontSize: 11, fill: 'hsl(var(--primary))', opacity: 0.5 }}
-            tickLine={false}
-            axisLine={false}
+            {...CHART_STYLES.yAxis}
           />
           <Tooltip
             cursor={false}
@@ -239,8 +235,8 @@ const MoneyFlowChart: React.FC<Props> = ({
               />
             )}
           />
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground) / 0.3)" vertical={false} />
-          <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeOpacity={0.3} />
+          <CartesianGrid {...CHART_STYLES.cartesianGrid} />
+          <ReferenceLine {...CHART_STYLES.referenceLine} />
           {renderChart(false)}
           {renderChart(true)}
         </ComposedChart>

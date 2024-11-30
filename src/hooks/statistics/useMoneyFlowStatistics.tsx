@@ -14,9 +14,9 @@ export const useMoneyFlow = ({
   const availablePeriods = useMemo(() => {
     const durationInDays = currentTimeframe.before.diff(currentTimeframe.after, 'days');
     return PERIOD_OPTIONS.filter(option => {
-      if (durationInDays <= 1) return option.value === '1 day';
-      if (durationInDays <= 7) return ['1 hour', '1 day'].includes(option.value);
-      if (durationInDays <= 31) return ['1 day', '1 week'].includes(option.value);
+      if (durationInDays <= 1) return option.value === 'P1D';
+      if (durationInDays <= 7) return ['PT1H', 'P1D'].includes(option.value);
+      if (durationInDays <= 31) return ['P1D', 'P1W'].includes(option.value);
       return true;
     });
   }, [currentTimeframe]);
@@ -53,7 +53,7 @@ export const useMoneyFlow = ({
   const transformedData: TransformedData[] = useMemo(() => {
     if (!currentDataBackend?.length || !previousDataBackend?.length) return [];
 
-    const periodUnit = period.includes('day') ? 'days' : period.includes('week') ? 'weeks' : 'months';
+    const periodUnit = period.includes('P1D') ? 'days' : period.includes('P1W') ? 'weeks' : 'months';
 
     const maxPeriods = Math.max(currentDataBackend.length, previousDataBackend.length);
 

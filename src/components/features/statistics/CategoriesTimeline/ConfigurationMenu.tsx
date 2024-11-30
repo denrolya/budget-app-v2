@@ -1,7 +1,3 @@
-import { CalendarIcon, SettingsIcon } from 'lucide-react';
-import moment, { Moment } from 'moment';
-import React, { useCallback, useState } from 'react';
-
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -15,10 +11,15 @@ import {
 } from '@/components/ui/drawer';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { ISO8601Period } from '@/types/global';
 import { Type as TransactionType } from '@/types/transaction';
+import { BarChart, CalendarIcon, LineChart, SettingsIcon } from 'lucide-react';
+import moment, { Moment } from 'moment';
+import React, { useCallback, useState } from 'react';
 
 const periodOptions: { value: ISO8601Period; label: string }[] = [
   { value: 'P1D', label: 'Daily' },
@@ -33,6 +34,8 @@ interface Timeframe {
 }
 
 interface UnifiedChartMenuProps {
+  chartType: 'bar' | 'line';
+  setChartType: (value: 'bar' | 'line') => void;
   selectedPeriod: ISO8601Period;
   setSelectedPeriod: (value: ISO8601Period) => void;
   selectedCategories: number[];
@@ -87,6 +90,8 @@ const TIMEFRAME_PRESETS = [
 ];
 
 export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
+                                                                    chartType,
+                                                                    setChartType,
                                                                     selectedPeriod,
                                                                     setSelectedPeriod,
                                                                     selectedCategories,
@@ -178,11 +183,35 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
           multiple
           id="categories"
           valueField="id"
-          type={TransactionType.Expense}
           value={selectedCategories}
           onChange={categories => setSelectedCategories(categories)}
           className="h-9 w-full"
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Chart Type</Label>
+        <RadioGroup
+          value={chartType}
+          onValueChange={(value) => setChartType(value as 'bar' | 'line')}
+          className="flex space-x-2"
+        >
+          {[
+            { value: 'bar', label: 'Bar', icon: BarChart },
+            { value: 'line', label: 'Line', icon: LineChart },
+          ].map(({ value, label, icon: Icon }) => (
+            <div key={value} className="flex items-center">
+              <RadioGroupItem value={value} id={value} className="sr-only peer" />
+              <Label
+                htmlFor={value}
+                className="flex items-center space-x-1 rounded-md px-2 py-1 text-xs cursor-pointer peer-checked:bg-primary peer-checked:text-primary-foreground hover:bg-muted"
+              >
+                <Icon className="h-3 w-3" />
+                <span>{label}</span>
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
       </div>
     </div>
   );
@@ -196,7 +225,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
             <span className="sr-only">Open settings</span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="p-3">
+        <PopoverContent className="p-3 w-100">
           <MenuContent />
         </PopoverContent>
       </Popover>

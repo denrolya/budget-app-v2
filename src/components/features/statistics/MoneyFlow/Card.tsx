@@ -1,3 +1,8 @@
+import cn from 'classnames';
+import { Calendar } from 'lucide-react';
+import moment from 'moment';
+import React, { memo, useMemo, useState } from 'react';
+
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
 import ConfigurationMenu from '@/components/features/statistics/MoneyFlow/ConfigurationMenu';
@@ -8,17 +13,13 @@ import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { PERIOD_OPTIONS, TIMEFRAME_OPTIONS } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
-import { PeriodValue, TimeframeValue } from '@/types/global';
+import { ISO8601Period, PeriodValue, TimeframeValue } from '@/types/global';
 import { formatShortDate } from '@/utils/formatShortDate';
-import cn from 'classnames';
-import { Calendar } from 'lucide-react';
-import moment from 'moment';
-import React, { memo, useMemo, useState } from 'react';
 
 export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
   const [timeframe, setTimeframe] = useState<TimeframeValue>(TIMEFRAME_OPTIONS[6].value);
-  const [period, setPeriod] = useState<PeriodValue>(PERIOD_OPTIONS[2].value);
+  const [period, setPeriod] = useState<ISO8601Period>(PERIOD_OPTIONS[2].value);
   const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
   const [showIncome, setShowIncome] = useState<boolean>(true);
   const [showExpenses, setShowExpenses] = useState<boolean>(true);

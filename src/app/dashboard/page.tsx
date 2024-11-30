@@ -61,14 +61,13 @@ const DashboardPage: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-2rem)] overflow-hidden bg-background">
-      {/* Main content */}
-      <main className="flex-1 overflow-auto p-6 pb-[187px] lg:pb-6">
+    <div className="flex flex-col 3xl:flex-row h-[calc(100vh-2rem)] md:overflow-hidden bg-background">
+      <main className="flex-1 overflow-auto p-6 pb-[187px] lg:pb-17 3xl:p-6">
         <div className="flex flex-col lg:flex-row gap-4 mb-6">
-          <div className="w-full lg:w-2/3">
+          <div className="w-full xl:w-3/5 3xl:w-2/3">
             <MoneyFlow />
           </div>
-          <div className="w-full lg:w-1/3">
+          <div className="w-full xl:w-2/5 3xl:w-1/3">
             <CategoriesDoughnut className="h-full" />
           </div>
         </div>
@@ -76,8 +75,7 @@ const DashboardPage: React.FC = () => {
         <CategoriesTimeline />
       </main>
 
-      {/* Mobile view: Bottom-fixed horizontal scroll above the menu bar */}
-      <div className="lg:hidden fixed bottom-[47px] left-0 w-full h-[180px] bg-gradient-to-b from-background/0 to-background">
+      <div className="3xl:hidden fixed bottom-[47px] md:bottom-0  left-0 w-full h-[180px] bg-gradient-to-b from-background/0 to-background">
         <div
           ref={scrollRef}
           className="flex overflow-x-auto snap-x snap-mandatory h-full py-4 px-6"
@@ -101,7 +99,7 @@ const DashboardPage: React.FC = () => {
                 key={index}
                 className="snap-center shrink-0"
                 style={{
-                  transform: `scale(${1 - blurAmount / 20})`, // Slight scale effect
+                  transform: `scale(${1 - blurAmount / 20})`,
                   transition: 'transform 0.3s ease-out, filter 0.3s ease-out, opacity 0.3s ease-out',
                 }}
               >
@@ -129,8 +127,7 @@ const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Desktop view: Right sidebar with inset styling */}
-      <aside className="hidden lg:block bg-muted/30 shadow-[inset_0_1px_4px_rgba(0,0,0,0.1)] backdrop-blur-xs z-1">
+      <aside className="hidden 3xl:block bg-muted/30 shadow-[inset_0_1px_4px_rgba(0,0,0,0.1)] backdrop-blur-xs z-1">
         <ScrollArea className="h-[calc(100vh-2rem)] px-4">
           <div className="py-6 space-y-6">
             <div className="space-y-4">
