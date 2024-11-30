@@ -1,3 +1,7 @@
+import { BarChart, CalendarIcon, LineChart, Percent, SettingsIcon, TrendingDown, TrendingUp, Tags } from 'lucide-react';
+import moment, { Moment } from 'moment';
+import React, { useCallback, useState } from 'react';
+
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -11,15 +15,10 @@ import {
 } from '@/components/ui/drawer';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Switch } from '@/components/ui/switch';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { ISO8601Period } from '@/types/global';
-import { Type as TransactionType } from '@/types/transaction';
-import { BarChart, CalendarIcon, LineChart, SettingsIcon } from 'lucide-react';
-import moment, { Moment } from 'moment';
-import React, { useCallback, useState } from 'react';
 
 const periodOptions: { value: ISO8601Period; label: string }[] = [
   { value: 'P1D', label: 'Daily' },
@@ -42,6 +41,14 @@ interface UnifiedChartMenuProps {
   setSelectedCategories: (categories: number[]) => void;
   timeframe: Timeframe;
   setTimeframe: (timeframe: Timeframe) => void;
+  showExpenseReference: boolean,
+  setShowExpenseReference: (value: boolean) => void,
+  showIncomeReference: boolean,
+  setShowIncomeReference: (value: boolean) => void,
+  showComparisonInTooltip: boolean;
+  setShowComparisonInTooltip: (value: boolean) => void;
+  fetchTransactionsFromSubcategories: boolean;
+  setFetchTransactionsFromSubcategories: (value: boolean) => void;
 }
 
 const TIMEFRAME_PRESETS = [
@@ -98,6 +105,14 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
                                                                     setSelectedCategories,
                                                                     timeframe,
                                                                     setTimeframe,
+                                                                    showExpenseReference,
+                                                                    setShowExpenseReference,
+                                                                    showIncomeReference,
+                                                                    setShowIncomeReference,
+                                                                    showComparisonInTooltip,
+                                                                    setShowComparisonInTooltip,
+                                                                    fetchTransactionsFromSubcategories,
+                                                                    setFetchTransactionsFromSubcategories,
                                                                   }) => {
   const isDesktop = useScreenSize();
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
@@ -191,27 +206,79 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
 
       <div className="space-y-2">
         <Label className="text-xs font-medium">Chart Type</Label>
-        <RadioGroup
-          value={chartType}
-          onValueChange={(value) => setChartType(value as 'bar' | 'line')}
-          className="flex space-x-2"
-        >
-          {[
-            { value: 'bar', label: 'Bar', icon: BarChart },
-            { value: 'line', label: 'Line', icon: LineChart },
-          ].map(({ value, label, icon: Icon }) => (
-            <div key={value} className="flex items-center">
-              <RadioGroupItem value={value} id={value} className="sr-only peer" />
-              <Label
-                htmlFor={value}
-                className="flex items-center space-x-1 rounded-md px-2 py-1 text-xs cursor-pointer peer-checked:bg-primary peer-checked:text-primary-foreground hover:bg-muted"
-              >
-                <Icon className="h-3 w-3" />
-                <span>{label}</span>
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            className="flex items-center px-2 py-1 space-x-1"
+            variant={chartType === 'line' ? 'default' : 'outline'}
+            onClick={() => setChartType('line')}>
+            <LineChart className="h-4 w-4" />
+            Line
+          </Button>
+          <Button
+            className="flex items-center px-2 py-1 space-x-1"
+            variant={chartType === 'bar' ? 'default' : 'outline'}
+            onClick={() => setChartType('bar')}>
+            <BarChart className="h-4 w-4" />
+            Bar
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-xs font-medium">Display Options</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="show-total-expense" className="flex items-center space-x-2 text-xs cursor-pointer">
+            <TrendingDown className="h-3 w-3" />
+            <span>Show Total Expense</span>
+          </Label>
+          <Switch
+            id="show-total-expense"
+            className="scale-75"
+            checked={showExpenseReference}
+            onCheckedChange={() => setShowExpenseReference(!showExpenseReference)}
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Label htmlFor="show-total-income" className="flex items-center space-x-2 text-xs cursor-pointer">
+            <TrendingUp className="h-3 w-3" />
+            <span>Show Income Reference</span>
+          </Label>
+          <Switch
+            id="show-total-income"
+            className="scale-75"
+            checked={showIncomeReference}
+            onCheckedChange={() => setShowIncomeReference(!showIncomeReference)}
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Label htmlFor="show-comparison-in-tooltip" className="flex items-center space-x-2 text-xs cursor-pointer">
+            <Percent className="h-3 w-3" />
+            <span>Show Comparison In Tooltip</span>
+          </Label>
+          <Switch
+            id="show-comparison-in-tooltip"
+            className="scale-75"
+            checked={showComparisonInTooltip}
+            onCheckedChange={() => setShowComparisonInTooltip(!showComparisonInTooltip)}
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Label
+            htmlFor="fetch-transactions-from-subcategories"
+            className="flex items-center space-x-2 text-xs cursor-pointer">
+            <Tags className="h-3 w-3" />
+            <span>Fetch Transactions From Subcategories</span>
+          </Label>
+          <Switch
+            id="fetch-transactions-from-subcategories"
+            className="scale-75"
+            checked={fetchTransactionsFromSubcategories}
+            onCheckedChange={() => setFetchTransactionsFromSubcategories(!fetchTransactionsFromSubcategories)}
+          />
+        </div>
       </div>
     </div>
   );
@@ -230,24 +297,24 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
         </PopoverContent>
       </Popover>
     );
-  } else {
-    return (
-      <Drawer>
-        <DrawerTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-7 w-7 p-0">
-            <SettingsIcon className="h-4 w-4" />
-          </Button>
-        </DrawerTrigger>
-        <DrawerContent className="p-6">
-          <DrawerHeader>
-            <DrawerTitle>Chart Options</DrawerTitle>
-            <DrawerDescription className="sr-only">Categories Timeline configuration</DrawerDescription>
-          </DrawerHeader>
-          <MenuContent />
-        </DrawerContent>
-      </Drawer>
-    );
   }
+
+  return (
+    <Drawer>
+      <DrawerTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-7 w-7 p-0">
+          <SettingsIcon className="h-4 w-4" />
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent className="p-6">
+        <DrawerHeader>
+          <DrawerTitle>Chart Options</DrawerTitle>
+          <DrawerDescription className="sr-only">Categories Timeline configuration</DrawerDescription>
+        </DrawerHeader>
+        <MenuContent />
+      </DrawerContent>
+    </Drawer>
+  );
 };
 
 export default UnifiedChartMenu;

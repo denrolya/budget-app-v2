@@ -1,10 +1,14 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import moment from 'moment';
-import { DependencyList, useEffect } from 'react';
+import { DependencyList, useCallback, useEffect, useMemo } from 'react';
+import capitalize from 'lodash/capitalize';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { axiosFetcher } from '@/services/api';
+import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
+import { ValueByPeriodData } from '@/types/valueByPeriodStatistics';
 import { generateQueryParamsString } from '@/utils/generateQueryParamsString';
+import { Type as TransactionType } from '@/types/transaction';
 
 const URL = '/api/v2/statistics/category/timeline';
 
@@ -30,10 +34,12 @@ interface UseTimelineStatisticsParams {
   period: string;
   categories: number[];
   queryKey?: string;
+  fetchIncomeReference?: boolean;
+  fetchExpenseReference?: boolean;
 }
 
 interface UseTimelineStatisticsReturn {
-  data: TimelineDataProcessed | undefined;
+  data: TimelineDataProcessed;
   isLoading: boolean;
   error: Error | null;
   refetch: () => void;
@@ -46,15 +52,18 @@ export const useTimelineStatistics = (
     period,
     categories,
     queryKey = 'timeline-statistics',
+    fetchIncomeReference = false,
+    fetchExpenseReference = false,
   }: UseTimelineStatisticsParams,
   dependencies: DependencyList = [],
 ): UseTimelineStatisticsReturn => {
   const queryClient = useQueryClient();
+
   const {
-    data,
-    isLoading,
-    error,
-    refetch,
+    data: categoriesData,
+    isLoading: isLoadingCategories,
+    error: errorCategories,
+    refetch: refetchCategories,
   } = useQuery<TimelineData, Error, TimelineDataProcessed>({
     queryKey: [
       queryKey,
@@ -65,11 +74,11 @@ export const useTimelineStatistics = (
       ...dependencies,
     ],
     queryFn: async (): Promise<TimelineData> => await axiosFetcher(`${URL}?${generateQueryParamsString({
-        after,
-        before,
-        period,
-        categories,
-      })}`) as TimelineData,
+      after,
+      before,
+      period,
+      categories,
+    })}`) as TimelineData,
     select: (data: TimelineData): TimelineDataProcessed => {
       const processedData: TimelineDataProcessed = {};
       Object.entries(data).forEach(([category, timelineData]) => {
@@ -84,6 +93,79 @@ export const useTimelineStatistics = (
     staleTime: 60 * 60 * 1000, // 1h
   });
 
+  const {
+    data: expenseData,
+    isLoading: isLoadingExpense,
+    error: errorExpense,
+    refetch: refetchExpense,
+  } = useValueByPeriodStatisticsRequest({
+    after,
+    before,
+    period,
+    type: TransactionType.Expense,
+    queryKey: `${queryKey}-expense`,
+    enabled: fetchExpenseReference,
+  });
+
+  const {
+    data: incomeData,
+    isLoading: isLoadingIncome,
+    error: errorIncome,
+    refetch: refetchIncome,
+  } = useValueByPeriodStatisticsRequest({
+    after,
+    before,
+    period,
+    type: TransactionType.Income,
+    queryKey: `${queryKey}-income`,
+    enabled: fetchIncomeReference,
+  });
+
+  const processReferenceData = (data: ValueByPeriodData[], type: 'income' | 'expense'): TimelineDataProcessed => {
+    const processedData: TimelineDataProcessed = {};
+    data.forEach((item) => {
+      const key = `Total ${capitalize(type)}`;
+      if (!processedData[key]) {
+        processedData[key] = [];
+      }
+      processedData[key].push({
+        date: item.after,
+        value: type === TransactionType.Income ? item.income : item.expense,
+      });
+    });
+    return processedData;
+  };
+
+  const timelineData = useMemo(() => {
+    let result: TimelineDataProcessed = {};
+    if (fetchExpenseReference && expenseData) {
+      const expenseProcessed = processReferenceData(expenseData, TransactionType.Expense);
+      result = { ...result, ...expenseProcessed };
+    }
+
+    if (fetchIncomeReference && incomeData) {
+      const incomeProcessed = processReferenceData(incomeData, TransactionType.Income);
+      result = { ...result, ...incomeProcessed };
+    }
+
+    result = { ...result, ...categoriesData };
+
+    return result;
+  }, [categoriesData, expenseData, incomeData, fetchExpenseReference, fetchIncomeReference]);
+
+  const isLoading = isLoadingCategories || (fetchExpenseReference && isLoadingExpense) || (fetchIncomeReference && isLoadingIncome);
+  const error = errorCategories || (fetchExpenseReference && errorExpense) || (fetchIncomeReference && errorIncome);
+
+  const refetch = useCallback(() => {
+    refetchCategories();
+    if (fetchExpenseReference) {
+      refetchExpense();
+    }
+    if (fetchIncomeReference) {
+      refetchIncome();
+    }
+  }, [refetchCategories, refetchExpense, refetchIncome, fetchExpenseReference, fetchIncomeReference]);
+
   useEffect(() => () => {
     queryClient.cancelQueries({ queryKey: [queryKey] });
   }, [queryClient, queryKey]);
@@ -93,9 +175,10 @@ export const useTimelineStatistics = (
   }, [refetch, ...dependencies]);
 
   return {
-    data: data || {},
+    data: timelineData,
     isLoading,
     error,
     refetch,
   };
 };
+

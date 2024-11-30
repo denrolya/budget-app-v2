@@ -13,34 +13,33 @@ import {
 } from '@/components/ui/drawer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
+import { useCategories } from '@/contexts/FinanceData';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactions } from '@/hooks/useTransactions';
+import Category from '@/models/Category';
 import TransactionFilters from '@/models/TransactionFilters';
-
-interface ProcessedCategory {
-  id: number;
-  name: string;
-  value: number;
-  children?: ProcessedCategory[];
-}
 
 interface TransactionsDrawerProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedCategory: ProcessedCategory;
+  selectedCategories: number[];
   timeframe: {
     after: Moment;
     before: Moment;
   };
+  fetchFromSubcategories?: boolean;
 }
 
 export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
                                                                         isOpen,
                                                                         onOpenChange,
-                                                                        selectedCategory,
+                                                                        selectedCategories,
                                                                         timeframe,
+                                                                        fetchFromSubcategories = true,
                                                                       }) => {
   const { openForm } = useFormContext();
+  const { list: allCategories } = useCategories();
+  const categories = selectedCategories.map((id) => allCategories.find((category: Category) => category.id === id)).filter(Boolean);
   const {
     groupedItems: groupedTransactions,
     isLoading: isTransactionsLoading,
@@ -52,23 +51,24 @@ export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
   } = useTransactions({
     updateUrl: false,
     initialFilters: new TransactionFilters({
-      withNestedCategories: true,
+      withNestedCategories: fetchFromSubcategories,
     }),
   });
 
+
   useEffect(() => {
-    if (isOpen && selectedCategory.id) {
-      setFilter('categories', [selectedCategory.id]);
+    if (isOpen && selectedCategories.length) {
+      setFilter('categories', selectedCategories);
       setFilter('after', timeframe.after);
       setFilter('before', timeframe.before);
     }
-  }, [isOpen, selectedCategory, timeframe, setFilter, refetchTransactions]);
+  }, [isOpen, selectedCategories, timeframe, setFilter, refetchTransactions]);
 
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Transactions in {selectedCategory.name}</DrawerTitle>
+          <DrawerTitle>Transactions in {categories.map(c => c.name).join(', ')}</DrawerTitle>
           <DrawerDescription>
             {timeframe.after.format(MOMENT_DATEPICKER_FORMAT)} - {timeframe.before.format(MOMENT_DATEPICKER_FORMAT)}
           </DrawerDescription>

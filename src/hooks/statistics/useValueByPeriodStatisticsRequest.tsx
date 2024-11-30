@@ -22,6 +22,7 @@ export const useValueByPeriodStatisticsRequest = ({
                                                     accounts,
                                                     categories,
                                                     queryKey = 'value-by-period',
+                                                    enabled = true,
                                                   }: UseStatisticsParams): UseStatisticsReturn => {
   const queryClient = useQueryClient();
   const {
@@ -30,6 +31,7 @@ export const useValueByPeriodStatisticsRequest = ({
     error,
     refetch,
   } = useQuery<ValueByPeriodDataDTO[], Error, ValueByPeriodData[]>({
+    enabled,
     queryKey: [queryKey,
       after?.format(BACKEND_DATE_FORMAT),
       before?.format(BACKEND_DATE_FORMAT),

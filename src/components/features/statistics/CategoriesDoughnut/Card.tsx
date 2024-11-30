@@ -236,12 +236,14 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
         </CardFooter>
       </Card>
 
-      <TransactionsDrawer
-        isOpen={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
-        selectedCategory={selectedCategory}
-        timeframe={timeframe}
-      />
+      {selectedCategory && (
+        <TransactionsDrawer
+          isOpen={isDrawerOpen}
+          onOpenChange={setIsDrawerOpen}
+          selectedCategory={selectedCategory}
+          timeframe={timeframe}
+        />
+      )}
     </>
   );
 };

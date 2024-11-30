@@ -1,25 +1,26 @@
-import moment from 'moment/moment';
+import moment from 'moment';
 import React, { useMemo } from 'react';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
+import { cn } from '@/lib/utils';
 import { ISO8601Period } from '@/types/global';
 
 interface CustomTooltipProps {
-  point: {
-    data: PointData;
-    serieId: string;
-  };
-  data: Array<{
-    id: string;
-    data: PointData[];
+  active?: boolean;
+  payload?: Array<{
+    name: string;
+    value: number;
+    color: string;
   }>;
+  label?: string;
   selectedPeriod: ISO8601Period;
+  showComparison?: boolean;
 }
 
-const ChartTooltip = ({ active, payload, label, selectedPeriod }) => {
+const ChartTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, selectedPeriod, showComparison = true }) => {
   if (!active || !payload || !payload.length) {
     return null;
   }
@@ -28,7 +29,7 @@ const ChartTooltip = ({ active, payload, label, selectedPeriod }) => {
   const formattedDate = useMemo(() => {
     switch (selectedPeriod) {
       case 'P1D':
-        return currentDate.format('MMMM D, YYYY');
+        return currentDate.format('MMM D, YYYY');
       case 'P1W':
         const startOfWeek = currentDate.clone().startOf('isoWeek');
         const endOfWeek = currentDate.clone().endOf('isoWeek');
@@ -37,33 +38,123 @@ const ChartTooltip = ({ active, payload, label, selectedPeriod }) => {
           : startOfWeek.month() !== endOfWeek.month()
             ? 'MMM D'
             : 'D';
-
-        return `Week ${currentDate.isoWeek()}: ${startOfWeek.format('MMM D, YYYY')} - ${endOfWeek.format(endFormat)}`;
+        return `W${currentDate.isoWeek()}: ${startOfWeek.format('MMM D')} - ${endOfWeek.format(endFormat)}`;
       case 'P1M':
-        return currentDate.format('MMMM YYYY');
+        return currentDate.format('MMM YYYY');
       default:
         return currentDate.format(MOMENT_DATE_VIEW_FORMAT);
     }
   }, [currentDate, selectedPeriod]);
 
-  return (
-    <Card className="w-[320px] shadow-lg z-10 p-4">
-      <CardContent className="p-0">
-        <div className="flex justify-between items-center mb-2">
-          <p className="text-xs font-medium">{formattedDate}</p>
-        </div>
-        <Separator className="mb-2" />
-        <div className="space-y-1">
-        {payload.map((entry, index) => (
-            <div key={index} className="flex justify-between items-center" style={{ color: entry.color }}>
-              <span className="text-sm font-medium">{entry.name}</span>
-              <MoneyValue className="font-mono font-medium text-xs" useColors={false} amount={entry.value} />
+  const totalExpense = payload.find(entry => entry.name === 'Total Expense');
+  const totalIncome = payload.find(entry => entry.name === 'Total Income');
+
+  const renderEntry = (entry: CustomTooltipProps['payload'][0]) => {
+    const isTotal = entry.name === 'Total Expense' || entry.name === 'Total Income';
+    if (isTotal) return null;
+
+    const expensePercentage = totalExpense && totalExpense.value !== 0 ? (entry.value / totalExpense.value) * 100 : 0;
+    const incomePercentage = totalIncome && totalIncome.value !== 0 ? (entry.value / totalIncome.value) * 100 : 0;
+
+    return (
+      <div key={entry.name} className="flex justify-between items-center text-xs" style={{ color: entry.color }}>
+        <span className="font-medium truncate mr-2">{entry.name}</span>
+        <div className="text-right flex items-center">
+          <MoneyValue className="font-mono font-medium" useColors={false} amount={entry.value} />
+          {showComparison && (
+            <div className="flex flex-col ml-1">
+              {totalExpense && totalExpense.value !== 0 && (
+                <div className="flex items-center">
+                  <span className="min-w-[30px] text-right">{expensePercentage.toFixed(0)}%</span>
+                  <div className="ml-1 w-8 bg-gray-200 rounded-full h-1 overflow-hidden">
+                    <div
+                      className="bg-destructive rounded-full h-1"
+                      style={{ width: `${Math.min(expensePercentage, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+              {totalIncome && totalIncome.value !== 0 && (
+                <div className="flex items-center mt-0.5">
+                  <span className="min-w-[30px] text-right">{incomePercentage.toFixed(0)}%</span>
+                  <div className="ml-1 w-8 bg-gray-200 rounded-full h-1 overflow-hidden">
+                    <div
+                      className="bg-success rounded-full h-1"
+                      style={{ width: `${Math.min(incomePercentage, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
             </div>
-          ))}
+          )}
         </div>
+      </div>
+    );
+  };
+
+  const getComparisonColor = (ratio: number) => {
+    if (ratio <= 0.5) return 'bg-success';
+    if (ratio <= 0.8) return 'bg-warning';
+    return 'bg-destructive';
+  };
+
+  const totalComparison = totalExpense && totalIncome && totalIncome.value !== 0
+    ? totalExpense.value / totalIncome.value
+    : null;
+
+  return (
+    <Card className="w-[280px] shadow-lg z-10">
+      <CardContent className="p-2">
+        <p className="text-xs font-medium mb-1">{formattedDate}</p>
+        <Separator className="my-1" />
+        <div className="space-y-1">
+          {payload.map(renderEntry)}
+        </div>
+        {(totalExpense || totalIncome) && (
+          <>
+            <Separator className="my-1" />
+            <div className="text-xs">
+              {totalExpense && (
+                <div className="flex justify-between items-center" style={{ color: totalExpense.color }}>
+                  <span className="font-medium">Expenses:</span>
+                  <MoneyValue
+                    className="font-mono font-medium"
+                    useColors={false}
+                    amount={totalExpense.value}
+                  />
+                </div>
+              )}
+              {totalIncome && (
+                <div className="flex justify-between items-center" style={{ color: totalIncome.color }}>
+                  <span className="font-medium">Income:</span>
+                  <MoneyValue
+                    className="font-mono font-medium"
+                    useColors={false}
+                    amount={totalIncome.value}
+                  />
+                </div>
+              )}
+              {showComparison && totalComparison !== null && (
+                <div className="flex items-center justify-between mt-1 text-muted-foreground">
+                  <span className="font-medium">Ratio:</span>
+                  <div className="flex items-center">
+                    <span className="mr-1">{(totalComparison * 100).toFixed(0)}%</span>
+                    <div className="w-12 bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className={cn('rounded-full h-1.5', getComparisonColor(totalComparison))}
+                        style={{ width: `${Math.min(totalComparison * 100, 100)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
 };
 
 export default ChartTooltip;
+

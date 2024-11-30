@@ -1,8 +1,7 @@
-import { MoneyValue } from '@/components/common/MoneyValue';
-import ChartTooltip from '@/components/features/statistics/CategoriesTimeline/ChartTooltip';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import React, { useMemo } from 'react';
-import _ from 'lodash'; // Import lodash
+import sumBy from 'lodash/sumBy';
+import mapValues from 'lodash/mapValues';
 import {
   Bar,
   BarChart,
@@ -16,30 +15,44 @@ import {
   YAxis,
 } from 'recharts';
 
+import ChartTooltip from '@/components/features/statistics/CategoriesTimeline/ChartTooltip';
+import { MoneyValue } from '@/components/common/MoneyValue';
 import { BACKEND_DATE_FORMAT, MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import { CHART_STYLES } from '@/constants/recharts';
 import { ISO8601Period } from '@/types/global';
 
+const colors = [
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))',
+];
+
+const getColor = (category: string, index: number) => {
+  if (category === 'Total Expense') return 'hsl(var(--destructive))';
+  if (category === 'Total Income') return 'hsl(var(--success))';
+  return colors[index % colors.length];
+};
+
 interface CategoryData {
-  date: moment.Moment;
+  date: Moment;
   value: number;
 }
 
 interface Props {
   chartType: 'line' | 'bar';
+  showComparisonInTooltip?: boolean;
   data: Array<{
     [category: string]: CategoryData[];
   }>;
   selectedPeriod: ISO8601Period;
 }
 
-export const CategoryTimelineChart: React.FC<Props> = ({ chartType = 'line', data, selectedPeriod }) => {
-  // Calculate totals using lodash
-  const totals = useMemo(() => {
-    return _.mapValues(data, (values) =>
-      _.sumBy(values as unknown as CategoryData[], 'value')
-    );
-  }, [data]);
+export const CategoryTimelineChart: React.FC<Props> = ({ chartType = 'line', showComparisonInTooltip = true, data, selectedPeriod, onClick }) => {
+  const totals = useMemo(() => mapValues(data, (values) =>
+      sumBy(values as unknown as CategoryData[], 'value')
+    ), [data]);
 
   const chartData = useMemo(() => {
     if (!data) return [];
@@ -90,14 +103,6 @@ export const CategoryTimelineChart: React.FC<Props> = ({ chartType = 'line', dat
     return label;
   };
 
-  const colors = [
-    'hsl(var(--chart-1))',
-    'hsl(var(--chart-2))',
-    'hsl(var(--chart-3))',
-    'hsl(var(--chart-4))',
-    'hsl(var(--chart-5))',
-  ];
-
   const ChartComponent = chartType === 'line' ? LineChart : BarChart;
   const DataComponent = chartType === 'line' ? Line : Bar;
 
@@ -107,6 +112,7 @@ export const CategoryTimelineChart: React.FC<Props> = ({ chartType = 'line', dat
         <ChartComponent
           data={chartData}
           margin={{ top: 0, right: 0, bottom: 0, left: -30 }}
+          onClick={onClick}
         >
           <CartesianGrid {...CHART_STYLES.cartesianGrid} />
           <XAxis
@@ -115,7 +121,7 @@ export const CategoryTimelineChart: React.FC<Props> = ({ chartType = 'line', dat
             {...CHART_STYLES.xAxis}
           />
           <YAxis {...CHART_STYLES.yAxis} />
-          <Tooltip content={(props) => <ChartTooltip selectedPeriod={selectedPeriod} {...props} />} />
+          <Tooltip content={(props) => <ChartTooltip selectedPeriod={selectedPeriod} showComparison={showComparisonInTooltip} {...props} />} />
           <Legend
             formatter={(value) => (
               <span>
@@ -128,8 +134,8 @@ export const CategoryTimelineChart: React.FC<Props> = ({ chartType = 'line', dat
               key={category}
               type="monotone"
               dataKey={category}
-              stroke={colors[index % colors.length]}
-              fill={colors[index % colors.length]}
+              stroke={getColor(category, index)}
+              fill={getColor(category, index)}
               dot={chartType === 'line' ? { r: 1.5, fill: colors[index % colors.length], strokeWidth: 0 } : undefined}
               activeDot={chartType === 'line' ? { r: 4 } : undefined}
             />

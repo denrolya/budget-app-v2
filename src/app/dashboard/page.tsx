@@ -1,5 +1,3 @@
-import React, { useEffect, useRef, useState } from 'react';
-
 import BalanceByAccountType from '@/components/features/statistics/BalanceByAccountType';
 import CategoriesDoughnut from '@/components/features/statistics/CategoriesDoughnut/Card';
 import CategoriesTimeline from '@/components/features/statistics/CategoriesTimeline/Card';
@@ -12,6 +10,7 @@ import { cardConfigs } from '@/constants/dashboard-config';
 import { Type as AccountType } from '@/types/account';
 import { StatisticsConfig } from '@/types/statistics';
 import { generateSlug } from '@/utils/generateSlug';
+import React, { useEffect, useRef, useState } from 'react';
 
 const DashboardPage: React.FC = () => {
   const [configs] = useState(cardConfigs);

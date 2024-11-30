@@ -32,6 +32,7 @@ export interface UseStatisticsParams {
   accounts?: (number | string)[];
   categories?: (number | string)[];
   queryKey?: string;
+  enabled?: boolean;
 }
 
 export interface UseValueByPeriodReturn<T extends StatisticsType> {
