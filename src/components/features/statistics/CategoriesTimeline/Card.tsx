@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import Chart from '@/components/features/statistics/CategoriesTimeline/Chart';
 import ConfigurationMenu from '@/components/features/statistics/CategoriesTimeline/ConfigurationMenu';
 import TransactionsDrawer from '@/components/features/statistics/CategoriesTimeline/TransactionsDrawer';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTimelineStatistics } from '@/hooks/statistics/useTimelineStatisticsRequest';
 import { cn } from '@/lib/utils';
@@ -27,8 +27,8 @@ interface ChartEvent {
 
 export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({ className }) => {
   const [chartType, setChartType] = useState<'line' | 'bar'>('line');
-  const [selectedPeriod, setSelectedPeriod] = useState<ISO8601Period>('P1M');
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([1, 25, 66]);
+  const [selectedPeriod, setSelectedPeriod] = useState<ISO8601Period>('P1Y');
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([1, 6, 73, 147]);
   const [debouncedCategories, setDebouncedCategories] = useState<number[]>(selectedCategories);
   const [showExpenseReference, setShowExpenseReference] = useState<boolean>(true);
   const [showIncomeReference, setShowIncomeReference] = useState<boolean>(true);
@@ -37,7 +37,7 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
   const [selectedTimeframeForTransactions, setSelectedTimeframeForTransactions] = useState<TransactionsTimeframe>(null);
   const [fetchTransactionsFromSubcategories, setFetchTransactionsFromSubcategories] = useState<boolean>(false);
   const [timeframe, setTimeframe] = useState<Timeframe>({
-    after: moment().subtract(2, 'year'),
+    after: moment().subtract(10, 'year'),
     before: moment(),
   });
 
@@ -89,6 +89,7 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
         break;
 
       case 'P1M':
+      case 'P3M':
         startDate = clickedDate.clone().startOf('month');
         endDate = clickedDate.clone().endOf('month');
         break;
@@ -153,9 +154,6 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
             </div>
           </div>
         </CardContent>
-        <CardFooter className={cn('flex flex-col gap-4 sm:gap-6 lg:flex-row lg:justify-between p-3 transition-all border-t duration-300 ease-in-out')}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:flex-1 lg:grid-cols-4 w-full"></div>
-        </CardFooter>
       </Card>
 
       {selectedTimeframeForTransactions && (
@@ -171,4 +169,17 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
   );
 };
 
+interface StatisticItemProps {
+  label: string;
+  value: string;
+}
+
+const StatisticItem: React.FC<StatisticItemProps> = ({ label, value }) => (
+  <div className="flex flex-col">
+    <span className="text-sm font-medium text-muted-foreground">{label}</span>
+    <span className="text-lg font-bold">{value}</span>
+  </div>
+);
+
 export default CategoriesTimelineCard;
+

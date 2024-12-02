@@ -1,5 +1,5 @@
 import moment, { Moment } from 'moment';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import sumBy from 'lodash/sumBy';
 import mapValues from 'lodash/mapValues';
 import {
@@ -47,12 +47,15 @@ interface Props {
     [category: string]: CategoryData[];
   }>;
   selectedPeriod: ISO8601Period;
+  onClick?: (data: any, index: number) => void;
 }
 
 export const CategoryTimelineChart: React.FC<Props> = ({ chartType = 'line', showComparisonInTooltip = true, data, selectedPeriod, onClick }) => {
+  const [hiddenSeries, setHiddenSeries] = useState<string[]>([]);
+
   const totals = useMemo(() => mapValues(data, (values) =>
-      sumBy(values as unknown as CategoryData[], 'value')
-    ), [data]);
+    sumBy(values as unknown as CategoryData[], 'value')
+  ), [data]);
 
   const chartData = useMemo(() => {
     if (!data) return [];
@@ -106,6 +109,24 @@ export const CategoryTimelineChart: React.FC<Props> = ({ chartType = 'line', sho
   const ChartComponent = chartType === 'line' ? LineChart : BarChart;
   const DataComponent = chartType === 'line' ? Line : Bar;
 
+  const handleLegendClick = (e: any) => {
+    const { dataKey } = e;
+    setHiddenSeries((prev) =>
+      prev.includes(dataKey) ? prev.filter((key) => key !== dataKey) : [...prev, dataKey]
+    );
+  };
+
+  const renderLegendIcon = (color: string) => chartType === 'line' ? (
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="7" cy="7" r="6" stroke={color} strokeWidth="2"/>
+        <circle cx="7" cy="7" r="3" fill={color}/>
+      </svg>
+    ) : (
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="14" height="14" fill={color}/>
+      </svg>
+    );
+
   return (
     <div className="w-full h-full min-w-[600px]">
       <ResponsiveContainer width="100%" height={385}>
@@ -123,8 +144,10 @@ export const CategoryTimelineChart: React.FC<Props> = ({ chartType = 'line', sho
           <YAxis {...CHART_STYLES.yAxis} />
           <Tooltip content={(props) => <ChartTooltip selectedPeriod={selectedPeriod} showComparison={showComparisonInTooltip} {...props} />} />
           <Legend
-            formatter={(value) => (
-              <span>
+            onClick={handleLegendClick}
+            formatter={(value, entry) => (
+              <span className={`flex items-center gap-2 ${hiddenSeries.includes(value) ? 'opacity-50' : ''}`}>
+                {renderLegendIcon(entry.color)}
                 {value} (<MoneyValue className="text-xs font-mono" useColors={false} amount={totals[value] || 0} />)
               </span>
             )}
@@ -138,6 +161,7 @@ export const CategoryTimelineChart: React.FC<Props> = ({ chartType = 'line', sho
               fill={getColor(category, index)}
               dot={chartType === 'line' ? { r: 1.5, fill: colors[index % colors.length], strokeWidth: 0 } : undefined}
               activeDot={chartType === 'line' ? { r: 4 } : undefined}
+              hide={hiddenSeries.includes(category)}
             />
           ))}
         </ChartComponent>

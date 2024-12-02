@@ -24,6 +24,7 @@ const periodOptions: { value: ISO8601Period; label: string }[] = [
   { value: 'P1D', label: 'Daily' },
   { value: 'P1W', label: 'Weekly' },
   { value: 'P1M', label: 'Monthly' },
+  { value: 'P3M', label: 'Quarterly' },
   { value: 'P1Y', label: 'Yearly' },
 ];
 
