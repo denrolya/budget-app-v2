@@ -34,9 +34,10 @@ interface Props {
   groupedItems: [Moment, (Transaction | Transfer)[], number, number, number, number][];
   startDate: Moment;
   endDate: Moment;
+  isReversedOrder?: boolean;
 }
 
-const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate }) => {
+const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate, isReversedOrder = false }) => {
   const { updateTransaction, deleteTransaction, isUpdating } = useTransactionMutations();
   const { openForm } = useFormContext();
   const [editingCell, setEditingCell] = useState<{ itemId: number; field: EditableField } | null>(null);
@@ -233,8 +234,8 @@ const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate }) => 
       dates.push(currentDate.clone());
       currentDate.add(1, 'day');
     }
-    return dates.reverse();
-  }, [startDate, endDate]);
+    return isReversedOrder ? dates.reverse() : dates;
+  }, [startDate, endDate, isReversedOrder]);
 
   const toggleDraft = async (transaction: Transaction) => {
     const confirmed = await confirm({

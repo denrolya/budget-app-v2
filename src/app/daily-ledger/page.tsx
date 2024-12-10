@@ -1,5 +1,6 @@
-import { ROUTES } from '@/constants/routes';
 import {
+  CalendarArrowDown,
+  CalendarArrowUp,
   ArrowRightLeftIcon,
   CalendarIcon,
   ChevronLeft,
@@ -17,6 +18,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSwipeable } from 'react-swipeable';
 
+import { ROUTES } from '@/constants/routes';
 import SummaryBadge from '@/components/common/SummaryBadge';
 import MoneyValue from '@/components/common/MoneyValue';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
@@ -128,6 +130,7 @@ const timePresets: TimePreset[] = [
 
 export const DailyLedgerPage: React.FC = () => {
   const [activeView, setActiveView] = useState<'table' | 'list'>('table');
+  const [isReversedOrder, setIsReversedOrder] = useState<boolean>(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState<boolean>(false);
   const [showBulkCreate, setShowBulkCreate] = useState<boolean>(false);
   const [selectedPreset, setSelectedPreset] = useState<string>('current-week');
@@ -312,6 +315,22 @@ export const DailyLedgerPage: React.FC = () => {
               </div>
             </ResponsiveTooltip>
             <div className="flex flex-wrap justify-between gap-2">
+              {activeView === 'table' && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="hidden md:flex"
+                      onClick={() => setIsReversedOrder(!isReversedOrder)}>
+                      {isReversedOrder && (<CalendarArrowDown className="h-4 w-4" />)}
+                      {!isReversedOrder && (<CalendarArrowUp className="h-4 w-4" />)}
+                      <span className="sr-only">Toggle ordering</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Toggle ordering</TooltipContent>
+                </Tooltip>
+              )}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -411,12 +430,14 @@ export const DailyLedgerPage: React.FC = () => {
                         groupedItems={groupedItems}
                         startDate={dateRange.startDate}
                         endDate={dateRange.endDate}
+                        isReversedOrder={isReversedOrder}
                       />
                     )}
                   </>
                 )}
                 {(activeView === 'list') && (
                   <DailyList
+                    isReversedOrder={isReversedOrder}
                     isLoading={isLoading}
                     groupedItems={groupedItems}
                     startDate={dateRange.startDate}

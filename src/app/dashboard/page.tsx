@@ -71,7 +71,7 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        <CategoriesTimeline />
+        <CategoriesTimeline className="mb-6" />
       </main>
 
       <div className="3xl:hidden fixed bottom-[47px] md:bottom-0  left-0 w-full h-[180px] bg-gradient-to-b from-background/0 to-background">

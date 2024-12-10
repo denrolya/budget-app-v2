@@ -33,6 +33,7 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
   const [showExpenseReference, setShowExpenseReference] = useState<boolean>(true);
   const [showIncomeReference, setShowIncomeReference] = useState<boolean>(true);
   const [showComparisonInTooltip, setShowComparisonInTooltip] = useState<boolean>(true);
+  const [useSeparateAxisForTotals, setUseSeparateAxisForTotals] = useState<boolean>(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [selectedTimeframeForTransactions, setSelectedTimeframeForTransactions] = useState<TransactionsTimeframe>(null);
   const [fetchTransactionsFromSubcategories, setFetchTransactionsFromSubcategories] = useState<boolean>(false);
@@ -114,7 +115,7 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
 
   return (
     <>
-      <Card className={cn('mb-6', className)}>
+      <Card className={cn('w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25', className)}>
         <CardHeader className="p-4 space-y-0.2">
           <div className="flex justify-between items-start">
             <CardTitle className="text-base font-medium">Categories Timeline</CardTitle>
@@ -135,6 +136,8 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
               setShowComparisonInTooltip={setShowComparisonInTooltip}
               fetchTransactionsFromSubcategories={fetchTransactionsFromSubcategories}
               setFetchTransactionsFromSubcategories={setFetchTransactionsFromSubcategories}
+              useSeparateAxisForTotals={useSeparateAxisForTotals}
+              setUseSeparateAxisForTotals={setUseSeparateAxisForTotals}
             />
           </div>
         </CardHeader>
@@ -149,6 +152,7 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
                   selectedPeriod={selectedPeriod}
                   showComparisonInTooltip={showComparisonInTooltip}
                   onClick={onChartClick}
+                  useSeparateAxisForTotals={useSeparateAxisForTotals}
                 />
               )}
             </div>

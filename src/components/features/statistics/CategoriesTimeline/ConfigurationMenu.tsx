@@ -1,4 +1,14 @@
-import { BarChart, CalendarIcon, LineChart, Percent, SettingsIcon, TrendingDown, TrendingUp, Tags } from 'lucide-react';
+import {
+  BarChart,
+  CalendarIcon,
+  LineChart,
+  Move3D,
+  Percent,
+  SettingsIcon,
+  Tags,
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useState } from 'react';
 
@@ -50,6 +60,8 @@ interface UnifiedChartMenuProps {
   setShowComparisonInTooltip: (value: boolean) => void;
   fetchTransactionsFromSubcategories: boolean;
   setFetchTransactionsFromSubcategories: (value: boolean) => void;
+  useSeparateAxisForTotals: boolean;
+  setUseSeparateAxisForTotals: (value: boolean) => void;
 }
 
 const TIMEFRAME_PRESETS = [
@@ -114,6 +126,8 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
                                                                     setShowComparisonInTooltip,
                                                                     fetchTransactionsFromSubcategories,
                                                                     setFetchTransactionsFromSubcategories,
+                                                                    useSeparateAxisForTotals,
+                                                                    setUseSeparateAxisForTotals,
                                                                   }) => {
   const isDesktop = useScreenSize();
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
@@ -278,6 +292,21 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
             className="scale-75"
             checked={fetchTransactionsFromSubcategories}
             onCheckedChange={() => setFetchTransactionsFromSubcategories(!fetchTransactionsFromSubcategories)}
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Label
+            htmlFor="use-separate-axis-for-totals"
+            className="flex items-center space-x-2 text-xs cursor-pointer">
+            <Move3D className="h-3 w-3" />
+            <span>Use separate Y Axis for Totals</span>
+          </Label>
+          <Switch
+            id="use-separate-axis-for-totals"
+            className="scale-75"
+            checked={useSeparateAxisForTotals}
+            onCheckedChange={() => setUseSeparateAxisForTotals(!useSeparateAxisForTotals)}
           />
         </div>
       </div>
