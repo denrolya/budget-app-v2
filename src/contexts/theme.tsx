@@ -4,6 +4,9 @@ export enum Theme {
   Dark = 'dark',
   Light = 'light',
   System = 'system',
+  TronDark = 'theme-tron-dark',
+  RetrowaveLight = 'theme-retrowave-light',
+  RetrowaveDark = 'theme-retrowave-dark',
 }
 
 interface ThemeProviderProps {
@@ -31,7 +34,7 @@ export const ThemeProvider = ({
                               }: ThemeProviderProps) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem(storageKey) as Theme || defaultTheme;
+      return (localStorage.getItem(storageKey) as Theme) || defaultTheme;
     }
     return defaultTheme;
   });
@@ -39,7 +42,13 @@ export const ThemeProvider = ({
   useEffect(() => {
     const root = window.document.documentElement;
 
-    root.classList.remove(Theme.Light, Theme.Dark);
+    root.classList.remove(
+      Theme.Light,
+      Theme.Dark,
+      Theme.TronDark,
+      Theme.RetrowaveLight,
+      Theme.RetrowaveDark,
+    );
 
     if (theme === Theme.System) {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches

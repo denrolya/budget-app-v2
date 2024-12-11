@@ -1,0 +1,45 @@
+@mixin theme {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 240 5.9% 10%;
+  --secondary: 240 3.7% 25%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 98%;
+  --success: 142 76% 36%;
+  --success-foreground: 210 40% 98%;
+  --warning: 48 95% 53%;
+  --warning-foreground: 48 100% 96%;
+  --info: 180 66% 40%;
+  --info-foreground: 180 100% 96%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 0.5rem;
+
+  --chart-1: 12 70% 45%;
+  --chart-2: 173 50% 32%;
+  --chart-3: 197 30% 20%;
+  --chart-4: 43 65% 50%;
+  --chart-5: 27 75% 50%;
+  --chart-6: 230 45% 45%;
+  --chart-7: 291 40% 45%;
+  --chart-8: 150 45% 35%;
+  --chart-9: 52 85% 50%;
+  --chart-10: 324 60% 35%;
+
+  --chart-text-color: 215 20% 65%;
+  --chart-crosshair-color: 262 83% 58%;
+  --chart-tooltip-background: 222 47% 11%;
+  --chart-tooltip-text-color: 210 40% 98%;
+}
+

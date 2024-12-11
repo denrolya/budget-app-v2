@@ -1,0 +1,52 @@
+@use 'variables' as *;
+
+/* Recharts styles */
+.recharts-cartesian-grid {
+  z-index: 1;
+}
+
+.recharts-line {
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1)) drop-shadow(0 4px 4px rgba(0, 0, 0, 0.1));
+  z-index: 10;
+}
+
+.recharts-bar {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) blur(0.5px);
+  transition: filter $transition-duration $transition-timing;
+}
+
+.recharts-bar-rectangle {
+  transition: filter $transition-duration $transition-timing;
+}
+
+.recharts-line:hover,
+.recharts-bar-rectangle:hover {
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.2)) drop-shadow(0 8px 8px rgba(0, 0, 0, 0.2));
+}
+
+.dark {
+  .recharts-line,
+  .recharts-bar {
+    filter: drop-shadow(0 2px 2px rgba(255, 255, 255, 0.03)) drop-shadow(0 4px 4px rgba(255, 255, 255, 0.03));
+  }
+
+  .recharts-line:hover,
+  .recharts-bar-rectangle:hover {
+    filter: drop-shadow(0 4px 4px rgba(255, 255, 255, 0.1)) drop-shadow(0 8px 8px rgba(255, 255, 255, 0.1));
+  }
+}
+
+.theme-tron-legacy {
+  .recharts-cartesian-grid {
+    stroke: hsl(var(--secondary) / 0.2);
+  }
+
+  .recharts-line {
+    filter: drop-shadow(0 0 5px hsl(var(--primary)));
+  }
+
+  .recharts-bar {
+    filter: drop-shadow(0 0 5px hsl(var(--secondary)));
+  }
+}
+

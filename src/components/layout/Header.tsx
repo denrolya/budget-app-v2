@@ -1,5 +1,5 @@
 import cn from 'classnames';
-import { Check, Command, Laptop, LogOut, Moon, Sun, User } from 'lucide-react';
+import { Check, Command, Laptop, LogOut, Moon, Sun, User, Bike, Palmtree } from 'lucide-react';
 import React from 'react';
 
 import { useHotkeys } from '@/contexts/Hotkeys';
@@ -8,8 +8,8 @@ import CurrencySelector from '@/components/layout/HeaderCurrencySelector';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuContent, DropdownMenuGroup,
+  DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
@@ -58,28 +58,63 @@ export const Header: React.FC<Props> = ({ className }) => {
                 <span>Theme</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
-                <DropdownMenuItem onClick={() => setTheme(Theme.Light)}>
-                  <Sun className="mr-2 h-4 w-4" />
-                  <span>Light</span>
-                  {theme === Theme.Light && (
-                    <Check className="ml-auto h-4 w-4 text-primary" />
-                  )}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme(Theme.Dark)}>
-                  <Moon className="mr-2 h-4 w-4" />
-                  <span>Dark</span>
-                  {theme === Theme.Dark && (
-                    <Check className="ml-auto h-4 w-4 text-primary" />
-                  )}
-                </DropdownMenuItem>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Custom</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => setTheme(Theme.RetrowaveLight)}>
+                    <Palmtree className="mr-2 h-4 w-4" />
+                    <span>Retrowave Light</span>
+                    {theme === Theme.RetrowaveLight && (
+                      <Check className="ml-auto h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme(Theme.RetrowaveDark)}>
+                    <Palmtree className="mr-2 h-4 w-4" />
+                    <span>Retrowave Dark</span>
+                    {theme === Theme.RetrowaveDark && (
+                      <Check className="ml-auto h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme(Theme.TronDark)}>
+                    <Bike className="mr-2 h-4 w-4" />
+                    <span>Tron Dark</span>
+                    {theme === Theme.TronDark && (
+                      <Check className="ml-auto h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setTheme(Theme.System)}>
-                  <Laptop className="mr-2 h-4 w-4" />
-                  <span>System</span>
-                  {theme === Theme.System && (
-                    <Check className="ml-auto h-4 w-4 text-primary" />
-                  )}
-                </DropdownMenuItem>
+
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Default</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => setTheme(Theme.Light)}>
+                    <Sun className="mr-2 h-4 w-4" />
+                    <span>Light</span>
+                    {theme === Theme.Light && (
+                      <Check className="ml-auto h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme(Theme.Dark)}>
+                    <Moon className="mr-2 h-4 w-4" />
+                    <span>Dark</span>
+                    {theme === Theme.Dark && (
+                      <Check className="ml-auto h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>System</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => setTheme(Theme.System)}>
+                    <Laptop className="mr-2 h-4 w-4" />
+                    <span>System</span>
+                    {theme === Theme.System && (
+                      <Check className="ml-auto h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
             <DropdownMenuSeparator />

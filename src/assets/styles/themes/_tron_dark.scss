@@ -1,0 +1,110 @@
+@mixin theme {
+  // Base colors
+  --background: 220 70% 2%;
+  --foreground: 180 100% 80%;
+  --card: 220 70% 5%;
+  --card-foreground: 180 100% 80%;
+  --popover: 220 70% 5%;
+  --popover-foreground: 180 100% 80%;
+
+  // Primary colors
+  --primary: 195 100% 50%;
+  --primary-foreground: 220 70% 2%;
+
+  // Secondary colors
+  --secondary: 180 100% 50%;
+  --secondary-foreground: 220 70% 2%;
+
+  // Accent colors
+  --accent: 165 100% 70%;
+  --accent-foreground: 180 100% 80%;
+
+  // Muted colors
+  --muted: 220 70% 10%;
+  --muted-foreground: 180 50% 60%;
+
+  // Destructive colors
+  --destructive: 10 100% 60%;
+  --destructive-foreground: 220 70% 2%;
+
+  // Success colors
+  --success: 160 100% 50%;
+  --success-foreground: 220 70% 2%;
+
+  // Warning colors
+  --warning: 40 100% 50%;
+  --warning-foreground: 220 70% 2%;
+
+  // Info colors
+  --info: 195 100% 50%;
+  --info-foreground: 220 70% 2%;
+
+  // Border and input colors
+  --border: 180 100% 50%;
+  --input: 220 70% 10%;
+  --ring: 195 100% 50%;
+
+  // Radius
+  --radius: 0.5rem;
+
+  /* Chart Colors */
+  --chart-1: 195 100% 50%;
+  --chart-2: 180 100% 50%;
+  --chart-3: 165 100% 70%;
+  --chart-4: 160 100% 50%;
+  --chart-5: 40 100% 50%;
+  --chart-6: 10 100% 60%;
+  --chart-7: 230 100% 50%;
+  --chart-8: 280 100% 60%;
+  --chart-9: 60 100% 50%;
+  --chart-10: 330 100% 60%;
+
+  /* Chart Specific Colors */
+  --chart-text-color: 180 100% 80%;
+  --chart-crosshair-color: 195 100% 50%;
+  --chart-tooltip-background: 220 70% 5%;
+  --chart-tooltip-text-color: 180 100% 80%;
+}
+
+// Additional theme-specific styles that can't be handled by CSS variables
+.theme-tron-dark {
+  .recharts-cartesian-grid {
+    stroke: hsl(var(--secondary) / 0.2);
+  }
+
+  .recharts-line {
+    filter: drop-shadow(0 0 5px hsl(var(--primary)));
+  }
+
+  .recharts-bar {
+    filter: drop-shadow(0 0 5px hsl(var(--secondary)));
+  }
+
+  // Add any other theme-specific overrides here
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
+  // Add a subtle grid effect to the background
+  &::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: linear-gradient(to right, hsl(var(--primary) / 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--primary) / 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+  }
+
+  // Add a glow effect to buttons and interactive elements
+  button, a, input, select {
+    &:hover, &:focus {
+      box-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+    }
+  }
+}
+

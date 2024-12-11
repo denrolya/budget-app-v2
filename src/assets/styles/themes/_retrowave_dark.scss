@@ -1,0 +1,153 @@
+@mixin theme {
+  // Base colors
+  --background: 260 20% 10%;
+  --foreground: 280 100% 90%;
+  --card: 260 20% 15%;
+  --card-foreground: 280 100% 90%;
+  --popover: 260 20% 15%;
+  --popover-foreground: 280 100% 90%;
+
+  // Primary colors (hot pink)
+  --primary: 320 100% 60%;
+  --primary-foreground: 260 20% 10%;
+
+  // Secondary colors (cyan)
+  --secondary: 180 100% 60%;
+  --secondary-foreground: 260 20% 10%;
+
+  // Accent colors (purple)
+  --accent: 280 100% 60%;
+  --accent-foreground: 260 20% 95%;
+
+  // Muted colors
+  --muted: 260 20% 20%;
+  --muted-foreground: 280 100% 80%;
+
+  // Destructive colors (red)
+  --destructive: 0 100% 60%;
+  --destructive-foreground: 260 20% 10%;
+
+  // Success colors (green)
+  --success: 140 100% 60%;
+  --success-foreground: 260 20% 10%;
+
+  // Warning colors (yellow)
+  --warning: 40 100% 60%;
+  --warning-foreground: 260 20% 10%;
+
+  // Info colors (blue)
+  --info: 220 100% 60%;
+  --info-foreground: 260 20% 10%;
+
+  // Border and input colors
+  --border: 280 100% 60%;
+  --input: 260 20% 20%;
+  --ring: 320 100% 60%;
+
+  // Radius
+  --radius: 0.5rem;
+
+  /* Chart Colors */
+  --chart-1: 320 100% 60%;
+  --chart-2: 180 100% 60%;
+  --chart-3: 280 100% 60%;
+  --chart-4: 140 100% 60%;
+  --chart-5: 40 100% 60%;
+  --chart-6: 0 100% 60%;
+  --chart-7: 220 100% 60%;
+  --chart-8: 300 100% 60%;
+  --chart-9: 60 100% 60%;
+  --chart-10: 260 100% 60%;
+
+  /* Chart Specific Colors */
+  --chart-text-color: 280 100% 90%;
+  --chart-crosshair-color: 320 100% 60%;
+  --chart-tooltip-background: 260 20% 15%;
+  --chart-tooltip-text-color: 280 100% 90%;
+
+  // Basic styling
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+
+  // Add a subtle grid effect to the background
+  &::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+            linear-gradient(to right, hsl(var(--primary) / 0.1) 1px, transparent 1px),
+            linear-gradient(to bottom, hsl(var(--primary) / 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  // Style headings
+  h1, h2, h3, h4, h5, h6 {
+    color: hsl(var(--primary));
+    text-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+  }
+
+  // Style links
+  a {
+    color: hsl(var(--secondary));
+    text-decoration: none;
+    transition: all 0.3s ease;
+
+    &:hover {
+      color: hsl(var(--primary));
+      text-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+    }
+  }
+
+  // Style buttons
+  button, .button {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+
+    &:hover {
+      background-color: hsl(var(--secondary));
+      color: hsl(var(--secondary-foreground));
+      box-shadow: 0 0 15px hsl(var(--secondary) / 0.5);
+    }
+
+    &.outline {
+      background-color: transparent;
+      border: 1px solid hsl(var(--primary));
+      color: hsl(var(--primary));
+
+      &:hover {
+        background-color: hsl(var(--primary));
+        color: hsl(var(--primary-foreground));
+      }
+    }
+  }
+
+  // Style form elements
+  input[type="text"], input[type="email"], input[type="password"], textarea, select {
+    background-color: hsl(var(--input));
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    padding: 0.5rem;
+
+    &:focus {
+      outline: none;
+      border-color: hsl(var(--primary));
+      box-shadow: 0 0 0 2px hsl(var(--primary) / 0.3);
+    }
+  }
+
+  // Style cards
+  .card {
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border-radius: var(--radius);
+    padding: 1rem;
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.2);
+  }
+}
+

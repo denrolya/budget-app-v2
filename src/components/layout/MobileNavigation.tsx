@@ -1,10 +1,9 @@
 import cn from 'classnames';
-import { LogOut, Monitor, Moon, MoreHorizontal, Plus, Sun } from 'lucide-react';
+import { Bike, LogOut, Monitor, Moon, MoreHorizontal, Palmtree, Plus, Sun } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSwipeable } from 'react-swipeable';
 
-import { useAuth } from '@/contexts/auth';
 import ExchangeRatesPresets from '@/components/common/ExchangeRatesPresets';
 import DraftTransactionForm from '@/components/features/transactions/DraftForm';
 import { CurrencyButtonSelector } from '@/components/layout/CurrencyButtonSelector';
@@ -14,7 +13,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ROUTES } from '@/constants/routes';
-import { useTheme } from '@/contexts/theme';
+import { useAuth } from '@/contexts/auth';
+import { Theme, useTheme } from '@/contexts/theme';
 
 
 type RouteKey = keyof typeof ROUTES
@@ -155,13 +155,13 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                               <SelectValue placeholder="Select theme" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="dark">
+                              <SelectItem value={Theme.Dark}>
                                 <div className="flex items-center">
                                   <Moon className="mr-2 h-4 w-4" />
                                   Dark
                                 </div>
                               </SelectItem>
-                              <SelectItem value="light">
+                              <SelectItem value={Theme.Light}>
                                 <div className="flex items-center">
                                   <Sun className="mr-2 h-4 w-4" />
                                   Light
@@ -171,6 +171,27 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                                 <div className="flex items-center">
                                   <Monitor className="mr-2 h-4 w-4" />
                                   System
+                                </div>
+                              </SelectItem>
+
+                              <SelectItem value={Theme.TronDark}>
+                                <div className="flex items-center">
+                                  <Bike className="mr-2 h-4 w-4" />
+                                  Tron Dark
+                                </div>
+                              </SelectItem>
+
+                              <SelectItem value={Theme.RetrowaveLight}>
+                                <div className="flex items-center">
+                                  <Palmtree className="mr-2 h-4 w-4" />
+                                  Retrowave Light
+                                </div>
+                              </SelectItem>
+
+                              <SelectItem value={Theme.RetrowaveDark}>
+                                <div className="flex items-center">
+                                  <Palmtree className="mr-2 h-4 w-4" />
+                                  Retrowave Dark
                                 </div>
                               </SelectItem>
                             </SelectContent>

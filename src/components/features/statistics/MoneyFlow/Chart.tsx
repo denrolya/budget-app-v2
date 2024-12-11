@@ -124,7 +124,6 @@ const MoneyFlowChart: React.FC<Props> = ({
                   strokeOpacity={isCurrentTimeframe ? 1 : 0.3}
                   dot={false}
                   strokeDasharray={isCurrentTimeframe ? undefined : '15 8'}
-                  className="recharts-line fade-line"
                 />
               )}
               {showExpenses && (
@@ -137,7 +136,6 @@ const MoneyFlowChart: React.FC<Props> = ({
                   strokeOpacity={isCurrentTimeframe ? 1 : 0.3}
                   dot={false}
                   strokeDasharray={isCurrentTimeframe ? undefined : '15 8'}
-                  className="recharts-line fade-line"
                 />
               )}
               {showRevenue && (
@@ -150,7 +148,6 @@ const MoneyFlowChart: React.FC<Props> = ({
                   strokeOpacity={isCurrentTimeframe ? 1 : 0.45}
                   dot={false}
                   strokeDasharray={isCurrentTimeframe ? undefined : '15 8'}
-                  className="recharts-line fade-line"
                 />
               )}
             </>
@@ -193,27 +190,27 @@ const MoneyFlowChart: React.FC<Props> = ({
           <defs>
             <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="hsl(var(--success) / 0.7)" />
-              <stop offset="100%" stopColor="hsl(var(--success))" />
+              <stop offset="100%" stopColor="hsl(var(--success) / 0.5)" />
             </linearGradient>
-            <linearGradient id="expensesGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(var(--destructive))" />
-              <stop offset="100%" stopColor="hsl(var(--destructive) / 0.7)" />
+            <linearGradient id="expensesGradient" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stopColor="hsl(var(--destructive) / 0.7)" />
+              <stop offset="100%" stopColor="hsl(var(--destructive) / 0.5)" />
             </linearGradient>
             <linearGradient id="revenueGradient" x1="0" y1="1" x2="0" y2="0">
               <stop offset="0%" stopColor="hsl(var(--secondary) / 0.7)" />
-              <stop offset="100%" stopColor="hsl(var(--secondary))" />
+              <stop offset="100%" stopColor="hsl(var(--secondary) / 0.5)" />
             </linearGradient>
             <linearGradient id="incomeGradientPrevious" x1="0" y1="1" x2="0" y2="0">
-              <stop offset="0%" stopColor="hsl(var(--success) / 0.1)" />
-              <stop offset="100%" stopColor="hsl(var(--success) / 0.2)" />
+              <stop offset="0%" stopColor="hsl(var(--success) / 0.2)" />
+              <stop offset="100%" stopColor="hsl(var(--success) / 0.1)" />
             </linearGradient>
             <linearGradient id="expensesGradientPrevious" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="hsl(var(--destructive) / 0.2)" />
               <stop offset="100%" stopColor="hsl(var(--destructive) / 0.1)" />
             </linearGradient>
             <linearGradient id="revenueGradientPrevious" x1="0" y1="1" x2="0" y2="0">
-              <stop offset="0%" stopColor="hsl(var(--secondary) / 0.1)" />
-              <stop offset="100%" stopColor="hsl(var(--secondary) / 0.2)" />
+              <stop offset="0%" stopColor="hsl(var(--secondary) / 0.2)" />
+              <stop offset="100%" stopColor="hsl(var(--secondary) / 0.1)" />
             </linearGradient>
           </defs>
           <XAxis
@@ -259,3 +256,4 @@ const MoneyFlowChart: React.FC<Props> = ({
 };
 
 export default MoneyFlowChart;
+
