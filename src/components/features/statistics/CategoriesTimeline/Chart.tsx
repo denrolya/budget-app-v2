@@ -230,11 +230,12 @@ export const CategoryTimelineChart: React.FC<Props> = ({
               key={category}
               dataKey={category}
               stroke={getColor(category, regularCategories.length + index)}
+              strokeOpacity={0.4}
               fill={getColor(category, regularCategories.length + index)}
-              strokeWidth={4}
-              strokeDasharray="5 5"
+              strokeWidth={1}
+              strokeDasharray="15 8"
               dot={chartType === 'line' ? {
-                r: 3,
+                r: 2,
                 fill: getColor(category, regularCategories.length + index),
                 strokeWidth: 0,
               } : undefined}

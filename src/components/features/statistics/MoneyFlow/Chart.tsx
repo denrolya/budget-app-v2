@@ -120,10 +120,10 @@ const MoneyFlowChart: React.FC<Props> = ({
                   xAxisId={xAxisId}
                   dataKey={dataKeys.income}
                   stroke={'hsl(var(--success))'}
-                  strokeWidth={isCurrentTimeframe ? 3 : 2}
-                  strokeOpacity={isCurrentTimeframe ? 1 : 0.7}
+                  strokeWidth={isCurrentTimeframe ? 3 : 1}
+                  strokeOpacity={isCurrentTimeframe ? 1 : 0.3}
                   dot={false}
-                  strokeDasharray={isCurrentTimeframe ? undefined : '5 5'}
+                  strokeDasharray={isCurrentTimeframe ? undefined : '15 8'}
                   className="recharts-line fade-line"
                 />
               )}
@@ -133,10 +133,10 @@ const MoneyFlowChart: React.FC<Props> = ({
                   xAxisId={xAxisId}
                   dataKey={dataKeys.expenses}
                   stroke={'hsl(var(--destructive))'}
-                  strokeWidth={isCurrentTimeframe ? 3 : 2}
-                  strokeOpacity={isCurrentTimeframe ? 1 : 0.7}
+                  strokeWidth={isCurrentTimeframe ? 3 : 1}
+                  strokeOpacity={isCurrentTimeframe ? 1 : 0.3}
                   dot={false}
-                  strokeDasharray={isCurrentTimeframe ? undefined : '5 5'}
+                  strokeDasharray={isCurrentTimeframe ? undefined : '15 8'}
                   className="recharts-line fade-line"
                 />
               )}
@@ -146,10 +146,10 @@ const MoneyFlowChart: React.FC<Props> = ({
                   xAxisId={xAxisId}
                   dataKey={dataKeys.revenue}
                   stroke={'hsl(var(--secondary))'}
-                  strokeWidth={isCurrentTimeframe ? 3 : 2}
-                  strokeOpacity={isCurrentTimeframe ? 1 : 0.7}
+                  strokeWidth={isCurrentTimeframe ? 3 : 1}
+                  strokeOpacity={isCurrentTimeframe ? 1 : 0.45}
                   dot={false}
-                  strokeDasharray={isCurrentTimeframe ? undefined : '5 5'}
+                  strokeDasharray={isCurrentTimeframe ? undefined : '15 8'}
                   className="recharts-line fade-line"
                 />
               )}
