@@ -20,6 +20,7 @@ import ChartTooltip from '@/components/features/statistics/CategoriesTimeline/Ch
 import { BACKEND_DATE_FORMAT, MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import { CHART_STYLES } from '@/constants/recharts';
 import { useCategories } from '@/contexts/FinanceData';
+import { useTheme } from '@/contexts/theme';
 import { ISO8601Period } from '@/types/global';
 
 const colors = [
@@ -28,6 +29,11 @@ const colors = [
   'hsl(var(--chart-3))',
   'hsl(var(--chart-4))',
   'hsl(var(--chart-5))',
+  'hsl(var(--chart-6))',
+  'hsl(var(--chart-7))',
+  'hsl(var(--chart-8))',
+  'hsl(var(--chart-9))',
+  'hsl(var(--chart-10))',
 ];
 
 const getColor = (category: string, index: number) => {
@@ -37,19 +43,19 @@ const getColor = (category: string, index: number) => {
 };
 
 interface CategoryData {
-  date: Moment
-  value: number
+  date: Moment;
+  value: number;
 }
 
 interface Props {
-  chartType: 'line' | 'bar'
-  showComparisonInTooltip?: boolean
+  chartType: 'line' | 'bar';
+  showComparisonInTooltip?: boolean;
   data: Array<{
     [category: string]: CategoryData[]
-  }>
-  selectedPeriod: ISO8601Period
-  onClick?: (data: any, index: number) => void
-  useSeparateAxisForTotals?: boolean // New prop for configurable right y-axis
+  }>;
+  selectedPeriod: ISO8601Period;
+  onClick?: (data: any, index: number) => void;
+  useSeparateAxisForTotals?: boolean;
 }
 
 export const CategoryTimelineChart: React.FC<Props> = ({
@@ -58,10 +64,11 @@ export const CategoryTimelineChart: React.FC<Props> = ({
                                                          data,
                                                          selectedPeriod,
                                                          onClick,
-                                                         useSeparateAxisForTotals = true, // Default to true for backward compatibility
+                                                         useSeparateAxisForTotals = true,
                                                        }) => {
   const [hiddenSeries, setHiddenSeries] = useState<string[]>([]);
   const { list: allCategories } = useCategories();
+  const { theme } = useTheme();
 
   const getCategoryDepth = (categoryName: string) => {
     const category = allCategories.find(cat => cat.name === categoryName);
@@ -74,6 +81,11 @@ export const CategoryTimelineChart: React.FC<Props> = ({
     const minSize = 1;
     const maxSize = 6;
     return Math.max(minSize, maxSize - depth + 1);
+  };
+
+  const getStrokeWidth = (categoryName: string) => {
+    const depth = getCategoryDepth(categoryName);
+    return Math.max(2, 6 - depth);
   };
 
   const totals = useMemo(() => mapValues(data, (values) =>
@@ -140,17 +152,6 @@ export const CategoryTimelineChart: React.FC<Props> = ({
     );
   };
 
-  const renderLegendIcon = (color: string) => chartType === 'line' ? (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="7" cy="7" r="6" stroke={color} strokeWidth="2" />
-      <circle cx="7" cy="7" r="3" fill={color} />
-    </svg>
-  ) : (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="14" height="14" fill={color} />
-    </svg>
-  );
-
   const categories = Object.keys(data);
   const regularCategories = categories.filter(cat => cat !== 'Total Income' && cat !== 'Total Expense');
   const totalCategories = categories.filter(cat => cat === 'Total Income' || cat === 'Total Expense');
@@ -163,6 +164,14 @@ export const CategoryTimelineChart: React.FC<Props> = ({
           margin={{ top: 0, right: useSeparateAxisForTotals ? -30 : 0, bottom: 0, left: -30 }}
           onClick={onClick}
         >
+          <defs>
+            <linearGradient id="fadeGradient" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+              <stop offset="10%" stopColor="rgba(255,255,255,1)" />
+              <stop offset="90%" stopColor="rgba(255,255,255,1)" />
+              <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+            </linearGradient>
+          </defs>
           <CartesianGrid {...CHART_STYLES.cartesianGrid} />
           <XAxis
             dataKey="date"
@@ -183,7 +192,8 @@ export const CategoryTimelineChart: React.FC<Props> = ({
           <Tooltip
             content={(props) => <ChartTooltip
               selectedPeriod={selectedPeriod}
-              showComparison={showComparisonInTooltip} {...props} />} />
+              showComparison={showComparisonInTooltip} {...props} />}
+          />
           <Legend
             onClick={handleLegendClick}
             formatter={(value, entry) => (
@@ -200,11 +210,17 @@ export const CategoryTimelineChart: React.FC<Props> = ({
               dataKey={category}
               stroke={getColor(category, index)}
               fill={getColor(category, index)}
-              strokeWidth={getSizeByDepth(category)}
-              dot={chartType === 'line' ? { r: 1.5, fill: colors[index % colors.length], strokeWidth: 0 } : undefined}
-              activeDot={chartType === 'line' ? { r: 4 } : undefined}
+              strokeWidth={getStrokeWidth(category)}
+              dot={{ r: 3, fill: getColor(category, index), strokeWidth: 0 }}
+              activeDot={{
+                r: 6,
+                fill: getColor(category, index),
+                strokeWidth: 2,
+                stroke: theme === 'dark' ? '#000' : '#fff',
+              }}
               hide={hiddenSeries.includes(category)}
               barSize={chartType === 'bar' ? getSizeByDepth(category) : undefined}
+              className={`${chartType === 'line' ? 'recharts-line fade-line' : 'recharts-bar'}`}
             />
           ))}
           {totalCategories.map((category, index) => (
@@ -215,16 +231,22 @@ export const CategoryTimelineChart: React.FC<Props> = ({
               dataKey={category}
               stroke={getColor(category, regularCategories.length + index)}
               fill={getColor(category, regularCategories.length + index)}
-              strokeWidth={2}
+              strokeWidth={4}
               strokeDasharray="5 5"
               dot={chartType === 'line' ? {
-                r: 1.5,
+                r: 3,
                 fill: getColor(category, regularCategories.length + index),
                 strokeWidth: 0,
               } : undefined}
-              activeDot={chartType === 'line' ? { r: 4 } : undefined}
+              activeDot={chartType === 'line' ? {
+                r: 6,
+                fill: getColor(category, regularCategories.length + index),
+                strokeWidth: 2,
+                stroke: theme === 'dark' ? '#000' : '#fff',
+              } : undefined}
               hide={hiddenSeries.includes(category)}
-              barSize={chartType === 'bar' ? 2 : undefined}
+              barSize={chartType === 'bar' ? 4 : undefined}
+              className={`${chartType === 'line' ? 'recharts-line fade-line' : 'recharts-bar'}`}
             />
           ))}
         </ChartComponent>

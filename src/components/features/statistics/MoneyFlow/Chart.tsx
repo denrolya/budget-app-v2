@@ -1,4 +1,3 @@
-
 import moment, { Moment } from 'moment';
 import React from 'react';
 import {
@@ -13,10 +12,10 @@ import {
   YAxis,
 } from 'recharts';
 
-import { ISO8601Period } from '@/types/global';
-import { CHART_STYLES } from '@/constants/recharts';
-import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import CustomTooltip from '@/components/features/statistics/MoneyFlow/Tooltip';
+import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
+import { CHART_STYLES } from '@/constants/recharts';
+import { ISO8601Period } from '@/types/global';
 
 interface Props {
   data: {
@@ -70,7 +69,6 @@ const MoneyFlowChart: React.FC<Props> = ({
   const renderChart = (isCurrentTimeframe: boolean) => {
     if (isCurrentTimeframe || showPreviousPeriod) {
       const xAxisId = isCurrentTimeframe ? 1 : 0;
-      const opacity = isCurrentTimeframe ? 1 : 0.1;
       const dataKeys = {
         income: isCurrentTimeframe ? 'income' : 'previousIncome',
         expenses: isCurrentTimeframe ? 'expenses' : 'previousExpenses',
@@ -81,33 +79,36 @@ const MoneyFlowChart: React.FC<Props> = ({
         <>
           {chartType === 'bar' ? (
             <>
-              {showIncome && (
-                <Bar
-                  dataKey={dataKeys.income}
-                  xAxisId={xAxisId}
-                  fill={`hsl(var(--success)${opacity < 1 ? ` / ${opacity})` : ')'}`}
-                  stackId={isCurrentTimeframe ? 'currentStack' : 'previousStack'}
-                  radius={[4, 4, 0, 0]}
-                  maxBarSize={60}
-                />
-              )}
               {showExpenses && (
                 <Bar
                   dataKey={dataKeys.expenses}
                   xAxisId={xAxisId}
-                  fill={`hsl(var(--destructive)${opacity < 1 ? ` / ${opacity})` : ')'}`}
+                  fill={`url(#expensesGradient${isCurrentTimeframe ? '' : 'Previous'})`}
                   stackId={isCurrentTimeframe ? 'currentStack' : 'previousStack'}
                   radius={[4, 4, 0, 0]}
                   maxBarSize={60}
+                  className="recharts-bar"
+                />
+              )}
+              {showIncome && (
+                <Bar
+                  dataKey={dataKeys.income}
+                  xAxisId={xAxisId}
+                  fill={`url(#incomeGradient${isCurrentTimeframe ? '' : 'Previous'})`}
+                  stackId={isCurrentTimeframe ? 'currentStack' : 'previousStack'}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={60}
+                  className="recharts-bar"
                 />
               )}
               {showRevenue && (
                 <Bar
                   dataKey={dataKeys.revenue}
                   xAxisId={xAxisId}
-                  fill={`hsl(var(--secondary)${opacity < 1 ? ` / ${opacity})` : ')'}`}
+                  fill={`url(#revenueGradient${isCurrentTimeframe ? '' : 'Previous'})`}
                   radius={[4, 4, 0, 0]}
                   maxBarSize={60}
+                  className="recharts-bar"
                 />
               )}
             </>
@@ -123,6 +124,7 @@ const MoneyFlowChart: React.FC<Props> = ({
                   strokeOpacity={isCurrentTimeframe ? 1 : 0.7}
                   dot={false}
                   strokeDasharray={isCurrentTimeframe ? undefined : '5 5'}
+                  className="recharts-line fade-line"
                 />
               )}
               {showExpenses && (
@@ -135,6 +137,7 @@ const MoneyFlowChart: React.FC<Props> = ({
                   strokeOpacity={isCurrentTimeframe ? 1 : 0.7}
                   dot={false}
                   strokeDasharray={isCurrentTimeframe ? undefined : '5 5'}
+                  className="recharts-line fade-line"
                 />
               )}
               {showRevenue && (
@@ -147,6 +150,7 @@ const MoneyFlowChart: React.FC<Props> = ({
                   strokeOpacity={isCurrentTimeframe ? 1 : 0.7}
                   dot={false}
                   strokeDasharray={isCurrentTimeframe ? undefined : '5 5'}
+                  className="recharts-line fade-line"
                 />
               )}
             </>
@@ -187,20 +191,29 @@ const MoneyFlowChart: React.FC<Props> = ({
           margin={{ top: 0, right: 30, bottom: 0, left: -30 }}
         >
           <defs>
-            <linearGradient id="incomeGradient" x1="0" y1="1" x2="0" y2="0">
-              <stop offset="0%" stopColor="hsl(var(--success) / 0.2)" />
-              <stop offset="50%" stopColor="hsl(var(--success) / 0.6)" />
+            <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(var(--success) / 0.7)" />
               <stop offset="100%" stopColor="hsl(var(--success))" />
             </linearGradient>
             <linearGradient id="expensesGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="hsl(var(--destructive))" />
-              <stop offset="50%" stopColor="hsl(var(--destructive) / 0.6)" />
-              <stop offset="100%" stopColor="hsl(var(--destructive) / 0.2)" />
+              <stop offset="100%" stopColor="hsl(var(--destructive) / 0.7)" />
             </linearGradient>
             <linearGradient id="revenueGradient" x1="0" y1="1" x2="0" y2="0">
-              <stop offset="0%" stopColor="hsl(var(--secondary) / 0.2)" />
-              <stop offset="50%" stopColor="hsl(var(--secondary) / 0.6)" />
+              <stop offset="0%" stopColor="hsl(var(--secondary) / 0.7)" />
               <stop offset="100%" stopColor="hsl(var(--secondary))" />
+            </linearGradient>
+            <linearGradient id="incomeGradientPrevious" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stopColor="hsl(var(--success) / 0.1)" />
+              <stop offset="100%" stopColor="hsl(var(--success) / 0.2)" />
+            </linearGradient>
+            <linearGradient id="expensesGradientPrevious" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(var(--destructive) / 0.2)" />
+              <stop offset="100%" stopColor="hsl(var(--destructive) / 0.1)" />
+            </linearGradient>
+            <linearGradient id="revenueGradientPrevious" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stopColor="hsl(var(--secondary) / 0.1)" />
+              <stop offset="100%" stopColor="hsl(var(--secondary) / 0.2)" />
             </linearGradient>
           </defs>
           <XAxis
