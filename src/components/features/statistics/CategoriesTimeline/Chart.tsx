@@ -22,6 +22,7 @@ import { CHART_STYLES } from '@/constants/recharts';
 import { useCategories } from '@/contexts/FinanceData';
 import { useTheme } from '@/contexts/theme';
 import { ISO8601Period } from '@/types/global';
+import { cn } from '@/lib/utils';
 
 const colors = [
   'hsl(var(--chart-1))',
@@ -73,14 +74,6 @@ export const CategoryTimelineChart: React.FC<Props> = ({
   const getCategoryDepth = (categoryName: string) => {
     const category = allCategories.find(cat => cat.name === categoryName);
     return category ? category.getFullPath().length : 1;
-  };
-
-  const getSizeByDepth = (categoryName: string) => {
-    const depth = getCategoryDepth(categoryName);
-    const maxDepth = 6;
-    const minSize = 1;
-    const maxSize = 6;
-    return Math.max(minSize, maxSize - depth + 1);
   };
 
   const getStrokeWidth = (categoryName: string) => {
@@ -163,6 +156,8 @@ export const CategoryTimelineChart: React.FC<Props> = ({
           data={chartData}
           margin={{ top: 0, right: useSeparateAxisForTotals ? -30 : 0, bottom: 0, left: -30 }}
           onClick={onClick}
+          barGap={chartType === 'bar' ? 2 : undefined}
+          barCategoryGap={chartType === 'bar' ? '20%' : undefined}
         >
           <defs>
             <linearGradient id="fadeGradient" x1="0" y1="0" x2="1" y2="0">
@@ -196,7 +191,7 @@ export const CategoryTimelineChart: React.FC<Props> = ({
           />
           <Legend
             onClick={handleLegendClick}
-            formatter={(value, entry) => (
+            formatter={(value) => (
               <span className={`${hiddenSeries.includes(value) ? 'opacity-50' : ''}`}>
                 {value} (<MoneyValue className="text-xs font-mono" useColors={false} amount={totals[value] || 0} />)
               </span>
@@ -210,6 +205,7 @@ export const CategoryTimelineChart: React.FC<Props> = ({
               dataKey={category}
               stroke={getColor(category, index)}
               fill={getColor(category, index)}
+              stackId="a"
               strokeWidth={getStrokeWidth(category)}
               dot={{ r: 3, fill: getColor(category, index), strokeWidth: 0 }}
               activeDot={{
@@ -219,8 +215,10 @@ export const CategoryTimelineChart: React.FC<Props> = ({
                 stroke: theme === 'dark' ? '#000' : '#fff',
               }}
               hide={hiddenSeries.includes(category)}
-              barSize={chartType === 'bar' ? getSizeByDepth(category) : undefined}
-              className={`${chartType === 'line' ? 'recharts-line fade-line' : 'recharts-bar'}`}
+              className={cn({
+                'recharts-line fade-line': chartType === 'line',
+                'recharts-bar': chartType === 'bar',
+              })}
             />
           ))}
           {totalCategories.map((category, index) => (
@@ -246,8 +244,10 @@ export const CategoryTimelineChart: React.FC<Props> = ({
                 stroke: theme === 'dark' ? '#000' : '#fff',
               } : undefined}
               hide={hiddenSeries.includes(category)}
-              barSize={chartType === 'bar' ? 4 : undefined}
-              className={`${chartType === 'line' ? 'recharts-line fade-line' : 'recharts-bar'}`}
+              className={cn({
+                'recharts-line fade-line': chartType === 'line',
+                'recharts-bar': chartType === 'bar',
+              })}
             />
           ))}
         </ChartComponent>
