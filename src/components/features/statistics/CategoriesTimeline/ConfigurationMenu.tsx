@@ -1,20 +1,8 @@
-import {
-  BarChart,
-  CalendarIcon,
-  LineChart,
-  Move3D,
-  Percent,
-  SettingsIcon,
-  Tags,
-  TrendingDown,
-  TrendingUp,
-} from 'lucide-react';
-import moment, { Moment } from 'moment';
-import React, { useCallback, useState } from 'react';
+import { BarChart, LineChart, Move3D, Percent, SettingsIcon, Tags, TrendingDown, TrendingUp } from 'lucide-react';
+import React from 'react';
 
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import {
   Drawer,
   DrawerContent,
@@ -26,7 +14,6 @@ import {
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
-import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { ISO8601Period } from '@/types/global';
 
@@ -38,11 +25,6 @@ const periodOptions: { value: ISO8601Period; label: string }[] = [
   { value: 'P1Y', label: 'Yearly' },
 ];
 
-interface Timeframe {
-  after: Moment;
-  before: Moment;
-}
-
 interface UnifiedChartMenuProps {
   chartType: 'bar' | 'line';
   setChartType: (value: 'bar' | 'line') => void;
@@ -50,8 +32,6 @@ interface UnifiedChartMenuProps {
   setSelectedPeriod: (value: ISO8601Period) => void;
   selectedCategories: number[];
   setSelectedCategories: (categories: number[]) => void;
-  timeframe: Timeframe;
-  setTimeframe: (timeframe: Timeframe) => void;
   showExpenseReference: boolean,
   setShowExpenseReference: (value: boolean) => void,
   showIncomeReference: boolean,
@@ -64,51 +44,6 @@ interface UnifiedChartMenuProps {
   setUseSeparateAxisForTotals: (value: boolean) => void;
 }
 
-const TIMEFRAME_PRESETS = [
-  {
-    label: 'Prev Month',
-    range: { from: moment().subtract(1, 'month').startOf('month'), to: moment().subtract(1, 'month').endOf('month') },
-  },
-  { label: 'This Month', range: { from: moment().startOf('month'), to: moment().endOf('month') } },
-  {
-    label: 'Summer',
-    range: { from: moment().month(5).startOf('month'), to: moment().month(8).endOf('month') },
-  },
-  {
-    label: 'Winter',
-    range: { from: moment().month(11).startOf('month'), to: moment().month(2).endOf('month') },
-  },
-  {
-    label: 'Spring',
-    range: { from: moment().month(2).startOf('month'), to: moment().month(5).endOf('month') },
-  },
-  {
-    label: 'Autumn',
-    range: { from: moment().month(8).startOf('month'), to: moment().month(11).endOf('month') },
-  },
-  { label: 'This Year', range: { from: moment().startOf('year'), to: moment().endOf('year') } },
-  {
-    label: 'Last Year',
-    range: { from: moment().subtract(1, 'year').startOf('year'), to: moment().subtract(1, 'year').endOf('year') },
-  },
-  {
-    label: 'Last 2 Years',
-    range: { from: moment().subtract(2, 'year').startOf('year'), to: moment() },
-  },
-  {
-    label: 'Last 3 Years',
-    range: { from: moment().subtract(3, 'year').startOf('year'), to: moment() },
-  },
-  {
-    label: 'Last 5 Years',
-    range: { from: moment().subtract(5, 'year').startOf('year'), to: moment() },
-  },
-  {
-    label: 'Last 10 Years',
-    range: { from: moment().subtract(10, 'year').startOf('year'), to: moment() },
-  },
-];
-
 export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
                                                                     chartType,
                                                                     setChartType,
@@ -116,8 +51,6 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
                                                                     setSelectedPeriod,
                                                                     selectedCategories,
                                                                     setSelectedCategories,
-                                                                    timeframe,
-                                                                    setTimeframe,
                                                                     showExpenseReference,
                                                                     setShowExpenseReference,
                                                                     showIncomeReference,
@@ -130,14 +63,6 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
                                                                     setUseSeparateAxisForTotals,
                                                                   }) => {
   const isDesktop = useScreenSize();
-  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
-
-  const handleDateRangeChange = useCallback((range: { from: Date | undefined; to: Date | undefined }) => {
-    setTimeframe({
-      after: range.from ? moment(range.from).startOf('day') : timeframe.after,
-      before: range.to ? moment(range.to).endOf('day') : timeframe.before,
-    });
-  }, [setTimeframe]);
 
 
   const MenuContent = () => (
@@ -157,52 +82,6 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="date-range">Timeframe</Label>
-        <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
-          <PopoverTrigger asChild>
-            <Button id="date-range" variant="outline" size="sm" className="h-9 text-sm w-full justify-start">
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              <span>
-                {timeframe.after && timeframe.before && `${timeframe.after.format(MOMENT_DATEPICKER_FORMAT)} - ${timeframe.before.format(MOMENT_DATEPICKER_FORMAT)}`}
-                {!timeframe.after && timeframe.before && `Before ${timeframe.before.format(MOMENT_DATEPICKER_FORMAT)}`}
-                {timeframe.after && !timeframe.before && `After ${timeframe.after.format(MOMENT_DATEPICKER_FORMAT)}`}
-                {!timeframe.after && !timeframe.before && 'Select date range'}
-              </span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 z-[100]" align="start">
-            <Calendar
-              initialFocus
-              mode="range"
-              defaultMonth={timeframe.after?.toDate() || moment().toDate()}
-              selected={{
-                from: timeframe.after?.toDate(),
-                to: timeframe.before?.toDate(),
-              }}
-              onSelect={handleDateRangeChange}
-              numberOfMonths={isDesktop ? 2 : 1}
-              className="border-b"
-            />
-            <div className="p-3 space-y-3">
-              <h4 className="font-medium text-sm text-primary">Presets</h4>
-              <div className="grid grid-cols-2 gap-2">
-                {TIMEFRAME_PRESETS.map((preset) => (
-                  <Button
-                    key={preset.label}
-                    size="sm"
-                    variant="outline"
-                    className="w-full justify-start text-left text-xs"
-                    onClick={() => handleDateRangeChange(preset.range)}
-                  >
-                    {preset.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">

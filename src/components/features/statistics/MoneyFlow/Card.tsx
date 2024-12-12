@@ -1,4 +1,3 @@
-import cn from 'classnames';
 import { Calendar } from 'lucide-react';
 import moment from 'moment';
 import React, { memo, useMemo, useState } from 'react';
@@ -13,6 +12,7 @@ import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { PERIOD_OPTIONS, TIMEFRAME_OPTIONS } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
+import { cn } from '@/lib/utils';
 import { ISO8601Period, PeriodValue, TimeframeValue } from '@/types/global';
 import { formatShortDate } from '@/utils/formatShortDate';
 
@@ -95,7 +95,7 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
 
   return (
     <Card className={cn('w-full min-h-[550px] flex flex-col transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25', className)}>
-      <CardHeader className="p-4 space-y-0.2">
+      <CardHeader className="p-4 pb-0 space-y-0.2">
         <div className="flex justify-between items-start">
           <CardTitle className="text-base font-medium">Money Flow</CardTitle>
           <ConfigurationMenu
@@ -123,7 +123,7 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
           openDelay={1}
           desktopComponent="hovercard"
           contentClassName="bg-transparent border-none shadow-none"
-          triggerClassName="cursor-help px-1 inline-flex flex-row"
+          triggerClassName="cursor-help inline-flex flex-row px-4"
           content={<YearDoughnutTimeframeDisplayChart data={[previousTimeframe, currentTimeframe]} />}
         >
           <span className="text-xs flex items-center">

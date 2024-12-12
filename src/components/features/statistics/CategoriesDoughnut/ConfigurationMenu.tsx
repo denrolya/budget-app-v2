@@ -1,11 +1,8 @@
 import cn from 'classnames';
-import { ArrowDownCircle, ArrowUpCircle, CalendarIcon, SettingsIcon } from 'lucide-react';
-import moment, { Moment } from 'moment/moment';
-import React, { useState } from 'react';
-import { DateRange } from 'react-day-picker';
+import { ArrowDownCircle, ArrowUpCircle, Sigma, SettingsIcon } from 'lucide-react';
+import React from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import {
   Drawer,
   DrawerContent,
@@ -16,31 +13,24 @@ import {
 } from '@/components/ui/drawer';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { FILTER_PRESETS, MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
+import { Switch } from '@/components/ui/switch';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { Type as TransactionType } from '@/types/transaction';
-
 
 interface UnifiedChartMenuProps {
   type: TransactionType,
   setType: (type: TransactionType) => void,
-  timeframe: { after: Moment, before: Moment },
-  setTimeframe: (timeframe: { after: Moment, before: Moment }) => void,
+  showMonthlyAverage: boolean,
+  setShowMonthlyAverage: (show: boolean) => void,
 }
 
-export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({ type, setType, timeframe, setTimeframe }) => {
+export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
+                                                                    type,
+                                                                    setType,
+                                                                    showMonthlyAverage,
+                                                                    setShowMonthlyAverage,
+                                                                  }) => {
   const isDesktop = useScreenSize();
-  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
-
-  const handleDateRangeChange = (range: DateRange | undefined) => {
-    if (range?.from && range?.to) {
-      setTimeframe({
-        after: moment(range.from),
-        before: moment(range.to),
-      });
-    }
-    setIsDatePopoverOpen(false);
-  };
 
   const MenuContent = () => (
     <div className="space-y-4">
@@ -71,48 +61,21 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({ type, setTyp
           </Button>
         </div>
       </div>
+
       <div className="space-y-2">
-        <Label className="text-xs font-medium">Timeframe</Label>
-        <div className="flex flex-wrap gap-2">
-          <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
-            <PopoverTrigger asChild>
-              <Button id="date-range" variant="outline" className="w-[260px] justify-start">
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                <span>
-                  {timeframe.after.format(MOMENT_DATEPICKER_FORMAT)} - {timeframe.before.format(MOMENT_DATEPICKER_FORMAT)}
-                </span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                initialFocus
-                mode="range"
-                defaultMonth={timeframe.after.toDate()}
-                selected={{
-                  from: timeframe.after.toDate(),
-                  to: timeframe.before.toDate(),
-                }}
-                onSelect={handleDateRangeChange}
-                numberOfMonths={isDesktop ? 2 : 1}
-              />
-              <div className="p-3 space-y-3">
-                <h4 className="font-medium text-sm">Presets</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {FILTER_PRESETS.map((preset) => (
-                    <Button
-                      key={preset.label}
-                      size="sm"
-                      variant="outline"
-                      className="w-full justify-start text-left text-xs"
-                      onClick={() => handleDateRangeChange(preset.range)}
-                    >
-                      {preset.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+        <div className="flex items-center justify-between">
+          <Label
+            htmlFor="show-monlty-average"
+            className="flex items-center space-x-2 text-xs cursor-pointer">
+            <Sigma className="h-3 w-3" />
+            <span>Show Monthly Average Values</span>
+          </Label>
+          <Switch
+            id="show-monlty-average"
+            className="scale-75"
+            checked={showMonthlyAverage}
+            onCheckedChange={() => setShowMonthlyAverage(!showMonthlyAverage)}
+          />
         </div>
       </div>
     </div>

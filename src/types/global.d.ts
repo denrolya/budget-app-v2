@@ -16,6 +16,11 @@ export interface DateRange {
   before: Moment;
 }
 
+export interface Timeframe {
+  after: Moment;
+  before: Moment;
+}
+
 export interface TimeframeOption {
   label: string;
   value: TimeframeValue;
