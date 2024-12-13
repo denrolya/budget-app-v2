@@ -1,15 +1,13 @@
 import {
   CalendarArrowDown,
   CalendarArrowUp,
-  ArrowRightLeftIcon,
   CalendarIcon,
   ChevronLeft,
-  ChevronRight, CreditCardIcon,
+  ChevronRight,
   Filter,
   LayoutList,
   ListIcon,
   Plus,
-  Receipt,
   RefreshCw,
   Table,
 } from 'lucide-react';
@@ -18,10 +16,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSwipeable } from 'react-swipeable';
 
-import { ROUTES } from '@/constants/routes';
 import SummaryBadge from '@/components/common/SummaryBadge';
-import MoneyValue from '@/components/common/MoneyValue';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
+import CompactInlineFilters from '@/components/features/daily-ledger/CompactInlineFilters';
 import DailyList from '@/components/features/daily-ledger/DailyList';
 import ListFiltersSheet from '@/components/features/daily-ledger/ListFiltersSheet';
 import TableListing from '@/components/features/daily-ledger/TableListing';
@@ -36,17 +33,17 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
+import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
+import { useScreenSize } from '@/hooks/useScreenSize';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
-import TransactionFilters from '@/models/TransactionFilters';
-import TransferFilters from '@/models/TransferFilters';
 
 
 type TimePreset = {
   label: string
   value: string
-  getDateRange: () => { startDate: moment.Moment; endDate: moment.Moment }
+  getTimeframe: () => { after: moment.Moment; before: moment.Moment }
   step: {
     unit: moment.unitOfTime.DurationConstructor
     amount: number
@@ -57,97 +54,98 @@ const timePresets: TimePreset[] = [
   {
     label: 'Current Week',
     value: 'current-week',
-    getDateRange: () => ({
-      startDate: moment().startOf('isoWeek'),
-      endDate: moment().endOf('isoWeek'),
+    getTimeframe: () => ({
+      after: moment().startOf('isoWeek'),
+      before: moment().endOf('isoWeek'),
     }),
     step: { unit: 'week', amount: 1 },
   },
   {
     label: 'Last Week',
     value: 'last-week',
-    getDateRange: () => ({
-      startDate: moment().subtract(1, 'week').startOf('isoWeek'),
-      endDate: moment().subtract(1, 'week').endOf('isoWeek'),
+    getTimeframe: () => ({
+      after: moment().subtract(1, 'week').startOf('isoWeek'),
+      before: moment().subtract(1, 'week').endOf('isoWeek'),
     }),
     step: { unit: 'week', amount: 1 },
   },
   {
     label: 'Last 2 Weeks',
     value: '2-weeks',
-    getDateRange: () => ({
-      startDate: moment().subtract(1, 'week').startOf('isoWeek'),
-      endDate: moment().endOf('isoWeek'),
+    getTimeframe: () => ({
+      after: moment().subtract(1, 'week').startOf('isoWeek'),
+      before: moment().endOf('isoWeek'),
     }),
     step: { unit: 'week', amount: 2 },
   },
   {
     label: 'Current Month',
     value: 'current-month',
-    getDateRange: () => ({
-      startDate: moment().startOf('month'),
-      endDate: moment().endOf('month'),
+    getTimeframe: () => ({
+      after: moment().startOf('month'),
+      before: moment().endOf('month'),
     }),
     step: { unit: 'month', amount: 1 },
   },
   {
     label: 'Last Month',
     value: 'last-month',
-    getDateRange: () => ({
-      startDate: moment().subtract(1, 'month').startOf('month'),
-      endDate: moment().subtract(1, 'month').endOf('month'),
+    getTimeframe: () => ({
+      after: moment().subtract(1, 'month').startOf('month'),
+      before: moment().subtract(1, 'month').endOf('month'),
     }),
     step: { unit: 'month', amount: 1 },
   },
   {
     label: 'Last 3 Months',
     value: '3-months',
-    getDateRange: () => ({
-      startDate: moment().subtract(2, 'month').startOf('month'),
-      endDate: moment().endOf('month'),
+    getTimeframe: () => ({
+      after: moment().subtract(2, 'month').startOf('month'),
+      before: moment().endOf('month'),
     }),
     step: { unit: 'month', amount: 3 },
   },
   {
     label: 'Current Year',
     value: 'current-year',
-    getDateRange: () => ({
-      startDate: moment().startOf('year'),
-      endDate: moment().endOf('year'),
+    getTimeframe: () => ({
+      after: moment().startOf('year'),
+      before: moment().endOf('year'),
     }),
     step: { unit: 'year', amount: 1 },
   },
   {
     label: 'Last Year',
     value: 'last-year',
-    getDateRange: () => ({
-      startDate: moment().subtract(1, 'year').startOf('year'),
-      endDate: moment().subtract(1, 'year').endOf('year'),
+    getTimeframe: () => ({
+      after: moment().subtract(1, 'year').startOf('year'),
+      before: moment().subtract(1, 'year').endOf('year'),
     }),
     step: { unit: 'year', amount: 1 },
   },
 ];
 
 export const DailyLedgerPage: React.FC = () => {
+  const isDesktop = useScreenSize();
   const [activeView, setActiveView] = useState<'table' | 'list'>('table');
-  const [isReversedOrder, setIsReversedOrder] = useState<boolean>(false);
+  const [isReversedOrder, setIsReversedOrder] = useState<boolean>(true);
   const [isFiltersOpen, setIsFiltersOpen] = useState<boolean>(false);
   const [showBulkCreate, setShowBulkCreate] = useState<boolean>(false);
   const [selectedPreset, setSelectedPreset] = useState<string>('current-week');
-  const [customDateRange, setCustomDateRange] = useState<{
-    startDate: moment.Moment
-    endDate: moment.Moment
+  const [customTimeframe, setCustomTimeframe] = useState<{
+    after: moment.Moment
+    before: moment.Moment
   } | null>(null);
   const { openForm } = useFormContext();
   const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
 
-  const dateRange = useMemo(() => {
-    if (customDateRange) {
-      return customDateRange;
+  const timeframe = useMemo(() => {
+    if (customTimeframe) {
+      return customTimeframe;
     }
     const preset = timePresets.find(p => p.value === selectedPreset);
-    return preset ? preset.getDateRange() : timePresets[0].getDateRange();
-  }, [selectedPreset, customDateRange]);
+    return preset ? preset.getTimeframe() : timePresets[0].getTimeframe();
+  }, [selectedPreset, customTimeframe]);
 
   const {
     groupedItems,
@@ -163,16 +161,14 @@ export const DailyLedgerPage: React.FC = () => {
     setShowTransfers,
     refetch,
   } = useTransactionsAndTransfers({
-    initialTransactionFilters: new TransactionFilters(),
-    initialTransferFilters: new TransferFilters(),
-    updateUrl: false,
+    updateUrl: true,
     excludeTransfers: true,
   });
 
   useEffect(() => {
-    setFilter('after', dateRange.startDate);
-    setFilter('before', dateRange.endDate.clone().endOf('day'));
-  }, [dateRange, setFilter]);
+    setFilter('after', timeframe.after);
+    setFilter('before', timeframe.before.clone().endOf('day'));
+  }, [timeframe, setFilter]);
 
   const onAddTransaction = () => openForm(FormType.Transaction);
 
@@ -180,27 +176,27 @@ export const DailyLedgerPage: React.FC = () => {
     const preset = timePresets.find(p => p.value === selectedPreset);
     if (preset) {
       const { step } = preset;
-      const newStartDate = dateRange.startDate.clone()[direction === 'next' ? 'add' : 'subtract'](step.amount, step.unit);
-      const newEndDate = dateRange.endDate.clone()[direction === 'next' ? 'add' : 'subtract'](step.amount, step.unit);
-      setCustomDateRange({
-        startDate: newStartDate,
-        endDate: newEndDate,
+      const newStartDate = timeframe.after.clone()[direction === 'next' ? 'add' : 'subtract'](step.amount, step.unit);
+      const newEndDate = timeframe.before.clone()[direction === 'next' ? 'add' : 'subtract'](step.amount, step.unit);
+      setCustomTimeframe({
+        after: newStartDate,
+        before: newEndDate,
       });
-    } else if (customDateRange) {
-      const duration = customDateRange.endDate.diff(customDateRange.startDate);
+    } else if (customTimeframe) {
+      const duration = customTimeframe.before.diff(customTimeframe.after);
       if (direction === 'next') {
-        setCustomDateRange({
-          startDate: customDateRange.endDate.clone().add(1, 'day'),
-          endDate: customDateRange.endDate.clone().add(1, 'day').add(duration, 'milliseconds'),
+        setCustomTimeframe({
+          after: customTimeframe.before.clone().add(1, 'day'),
+          before: customTimeframe.before.clone().add(1, 'day').add(duration, 'milliseconds'),
         });
       } else {
-        setCustomDateRange({
-          startDate: customDateRange.startDate.clone().subtract(duration, 'milliseconds'),
-          endDate: customDateRange.startDate.clone().subtract(1, 'millisecond'),
+        setCustomTimeframe({
+          after: customTimeframe.after.clone().subtract(duration, 'milliseconds'),
+          before: customTimeframe.after.clone().subtract(1, 'millisecond'),
         });
       }
     }
-  }, [dateRange, selectedPreset, customDateRange]);
+  }, [timeframe, selectedPreset, customTimeframe]);
 
   const goToNextPeriod = useCallback(() => navigatePeriod('next'), [navigatePeriod]);
   const goToPreviousPeriod = useCallback(() => navigatePeriod('previous'), [navigatePeriod]);
@@ -211,13 +207,13 @@ export const DailyLedgerPage: React.FC = () => {
     trackMouse: true,
   });
 
-  const formatDateRange = (startDate: moment.Moment, endDate: moment.Moment) => {
-    if (startDate.isSame(endDate, 'month')) {
-      return `${startDate.format('MMM D')}-${endDate.format('D, YYYY')}`;
-    } else if (startDate.isSame(endDate, 'year')) {
-      return `${startDate.format('MMM D')} - ${endDate.format('MMM D, YYYY')}`;
+  const formatTimeframe = (after: moment.Moment, before: moment.Moment) => {
+    if (after.isSame(before, 'month')) {
+      return `${after.format('MMM D')}-${before.format('D, YYYY')}`;
+    } else if (after.isSame(before, 'year')) {
+      return `${after.format('MMM D')} - ${before.format('MMM D, YYYY')}`;
     } else {
-      return `${startDate.format('MMM D, YYYY')} - ${endDate.format('MMM D, YYYY')}`;
+      return `${after.format('MMM D, YYYY')} - ${before.format('MMM D, YYYY')}`;
     }
   };
 
@@ -247,15 +243,15 @@ export const DailyLedgerPage: React.FC = () => {
   const activeFiltersCount = React.useMemo(() => {
     let count = 0;
 
-    if (dateRange.startDate.format(BACKEND_DATE_FORMAT) !== moment().startOf('week').format(BACKEND_DATE_FORMAT) ||
-      dateRange.endDate.format(BACKEND_DATE_FORMAT) !== moment().endOf('week').format(BACKEND_DATE_FORMAT)) count++;
+    if (timeframe.after.format(BACKEND_DATE_FORMAT) !== moment().startOf('week').format(BACKEND_DATE_FORMAT) ||
+      timeframe.before.format(BACKEND_DATE_FORMAT) !== moment().endOf('week').format(BACKEND_DATE_FORMAT)) count++;
     if (transactionFilters.categories.length > 0) count++;
     if (transactionFilters.accounts.length > 0 || transferFilters.accounts.length > 0) count++;
     if (transactionFilters.amountRange[0] !== undefined || transactionFilters.amountRange[1] !== undefined) count++;
     if (transactionFilters.isDraft !== null) count++;
 
     return count;
-  }, [transactionFilters, transferFilters, dateRange]);
+  }, [transactionFilters, transferFilters, timeframe]);
 
   useHotkeys('arrowleft', goToPreviousPeriod);
   useHotkeys('arrowright', goToNextPeriod);
@@ -300,17 +296,24 @@ export const DailyLedgerPage: React.FC = () => {
               content={
                 <YearDoughnutTimeframeDisplayChart
                   data={[{
-                    after: dateRange.startDate,
-                    before: dateRange.endDate,
+                    after: timeframe.after,
+                    before: timeframe.before,
                   }]} />
               }
             >
               <div className="flex flex-col">
                 <CardTitle className="text-xl font-semibold flex items-center space-x-4">
                   <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground flex-shrink-0" />
-                  {formatDateRange(dateRange.startDate, dateRange.endDate)}
-                  <SummaryBadge icon={ROUTES.TRANSACTION_LIST.icon} count={summary.transactionsCount} value={summary.transactionsValue} />
-                  <SummaryBadge useColors={false} icon={ROUTES.TRANSFER_LIST.icon} count={summary.transfersCount} value={summary.transfersValue} />
+                  {formatTimeframe(timeframe.after, timeframe.before)}
+                  <SummaryBadge
+                    icon={ROUTES.TRANSACTION_LIST.icon}
+                    count={summary.transactionsCount}
+                    value={summary.transactionsValue} />
+                  <SummaryBadge
+                    useColors={false}
+                    icon={ROUTES.TRANSFER_LIST.icon}
+                    count={summary.transfersCount}
+                    value={summary.transfersValue} />
                 </CardTitle>
               </div>
             </ResponsiveTooltip>
@@ -397,6 +400,19 @@ export const DailyLedgerPage: React.FC = () => {
           </div>
         </CardHeader>
         <CardContent className="p-0 bg-background md:bg-card flex-grow overflow-hidden">
+          {isDesktop && (
+            <CompactInlineFilters
+              transactionFilters={transactionFilters}
+              transferFilters={transferFilters}
+              setFilter={setFilter}
+              showTransactions={showTransactions}
+              setShowTransactions={setShowTransactions}
+              showTransfers={showTransfers}
+              setShowTransfers={setShowTransfers}
+              timeframe={timeframe}
+              setCustomTimeframe={setCustomTimeframe}
+            />
+          )}
           <ScrollArea className="h-full">
             {showBulkCreate && (
               <div className="border-b bg-muted/50 supports-[backdrop-filter]:bg-muted/50">
@@ -420,16 +436,16 @@ export const DailyLedgerPage: React.FC = () => {
                   <>
                     {isLoading && (
                       <TableListingSkeleton
-                        startDate={dateRange.startDate}
-                        endDate={dateRange.endDate}
+                        after={timeframe.after}
+                        before={timeframe.before}
                       />
                     )}
                     {(!isLoading) && (
                       <TableListing
                         isLoading={isLoading}
                         groupedItems={groupedItems}
-                        startDate={dateRange.startDate}
-                        endDate={dateRange.endDate}
+                        after={timeframe.after}
+                        before={timeframe.before}
                         isReversedOrder={isReversedOrder}
                       />
                     )}
@@ -440,8 +456,8 @@ export const DailyLedgerPage: React.FC = () => {
                     isReversedOrder={isReversedOrder}
                     isLoading={isLoading}
                     groupedItems={groupedItems}
-                    startDate={dateRange.startDate}
-                    endDate={dateRange.endDate}
+                    after={timeframe.after}
+                    before={timeframe.before}
                   />
                 )}
               </div>
@@ -451,8 +467,8 @@ export const DailyLedgerPage: React.FC = () => {
                 <DailyList
                   isLoading={isLoading}
                   groupedItems={groupedItems}
-                  startDate={dateRange.startDate}
-                  endDate={dateRange.endDate}
+                  after={timeframe.after}
+                  before={timeframe.before}
                 />
               </div>
             </div>
@@ -468,7 +484,7 @@ export const DailyLedgerPage: React.FC = () => {
               value={selectedPreset}
               onValueChange={(value) => {
                 setSelectedPreset(value);
-                setCustomDateRange(null);
+                setCustomTimeframe(null);
               }}
             >
               <SelectTrigger className="w-[180px]">
@@ -500,8 +516,8 @@ export const DailyLedgerPage: React.FC = () => {
         setShowTransactions={setShowTransactions}
         showTransfers={showTransfers}
         setShowTransfers={setShowTransfers}
-        dateRange={dateRange}
-        setCustomDateRange={setCustomDateRange}
+        timeframe={timeframe}
+        setCustomTimeframe={setCustomTimeframe}
       />
     </FullHeightPageContent>
   );

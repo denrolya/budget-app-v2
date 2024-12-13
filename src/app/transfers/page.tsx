@@ -69,6 +69,15 @@ export const TransfersListPage: React.FC = () => {
             <div className="flex flex-wrap gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
+                  <Button variant="outline" size="icon" onClick={onAddTransfer}>
+                    <Plus className="h-4 w-4" />
+                    <span className="sr-only">New Transfer</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>New Transfer</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
                   <Button variant="outline" size="icon" onClick={refetch}>
                     <RefreshCw className="h-4 w-4" />
                     <span className="sr-only">Refresh</span>
@@ -93,15 +102,6 @@ export const TransfersListPage: React.FC = () => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Filter</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon" onClick={onAddTransfer}>
-                    <Plus className="h-4 w-4" />
-                    <span className="sr-only">New Transfer</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>New Transfer</TooltipContent>
               </Tooltip>
             </div>
           </div>

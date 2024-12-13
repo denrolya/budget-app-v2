@@ -1,21 +1,20 @@
 import debounce from 'lodash/debounce';
 import { ArrowDownCircle, ArrowUpCircle, CalendarIcon, FileText, FilterIcon, Layers } from 'lucide-react';
-import moment from 'moment';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
+import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { MOMENT_DATEPICKER_FORMAT, FILTER_PRESETS } from '@/constants/datetime';
+import { FILTER_PRESETS, MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { TransactionFilters } from '@/models/TransactionFilters';
+import { Timeframe } from '@/types/global';
 import { Type as TransactionType } from '@/types/transaction';
 
 interface ListFiltersProps {
@@ -27,9 +26,7 @@ interface ListFiltersProps {
 }
 
 const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
-  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
   const [localAmountRange, setLocalAmountRange] = useState(data.amountRange);
-  const isDesktop = useScreenSize();
 
   const debouncedOnChange = useRef(
     debounce(<K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => {
@@ -57,9 +54,9 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
     debouncedOnChange('amountRange', [localAmountRange[0], newMax]);
   }, [localAmountRange, debouncedOnChange]);
 
-  const handleDateRangeChange = useCallback((range: { from: Date | undefined; to: Date | undefined }) => {
-    onChange('after', range.from ? moment(range.from) : undefined);
-    onChange('before', range.to ? moment(range.to) : undefined);
+  const handleTimeframeChange = useCallback((range: Timeframe) => {
+    onChange('after', range.after ? range.after : undefined);
+    onChange('before', range.before ? range.before : undefined);
   }, [onChange]);
 
   const handleTransactionTypeChange = useCallback((type: TransactionType | undefined) => {
@@ -113,49 +110,21 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
 
       <div className="space-y-2">
         <Label htmlFor="date-range">Date Range</Label>
-        <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
-          <PopoverTrigger asChild>
-            <Button id="date-range" variant="outline" size="sm" className="h-9 text-sm w-full justify-start">
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              <span>
-                {data.after && data.before && `${data.after.format(MOMENT_DATEPICKER_FORMAT)} - ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`}
-                {!data.after && data.before && `Before ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`}
-                {data.after && !data.before && `After ${data.after.format(MOMENT_DATEPICKER_FORMAT)}`}
-                {!data.after && !data.before && 'Select date range'}
-              </span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 z-[100]" align="start">
-            <Calendar
-              initialFocus
-              mode="range"
-              defaultMonth={data.after?.toDate() || moment().toDate()}
-              selected={{
-                from: data.after?.toDate(),
-                to: data.before?.toDate(),
-              }}
-              onSelect={handleDateRangeChange}
-              numberOfMonths={isDesktop ? 2 : 1}
-              className="border-b"
-            />
-            <div className="p-3 space-y-3">
-              <h4 className="font-medium text-sm text-primary">Presets</h4>
-              <div className="grid grid-cols-2 gap-2">
-                {FILTER_PRESETS.map((preset) => (
-                  <Button
-                    key={preset.label}
-                    size="sm"
-                    variant="oultine"
-                    className="w-full justify-start text-left text-xs"
-                    onClick={() => handleDateRangeChange(preset.range)}
-                  >
-                    {preset.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <DaterangePickerWithPresets
+          after={data.after}
+          before={data.before}
+          onChange={handleTimeframeChange}
+          presets={FILTER_PRESETS}>
+          <Button id="date-range" variant="outline" size="sm" className="h-9 text-sm w-full justify-start">
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            <span>
+              {data.after && data.before && `${data.after.format(MOMENT_DATEPICKER_FORMAT)} - ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`}
+              {!data.after && data.before && `Before ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`}
+              {data.after && !data.before && `After ${data.after.format(MOMENT_DATEPICKER_FORMAT)}`}
+              {!data.after && !data.before && 'Select date range'}
+            </span>
+          </Button>
+        </DaterangePickerWithPresets>
       </div>
 
       <div className="space-y-2">

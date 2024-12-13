@@ -1,22 +1,21 @@
-import { ArrowDownCircle, ArrowUpCircle, CalendarIcon, FilterIcon, X } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, FilterIcon } from 'lucide-react';
 import moment, { Moment } from 'moment';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
+import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { TransferFilters } from '@/models/TransferFilters';
+import { Timeframe } from '@/types/global';
 import { Type as TransactionType } from '@/types/transaction';
-
 
 type CombinedFilters = TransactionFilters & TransferFilters
 
@@ -28,8 +27,8 @@ interface ListFiltersContentProps {
   setShowTransactions: (value: boolean) => void;
   showTransfers: boolean;
   setShowTransfers: (value: boolean) => void;
-  dateRange: { startDate: Moment; endDate: Moment };
-  setCustomDateRange: (range: { startDate: Moment; endDate: Moment } | null) => void;
+  timeframe: { after: Moment; before: Moment };
+  setCustomTimeframe: (range: { after: Moment; before: Moment } | null) => void;
 }
 
 interface ListFiltersProps extends ListFiltersContentProps {
@@ -38,27 +37,37 @@ interface ListFiltersProps extends ListFiltersContentProps {
 }
 
 const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
-                                                          transactionFilters,
-                                                          transferFilters,
-                                                          setFilter,
-                                                          showTransactions,
-                                                          setShowTransactions,
-                                                          showTransfers,
-                                                          setShowTransfers,
-                                                          dateRange,
-                                                          setCustomDateRange,
-                                                        }) => {
-  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
-  const isDesktop = useScreenSize();
+                                                                 transactionFilters,
+                                                                 transferFilters,
+                                                                 setFilter,
+                                                                 showTransactions,
+                                                                 setShowTransactions,
+                                                                 showTransfers,
+                                                                 setShowTransfers,
+                                                                 timeframe,
+                                                                 setCustomTimeframe,
+                                                               }) => {
+  const [filtersActive, setFiltersActive] = useState<boolean>(false);
 
-  const handleDateRangeChange = useCallback((range: { from: Date | undefined; to: Date | undefined }) => {
-    if (range.from && range.to) {
-      setCustomDateRange({
-        startDate: moment(range.from),
-        endDate: moment(range.to),
-      });
-    }
-  }, [setCustomDateRange]);
+  useEffect(() => {
+    const isActive = transactionFilters.categories.length > 0 ||
+      transactionFilters.accounts.length > 0 ||
+      transferFilters.accounts.length > 0 ||
+      transactionFilters.isDraft !== null ||
+      transactionFilters.type !== undefined ||
+      transactionFilters.amountRange[0] !== undefined ||
+      transactionFilters.amountRange[1] !== undefined ||
+      (timeframe.after.format(MOMENT_DATEPICKER_FORMAT) !== moment().startOf('week').format(MOMENT_DATEPICKER_FORMAT) ||
+        timeframe.before.format(MOMENT_DATEPICKER_FORMAT) !== moment().endOf('week').format(MOMENT_DATEPICKER_FORMAT));
+    setFiltersActive(isActive);
+  }, [transactionFilters, transferFilters, timeframe]);
+
+  const handleTimeframeChange = useCallback((range: Timeframe) => {
+    setCustomTimeframe({
+      after: range.after ? moment(range.after).startOf('day') : timeframe.after,
+      before: range.before ? moment(range.before).endOf('day') : timeframe.before,
+    });
+  }, [setCustomTimeframe]);
 
   const handleAmountRangeChange = useCallback((value: [number | undefined, number | undefined]) => {
     setFilter('amountRange', value);
@@ -66,21 +75,51 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
 
   const toggleDraftFilter = useCallback(() => {
     setFilter('isDraft', transactionFilters.isDraft === null ? true : transactionFilters.isDraft ? false : null);
-  }, [setFilter, transactionFilters.isDraft]);
+    setShowTransactions(true);
+    setShowTransfers(false);
+  }, [setFilter, transactionFilters.isDraft, setShowTransactions, setShowTransfers]);
 
   const handleTransactionTypeChange = useCallback((type: TransactionType | undefined) => {
     setFilter('type', transactionFilters.type === type ? undefined : type);
-    if (transactionFilters.type) {
+    setFilter('categories', []); // Reset categories when changing type
+    setShowTransactions(true);
+    setShowTransfers(false);
+  }, [setFilter, setShowTransactions, setShowTransfers]);
+
+  const handleTransactionVisibilityToggle = useCallback((visible: boolean) => {
+    setShowTransactions(visible);
+    if (!visible) {
+      setFilter('categories', []);
+      setFilter('type', undefined);
+      setFilter('isDraft', null);
+    }
+  }, [setShowTransactions, setFilter]);
+
+  const handleCategoryChange = useCallback((categories: any[]) => {
+    setFilter('categories', categories);
+    if (categories.length > 0) {
+      setShowTransactions(true);
       setShowTransfers(false);
     }
-  }, [setFilter, setShowTransfers, transactionFilters.type]);
+  }, [setFilter, setShowTransactions, setShowTransfers]);
+
+  const handleResetFilters = useCallback(() => {
+    setFilter('amountRange', [undefined, undefined]);
+    setFilter('categories', []);
+    setFilter('accounts', []);
+    setFilter('isDraft', null);
+    setFilter('type', undefined);
+    setCustomTimeframe(null);
+    setShowTransactions(true);
+    setShowTransfers(true);
+  }, [setFilter, setCustomTimeframe, setShowTransactions, setShowTransfers]);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-2">
         <Button
           variant={showTransactions ? 'default' : 'outline'}
-          onClick={() => setShowTransactions(!showTransactions)}
+          onClick={() => handleTransactionVisibilityToggle(!showTransactions)}
         >
           Transactions
         </Button>
@@ -105,7 +144,7 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
             variant={transactionFilters.type === TransactionType.Income ? 'success' : 'outline'}
             size="sm"
             className="flex-1"
-            onClick={() => handleTransactionTypeChange(TransactionType.Income)}
+            onClick={() => handleTransactionTypeChange(transactionFilters.type === TransactionType.Income ? undefined : TransactionType.Income)}
           >
             <ArrowDownCircle className="mr-2 h-4 w-4" />
             Income
@@ -114,7 +153,7 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
             variant={transactionFilters.type === TransactionType.Expense ? 'destructive' : 'outline'}
             size="sm"
             className="flex-1"
-            onClick={() => handleTransactionTypeChange(TransactionType.Expense)}
+            onClick={() => handleTransactionTypeChange(transactionFilters.type === TransactionType.Expense ? undefined : TransactionType.Expense)}
           >
             <ArrowUpCircle className="mr-2 h-4 w-4" />
             Expense
@@ -124,29 +163,11 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
 
       <div className="space-y-2">
         <Label htmlFor="date-range">Custom Date Range</Label>
-        <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
-          <PopoverTrigger asChild>
-            <Button id="date-range" variant="outline" className="w-full justify-start">
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              <span>
-                {dateRange.startDate.format(MOMENT_DATEPICKER_FORMAT)} - {dateRange.endDate.format(MOMENT_DATEPICKER_FORMAT)}
-              </span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              initialFocus
-              mode="range"
-              defaultMonth={dateRange.startDate.toDate()}
-              selected={{
-                from: dateRange.startDate.toDate(),
-                to: dateRange.endDate.toDate(),
-              }}
-              onSelect={handleDateRangeChange}
-              numberOfMonths={isDesktop ? 2 : 1}
-            />
-          </PopoverContent>
-        </Popover>
+        <DaterangePickerWithPresets
+          id="date-range"
+          after={timeframe.after}
+          before={timeframe.before}
+          onChange={handleTimeframeChange} />
       </div>
 
       <div className="space-y-2">
@@ -156,7 +177,7 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
           id="categories"
           valueField="id"
           value={transactionFilters.categories}
-          onChange={(categories) => setFilter('categories', categories)}
+          onChange={handleCategoryChange}
           className="w-full"
         />
       </div>
@@ -200,16 +221,11 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
         </div>
       </div>
 
-      <Button
-        onClick={() => {
-          setFilter('amountRange', [undefined, undefined]);
-          setFilter('categories', []);
-          setFilter('accounts', []);
-          setFilter('isDraft', null);
-          setCustomDateRange(null);
-        }} variant="outline" className="w-full">
-        Reset All Filters
-      </Button>
+      {filtersActive && (
+        <Button onClick={handleResetFilters} variant="outline" className="w-full">
+          Reset All Filters
+        </Button>
+      )}
     </div>
   );
 };
@@ -229,9 +245,6 @@ export const ListFiltersSheet: React.FC<ListFiltersProps> = ({ isOpen = false, s
         <ContentHeader>
           <ContentTitle>Filters</ContentTitle>
           <ContentDescription className="sr-only">Adjust list filters</ContentDescription>
-          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="absolute right-4 top-4">
-            <X className="h-4 w-4" />
-          </Button>
         </ContentHeader>
         <div className="mt-4 px-4">
           <ListFiltersContent {...props} />
@@ -242,3 +255,4 @@ export const ListFiltersSheet: React.FC<ListFiltersProps> = ({ isOpen = false, s
 };
 
 export default ListFiltersSheet;
+

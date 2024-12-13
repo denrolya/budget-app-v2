@@ -97,20 +97,12 @@ export const TIMEFRAME_OPTIONS: TimeframeOption[] = [
 
 export const DASHBOARD_TIMEFRAME_OPTIONS: Array<{ label: string, range: Timeframe }> = [
   {
-    label: 'Prev Month',
-    range: {
-      after: moment().subtract(1, 'month').startOf('month'),
-      before: moment().subtract(1, 'month').endOf('month'),
-    },
-  },
-  { label: 'This Month', range: { after: moment().startOf('month'), before: moment().endOf('month') } },
-  {
     label: 'Summer',
     range: { after: moment().month(5).startOf('month'), before: moment().month(8).endOf('month') },
   },
   {
     label: 'Winter',
-    range: { after: moment().month(11).startOf('month'), before: moment().month(2).endOf('month') },
+    range: { after: moment().month(11).startOf('month'), before: moment().month(1).endOf('month') },
   },
   {
     label: 'Spring',
@@ -120,6 +112,14 @@ export const DASHBOARD_TIMEFRAME_OPTIONS: Array<{ label: string, range: Timefram
     label: 'Autumn',
     range: { after: moment().month(8).startOf('month'), before: moment().month(11).endOf('month') },
   },
+  {
+    label: 'Prev Month',
+    range: {
+      after: moment().subtract(1, 'month').startOf('month'),
+      before: moment().subtract(1, 'month').endOf('month'),
+    },
+  },
+  { label: 'This Month', range: { after: moment().startOf('month'), before: moment().endOf('month') } },
   { label: 'This Year', range: { after: moment().startOf('year'), before: moment().endOf('year') } },
   {
     label: 'Last Year',
@@ -154,13 +154,16 @@ export const PERIOD_OPTIONS: PeriodOption[] = [
 export const FILTER_PRESETS = [
   {
     label: 'Prev Month',
-    range: { from: moment().subtract(1, 'month').startOf('month'), to: moment().subtract(1, 'month').endOf('month') },
+    range: {
+      after: moment().subtract(1, 'month').startOf('month'),
+      before: moment().subtract(1, 'month').endOf('month'),
+    },
   },
-  { label: 'This Month', range: { from: moment().startOf('month'), to: moment().endOf('month') } },
-  { label: 'Last 30 Days', range: { from: moment().subtract(30, 'days'), to: moment() } },
-  { label: 'This Year', range: { from: moment().startOf('year'), to: moment().endOf('year') } },
+  { label: 'This Month', range: { after: moment().startOf('month'), before: moment().endOf('month') } },
+  { label: 'Last 30 Days', range: { after: moment().subtract(30, 'days'), before: moment() } },
+  { label: 'This Year', range: { after: moment().startOf('year'), before: moment().endOf('year') } },
   {
     label: 'Last Year',
-    range: { from: moment().subtract(1, 'year').startOf('year'), to: moment().subtract(1, 'year').endOf('year') },
+    range: { after: moment().subtract(1, 'year').startOf('year'), before: moment().subtract(1, 'year').endOf('year') },
   },
 ];

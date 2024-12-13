@@ -8,20 +8,20 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 
 interface Props {
-  startDate: Moment;
-  endDate: Moment;
+  after: Moment;
+  before: Moment;
 }
 
-export const TableListingSkeleton: React.FC<Props> = ({ startDate, endDate }) => {
+export const TableListingSkeleton: React.FC<Props> = ({ after, before }) => {
   const dates = useMemo(() => {
     const dates = [];
-    const currentDate = startDate.clone();
-    while (currentDate.isSameOrBefore(endDate)) {
+    const currentDate = after.clone();
+    while (currentDate.isSameOrBefore(before)) {
       dates.push(currentDate.clone());
       currentDate.add(1, 'day');
     }
     return dates.reverse(); // Reverse to show most recent dates first
-  }, [startDate, endDate]);
+  }, [after, before]);
 
   return (
     <div className="overflow-x-auto">

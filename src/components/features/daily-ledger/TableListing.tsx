@@ -32,12 +32,12 @@ type EditableField = 'account' | 'amount' | 'category' | 'note' | 'executedAt'
 interface Props {
   isLoading: boolean;
   groupedItems: [Moment, (Transaction | Transfer)[], number, number, number, number][];
-  startDate: Moment;
-  endDate: Moment;
+  after: Moment;
+  before: Moment;
   isReversedOrder?: boolean;
 }
 
-const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate, isReversedOrder = false }) => {
+const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversedOrder = false }) => {
   const { updateTransaction, deleteTransaction, isUpdating } = useTransactionMutations();
   const { openForm } = useFormContext();
   const [editingCell, setEditingCell] = useState<{ itemId: number; field: EditableField } | null>(null);
@@ -229,13 +229,13 @@ const TableListing: React.FC<Props> = ({ groupedItems, startDate, endDate, isRev
 
   const dates = useMemo(() => {
     const dates = [];
-    const currentDate = startDate.clone();
-    while (currentDate.isSameOrBefore(endDate)) {
+    const currentDate = after.clone();
+    while (currentDate.isSameOrBefore(before)) {
       dates.push(currentDate.clone());
       currentDate.add(1, 'day');
     }
     return isReversedOrder ? dates.reverse() : dates;
-  }, [startDate, endDate, isReversedOrder]);
+  }, [after, before, isReversedOrder]);
 
   const toggleDraft = async (transaction: Transaction) => {
     const confirmed = await confirm({

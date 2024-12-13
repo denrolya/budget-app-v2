@@ -11,22 +11,22 @@ import Transfer from '@/models/Transfer';
 interface Props {
   isLoading: boolean;
   groupedItems: [Moment, (Transaction | Transfer)[], number, number, number, number][];
-  startDate: Moment;
-  endDate: Moment;
+  after: Moment;
+  before: Moment;
 }
 
-const DailyList: React.FC<Props> = ({ isLoading, groupedItems, startDate, endDate }) => {
+const DailyList: React.FC<Props> = ({ isLoading, groupedItems, after, before }) => {
   const isDesktop = useScreenSize();
 
   const dates = useMemo(() => {
     const dates = [];
-    const currentDate = startDate.clone();
-    while (currentDate.isSameOrBefore(endDate)) {
+    const currentDate = after.clone();
+    while (currentDate.isSameOrBefore(before)) {
       dates.push(currentDate.clone());
       currentDate.add(1, 'day');
     }
     return dates;
-  }, [startDate, endDate]);
+  }, [after, before]);
 
   const totalDays = dates.length;
 

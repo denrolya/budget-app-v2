@@ -4,6 +4,7 @@ import { Calendar as CalendarIcon, CreditCard } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import ConfigurationMenu from '@/components/features/statistics/CategoriesDoughnut/ConfigurationMenu';
 import Skeleton from '@/components/features/statistics/CategoriesDoughnut/Skeleton';
@@ -17,14 +18,10 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { DASHBOARD_TIMEFRAME_OPTIONS } from '@/constants/datetime';
 import { useCategoryTreeStatistics } from '@/hooks/statistics/useCategoryTreeStatistics';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import { Timeframe } from '@/types/global';
 import { Type as TransactionType } from '@/types/transaction';
 import { formatShortDate } from '@/utils/formatShortDate';
@@ -46,9 +43,7 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
   });
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<ProcessedCategory | null>(null);
-  const [showMonthlyAverage, setShowMonthlyAverage] = useState<boolean>(false); // Toggle state
-  const isDesktop = useScreenSize();
-  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState<boolean>(false);
+  const [showMonthlyAverage, setShowMonthlyAverage] = useState<boolean>(false);
 
   const handleTimeframeChange = useCallback((range: Timeframe) => {
     setTimeframe({
@@ -159,46 +154,18 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
           </div>
         </CardHeader>
         <CardContent className="p-4 pt-0">
-          <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
-            <PopoverTrigger asChild>
-              <span className="cursor-pointer inline-flex flex-row mb-2">
-                <span className="text-xs flex items-center">
-                  <CalendarIcon className="inline h-3 w-3 mr-1" />
-                  {formatShortDate(timeframe.after)} - {formatShortDate(timeframe.before)}
-                </span>
+          <DaterangePickerWithPresets
+            after={timeframe.after}
+            before={timeframe.before}
+            onChange={handleTimeframeChange}
+          >
+            <span className="cursor-pointer hover:underline inline-flex flex-row mb-2">
+              <span className="text-xs flex items-center">
+                <CalendarIcon className="inline h-3 w-3 mr-1" />
+                {formatShortDate(timeframe.after)} - {formatShortDate(timeframe.before)}
               </span>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 z-[100]" align="start">
-              <Calendar
-                initialFocus
-                mode="range"
-                defaultMonth={timeframe.after?.toDate() || moment().toDate()}
-                selected={{
-                  from: timeframe.after?.toDate(),
-                  to: timeframe.before?.toDate(),
-                }}
-                onSelect={({ from, to }) => handleTimeframeChange({ after: from, before: to })}
-                numberOfMonths={isDesktop ? 2 : 1}
-                className="border-b"
-              />
-              <div className="p-3 space-y-3">
-                <h4 className="font-medium text-sm text-primary">Presets</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {DASHBOARD_TIMEFRAME_OPTIONS.map(({ label, range }) => (
-                    <Button
-                      key={label}
-                      size="sm"
-                      variant="outline"
-                      className="w-full justify-start text-left text-xs"
-                      onClick={() => handleTimeframeChange(range)}
-                    >
-                      {label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+            </span>
+          </DaterangePickerWithPresets>
 
           <Breadcrumb>
             <BreadcrumbList className="flex-wrap">
