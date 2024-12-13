@@ -6,10 +6,10 @@ import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { Button } from '@/components/ui/button';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FILTER_PRESETS, MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useScreenSize } from '@/hooks/useScreenSize';
@@ -215,6 +215,7 @@ export const ListFiltersSheet: React.FC<ListFiltersProps> = ({
   const FilterWrapper = isDesktop ? Sheet : Drawer;
   const FilterHeader = isDesktop ? SheetHeader : DrawerHeader;
   const FilterTitle = isDesktop ? SheetTitle : DrawerTitle;
+  const FilterDescription = isDesktop ? SheetDescription : DrawerDescription;
   const FilterContent = isDesktop ? SheetContent : DrawerContent;
 
   return (
@@ -224,6 +225,9 @@ export const ListFiltersSheet: React.FC<ListFiltersProps> = ({
         className={isDesktop ? 'w-[400px] sm:w-[540px]' : undefined}>
         <FilterHeader>
           <FilterTitle>Transaction Filters</FilterTitle>
+          <FilterDescription className="sr-only">
+            Filter transactions by dates, accounts, categories etc.
+          </FilterDescription>
         </FilterHeader>
         <div className={isDesktop ? 'mt-4' : 'px-4 pb-4'}>
           <Content data={data} onChange={handleChange} onReset={onReset} />

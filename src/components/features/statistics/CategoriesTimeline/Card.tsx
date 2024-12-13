@@ -25,7 +25,7 @@ interface ChartEvent {
 
 export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({ className }) => {
   const [chartType, setChartType] = useState<'line' | 'bar'>('line');
-  const [selectedPeriod, setSelectedPeriod] = useState<ISO8601Period>('P1Y');
+  const [selectedPeriod, setSelectedPeriod] = useState<ISO8601Period>('P1M');
   const [selectedCategories, setSelectedCategories] = useState<number[]>([1, 6, 73, 147]);
   const [debouncedCategories, setDebouncedCategories] = useState<number[]>(selectedCategories);
   const [showExpenseReference, setShowExpenseReference] = useState<boolean>(true);
@@ -36,7 +36,7 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
   const [selectedTimeframeForTransactions, setSelectedTimeframeForTransactions] = useState<TransactionsTimeframe>(null);
   const [fetchTransactionsFromSubcategories, setFetchTransactionsFromSubcategories] = useState<boolean>(false);
   const [timeframe, setTimeframe] = useState<Timeframe>({
-    after: moment().subtract(10, 'year'),
+    after: moment().subtract(2, 'year').startOf('year'),
     before: moment(),
   });
 
