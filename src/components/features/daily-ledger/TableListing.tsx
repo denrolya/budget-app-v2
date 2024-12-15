@@ -1,10 +1,10 @@
-import { ROUTES } from '@/constants/routes';
 import cn from 'classnames';
 import { ArrowRight, ArrowRightLeft, Check, CreditCardIcon, Eye, Pencil, Trash2, X } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { ROUTES } from '@/constants/routes';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import MoneyValue from '@/components/common/MoneyValue';
@@ -309,7 +309,7 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
             return (
               <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
                 <TableRow>
-                  <TableCell colSpan={8} className="bg-muted px-4">
+                  <TableCell colSpan={8} className="bg-muted/40 px-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <span className="font-semibold">

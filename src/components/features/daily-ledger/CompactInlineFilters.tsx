@@ -109,7 +109,7 @@ export const CompactInlineFilters: React.FC<CompactInlineFiltersProps> = ({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 p-2 bg-muted rounded-md mb-4 relative">
+    <div className="flex flex-wrap items-center gap-2 p-2 bg-muted relative">
       <div className="flex items-center space-x-2">
         <Tooltip>
           <TooltipTrigger asChild>
