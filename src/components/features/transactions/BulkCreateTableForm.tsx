@@ -37,6 +37,16 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
+const DEFAULT_VALUES = {
+  isDraft: false,
+  account: undefined,
+  amount: 0,
+  type: TransactionType.Expense,
+  category: undefined,
+  note: undefined,
+  executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
+};
+
 export const BulkCreateTableForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
@@ -45,15 +55,7 @@ export const BulkCreateTableForm: React.FC = () => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      transactions: [{
-        isDraft: false,
-        account: undefined,
-        amount: 0,
-        type: TransactionType.Expense,
-        category: undefined,
-        note: undefined,
-        executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
-      }],
+      transactions: [DEFAULT_VALUES],
     },
   });
 
@@ -66,15 +68,7 @@ export const BulkCreateTableForm: React.FC = () => {
     const currentTransactions = form.getValues().transactions;
     if (currentTransactions.length === 1) {
       form.reset({
-        transactions: [{
-          isDraft: false,
-          account: '',
-          amount: '',
-          isExpense: true,
-          category: '',
-          note: '',
-          executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
-        }],
+        transactions: [DEFAULT_VALUES],
       });
     } else {
       const newTransactions = currentTransactions.filter((_, i) => i !== index);
@@ -105,15 +99,7 @@ export const BulkCreateTableForm: React.FC = () => {
     }
 
     form.reset({
-      transactions: [{
-        account: '',
-        amount: '',
-        isExpense: true,
-        category: '',
-        note: '',
-        executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
-        isDraft: false,
-      }],
+      transactions: [DEFAULT_VALUES],
     });
 
     if (failedIndices.length > 0) {
@@ -123,15 +109,7 @@ export const BulkCreateTableForm: React.FC = () => {
     setIsSubmitting(false);
   };
 
-  const addAnotherTransaction = () => append({
-    isDraft: false,
-    account: '',
-    amount: 0,
-    type: TransactionType.Expense,
-    category: '',
-    note: '',
-    executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
-  });
+  const addAnotherTransaction = () => append(DEFAULT_VALUES);
 
 
   useHotkeys('ctrl+n', (event) => {
