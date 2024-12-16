@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { CURRENCY_CODE } from '@/constants/currency';
 import User from '@/models/User';
 import { api } from '@/services/api';
+import storage from '@/services/storage';
 import { parseJwt } from '@/utils/parseJWT';
 
 interface AuthContextType {
@@ -26,18 +27,20 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
+  console.log(import.meta.env.VITE_STORAGE_TYPE, storage);
+
   const login = (token: string) => {
     const decodedUser = parseJwt(token);
     setToken(token);
     setUser(decodedUser);
-    sessionStorage.setItem('token', token);
+    storage.setItem('token', token);
     setIsLoading(false);
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
-    sessionStorage.removeItem('token');
+    storage.removeItem('token');
   };
 
   const updateCurrency = async (currency: CURRENCY_CODE) => {
@@ -67,7 +70,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   };
 
   useEffect(() => {
-    const storedToken = sessionStorage.getItem('token');
+    const storedToken = storage.getItem('token');
     if (storedToken) {
       login(storedToken);
     } else {
@@ -77,17 +80,18 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   }, []);
 
   return (
-    <AuthContext.Provider value={{
-      isAuthenticated: !!user,
-      isLoading,
-      isInitialized,
-      user,
-      token,
-      login,
-      logout,
-      updateCurrency,
-      refreshToken,
-    }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated: !!user,
+        isLoading,
+        isInitialized,
+        user,
+        token,
+        login,
+        logout,
+        updateCurrency,
+        refreshToken,
+      }}>
       {children}
     </AuthContext.Provider>
   );
