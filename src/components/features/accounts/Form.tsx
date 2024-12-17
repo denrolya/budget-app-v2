@@ -13,11 +13,11 @@ import { useForm as useFormContext } from '@/contexts/Form';
 import { ACCOUNT_CURRENCY_COLORSCHEME } from '@/constants/colors';
 
 const currencyInfo = {
-  eur: { symbol: '€', color: '#0066CC', name: 'Euro' },
-  usd: { symbol: '$', color: '#008000', name: 'US Dollar' },
-  uah: { symbol: '₴', color: '#FFD700', name: 'Ukrainian Hryvnia' },
-  huf: { symbol: 'Ft', color: '#C41E3A', name: 'Hungarian Forint' },
-  btc: { symbol: '₿', color: '#FFA500', name: 'Bitcoin' },
+  eur: { symbol: '€', color: 'var(--account-bank-EUR)', name: 'Euro' },
+  usd: { symbol: '$', color: 'var(--account-bank-USD)', name: 'US Dollar' },
+  uah: { symbol: '₴', color: 'var(--account-bank-UAH)', name: 'Ukrainian Hryvnia' },
+  huf: { symbol: 'Ft', color: 'var(--account-bank-HUF)', name: 'Hungarian Forint' },
+  btc: { symbol: '₿', color: 'var(--account-bank-BTC)', name: 'Bitcoin' },
 };
 
 const formSchema = z.object({

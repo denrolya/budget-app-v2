@@ -48,7 +48,7 @@ export const AccountAvatar: React.FC<AccountAvatarProps> = ({
   const Icon = iconMap[type];
 
   const borderColor = account.isArchived() ? 'var(--muted-foreground)' : color;
-  const iconColor = account.isArchived() ? 'var(--muted-foreground)' : `${color}80`;
+  const iconColor = account.isArchived() ? 'var(--muted-foreground)' : `${color}`;
 
   return (
     <div className={cn('relative inline-block', sizeMap[size])}>

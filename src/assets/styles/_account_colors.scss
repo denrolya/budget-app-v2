@@ -1,0 +1,35 @@
+@use "sass:color";
+@use "sass:map";
+
+$account-type-modifiers: (
+        'bank': (lightness: 0%, saturation: 0%, hue: 0deg),
+        'cash': (lightness: +30%, saturation: +40%, hue: +20deg),
+        'internet': (lightness: +10%, saturation: -30%, hue: -20deg),
+        'basic': (lightness: +40%, saturation: -10%, hue: +40deg)
+);
+
+:root {
+  @each $type, $modifiers in $account-type-modifiers {
+    @each $currency, $base-color in (
+            'EUR': #0077CC,
+            'USD': #4CAF50,
+            'UAH': #FFC107,
+            'HUF': #E53935,
+            'BTC': #FF9800
+    ) {
+      // Replace scale-color and adjust-hue with modern functions
+      $scaled-color: color.scale(
+                      $base-color,
+              $lightness: map.get($modifiers, lightness),
+              $saturation: map.get($modifiers, saturation)
+      );
+
+      $adjusted-color: color.adjust(
+                      $scaled-color,
+              $hue: map.get($modifiers, hue)
+      );
+
+      --account-#{$type}-#{$currency}: #{$adjusted-color};
+    }
+  }
+}

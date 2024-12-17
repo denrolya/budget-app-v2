@@ -30,9 +30,9 @@ const AccountDetail: React.FC<Props> = ({ account }) => {
   const daysPerPage = 15;
   const [activeTab, setActiveTab] = useState('activity');
   const dateRange = useMemo(() => {
-    const startDate = currentDate.clone().subtract(daysPerPage - 1, 'days');
-    const endDate = currentDate.clone();
-    return { startDate, endDate };
+    const after = currentDate.clone().subtract(daysPerPage - 1, 'days');
+    const before = currentDate.clone();
+    return { after, before };
   }, [currentDate]);
 
   const {
@@ -47,8 +47,8 @@ const AccountDetail: React.FC<Props> = ({ account }) => {
   });
 
   useEffect(() => {
-    setFilter('after', dateRange.startDate);
-    setFilter('before', dateRange.endDate.clone().endOf('day'));
+    setFilter('after', dateRange.after);
+    setFilter('before', dateRange.before.clone().endOf('day'));
   }, [dateRange, setFilter]);
 
   useEffect(() => {
@@ -81,19 +81,19 @@ const AccountDetail: React.FC<Props> = ({ account }) => {
           <DailyList
             isLoading={isLoading}
             groupedItems={groupedItems}
-            startDate={dateRange.startDate}
-            endDate={dateRange.endDate}
+            after={dateRange.after}
+            before={dateRange.before}
           />
         </div>
 
         <div className="hidden md:block">
-          {isLoading && <TableListingSkeleton startDate={dateRange.startDate} endDate={dateRange.endDate} />}
+          {isLoading && <TableListingSkeleton after={dateRange.after} before={dateRange.before} />}
           {!isLoading && (
             <TableListing
               isLoading={isLoading}
               groupedItems={groupedItems}
-              startDate={dateRange.startDate}
-              endDate={dateRange.endDate}
+              after={dateRange.after}
+              before={dateRange.before}
             />
           )}
         </div>

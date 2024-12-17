@@ -27,8 +27,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
-  console.log(import.meta.env.VITE_STORAGE_TYPE, storage);
-
   const login = (token: string) => {
     const decodedUser = parseJwt(token);
     setToken(token);

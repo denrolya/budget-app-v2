@@ -1,6 +1,7 @@
 @use 'variables' as *;
 @use 'base';
 @use 'recharts';
+@use 'account_colors';
 @use 'themes/light' as light;
 @use 'themes/dark' as dark;
 @use 'themes/tron_dark' as tron-dark;
@@ -32,4 +33,3 @@
     @include retrowave-light.theme;
   }
 }
-

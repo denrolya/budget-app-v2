@@ -5,3 +5,10 @@ $transition-timing: ease;
   transitionDuration: $transition-duration;
   transitionTiming: $transition-timing;
 }
+:root {
+  --account-base-EUR: #0077CC; // Default Blue
+  --account-base-USD: #4CAF50; // Default Green
+  --account-base-UAH: #FFC107; // Default Amber
+  --account-base-HUF: #E53935; // Default Red
+  --account-base-BTC: #FF9800; // Default Orange
+}

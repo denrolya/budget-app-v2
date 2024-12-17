@@ -1,12 +1,13 @@
 import React from 'react';
 import moment from 'moment';
 
+import BalanceProgressBar from '@/components/features/accounts/BalanceProgressbar.example';
 import BarChartWithDrawer from '@/components/features/statistics/BarChartWithDrawer.example';
 import FunnelWithDrawer from '@/components/features/statistics/FunnelWithDrawer.example';
 import MonthExpensesRadialBarChart from '@/components/features/statistics/MonthExpensesRadialBarChart.example';
 import ExpenseSunburstChart from '@/components/features/statistics/Sunburst.example';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/contexts/FinanceData';
+import { useActiveAccountsWithDefaultOrder, useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/contexts/FinanceData';
 import TreeDND from '@/components/features/categories/TreeDND.example';
 import ExpensesBySeasons from '@/components/features/statistics/ExpensesBySeasons.example';
 import CategoryValueWithinTimeframeSunburstChart from '@/components/features/statistics/CategoryValueWithinTimeframeSunburstChart.example';
@@ -15,6 +16,7 @@ import { Type as TransactionType } from '@/types/transaction';
 const TestingPage: React.FC = () => {
   const expenseCategoriesTree = useExpenseCategoriesTree();
   const incomeCategoriesTree = useIncomeCategoriesTree();
+  const accounts = useActiveAccountsWithDefaultOrder();
 
   return (
     <section className="p-4">
@@ -27,6 +29,7 @@ const TestingPage: React.FC = () => {
           <h1>New Nivo Charts</h1>
 
           <div>
+            <BalanceProgressBar accounts={accounts} />
             <CategoryValueWithinTimeframeSunburstChart type={TransactionType.Expense} after={moment().startOf('month')} before={moment().endOf('month')} />
           </div>
 
