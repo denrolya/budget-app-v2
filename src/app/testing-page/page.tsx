@@ -12,6 +12,7 @@ import TreeDND from '@/components/features/categories/TreeDND.example';
 import ExpensesBySeasons from '@/components/features/statistics/ExpensesBySeasons.example';
 import CategoryValueWithinTimeframeSunburstChart from '@/components/features/statistics/CategoryValueWithinTimeframeSunburstChart.example';
 import { Type as TransactionType } from '@/types/transaction';
+import BalaneProgressbarStyled from '@/components/features/accounts/BalanceProgressbarStyled.example';
 
 const TestingPage: React.FC = () => {
   const expenseCategoriesTree = useExpenseCategoriesTree();
@@ -27,6 +28,8 @@ const TestingPage: React.FC = () => {
         </TabsList>
         <TabsContent value="nivo-charts">
           <h1>New Nivo Charts</h1>
+
+          <BalaneProgressbarStyled />
 
           <div>
             <BalanceProgressBar accounts={accounts} />
