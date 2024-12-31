@@ -399,7 +399,7 @@ export const DailyLedgerPage: React.FC = () => {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0 bg-background md:bg-card flex-grow overflow-hidden">
+        <CardContent className="p-0 bg-background md:bg-card flex flex-col h-full overflow-hidden">
           {isDesktop && (
             <CompactInlineFilters
               transactionFilters={transactionFilters}
@@ -413,33 +413,26 @@ export const DailyLedgerPage: React.FC = () => {
               setCustomTimeframe={setCustomTimeframe}
             />
           )}
-          <ScrollArea className="h-full">
-            {showBulkCreate && (
-              <div className="border-b bg-muted/50 supports-[backdrop-filter]:bg-muted/50">
-                <div className="px-4 py-3">
-                  <BulkCreateTableForm />
-                </div>
-              </div>
-            )}
+          {showBulkCreate && (
+            <div className="px-4 py-3 border-b bg-muted/50 supports-[backdrop-filter]:bg-muted/50">
+                <BulkCreateTableForm />
+            </div>
+          )}
 
-            {isError && (
-              <div className="p-4 bg-destructive/10 text-destructive rounded-md m-4">
-                <p className="font-medium">Error:</p>
-                <p>{error?.message || 'An unexpected error occurred.'}</p>
-              </div>
-            )}
+          {isError && (
+            <div className="p-4 bg-destructive/10 text-destructive rounded-md m-4">
+              <p className="font-medium">Error:</p>
+              <p>{error?.message || 'An unexpected error occurred.'}</p>
+            </div>
+          )}
 
+          <ScrollArea className="h-full overflow-auto">
             <div className="flex-grow overflow-hidden">
               {/* Desktop View */}
               <div className="hidden md:block h-full overflow-auto">
                 {(activeView === 'table') && (
                   <>
-                    {isLoading && (
-                      <TableListingSkeleton
-                        after={timeframe.after}
-                        before={timeframe.before}
-                      />
-                    )}
+                    {isLoading && (<TableListingSkeleton after={timeframe.after} before={timeframe.before} />)}
                     {(!isLoading) && (
                       <TableListing
                         isLoading={isLoading}
@@ -453,7 +446,6 @@ export const DailyLedgerPage: React.FC = () => {
                 )}
                 {(activeView === 'list') && (
                   <DailyList
-                    isReversedOrder={isReversedOrder}
                     isLoading={isLoading}
                     groupedItems={groupedItems}
                     after={timeframe.after}
