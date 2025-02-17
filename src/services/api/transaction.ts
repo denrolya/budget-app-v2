@@ -141,6 +141,7 @@ export const transactionService = {
       note: values.note || '',
       type: values.type,
       compensations: this.formatCompensations(values, existingData),
+      debt: values.debt,
     };
   },
 

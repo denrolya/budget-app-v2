@@ -11,6 +11,7 @@ import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
 import { useTransactionMutations } from '@/hooks/useTransactionMutations';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
+import DebtTypeahead from '@/components/common/DebtTypeahead';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -38,6 +39,7 @@ export const formSchema = z.object({
   executedAt: z.string().min(1, 'Date is required'),
   note: z.string().optional(),
   isDraft: z.boolean().default(false),
+  debt: z.number().int().positive().optional(),
   compensations: z.array(
     z.object({
       account: z.number().int().positive(),
@@ -61,6 +63,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
       executedAt: moment(data?.executedAt).format(MOMENT_DATETIME_FORM_FORMAT) || moment().format(MOMENT_DATETIME_FORM_FORMAT),
       note: data?.note,
       isDraft: data?.isDraft ?? false,
+      debt: data?.debt?.id,
       compensations: data?.compensations?.map((comp: Transaction) => ({
         ...comp,
         account: comp?.account?.id,
@@ -159,6 +162,24 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                   </Button>
                 </div>
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          name="debt"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Debt</FormLabel>
+              <DebtTypeahead
+                {...field}
+                multiple={false}
+                className={cn('w-full justify-between', {
+                  'text-muted-foreground': !field.value,
+                })}
+              />
               <FormMessage />
             </FormItem>
           )}

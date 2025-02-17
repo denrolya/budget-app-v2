@@ -6,6 +6,7 @@ import { ArrowUpDown, Plus } from 'lucide-react';
 import moment, { Moment } from 'moment/moment';
 import React, { useMemo, useState } from 'react';
 
+import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import List from '@/components/features/transactions/List';
@@ -27,6 +28,7 @@ interface Props {
 
 const DebtDetails: React.FC<Props> = ({ debt }) => {
   const [activeTab, setActiveTab] = useState('transactions');
+  const { openForm } = useFormContext();
   const baseCurrency = useBaseCurrency();
   const isDesktop = useScreenSize();
 
@@ -106,7 +108,7 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
                 </ScrollArea>
               </CardContent>
               <CardFooter>
-                <Button>
+                <Button onClick={() => openForm(FormType.Transaction, { debt })}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add Transaction
                 </Button>
