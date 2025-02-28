@@ -178,7 +178,7 @@ export const BulkCreateTableForm: React.FC = () => {
                       control={form.control}
                       name={`transactions.${index}.isDraft`}
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2">
+                        <FormItem className="flex items-center space-y-0 gap-2">
                           <FormLabel><code>#{index}</code></FormLabel>
                           <FormControl className="p-0 m-0">
                             <Checkbox
@@ -192,57 +192,12 @@ export const BulkCreateTableForm: React.FC = () => {
                     />
                   </TableCell>
                   <TableCell>
-                    <FormField
-                      name={`transactions.${index}.category`}
-                      control={form.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="sr-only">Category</FormLabel>
-                          <CategoryTypeahead
-                            {...field}
-                            autoFocus
-                            multiple={false}
-                            type={form.watch(`transactions.${index}.type`)}
-                            className={cn('w-full justify-between', {
-                              'text-muted-foreground': !field.value,
-                            })}
-                          />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-between">
-                      <div className="flex-grow">
-                        <FormField
-                          control={form.control}
-                          name={`transactions.${index}.amount`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input
-                                  {...field}
-                                  autoFocus={false}
-                                  type="number"
-                                  placeholder="Amount"
-                                  className="w-full"
-                                  value={field.value ?? ''}
-                                  onChange={e => {
-                                    field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber);
-                                  }}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                    <div className="flex items-center space-y-0 gap-2">
                       <FormField
                         control={form.control}
                         name={`transactions.${index}.type`}
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="space-y-0">
                             <FormControl>
                               <Button
                                 type="button"
@@ -260,14 +215,57 @@ export const BulkCreateTableForm: React.FC = () => {
                           </FormItem>
                         )}
                       />
+                      <FormField
+                        name={`transactions.${index}.category`}
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem className="space-y-0 w-full">
+                            <FormLabel className="sr-only">Category</FormLabel>
+                            <CategoryTypeahead
+                              {...field}
+                              autoFocus
+                              valueField="id"
+                              multiple={false}
+                              type={form.watch(`transactions.${index}.type`)}
+                              className={cn('w-full justify-between', {
+                                'text-muted-foreground': !field.value,
+                              })}
+                            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={form.control}
+                      name={`transactions.${index}.amount`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="number"
+                              placeholder="Amount"
+                              className="w-full"
+                              value={field.value ?? ''}
+                              onChange={e => {
+                                field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber);
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </TableCell>
                   <TableCell>
                     <FormField
                       name={`transactions.${index}.account`}
                       control={form.control}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="space-y-0">
                           <FormLabel className="sr-only">Account</FormLabel>
                           <AccountTypeahead
                             {...field}

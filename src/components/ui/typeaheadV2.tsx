@@ -216,6 +216,9 @@ export const TypeaheadV2 = <T, V extends string | number>({
                 setOpen(true);
                 inputProps.onFocus?.(e);
               }}
+              onBlur={(() => {
+                setOpen(false);
+              })}
               placeholder={selectedOptions.length === 0 ? placeholder : ''}
               className={cn('flex-1 bg-transparent outline-none placeholder:text-muted-foreground min-w-[50px]', { 'w-0 p-0': !multiple && selectedOptions.length > 0 })}
             />
@@ -243,7 +246,7 @@ export const TypeaheadV2 = <T, V extends string | number>({
         <div
           className="absolute z-50 w-full left-0 mt-1 bg-popover border border-input rounded-md shadow-md overflow-hidden"
           ref={dropdownRef}>
-          <ScrollArea className="max-h-[300px] overflow-y-auto">
+          <ScrollArea className="max-h-[300px] overflow-y-auto" tabIndex={-1}>
             <div className="p-1">
               {filteredOptions.length === 0 && (
                 <div className="p-2 text-sm text-muted-foreground">{emptyMessage}</div>
