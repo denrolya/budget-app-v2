@@ -173,7 +173,7 @@ export const BulkCreateTableForm: React.FC = () => {
             <TableBody>
               {fields.map((field, index) => (
                 <TableRow key={field.id}>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right py-0">
                     <FormField
                       control={form.control}
                       name={`transactions.${index}.isDraft`}
@@ -191,7 +191,7 @@ export const BulkCreateTableForm: React.FC = () => {
                       )}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-0">
                     <div className="flex items-center space-y-0 gap-2">
                       <FormField
                         control={form.control}
@@ -237,7 +237,7 @@ export const BulkCreateTableForm: React.FC = () => {
                       />
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-0">
                     <FormField
                       control={form.control}
                       name={`transactions.${index}.amount`}
@@ -260,7 +260,7 @@ export const BulkCreateTableForm: React.FC = () => {
                       )}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-0">
                     <FormField
                       name={`transactions.${index}.account`}
                       control={form.control}
@@ -279,7 +279,7 @@ export const BulkCreateTableForm: React.FC = () => {
                       )}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-0">
                     <FormField
                       control={form.control}
                       name={`transactions.${index}.note`}
@@ -297,7 +297,7 @@ export const BulkCreateTableForm: React.FC = () => {
                       )}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-0">
                     <FormField
                       control={form.control}
                       name={`transactions.${index}.executedAt`}
@@ -311,7 +311,7 @@ export const BulkCreateTableForm: React.FC = () => {
                       )}
                     />
                   </TableCell>
-                  <TableCell className="w-[50px]">
+                  <TableCell className="w-[50px] py-0">
                     <div className="flex justify-end">
                       <Button
                         type="button"
@@ -329,20 +329,10 @@ export const BulkCreateTableForm: React.FC = () => {
             </TableBody>
           </Table>
           <div className="flex justify-end items-center space-x-2 mt-4">
-            <Button
-              type="button"
-              variant="outline"
-              className="h-10 px-4 py-2 text-sm font-medium"
-              onClick={addAnotherTransaction}
-            >
+            <Button type="button" variant="outline" onClick={addAnotherTransaction}>
               <Plus className="mr-2 h-4 w-4" /> Add Transaction
             </Button>
-            <Button
-              type="submit"
-              variant="default"
-              className="h-10 px-4 py-2 text-sm font-medium"
-              disabled={isSubmitting}
-            >
+            <Button type="submit" variant="default" disabled={isSubmitting}>
               <Save className="mr-2 h-4 w-4" /> {isSubmitting ? 'Saving...' : 'Save All'}
             </Button>
           </div>

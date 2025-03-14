@@ -1,10 +1,9 @@
 import cn from 'classnames';
-import { ArrowRight, ArrowRightLeft, Check, CreditCardIcon, Eye, Pencil, Trash2, X } from 'lucide-react';
+import { ArrowRight, Check, Eye, Pencil, Trash2, X } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import { ROUTES } from '@/constants/routes';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import MoneyValue from '@/components/common/MoneyValue';
@@ -21,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BACKEND_DATE_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
+import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactionMutations } from '@/hooks/useTransactionMutations';
 import Transaction from '@/models/Transaction';
@@ -35,9 +35,10 @@ interface Props {
   after: Moment;
   before: Moment;
   isReversedOrder?: boolean;
+  compact?: boolean;
 }
 
-const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversedOrder = false }) => {
+const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversedOrder = false, compact = true }) => {
   const { updateTransaction, deleteTransaction, isUpdating } = useTransactionMutations();
   const { openForm } = useFormContext();
   const [editingCell, setEditingCell] = useState<{ itemId: number; field: EditableField } | null>(null);
@@ -308,35 +309,60 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
 
             return (
               <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
-                <TableRow>
-                  <TableCell colSpan={8} className="bg-muted/40 px-4">
+                <TableRow className="bg-muted/40">
+                  <TableCell
+                    colSpan={8}
+                    className={cn('font-semibold', 'px-4', {
+                      'py-2': compact,
+                    })}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <span className="font-semibold">
-                          <RelativeDatetimeDisplay showDayBadge badgeSize="sm" variant="default" showTime={false} date={date} />
+                          <RelativeDatetimeDisplay
+                            showDayBadge
+                            badgeSize="sm"
+                            variant="default"
+                            showTime={false}
+                            date={date} />
                         </span>
                       </div>
                       <div className="flex items-center space-x-4">
-                        <SummaryBadge icon={ROUTES.TRANSACTION_LIST.icon} count={transactionsCount} value={transactionsValue} />
-                        <SummaryBadge useColors={false} icon={ROUTES.TRANSFER_LIST.icon} count={transfersCount} value={transfersValue} />
+                        <SummaryBadge
+                          icon={ROUTES.TRANSACTION_LIST.icon}
+                          count={transactionsCount}
+                          value={transactionsValue} />
+                        <SummaryBadge
+                          useColors={false}
+                          icon={ROUTES.TRANSFER_LIST.icon}
+                          count={transfersCount}
+                          value={transfersValue} />
                       </div>
                     </div>
                   </TableCell>
                 </TableRow>
                 {items.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-4 text-muted-foreground">
+                  <TableRow className="bg-muted/10">
+                    <TableCell
+                      colSpan={8} className={cn('text-center', 'py-4', 'text-muted-foreground', {
+                      'py-2': compact,
+                    })}>
                       No transactions or transfers for this day.
                     </TableCell>
                   </TableRow>
                 )}
                 {items.map((item) => (
                   <TableRow
-                    key={item.id} className={cn({
+                    key={item.id} className={cn('bg-muted/20', {
                     'bg-warning/20 hover:bg-warning/30': (item instanceof Transaction && item.isDraft),
                   })}>
-                    <TableCell className="w-4"></TableCell>
-                    <TableCell>
+                    <TableCell
+                      className={cn('w-4', {
+                        'py-0': compact,
+                      })}></TableCell>
+                    <TableCell
+                      className={cn({
+                        'py-0': compact,
+                      })}>
                       <Sheet
                         open={openSheetId === item.id}
                         onOpenChange={(open) => setOpenSheetId(open ? Number(item.id) : null)}>
@@ -369,7 +395,10 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell
+                      className={cn({
+                        'py-0': compact,
+                      })}>
                       {(item instanceof Transfer) && (
                         <div className="flex items-center space-x-2">
                           <AccountBadge
@@ -389,7 +418,10 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                         renderEditableCell(item, 'account', <AccountBadge size="sm" account={item.account} />)
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell
+                      className={cn({
+                        'py-0': compact,
+                      })}>
                       {'fromExpense' in item ? (
                         <div>
                           {renderTransferAmounts(item)}
@@ -398,7 +430,10 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                         renderEditableCell(item, 'amount', <TransactionValue transaction={item} />)
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell
+                      className={cn({
+                        'py-0': compact,
+                      })}>
                       {item instanceof Transaction && (
                         renderEditableCell(item, 'category',
                           <Badge
@@ -417,13 +452,22 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                         </>
                       )}
                     </TableCell>
-                    <TableCell>{item instanceof Transaction ? renderEditableCell(item, 'note', item.note) : item.note}</TableCell>
-                    <TableCell>
+                    <TableCell
+                      className={cn({
+                        'py-0': compact,
+                      })}>{item instanceof Transaction ? renderEditableCell(item, 'note', item.note) : item.note}</TableCell>
+                    <TableCell
+                      className={cn({
+                        'py-0': compact,
+                      })}>
                       {item instanceof Transaction
                         ? renderEditableCell(item, 'executedAt', item.executedAt.format(MOMENT_TIME_VIEW_FORMAT))
                         : item.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell
+                      className={cn('text-right', {
+                        'py-0': compact,
+                      })}>
                       <div className="flex justify-end space-x-2">
                         <Button
                           variant="ghost"

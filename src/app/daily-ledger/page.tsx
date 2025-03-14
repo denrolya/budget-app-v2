@@ -5,11 +5,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
+  FoldVertical,
   LayoutList,
   ListIcon,
   Plus,
-  RefreshCw,
-  Table,
+  RefreshCw, RotateCcw,
+  Table2,
+  UnfoldVertical,
 } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -27,10 +29,11 @@ import BulkCreateTableForm from '@/components/features/transactions/BulkCreateTa
 import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Toggle } from '@/components/ui/toggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
@@ -129,6 +132,7 @@ export const DailyLedgerPage: React.FC = () => {
   const isDesktop = useScreenSize();
   const [activeView, setActiveView] = useState<'table' | 'list'>('table');
   const [isReversedOrder, setIsReversedOrder] = useState<boolean>(true);
+  const [isCompactTable, setIsCompactTable] = useState<boolean>(true);
   const [isFiltersOpen, setIsFiltersOpen] = useState<boolean>(false);
   const [showBulkCreate, setShowBulkCreate] = useState<boolean>(false);
   const [selectedPreset, setSelectedPreset] = useState<string>('current-week');
@@ -198,8 +202,8 @@ export const DailyLedgerPage: React.FC = () => {
     }
   }, [timeframe, selectedPreset, customTimeframe]);
 
-  const goToNextPeriod = useCallback(() => navigatePeriod('next'), [navigatePeriod]);
-  const goToPreviousPeriod = useCallback(() => navigatePeriod('previous'), [navigatePeriod]);
+  const goToNextPeriod = () => navigatePeriod('next');
+  const goToPreviousPeriod = () => navigatePeriod('previous');
 
   const swipeHandlers = useSwipeable({
     onSwipedLeft: goToNextPeriod,
@@ -283,149 +287,185 @@ export const DailyLedgerPage: React.FC = () => {
     };
   }, [addPageHotkeys, removePageHotkeys]);
 
+  const handleResetFilters = () => {
+    setFilter('amountRange', [undefined, undefined]);
+    setFilter('categories', []);
+    setFilter('accounts', []);
+    setFilter('isDraft', null);
+    setFilter('type', undefined);
+    setCustomTimeframe(null);
+    setShowTransactions(true);
+    setShowTransfers(true);
+  };
+
   return (
-    <FullHeightPageContent {...swipeHandlers}>
-      <Card className="shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
-        <CardHeader className="flex flex-col space-y-4 p-0 md:p-6 bg-background md:bg-card">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-            <ResponsiveTooltip
-              openDelay={1}
-              desktopComponent="hovercard"
-              contentClassName="bg-transparent border-none shadow-none"
-              triggerClassName="cursor-help"
-              content={
-                <YearDoughnutTimeframeDisplayChart
-                  data={[{
-                    after: timeframe.after,
-                    before: timeframe.before,
-                  }]} />
-              }
-            >
-              <div className="flex flex-col">
-                <CardTitle className="text-xl font-semibold flex items-center space-x-4">
-                  <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground flex-shrink-0" />
-                  {formatTimeframe(timeframe.after, timeframe.before)}
-                  <SummaryBadge
-                    icon={ROUTES.TRANSACTION_LIST.icon}
-                    count={summary.transactionsCount}
-                    value={summary.transactionsValue} />
-                  <SummaryBadge
-                    useColors={false}
-                    icon={ROUTES.TRANSFER_LIST.icon}
-                    count={summary.transfersCount}
-                    value={summary.transfersValue} />
-                </CardTitle>
-              </div>
-            </ResponsiveTooltip>
-            <div className="flex flex-wrap justify-between gap-2">
-              {activeView === 'table' && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="hidden md:flex"
-                      onClick={() => setIsReversedOrder(!isReversedOrder)}>
-                      {isReversedOrder && (<CalendarArrowDown className="h-4 w-4" />)}
-                      {!isReversedOrder && (<CalendarArrowUp className="h-4 w-4" />)}
-                      <span className="sr-only">Toggle ordering</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Toggle ordering</TooltipContent>
-                </Tooltip>
-              )}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="hidden md:flex"
-                    onClick={() => setActiveView(activeView === 'table' ? 'list' : 'table')}>
-                    {activeView === 'table' && <LayoutList className="h-4 w-4" />}
-                    {activeView === 'list' && <Table className="h-4 w-4" />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Toggle {activeView === 'table' ? 'List' : 'Table'} View</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon" onClick={onAddTransaction}>
-                    <Plus className="h-4 w-4" />
-                    <span className="sr-only">New Transaction</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>New Transaction</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="hidden md:flex"
-                    onClick={() => setShowBulkCreate(!showBulkCreate)}>
-                    <ListIcon className="h-4 w-4" />
-                    <span className="sr-only">Bulk Create</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Bulk Create</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button size="icon" variant="outline" onClick={refetch}>
-                    <RefreshCw className="h-4 w-4" />
-                    <span className="sr-only">Refresh</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Refresh</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="relative"
-                    onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
-                    <Filter className="h-4 w-4" />
-                    <span className="sr-only">Filter</span>
-                    {activeFiltersCount > 0 && (
-                      <Badge className="absolute -top-2 -right-2 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
-                        {activeFiltersCount}
-                      </Badge>
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Filters</TooltipContent>
-              </Tooltip>
-            </div>
+    <FullHeightPageContent {...swipeHandlers} className="flex flex-col justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+        <ResponsiveTooltip
+          openDelay={1}
+          desktopComponent="hovercard"
+          contentClassName="bg-transparent border-none shadow-none"
+          triggerClassName="cursor-help"
+          content={
+            <YearDoughnutTimeframeDisplayChart
+              data={[{
+                after: timeframe.after,
+                before: timeframe.before,
+              }]} />
+          }
+        >
+          <div className="flex flex-col">
+            <CardTitle className="text-xl font-semibold flex items-center space-x-4">
+              <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground flex-shrink-0" />
+              {formatTimeframe(timeframe.after, timeframe.before)}
+              <SummaryBadge
+                icon={ROUTES.TRANSACTION_LIST.icon}
+                count={summary.transactionsCount}
+                value={summary.transactionsValue} />
+              <SummaryBadge
+                useColors={false}
+                icon={ROUTES.TRANSFER_LIST.icon}
+                count={summary.transfersCount}
+                value={summary.transfersValue} />
+            </CardTitle>
           </div>
-        </CardHeader>
+        </ResponsiveTooltip>
+        <div className="flex flex-wrap justify-between gap-2">
+          {activeView === 'table' && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="hidden md:flex"
+                  onClick={() => setIsReversedOrder(!isReversedOrder)}>
+                  {isReversedOrder && (<CalendarArrowDown className="h-4 w-4" />)}
+                  {!isReversedOrder && (<CalendarArrowUp className="h-4 w-4" />)}
+                  <span className="sr-only">Toggle ordering</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Toggle ordering</TooltipContent>
+            </Tooltip>
+          )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="hidden md:flex data-[state=active]:bg-accent/20 data-[state=active]:ring-2 data-[state=active]:ring-accent"
+                onClick={() => setActiveView(activeView === 'table' ? 'list' : 'table')}>
+                {activeView === 'table' && <LayoutList className="h-4 w-4" />}
+                {activeView === 'list' && <Table2 className="h-4 w-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Toggle {activeView === 'table' ? 'List' : 'Table'} View</TooltipContent>
+          </Tooltip>
+          {activeView === 'table' && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Toggle
+                  className="hidden md:flex"
+                  pressed={isCompactTable}
+                  onPressedChange={setIsCompactTable}
+                >
+                  {isCompactTable && <UnfoldVertical className="h-4 w-4" />}
+                  {!isCompactTable && <FoldVertical className="h-4 w-4" />}
+                </Toggle>
+              </TooltipTrigger>
+              <TooltipContent>Toggle compact view</TooltipContent>
+            </Tooltip>
+          )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={onAddTransaction}>
+                <Plus className="h-4 w-4" />
+                <span className="sr-only">New Transaction</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>New Transaction</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Toggle
+                className="hidden md:flex"
+                pressed={showBulkCreate}
+                onClick={() => setShowBulkCreate(!showBulkCreate)}
+              >
+                <ListIcon className="h-4 w-4" />
+                <span className="sr-only">Bulk Create</span>
+              </Toggle>
+            </TooltipTrigger>
+            <TooltipContent>Bulk Create</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" onClick={refetch}>
+                <RefreshCw className="h-4 w-4" />
+                <span className="sr-only">Refresh</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Refresh</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Toggle
+                className="relative"
+                pressed={isFiltersOpen}
+                onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
+                <Filter className="h-4 w-4" />
+                <span className="sr-only">Filter</span>
+                {activeFiltersCount > 0 && (
+                  <Badge className="absolute -top-2 -right-2 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
+                    {activeFiltersCount}
+                  </Badge>
+                )}
+              </Toggle>
+            </TooltipTrigger>
+            <TooltipContent>Filters</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={handleResetFilters}>
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Reset all filters</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </div>
+
+      <div className="mb-4">
+        {isDesktop && (
+          <CompactInlineFilters
+            transactionFilters={transactionFilters}
+            transferFilters={transferFilters}
+            setFilter={setFilter}
+            showTransactions={showTransactions}
+            setShowTransactions={setShowTransactions}
+            showTransfers={showTransfers}
+            setShowTransfers={setShowTransfers}
+            timeframe={timeframe}
+            setCustomTimeframe={setCustomTimeframe}
+          />
+        )}
+
+        {showBulkCreate && (
+          <BulkCreateTableForm />
+        )}
+
+        {isError && (
+          <div className="p-4 bg-destructive/10 text-destructive rounded-md m-4">
+            <p className="font-medium">Error:</p>
+            <p>{error?.message || 'An unexpected error occurred.'}</p>
+          </div>
+        )}
+      </div>
+
+      <Card className="shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
         <CardContent className="p-0 bg-background md:bg-card flex flex-col h-full overflow-hidden">
-          {isDesktop && (
-            <CompactInlineFilters
-              transactionFilters={transactionFilters}
-              transferFilters={transferFilters}
-              setFilter={setFilter}
-              showTransactions={showTransactions}
-              setShowTransactions={setShowTransactions}
-              showTransfers={showTransfers}
-              setShowTransfers={setShowTransfers}
-              timeframe={timeframe}
-              setCustomTimeframe={setCustomTimeframe}
-            />
-          )}
-          {showBulkCreate && (
-            <div className="px-4 py-3 border-b bg-muted/50 supports-[backdrop-filter]:bg-muted/50">
-                <BulkCreateTableForm />
-            </div>
-          )}
-
-          {isError && (
-            <div className="p-4 bg-destructive/10 text-destructive rounded-md m-4">
-              <p className="font-medium">Error:</p>
-              <p>{error?.message || 'An unexpected error occurred.'}</p>
-            </div>
-          )}
-
           <ScrollArea className="h-full overflow-auto">
             <div className="flex-grow overflow-hidden">
               {/* Desktop View */}
@@ -440,6 +480,7 @@ export const DailyLedgerPage: React.FC = () => {
                         after={timeframe.after}
                         before={timeframe.before}
                         isReversedOrder={isReversedOrder}
+                        compact={isCompactTable}
                       />
                     )}
                   </>
@@ -466,37 +507,36 @@ export const DailyLedgerPage: React.FC = () => {
             </div>
           </ScrollArea>
         </CardContent>
-        <CardFooter>
-          <div className="flex items-center justify-end gap-2">
-            <Button size="icon" variant="outline" onClick={goToPreviousPeriod} disabled={isLoading}>
-              <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only">Previous</span>
-            </Button>
-            <Select
-              value={selectedPreset}
-              onValueChange={(value) => {
-                setSelectedPreset(value);
-                setCustomTimeframe(null);
-              }}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select time period" />
-              </SelectTrigger>
-              <SelectContent>
-                {timePresets.map((preset) => (
-                  <SelectItem key={preset.value} value={preset.value}>
-                    {preset.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button size="icon" variant="outline" onClick={goToNextPeriod} disabled={isLoading}>
-              <ChevronRight className="h-4 w-4" />
-              <span className="sr-only">Next</span>
-            </Button>
-          </div>
-        </CardFooter>
       </Card>
+
+      <div className="flex items-center justify-end gap-2 mt-4">
+        <Button size="icon" variant="outline" onClick={goToPreviousPeriod} disabled={isLoading}>
+          <ChevronLeft className="h-4 w-4" />
+          <span className="sr-only">Previous</span>
+        </Button>
+        <Select
+          value={selectedPreset}
+          onValueChange={(value) => {
+            setSelectedPreset(value);
+            setCustomTimeframe(null);
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select time period" />
+          </SelectTrigger>
+          <SelectContent>
+            {timePresets.map((preset) => (
+              <SelectItem key={preset.value} value={preset.value}>
+                {preset.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button size="icon" variant="outline" onClick={goToNextPeriod} disabled={isLoading}>
+          <ChevronRight className="h-4 w-4" />
+          <span className="sr-only">Next</span>
+        </Button>
+      </div>
 
       <ListFiltersSheet
         isOpen={isFiltersOpen}

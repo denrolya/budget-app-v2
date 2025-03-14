@@ -23,8 +23,8 @@ export class TransferFilters extends BaseFilters {
     super();
 
     this.searchTerm = props.searchTerm ?? '';
-    this.before = props.before ?? moment();
-    this.after = props.after ?? moment().subtract(30, 'days');
+    this.before = props.before ?? moment().endOf('year');
+    this.after = props.after ?? moment().startOf('year');
     this.amountRange = props.amountRange ?? [];
     this.accounts = props.accounts ?? [];
   }

@@ -91,7 +91,7 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
-                <ScrollArea className="h-[300px]">
+                <ScrollArea className="h-[450px]">
                   {groupedTransactions.length > 0 && (
                     <>
                       <div className="hidden md:block">
@@ -107,7 +107,7 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
                   )}
                 </ScrollArea>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="p-4">
                 <Button onClick={() => openForm(FormType.Transaction, { debt })}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add Transaction

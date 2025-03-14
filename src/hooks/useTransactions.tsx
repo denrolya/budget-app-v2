@@ -56,7 +56,7 @@ export const useTransactions = (options: UseTransactionsOptions = {}): {
 } => {
   const baseCurrency = useBaseCurrency();
   const {
-    initialPerPage = 20,
+    initialPerPage = 50,
     initialFilters = new TransactionFilters(),
     initialSort = { field: 'executedAt', direction: 'desc' } as Sorting,
     updateUrl = true,

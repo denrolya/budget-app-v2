@@ -42,7 +42,7 @@ export const CategoryDetails: React.FC<Props> = ({ category }) => {
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-auto">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <Tabs className="space-y-4" value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="activity">Transactions</TabsTrigger>
             <TabsTrigger value="data">Data</TabsTrigger>

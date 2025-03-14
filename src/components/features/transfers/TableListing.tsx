@@ -1,26 +1,27 @@
-import SummaryBadge from '@/components/common/SummaryBadge';
-import RateDisplay from '@/components/features/transfers/RateDisplay';
-import { ROUTES } from '@/constants/routes';
 import { ArrowRight, Eye, Trash2 } from 'lucide-react';
 import { Moment } from 'moment';
 import React, { useState } from 'react';
 
-import { CURRENCY_CODE } from '@/constants/currency';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
+import SummaryBadge from '@/components/common/SummaryBadge';
 import AccountBadge from '@/components/features/accounts/Badge';
 import Details from '@/components/features/transfers/Details';
+import RateDisplay from '@/components/features/transfers/RateDisplay';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BACKEND_DATE_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
+import { ROUTES } from '@/constants/routes';
+import { cn } from '@/lib/utils';
 import Transfer from '@/models/Transfer';
 
 interface Props {
   groupedItems: [Moment, Transfer[], number, number][];
+  compact?: boolean;
 }
 
-export const TableListing: React.FC<Props> = ({ groupedItems }) => {
+export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) => {
   const [openSheetId, setOpenSheetId] = useState<number | null>(null);
   const toggleSheet = (transferId: number) => {
     setOpenSheetId(prevId => prevId === transferId ? null : transferId);
@@ -50,17 +51,35 @@ export const TableListing: React.FC<Props> = ({ groupedItems }) => {
           {groupedItems.map(([date, transfers, totalValue, totalItems]) => (
             <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
               <TableRow>
-                <TableCell className="font-semibold bg-muted px-4" colSpan={8}>
+                <TableCell
+                  colSpan={8} className={cn('font-semibold', 'bg-muted/40', 'px-4', {
+                  'py-0': compact,
+                })}>
                   <div className="flex flex-wrap justify-between items-center">
-                    <RelativeDatetimeDisplay showDayBadge badgeSize="sm" variant="default" showTime={false} date={date} />
-                    <SummaryBadge useColors={false} icon={ROUTES.TRANSFER_LIST.icon} count={totalItems} value={totalValue} />
+                    <RelativeDatetimeDisplay
+                      showDayBadge
+                      badgeSize="sm"
+                      variant="default"
+                      showTime={false}
+                      date={date} />
+                    <SummaryBadge
+                      useColors={false}
+                      icon={ROUTES.TRANSFER_LIST.icon}
+                      count={totalItems}
+                      value={totalValue} />
                   </div>
                 </TableCell>
               </TableRow>
               {transfers.map((transfer) => (
                 <TableRow key={transfer.id}>
-                  <TableCell className="w-4"></TableCell>
-                  <TableCell>
+                  <TableCell
+                    className={cn('w-4', {
+                      'py-0': compact,
+                    })}></TableCell>
+                  <TableCell
+                    className={cn({
+                      'py-0': compact,
+                    })}>
                     <Sheet
                       open={openSheetId === transfer.id}
                       onOpenChange={(open) => setOpenSheetId(open ? transfer.id : null)}>
@@ -82,7 +101,10 @@ export const TableListing: React.FC<Props> = ({ groupedItems }) => {
                       </SheetContent>
                     </Sheet>
                   </TableCell>
-                  <TableCell>
+                  <TableCell
+                    className={cn({
+                      'py-0': compact,
+                    })}>
                     <div className="flex items-center space-x-2">
                       <AccountBadge
                         size="sm"
@@ -97,7 +119,10 @@ export const TableListing: React.FC<Props> = ({ groupedItems }) => {
                       />
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell
+                    className={cn({
+                      'py-0': compact,
+                    })}>
                     <>
                       <div className="flex flex-row items-center">
                         <MoneyValue
@@ -123,17 +148,29 @@ export const TableListing: React.FC<Props> = ({ groupedItems }) => {
                       </div>
                     </>
                   </TableCell>
-                  <TableCell>
+                  <TableCell
+                    className={cn({
+                      'py-0': compact,
+                    })}>
                     <div>Rate: {Number(transfer.rate.toFixed(4))}</div>
                     <div className="text-xs text-muted-foreground">
                       <RateDisplay transfer={transfer} />
                     </div>
                   </TableCell>
-                  <TableCell className="max-w-xs truncate">{transfer.note}</TableCell>
-                  <TableCell>
+                  <TableCell
+                    className={cn('max-w-xs', 'truncate', {
+                      'py-0': compact,
+                    })}>{transfer.note}</TableCell>
+                  <TableCell
+                    className={cn({
+                      'py-0': compact,
+                    })}>
                     {transfer.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell
+                    className={cn('text-right', {
+                      'py-0': compact,
+                    })}>
                     <div className="flex justify-end space-x-2">
                       <Button
                         variant="ghost"

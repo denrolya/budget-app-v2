@@ -35,6 +35,7 @@ const Toggle = React.forwardRef<
     ref={ref}
     className={cn(toggleVariants({ variant, size, className }))}
     {...props}
+    data-state={props.pressed ? "on" : "off"}
   />
 ))
 

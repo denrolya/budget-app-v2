@@ -24,12 +24,13 @@ import Transaction from '@/models/Transaction';
 import { confirm } from '@/utils/confirmation';
 
 interface Props extends React.ComponentPropsWithoutRef<'div'> {
+  compact?: boolean;
   groupedItems: [Moment, Transaction[], number, number][];
 }
 
 type EditableField = 'account' | 'amount' | 'category' | 'note' | 'executedAt';
 
-export const TableListing: React.FC<Props> = ({ groupedItems, ...props }) => {
+export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ...props }) => {
   const { updateTransaction, deleteTransaction, isUpdating } = useTransactionMutations();
   const { openForm } = useFormContext();
   const [editingCell, setEditingCell] = useState<{ transactionId: number; field: EditableField } | null>(null);
@@ -248,7 +249,11 @@ export const TableListing: React.FC<Props> = ({ groupedItems, ...props }) => {
         {groupedItems.map(([date, transactions, totalValue, count]) => (
           <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
             <TableRow>
-              <TableCell colSpan={8} className="font-semibold bg-muted px-4">
+              <TableCell
+                colSpan={8}
+                className={cn('font-semibold', 'bg-muted/40', 'px-4', {
+                  'py-0': compact,
+                })}>
                 <div className="flex justify-between items-center">
                   <RelativeDatetimeDisplay showDayBadge badgeSize="sm" variant="default" showTime={false} date={date} />
                   <SummaryBadge icon={ROUTES.TRANSACTION_LIST.icon} count={count} value={totalValue} />
@@ -263,8 +268,11 @@ export const TableListing: React.FC<Props> = ({ groupedItems, ...props }) => {
                   'hover:bg-muted/50': !transaction.isDraft,
                 })}
               >
-                <TableCell></TableCell>
-                <TableCell>
+                <TableCell
+                  colSpan={2}
+                  className={cn({
+                    'py-0': compact,
+                  })}>
                   <Sheet>
                     <SheetTrigger className="m-0 cursor-help" asChild>
                       <code>#{transaction.id}</code>
@@ -293,24 +301,42 @@ export const TableListing: React.FC<Props> = ({ groupedItems, ...props }) => {
                     </Badge>
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell
+                  className={cn({
+                    'py-0': compact,
+                  })}>
                   {renderEditableCell(transaction, 'category',
                     <Badge variant="outline" className="text-xs px-1 py-0 whitespace-nowrap bg-background shadow-md">
                       {transaction.category.name}
                     </Badge>,
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell
+                  className={cn({
+                    'py-0': compact,
+                  })}>
                   {renderEditableCell(transaction, 'amount', <TransactionValue transaction={transaction} />)}
                 </TableCell>
-                <TableCell>
+                <TableCell
+                  className={cn({
+                    'py-0': compact,
+                  })}>
                   {renderEditableCell(transaction, 'account', <AccountBadge size="sm" account={transaction.account} />)}
                 </TableCell>
-                <TableCell>
+                <TableCell
+                  className={cn({
+                    'py-0': compact,
+                  })}>
                   {renderEditableCell(transaction, 'note', transaction.note)}
                 </TableCell>
-                <TableCell>{renderEditableCell(transaction, 'executedAt', transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT))}</TableCell>
-                <TableCell>
+                <TableCell
+                  className={cn({
+                    'py-0': compact,
+                  })}>{renderEditableCell(transaction, 'executedAt', transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT))}</TableCell>
+                <TableCell
+                  className={cn({
+                    'py-0': compact,
+                  })}>
                   <div className="flex justify-end">
                     <Button
                       variant="ghost"

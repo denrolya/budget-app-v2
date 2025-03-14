@@ -2,6 +2,7 @@ import { Edit, Filter, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
+import { Toggle } from '@/components/ui/toggle';
 import Pagination from '@/components/common/Pagination';
 import FormattedListing from '@/components/features/transfers/FormattedListing';
 import ListFiltersSheet from '@/components/features/transfers/ListFiltersSheet';
@@ -63,13 +64,13 @@ export const TransfersListPage: React.FC = () => {
   return (
     <FullHeightPageContent>
       <Card className="shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
-        <CardHeader className="flex flex-col space-y-4 p-0 md:p-6 bg-background md:bg-card">
+        <CardHeader className="flex flex-col space-y-4 p-0 md:p-3 bg-background md:bg-card">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
             <CardTitle className="text-2xl font-bold">Transfers</CardTitle>
             <div className="flex flex-wrap gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon" onClick={onAddTransfer}>
+                  <Button variant="ghost" size="icon" onClick={onAddTransfer}>
                     <Plus className="h-4 w-4" />
                     <span className="sr-only">New Transfer</span>
                   </Button>
@@ -78,7 +79,7 @@ export const TransfersListPage: React.FC = () => {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon" onClick={refetch}>
+                  <Button variant="ghost" size="icon" onClick={refetch}>
                     <RefreshCw className="h-4 w-4" />
                     <span className="sr-only">Refresh</span>
                   </Button>
@@ -87,10 +88,9 @@ export const TransfersListPage: React.FC = () => {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
+                  <Toggle
                     className="relative"
+                    pressed={isFiltersOpen}
                     onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
                     <Filter className="h-4 w-4" />
                     <span className="sr-only">Filter</span>
@@ -99,7 +99,7 @@ export const TransfersListPage: React.FC = () => {
                         {activeFiltersCount}
                       </Badge>
                     )}
-                  </Button>
+                  </Toggle>
                 </TooltipTrigger>
                 <TooltipContent>Filter</TooltipContent>
               </Tooltip>

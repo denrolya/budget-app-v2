@@ -154,7 +154,7 @@ const AccountDetail: React.FC<Props> = ({ account }) => {
                 {renderActivityContent()}
               </ScrollArea>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="p-4">
               <Button onClick={() => openForm(FormType.Transaction, { account })}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Transaction

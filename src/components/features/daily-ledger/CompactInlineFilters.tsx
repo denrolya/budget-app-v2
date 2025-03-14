@@ -1,4 +1,4 @@
-import { ArrowDownCircle, ArrowUpCircle, X } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, RotateCcw } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -97,19 +97,8 @@ export const CompactInlineFilters: React.FC<CompactInlineFiltersProps> = ({
     }
   }, [setShowTransactions, setFilter]);
 
-  const handleResetFilters = () => {
-    setFilter('amountRange', [undefined, undefined]);
-    setFilter('categories', []);
-    setFilter('accounts', []);
-    setFilter('isDraft', null);
-    setFilter('type', undefined);
-    setCustomTimeframe(null);
-    setShowTransactions(true);
-    setShowTransfers(true);
-  };
-
   return (
-    <div className="flex flex-wrap items-center gap-2 p-2 bg-muted relative">
+    <div className="flex flex-wrap items-center gap-2 p-2 relative">
       <div className="flex items-center space-x-2">
         <Tooltip>
           <TooltipTrigger asChild>
@@ -258,21 +247,6 @@ export const CompactInlineFilters: React.FC<CompactInlineFiltersProps> = ({
           placeholder="Max"
         />
       </div>
-
-      {filtersActive && (
-        <div className="ml-auto">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="icon" onClick={handleResetFilters}>
-                <X className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Reset all filters</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      )}
     </div>
   );
 };

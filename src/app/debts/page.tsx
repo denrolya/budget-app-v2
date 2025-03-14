@@ -36,8 +36,8 @@ export const DebtsManagementPage: React.FC = () => {
         )}
 
         {(!selectedDebt) && (
-          <div className="flex items-center justify-center h-full bg-muted -m-4">
-            <div className="text-center space-y-4">
+          <div className="flex items-center justify-center h-full bg-muted">
+            <div className="text-center space-y-4 h-full">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
                 <Icon className="h-8 w-8 text-primary/60" />
               </div>

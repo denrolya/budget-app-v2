@@ -52,13 +52,12 @@ const PageWithSidebar: PageWithSidebarComponent = ({
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         {header}
         <div className="flex-1 overflow-hidden">
-          {contentScrollable ? (
+          {contentScrollable && (
             <ScrollArea className="h-full">
               {renderContent()}
             </ScrollArea>
-          ) : (
-            renderContent()
           )}
+          {!contentScrollable && renderContent()}
         </div>
       </div>
     </div>
