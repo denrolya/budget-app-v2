@@ -1,9 +1,10 @@
-import cn from 'classnames';
 import React, { memo, useMemo } from 'react';
 
+import ConvertedValuesTooltip from '@/components/common/ConvertedValuesTooltip';
 import { Badge } from '@/components/ui/badge';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useBaseCurrency } from '@/contexts/auth';
+import { cn } from '@/lib/utils';
 import { formatMoney } from '@/utils/formatMoney';
 
 interface MoneyValueProps extends React.ComponentPropsWithoutRef<'span'> {
@@ -12,6 +13,7 @@ interface MoneyValueProps extends React.ComponentPropsWithoutRef<'span'> {
   values?: Record<string, number>;
   showSymbol?: boolean;
   showSign?: boolean;
+  showValuesTooltip?: boolean;
   maximumFractionDigits?: number;
   badge?: boolean;
   revertColors?: boolean;
@@ -32,6 +34,7 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
                                                         values = {},
                                                         showSymbol = true,
                                                         showSign = false,
+                                                        showValuesTooltip = true,
                                                         maximumFractionDigits,
                                                         className,
                                                         badge = false,
@@ -43,27 +46,25 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
   const symbol = currency ? CURRENCIES[currency]?.symbol : baseCurrency.symbol;
   const baseValue = values[baseCurrency.code];
 
-  const numericAmount = useMemo(() => typeof amount === 'string' ? parseFloat(amount) : amount, [amount]);
-
   const shouldShowConvertedValue = useMemo(() =>
       baseValue !== undefined &&
       currency !== undefined &&
       baseCurrency.code !== currency &&
-      Math.abs(numericAmount - baseValue) > 0.01,
-    [baseValue, currency, baseCurrency.code, numericAmount]);
+      Math.abs(amount - baseValue) > 0.01,
+    [baseValue, currency, baseCurrency.code, amount]);
 
   const colorClass = useMemo(() => {
     if (!useColors) return '';
     switch (true) {
-      case (numericAmount > 0 && revertColors) || (numericAmount < 0 && !revertColors):
+      case (amount > 0 && revertColors) || (amount < 0 && !revertColors):
         return 'text-destructive';
-      case (numericAmount > 0 && !revertColors) || (numericAmount < 0 && revertColors):
+      case (amount > 0 && !revertColors) || (amount < 0 && revertColors):
         return 'text-success';
       default:
         return 'text-muted-foreground';
     }
-  }, [numericAmount, useColors, revertColors]);
-  const badgeVariant = useMemo(() => getBadgeVariant(numericAmount, useColors, revertColors), [numericAmount, useColors, revertColors]);
+  }, [amount, useColors, revertColors]);
+  const badgeVariant = useMemo(() => getBadgeVariant(amount, useColors, revertColors), [amount, useColors, revertColors]);
 
   const renderMoneyElement = (value: number, currencySymbol: string, currencyCode?: CURRENCY_CODE) => (
     <>
@@ -79,16 +80,16 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
         <>
           {renderMoneyElement(baseValue, baseCurrency.symbol, baseCurrency.code)}
           <span className="text-xs opacity-75 hidden md:inline ml-1">
-            {' | '}{renderMoneyElement(numericAmount, symbol, currency)}
+            {' | '}{renderMoneyElement(amount, symbol, currency)}
           </span>
         </>
       ) : (
-        renderMoneyElement(numericAmount, symbol, currency || baseCurrency.code)
+        renderMoneyElement(amount, symbol, currency || baseCurrency.code)
       )}
     </span>
   );
 
-  return badge ? (
+  let displayedContent = badge ? (
     <Badge className={cn(className)} variant={badgeVariant}>
       {content}
     </Badge>
@@ -97,6 +98,16 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
       {content}
     </span>
   );
+
+  if (showValuesTooltip && values && Object.keys(values).length > 0) {
+    displayedContent = (
+      <ConvertedValuesTooltip convertedValues={values} originalCurrency={currency || baseCurrency.code}>
+        {displayedContent}
+      </ConvertedValuesTooltip>
+    );
+  }
+
+  return displayedContent;
 };
 
 MoneyValue.displayName = 'MoneyValue';

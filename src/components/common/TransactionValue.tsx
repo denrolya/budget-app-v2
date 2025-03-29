@@ -1,9 +1,10 @@
-import cn from 'classnames';
 import React from 'react';
 
+import ConvertedValuesTooltip from '@/components/common/ConvertedValuesTooltip';
 import { Badge } from '@/components/ui/badge';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useBaseCurrency } from '@/contexts/auth';
+import { cn } from '@/lib/utils';
 import Transaction from '@/models/Transaction';
 import { formatMoney as formatMoneyValue } from '@/utils/formatMoney';
 
@@ -11,6 +12,7 @@ interface Props extends React.ComponentPropsWithoutRef<'span'> {
   transaction: Transaction;
   maximumFractionDigits?: number;
   badge?: boolean;
+  showValuesTooltip?: boolean;
 }
 
 export const TransactionValue: React.FC<Props> = ({
@@ -18,52 +20,72 @@ export const TransactionValue: React.FC<Props> = ({
                                                     className = '',
                                                     maximumFractionDigits,
                                                     badge = false,
+                                                    showValuesTooltip = true,
                                                   }) => {
   const baseCurrencyCode = useBaseCurrency();
   const baseCurrency = CURRENCIES[baseCurrencyCode];
-  const { amount, account: { currency }, convertedValues } = transaction;
+  const {
+    amount,
+    account: { currency },
+    convertedValues,
+  } = transaction;
   const symbol = currency ? CURRENCIES[currency]?.symbol : baseCurrency.symbol;
-  const value = convertedValues?.[baseCurrency.code];
+  const baseValue = convertedValues?.[baseCurrency.code];
 
-  const formatMoney = (value: number, currency: CURRENCY_CODE, symbol: string) => {
-    const sign = ((transaction.isIncome() && value >= 0) || (transaction.isExpense() && value < 0)) ? '+' : '-';
-    return `${sign} ${symbol} ${formatMoneyValue(value, currency, maximumFractionDigits)}`;
+  // Helper to format money values using the transaction's sign logic.
+  const formatMoney = (value: number, currencyCode: CURRENCY_CODE, currencySymbol: string) => {
+    const sign =
+      (transaction.isIncome() && value >= 0) ||
+      (transaction.isExpense() && value < 0)
+        ? '+'
+        : '-';
+    return `${sign} ${currencySymbol} ${formatMoneyValue(value, currencyCode, maximumFractionDigits)}`;
   };
 
-  const amountString = formatMoney(amount, currency, symbol);
-  const valueString = value !== undefined ? formatMoney(value, baseCurrencyCode, baseCurrency.symbol) : '';
+  // Format the original and converted (base) values.
+  const originalFormatted = formatMoney(amount, currency, symbol);
+  const baseFormatted =
+    baseValue !== undefined ? formatMoney(baseValue, baseCurrencyCode, baseCurrency.symbol) : '';
 
-  const textColorClass = transaction.isExpense() ? 'text-destructive' : 'text-success';
+  // Determine if conversion is applicable.
+  const hasConversion =
+    baseValue !== undefined &&
+    currency !== baseCurrencyCode &&
+    Math.abs(amount) !== Math.abs(baseValue);
 
-  const shouldShowConvertedValue = value !== undefined && currency !== baseCurrencyCode && Math.abs(amount) !== Math.abs(value);
-
-  const content = (
-    <span className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}>
-      {!shouldShowConvertedValue && <span>{amountString}</span>}
-      {shouldShowConvertedValue && (
-        <>
-          <span>{valueString}</span>
-          <span className="text-xs opacity-75 hidden md:inline ml-1">
-            | {amountString}
-          </span>
-        </>
-      )}
-    </span>
+  // Elegant content: if a conversion exists, show the base conversion with the original as a subtext.
+  const content = hasConversion ? (
+    <>
+      <span>{baseFormatted}</span>
+      <span className="text-xs opacity-75 hidden md:inline ml-1">| {originalFormatted}</span>
+    </>
+  ) : (
+    <span>{originalFormatted}</span>
   );
 
-  if (badge) {
-    return (
-      <Badge className="text-xs" variant={transaction.isIncome() ? 'success' : 'destructive'}>
-        {content}
-      </Badge>
-    );
-  }
-
-  return (
-    <span className={`${textColorClass} ${className}`}>
+  // Wrap with badge if required.
+  let displayedContent = badge ? (
+    <Badge
+      className="text-xs"
+      variant={transaction.isIncome() ? 'success' : 'destructive'}
+    >
+      {content}
+    </Badge>
+  ) : (
+    <span className={cn(transaction.isExpense() ? 'text-destructive' : 'text-success', className)}>
       {content}
     </span>
   );
+
+  if (showValuesTooltip && convertedValues && Object.keys(convertedValues).length > 0) {
+    displayedContent = (
+      <ConvertedValuesTooltip convertedValues={convertedValues} originalCurrency={currency}>
+        {displayedContent}
+      </ConvertedValuesTooltip>
+    );
+  }
+
+  return displayedContent;
 };
 
 export default TransactionValue;
