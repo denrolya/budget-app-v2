@@ -42,6 +42,7 @@ export const formSchema = z.object({
   debt: z.number().int().positive().optional(),
   compensations: z.array(
     z.object({
+      id: z.number().optional(),
       account: z.number().int().positive(),
       amount: z.number().positive('Amount must be positive'),
       executedAt: z.string().min(1, 'Date is required'),
@@ -290,6 +291,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
             <Label>Compensations</Label>
             {fields.map((field, index) => (
               <div key={field.id} className="mt-2 p-2 border border-border rounded-md space-y-2">
+                <FormField control={form.control} name={`compensations.${index}.id`} render={() => null} />
                 <div className="flex items-center gap-2">
                   <FormField
                     control={form.control}

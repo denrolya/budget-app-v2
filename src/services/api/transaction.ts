@@ -150,7 +150,7 @@ export const transactionService = {
     return values.compensations?.map((comp: CompensationData, index: number) => {
       const existingComp = existingData?.compensations?.[index];
       return {
-        id: existingComp ? `api/transactions/${existingComp.id}` : undefined,
+        id: existingComp?.id ? `api/transactions/${existingComp.id}` : undefined,
         account: comp.account,
         amount: comp.amount.toString(),
         category: 137,
