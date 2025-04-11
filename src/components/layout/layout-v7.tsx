@@ -65,8 +65,6 @@ export const LayoutV7 = () => {
   const [toCurrency, setToCurrency] = useState('EUR');
   const [baseCurrency, setBaseCurrency] = useState('USD');
 
-  const test = 'asdf';
-
   const getExchangeRate = (source: string, from: string, to: string) => {
     if (from === to) return 1;
     return (
