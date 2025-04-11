@@ -7,7 +7,7 @@
         "dev": "vite --host",
         "build": "tsc -b && vite build",
         "build:dev": "vite build",
-        "lint": "eslint --quiet",
+        "lint": "eslint -f friendly",
         "preview": "vite preview",
         "test": "vitest",
         "test:ui": "vitest --ui",
@@ -116,6 +116,7 @@
         "axios-mock-adapter": "^2.1.0",
         "eslint": "^9.9.0",
         "eslint-config-prettier": "^9.1.0",
+        "eslint-formatter-friendly": "^7.0.0",
         "eslint-import-resolver-typescript": "^3.6.1",
         "eslint-plugin-import": "^2.29.1",
         "eslint-plugin-react": "^7.35.0",
@@ -145,8 +146,8 @@
     "engine-strict": true,
     "lint-staged": {
         "**/*.{js,jsx,ts,tsx}": [
-            "eslint --cache --fix",
-            "tsc --noEmit",
+            "eslint --cache --fix -f friendly",
+            "tsc --pretty",
             "git add"
         ]
     }
