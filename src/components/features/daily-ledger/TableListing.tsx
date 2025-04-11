@@ -1,9 +1,9 @@
-import cn from 'classnames';
 import { ArrowRight, Check, Eye, Pencil, Trash2, X } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { cn } from '@/lib/utils';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import MoneyValue from '@/components/common/MoneyValue';
@@ -305,11 +305,17 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
 
             return (
               <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
-                <TableRow className="bg-muted/40">
+                <TableRow
+                  className={cn({
+                    'bg-success/10': transactionsValue > 0,
+                    'bg-destructive/10': transactionsValue < 0,
+                    'bg-muted/20': items.length === 0,
+                  })}
+                >
                   <TableCell
                     colSpan={8}
                     className={cn('font-semibold', 'px-4', {
-                      'py-2': compact,
+                      'py-0': compact,
                     })}
                   >
                     <div className="flex items-center justify-between">
@@ -340,18 +346,6 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                     </div>
                   </TableCell>
                 </TableRow>
-                {items.length === 0 && (
-                  <TableRow className="bg-muted/10">
-                    <TableCell
-                      colSpan={8}
-                      className={cn('text-center', 'py-4', 'text-muted-foreground', {
-                        'py-2': compact,
-                      })}
-                    >
-                      No transactions or transfers for this day.
-                    </TableCell>
-                  </TableRow>
-                )}
                 {items.map((item) => (
                   <TableRow
                     key={item.id}

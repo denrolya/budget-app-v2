@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useIsMobile } from '@/hooks/useMobile';
 import { cn } from '@/lib/utils';
 import ConfigForm from '@/components/features/statistics/StatisticsCard/ConfigForm';
 import {
@@ -11,7 +12,6 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import { StatisticsConfig } from '@/types/statistics';
 
 interface ConfigContainerProps {
@@ -31,21 +31,21 @@ const ConfigContainer: React.FC<ConfigContainerProps> = ({
   config,
   children,
 }) => {
-  const isDesktop = useScreenSize();
-  const ConfigWrapper = isDesktop ? Sheet : Drawer;
-  const ConfigHeader = isDesktop ? SheetHeader : DrawerHeader;
-  const ConfigTitle = isDesktop ? SheetTitle : DrawerTitle;
-  const ConfigDescription = isDesktop ? SheetDescription : DrawerDescription;
-  const ConfigTrigger = isDesktop ? SheetTrigger : DrawerTrigger;
-  const ConfigContent = isDesktop ? SheetContent : DrawerContent;
+  const isMobile = useIsMobile();
+  const ConfigWrapper = !isMobile ? Sheet : Drawer;
+  const ConfigHeader = !isMobile ? SheetHeader : DrawerHeader;
+  const ConfigTitle = !isMobile ? SheetTitle : DrawerTitle;
+  const ConfigDescription = !isMobile ? SheetDescription : DrawerDescription;
+  const ConfigTrigger = !isMobile ? SheetTrigger : DrawerTrigger;
+  const ConfigContent = !isMobile ? SheetContent : DrawerContent;
 
   return (
     <ConfigWrapper open={open} onOpenChange={setOpen}>
       <ConfigTrigger asChild>{children}</ConfigTrigger>
       <ConfigContent
         className={cn({
-          'max-w-md overflow-y-auto': isDesktop,
-          'max-h-[85vh] flex flex-col': !isDesktop,
+          'max-w-md overflow-y-auto': !isMobile,
+          'max-h-[85vh] flex flex-col': isMobile,
         })}
       >
         <ConfigHeader>
@@ -53,7 +53,7 @@ const ConfigContainer: React.FC<ConfigContainerProps> = ({
           <ConfigDescription className="sr-only">Adjust card settings</ConfigDescription>
           <span className="sr-only">Adjust card settings</span>
         </ConfigHeader>
-        <div className={cn({ 'px-4 pb-4 overflow-y-auto': !isDesktop })}>
+        <div className={cn({ 'px-4 pb-4 overflow-y-auto': isMobile })}>
           <ConfigForm initialConfig={config} onSubmit={onChange} />
         </div>
       </ConfigContent>

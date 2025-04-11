@@ -14,10 +14,10 @@ export enum Type {
 }
 
 export interface RawTransactionDTO {
-  id: number | string | undefined;
+  id: number;
   account: {
+    id: number;
     icon: string;
-    id: number | string;
     name: string;
     currency: string;
     color: string;
@@ -27,17 +27,19 @@ export interface RawTransactionDTO {
   note: string;
   executedAt: string;
   category: {
-    id: number | string;
+    id: number;
     name: string;
     icon: string;
     color: string | null;
   };
   isDraft: boolean;
   debt: any;
-  transfer: {
-    id: number;
-  } | undefined;
-  compensations: Partial<RawTransactionDTO>[] | undefined;
+  transfer:
+    | {
+        id: number;
+      }
+    | undefined;
+  compensations?: Omit<RawTransactionDTO, 'compensations' | 'transfer' | 'debt'>[];
   type: Type;
 }
 
@@ -51,6 +53,6 @@ export interface TransactionModelProps {
   category: Category;
   isDraft: boolean;
   debt?: Debt | undefined;
-  compensations: undefined | Partial<TransactionModelProps>[];
+  compensations?: Partial<TransactionModelProps>[];
   type: Type;
 }

@@ -1,6 +1,7 @@
 import { BarChart, LineChart, Move3D, Percent, SettingsIcon, Tags, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
 
+import { useIsMobile } from '@/hooks/useMobile';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,7 +15,6 @@ import {
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import { ISO8601Period } from '@/types/global';
 
 const periodOptions: { value: ISO8601Period; label: string }[] = [
@@ -62,7 +62,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
   useSeparateAxisForTotals,
   setUseSeparateAxisForTotals,
 }) => {
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
 
   const MenuContent = () => (
     <div className="space-y-4">
@@ -191,7 +191,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
     </div>
   );
 
-  if (isDesktop) {
+  if (!isMobile) {
     return (
       <Popover>
         <PopoverTrigger asChild>

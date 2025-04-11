@@ -6,6 +6,7 @@ import { ArrowUpDown, Plus } from 'lucide-react';
 import moment, { Moment } from 'moment/moment';
 import React, { useMemo, useState } from 'react';
 
+import { useIsMobile } from '@/hooks/useMobile';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
@@ -18,7 +19,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BACKEND_DATE_FORMAT, MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import Debt from '@/models/Debt';
 import Transaction from '@/models/Transaction';
 
@@ -30,7 +30,7 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
   const [activeTab, setActiveTab] = useState('transactions');
   const { openForm } = useFormContext();
   const baseCurrency = useBaseCurrency();
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
 
   const groupedTransactions: [Moment, Transaction[], number, number][] = useMemo(
     () =>
@@ -78,7 +78,7 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
         </Card>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={!isDesktop ? 'grid w-full grid-cols-2' : ''}>
+          <TabsList className={isMobile ? 'grid w-full grid-cols-2' : ''}>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="history">Debt History</TabsTrigger>
           </TabsList>

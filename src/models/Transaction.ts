@@ -7,31 +7,31 @@ import { ConvertedValues, Type, TransactionModelProps, RawTransactionDTO } from 
 import Account from '@/models/Account';
 
 export class Transaction {
-  id: number | string | undefined;
+  id: number;
   account: Account;
+  category: Category;
   amount: number;
   convertedValues: ConvertedValues;
   note: string;
   executedAt: Moment;
-  category: Category;
   isDraft: boolean;
-  debt?: undefined | Debt;
-  compensations?: undefined | Transaction[];
+  debt?: Debt;
+  compensations?: Transaction[];
   type: Type;
 
   constructor({
-                id,
-                account,
-                amount,
-                convertedValues,
-                note,
-                executedAt,
-                category,
-                isDraft,
-                debt,
-                compensations,
-                type,
-              }: TransactionModelProps) {
+    id,
+    account,
+    amount,
+    convertedValues,
+    note,
+    executedAt,
+    category,
+    isDraft,
+    debt,
+    compensations,
+    type,
+  }: TransactionModelProps) {
     this.id = id;
     this.account = account;
     this.amount = amount;
@@ -101,20 +101,31 @@ export const TransactionFactory = () => {
       account,
       category,
       executedAt: moment(rawTransaction.executedAt),
-      compensations: rawTransaction.compensations?.map((comp) =>
-        new Transaction({
+      compensations: rawTransaction.compensations?.map((comp) => {
+        const compAccount = accounts.find((acc: Account) => acc.id === comp.account.id);
+        const compCategory = categories.find((cat: Category) => cat.id === comp.category.id);
+
+        if (!account) {
+          throw new Error(`Account with ID ${rawTransaction.account.id} not found`);
+        }
+
+        if (!category) {
+          throw new Error(`Category with ID ${rawTransaction.category.id} not found`);
+        }
+
+        return new Transaction({
           id: comp.id!,
-          account: comp.account!,
+          account: compAccount!,
           amount: comp.amount!,
           convertedValues: comp.convertedValues!,
           note: comp.note!,
           executedAt: moment(comp.executedAt)!,
-          category: comp.category!,
+          category: compCategory!,
           isDraft: comp.isDraft!,
-          compensations: comp.compensations,
+          compensations: undefined,
           type: comp.type!,
-        })
-      )
+        });
+      }),
     });
   };
 

@@ -3,20 +3,18 @@ import React from 'react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useScreenSize } from '@/hooks/useScreenSize';
+import { useIsMobile } from '@/hooks/useMobile';
 import { cn } from '@/lib/utils';
 
 interface WrapperProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-const Wrapper = React.forwardRef<HTMLDivElement, WrapperProps>(
-  ({ children, className, ...props }, ref) => (
-    <div ref={ref} className={className} {...props}>
-      {children}
-    </div>
-  )
-)
+const Wrapper = React.forwardRef<HTMLDivElement, WrapperProps>(({ children, className, ...props }, ref) => (
+  <div ref={ref} className={className} {...props}>
+    {children}
+  </div>
+));
 Wrapper.displayName = 'Wrapper';
 
 interface Props {
@@ -30,25 +28,23 @@ interface Props {
 }
 
 export const ResponsiveTooltip: React.FC<Props> = ({
-                                                                      content,
-                                                                      children,
-                                                                      desktopComponent = 'tooltip',
-                                                                      contentClassName,
-                                                                      triggerClassName,
-                                                                      openDelay = 0,
-                                                                      closeDelay = 0,
-                                                                    }) => {
-  const isDesktop = useScreenSize();
+  content,
+  children,
+  desktopComponent = 'tooltip',
+  contentClassName,
+  triggerClassName,
+  openDelay = 0,
+  closeDelay = 0,
+}) => {
+  const isMobile = useIsMobile();
 
-  if (!isDesktop) {
+  if (isMobile) {
     return (
       <Popover>
         <PopoverTrigger asChild>
           <Wrapper className={triggerClassName}>{children}</Wrapper>
         </PopoverTrigger>
-        <PopoverContent className={cn('w-auto', contentClassName)}>
-          {content}
-        </PopoverContent>
+        <PopoverContent className={cn('w-auto', contentClassName)}>{content}</PopoverContent>
       </Popover>
     );
   }
@@ -59,9 +55,7 @@ export const ResponsiveTooltip: React.FC<Props> = ({
         <HoverCardTrigger asChild>
           <Wrapper className={triggerClassName}>{children}</Wrapper>
         </HoverCardTrigger>
-        <HoverCardContent>
-          {content}
-        </HoverCardContent>
+        <HoverCardContent>{content}</HoverCardContent>
       </HoverCard>
     );
   }

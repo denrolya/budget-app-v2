@@ -2,6 +2,7 @@ import { ArrowDownCircle, ArrowUpCircle, FilterIcon } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { useIsMobile } from '@/hooks/useMobile';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
@@ -11,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { TransferFilters } from '@/models/TransferFilters';
 import { Timeframe } from '@/types/global';
@@ -192,6 +192,7 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
         <Label htmlFor="date-range">Custom Date Range</Label>
         <DaterangePickerWithPresets
           id="date-range"
+          className="w-full"
           after={timeframe.after}
           before={timeframe.before}
           onChange={handleTimeframeChange}
@@ -269,22 +270,22 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
 };
 
 export const ListFiltersSheet: React.FC<ListFiltersProps> = ({ isOpen = false, setIsOpen, ...props }) => {
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
 
-  const ContentWrapper = isDesktop ? Sheet : Drawer;
-  const ContentHeader = isDesktop ? SheetHeader : DrawerHeader;
-  const ContentTitle = isDesktop ? SheetTitle : DrawerTitle;
-  const ContentDescription = isDesktop ? SheetDescription : DrawerDescription;
-  const ContentContent = isDesktop ? SheetContent : DrawerContent;
+  const ContentWrapper = !isMobile ? Sheet : Drawer;
+  const ContentHeader = !isMobile ? SheetHeader : DrawerHeader;
+  const ContentTitle = !isMobile ? SheetTitle : DrawerTitle;
+  const ContentDescription = !isMobile ? SheetDescription : DrawerDescription;
+  const ContentContent = !isMobile ? SheetContent : DrawerContent;
 
   return (
     <ContentWrapper open={isOpen} onOpenChange={setIsOpen}>
-      <ContentContent side={isDesktop ? 'right' : undefined} className={isDesktop ? 'sm:max-w-[425px]' : undefined}>
+      <ContentContent side={!isMobile ? 'right' : undefined} className={!isMobile ? 'sm:max-w-[425px]' : undefined}>
         <ContentHeader>
           <ContentTitle>Filters</ContentTitle>
           <ContentDescription className="sr-only">Adjust list filters</ContentDescription>
         </ContentHeader>
-        <div className="mt-4 px-4">
+        <div className="mt-4 px-2">
           <ListFiltersContent {...props} />
         </div>
       </ContentContent>

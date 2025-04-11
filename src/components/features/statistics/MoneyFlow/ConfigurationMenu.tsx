@@ -1,6 +1,7 @@
 import { BarChart, LineChart, PieChart, SettingsIcon, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
 
+import { useIsMobile } from '@/hooks/useMobile';
 import { PeriodValue } from '@/types/global';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,7 +17,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import { TIMEFRAME_OPTIONS } from '@/constants/datetime';
-import { useScreenSize } from '@/hooks/useScreenSize';
 
 interface UnifiedChartMenuProps {
   timeframe: string;
@@ -44,7 +44,7 @@ interface OptionButtonProps {
 }
 
 export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
 
   const OptionButton: React.FC<OptionButtonProps> = ({ value, label, currentValue, onChange }) => (
     <Button
@@ -157,7 +157,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
     </div>
   );
 
-  if (isDesktop) {
+  if (!isMobile) {
     return (
       <Popover>
         <PopoverTrigger asChild>

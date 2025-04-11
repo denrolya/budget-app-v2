@@ -12,7 +12,6 @@ import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FILTER_PRESETS, MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { Timeframe } from '@/types/global';
 import { Type as TransactionType } from '@/types/transaction';
@@ -224,7 +223,7 @@ export const ListFiltersSheet: React.FC<ListFiltersProps> = ({
   onChange,
   onReset,
 }) => {
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
 
   const handleChange = useCallback(
     <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => {
@@ -233,17 +232,17 @@ export const ListFiltersSheet: React.FC<ListFiltersProps> = ({
     [onChange],
   );
 
-  const FilterWrapper = isDesktop ? Sheet : Drawer;
-  const FilterHeader = isDesktop ? SheetHeader : DrawerHeader;
-  const FilterTitle = isDesktop ? SheetTitle : DrawerTitle;
-  const FilterDescription = isDesktop ? SheetDescription : DrawerDescription;
-  const FilterContent = isDesktop ? SheetContent : DrawerContent;
+  const FilterWrapper = !isMobile ? Sheet : Drawer;
+  const FilterHeader = !isMobile ? SheetHeader : DrawerHeader;
+  const FilterTitle = !isMobile ? SheetTitle : DrawerTitle;
+  const FilterDescription = !isMobile ? SheetDescription : DrawerDescription;
+  const FilterContent = !isMobile ? SheetContent : DrawerContent;
 
   return (
     <FilterWrapper open={isOpen} onOpenChange={setIsOpen}>
       <FilterContent
-        side={isDesktop ? 'right' : undefined}
-        className={isDesktop ? 'w-[400px] sm:w-[540px]' : undefined}
+        side={!isMobile ? 'right' : undefined}
+        className={!isMobile ? 'w-[400px] sm:w-[540px]' : undefined}
       >
         <FilterHeader>
           <FilterTitle>Transaction Filters</FilterTitle>
@@ -251,7 +250,7 @@ export const ListFiltersSheet: React.FC<ListFiltersProps> = ({
             Filter transactions by dates, accounts, categories etc.
           </FilterDescription>
         </FilterHeader>
-        <div className={isDesktop ? 'mt-4' : 'px-4 pb-4'}>
+        <div className={!isMobile ? 'mt-4' : 'px-4 pb-4'}>
           <Content data={data} onChange={handleChange} onReset={onReset} />
         </div>
       </FilterContent>

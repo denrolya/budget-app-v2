@@ -2,9 +2,9 @@ import cn from 'classnames';
 import { Moment } from 'moment';
 import React, { useMemo } from 'react';
 
+import { useIsMobile } from '@/hooks/useMobile';
 import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import Transaction from '@/models/Transaction';
 import Transfer from '@/models/Transfer';
 
@@ -16,7 +16,7 @@ interface Props {
 }
 
 const DailyList: React.FC<Props> = ({ isLoading, groupedItems, after, before }) => {
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
 
   const dates = useMemo(() => {
     const dates = [];
@@ -37,17 +37,17 @@ const DailyList: React.FC<Props> = ({ isLoading, groupedItems, after, before }) 
     <div
       className={cn(
         'flex flex-col md:flex-row md:-mx-2 mb-6',
-        { 'md:flex-row-reverse': !isDesktop }, // Reverse order for desktop view
+        { 'md:flex-row-reverse': isMobile }, // Reverse order for desktop view
       )}
     >
-      {(isDesktop ? dates : sortedDates).map((date, index) => {
+      {(!isMobile ? dates : sortedDates).map((date, index) => {
         const foundGroup = groupedItems?.find((group) => group[0].isSame(date, 'day'));
 
         return (
           <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
             <div
               className={cn('w-full px-0 md:px-2', {
-                'md:w-1/7': isDesktop,
+                'md:w-1/7': !isMobile,
               })}
             >
               {isLoading && <DateCardSkeleton index={index} totalDays={totalDays} />}

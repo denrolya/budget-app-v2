@@ -1,4 +1,4 @@
-import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, LayoutList, Settings, Table } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -6,11 +6,19 @@ import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
-import { ROUTES } from '@/constants/routes';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { TransferFilters } from '@/models/TransferFilters';
 import { Timeframe } from '@/types/global';
@@ -73,13 +81,6 @@ export const CompactInlineFilters: React.FC<CompactInlineFiltersProps> = ({
     },
     [setFilter],
   );
-
-  const toggleDraftFilter = useCallback(() => {
-    setFilter('isDraft', transactionFilters.isDraft === null ? true : transactionFilters.isDraft ? false : null);
-    setShowTransactions(true);
-    setShowTransfers(false);
-  }, [setFilter, transactionFilters.isDraft, setShowTransactions, setShowTransfers]);
-
   const handleTransactionTypeChange = useCallback(
     (type: TransactionType | undefined) => {
       setFilter('type', transactionFilters.type === type ? undefined : type);
@@ -114,117 +115,7 @@ export const CompactInlineFilters: React.FC<CompactInlineFiltersProps> = ({
   );
 
   return (
-    <div className="flex flex-wrap items-center gap-2 p-2 relative">
-      <div className="flex items-center space-x-2">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="sm"
-              className="text-xs"
-              variant={showTransactions ? 'default' : 'outline'}
-              onClick={() => handleTransactionVisibilityToggle(!showTransactions)}
-            >
-              <ROUTES.TRANSACTION_LIST.icon className="mr-2 h-4 w-4" />
-              Transactions
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Toggle transaction visibility</p>
-          </TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="sm"
-              className="text-xs"
-              variant={showTransfers ? 'default' : 'outline'}
-              onClick={() => setShowTransfers(!showTransfers)}
-            >
-              <ROUTES.TRANSFER_LIST.icon className="mr-2 h-4 w-4" />
-              Transfers
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Toggle transfer visibility</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-
-      <Separator orientation="vertical" className="h-8" />
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            size="sm"
-            className="text-xs"
-            variant={
-              transactionFilters.isDraft === true
-                ? 'default'
-                : transactionFilters.isDraft === false
-                  ? 'destructive'
-                  : 'outline'
-            }
-            onClick={toggleDraftFilter}
-          >
-            {transactionFilters.isDraft === true
-              ? 'Drafts'
-              : transactionFilters.isDraft === false
-                ? 'No Drafts'
-                : 'All'}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Filter by draft status (Transactions only)</p>
-        </TooltipContent>
-      </Tooltip>
-
-      <Separator orientation="vertical" className="h-8" />
-
-      <div className="flex items-center space-x-2">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="sm"
-              className="text-xs"
-              variant={transactionFilters.type === TransactionType.Income ? 'success' : 'outline'}
-              onClick={() =>
-                handleTransactionTypeChange(
-                  transactionFilters.type === TransactionType.Income ? undefined : TransactionType.Income,
-                )
-              }
-            >
-              <ArrowDownCircle className="mr-2 h-4 w-4" />
-              Income
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Filter income transactions</p>
-          </TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="sm"
-              className="text-xs"
-              variant={transactionFilters.type === TransactionType.Expense ? 'destructive' : 'outline'}
-              onClick={() =>
-                handleTransactionTypeChange(
-                  transactionFilters.type === TransactionType.Expense ? undefined : TransactionType.Expense,
-                )
-              }
-            >
-              <ArrowUpCircle className="mr-2 h-4 w-4" />
-              Expense
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Filter expense transactions</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-
-      <Separator orientation="vertical" className="h-8" />
-
+    <div className="flex flex-wrap items-center gap-2 relative">
       <DaterangePickerWithPresets after={timeframe.after} before={timeframe.before} onChange={handleTimeframeChange} />
 
       <Separator orientation="vertical" className="h-8" />
@@ -287,6 +178,82 @@ export const CompactInlineFilters: React.FC<CompactInlineFiltersProps> = ({
           placeholder="Max"
         />
       </div>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button size="icon" variant="outline">
+            <Settings className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56">
+          <DropdownMenuLabel>View Mode</DropdownMenuLabel>
+          <DropdownMenuRadioGroup value="table" onValueChange={() => {}}>
+            <DropdownMenuRadioItem value="list">
+              <LayoutList className="mr-2 h-4 w-4" /> List
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="table">
+              <Table className="mr-2 h-4 w-4" /> Table
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuCheckboxItem checked onCheckedChange={() => {}}>
+            Compact mode
+          </DropdownMenuCheckboxItem>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuLabel>Visibility</DropdownMenuLabel>
+          <DropdownMenuCheckboxItem checked={showTransactions} onCheckedChange={handleTransactionVisibilityToggle}>
+            Transactions
+          </DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem checked={showTransfers} onCheckedChange={setShowTransfers}>
+            Transfers
+          </DropdownMenuCheckboxItem>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuLabel>Draft Status</DropdownMenuLabel>
+          <DropdownMenuRadioGroup
+            value={
+              transactionFilters.isDraft === true ? 'drafts' : transactionFilters.isDraft === false ? 'noDrafts' : 'all'
+            }
+            onValueChange={(value) => {
+              setFilter('isDraft', value === 'drafts' ? true : value === 'noDrafts' ? false : null);
+              setShowTransfers(value === 'all');
+            }}
+          >
+            <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="drafts">Drafts</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="noDrafts">No Drafts</DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuLabel>Transaction Type</DropdownMenuLabel>
+          <DropdownMenuCheckboxItem
+            checked={transactionFilters.type === TransactionType.Income || !transactionFilters.type}
+            onCheckedChange={() =>
+              handleTransactionTypeChange(
+                transactionFilters.type === TransactionType.Income ? undefined : TransactionType.Income,
+              )
+            }
+          >
+            <ArrowDownCircle className="mr-2 h-4 w-4 text-success" /> Income
+          </DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem
+            checked={transactionFilters.type === TransactionType.Expense || !transactionFilters.type}
+            onCheckedChange={() =>
+              handleTransactionTypeChange(
+                transactionFilters.type === TransactionType.Expense ? undefined : TransactionType.Expense,
+              )
+            }
+          >
+            <ArrowUpCircle className="mr-2 h-4 w-4 text-destructive" /> Expense
+          </DropdownMenuCheckboxItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 };

@@ -1,9 +1,9 @@
 import { ChevronLeft } from 'lucide-react';
 import React, { ReactNode } from 'react';
 
+import { useIsMobile } from '@/hooks/useMobile';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import { cn } from '@/lib/utils';
 
 type PageWithSidebarProps = React.ComponentPropsWithoutRef<'div'> & {
@@ -27,14 +27,14 @@ const PageWithSidebar: PageWithSidebarComponent = ({
   contentScrollable = true,
   ...props
 }) => {
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
   const childrenArray = React.Children.toArray(children);
   const header = childrenArray.find((child) => React.isValidElement(child) && child.type === PageWithSidebar.Header);
   const sidebar = childrenArray.find((child) => React.isValidElement(child) && child.type === PageWithSidebar.Sidebar);
   const content = childrenArray.find((child) => React.isValidElement(child) && child.type === PageWithSidebar.Content);
 
   const renderContent = () => {
-    if (isDesktop) {
+    if (!isMobile) {
       return content;
     }
     if (header) {
@@ -45,7 +45,7 @@ const PageWithSidebar: PageWithSidebarComponent = ({
 
   return (
     <div className={cn('flex h-screen md:h-[calc(100vh-2rem)] overflow-hidden pb-16 md:pb-0', className)} {...props}>
-      {isDesktop && (
+      {!isMobile && (
         <div className={cn('border-r bg-background', sidebarWidth)}>
           <ScrollArea className="h-full">{sidebar}</ScrollArea>
         </div>

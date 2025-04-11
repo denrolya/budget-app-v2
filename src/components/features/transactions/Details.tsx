@@ -124,7 +124,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
 
   return (
     <>
-      <div className="grid gap-4 py-4">
+      <div className="grid gap-4">
         <div className="flex justify-between">
           <span className="capitalize">
             {transaction.type} <code>#{transaction.id}</code>
@@ -176,9 +176,9 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
         {transaction.note && (
           <>
             <Separator />
-            <div className="grid gap-2">
-              <h3 className="font-semibold">Note</h3>
-              <p className="text-sm">{transaction.note}</p>
+            <div className="flex items-center space-x-2">
+              <InfoIcon className="h-4 w-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">{transaction.note}</p>
             </div>
           </>
         )}
@@ -283,11 +283,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
         )}
       </div>
 
-      <div className="flex items-center justify-between mt-6">
-        <div className="flex items-center space-x-2">
-          <InfoIcon className="h-4 w-4 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Transaction completed successfully</p>
-        </div>
+      <div className="flex items-center justify-end mt-6">
         <div className="flex space-x-2">
           <Button
             variant="outline"

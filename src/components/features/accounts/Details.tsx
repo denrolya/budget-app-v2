@@ -3,6 +3,7 @@ import { AlertCircle, ArrowUpDown, Plus } from 'lucide-react';
 import moment from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { useIsMobile } from '@/hooks/useMobile';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountAvatar from '@/components/features/accounts/Avatar';
@@ -15,7 +16,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 import Account from '@/models/Account';
 
@@ -24,7 +24,7 @@ interface Props {
 }
 
 const AccountDetail: React.FC<Props> = ({ account }) => {
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
   const { openForm } = useFormContext();
   const currentDate = moment().startOf('day');
   const daysPerPage = 15;
@@ -132,7 +132,7 @@ const AccountDetail: React.FC<Props> = ({ account }) => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList
           className={cn({
-            'grid w-full grid-cols-2': !isDesktop,
+            'grid w-full grid-cols-2': isMobile,
           })}
         >
           <TabsTrigger value="activity">Activity</TabsTrigger>

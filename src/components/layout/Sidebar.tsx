@@ -4,6 +4,7 @@ import sumBy from 'lodash/sumBy';
 import { Plus } from 'lucide-react';
 import React, { useMemo } from 'react';
 
+import { useIsMobile } from '@/hooks/useMobile';
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountLink from '@/components/layout/SidebarAccountLink';
 import SidebarLink from '@/components/layout/SidebarLink';
@@ -16,7 +17,6 @@ import { useActiveAccountsWithDefaultOrder, useTotalBalance } from '@/contexts/F
 import { useTotalDebt } from '@/contexts/FinanceData/hooks';
 import { FormType, useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import { ACCOUNT_TYPES_ORDER } from '@/models/Account';
 import { Type as AccountType } from '@/types/account';
 import { percentage } from '@/utils/percentage';
@@ -28,20 +28,20 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
   const totalDebt = useTotalDebt();
   const baseCurrency = useBaseCurrency();
   const accounts = useActiveAccountsWithDefaultOrder();
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
   const { isSidebarExpanded, setIsSidebarExpanded } = useSidebar();
   const { openForm } = useForm();
 
   const debtPercentage = useMemo(() => percentage(totalDebt, totalDebt + totalBalance), [totalBalance, totalDebt]);
 
   const handleMouseEnter = () => {
-    if (isDesktop) {
+    if (!isMobile) {
       setIsSidebarExpanded(true);
     }
   };
 
   const handleMouseLeave = () => {
-    if (isDesktop) {
+    if (!isMobile) {
       setIsSidebarExpanded(false);
     }
   };
@@ -77,10 +77,10 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
       className={cn(
         'bg-background border-r border-accent flex flex-col h-[calc(100vh-2rem)] transition-all duration-300 ease-in-out z-40',
         {
-          'fixed inset-y-0 left-0 w-64': !isDesktop && isSidebarExpanded,
-          'fixed inset-y-0 -left-64 w-64': !isDesktop && !isSidebarExpanded,
-          'w-64': isDesktop && isSidebarExpanded,
-          'w-16': isDesktop && !isSidebarExpanded,
+          'fixed inset-y-0 left-0 w-64': isMobile && isSidebarExpanded,
+          'fixed inset-y-0 -left-64 w-64': isMobile && !isSidebarExpanded,
+          'w-64': !isMobile && isSidebarExpanded,
+          'w-16': !isMobile && !isSidebarExpanded,
         },
         className,
       )}

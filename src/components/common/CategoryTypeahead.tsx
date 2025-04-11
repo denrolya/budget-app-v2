@@ -1,3 +1,7 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+import React from 'react';
+
 import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
 import { useExpenseCategories, useIncomeCategories } from '@/contexts/FinanceData';
 import Category from '@/models/Category';

@@ -251,7 +251,13 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
       <TableBody>
         {groupedItems.map(([date, transactions, totalValue, count]) => (
           <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
-            <TableRow>
+            <TableRow
+              className={cn({
+                'bg-success/10': totalValue > 0,
+                'bg-destructive/10': totalValue < 0,
+                'bg-muted/20': count === 0,
+              })}
+            >
               <TableCell
                 colSpan={8}
                 className={cn('font-semibold', 'bg-muted/40', 'px-4', {

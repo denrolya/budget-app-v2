@@ -2,6 +2,7 @@ import cn from 'classnames';
 import { ArrowDownCircle, ArrowUpCircle, Sigma, SettingsIcon } from 'lucide-react';
 import React from 'react';
 
+import { useIsMobile } from '@/hooks/useMobile';
 import { Button } from '@/components/ui/button';
 import {
   Drawer,
@@ -14,7 +15,6 @@ import {
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import { Type as TransactionType } from '@/types/transaction';
 
 interface UnifiedChartMenuProps {
@@ -30,7 +30,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
   showMonthlyAverage,
   setShowMonthlyAverage,
 }) => {
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
 
   const MenuContent = () => (
     <div className="space-y-4">
@@ -79,7 +79,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
     </div>
   );
 
-  if (isDesktop) {
+  if (!isMobile) {
     return (
       <Popover>
         <PopoverTrigger asChild>

@@ -4,13 +4,13 @@ import { ChevronRight, Folder, FolderClosed, FolderOpenDot, Info, Search } from 
 import moment from 'moment/moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { useIsMobile } from '@/hooks/useMobile';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/contexts/FinanceData';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import Category from '@/models/Category';
 import { Type as TransactionType } from '@/types/transaction';
 
@@ -21,7 +21,7 @@ interface Props {
 }
 
 const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails }) => {
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [currentPath, setCurrentPath] = useState<Category[]>([]);
@@ -119,7 +119,7 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails })
     depth?: number;
   }> = ({ categories, expandedCategories, setExpandedCategories, depth = 0 }) => {
     const handleCategoryClick = (category: Category) => {
-      if (isDesktop) {
+      if (!isMobile) {
         onSelect(category);
         setShowDetails(true);
       }
@@ -142,7 +142,7 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails })
           <React.Fragment key={category.id}>
             <div
               className={cn('border-b cursor-pointer hover:bg-accent hover:text-accent-foreground', {
-                'bg-accent text-accent-foreground': isDesktop && selected?.id === category.id,
+                'bg-accent text-accent-foreground': !isMobile && selected?.id === category.id,
               })}
               onClick={() => handleCategoryClick(category)}
             >
@@ -172,7 +172,7 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails })
                     </div>
                   </div>
                 </div>
-                {!isDesktop && (
+                {isMobile && (
                   <Button
                     variant="ghost"
                     size="sm"

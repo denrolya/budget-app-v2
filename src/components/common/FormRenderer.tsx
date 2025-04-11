@@ -2,7 +2,7 @@ import { Loader2 } from 'lucide-react';
 import React, { forwardRef, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
-import { useScreenSize } from '@/hooks/useScreenSize';
+import { useIsMobile } from '@/hooks/useMobile';
 import AccountForm from '@/components/features/accounts/Form';
 import TransactionForm from '@/components/features/transactions/Form';
 import TransferForm from '@/components/features/transfers/Form';
@@ -51,7 +51,7 @@ const FormContent = forwardRef<{ submitForm: () => Promise<void> }, FormContentP
 export const FormRenderer: React.FC = () => {
   const { formState, submitForm, closeForm, resetForm, updateFormState } = useFormContext();
   const formRef = useRef<{ submitForm: () => Promise<void> }>(null);
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
   const [formKey, setFormKey] = useState('0');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -121,7 +121,7 @@ export const FormRenderer: React.FC = () => {
     </div>
   );
 
-  if (isDesktop) {
+  if (!isMobile) {
     return (
       <Dialog open={formState.isOpen} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">

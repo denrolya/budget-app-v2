@@ -3,6 +3,7 @@ import isEqual from 'lodash/isEqual';
 import { SettingsIcon } from 'lucide-react';
 import React, { memo, useMemo, useState } from 'react';
 
+import { useIsMobile } from '@/hooks/useMobile';
 import ConfigContainer from '@/components/features/statistics/StatisticsCard/ConfigContainer';
 import GenericContent from '@/components/features/statistics/StatisticsCard/GenericContent';
 import MinMaxContent from '@/components/features/statistics/StatisticsCard/MinMaxContent';
@@ -12,7 +13,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import { Interval, StatisticsConfig, StatisticsType } from '@/types/statistics';
 import { Type as TransactionType } from '@/types/transaction';
 import { PercentageChange, StatisticsData, ValueByPeriodData } from '@/types/valueByPeriodStatistics';
@@ -78,7 +78,7 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
 
   const periodText = useMemo(() => getPeriodText(timeframe, period), [timeframe, period]);
   const [open, setOpen] = useState(false);
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
 
   const chartData = useMemo(() => {
     if (statType !== StatisticsType.Avg || (!currentData && !comparisonData)) return null;
@@ -138,7 +138,7 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
           <div className="flex items-center space-x-2 ml-2">
             <StatTypeBadge type={statType} />
             <ConfigContainer open={open} setOpen={setOpen} title={config.title} onChange={onChange} config={config}>
-              <Button variant="ghost" size="icon" className={isDesktop ? 'h-7 w-7 p-0' : 'h-8 w-8 p-0'}>
+              <Button variant="ghost" size="icon" className={!isMobile ? 'h-7 w-7 p-0' : 'h-8 w-8 p-0'}>
                 <SettingsIcon className="h-4 w-4" />
                 <span className="sr-only">Open settings</span>
               </Button>

@@ -9,7 +9,8 @@ import {
   LayoutList,
   ListIcon,
   Plus,
-  RefreshCw, RotateCcw,
+  RefreshCw,
+  RotateCcw,
   Table2,
   UnfoldVertical,
 } from 'lucide-react';
@@ -18,6 +19,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSwipeable } from 'react-swipeable';
 
+import { useIsMobile } from '@/hooks/useMobile';
 import SummaryBadge from '@/components/common/SummaryBadge';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import CompactInlineFilters from '@/components/features/daily-ledger/CompactInlineFilters';
@@ -29,7 +31,7 @@ import BulkCreateTableForm from '@/components/features/transactions/BulkCreateTa
 import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -39,19 +41,17 @@ import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 
-
 type TimePreset = {
-  label: string
-  value: string
-  getTimeframe: () => { after: moment.Moment; before: moment.Moment }
+  label: string;
+  value: string;
+  getTimeframe: () => { after: moment.Moment; before: moment.Moment };
   step: {
-    unit: moment.unitOfTime.DurationConstructor
-    amount: number
-  }
-}
+    unit: moment.unitOfTime.DurationConstructor;
+    amount: number;
+  };
+};
 
 const timePresets: TimePreset[] = [
   {
@@ -80,6 +80,15 @@ const timePresets: TimePreset[] = [
       before: moment().endOf('isoWeek'),
     }),
     step: { unit: 'week', amount: 2 },
+  },
+  {
+    label: 'Current 30 Days',
+    value: '30-days',
+    getTimeframe: () => ({
+      after: moment().subtract(30, 'days').startOf('day'),
+      before: moment().endOf('day'),
+    }),
+    step: { unit: 'day', amount: 30 },
   },
   {
     label: 'Current Month',
@@ -129,16 +138,16 @@ const timePresets: TimePreset[] = [
 ];
 
 export const DailyLedgerPage: React.FC = () => {
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
   const [activeView, setActiveView] = useState<'table' | 'list'>('table');
   const [isReversedOrder, setIsReversedOrder] = useState<boolean>(true);
   const [isCompactTable, setIsCompactTable] = useState<boolean>(true);
   const [isFiltersOpen, setIsFiltersOpen] = useState<boolean>(false);
   const [showBulkCreate, setShowBulkCreate] = useState<boolean>(false);
-  const [selectedPreset, setSelectedPreset] = useState<string>('current-week');
+  const [selectedPreset, setSelectedPreset] = useState<string>('30-days');
   const [customTimeframe, setCustomTimeframe] = useState<{
-    after: moment.Moment
-    before: moment.Moment
+    after: moment.Moment;
+    before: moment.Moment;
   } | null>(null);
   const { openForm } = useFormContext();
   const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
@@ -147,7 +156,7 @@ export const DailyLedgerPage: React.FC = () => {
     if (customTimeframe) {
       return customTimeframe;
     }
-    const preset = timePresets.find(p => p.value === selectedPreset);
+    const preset = timePresets.find((p) => p.value === selectedPreset);
     return preset ? preset.getTimeframe() : timePresets[0].getTimeframe();
   }, [selectedPreset, customTimeframe]);
 
@@ -176,31 +185,34 @@ export const DailyLedgerPage: React.FC = () => {
 
   const onAddTransaction = () => openForm(FormType.Transaction);
 
-  const navigatePeriod = useCallback((direction: 'next' | 'previous') => {
-    const preset = timePresets.find(p => p.value === selectedPreset);
-    if (preset) {
-      const { step } = preset;
-      const newStartDate = timeframe.after.clone()[direction === 'next' ? 'add' : 'subtract'](step.amount, step.unit);
-      const newEndDate = timeframe.before.clone()[direction === 'next' ? 'add' : 'subtract'](step.amount, step.unit);
-      setCustomTimeframe({
-        after: newStartDate,
-        before: newEndDate,
-      });
-    } else if (customTimeframe) {
-      const duration = customTimeframe.before.diff(customTimeframe.after);
-      if (direction === 'next') {
+  const navigatePeriod = useCallback(
+    (direction: 'next' | 'previous') => {
+      const preset = timePresets.find((p) => p.value === selectedPreset);
+      if (preset) {
+        const { step } = preset;
+        const newStartDate = timeframe.after.clone()[direction === 'next' ? 'add' : 'subtract'](step.amount, step.unit);
+        const newEndDate = timeframe.before.clone()[direction === 'next' ? 'add' : 'subtract'](step.amount, step.unit);
         setCustomTimeframe({
-          after: customTimeframe.before.clone().add(1, 'day'),
-          before: customTimeframe.before.clone().add(1, 'day').add(duration, 'milliseconds'),
+          after: newStartDate,
+          before: newEndDate,
         });
-      } else {
-        setCustomTimeframe({
-          after: customTimeframe.after.clone().subtract(duration, 'milliseconds'),
-          before: customTimeframe.after.clone().subtract(1, 'millisecond'),
-        });
+      } else if (customTimeframe) {
+        const duration = customTimeframe.before.diff(customTimeframe.after);
+        if (direction === 'next') {
+          setCustomTimeframe({
+            after: customTimeframe.before.clone().add(1, 'day'),
+            before: customTimeframe.before.clone().add(1, 'day').add(duration, 'milliseconds'),
+          });
+        } else {
+          setCustomTimeframe({
+            after: customTimeframe.after.clone().subtract(duration, 'milliseconds'),
+            before: customTimeframe.after.clone().subtract(1, 'millisecond'),
+          });
+        }
       }
-    }
-  }, [timeframe, selectedPreset, customTimeframe]);
+    },
+    [timeframe, selectedPreset, customTimeframe],
+  );
 
   const goToNextPeriod = () => navigatePeriod('next');
   const goToPreviousPeriod = () => navigatePeriod('previous');
@@ -222,24 +234,27 @@ export const DailyLedgerPage: React.FC = () => {
   };
 
   const summary = useMemo(() => {
-    if (!groupedItems) return {
-      transactionsCount: 0,
-      transfersCount: 0,
-      transactionsValue: 0,
-      transfersValue: 0,
-    };
+    if (!groupedItems)
+      return {
+        transactionsCount: 0,
+        transfersCount: 0,
+        transactionsValue: 0,
+        transfersValue: 0,
+      };
 
     let transactionsCount = 0;
     let transfersCount = 0;
     let transfersValue = 0;
     let transactionsValue = 0;
 
-    groupedItems.forEach(([, , groupTransactionsValue, groupTransfersValue, groupTransactionsCount, groupTransfersCount]) => {
-      transactionsCount += groupTransactionsCount;
-      transfersCount += groupTransfersCount;
-      transactionsValue += groupTransactionsValue;
-      transfersValue += groupTransfersValue;
-    });
+    groupedItems.forEach(
+      ([, , groupTransactionsValue, groupTransfersValue, groupTransactionsCount, groupTransfersCount]) => {
+        transactionsCount += groupTransactionsCount;
+        transfersCount += groupTransfersCount;
+        transactionsValue += groupTransactionsValue;
+        transfersValue += groupTransfersValue;
+      },
+    );
 
     return { transactionsCount, transfersCount, transactionsValue, transfersValue };
   }, [groupedItems]);
@@ -247,8 +262,11 @@ export const DailyLedgerPage: React.FC = () => {
   const activeFiltersCount = React.useMemo(() => {
     let count = 0;
 
-    if (timeframe.after.format(BACKEND_DATE_FORMAT) !== moment().startOf('week').format(BACKEND_DATE_FORMAT) ||
-      timeframe.before.format(BACKEND_DATE_FORMAT) !== moment().endOf('week').format(BACKEND_DATE_FORMAT)) count++;
+    if (
+      timeframe.after.format(BACKEND_DATE_FORMAT) !== moment().startOf('week').format(BACKEND_DATE_FORMAT) ||
+      timeframe.before.format(BACKEND_DATE_FORMAT) !== moment().endOf('week').format(BACKEND_DATE_FORMAT)
+    )
+      count++;
     if (transactionFilters.categories.length > 0) count++;
     if (transactionFilters.accounts.length > 0 || transferFilters.accounts.length > 0) count++;
     if (transactionFilters.amountRange[0] !== undefined || transactionFilters.amountRange[1] !== undefined) count++;
@@ -263,23 +281,28 @@ export const DailyLedgerPage: React.FC = () => {
   useHotkeys('f', () => setIsFiltersOpen(!isFiltersOpen), {}, [isFiltersOpen]);
 
   useEffect(() => {
-    const hotkeys = [{
-      windows: 'ArrowLeft',
-      mac: 'ArrowLeft',
-      description: 'Go to previous period',
-    }, {
-      windows: 'ArrowRight',
-      mac: 'ArrowRight',
-      description: 'Go to next period',
-    }, {
-      windows: 'B',
-      mac: 'B',
-      description: 'Toggle Bulk Create',
-    }, {
-      windows: 'F',
-      mac: 'F',
-      description: 'Toggle Filters Dialog',
-    }];
+    const hotkeys = [
+      {
+        windows: 'ArrowLeft',
+        mac: 'ArrowLeft',
+        description: 'Go to previous period',
+      },
+      {
+        windows: 'ArrowRight',
+        mac: 'ArrowRight',
+        description: 'Go to next period',
+      },
+      {
+        windows: 'B',
+        mac: 'B',
+        description: 'Toggle Bulk Create',
+      },
+      {
+        windows: 'F',
+        mac: 'F',
+        description: 'Toggle Filters Dialog',
+      },
+    ];
     addPageHotkeys('Daily Ledger', hotkeys);
 
     return () => {
@@ -300,180 +323,178 @@ export const DailyLedgerPage: React.FC = () => {
 
   return (
     <FullHeightPageContent {...swipeHandlers} className="flex flex-col justify-between">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-        <ResponsiveTooltip
-          openDelay={1}
-          desktopComponent="hovercard"
-          contentClassName="bg-transparent border-none shadow-none"
-          triggerClassName="cursor-help"
-          content={
-            <YearDoughnutTimeframeDisplayChart
-              data={[{
-                after: timeframe.after,
-                before: timeframe.before,
-              }]} />
-          }
-        >
-          <div className="flex flex-col">
-            <CardTitle className="text-xl font-semibold flex items-center space-x-4">
-              <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground flex-shrink-0" />
-              {formatTimeframe(timeframe.after, timeframe.before)}
-              <SummaryBadge
-                icon={ROUTES.TRANSACTION_LIST.icon}
-                count={summary.transactionsCount}
-                value={summary.transactionsValue} />
-              <SummaryBadge
-                useColors={false}
-                icon={ROUTES.TRANSFER_LIST.icon}
-                count={summary.transfersCount}
-                value={summary.transfersValue} />
-            </CardTitle>
-          </div>
-        </ResponsiveTooltip>
-        <div className="flex flex-wrap justify-between gap-2">
-          {activeView === 'table' && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="hidden md:flex"
-                  onClick={() => setIsReversedOrder(!isReversedOrder)}>
-                  {isReversedOrder && (<CalendarArrowDown className="h-4 w-4" />)}
-                  {!isReversedOrder && (<CalendarArrowUp className="h-4 w-4" />)}
-                  <span className="sr-only">Toggle ordering</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Toggle ordering</TooltipContent>
-            </Tooltip>
-          )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="hidden md:flex data-[state=active]:bg-accent/20 data-[state=active]:ring-2 data-[state=active]:ring-accent"
-                onClick={() => setActiveView(activeView === 'table' ? 'list' : 'table')}>
-                {activeView === 'table' && <LayoutList className="h-4 w-4" />}
-                {activeView === 'list' && <Table2 className="h-4 w-4" />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Toggle {activeView === 'table' ? 'List' : 'Table'} View</TooltipContent>
-          </Tooltip>
-          {activeView === 'table' && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Toggle
-                  className="hidden md:flex"
-                  pressed={isCompactTable}
-                  onPressedChange={setIsCompactTable}
-                >
-                  {isCompactTable && <UnfoldVertical className="h-4 w-4" />}
-                  {!isCompactTable && <FoldVertical className="h-4 w-4" />}
-                </Toggle>
-              </TooltipTrigger>
-              <TooltipContent>Toggle compact view</TooltipContent>
-            </Tooltip>
-          )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={onAddTransaction}>
-                <Plus className="h-4 w-4" />
-                <span className="sr-only">New Transaction</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>New Transaction</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Toggle
-                className="hidden md:flex"
-                pressed={showBulkCreate}
-                onClick={() => setShowBulkCreate(!showBulkCreate)}
-              >
-                <ListIcon className="h-4 w-4" />
-                <span className="sr-only">Bulk Create</span>
-              </Toggle>
-            </TooltipTrigger>
-            <TooltipContent>Bulk Create</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button size="icon" variant="ghost" onClick={refetch}>
-                <RefreshCw className="h-4 w-4" />
-                <span className="sr-only">Refresh</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Refresh</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Toggle
-                className="relative"
-                pressed={isFiltersOpen}
-                onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
-                <Filter className="h-4 w-4" />
-                <span className="sr-only">Filter</span>
-                {activeFiltersCount > 0 && (
-                  <Badge className="absolute -top-2 -right-2 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
-                    {activeFiltersCount}
-                  </Badge>
-                )}
-              </Toggle>
-            </TooltipTrigger>
-            <TooltipContent>Filters</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={handleResetFilters}>
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Reset all filters</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      </div>
-
-      <div className="mb-4">
-        {isDesktop && (
-          <CompactInlineFilters
-            transactionFilters={transactionFilters}
-            transferFilters={transferFilters}
-            setFilter={setFilter}
-            showTransactions={showTransactions}
-            setShowTransactions={setShowTransactions}
-            showTransfers={showTransfers}
-            setShowTransfers={setShowTransfers}
-            timeframe={timeframe}
-            setCustomTimeframe={setCustomTimeframe}
-          />
-        )}
-
-        {showBulkCreate && (
-          <BulkCreateTableForm />
-        )}
-
-        {isError && (
-          <div className="p-4 bg-destructive/10 text-destructive rounded-md m-4">
-            <p className="font-medium">Error:</p>
-            <p>{error?.message || 'An unexpected error occurred.'}</p>
-          </div>
-        )}
-      </div>
-
       <Card className="shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
-        <CardContent className="p-0 bg-background md:bg-card flex flex-col h-full overflow-hidden">
+        <CardHeader className="flex flex-col space-y-4 p-0 md:p-3 bg-background md:bg-card">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+            <ResponsiveTooltip
+              openDelay={1}
+              desktopComponent="hovercard"
+              contentClassName="bg-transparent border-none shadow-none"
+              triggerClassName="cursor-help"
+              content={
+                <YearDoughnutTimeframeDisplayChart
+                  data={[
+                    {
+                      after: timeframe.after,
+                      before: timeframe.before,
+                    },
+                  ]}
+                />
+              }
+            >
+              <div className="flex flex-col">
+                <CardTitle className="text-xl font-semibold flex items-center space-x-4">
+                  <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  {formatTimeframe(timeframe.after, timeframe.before)}
+                  <SummaryBadge
+                    icon={ROUTES.TRANSACTION_LIST.icon}
+                    count={summary.transactionsCount}
+                    value={summary.transactionsValue}
+                  />
+                  <SummaryBadge
+                    useColors={false}
+                    icon={ROUTES.TRANSFER_LIST.icon}
+                    count={summary.transfersCount}
+                    value={summary.transfersValue}
+                  />
+                </CardTitle>
+              </div>
+            </ResponsiveTooltip>
+            <div className="flex flex-wrap justify-between gap-2">
+              {activeView === 'table' && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="hidden md:flex"
+                      onClick={() => setIsReversedOrder(!isReversedOrder)}
+                    >
+                      {isReversedOrder && <CalendarArrowDown className="h-4 w-4" />}
+                      {!isReversedOrder && <CalendarArrowUp className="h-4 w-4" />}
+                      <span className="sr-only">Toggle ordering</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Toggle ordering</TooltipContent>
+                </Tooltip>
+              )}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="hidden md:flex data-[state=active]:bg-accent/20 data-[state=active]:ring-2 data-[state=active]:ring-accent"
+                    onClick={() => setActiveView(activeView === 'table' ? 'list' : 'table')}
+                  >
+                    {activeView === 'table' && <LayoutList className="h-4 w-4" />}
+                    {activeView === 'list' && <Table2 className="h-4 w-4" />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Toggle {activeView === 'table' ? 'List' : 'Table'} View</TooltipContent>
+              </Tooltip>
+              {activeView === 'table' && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Toggle className="hidden md:flex" pressed={isCompactTable} onPressedChange={setIsCompactTable}>
+                      {isCompactTable && <UnfoldVertical className="h-4 w-4" />}
+                      {!isCompactTable && <FoldVertical className="h-4 w-4" />}
+                    </Toggle>
+                  </TooltipTrigger>
+                  <TooltipContent>Toggle compact view</TooltipContent>
+                </Tooltip>
+              )}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={onAddTransaction}>
+                    <Plus className="h-4 w-4" />
+                    <span className="sr-only">New Transaction</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>New Transaction</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Toggle
+                    className="hidden md:flex"
+                    pressed={showBulkCreate}
+                    onClick={() => setShowBulkCreate(!showBulkCreate)}
+                  >
+                    <ListIcon className="h-4 w-4" />
+                    <span className="sr-only">Bulk Create</span>
+                  </Toggle>
+                </TooltipTrigger>
+                <TooltipContent>Bulk Create</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost" onClick={refetch}>
+                    <RefreshCw className="h-4 w-4" />
+                    <span className="sr-only">Refresh</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Refresh</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Toggle className="relative" pressed={isFiltersOpen} onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
+                    <Filter className="h-4 w-4" />
+                    <span className="sr-only">Filter</span>
+                    {activeFiltersCount > 0 && (
+                      <Badge className="absolute -top-2 -right-2 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
+                        {activeFiltersCount}
+                      </Badge>
+                    )}
+                  </Toggle>
+                </TooltipTrigger>
+                <TooltipContent>Filters</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={handleResetFilters}>
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Reset all filters</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </div>
+          <div className="mb-4">
+            {!isMobile && (
+              <CompactInlineFilters
+                transactionFilters={transactionFilters}
+                transferFilters={transferFilters}
+                setFilter={setFilter}
+                showTransactions={showTransactions}
+                setShowTransactions={setShowTransactions}
+                showTransfers={showTransfers}
+                setShowTransfers={setShowTransfers}
+                timeframe={timeframe}
+                setCustomTimeframe={setCustomTimeframe}
+              />
+            )}
+
+            {showBulkCreate && <BulkCreateTableForm />}
+
+            {isError && (
+              <div className="p-4 bg-destructive/10 text-destructive rounded-md m-4">
+                <p className="font-medium">Error:</p>
+                <p>{error?.message || 'An unexpected error occurred.'}</p>
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="p-0 bg-background md:bg-card flex-grow overflow-hidden">
           <ScrollArea className="h-full overflow-auto">
             <div className="flex-grow overflow-hidden">
               {/* Desktop View */}
               <div className="hidden md:block h-full overflow-auto">
-                {(activeView === 'table') && (
+                {activeView === 'table' && (
                   <>
-                    {isLoading && (<TableListingSkeleton after={timeframe.after} before={timeframe.before} />)}
-                    {(!isLoading) && (
+                    {isLoading && <TableListingSkeleton after={timeframe.after} before={timeframe.before} />}
+                    {!isLoading && (
                       <TableListing
                         isLoading={isLoading}
                         groupedItems={groupedItems}
@@ -485,7 +506,7 @@ export const DailyLedgerPage: React.FC = () => {
                     )}
                   </>
                 )}
-                {(activeView === 'list') && (
+                {activeView === 'list' && (
                   <DailyList
                     isLoading={isLoading}
                     groupedItems={groupedItems}
@@ -507,36 +528,37 @@ export const DailyLedgerPage: React.FC = () => {
             </div>
           </ScrollArea>
         </CardContent>
+        <CardFooter className="flex justify-end p-4 md:p-6 bg-background md:bg-card">
+          <div className="flex items-center justify-end gap-2 mt-4">
+            <Button size="icon" variant="outline" onClick={goToPreviousPeriod} disabled={isLoading}>
+              <ChevronLeft className="h-4 w-4" />
+              <span className="sr-only">Previous</span>
+            </Button>
+            <Select
+              value={selectedPreset}
+              onValueChange={(value) => {
+                setSelectedPreset(value);
+                setCustomTimeframe(null);
+              }}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select time period" />
+              </SelectTrigger>
+              <SelectContent>
+                {timePresets.map((preset) => (
+                  <SelectItem key={preset.value} value={preset.value}>
+                    {preset.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button size="icon" variant="outline" onClick={goToNextPeriod} disabled={isLoading}>
+              <ChevronRight className="h-4 w-4" />
+              <span className="sr-only">Next</span>
+            </Button>
+          </div>
+        </CardFooter>
       </Card>
-
-      <div className="flex items-center justify-end gap-2 mt-4">
-        <Button size="icon" variant="outline" onClick={goToPreviousPeriod} disabled={isLoading}>
-          <ChevronLeft className="h-4 w-4" />
-          <span className="sr-only">Previous</span>
-        </Button>
-        <Select
-          value={selectedPreset}
-          onValueChange={(value) => {
-            setSelectedPreset(value);
-            setCustomTimeframe(null);
-          }}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select time period" />
-          </SelectTrigger>
-          <SelectContent>
-            {timePresets.map((preset) => (
-              <SelectItem key={preset.value} value={preset.value}>
-                {preset.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button size="icon" variant="outline" onClick={goToNextPeriod} disabled={isLoading}>
-          <ChevronRight className="h-4 w-4" />
-          <span className="sr-only">Next</span>
-        </Button>
-      </div>
 
       <ListFiltersSheet
         isOpen={isFiltersOpen}

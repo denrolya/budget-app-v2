@@ -2,11 +2,11 @@ import { CalendarIcon } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useState } from 'react';
 
+import { useIsMobile } from '@/hooks/useMobile';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { DASHBOARD_TIMEFRAME_OPTIONS, MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
-import { useScreenSize } from '@/hooks/useScreenSize';
 import { cn } from '@/lib/utils';
 import { Timeframe } from '@/types/global';
 
@@ -30,7 +30,7 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
   children,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const isDesktop = useScreenSize();
+  const isMobile = useIsMobile();
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -63,7 +63,7 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
               });
             }
           }}
-          numberOfMonths={isDesktop ? 2 : 1}
+          numberOfMonths={isMobile ? 1 : 2}
         />
         <div className="p-3 space-y-3">
           <h4 className="font-medium text-sm text-primary">Presets</h4>
