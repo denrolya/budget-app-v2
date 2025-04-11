@@ -7,7 +7,8 @@
         "dev": "vite --host",
         "build": "tsc -b && vite build",
         "build:dev": "vite build",
-        "lint": "eslint -f friendly",
+        "lint": "eslint --cache -f friendly",
+        "lint:ts": "tsc -b --noEmit --pretty",
         "preview": "vite preview",
         "test": "vitest",
         "test:ui": "vitest --ui",
@@ -147,7 +148,7 @@
     "lint-staged": {
         "**/*.{js,jsx,ts,tsx}": [
             "eslint --cache --fix -f friendly",
-            "tsc --pretty",
+            "tsc --noEmit --pretty",
             "git add"
         ]
     }
