@@ -1,9 +1,10 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import debounce from 'lodash/debounce';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface PaginationProps {
   currentPage: number;
@@ -16,14 +17,14 @@ interface PaginationProps {
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
-                                                        currentPage,
-                                                        totalPages,
-                                                        totalItems,
-                                                        perPage,
-                                                        onPageChange,
-                                                        onPerPageChange,
-                                                        isLoading,
-                                                      }) => {
+  currentPage,
+  totalPages,
+  totalItems,
+  perPage,
+  onPageChange,
+  onPerPageChange,
+  isLoading,
+}) => {
   const [inputPage, setInputPage] = useState(currentPage.toString());
 
   useEffect(() => {
@@ -96,9 +97,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           disabled={isLoading}
         />
 
-        <span className="text-muted-foreground whitespace-nowrap">
-          of {totalPages}
-        </span>
+        <span className="text-muted-foreground whitespace-nowrap">of {totalPages}</span>
 
         <Button
           variant="outline"

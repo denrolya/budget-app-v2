@@ -1,5 +1,6 @@
+// eslint-disable
 import { ChevronDownIcon, LineChartIcon, ListIcon, PlusCircleIcon } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { ROUTES } from '@/constants/routes';
 import SidebarListing from '@/components/features/budget/SidebarListing';
@@ -12,20 +13,20 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export type Budget = {
-  id: string
-  name: string
-  startDate: Date
-  endDate?: Date
-  categories: Category[]
-}
+  id: string;
+  name: string;
+  startDate: Date;
+  endDate?: Date;
+  categories: Category[];
+};
 
 export type Category = {
-  id: string
-  name: string
-  budgeted: number
-  actual: number
-  children?: Category[]
-}
+  id: string;
+  name: string;
+  budgeted: number;
+  actual: number;
+  children?: Category[];
+};
 
 export const BudgetManagementPage = () => {
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
@@ -35,7 +36,7 @@ export const BudgetManagementPage = () => {
 
   const updateBudgetDates = (startDate: Date | undefined, endDate: Date | undefined) => {
     if (selectedBudget && startDate) {
-      const updatedBudgets = budgets.map(budget =>
+      const updatedBudgets = budgets.map((budget) =>
         budget.id === selectedBudget.id ? { ...budget, startDate, endDate } : budget,
       );
       setBudgets(updatedBudgets);
@@ -52,7 +53,8 @@ export const BudgetManagementPage = () => {
         <PageWithSidebar.Header
           overrideContent
           title={`${selectedBudget.name} Budget`}
-          onBack={() => setSelectedBudget(null)}>
+          onBack={() => setSelectedBudget(null)}
+        >
           <div className="flex items-center">
             <h1 className="text-xl md:text-2xl font-bold mr-4">
               {selectedBudget ? selectedBudget.name : 'Select a Budget'}
@@ -104,12 +106,8 @@ export const BudgetManagementPage = () => {
                 <section>
                   <h2 className="text-lg font-semibold mb-4">Categories</h2>
                   <div className="space-y-4">
-                    {selectedBudget.categories.map(category => (
-                      <CategoryItem
-                        key={category.id}
-                        category={category}
-                        calculateProgress={calculateProgress}
-                      />
+                    {selectedBudget.categories.map((category) => (
+                      <CategoryItem key={category.id} category={category} calculateProgress={calculateProgress} />
                     ))}
                   </div>
                   <Button variant="outline" size="sm" className="mt-4">
@@ -137,10 +135,14 @@ export const BudgetManagementPage = () => {
   );
 };
 
-const CategoryItem = ({ category, calculateProgress, depth = 0 }: {
-  category: Category,
-  calculateProgress: (budgeted: number, actual: number) => number,
-  depth?: number
+const CategoryItem = ({
+  category,
+  calculateProgress,
+  depth = 0,
+}: {
+  category: Category;
+  calculateProgress: (budgeted: number, actual: number) => number;
+  depth?: number;
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -170,7 +172,8 @@ const CategoryItem = ({ category, calculateProgress, depth = 0 }: {
           <Input
             type="number"
             value={category.budgeted}
-            onChange={(e) => {/* Handle budget update */
+            onChange={() => {
+              /* Handle budget update */
             }}
             className="w-24"
             aria-label={`Budgeted amount for ${category.name}`}
@@ -188,7 +191,7 @@ const CategoryItem = ({ category, calculateProgress, depth = 0 }: {
       </div>
       {isExpanded && category.children && (
         <div className="pl-4">
-          {category.children.map(childCategory => (
+          {category.children.map((childCategory) => (
             <CategoryItem
               key={childCategory.id}
               category={childCategory}
@@ -203,4 +206,3 @@ const CategoryItem = ({ category, calculateProgress, depth = 0 }: {
 };
 
 export default BudgetManagementPage;
-

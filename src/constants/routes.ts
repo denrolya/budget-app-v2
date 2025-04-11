@@ -1,7 +1,6 @@
 import {
-  ArrowLeftRight,
-  BarChart3,
-  CalendarDays, CreditCardIcon,
+  CalendarDays,
+  CreditCardIcon,
   Handshake,
   LayoutDashboard,
   PieChart,

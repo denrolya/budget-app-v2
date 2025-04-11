@@ -25,11 +25,14 @@ export const globalHotkeys: Hotkey[] = [
 
 type HotkeysAction =
   | { type: 'ADD_PAGE_HOTKEYS'; payload: { pageName: string; hotkeys: Hotkey[] } }
-  | { type: 'REMOVE_PAGE_HOTKEYS'; payload: { pageName: string } }
+  | { type: 'REMOVE_PAGE_HOTKEYS'; payload: { pageName: string } };
 
-const hotkeysReducer = (state: { [key: string]: HotkeyCategory }, action: HotkeysAction) => {
+const hotkeysReducer = (
+  state: { [key: string]: HotkeyCategory },
+  action: HotkeysAction,
+): { [key: string]: HotkeyCategory } => {
   switch (action.type) {
-    case 'ADD_PAGE_HOTKEYS':
+    case 'ADD_PAGE_HOTKEYS': {
       const { pageName, hotkeys } = action.payload;
       if (JSON.stringify(state[pageName]?.hotkeys) === JSON.stringify(hotkeys)) {
         return state; // No change, return the same state
@@ -38,9 +41,12 @@ const hotkeysReducer = (state: { [key: string]: HotkeyCategory }, action: Hotkey
         ...state,
         [pageName]: { name: pageName, hotkeys },
       };
-    case 'REMOVE_PAGE_HOTKEYS':
+    }
+    case 'REMOVE_PAGE_HOTKEYS': {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [action.payload.pageName]: _, ...rest } = state;
       return rest;
+    }
     default:
       return state;
   }
@@ -58,7 +64,7 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
   const { openForm } = useFormContext();
   const { toggleCurrencyConverter } = useFinanceData();
 
-  const toggleHotkeysDialog = useCallback(() => setIsDialogOpen(prev => !prev), []);
+  const toggleHotkeysDialog = useCallback(() => setIsDialogOpen((prev) => !prev), []);
   const openHotkeysDialog = useCallback(() => setIsDialogOpen(true), []);
   const closeHotkeysDialog = useCallback(() => setIsDialogOpen(false), []);
 
@@ -71,54 +77,85 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
     dispatch({ type: 'REMOVE_PAGE_HOTKEYS', payload: { pageName } });
   }, []);
 
-  useReactHotkeysHook('shift+t', (event) => {
-    event.preventDefault();
-    openForm(FormType.Transaction);
-  }, [openForm]);
+  useReactHotkeysHook(
+    'shift+t',
+    (event) => {
+      event.preventDefault();
+      openForm(FormType.Transaction);
+    },
+    [openForm],
+  );
 
-  useReactHotkeysHook('shift+r', (event) => {
-    event.preventDefault();
-    openForm(FormType.Transfer);
-  }, [openForm]);
+  useReactHotkeysHook(
+    'shift+r',
+    (event) => {
+      event.preventDefault();
+      openForm(FormType.Transfer);
+    },
+    [openForm],
+  );
 
-  useReactHotkeysHook('shift+a', (event) => {
-    event.preventDefault();
-    openForm(FormType.Account);
-  }, [openForm]);
+  useReactHotkeysHook(
+    'shift+a',
+    (event) => {
+      event.preventDefault();
+      openForm(FormType.Account);
+    },
+    [openForm],
+  );
 
-  useReactHotkeysHook('shift+c', (event) => {
-    event.preventDefault();
-    toggleCurrencyConverter();
-  }, [toggleCurrencyConverter]);
+  useReactHotkeysHook(
+    'shift+c',
+    (event) => {
+      event.preventDefault();
+      toggleCurrencyConverter();
+    },
+    [toggleCurrencyConverter],
+  );
 
-  useReactHotkeysHook('h', (event) => {
-    event.preventDefault();
-    toggleHotkeysDialog();
-  }, [toggleHotkeysDialog]);
+  useReactHotkeysHook(
+    'h',
+    (event) => {
+      event.preventDefault();
+      toggleHotkeysDialog();
+    },
+    [toggleHotkeysDialog],
+  );
 
-  useReactHotkeysHook('l', (event) => {
-    event.preventDefault();
-    if (location.pathname !== ROUTES.DAILY_LEDGER.path) {
-      navigate(ROUTES.DAILY_LEDGER.path);
-    }
-  }, [location.pathname, navigate]);
+  useReactHotkeysHook(
+    'l',
+    (event) => {
+      event.preventDefault();
+      if (location.pathname !== ROUTES.DAILY_LEDGER.path) {
+        navigate(ROUTES.DAILY_LEDGER.path);
+      }
+    },
+    [location.pathname, navigate],
+  );
 
-  useReactHotkeysHook('t', (event) => {
-    event.preventDefault();
-    if (location.pathname !== ROUTES.TRANSACTION_LIST.path) {
-      navigate(ROUTES.TRANSACTION_LIST.path);
-    }
-  }, [location.pathname, navigate]);
+  useReactHotkeysHook(
+    't',
+    (event) => {
+      event.preventDefault();
+      if (location.pathname !== ROUTES.TRANSACTION_LIST.path) {
+        navigate(ROUTES.TRANSACTION_LIST.path);
+      }
+    },
+    [location.pathname, navigate],
+  );
 
-  const contextValue = useMemo(() => ({
-    addPageHotkeys,
-    removePageHotkeys,
-    currentPage,
-    setCurrentPage,
-    openHotkeysDialog,
-    closeHotkeysDialog,
-    pageHotkeys,
-  }), [addPageHotkeys, removePageHotkeys, currentPage, openHotkeysDialog, closeHotkeysDialog, pageHotkeys]);
+  const contextValue = useMemo(
+    () => ({
+      addPageHotkeys,
+      removePageHotkeys,
+      currentPage,
+      setCurrentPage,
+      openHotkeysDialog,
+      closeHotkeysDialog,
+      pageHotkeys,
+    }),
+    [addPageHotkeys, removePageHotkeys, currentPage, openHotkeysDialog, closeHotkeysDialog, pageHotkeys],
+  );
 
   return (
     <HotkeysContext.Provider value={contextValue}>

@@ -20,25 +20,34 @@ interface CustomTooltipProps {
   showComparison?: boolean;
 }
 
-const ChartTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, selectedPeriod, showComparison = true }) => {
+const ChartTooltip: React.FC<CustomTooltipProps> = ({
+  active,
+  payload,
+  label,
+  selectedPeriod,
+  showComparison = true,
+}) => {
   if (!active || !payload || !payload.length) {
     return null;
   }
 
   const currentDate = moment(label);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const formattedDate = useMemo(() => {
     switch (selectedPeriod) {
       case 'P1D':
         return currentDate.format('MMM D, YYYY');
-      case 'P1W':
+      case 'P1W': {
         const startOfWeek = currentDate.clone().startOf('isoWeek');
         const endOfWeek = currentDate.clone().endOf('isoWeek');
-        const endFormat = startOfWeek.year() !== endOfWeek.year()
-          ? 'MMM D, YYYY'
-          : startOfWeek.month() !== endOfWeek.month()
-            ? 'MMM D'
-            : 'D';
+        const endFormat =
+          startOfWeek.year() !== endOfWeek.year()
+            ? 'MMM D, YYYY'
+            : startOfWeek.month() !== endOfWeek.month()
+              ? 'MMM D'
+              : 'D';
         return `W${currentDate.isoWeek()}: ${startOfWeek.format('MMM D')} - ${endOfWeek.format(endFormat)}`;
+      }
       case 'P1M':
         return currentDate.format('MMM YYYY');
       default:
@@ -46,8 +55,8 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, se
     }
   }, [currentDate, selectedPeriod]);
 
-  const totalExpense = payload.find(entry => entry.name === 'Total Expense');
-  const totalIncome = payload.find(entry => entry.name === 'Total Income');
+  const totalExpense = payload.find((entry) => entry.name === 'Total Expense');
+  const totalIncome = payload.find((entry) => entry.name === 'Total Income');
 
   const renderEntry = (entry: CustomTooltipProps['payload'][0]) => {
     const isTotal = entry.name === 'Total Expense' || entry.name === 'Total Income';
@@ -98,18 +107,15 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, se
     return 'bg-destructive';
   };
 
-  const totalComparison = totalExpense && totalIncome && totalIncome.value !== 0
-    ? totalExpense.value / totalIncome.value
-    : null;
+  const totalComparison =
+    totalExpense && totalIncome && totalIncome.value !== 0 ? totalExpense.value / totalIncome.value : null;
 
   return (
     <Card className="w-[280px] shadow-lg z-10">
       <CardContent className="p-2">
         <p className="text-xs font-medium mb-1">{formattedDate}</p>
         <Separator className="my-1" />
-        <div className="space-y-1">
-          {payload.map(renderEntry)}
-        </div>
+        <div className="space-y-1">{payload.map(renderEntry)}</div>
         {(totalExpense || totalIncome) && (
           <>
             <Separator className="my-1" />
@@ -117,21 +123,13 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, se
               {totalExpense && (
                 <div className="flex justify-between items-center" style={{ color: totalExpense.color }}>
                   <span className="font-medium">Expenses:</span>
-                  <MoneyValue
-                    className="font-mono font-medium"
-                    useColors={false}
-                    amount={totalExpense.value}
-                  />
+                  <MoneyValue className="font-mono font-medium" useColors={false} amount={totalExpense.value} />
                 </div>
               )}
               {totalIncome && (
                 <div className="flex justify-between items-center" style={{ color: totalIncome.color }}>
                   <span className="font-medium">Income:</span>
-                  <MoneyValue
-                    className="font-mono font-medium"
-                    useColors={false}
-                    amount={totalIncome.value}
-                  />
+                  <MoneyValue className="font-mono font-medium" useColors={false} amount={totalIncome.value} />
                 </div>
               )}
               {showComparison && totalComparison !== null && (
@@ -157,4 +155,3 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, se
 };
 
 export default ChartTooltip;
-

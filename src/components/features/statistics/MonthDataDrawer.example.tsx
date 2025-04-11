@@ -5,26 +5,21 @@ import React, { useMemo } from 'react';
 
 import MonthExpensesRadialBarChart from '@/components/features/statistics/MonthExpensesRadialBarChart.example';
 import ExpenseSunburstChart from '@/components/features/statistics/Sunburst.example';
-import TimelineChart from '@/components/features/statistics/TimelineChart.example';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+
+import TimelineChart from '@/components/features/statistics/TimelineChart.example';
 
 type CalendarData = {
   day: string;
   value: number;
-}
+};
 
 type TreeMapData = {
   name: string;
   children?: TreeMapData[];
   value?: number;
-}
+};
 
 type Category = {
   name: string;
@@ -32,21 +27,21 @@ type Category = {
     name: string;
     items: string[];
   }[];
-}
+};
 
 const generateMonthData = (startDate: Date, endDate: Date): CalendarData[] =>
-  eachDayOfInterval({ start: startDate, end: endDate }).map(date => ({
+  eachDayOfInterval({ start: startDate, end: endDate }).map((date) => ({
     day: format(date, 'yyyy-MM-dd'),
     value: Math.max(1, Math.floor(Math.random() * 100)), // Ensure minimum value of 1
   }));
 
 const generateNestedTreemapData = (categories: Category[], isExpense: boolean): TreeMapData => ({
   name: isExpense ? 'Expenses' : 'Income',
-  children: categories.map(category => ({
+  children: categories.map((category) => ({
     name: category.name,
-    children: category.subcategories.map(subcategory => ({
+    children: category.subcategories.map((subcategory) => ({
       name: subcategory.name,
-      children: subcategory.items.map(item => ({
+      children: subcategory.items.map((item) => ({
         name: item,
         value: Math.max(1, Math.floor(Math.random() * 1000) + 100), // Ensure minimum value of 1
       })),
@@ -105,7 +100,7 @@ const incomeCategories: Category[] = [
 type FinancialStatisticsDrawerProps = {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-}
+};
 
 const FinancialStatisticsDrawer = ({ isOpen, setIsOpen }: FinancialStatisticsDrawerProps) => {
   const today = new Date();
@@ -168,65 +163,65 @@ type CalendarChartProps = {
   monthStart: Date;
   monthEnd: Date;
   className?: string;
-}
+};
 
 const CalendarChart = ({ title, data, monthStart, monthEnd, className }: CalendarChartProps) => (
-    <div className={className}>
-      <h3 className="text-base font-semibold mb-2">{title}</h3>
-      <div className="h-[250px] sm:h-[300px]">
-        <ResponsiveCalendar
-          data={data}
-          from={format(monthStart, 'yyyy-MM-dd')}
-          to={format(monthEnd, 'yyyy-MM-dd')}
-          emptyColor="#eeeeee"
-          colors={['#61cdbb', '#97e3d5', '#e8c1a0', '#f47560']}
-          margin={{ top: 20, right: 10, bottom: 20, left: 10 }}
-          yearSpacing={40}
-          monthBorderColor="#ffffff"
-          dayBorderWidth={2}
-          dayBorderColor="#ffffff"
-          legends={[
-            {
-              anchor: 'bottom',
-              direction: 'row',
-              translateY: 36,
-              itemCount: 4,
-              itemWidth: 42,
-              itemHeight: 36,
-              itemsSpacing: 14,
-              itemDirection: 'right-to-left',
-            },
-          ]}
-        />
-      </div>
+  <div className={className}>
+    <h3 className="text-base font-semibold mb-2">{title}</h3>
+    <div className="h-[250px] sm:h-[300px]">
+      <ResponsiveCalendar
+        data={data}
+        from={format(monthStart, 'yyyy-MM-dd')}
+        to={format(monthEnd, 'yyyy-MM-dd')}
+        emptyColor="#eeeeee"
+        colors={['#61cdbb', '#97e3d5', '#e8c1a0', '#f47560']}
+        margin={{ top: 20, right: 10, bottom: 20, left: 10 }}
+        yearSpacing={40}
+        monthBorderColor="#ffffff"
+        dayBorderWidth={2}
+        dayBorderColor="#ffffff"
+        legends={[
+          {
+            anchor: 'bottom',
+            direction: 'row',
+            translateY: 36,
+            itemCount: 4,
+            itemWidth: 42,
+            itemHeight: 36,
+            itemsSpacing: 14,
+            itemDirection: 'right-to-left',
+          },
+        ]}
+      />
     </div>
-  );
+  </div>
+);
 
 type TreeMapChartProps = {
   title: string;
   data: TreeMapData;
   className?: string;
-}
+};
 
 const TreeMapChart = ({ title, data, className }: TreeMapChartProps) => (
-    <div className={className}>
-      <h3 className="text-base font-semibold mb-2">{title}</h3>
-      <div className="h-[250px] sm:h-[300px]">
-        <ResponsiveTreeMap
-          data={data}
-          identity="name"
-          value="value"
-          valueFormat=".02s"
-          margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-          labelSkipSize={12}
-          labelTextColor={{ from: 'color', modifiers: [['darker', 1.2]] }}
-          parentLabelPosition="left"
-          parentLabelTextColor={{ from: 'color', modifiers: [['darker', 2]] }}
-          borderColor={{ from: 'color', modifiers: [['darker', 0.1]] }}
-          colors={{ scheme: 'nivo' }}
-        />
-      </div>
+  <div className={className}>
+    <h3 className="text-base font-semibold mb-2">{title}</h3>
+    <div className="h-[250px] sm:h-[300px]">
+      <ResponsiveTreeMap
+        data={data}
+        identity="name"
+        value="value"
+        valueFormat=".02s"
+        margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+        labelSkipSize={12}
+        labelTextColor={{ from: 'color', modifiers: [['darker', 1.2]] }}
+        parentLabelPosition="left"
+        parentLabelTextColor={{ from: 'color', modifiers: [['darker', 2]] }}
+        borderColor={{ from: 'color', modifiers: [['darker', 0.1]] }}
+        colors={{ scheme: 'nivo' }}
+      />
     </div>
-  );
+  </div>
+);
 
 export default FinancialStatisticsDrawer;

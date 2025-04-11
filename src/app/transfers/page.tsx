@@ -32,7 +32,7 @@ export const TransfersListPage: React.FC = () => {
   } = useTransfers();
   const { openForm } = useFormContext();
   const onAddTransfer = () => openForm(FormType.Transfer);
-  const [selectedTransfers, setSelectedTransfers] = useState<number[]>([]);
+  const [selectedTransfers] = useState<number[]>([]);
   const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
 
   const activeFiltersCount = useMemo(() => {
@@ -49,11 +49,13 @@ export const TransfersListPage: React.FC = () => {
   useHotkeys('f', () => setIsFiltersOpen(!isFiltersOpen), {}, [isFiltersOpen]);
 
   useEffect(() => {
-    const hotkeys = [{
-      windows: 'F',
-      mac: 'F',
-      description: 'Toggle Filters Dialog',
-    }];
+    const hotkeys = [
+      {
+        windows: 'F',
+        mac: 'F',
+        description: 'Toggle Filters Dialog',
+      },
+    ];
     addPageHotkeys('Transfers', hotkeys);
 
     return () => {
@@ -88,10 +90,7 @@ export const TransfersListPage: React.FC = () => {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Toggle
-                    className="relative"
-                    pressed={isFiltersOpen}
-                    onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
+                  <Toggle className="relative" pressed={isFiltersOpen} onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
                     <Filter className="h-4 w-4" />
                     <span className="sr-only">Filter</span>
                     {activeFiltersCount > 0 && (
@@ -107,9 +106,7 @@ export const TransfersListPage: React.FC = () => {
           </div>
           {selectedTransfers.length > 0 && (
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-muted-foreground">
-                {selectedTransfers.length} transfer(s) selected
-              </span>
+              <span className="text-sm text-muted-foreground">{selectedTransfers.length} transfer(s) selected</span>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button variant="outline" size="icon">
@@ -156,10 +153,8 @@ export const TransfersListPage: React.FC = () => {
         </CardFooter>
       </Card>
 
-      {(isFetching && !isLoading) && (
-        <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded">
-          Updating...
-        </div>
+      {isFetching && !isLoading && (
+        <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded">Updating...</div>
       )}
 
       <ListFiltersSheet
@@ -167,7 +162,8 @@ export const TransfersListPage: React.FC = () => {
         setIsOpen={setIsFiltersOpen}
         data={filters}
         onChange={setFilter}
-        onReset={resetFilters} />
+        onReset={resetFilters}
+      />
     </FullHeightPageContent>
   );
 };

@@ -17,7 +17,8 @@ const DetailsHoverCard: React.FC<Props> = ({ account }) => (
       {'Balance: '}
       <MoneyValue
         showSign
-        className="text-mono"
+        showValuesTooltip={false}
+        className="text-mono font-medium"
         maximumFractionDigits={2}
         amount={account.balance}
         currency={account.currency} />

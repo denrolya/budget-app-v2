@@ -1,3 +1,5 @@
+import React, { useEffect, useRef, useState } from 'react';
+
 import BalanceByAccountType from '@/components/features/statistics/BalanceByAccountType';
 import CategoriesDoughnut from '@/components/features/statistics/CategoriesDoughnut/Card';
 import CategoriesTimeline from '@/components/features/statistics/CategoriesTimeline/Card';
@@ -10,7 +12,6 @@ import { cardConfigs } from '@/constants/dashboard-config';
 import { Type as AccountType } from '@/types/account';
 import { StatisticsConfig } from '@/types/statistics';
 import { generateSlug } from '@/utils/generateSlug';
-import React, { useEffect, useRef, useState } from 'react';
 
 const DashboardPage: React.FC = () => {
   const [configs] = useState(cardConfigs);
@@ -54,9 +55,7 @@ const DashboardPage: React.FC = () => {
     { type: 'balance', accountType: AccountType.Cash },
     { type: 'balance', accountType: AccountType.Bank },
     { type: 'total' },
-    ...groups.flatMap(group =>
-      configs[group].map(card => ({ type: 'statistics', group, card })),
-    ),
+    ...groups.flatMap((group) => configs[group].map((card) => ({ type: 'statistics', group, card }))),
   ];
 
   return (
@@ -109,16 +108,9 @@ const DashboardPage: React.FC = () => {
                     transition: 'filter 0.3s ease-out, opacity 0.3s ease-out',
                   }}
                 >
-                  {item.type === 'balance' && (
-                    <BalanceByAccountType type={item.accountType} />
-                  )}
+                  {item.type === 'balance' && <BalanceByAccountType type={item.accountType} />}
                   {item.type === 'total' && <TotalBalanceCard />}
-                  {item.type === 'statistics' && (
-                    <StatisticsCard
-                      config={item.card}
-                      onChange={handleConfigChange}
-                    />
-                  )}
+                  {item.type === 'statistics' && <StatisticsCard config={item.card} onChange={handleConfigChange} />}
                 </div>
               </div>
             );
@@ -139,9 +131,7 @@ const DashboardPage: React.FC = () => {
               <div key={group}>
                 {index > 0 && <Separator className="my-6" />}
                 <h3 className="text-lg font-semibold mb-4 capitalize text-primary">{group}</h3>
-                <div className="space-y-4">
-                  {renderStatisticsCards(group)}
-                </div>
+                <div className="space-y-4">{renderStatisticsCards(group)}</div>
               </div>
             ))}
           </div>
@@ -152,4 +142,3 @@ const DashboardPage: React.FC = () => {
 };
 
 export default DashboardPage;
-
