@@ -42,18 +42,18 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 // Mock data for different exchange rate sources
 const exchangeRateSources = {
   'Central Bank': {
-    USD: { EUR: 0.92, GBP: 0.79, JPY: 148.21, HUF: 354.50 },
-    EUR: { USD: 1.09, GBP: 0.86, JPY: 161.10, HUF: 385.33 },
+    USD: { EUR: 0.92, GBP: 0.79, JPY: 148.21, HUF: 354.5 },
+    EUR: { USD: 1.09, GBP: 0.86, JPY: 161.1, HUF: 385.33 },
     HUF: { USD: 0.0028, EUR: 0.0026, GBP: 0.0022, JPY: 0.42 },
   },
   'Market Average': {
-    USD: { EUR: 0.93, GBP: 0.80, JPY: 148.50, HUF: 355.00 },
-    EUR: { USD: 1.08, GBP: 0.86, JPY: 160.80, HUF: 384.50 },
+    USD: { EUR: 0.93, GBP: 0.8, JPY: 148.5, HUF: 355.0 },
+    EUR: { USD: 1.08, GBP: 0.86, JPY: 160.8, HUF: 384.5 },
     HUF: { USD: 0.0028, EUR: 0.0026, GBP: 0.0022, JPY: 0.42 },
   },
   'Commercial Bank': {
-    USD: { EUR: 0.91, GBP: 0.78, JPY: 147.90, HUF: 353.80 },
-    EUR: { USD: 1.10, GBP: 0.85, JPY: 161.50, HUF: 386.00 },
+    USD: { EUR: 0.91, GBP: 0.78, JPY: 147.9, HUF: 353.8 },
+    EUR: { USD: 1.1, GBP: 0.85, JPY: 161.5, HUF: 386.0 },
     HUF: { USD: 0.0028, EUR: 0.0026, GBP: 0.0022, JPY: 0.41 },
   },
 };
@@ -65,13 +65,21 @@ export const LayoutV7 = () => {
   const [toCurrency, setToCurrency] = useState('EUR');
   const [baseCurrency, setBaseCurrency] = useState('USD');
 
+  const test = 'asdf';
+
   const getExchangeRate = (source: string, from: string, to: string) => {
     if (from === to) return 1;
-    return exchangeRateSources[source as keyof typeof exchangeRateSources][from as keyof (typeof exchangeRateSources)[keyof typeof exchangeRateSources]][to as keyof (typeof exchangeRateSources)[keyof typeof exchangeRateSources][keyof (typeof exchangeRateSources)[keyof typeof exchangeRateSources]]] || 0;
+    return (
+      exchangeRateSources[source as keyof typeof exchangeRateSources][
+        from as keyof (typeof exchangeRateSources)[keyof typeof exchangeRateSources]
+      ][
+        to as keyof (typeof exchangeRateSources)[keyof typeof exchangeRateSources][keyof (typeof exchangeRateSources)[keyof typeof exchangeRateSources]]
+      ] || 0
+    );
   };
 
   const calculateStatistics = (from: string, to: string) => {
-    const rates = Object.keys(exchangeRateSources).map(source => getExchangeRate(source, from, to));
+    const rates = Object.keys(exchangeRateSources).map((source) => getExchangeRate(source, from, to));
     const avg = rates.reduce((a, b) => a + b, 0) / rates.length;
     const min = Math.min(...rates);
     const max = Math.max(...rates);
@@ -119,28 +127,40 @@ export const LayoutV7 = () => {
                   </SelectContent>
                 </Select>
                 <div className="text-xs text-accent-foreground/80 space-x-2 hidden md:inline-block">
-                  <span>{baseCurrency}/EUR: {getExchangeRate('Central Bank', baseCurrency, 'EUR').toFixed(2)}</span>
-                  <span>{baseCurrency}/GBP: {getExchangeRate('Central Bank', baseCurrency, 'GBP').toFixed(2)}</span>
-                  <span>{baseCurrency}/JPY: {getExchangeRate('Central Bank', baseCurrency, 'JPY').toFixed(2)}</span>
+                  <span>
+                    {baseCurrency}/EUR: {getExchangeRate('Central Bank', baseCurrency, 'EUR').toFixed(2)}
+                  </span>
+                  <span>
+                    {baseCurrency}/GBP: {getExchangeRate('Central Bank', baseCurrency, 'GBP').toFixed(2)}
+                  </span>
+                  <span>
+                    {baseCurrency}/JPY: {getExchangeRate('Central Bank', baseCurrency, 'JPY').toFixed(2)}
+                  </span>
                 </div>
               </div>
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
                 <SheetTitle>Exchange Rates</SheetTitle>
-                <SheetDescription>
-                  Current exchange rates and statistics for {baseCurrency}
-                </SheetDescription>
+                <SheetDescription>Current exchange rates and statistics for {baseCurrency}</SheetDescription>
               </SheetHeader>
               <div className="mt-4 space-y-4">
                 {Object.keys(exchangeRateSources).map((source) => (
                   <div key={source} className="space-y-2">
                     <h4 className="text-sm font-medium">{source}</h4>
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div>{baseCurrency}/EUR: {getExchangeRate(source, baseCurrency, 'EUR').toFixed(4)}</div>
-                      <div>{baseCurrency}/GBP: {getExchangeRate(source, baseCurrency, 'GBP').toFixed(4)}</div>
-                      <div>{baseCurrency}/JPY: {getExchangeRate(source, baseCurrency, 'JPY').toFixed(2)}</div>
-                      <div>{baseCurrency}/HUF: {getExchangeRate(source, baseCurrency, 'HUF').toFixed(2)}</div>
+                      <div>
+                        {baseCurrency}/EUR: {getExchangeRate(source, baseCurrency, 'EUR').toFixed(4)}
+                      </div>
+                      <div>
+                        {baseCurrency}/GBP: {getExchangeRate(source, baseCurrency, 'GBP').toFixed(4)}
+                      </div>
+                      <div>
+                        {baseCurrency}/JPY: {getExchangeRate(source, baseCurrency, 'JPY').toFixed(2)}
+                      </div>
+                      <div>
+                        {baseCurrency}/HUF: {getExchangeRate(source, baseCurrency, 'HUF').toFixed(2)}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -148,7 +168,9 @@ export const LayoutV7 = () => {
                   <h4 className="text-sm font-medium">Statistics ({baseCurrency}/EUR)</h4>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     {Object.entries(calculateStatistics(baseCurrency, 'EUR')).map(([key, value]) => (
-                      <div key={key}>{key}: {value.toFixed(4)}</div>
+                      <div key={key}>
+                        {key}: {value.toFixed(4)}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -271,12 +293,7 @@ export const LayoutV7 = () => {
             <div className="flex items-center space-x-4">
               <div className="flex-1 space-y-2">
                 <div className="flex items-center space-x-2">
-                  <Input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="w-full"
-                  />
+                  <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full" />
                   <Select value={fromCurrency} onValueChange={setFromCurrency}>
                     <SelectTrigger className="w-[100px]">
                       <SelectValue placeholder="From" />
@@ -314,12 +331,7 @@ export const LayoutV7 = () => {
             </div>
             <div className="flex flex-wrap gap-2">
               {presetAmounts.map((preset) => (
-                <Button
-                  key={preset}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setAmount(preset.toString())}
-                >
+                <Button key={preset} variant="outline" size="sm" onClick={() => setAmount(preset.toString())}>
                   {preset}
                 </Button>
               ))}
