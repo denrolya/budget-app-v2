@@ -27,7 +27,7 @@ import Transaction from '@/models/Transaction';
 import Transfer from '@/models/Transfer';
 import { confirm } from '@/utils/confirmation';
 
-type EditableField = 'account' | 'amount' | 'category' | 'note' | 'executedAt'
+type EditableField = 'account' | 'amount' | 'category' | 'note' | 'executedAt';
 
 interface Props {
   isLoading: boolean;
@@ -50,45 +50,48 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
     setEditValue(value);
   };
 
-  const handleSave = useCallback(async (item: Transaction) => {
-    if (!editingCell || !('id' in item)) return;
+  const handleSave = useCallback(
+    async (item: Transaction) => {
+      if (!editingCell || !('id' in item)) return;
 
-    const updatedItem = { ...item };
+      const updatedItem = { ...item };
 
-    switch (editingCell.field) {
-      case 'account':
-        updatedItem.account = editValue || item.account;
-        break;
-      case 'amount':
-        updatedItem.amount = parseFloat(editValue as string);
-        break;
-      case 'category':
-        if ('category' in updatedItem) {
-          updatedItem.category = editValue || item.category;
-        }
-        break;
-      case 'note':
-        updatedItem.note = editValue as string;
-        break;
-      case 'executedAt':
-        updatedItem.executedAt = moment(editValue as string);
-        break;
-    }
+      switch (editingCell.field) {
+        case 'account':
+          updatedItem.account = editValue || item.account;
+          break;
+        case 'amount':
+          updatedItem.amount = parseFloat(editValue as string);
+          break;
+        case 'category':
+          if ('category' in updatedItem) {
+            updatedItem.category = editValue || item.category;
+          }
+          break;
+        case 'note':
+          updatedItem.note = editValue as string;
+          break;
+        case 'executedAt':
+          updatedItem.executedAt = moment(editValue as string);
+          break;
+      }
 
-    try {
-      await updateTransaction({
-        id: Number(item.id),
-        updates: updatedItem,
-        originalTransaction: item as Transaction,
-      });
-      toast.success('Item updated successfully');
-    } catch (error) {
-      console.error('Form submission failed:', error);
-      toast.error('Failed to submit item. Issue requires investigation.');
-    }
+      try {
+        await updateTransaction({
+          id: Number(item.id),
+          updates: updatedItem,
+          originalTransaction: item as Transaction,
+        });
+        toast.success('Item updated successfully');
+      } catch (error) {
+        console.error('Form submission failed:', error);
+        toast.error('Failed to submit item. Issue requires investigation.');
+      }
 
-    setEditingCell(null);
-  }, [editingCell, editValue, updateTransaction]);
+      setEditingCell(null);
+    },
+    [editingCell, editValue, updateTransaction],
+  );
 
   const handleCancel = useCallback(() => {
     setEditingCell(null);
@@ -114,7 +117,7 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
   };
 
   const toggleSheet = (itemId: number) => {
-    setOpenSheetId(prevId => prevId === itemId ? null : itemId);
+    setOpenSheetId((prevId) => (prevId === itemId ? null : itemId));
   };
 
   const renderEditableCell = (item: Transaction, field: EditableField, content: React.ReactNode) => {
@@ -131,7 +134,7 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
               multiple={false}
               disabled={isUpdating}
               value={editValue?.id || editValue}
-              onChange={v => setEditValue(v)}
+              onChange={(v) => setEditValue(v)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSave(item);
                 if (e.key === 'Escape') handleCancel();
@@ -164,7 +167,7 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                 disabled={isUpdating}
                 type={item.type}
                 value={editValue?.id || editValue}
-                onChange={v => setEditValue(v)}
+                onChange={(v) => setEditValue(v)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleSave(item);
                   if (e.key === 'Escape') handleCancel();
@@ -264,24 +267,15 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
   const renderTransferAmounts = (transfer: Transfer) => (
     <>
       <div className="flex flex-row items-center">
-        <MoneyValue
-          amount={-transfer.fromExpense.amount}
-          currency={transfer.fromExpense.account.currency}
-        />
+        <MoneyValue amount={-transfer.fromExpense.amount} currency={transfer.fromExpense.account.currency} />
         <ArrowRight className="h-4 w-4 text-muted-foreground mx-2" />
-        <MoneyValue
-          amount={transfer.toIncome.amount}
-          currency={transfer.toIncome.account.currency}
-        />
+        <MoneyValue amount={transfer.toIncome.amount} currency={transfer.toIncome.account.currency} />
       </div>
       <div className="text-xs text-muted-foreground">
         {transfer.feeExpense && (
           <div className="flex items-center">
             <span className="mr-1">Fee:</span>
-            <MoneyValue
-              amount={-transfer.feeExpense.amount}
-              currency={transfer.feeExpense.account.currency}
-            />
+            <MoneyValue amount={-transfer.feeExpense.amount} currency={transfer.feeExpense.account.currency} />
           </div>
         )}
       </div>
@@ -305,7 +299,9 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
         </TableHeader>
         <TableBody>
           {dates.map((date) => {
-            const [, items, transactionsValue, transfersValue, transactionsCount, transfersCount] = groupedItems?.find((group) => group[0].isSame(date, 'day')) || [null, [], 0, 0, 0, 0];
+            const [, items, transactionsValue, transfersValue, transactionsCount, transfersCount] = groupedItems?.find(
+              (group) => group[0].isSame(date, 'day'),
+            ) || [null, [], 0, 0, 0, 0];
 
             return (
               <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
@@ -314,7 +310,8 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                     colSpan={8}
                     className={cn('font-semibold', 'px-4', {
                       'py-2': compact,
-                    })}>
+                    })}
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <span className="font-semibold">
@@ -323,19 +320,22 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                             badgeSize="sm"
                             variant="default"
                             showTime={false}
-                            date={date} />
+                            date={date}
+                          />
                         </span>
                       </div>
                       <div className="flex items-center space-x-4">
                         <SummaryBadge
                           icon={ROUTES.TRANSACTION_LIST.icon}
                           count={transactionsCount}
-                          value={transactionsValue} />
+                          value={transactionsValue}
+                        />
                         <SummaryBadge
                           useColors={false}
                           icon={ROUTES.TRANSFER_LIST.icon}
                           count={transfersCount}
-                          value={transfersValue} />
+                          value={transfersValue}
+                        />
                       </div>
                     </div>
                   </TableCell>
@@ -343,49 +343,61 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                 {items.length === 0 && (
                   <TableRow className="bg-muted/10">
                     <TableCell
-                      colSpan={8} className={cn('text-center', 'py-4', 'text-muted-foreground', {
-                      'py-2': compact,
-                    })}>
+                      colSpan={8}
+                      className={cn('text-center', 'py-4', 'text-muted-foreground', {
+                        'py-2': compact,
+                      })}
+                    >
                       No transactions or transfers for this day.
                     </TableCell>
                   </TableRow>
                 )}
                 {items.map((item) => (
                   <TableRow
-                    key={item.id} className={cn('bg-muted/20', {
-                    'bg-warning/20 hover:bg-warning/30': (item instanceof Transaction && item.isDraft),
-                  })}>
+                    key={item.id}
+                    className={cn('bg-muted/20', {
+                      'bg-warning/20 hover:bg-warning/30': item instanceof Transaction && item.isDraft,
+                    })}
+                  >
                     <TableCell
                       className={cn('w-4', {
                         'py-0': compact,
-                      })}></TableCell>
+                      })}
+                    ></TableCell>
                     <TableCell
                       className={cn({
                         'py-0': compact,
-                      })}>
+                      })}
+                    >
                       <Sheet
                         open={openSheetId === item.id}
-                        onOpenChange={(open) => setOpenSheetId(open ? Number(item.id) : null)}>
+                        onOpenChange={(open) => setOpenSheetId(open ? Number(item.id) : null)}
+                      >
                         <SheetTrigger asChild>
-                          <code className="cursor-help" onClick={() => toggleSheet(Number(item.id))}>#{item.id}</code>
+                          <code className="cursor-help" onClick={() => toggleSheet(Number(item.id))}>
+                            #{item.id}
+                          </code>
                         </SheetTrigger>
                         <SheetContent side="right" className="w-full sm:max-w-3xl p-0 overflow-y-auto">
                           <div className="h-full flex flex-col">
                             <SheetHeader className="p-6 pb-0">
-                              <SheetTitle>{('fromExpense' in item) ? 'Transfer' : 'Transaction'} Details</SheetTitle>
+                              <SheetTitle>{'fromExpense' in item ? 'Transfer' : 'Transaction'} Details</SheetTitle>
                               <SheetDescription className="sr-only">
-                                Detailed information
-                                about {('fromExpense' in item) ? 'transfer' : 'transaction'} #{item.id}
+                                Detailed information about {'fromExpense' in item ? 'transfer' : 'transaction'} #
+                                {item.id}
                               </SheetDescription>
                             </SheetHeader>
                             <div className="flex-grow overflow-y-auto p-6">
-                              {'fromExpense' in item ? <TransferDetails transfer={item} /> :
-                                <TransactionDetails transaction={item} />}
+                              {'fromExpense' in item ? (
+                                <TransferDetails transfer={item} />
+                              ) : (
+                                <TransactionDetails transaction={item} />
+                              )}
                             </div>
                           </div>
                         </SheetContent>
                       </Sheet>
-                      {(item instanceof Transaction && item.isDraft) && (
+                      {item instanceof Transaction && item.isDraft && (
                         <Badge
                           variant="outline"
                           className="ml-2 bg-warning text-warning-foreground border-warning cursor-pointer hover:bg-warning/80"
@@ -398,34 +410,39 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                     <TableCell
                       className={cn({
                         'py-0': compact,
-                      })}>
-                      {(item instanceof Transfer) && (
+                      })}
+                    >
+                      {item instanceof Transfer && (
                         <div className="flex items-center space-x-2">
                           <AccountBadge
                             size="sm"
                             account={item.fromExpense.account}
-                            className={item.feeExpense?.account.id === item.fromExpense.account.id ? 'ring-2 ring-destructive' : ''}
+                            className={
+                              item.feeExpense?.account.id === item.fromExpense.account.id
+                                ? 'ring-2 ring-destructive'
+                                : ''
+                            }
                           />
                           <ArrowRight className="h-4 w-4 text-muted-foreground" />
                           <AccountBadge
                             size="sm"
                             account={item.toIncome.account}
-                            className={item.feeExpense?.account.id === item.toIncome.account.id ? 'ring-2 ring-destructive' : ''}
+                            className={
+                              item.feeExpense?.account.id === item.toIncome.account.id ? 'ring-2 ring-destructive' : ''
+                            }
                           />
                         </div>
                       )}
-                      {(item instanceof Transaction) && (
-                        renderEditableCell(item, 'account', <AccountBadge size="sm" account={item.account} />)
-                      )}
+                      {item instanceof Transaction &&
+                        renderEditableCell(item, 'account', <AccountBadge size="sm" account={item.account} />)}
                     </TableCell>
                     <TableCell
                       className={cn({
                         'py-0': compact,
-                      })}>
+                      })}
+                    >
                       {'fromExpense' in item ? (
-                        <div>
-                          {renderTransferAmounts(item)}
-                        </div>
+                        <div>{renderTransferAmounts(item)}</div>
                       ) : (
                         renderEditableCell(item, 'amount', <TransactionValue transaction={item} />)
                       )}
@@ -433,16 +450,19 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                     <TableCell
                       className={cn({
                         'py-0': compact,
-                      })}>
-                      {item instanceof Transaction && (
-                        renderEditableCell(item, 'category',
+                      })}
+                    >
+                      {item instanceof Transaction &&
+                        renderEditableCell(
+                          item,
+                          'category',
                           <Badge
                             variant="outline"
-                            className="text-xs px-1 py-0 whitespace-nowrap bg-background shadow-md">
+                            className="text-xs px-1 py-0 whitespace-nowrap bg-background shadow-md"
+                          >
                             {item.category.name}
                           </Badge>,
-                        )
-                      )}
+                        )}
                       {item instanceof Transfer && (
                         <>
                           <div>Rate: {Number(item.rate.toFixed(4))}</div>
@@ -455,11 +475,15 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                     <TableCell
                       className={cn({
                         'py-0': compact,
-                      })}>{item instanceof Transaction ? renderEditableCell(item, 'note', item.note) : item.note}</TableCell>
+                      })}
+                    >
+                      {item instanceof Transaction ? renderEditableCell(item, 'note', item.note) : item.note}
+                    </TableCell>
                     <TableCell
                       className={cn({
                         'py-0': compact,
-                      })}>
+                      })}
+                    >
                       {item instanceof Transaction
                         ? renderEditableCell(item, 'executedAt', item.executedAt.format(MOMENT_TIME_VIEW_FORMAT))
                         : item.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
@@ -467,7 +491,8 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                     <TableCell
                       className={cn('text-right', {
                         'py-0': compact,
-                      })}>
+                      })}
+                    >
                       <div className="flex justify-end space-x-2">
                         <Button
                           variant="ghost"
@@ -484,7 +509,9 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                             size="icon"
                             aria-label="Edit Item"
                             className="h-8 w-8 p-0"
-                            onClick={() => openForm('fromExpense' in item ? FormType.Transfer : FormType.Transaction, item)}
+                            onClick={() =>
+                              openForm('fromExpense' in item ? FormType.Transfer : FormType.Transaction, item)
+                            }
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>

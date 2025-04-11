@@ -7,29 +7,31 @@ import { useScreenSize } from '@/hooks/useScreenSize';
 import { cn } from '@/lib/utils';
 
 type PageWithSidebarProps = React.ComponentPropsWithoutRef<'div'> & {
-  sidebarWidth?: string
-  contentScrollable?: boolean
-  children: ReactNode
-}
+  sidebarWidth?: string;
+  contentScrollable?: boolean;
+  children: ReactNode;
+};
 
 type PageWithSidebarComponent = React.FC<PageWithSidebarProps> & {
-  Header: React.FC<React.ComponentPropsWithoutRef<'header'> & { title?: string, onBack?: () => void, overrideContent?: boolean }>
-  Sidebar: React.FC<React.ComponentPropsWithoutRef<'aside'>>
-  Content: React.FC<React.ComponentPropsWithoutRef<'main'>>
-}
+  Header: React.FC<
+    React.ComponentPropsWithoutRef<'header'> & { title?: string; onBack?: () => void; overrideContent?: boolean }
+  >;
+  Sidebar: React.FC<React.ComponentPropsWithoutRef<'aside'>>;
+  Content: React.FC<React.ComponentPropsWithoutRef<'main'>>;
+};
 
 const PageWithSidebar: PageWithSidebarComponent = ({
-                                                     children,
-                                                     className = '',
-                                                     sidebarWidth = 'w-80',
-                                                     contentScrollable = true,
-                                                     ...props
-                                                   }) => {
+  children,
+  className = '',
+  sidebarWidth = 'w-80',
+  contentScrollable = true,
+  ...props
+}) => {
   const isDesktop = useScreenSize();
   const childrenArray = React.Children.toArray(children);
-  const header = childrenArray.find(child => React.isValidElement(child) && child.type === PageWithSidebar.Header);
-  const sidebar = childrenArray.find(child => React.isValidElement(child) && child.type === PageWithSidebar.Sidebar);
-  const content = childrenArray.find(child => React.isValidElement(child) && child.type === PageWithSidebar.Content);
+  const header = childrenArray.find((child) => React.isValidElement(child) && child.type === PageWithSidebar.Header);
+  const sidebar = childrenArray.find((child) => React.isValidElement(child) && child.type === PageWithSidebar.Sidebar);
+  const content = childrenArray.find((child) => React.isValidElement(child) && child.type === PageWithSidebar.Content);
 
   const renderContent = () => {
     if (isDesktop) {
@@ -52,11 +54,7 @@ const PageWithSidebar: PageWithSidebarComponent = ({
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         {header}
         <div className="flex-1 overflow-hidden">
-          {contentScrollable && (
-            <ScrollArea className="h-full">
-              {renderContent()}
-            </ScrollArea>
-          )}
+          {contentScrollable && <ScrollArea className="h-full">{renderContent()}</ScrollArea>}
           {!contentScrollable && renderContent()}
         </div>
       </div>
@@ -64,18 +62,13 @@ const PageWithSidebar: PageWithSidebarComponent = ({
   );
 };
 
-const Header: React.FC<React.ComponentPropsWithoutRef<'header'> & {
-  title?: string,
-  onBack?: () => void,
-  overrideContent?: boolean
-}> = ({
-        children,
-        className = '',
-        title,
-        onBack,
-        overrideContent = false,
-        ...props
-      }) => (
+const Header: React.FC<
+  React.ComponentPropsWithoutRef<'header'> & {
+    title?: string;
+    onBack?: () => void;
+    overrideContent?: boolean;
+  }
+> = ({ children, className = '', title, onBack, overrideContent = false, ...props }) => (
   <header className={cn('bg-background border-b p-4 flex justify-between items-center', className)} {...props}>
     {!overrideContent && (
       <>
@@ -85,9 +78,7 @@ const Header: React.FC<React.ComponentPropsWithoutRef<'header'> & {
           </Button>
           <h1 className="text-xl font-bold">{title}</h1>
         </div>
-        <div className="flex space-x-2">
-          {children}
-        </div>
+        <div className="flex space-x-2">{children}</div>
       </>
     )}
     {overrideContent && children}

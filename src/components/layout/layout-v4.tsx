@@ -69,14 +69,15 @@ export const LayoutV4 = () => {
           <nav className="p-4">
             <ul className="space-y-2">
               <li>
-                <Link to="/dashboard"
-                      className="block py-2 px-4 rounded hover:bg-primary hover:text-primary-foreground">
+                <Link
+                  to="/dashboard"
+                  className="block py-2 px-4 rounded hover:bg-primary hover:text-primary-foreground"
+                >
                   Dashboard
                 </Link>
               </li>
               <li>
-                <Link to="/projects"
-                      className="block py-2 px-4 rounded hover:bg-primary hover:text-primary-foreground">
+                <Link to="/projects" className="block py-2 px-4 rounded hover:bg-primary hover:text-primary-foreground">
                   Projects
                 </Link>
               </li>
@@ -86,8 +87,7 @@ export const LayoutV4 = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/reports"
-                      className="block py-2 px-4 rounded hover:bg-primary hover:text-primary-foreground">
+                <Link to="/reports" className="block py-2 px-4 rounded hover:bg-primary hover:text-primary-foreground">
                   Reports
                 </Link>
               </li>

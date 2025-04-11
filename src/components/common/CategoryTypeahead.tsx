@@ -3,22 +3,23 @@ import { useExpenseCategories, useIncomeCategories } from '@/contexts/FinanceDat
 import Category from '@/models/Category';
 import { Type as TransactionType } from '@/types/transaction';
 
-type CategoryTypeaheadProps =
-  Omit<TypeaheadV2Props<Category, string>, 'options' | 'labelField' | 'groupBy' | 'renderElement'>
-  & {
+type CategoryTypeaheadProps = Omit<
+  TypeaheadV2Props<Category, string>,
+  'options' | 'labelField' | 'groupBy' | 'renderElement'
+> & {
   className?: string;
   type?: TransactionType;
 };
 
 const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
-                                                               multiple = false,
-                                                               value,
-                                                               onChange,
-                                                               valueField = 'id',
-                                                               className,
-                                                               type,
-                                                               ...props
-                                                             }) => {
+  multiple = false,
+  value,
+  onChange,
+  valueField = 'id',
+  className,
+  type,
+  ...props
+}) => {
   const incomeCategories = useIncomeCategories();
   const expenseCategories = useExpenseCategories();
 
@@ -26,9 +27,7 @@ const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     <>
       <div className="flex flex-col">
         <span>{el.name}</span>
-        <span className="text-xs text-muted-foreground">
-          {el.getFullPath().join(' > ')}
-        </span>
+        <span className="text-xs text-muted-foreground">{el.getFullPath().join(' > ')}</span>
       </div>
       <div className="ml-auto flex items-center space-x-2">
         <span className="w-3 h-3 rounded-full" style={{ backgroundColor: el.color }}></span>

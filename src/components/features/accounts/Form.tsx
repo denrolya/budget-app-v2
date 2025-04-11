@@ -42,7 +42,10 @@ interface AccountFormProps {
 }
 
 export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref) => {
-  const { updateFormState, formState: { values: data } } = useFormContext();
+  const {
+    updateFormState,
+    formState: { values: data },
+  } = useFormContext();
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -72,9 +75,12 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
   const getButtonStyle = (value: string, field: 'currency' | 'type') => {
     const baseStyle = 'h-20 sm:h-24 transition-colors duration-200';
     const isSelected = form.watch(field) === value;
-    const bgColor = field === 'type'
-      ? ACCOUNT_CURRENCY_COLORSCHEME[value as keyof typeof ACCOUNT_CURRENCY_COLORSCHEME][form.watch('currency') as keyof (typeof ACCOUNT_CURRENCY_COLORSCHEME)['internet']]
-      : currencyInfo[value as keyof typeof currencyInfo].color;
+    const bgColor =
+      field === 'type'
+        ? ACCOUNT_CURRENCY_COLORSCHEME[value as keyof typeof ACCOUNT_CURRENCY_COLORSCHEME][
+            form.watch('currency') as keyof (typeof ACCOUNT_CURRENCY_COLORSCHEME)['internet']
+          ]
+        : currencyInfo[value as keyof typeof currencyInfo].color;
     const textColor = isSelected ? 'text-primary-foreground' : 'text-primary';
     return `${baseStyle} ${isSelected ? `bg-[${bgColor}]` : 'bg-background'} ${textColor}`;
   };
@@ -96,10 +102,12 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
                       type="button"
                       variant={field.value === value ? 'default' : 'outline'}
                       className={cn(
-                        'flex-1 h-14 text-sm font-medium border-2 rounded-md transition-all duration-200 hover:bg-accent hover:text-accent-foreground', {
+                        'flex-1 h-14 text-sm font-medium border-2 rounded-md transition-all duration-200 hover:bg-accent hover:text-accent-foreground',
+                        {
                           'bg-primary/10': field.value === value,
                           'border-transparent': field.value !== value,
-                        })}
+                        },
+                      )}
                       style={{
                         backgroundColor: field.value === value ? info.color : undefined,
                       }}
@@ -137,9 +145,12 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
                       variant={field.value === option.value ? 'default' : 'outline'}
                       className={getButtonStyle(option.value, 'type')}
                       style={{
-                        backgroundColor: field.value === option.value
-                          ? ACCOUNT_CURRENCY_COLORSCHEME[option.value as keyof typeof ACCOUNT_CURRENCY_COLORSCHEME][form.watch('currency') as keyof (typeof ACCOUNT_CURRENCY_COLORSCHEME)['internet']]
-                          : undefined,
+                        backgroundColor:
+                          field.value === option.value
+                            ? ACCOUNT_CURRENCY_COLORSCHEME[option.value as keyof typeof ACCOUNT_CURRENCY_COLORSCHEME][
+                                form.watch('currency') as keyof (typeof ACCOUNT_CURRENCY_COLORSCHEME)['internet']
+                              ]
+                            : undefined,
                       }}
                       onClick={() => field.onChange(option.value)}
                     >

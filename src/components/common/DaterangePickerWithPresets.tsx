@@ -21,14 +21,14 @@ interface Props {
 }
 
 const DaterangePickerWithPresets: React.FC<Props> = ({
-                                                       id,
-                                                       after,
-                                                       before,
-                                                       onChange,
-                                                       presets = DASHBOARD_TIMEFRAME_OPTIONS,
-                                                       className,
-                                                       children,
-                                                     }) => {
+  id,
+  after,
+  before,
+  onChange,
+  presets = DASHBOARD_TIMEFRAME_OPTIONS,
+  className,
+  children,
+}) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const isDesktop = useScreenSize();
 

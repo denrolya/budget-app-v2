@@ -16,12 +16,12 @@ interface Props extends React.ComponentPropsWithoutRef<'span'> {
 }
 
 export const TransactionValue: React.FC<Props> = ({
-                                                    transaction,
-                                                    className = '',
-                                                    maximumFractionDigits,
-                                                    badge = false,
-                                                    showValuesTooltip = true,
-                                                  }) => {
+  transaction,
+  className = '',
+  maximumFractionDigits,
+  badge = false,
+  showValuesTooltip = true,
+}) => {
   const baseCurrencyCode = useBaseCurrency();
   const baseCurrency = CURRENCIES[baseCurrencyCode];
   const {
@@ -34,24 +34,17 @@ export const TransactionValue: React.FC<Props> = ({
 
   // Helper to format money values using the transaction's sign logic.
   const formatMoney = (value: number, currencyCode: CURRENCY_CODE, currencySymbol: string) => {
-    const sign =
-      (transaction.isIncome() && value >= 0) ||
-      (transaction.isExpense() && value < 0)
-        ? '+'
-        : '-';
+    const sign = (transaction.isIncome() && value >= 0) || (transaction.isExpense() && value < 0) ? '+' : '-';
     return `${sign} ${currencySymbol} ${formatMoneyValue(value, currencyCode, maximumFractionDigits)}`;
   };
 
   // Format the original and converted (base) values.
   const originalFormatted = formatMoney(amount, currency, symbol);
-  const baseFormatted =
-    baseValue !== undefined ? formatMoney(baseValue, baseCurrencyCode, baseCurrency.symbol) : '';
+  const baseFormatted = baseValue !== undefined ? formatMoney(baseValue, baseCurrencyCode, baseCurrency.symbol) : '';
 
   // Determine if conversion is applicable.
   const hasConversion =
-    baseValue !== undefined &&
-    currency !== baseCurrencyCode &&
-    Math.abs(amount) !== Math.abs(baseValue);
+    baseValue !== undefined && currency !== baseCurrencyCode && Math.abs(amount) !== Math.abs(baseValue);
 
   // Elegant content: if a conversion exists, show the base conversion with the original as a subtext.
   const content = hasConversion ? (
@@ -65,16 +58,11 @@ export const TransactionValue: React.FC<Props> = ({
 
   // Wrap with badge if required.
   let displayedContent = badge ? (
-    <Badge
-      className="text-xs"
-      variant={transaction.isIncome() ? 'success' : 'destructive'}
-    >
+    <Badge className="text-xs" variant={transaction.isIncome() ? 'success' : 'destructive'}>
       {content}
     </Badge>
   ) : (
-    <span className={cn(transaction.isExpense() ? 'text-destructive' : 'text-success', className)}>
-      {content}
-    </span>
+    <span className={cn(transaction.isExpense() ? 'text-destructive' : 'text-success', className)}>{content}</span>
   );
 
   if (showValuesTooltip && convertedValues && Object.keys(convertedValues).length > 0) {

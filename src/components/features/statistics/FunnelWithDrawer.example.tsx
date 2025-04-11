@@ -56,8 +56,9 @@ export default function Component() {
     <Card className="w-full max-w-3xl">
       <CardHeader>
         <CardTitle>Yearly Income and Expenses Funnel</CardTitle>
-        <CardDescription>Double-click (desktop) or double-tap (mobile) on a section for detailed
-                         information</CardDescription>
+        <CardDescription>
+          Double-click (desktop) or double-tap (mobile) on a section for detailed information
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <TooltipProvider>
@@ -72,12 +73,7 @@ export default function Component() {
                   borderWidth={20}
                   labelColor={{
                     from: 'color',
-                    modifiers: [
-                      [
-                        'darker',
-                        3,
-                      ],
-                    ],
+                    modifiers: [['darker', 3]],
                   }}
                   beforeSeparatorLength={100}
                   beforeSeparatorOffset={20}

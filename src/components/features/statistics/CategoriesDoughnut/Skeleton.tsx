@@ -23,4 +23,3 @@ export const CategoriesDoughnutCardSkeleton: React.FC<React.ComponentPropsWithou
 );
 
 export default CategoriesDoughnutCardSkeleton;
-

@@ -32,10 +32,10 @@ interface UnifiedChartMenuProps {
   setSelectedPeriod: (value: ISO8601Period) => void;
   selectedCategories: number[];
   setSelectedCategories: (categories: number[]) => void;
-  showExpenseReference: boolean,
-  setShowExpenseReference: (value: boolean) => void,
-  showIncomeReference: boolean,
-  setShowIncomeReference: (value: boolean) => void,
+  showExpenseReference: boolean;
+  setShowExpenseReference: (value: boolean) => void;
+  showIncomeReference: boolean;
+  setShowIncomeReference: (value: boolean) => void;
   showComparisonInTooltip: boolean;
   setShowComparisonInTooltip: (value: boolean) => void;
   fetchTransactionsFromSubcategories: boolean;
@@ -45,32 +45,31 @@ interface UnifiedChartMenuProps {
 }
 
 export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
-                                                                    chartType,
-                                                                    setChartType,
-                                                                    selectedPeriod,
-                                                                    setSelectedPeriod,
-                                                                    selectedCategories,
-                                                                    setSelectedCategories,
-                                                                    showExpenseReference,
-                                                                    setShowExpenseReference,
-                                                                    showIncomeReference,
-                                                                    setShowIncomeReference,
-                                                                    showComparisonInTooltip,
-                                                                    setShowComparisonInTooltip,
-                                                                    fetchTransactionsFromSubcategories,
-                                                                    setFetchTransactionsFromSubcategories,
-                                                                    useSeparateAxisForTotals,
-                                                                    setUseSeparateAxisForTotals,
-                                                                  }) => {
+  chartType,
+  setChartType,
+  selectedPeriod,
+  setSelectedPeriod,
+  selectedCategories,
+  setSelectedCategories,
+  showExpenseReference,
+  setShowExpenseReference,
+  showIncomeReference,
+  setShowIncomeReference,
+  showComparisonInTooltip,
+  setShowComparisonInTooltip,
+  fetchTransactionsFromSubcategories,
+  setFetchTransactionsFromSubcategories,
+  useSeparateAxisForTotals,
+  setUseSeparateAxisForTotals,
+}) => {
   const isDesktop = useScreenSize();
-
 
   const MenuContent = () => (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Period</Label>
         <div className="flex flex-wrap gap-2">
-          {periodOptions.map(option => (
+          {periodOptions.map((option) => (
             <Button
               key={option.value}
               variant={selectedPeriod === option.value ? 'default' : 'outline'}
@@ -82,7 +81,6 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
         </div>
       </div>
 
-
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="categories">Categories</Label>
@@ -93,7 +91,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
           id="categories"
           valueField="id"
           value={selectedCategories}
-          onChange={categories => setSelectedCategories(categories)}
+          onChange={(categories) => setSelectedCategories(categories)}
           className="h-9 w-full"
         />
       </div>
@@ -104,14 +102,16 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
           <Button
             className="flex items-center px-2 py-1 space-x-1"
             variant={chartType === 'line' ? 'default' : 'outline'}
-            onClick={() => setChartType('line')}>
+            onClick={() => setChartType('line')}
+          >
             <LineChart className="h-4 w-4" />
             Line
           </Button>
           <Button
             className="flex items-center px-2 py-1 space-x-1"
             variant={chartType === 'bar' ? 'default' : 'outline'}
-            onClick={() => setChartType('bar')}>
+            onClick={() => setChartType('bar')}
+          >
             <BarChart className="h-4 w-4" />
             Bar
           </Button>
@@ -162,7 +162,8 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
         <div className="flex items-center justify-between">
           <Label
             htmlFor="fetch-transactions-from-subcategories"
-            className="flex items-center space-x-2 text-xs cursor-pointer">
+            className="flex items-center space-x-2 text-xs cursor-pointer"
+          >
             <Tags className="h-3 w-3" />
             <span>Fetch Transactions From Subcategories</span>
           </Label>
@@ -175,9 +176,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
         </div>
 
         <div className="flex items-center justify-between">
-          <Label
-            htmlFor="use-separate-axis-for-totals"
-            className="flex items-center space-x-2 text-xs cursor-pointer">
+          <Label htmlFor="use-separate-axis-for-totals" className="flex items-center space-x-2 text-xs cursor-pointer">
             <Move3D className="h-3 w-3" />
             <span>Use separate Y Axis for Totals</span>
           </Label>
@@ -227,4 +226,3 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
 };
 
 export default UnifiedChartMenu;
-

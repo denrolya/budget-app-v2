@@ -19,7 +19,7 @@ const calculateSeasonalSpending = (monthlySpending: Record<string, number>) => {
     Winter: 0,
     Spring: 0,
     Summer: 0,
-    Fall: 0
+    Fall: 0,
   };
 
   Object.entries(monthlySpending).forEach(([month, amount]) => {
@@ -37,7 +37,7 @@ const calculateSeasonalSpending = (monthlySpending: Record<string, number>) => {
   return Object.entries(seasonalSpending).map(([season, value]) => ({
     id: season,
     label: season,
-    value
+    value,
   }));
 };
 
@@ -52,7 +52,7 @@ export const SeasonalSpending: React.FC = () => {
     Winter: isDark ? '#e0e0e0' : '#ffffff',
     Spring: isDark ? '#81c784' : '#c8e6c9',
     Summer: isDark ? '#e57373' : '#ffcdd2',
-    Fall: isDark ? '#ffb74d' : '#ffe0b2'
+    Fall: isDark ? '#ffb74d' : '#ffe0b2',
   };
 
   useEffect(() => {
@@ -60,21 +60,21 @@ export const SeasonalSpending: React.FC = () => {
     const fetchData = async () => {
       // Sample monthly spending data (you would replace this with real data fetching)
       const monthlySpending = {
-        '1': 1500,  // January
-        '2': 1400,  // February
-        '3': 1300,  // March
-        '4': 1200,  // April
-        '5': 1100,  // May
-        '6': 1000,  // June
-        '7': 1100,  // July
-        '8': 1200,  // August
-        '9': 1300,  // September
+        '1': 1500, // January
+        '2': 1400, // February
+        '3': 1300, // March
+        '4': 1200, // April
+        '5': 1100, // May
+        '6': 1000, // June
+        '7': 1100, // July
+        '8': 1200, // August
+        '9': 1300, // September
         '10': 1400, // October
         '11': 1500, // November
-        '12': 1600  // December (previous year)
+        '12': 1600, // December (previous year)
       };
 
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+      await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate network delay
       const data = calculateSeasonalSpending(monthlySpending);
       setSeasonalData(data);
       setIsLoading(false);
@@ -105,7 +105,7 @@ export const SeasonalSpending: React.FC = () => {
               borderWidth={1}
               borderColor={{
                 from: 'color',
-                modifiers: [['darker', 0.2]]
+                modifiers: [['darker', 0.2]],
               }}
               startAngle={-90}
               colors={({ id }) => customColors[id as keyof typeof customColors]}

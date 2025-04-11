@@ -12,8 +12,16 @@ type Category = {
 };
 
 const baseColors = [
-  '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-  '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf',
+  '#1f77b4',
+  '#ff7f0e',
+  '#2ca02c',
+  '#d62728',
+  '#9467bd',
+  '#8c564b',
+  '#e377c2',
+  '#7f7f7f',
+  '#bcbd22',
+  '#17becf',
 ];
 
 const generateColorScheme = (categories: Category[], parentColor: string | null = null, depth = 0): any[] =>
@@ -70,7 +78,7 @@ export default function TreeChart() {
             layout="left-to-right"
             activeNodeSize={24}
             inactiveNodeSize={12}
-            nodePadding={20}  // Reduced padding to bring levels closer
+            nodePadding={20} // Reduced padding to bring levels closer
             nodeColor={(node) => node.data.color}
             linkThickness={1}
             enableLinkGradient={false}
@@ -83,14 +91,12 @@ export default function TreeChart() {
               modifiers: [['darker', 2]],
             }}
             labelSkipSize={8}
-            separation={{ siblings: 2, nonSiblings: 4 }}  // Reduced separation between nodes
+            separation={{ siblings: 2, nonSiblings: 4 }} // Reduced separation between nodes
             tooltip={({ node }) => (
               <div className="bg-white p-2 shadow rounded">
                 <strong>{node.data.name}</strong>
                 {node.data.children && (
-                  <p className="text-sm text-gray-500">
-                    Subcategories: {node.data.children.length}
-                  </p>
+                  <p className="text-sm text-gray-500">Subcategories: {node.data.children.length}</p>
                 )}
               </div>
             )}

@@ -45,9 +45,11 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
                 </Badge>
               )}
               {transaction.isDraft && (
-                <Badge variant="outline" className="bg-primary text-primary-foreground text-[10px] px-1">Draft</Badge>
+                <Badge variant="outline" className="bg-primary text-primary-foreground text-[10px] px-1">
+                  Draft
+                </Badge>
               )}
-              {(transaction.compensations && transaction.compensations.length > 0) && (
+              {transaction.compensations && transaction.compensations.length > 0 && (
                 <Badge variant="outline" className="bg-secondary text-secondary-foreground text-[10px] px-1">
                   Compensated
                 </Badge>
@@ -68,9 +70,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
                   <SheetContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
                     <SheetHeader>
                       <SheetTitle>Transaction Details</SheetTitle>
-                      <SheetDescription classname="sr-only">
-                          Transaction details for {transaction.id}
-                      </SheetDescription>
+                      <SheetDescription classname="sr-only">Transaction details for {transaction.id}</SheetDescription>
                     </SheetHeader>
                     <Details transaction={transaction} />
                   </SheetContent>

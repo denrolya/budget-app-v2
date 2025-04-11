@@ -17,9 +17,7 @@ export const BalanceProgressBar: React.FC<Props> = ({ accounts }) => {
   }
 
   // Filter out accounts with zero or undefined converted values
-  const filteredAccounts = accounts.filter(
-    account => (account.convertedValues?.[baseCurrency] || 0) > 0,
-  );
+  const filteredAccounts = accounts.filter((account) => (account.convertedValues?.[baseCurrency] || 0) > 0);
 
   if (filteredAccounts.length === 0) {
     return <div className="text-yellow-500 dark:text-yellow-400 font-semibold">No accounts with positive balances</div>;
@@ -36,9 +34,9 @@ export const BalanceProgressBar: React.FC<Props> = ({ accounts }) => {
   }
 
   // Group accounts by type
-  const groupedAccounts = ACCOUNT_TYPES_ORDER.map(type =>
-    filteredAccounts.filter(account => account.type === type),
-  ).filter(group => group.length > 0);
+  const groupedAccounts = ACCOUNT_TYPES_ORDER.map((type) =>
+    filteredAccounts.filter((account) => account.type === type),
+  ).filter((group) => group.length > 0);
 
   return (
     <div className="w-full">
@@ -46,9 +44,7 @@ export const BalanceProgressBar: React.FC<Props> = ({ accounts }) => {
         <div className="relative h-20 rounded-xl overflow-hidden flex bg-gray-200 dark:bg-gray-700">
           {groupedAccounts.map((group, groupIndex) => (
             <React.Fragment key={group[0].type}>
-              {groupIndex > 0 && (
-                <div className="w-2 bg-gray-300 dark:bg-gray-600 z-10 mx-1"></div>
-              )}
+              {groupIndex > 0 && <div className="w-2 bg-gray-300 dark:bg-gray-600 z-10 mx-1"></div>}
               <div className="flex flex-grow relative">
                 <div className="absolute top-0 left-2 text-xs font-semibold text-gray-600 dark:text-gray-300 z-20 mt-1">
                   {group[0].type}
@@ -90,11 +86,10 @@ export const BalanceProgressBar: React.FC<Props> = ({ accounts }) => {
                             useColors={false}
                             amount={account.balance}
                             currency={account.currency}
-                            values={account.convertedValues} />
+                            values={account.convertedValues}
+                          />
                         </div>
-                        <div className="text-sm text-gray-300 mt-1">
-                          {percentage.toFixed(2)}% of total
-                        </div>
+                        <div className="text-sm text-gray-300 mt-1">{percentage.toFixed(2)}% of total</div>
                       </TooltipContent>
                     </Tooltip>
                   );

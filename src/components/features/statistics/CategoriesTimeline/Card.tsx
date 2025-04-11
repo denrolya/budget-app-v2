@@ -52,15 +52,12 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
     [selectedPeriod, debouncedCategories],
   );
 
-  const debouncedSetCategories = useCallback(
-    (newCategories: number[]) => {
-      const timeoutId = setTimeout(() => {
-        setDebouncedCategories(newCategories);
-      }, 1000);
-      return () => clearTimeout(timeoutId);
-    },
-    [],
-  );
+  const debouncedSetCategories = useCallback((newCategories: number[]) => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedCategories(newCategories);
+    }, 1000);
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   useEffect(() => {
     debouncedSetCategories(selectedCategories);
@@ -111,16 +108,24 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
     setIsDrawerOpen(true);
   };
 
-  const handleTimeframeChange = useCallback((range: Timeframe) => {
-    setTimeframe({
-      after: range.after ? range.after.startOf('day') : timeframe.after,
-      before: range.before ? range.before.endOf('day') : timeframe.before,
-    });
-  }, [setTimeframe]);
+  const handleTimeframeChange = useCallback(
+    (range: Timeframe) => {
+      setTimeframe({
+        after: range.after ? range.after.startOf('day') : timeframe.after,
+        before: range.before ? range.before.endOf('day') : timeframe.before,
+      });
+    },
+    [setTimeframe],
+  );
 
   return (
     <>
-      <Card className={cn('w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25', className)}>
+      <Card
+        className={cn(
+          'w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25',
+          className,
+        )}
+      >
         <CardHeader className="p-4 pb-0 space-y-0.2">
           <div className="flex justify-between items-start">
             <CardTitle className="text-base font-medium">Categories Timeline</CardTitle>
@@ -148,7 +153,8 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
           <DaterangePickerWithPresets
             after={timeframe.after}
             before={timeframe.before}
-            onChange={handleTimeframeChange}>
+            onChange={handleTimeframeChange}
+          >
             <span className="cursor-pointer hover:underline inline-flex flex-row px-4">
               <span className="text-xs flex items-center">
                 <CalendarIcon className="inline h-3 w-3 mr-1" />
@@ -188,4 +194,3 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
 };
 
 export default CategoriesTimelineCard;
-

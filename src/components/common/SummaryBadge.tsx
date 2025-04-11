@@ -14,11 +14,8 @@ interface Props extends React.ComponentPropsWithoutRef<'div'> {
 const SummaryBadge: React.FC<Props> = ({ count, value, icon, useColors = true, ...props }) => {
   const Icon = icon;
   return (
-    <div className="relative inline-flex" {...props} >
-      <Badge
-        variant="outline"
-        className="text-xs py-1.5 pl-2 pr-3 flex items-center space-x-2 bg-background"
-      >
+    <div className="relative inline-flex" {...props}>
+      <Badge variant="outline" className="text-xs py-1.5 pl-2 pr-3 flex items-center space-x-2 bg-background">
         <Icon className="h-3.5 w-3.5" />
         <MoneyValue className="font-medium font-mono" useColors={useColors} amount={value} />
       </Badge>
@@ -31,6 +28,5 @@ const SummaryBadge: React.FC<Props> = ({ count, value, icon, useColors = true, .
     </div>
   );
 };
-
 
 export default memo(SummaryBadge);

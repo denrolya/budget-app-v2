@@ -35,25 +35,32 @@ export const ExchangeRatesPresets: React.FC = () => {
   const wiseRates = useWiseExchangeRates();
 
   const RateComparison: React.FC<RateComparisonProps> = ({ from, to, amount = 1 }) => {
-    const rate = useMemo(() => ({
-      fixer: getExchangeRate(from, to, fixerRates),
-      mono: getExchangeRate(from, to, monoRates),
-      wise: getExchangeRate(from, to, wiseRates),
-    }), [from, to, fixerRates, monoRates, wiseRates]);
+    const rate = useMemo(
+      () => ({
+        fixer: getExchangeRate(from, to, fixerRates),
+        mono: getExchangeRate(from, to, monoRates),
+        wise: getExchangeRate(from, to, wiseRates),
+      }),
+      [from, to, fixerRates, monoRates, wiseRates],
+    );
 
     const averageRate = useMemo(() => {
-      const validRates = Object.values(rate).filter(r => r !== null) as number[];
+      const validRates = Object.values(rate).filter((r) => r !== null) as number[];
       return validRates.length > 0 ? validRates.reduce((a, b) => a + b, 0) / validRates.length : null;
     }, [rate]);
 
-    const diff = averageRate !== null
-      ? Object.entries(rate).reduce((acc, [source, value]) => {
-        if (value !== null) {
-          acc[source] = ((value - averageRate) / averageRate) * 100;
-        }
-        return acc;
-      }, {} as Record<string, number>)
-      : null;
+    const diff =
+      averageRate !== null
+        ? Object.entries(rate).reduce(
+            (acc, [source, value]) => {
+              if (value !== null) {
+                acc[source] = ((value - averageRate) / averageRate) * 100;
+              }
+              return acc;
+            },
+            {} as Record<string, number>,
+          )
+        : null;
 
     const maximumFractionDigits = [CURRENCY_CODE.BTC].includes(from) || [CURRENCY_CODE.HUF].includes(to) ? 0 : 2;
 
@@ -66,18 +73,19 @@ export const ExchangeRatesPresets: React.FC = () => {
             useColors={false}
             amount={amount * value}
             currency={to}
-            maximumFractionDigits={maximumFractionDigits} />
-          <sup className="ml-1 mt-2 text-[8px] font-medium text-muted-foreground">
-            {source}
-          </sup>
+            maximumFractionDigits={maximumFractionDigits}
+          />
+          <sup className="ml-1 mt-2 text-[8px] font-medium text-muted-foreground">{source}</sup>
         </div>
         {diff && diff[source] !== undefined && (
           <span
             className={cn('text-[10px] font-medium', {
               'text-success': diff[source] >= 0,
               'text-destructive': diff[source] < 0,
-            })}>
-            {diff[source] >= 0 ? '+' : ''}{diff[source].toFixed(1)}%
+            })}
+          >
+            {diff[source] >= 0 ? '+' : ''}
+            {diff[source].toFixed(1)}%
           </span>
         )}
       </div>

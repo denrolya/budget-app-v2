@@ -35,13 +35,12 @@ export const DetailsHeader: React.FC<Props> = ({ selectedCategory, onCategorySel
           <span className="sr-only">Back to list</span>
         </Button>
         <div className="flex flex-col space-y-1">
-          <h1 className="text-xl sm:text-2xl font-bold">
-            {selectedCategory.name}
-          </h1>
+          <h1 className="text-xl sm:text-2xl font-bold">{selectedCategory.name}</h1>
           {breadcrumbs.length > 1 && (
             <nav
               aria-label="Breadcrumbs"
-              className="flex items-center space-x-1 text-sm text-muted-foreground overflow-x-auto">
+              className="flex items-center space-x-1 text-sm text-muted-foreground overflow-x-auto"
+            >
               {breadcrumbs.map((breadcrumb, index) => (
                 <React.Fragment key={breadcrumb.id}>
                   {index > 0 && <ChevronRight className="h-4 w-4 flex-shrink-0" />}

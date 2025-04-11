@@ -42,43 +42,46 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
     setEditValue(value);
   };
 
-  const handleSave = useCallback(async (transaction: Transaction) => {
-    if (!editingCell) return;
+  const handleSave = useCallback(
+    async (transaction: Transaction) => {
+      if (!editingCell) return;
 
-    const updatedTransaction = { ...transaction };
+      const updatedTransaction = { ...transaction };
 
-    switch (editingCell.field) {
-      case 'account':
-        updatedTransaction.account = editValue || transaction.account;
-        break;
-      case 'amount':
-        updatedTransaction.amount = parseFloat(editValue as string);
-        break;
-      case 'category':
-        updatedTransaction.category = editValue || transaction.category;
-        break;
-      case 'note':
-        updatedTransaction.note = editValue as string;
-        break;
-      case 'executedAt':
-        updatedTransaction.executedAt = moment(editValue as string);
-        break;
-    }
+      switch (editingCell.field) {
+        case 'account':
+          updatedTransaction.account = editValue || transaction.account;
+          break;
+        case 'amount':
+          updatedTransaction.amount = parseFloat(editValue as string);
+          break;
+        case 'category':
+          updatedTransaction.category = editValue || transaction.category;
+          break;
+        case 'note':
+          updatedTransaction.note = editValue as string;
+          break;
+        case 'executedAt':
+          updatedTransaction.executedAt = moment(editValue as string);
+          break;
+      }
 
-    try {
-      await updateTransaction({
-        id: transaction.id,
-        updates: updatedTransaction,
-        originalTransaction: transaction,
-      });
-      toast.success('Transaction updated successfully');
-    } catch (error) {
-      console.error('Form submission failed:', error);
-      toast.error('Failed to submit transaction. Issue requires investigation.');
-    }
+      try {
+        await updateTransaction({
+          id: transaction.id,
+          updates: updatedTransaction,
+          originalTransaction: transaction,
+        });
+        toast.success('Transaction updated successfully');
+      } catch (error) {
+        console.error('Form submission failed:', error);
+        toast.error('Failed to submit transaction. Issue requires investigation.');
+      }
 
-    setEditingCell(null);
-  }, [editingCell, editValue, updateTransaction]);
+      setEditingCell(null);
+    },
+    [editingCell, editValue, updateTransaction],
+  );
 
   const handleCancel = useCallback(() => {
     setEditingCell(null);
@@ -151,7 +154,7 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
               multiple={false}
               disabled={isUpdating}
               value={editValue?.id || editValue}
-              onChange={v => setEditValue(v)}
+              onChange={(v) => setEditValue(v)}
               onKeyDown={(e) => handleKeyDown(e, transaction)}
             />
           );
@@ -177,7 +180,7 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
               disabled={isUpdating}
               type={transaction.type}
               value={editValue?.id || editValue}
-              onChange={v => setEditValue(v)}
+              onChange={(v) => setEditValue(v)}
               onKeyDown={(e) => handleKeyDown(e, transaction)}
             />
           );
@@ -253,7 +256,8 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
                 colSpan={8}
                 className={cn('font-semibold', 'bg-muted/40', 'px-4', {
                   'py-0': compact,
-                })}>
+                })}
+              >
                 <div className="flex justify-between items-center">
                   <RelativeDatetimeDisplay showDayBadge badgeSize="sm" variant="default" showTime={false} date={date} />
                   <SummaryBadge icon={ROUTES.TRANSACTION_LIST.icon} count={count} value={totalValue} />
@@ -272,7 +276,8 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
                   colSpan={2}
                   className={cn({
                     'py-0': compact,
-                  })}>
+                  })}
+                >
                   <Sheet>
                     <SheetTrigger className="m-0 cursor-help" asChild>
                       <code>#{transaction.id}</code>
@@ -304,8 +309,11 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
                 <TableCell
                   className={cn({
                     'py-0': compact,
-                  })}>
-                  {renderEditableCell(transaction, 'category',
+                  })}
+                >
+                  {renderEditableCell(
+                    transaction,
+                    'category',
                     <Badge variant="outline" className="text-xs px-1 py-0 whitespace-nowrap bg-background shadow-md">
                       {transaction.category.name}
                     </Badge>,
@@ -314,29 +322,40 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
                 <TableCell
                   className={cn({
                     'py-0': compact,
-                  })}>
+                  })}
+                >
                   {renderEditableCell(transaction, 'amount', <TransactionValue transaction={transaction} />)}
                 </TableCell>
                 <TableCell
                   className={cn({
                     'py-0': compact,
-                  })}>
+                  })}
+                >
                   {renderEditableCell(transaction, 'account', <AccountBadge size="sm" account={transaction.account} />)}
                 </TableCell>
                 <TableCell
                   className={cn({
                     'py-0': compact,
-                  })}>
+                  })}
+                >
                   {renderEditableCell(transaction, 'note', transaction.note)}
                 </TableCell>
                 <TableCell
                   className={cn({
                     'py-0': compact,
-                  })}>{renderEditableCell(transaction, 'executedAt', transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT))}</TableCell>
+                  })}
+                >
+                  {renderEditableCell(
+                    transaction,
+                    'executedAt',
+                    transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT),
+                  )}
+                </TableCell>
                 <TableCell
                   className={cn({
                     'py-0': compact,
-                  })}>
+                  })}
+                >
                   <div className="flex justify-end">
                     <Button
                       variant="ghost"
@@ -368,6 +387,5 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
 };
 
 TableListing.displayName = 'TransactionsTableListing';
-
 
 export default TableListing;

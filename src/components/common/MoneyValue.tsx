@@ -20,7 +20,11 @@ interface MoneyValueProps extends React.ComponentPropsWithoutRef<'span'> {
   useColors?: boolean;
 }
 
-const getBadgeVariant = (value: number, useColors: boolean, revertColors: boolean): 'default' | 'destructive' | 'success' | 'outline' => {
+const getBadgeVariant = (
+  value: number,
+  useColors: boolean,
+  revertColors: boolean,
+): 'default' | 'destructive' | 'success' | 'outline' => {
   if (!useColors) return 'outline';
   if (value > 0) return revertColors ? 'destructive' : 'success';
   if (value < 0) return revertColors ? 'success' : 'destructive';
@@ -28,30 +32,32 @@ const getBadgeVariant = (value: number, useColors: boolean, revertColors: boolea
 };
 
 export const MoneyValue: React.FC<MoneyValueProps> = ({
-                                                        id,
-                                                        currency,
-                                                        amount,
-                                                        values = {},
-                                                        showSymbol = true,
-                                                        showSign = false,
-                                                        showValuesTooltip = true,
-                                                        maximumFractionDigits,
-                                                        className,
-                                                        badge = false,
-                                                        revertColors = false,
-                                                        useColors = true,
-                                                      }) => {
+  id,
+  currency,
+  amount,
+  values = {},
+  showSymbol = true,
+  showSign = false,
+  showValuesTooltip = true,
+  maximumFractionDigits,
+  className,
+  badge = false,
+  revertColors = false,
+  useColors = true,
+}) => {
   const baseCurrencyCode = useBaseCurrency();
   const baseCurrency = CURRENCIES[baseCurrencyCode];
   const symbol = currency ? CURRENCIES[currency]?.symbol : baseCurrency.symbol;
   const baseValue = values[baseCurrency.code];
 
-  const shouldShowConvertedValue = useMemo(() =>
+  const shouldShowConvertedValue = useMemo(
+    () =>
       baseValue !== undefined &&
       currency !== undefined &&
       baseCurrency.code !== currency &&
       Math.abs(amount - baseValue) > 0.01,
-    [baseValue, currency, baseCurrency.code, amount]);
+    [baseValue, currency, baseCurrency.code, amount],
+  );
 
   const colorClass = useMemo(() => {
     if (!useColors) return '';
@@ -64,7 +70,10 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
         return 'text-muted-foreground';
     }
   }, [amount, useColors, revertColors]);
-  const badgeVariant = useMemo(() => getBadgeVariant(amount, useColors, revertColors), [amount, useColors, revertColors]);
+  const badgeVariant = useMemo(
+    () => getBadgeVariant(amount, useColors, revertColors),
+    [amount, useColors, revertColors],
+  );
 
   const renderMoneyElement = (value: number, currencySymbol: string, currencyCode?: CURRENCY_CODE) => (
     <>
@@ -80,7 +89,8 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
         <>
           {renderMoneyElement(baseValue, baseCurrency.symbol, baseCurrency.code)}
           <span className="text-xs opacity-75 hidden md:inline ml-1">
-            {' | '}{renderMoneyElement(amount, symbol, currency)}
+            {' | '}
+            {renderMoneyElement(amount, symbol, currency)}
           </span>
         </>
       ) : (
@@ -94,9 +104,7 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
       {content}
     </Badge>
   ) : (
-    <span className={cn(colorClass, className)}>
-      {content}
-    </span>
+    <span className={cn(colorClass, className)}>{content}</span>
   );
 
   if (showValuesTooltip && values && Object.keys(values).length > 0) {

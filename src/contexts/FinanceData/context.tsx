@@ -13,18 +13,18 @@ import Category, { CategoryTreeBuilder } from '@/models/Category';
 import { axiosFetcher } from '@/services/api';
 import Debt from '@/models/Debt';
 import { RawTransactionDTO, ConvertedValues } from '@/types/transaction';
-import CurrencyConverter from '@/components/features/CurrencyConverter';
+import CurrencyConverter from '@/components/common/CurrencyConverter';
 
 export type ExchangeRatesData = {
   fixer: ConvertedValues;
   mono: ConvertedValues;
   wise: ConvertedValues;
-}
+};
 
 export type CategoriesData = {
   tree: Category[];
   list: Category[];
-}
+};
 
 export interface FinanceData {
   accounts: Account[];
@@ -113,10 +113,13 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
         return convertedValues;
       };
 
-      return rawAccounts.map((account: AccountRawData) => new Account({
-        ...account,
-        convertedValues: convertBalance(account.balance, account.currency, exchangeRatesQuery.data.fixer!),
-      }));
+      return rawAccounts.map(
+        (account: AccountRawData) =>
+          new Account({
+            ...account,
+            convertedValues: convertBalance(account.balance, account.currency, exchangeRatesQuery.data.fixer!),
+          }),
+      );
     },
     enabled: !!exchangeRatesQuery.data, // Fetch accounts only when exchange rates are available
     ...queryOptions,
@@ -168,20 +171,21 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
             account,
             category,
             executedAt: moment(rawTransaction.executedAt),
-            compensations: rawTransaction.compensations?.map((comp) =>
-              new Transaction({
-                id: comp.id!,
-                account: comp.account!,
-                amount: comp.amount!,
-                convertedValues: comp.convertedValues!,
-                note: comp.note!,
-                executedAt: moment(comp.executedAt)!,
-                category: comp.category!,
-                isDraft: comp.isDraft!,
-                compensations: comp.compensations,
-                type: comp.type!,
-              })
-            )
+            compensations: rawTransaction.compensations?.map(
+              (comp) =>
+                new Transaction({
+                  id: comp.id!,
+                  account: comp.account!,
+                  amount: comp.amount!,
+                  convertedValues: comp.convertedValues!,
+                  note: comp.note!,
+                  executedAt: moment(comp.executedAt)!,
+                  category: comp.category!,
+                  isDraft: comp.isDraft!,
+                  compensations: comp.compensations,
+                  type: comp.type!,
+                }),
+            ),
           });
         });
 
@@ -195,34 +199,42 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
     ...queryOptions,
   });
 
-  const isLoading = accountsQuery.isLoading || debtsQuery.isLoading || categoriesQuery.isLoading || exchangeRatesQuery.isLoading;
+  const isLoading =
+    accountsQuery.isLoading || debtsQuery.isLoading || categoriesQuery.isLoading || exchangeRatesQuery.isLoading;
   const error = accountsQuery.error || debtsQuery.error || categoriesQuery.error || exchangeRatesQuery.error;
 
-  const financeData: FinanceData = isLoading ? INITIAL_STATE : {
-    accounts: accountsQuery.data!,
-    debts: debtsQuery.data!,
-    categories: categoriesQuery.data!,
-    exchangeRates: exchangeRatesQuery.data!,
-  };
+  const financeData: FinanceData = isLoading
+    ? INITIAL_STATE
+    : {
+        accounts: accountsQuery.data!,
+        debts: debtsQuery.data!,
+        categories: categoriesQuery.data!,
+        exchangeRates: exchangeRatesQuery.data!,
+      };
 
   const retry = useCallback((): void => {
     setProgress(0);
     queryClient.invalidateQueries({ queryKey: ['accounts', 'debts', 'categories', 'exchangeRates'] });
   }, [queryClient]);
 
-  const updateAccount = useCallback((updatedAccount: Account): void => {
-    queryClient.setQueryData(['accounts'], (oldData: Account[] | undefined) => {
-      if (!oldData) return oldData;
-      return oldData.map(account => account.id === updatedAccount.id ? updatedAccount : account);
-    });
-  }, [queryClient]);
+  const updateAccount = useCallback(
+    (updatedAccount: Account): void => {
+      queryClient.setQueryData(['accounts'], (oldData: Account[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.map((account) => (account.id === updatedAccount.id ? updatedAccount : account));
+      });
+    },
+    [queryClient],
+  );
 
   const refetchAccounts = useCallback(async (): Promise<void> => {
     await queryClient.refetchQueries({ queryKey: ['accounts'] });
   }, [queryClient]);
 
   useEffect(() => {
-    const loadedItems = [accountsQuery.data, debtsQuery.data, categoriesQuery.data, exchangeRatesQuery.data].filter(Boolean).length;
+    const loadedItems = [accountsQuery.data, debtsQuery.data, categoriesQuery.data, exchangeRatesQuery.data].filter(
+      Boolean,
+    ).length;
     const totalItems = Object.keys(ENDPOINTS).length;
     const newProgress = (loadedItems / totalItems) * 100;
     setProgress(newProgress);
@@ -244,13 +256,15 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
   }
 
   if (isLoading) {
-    return (<MainLoadingScreen progress={progress} />);
+    return <MainLoadingScreen progress={progress} />;
   }
 
   return (
-    <FinanceDataContext.Provider value={{ data: financeData, isLoading, error, retry, updateAccount, refetchAccounts, toggleCurrencyConverter }}>
+    <FinanceDataContext.Provider
+      value={{ data: financeData, isLoading, error, retry, updateAccount, refetchAccounts, toggleCurrencyConverter }}
+    >
       {children}
-      {(!isLoading && !error && financeData.exchangeRates) && (
+      {!isLoading && !error && financeData.exchangeRates && (
         <CurrencyConverter open={currencyConverterOpen} onOpenChange={setCurrencyConverterOpen} />
       )}
     </FinanceDataContext.Provider>

@@ -21,9 +21,7 @@ export const TotalBalanceCard: React.FC = () => {
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-sm text-primary truncate">Net Worth</h3>
             <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">
-                Cash vs Debt
-              </span>
+              <span className="text-muted-foreground">Cash vs Debt</span>
             </div>
           </div>
           <div className="flex items-center space-x-2 ml-2">

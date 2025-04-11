@@ -11,7 +11,8 @@ interface Props {
 
 const DetailsHoverCard: React.FC<Props> = ({ account }) => (
   <div>
-    <h3 className="font-bold mb-2"><AccountAvatar className="mr-2" account={account} /> {account.nameWithCurrency}
+    <h3 className="font-bold mb-2">
+      <AccountAvatar className="mr-2" account={account} /> {account.nameWithCurrency}
     </h3>
     <p className="text-sm mb-1">
       {'Balance: '}
@@ -21,11 +22,13 @@ const DetailsHoverCard: React.FC<Props> = ({ account }) => (
         className="text-mono font-medium"
         maximumFractionDigits={2}
         amount={account.balance}
-        currency={account.currency} />
+        currency={account.currency}
+      />
     </p>
-    <p className="text-sm mb-1">Last Transaction: <RelativeDatetimeDisplay date={account.updatedAt} /></p>
+    <p className="text-sm mb-1">
+      Last Transaction: <RelativeDatetimeDisplay date={account.updatedAt} />
+    </p>
   </div>
 );
-
 
 export default DetailsHoverCard;

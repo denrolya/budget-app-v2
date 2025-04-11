@@ -7,65 +7,65 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 // Sample nested expense data
 const data = [
   {
-    'id': 'Housing',
-    'data': [
+    id: 'Housing',
+    data: [
       {
-        'x': 'Rent',
-        'y': 1200
+        x: 'Rent',
+        y: 1200,
       },
       {
-        'x': 'Utilities',
-        'y': 200
+        x: 'Utilities',
+        y: 200,
       },
       {
-        'x': 'Insurance',
-        'y': 100
-      }
-    ]
+        x: 'Insurance',
+        y: 100,
+      },
+    ],
   },
   {
-    'id': 'Food',
-    'data': [
+    id: 'Food',
+    data: [
       {
-        'x': 'Groceries',
-        'y': 400
+        x: 'Groceries',
+        y: 400,
       },
       {
-        'x': 'Dining Out',
-        'y': 200
-      }
-    ]
+        x: 'Dining Out',
+        y: 200,
+      },
+    ],
   },
   {
-    'id': 'Transportation',
-    'data': [
+    id: 'Transportation',
+    data: [
       {
-        'x': 'Car Payment',
-        'y': 300
+        x: 'Car Payment',
+        y: 300,
       },
       {
-        'x': 'Gas',
-        'y': 150
+        x: 'Gas',
+        y: 150,
       },
       {
-        'x': 'Public Transit',
-        'y': 50
-      }
-    ]
+        x: 'Public Transit',
+        y: 50,
+      },
+    ],
   },
   {
-    'id': 'Entertainment',
-    'data': [
+    id: 'Entertainment',
+    data: [
       {
-        'x': 'Streaming Services',
-        'y': 50
+        x: 'Streaming Services',
+        y: 50,
       },
       {
-        'x': 'Movies/Events',
-        'y': 100
-      }
-    ]
-  }
+        x: 'Movies/Events',
+        y: 100,
+      },
+    ],
+  },
 ];
 
 export default function Component() {
@@ -103,32 +103,32 @@ export default function Component() {
                   {
                     on: 'hover',
                     style: {
-                      itemTextColor: '#000'
-                    }
-                  }
-                ]
-              }
+                      itemTextColor: '#000',
+                    },
+                  },
+                ],
+              },
             ]}
             theme={{
               axis: {
                 ticks: {
                   text: {
-                    fill: 'hsl(var(--foreground))'
-                  }
-                }
+                    fill: 'hsl(var(--foreground))',
+                  },
+                },
               },
               legends: {
                 text: {
-                  fill: 'hsl(var(--foreground))'
-                }
+                  fill: 'hsl(var(--foreground))',
+                },
               },
               tooltip: {
                 container: {
                   background: 'hsl(var(--background))',
                   color: 'hsl(var(--foreground))',
-                  fontSize: 12
-                }
-              }
+                  fontSize: 12,
+                },
+              },
             }}
           />
         </div>

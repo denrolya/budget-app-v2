@@ -40,19 +40,24 @@ export const formSchema = z.object({
   note: z.string().optional(),
   isDraft: z.boolean().default(false),
   debt: z.number().int().positive().optional(),
-  compensations: z.array(
-    z.object({
-      id: z.number().optional(),
-      account: z.number().int().positive(),
-      amount: z.number().positive('Amount must be positive'),
-      executedAt: z.string().min(1, 'Date is required'),
-    }),
-  ).optional(),
+  compensations: z
+    .array(
+      z.object({
+        id: z.number().optional(),
+        account: z.number().int().positive(),
+        amount: z.number().positive('Amount must be positive'),
+        executedAt: z.string().min(1, 'Date is required'),
+      }),
+    )
+    .optional(),
 });
 
 export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>((_, ref) => {
   const { createTransaction, updateTransaction } = useTransactionMutations();
-  const { updateFormState, formState: { values: data } } = useFormContext();
+  const {
+    updateFormState,
+    formState: { values: data },
+  } = useFormContext();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -61,16 +66,18 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
       account: data?.account?.id,
       amount: data?.amount,
       category: data?.category?.id,
-      executedAt: moment(data?.executedAt).format(MOMENT_DATETIME_FORM_FORMAT) || moment().format(MOMENT_DATETIME_FORM_FORMAT),
+      executedAt:
+        moment(data?.executedAt).format(MOMENT_DATETIME_FORM_FORMAT) || moment().format(MOMENT_DATETIME_FORM_FORMAT),
       note: data?.note,
       isDraft: data?.isDraft ?? false,
       debt: data?.debt?.id,
-      compensations: data?.compensations?.map((comp: Transaction) => ({
-        ...comp,
-        account: comp?.account?.id,
-        amount: comp.amount,
-        executedAt: moment(comp.executedAt).format(MOMENT_DATETIME_FORM_FORMAT),
-      })) || [],
+      compensations:
+        data?.compensations?.map((comp: Transaction) => ({
+          ...comp,
+          account: comp?.account?.id,
+          amount: comp.amount,
+          executedAt: moment(comp.executedAt).format(MOMENT_DATETIME_FORM_FORMAT),
+        })) || [],
     },
     mode: 'onChange',
   });
@@ -106,7 +113,6 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     }
   }, [form.watch('note')]);
 
-
   return (
     <Form {...form}>
       <form className="space-y-2">
@@ -116,16 +122,11 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
           render={({ field }) => (
             <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
               <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
+                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel>Draft</FormLabel>
-                <p className="text-sm text-muted-foreground">
-                  This transaction will be saved as a draft.
-                </p>
+                <p className="text-sm text-muted-foreground">This transaction will be saved as a draft.</p>
               </div>
             </FormItem>
           )}
@@ -219,7 +220,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                     type="number"
                     placeholder="Enter amount"
                     value={field.value ?? ''}
-                    onChange={e => {
+                    onChange={(e) => {
                       field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber);
                     }}
                   />
@@ -304,7 +305,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                             type="number"
                             placeholder="Amount"
                             className="w-full"
-                            onChange={e => field.onChange(e.target.valueAsNumber)}
+                            onChange={(e) => field.onChange(e.target.valueAsNumber)}
                           />
                         </FormControl>
                         <FormMessage />
@@ -316,9 +317,13 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                     name={`compensations.${index}.account`}
                     render={({ field }) => (
                       <FormItem>
-                        <AccountTypeahead multiple={false} className={cn('w-full justify-between', {
-                          'text-muted-foreground': !field.value,
-                        })} {...field} />
+                        <AccountTypeahead
+                          multiple={false}
+                          className={cn('w-full justify-between', {
+                            'text-muted-foreground': !field.value,
+                          })}
+                          {...field}
+                        />
                         <FormMessage />
                       </FormItem>
                     )}
@@ -331,22 +336,13 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                     render={({ field }) => (
                       <FormItem className="flex-1">
                         <FormControl>
-                          <Input
-                            type="datetime-local"
-                            {...field}
-                            className="w-full"
-                          />
+                          <Input type="datetime-local" {...field} className="w-full" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => remove(index)}
-                    className="p-2 h-9 w-9"
-                  >
+                  <Button type="button" variant="destructive" onClick={() => remove(index)} className="p-2 h-9 w-9">
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -355,11 +351,13 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
             <Button
               type="button"
               className="mt-2 w-full"
-              onClick={() => append({
-                account: -1,
-                amount: 0,
-                executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
-              })}
+              onClick={() =>
+                append({
+                  account: -1,
+                  amount: 0,
+                  executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
+                })
+              }
             >
               Add Compensation
             </Button>
@@ -369,6 +367,5 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     </Form>
   );
 });
-
 
 export default TransactionForm;

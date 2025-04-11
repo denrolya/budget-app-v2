@@ -1,13 +1,32 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import { useState } from 'react';
-import { CalendarIcon, ChevronRightIcon, TrendingUpIcon, TrendingDownIcon, BarChartIcon, PieChartIcon, RadarIcon } from 'lucide-react';
+import {
+  CalendarIcon,
+  ChevronRightIcon,
+  TrendingUpIcon,
+  TrendingDownIcon,
+  BarChartIcon,
+  PieChartIcon,
+  RadarIcon,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import {
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
-  ResponsiveContainer, Tooltip,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  PieChart, Pie, Cell
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  ResponsiveContainer,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,7 +45,7 @@ const expenseData = {
       children: [
         { name: 'Rent', currentPeriod: 1000, previousPeriod: 950 },
         { name: 'Utilities', currentPeriod: 200, previousPeriod: 150 },
-      ]
+      ],
     },
     {
       name: 'Food',
@@ -35,7 +54,7 @@ const expenseData = {
       children: [
         { name: 'Groceries', currentPeriod: 300, previousPeriod: 280 },
         { name: 'Dining Out', currentPeriod: 200, previousPeriod: 170 },
-      ]
+      ],
     },
     {
       name: 'Transportation',
@@ -44,7 +63,7 @@ const expenseData = {
       children: [
         { name: 'Public Transit', currentPeriod: 100, previousPeriod: 120 },
         { name: 'Car Expenses', currentPeriod: 200, previousPeriod: 200 },
-      ]
+      ],
     },
     {
       name: 'Entertainment',
@@ -53,7 +72,7 @@ const expenseData = {
       children: [
         { name: 'Movies', currentPeriod: 50, previousPeriod: 40 },
         { name: 'Hobbies', currentPeriod: 150, previousPeriod: 140 },
-      ]
+      ],
     },
     {
       name: 'Healthcare',
@@ -62,19 +81,19 @@ const expenseData = {
       children: [
         { name: 'Insurance', currentPeriod: 150, previousPeriod: 140 },
         { name: 'Medical Expenses', currentPeriod: 100, previousPeriod: 80 },
-      ]
+      ],
     },
-  ]
+  ],
 };
 
 type Category = {
-  name: string
-  currentPeriod: number
-  previousPeriod: number
-  children?: Category[]
-}
+  name: string;
+  currentPeriod: number;
+  previousPeriod: number;
+  children?: Category[];
+};
 
-type ChartType = 'radar' | 'bar' | 'doughnut'
+type ChartType = 'radar' | 'bar' | 'doughnut';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
@@ -149,7 +168,7 @@ export const CategoryTreeCardSkeleton = () => (
 export const CategoryTreeCard = () => {
   const [dateRange, setDateRange] = useState({
     from: new Date(2023, 0, 1),
-    to: new Date(2023, 11, 31)
+    to: new Date(2023, 11, 31),
   });
   const [currentCategory, setCurrentCategory] = useState<Category>(expenseData);
   const [categoryPath, setCategoryPath] = useState<Category[]>([expenseData]);
@@ -165,7 +184,7 @@ export const CategoryTreeCard = () => {
   const handleCategoryClick = (category: Category) => {
     if (category.children) {
       setCurrentCategory(category);
-      setCategoryPath(prev => [...prev, category]);
+      setCategoryPath((prev) => [...prev, category]);
     }
   };
 
@@ -175,11 +194,12 @@ export const CategoryTreeCard = () => {
     setCategoryPath(newPath);
   };
 
-  const chartData = currentCategory.children?.map(cat => ({
-    name: cat.name,
-    currentPeriod: cat.currentPeriod,
-    previousPeriod: cat.previousPeriod,
-  })) || [];
+  const chartData =
+    currentCategory.children?.map((cat) => ({
+      name: cat.name,
+      currentPeriod: cat.currentPeriod,
+      previousPeriod: cat.previousPeriod,
+    })) || [];
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -206,7 +226,13 @@ export const CategoryTreeCard = () => {
               <PolarAngleAxis dataKey="name" />
               <PolarRadiusAxis />
               <Radar name="Current Period" dataKey="currentPeriod" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-              <Radar name="Previous Period" dataKey="previousPeriod" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
+              <Radar
+                name="Previous Period"
+                dataKey="previousPeriod"
+                stroke="#82ca9d"
+                fill="#82ca9d"
+                fillOpacity={0.6}
+              />
               <Tooltip content={<CustomTooltip />} />
             </RadarChart>
           </ResponsiveContainer>
@@ -277,8 +303,7 @@ export const CategoryTreeCard = () => {
                 {dateRange.from ? (
                   dateRange.to ? (
                     <>
-                      {format(dateRange.from, 'LLL dd, y')} -{' '}
-                      {format(dateRange.to, 'LLL dd, y')}
+                      {format(dateRange.from, 'LLL dd, y')} - {format(dateRange.to, 'LLL dd, y')}
                     </>
                   ) : (
                     format(dateRange.from, 'LLL dd, y')
@@ -289,12 +314,7 @@ export const CategoryTreeCard = () => {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="range"
-                selected={dateRange}
-                onSelect={handleDateRangeChange}
-                initialFocus
-              />
+              <Calendar mode="range" selected={dateRange} onSelect={handleDateRangeChange} initialFocus />
             </PopoverContent>
           </Popover>
           <div className="flex space-x-2">
@@ -345,9 +365,7 @@ export const CategoryTreeCard = () => {
           </nav>
         </div>
         <div className="flex flex-col gap-6 flex-grow overflow-hidden">
-          <div className="w-full h-[300px]">
-            {renderChart()}
-          </div>
+          <div className="w-full h-[300px]">{renderChart()}</div>
           <div className="w-full flex-grow overflow-hidden">
             <ScrollArea className="h-[calc(100%-2rem)] pr-4">
               <div className="space-y-2">
@@ -355,23 +373,29 @@ export const CategoryTreeCard = () => {
                   const diff = category.currentPeriod - category.previousPeriod;
                   const percentChange = ((diff / category.previousPeriod) * 100).toFixed(1);
                   return (
-                    <div key={category.name}
-                         className="flex items-center justify-between py-2 px-3 bg-muted rounded-md hover:bg-muted/80 transition-colors">
+                    <div
+                      key={category.name}
+                      className="flex items-center justify-between py-2 px-3 bg-muted rounded-md hover:bg-muted/80 transition-colors"
+                    >
                       <div className="flex items-center space-x-3 flex-grow">
-                        <div className="w-4 h-4 rounded-full flex-shrink-0"
-                             style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                        <div
+                          className="w-4 h-4 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                        ></div>
                         <div className="flex-grow min-w-0">
                           <h5 className="font-medium text-sm truncate">{category.name}</h5>
                           <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                             <span>${category.currentPeriod.toLocaleString()}</span>
-                            <span className={`flex items-center ${diff >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                            {diff >= 0 ? (
-                              <TrendingUpIcon className="inline mr-1 h-3 w-3" />
-                            ) : (
-                              <TrendingDownIcon className="inline mr-1 h-3 w-3" />
-                            )}
+                            <span
+                              className={`flex items-center ${diff >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
+                            >
+                              {diff >= 0 ? (
+                                <TrendingUpIcon className="inline mr-1 h-3 w-3" />
+                              ) : (
+                                <TrendingDownIcon className="inline mr-1 h-3 w-3" />
+                              )}
                               {percentChange}%
-                          </span>
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -379,7 +403,7 @@ export const CategoryTreeCard = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          const fullCategory = currentCategory.children?.find(cat => cat.name === category.name);
+                          const fullCategory = currentCategory.children?.find((cat) => cat.name === category.name);
                           if (fullCategory) {
                             handleCategoryClick(fullCategory);
                           }

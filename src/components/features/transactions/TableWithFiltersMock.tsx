@@ -25,20 +25,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type Transaction = {
-  id: number
-  datetime: string
-  account: string
-  amount: number
-  category: string
-  note: string
-  isDraft: boolean
-}
+  id: number;
+  datetime: string;
+  account: string;
+  amount: number;
+  category: string;
+  note: string;
+  isDraft: boolean;
+};
 
 type EditingField = {
-  groupDate: string
-  id: number
-  field: keyof Transaction
-} | null
+  groupDate: string;
+  id: number;
+  field: keyof Transaction;
+} | null;
 
 export default function TransactionTable() {
   const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
@@ -66,12 +66,13 @@ export default function TransactionTable() {
   // Mock data for demonstration
   const [transactions, setTransactions] = useState([
     {
-      date: '2023-06-01', items: [
+      date: '2023-06-01',
+      items: [
         {
           id: 1,
           datetime: '2023-06-01T09:30',
           account: 'Credit Card',
-          amount: -5.50,
+          amount: -5.5,
           category: 'Food',
           note: 'Morning coffee',
           isDraft: false,
@@ -80,7 +81,7 @@ export default function TransactionTable() {
           id: 2,
           datetime: '2023-06-01T12:45',
           account: 'Cash',
-          amount: -15.00,
+          amount: -15.0,
           category: 'Food',
           note: 'Lunch with colleagues',
           isDraft: true,
@@ -97,12 +98,13 @@ export default function TransactionTable() {
       ],
     },
     {
-      date: '2023-06-02', items: [
+      date: '2023-06-02',
+      items: [
         {
           id: 4,
           datetime: '2023-06-02T10:00',
           account: 'Debit Card',
-          amount: -75.20,
+          amount: -75.2,
           category: 'Food',
           note: 'Weekly grocery shopping',
           isDraft: false,
@@ -111,7 +113,7 @@ export default function TransactionTable() {
           id: 5,
           datetime: '2023-06-02T14:30',
           account: 'Credit Card',
-          amount: -40.00,
+          amount: -40.0,
           category: 'Transport',
           note: 'Gas station fill-up',
           isDraft: true,
@@ -119,12 +121,13 @@ export default function TransactionTable() {
       ],
     },
     {
-      date: '2023-06-03', items: [
+      date: '2023-06-03',
+      items: [
         {
           id: 6,
           datetime: '2023-06-03T09:15',
           account: 'Checking',
-          amount: -1200.00,
+          amount: -1200.0,
           category: 'Housing',
           note: 'Monthly rent payment',
           isDraft: false,
@@ -133,7 +136,7 @@ export default function TransactionTable() {
           id: 7,
           datetime: '2023-06-03T11:45',
           account: 'Credit Card',
-          amount: -50.00,
+          amount: -50.0,
           category: 'Health',
           note: 'Gym membership fee',
           isDraft: false,
@@ -142,7 +145,7 @@ export default function TransactionTable() {
           id: 8,
           datetime: '2023-06-03T18:15',
           account: 'Credit Card',
-          amount: -25.00,
+          amount: -25.0,
           category: 'Entertainment',
           note: 'Movie night tickets',
           isDraft: true,
@@ -150,12 +153,13 @@ export default function TransactionTable() {
       ],
     },
     {
-      date: '2023-06-04', items: [
+      date: '2023-06-04',
+      items: [
         {
           id: 9,
           datetime: '2023-06-04T08:30',
           account: 'Savings',
-          amount: 3000.00,
+          amount: 3000.0,
           category: 'Income',
           note: 'Monthly salary deposit',
           isDraft: false,
@@ -164,7 +168,7 @@ export default function TransactionTable() {
           id: 10,
           datetime: '2023-06-04T13:20',
           account: 'Checking',
-          amount: -65.00,
+          amount: -65.0,
           category: 'Utilities',
           note: 'Phone bill payment',
           isDraft: false,
@@ -174,26 +178,27 @@ export default function TransactionTable() {
   ]);
 
   const addBulkTransaction = () => {
-    const newId = bulkTransactions.length > 0 ? Math.max(...bulkTransactions.map(t => t.id)) + 1 : 1;
-    setBulkTransactions([...bulkTransactions, {
-      id: newId,
-      datetime: new Date().toISOString().slice(0, 16),
-      account: '',
-      amount: 0,
-      category: '',
-      note: '',
-      isDraft: false,
-    }]);
+    const newId = bulkTransactions.length > 0 ? Math.max(...bulkTransactions.map((t) => t.id)) + 1 : 1;
+    setBulkTransactions([
+      ...bulkTransactions,
+      {
+        id: newId,
+        datetime: new Date().toISOString().slice(0, 16),
+        account: '',
+        amount: 0,
+        category: '',
+        note: '',
+        isDraft: false,
+      },
+    ]);
   };
 
   const removeBulkTransaction = (id: number) => {
-    setBulkTransactions(bulkTransactions.filter(t => t.id !== id));
+    setBulkTransactions(bulkTransactions.filter((t) => t.id !== id));
   };
 
   const updateBulkTransaction = (id: number, field: keyof Transaction, value: any) => {
-    setBulkTransactions(bulkTransactions.map(t =>
-      t.id === id ? { ...t, [field]: value } : t,
-    ));
+    setBulkTransactions(bulkTransactions.map((t) => (t.id === id ? { ...t, [field]: value } : t)));
   };
 
   const handleSaveBulkTransactions = () => {
@@ -217,20 +222,21 @@ export default function TransactionTable() {
   };
 
   const updateTransaction = (groupDate: string, id: number, field: keyof Transaction, value: any) => {
-    setTransactions(transactions.map(group =>
-      group.date === groupDate
-        ? {
-          ...group,
-          items: group.items.map(item =>
-            item.id === id ? { ...item, [field]: value } : item,
-          ),
-        }
-        : group,
-    ));
+    setTransactions(
+      transactions.map((group) =>
+        group.date === groupDate
+          ? {
+              ...group,
+              items: group.items.map((item) => (item.id === id ? { ...item, [field]: value } : item)),
+            }
+          : group,
+      ),
+    );
   };
 
   const renderEditableCell = (groupDate: string, transaction: Transaction, field: keyof Transaction) => {
-    const isEditing = editingField?.groupDate === groupDate && editingField?.id === transaction.id && editingField?.field === field;
+    const isEditing =
+      editingField?.groupDate === groupDate && editingField?.id === transaction.id && editingField?.field === field;
     const value = transaction[field];
 
     if (isEditing) {
@@ -356,12 +362,7 @@ export default function TransactionTable() {
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="range"
-                          selected={dateRange}
-                          onSelect={setDateRange}
-                          initialFocus
-                        />
+                        <Calendar mode="range" selected={dateRange} onSelect={setDateRange} initialFocus />
                       </PopoverContent>
                     </Popover>
                   </div>
@@ -396,7 +397,9 @@ export default function TransactionTable() {
                           checked={includeNestedCategories}
                           onCheckedChange={(checked) => setIncludeNestedCategories(checked as boolean)}
                         />
-                        <Label htmlFor="nested" className="text-sm">Include nested categories</Label>
+                        <Label htmlFor="nested" className="text-sm">
+                          Include nested categories
+                        </Label>
                       </div>
                     </div>
                     <div>
@@ -461,47 +464,62 @@ export default function TransactionTable() {
                           {group.date}
                         </TableCell>
                       </TableRow>
-                      {group.items.filter(item => showDrafts || !item.isDraft).map((transaction) => (
-                        <TableRow key={transaction.id} className={`h-12 ${transaction.isDraft ? 'bg-yellow-50' : ''}`}>
-                          <TableCell className="py-1">{transaction.id}</TableCell>
-                          <TableCell className="py-1">{renderEditableCell(group.date, transaction, 'account')}</TableCell>
-                          <TableCell className="text-right py-1">{renderEditableCell(group.date, transaction, 'amount')}</TableCell>
-                          <TableCell className="py-1">{renderEditableCell(group.date, transaction, 'category')}</TableCell>
-                          <TableCell className="py-1">
-                            {renderEditableCell(group.date, transaction, 'note')}
-                            {transaction.isDraft && (
-                              <Badge variant="secondary" className="ml-2">Draft</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="py-1">{renderEditableCell(group.date, transaction, 'datetime')}</TableCell>
-                          <TableCell className="py-1">
-                            <TooltipProvider>
-                              <div className="flex space-x-1">
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                      <EyeIcon className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>View</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                      <TrashIcon className="h-4 w-4" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Delete</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </div>
-                            </TooltipProvider>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {group.items
+                        .filter((item) => showDrafts || !item.isDraft)
+                        .map((transaction) => (
+                          <TableRow
+                            key={transaction.id}
+                            className={`h-12 ${transaction.isDraft ? 'bg-yellow-50' : ''}`}
+                          >
+                            <TableCell className="py-1">{transaction.id}</TableCell>
+                            <TableCell className="py-1">
+                              {renderEditableCell(group.date, transaction, 'account')}
+                            </TableCell>
+                            <TableCell className="text-right py-1">
+                              {renderEditableCell(group.date, transaction, 'amount')}
+                            </TableCell>
+                            <TableCell className="py-1">
+                              {renderEditableCell(group.date, transaction, 'category')}
+                            </TableCell>
+                            <TableCell className="py-1">
+                              {renderEditableCell(group.date, transaction, 'note')}
+                              {transaction.isDraft && (
+                                <Badge variant="secondary" className="ml-2">
+                                  Draft
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="py-1">
+                              {renderEditableCell(group.date, transaction, 'datetime')}
+                            </TableCell>
+                            <TableCell className="py-1">
+                              <TooltipProvider>
+                                <div className="flex space-x-1">
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                                        <EyeIcon className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>View</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                                        <TrashIcon className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Delete</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                              </TooltipProvider>
+                            </TableCell>
+                          </TableRow>
+                        ))}
                     </React.Fragment>
                   ))}
                 </TableBody>
@@ -513,45 +531,49 @@ export default function TransactionTable() {
               {transactions.map((group) => (
                 <div key={group.date} className="mb-2">
                   <h3 className="bg-muted/50 font-medium py-2 px-4">{group.date}</h3>
-                  {group.items.filter(item => showDrafts || !item.isDraft).map((transaction) => (
-                    <div key={transaction.id} className={`border-b p-2 ${transaction.isDraft ? 'bg-yellow-50' : ''}`}>
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">{transaction.note}</p>
-                          <div className="flex items-center space-x-2 text-sm text-gray-500">
-                            <span>{new Date(transaction.datetime).toLocaleTimeString([], {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                              hour12: false,
-                            })}</span>
-                            <Badge variant="outline" className="font-normal">
-                              {transaction.category}
-                            </Badge>
-                            {transaction.isDraft && (
-                              <Badge variant="secondary">Draft</Badge>
-                            )}
+                  {group.items
+                    .filter((item) => showDrafts || !item.isDraft)
+                    .map((transaction) => (
+                      <div key={transaction.id} className={`border-b p-2 ${transaction.isDraft ? 'bg-yellow-50' : ''}`}>
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">{transaction.note}</p>
+                            <div className="flex items-center space-x-2 text-sm text-gray-500">
+                              <span>
+                                {new Date(transaction.datetime).toLocaleTimeString([], {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  hour12: false,
+                                })}
+                              </span>
+                              <Badge variant="outline" className="font-normal">
+                                {transaction.category}
+                              </Badge>
+                              {transaction.isDraft && <Badge variant="secondary">Draft</Badge>}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p
+                              className={`font-semibold ${transaction.amount < 0 ? 'text-red-500' : 'text-green-500'}`}
+                            >
+                              ${Math.abs(transaction.amount).toFixed(2)}
+                            </p>
+                            <p className="text-sm text-gray-500">{transaction.account}</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className={`font-semibold ${transaction.amount < 0 ? 'text-red-500' : 'text-green-500'}`}>
-                            ${Math.abs(transaction.amount).toFixed(2)}
-                          </p>
-                          <p className="text-sm text-gray-500">{transaction.account}</p>
+                        <div className="flex justify-end mt-2 space-x-2">
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <EyeIcon className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Edit2Icon className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <TrashIcon className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex justify-end mt-2 space-x-2">
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <EyeIcon className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <Edit2Icon className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <TrashIcon className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               ))}
             </div>
@@ -574,9 +596,7 @@ export default function TransactionTable() {
               <span className="text-sm text-gray-500">entries</span>
             </div>
 
-            <div className="text-sm text-gray-500">
-              Showing 1 to {pageSize} of 100 entries
-            </div>
+            <div className="text-sm text-gray-500">Showing 1 to {pageSize} of 100 entries</div>
 
             <div className="flex items-center space-x-2">
               <Button variant="outline" size="sm" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}>
@@ -670,11 +690,7 @@ export default function TransactionTable() {
                         />
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeBulkTransaction(transaction.id)}
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => removeBulkTransaction(transaction.id)}>
                           <TrashIcon className="h-4 w-4" />
                         </Button>
                       </TableCell>

@@ -49,7 +49,8 @@ export const TableListingSkeleton: React.FC<Props> = ({ after, before }) => {
                       badgeSize="sm"
                       variant="default"
                       showTime={false}
-                      date={date} />
+                      date={date}
+                    />
                     <div className="text-sm flex flex-row space-x-4 font-normal">
                       <Skeleton className="h-6 w-32" />
                       <Skeleton className="h-6 w-32" />
@@ -60,7 +61,9 @@ export const TableListingSkeleton: React.FC<Props> = ({ after, before }) => {
               {Array.from({ length: 3 }).map((_, index) => (
                 <TableRow key={index}>
                   <TableCell className="w-4"></TableCell>
-                  <TableCell><Skeleton className="w-12 h-4" /></TableCell>
+                  <TableCell>
+                    <Skeleton className="w-12 h-4" />
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
                       <Skeleton className="w-16 h-6 rounded-full" />
@@ -68,10 +71,18 @@ export const TableListingSkeleton: React.FC<Props> = ({ after, before }) => {
                       <Skeleton className="w-16 h-6 rounded-full" />
                     </div>
                   </TableCell>
-                  <TableCell><Skeleton className="w-24 h-6" /></TableCell>
-                  <TableCell><Skeleton className="w-20 h-6" /></TableCell>
-                  <TableCell><Skeleton className="w-32 h-4" /></TableCell>
-                  <TableCell><Skeleton className="w-16 h-4" /></TableCell>
+                  <TableCell>
+                    <Skeleton className="w-24 h-6" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="w-20 h-6" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="w-32 h-4" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="w-16 h-4" />
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Skeleton className="w-8 h-8 rounded-full" />

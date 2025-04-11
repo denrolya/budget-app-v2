@@ -7,7 +7,14 @@ import AccountForm from '@/components/features/accounts/Form';
 import TransactionForm from '@/components/features/transactions/Form';
 import TransferForm from '@/components/features/transfers/Form';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { Separator } from '@/components/ui/separator';
@@ -38,9 +45,7 @@ const FormContent = forwardRef<{ submitForm: () => Promise<void> }, FormContentP
   const { key, formType } = props;
   const FormComponent = formComponents[formType];
 
-  return (
-    <FormComponent ref={ref} key={key} />
-  );
+  return <FormComponent ref={ref} key={key} />;
 });
 
 export const FormRenderer: React.FC = () => {
@@ -60,15 +65,15 @@ export const FormRenderer: React.FC = () => {
           closeForm();
         } else {
           resetForm();
-          setFormKey(prev => (parseInt(prev) + 1).toString());
+          setFormKey((prev) => (parseInt(prev) + 1).toString());
         }
       } catch (error) {
         console.error('Form submission failed:', error);
         toast.error('Failed to submit form. Please try again.', {
           action: {
             label: 'Close',
-            onClick: () => toast.dismiss()
-          }
+            onClick: () => toast.dismiss(),
+          },
         });
       } finally {
         setIsLoading(false);
@@ -100,18 +105,10 @@ export const FormRenderer: React.FC = () => {
 
   const footer = (
     <div className="flex justify-end space-x-2">
-      <Button
-        type="submit"
-        onClick={() => handleSubmit(false)}
-        disabled={isLoading || !formState.isValid}
-      >
+      <Button type="submit" onClick={() => handleSubmit(false)} disabled={isLoading || !formState.isValid}>
         {isEditMode ? 'Update' : 'Create'}
       </Button>
-      <Button
-        type="button"
-        onClick={() => handleSubmit(true)}
-        disabled={isLoading || !formState.isValid}
-      >
+      <Button type="button" onClick={() => handleSubmit(true)} disabled={isLoading || !formState.isValid}>
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -133,9 +130,7 @@ export const FormRenderer: React.FC = () => {
             <DialogDescription className="sr-only">Form: {title}</DialogDescription>
           </DialogHeader>
           {content}
-          <DialogFooter className="border-t pt-2">
-            {footer}
-          </DialogFooter>
+          <DialogFooter className="border-t pt-2">{footer}</DialogFooter>
         </DialogContent>
       </Dialog>
     );
@@ -150,7 +145,7 @@ export const FormRenderer: React.FC = () => {
         </DrawerHeader>
         <div className="px-4 pb-4 overflow-y-auto">
           {content}
-          <Separator className="h-1"  />
+          <Separator className="h-1" />
           {footer}
         </div>
       </DrawerContent>

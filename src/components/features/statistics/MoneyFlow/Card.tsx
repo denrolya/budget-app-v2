@@ -26,9 +26,8 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
   const [showRevenue, setShowRevenue] = useState<boolean>(false);
   const [showPreviousPeriod, setShowPreviousPeriod] = useState<boolean>(true);
 
-
-  const selectedTimeframeOption = useMemo(() => TIMEFRAME_OPTIONS
-      .find((t) => t.value === timeframe) || TIMEFRAME_OPTIONS[2],
+  const selectedTimeframeOption = useMemo(
+    () => TIMEFRAME_OPTIONS.find((t) => t.value === timeframe) || TIMEFRAME_OPTIONS[2],
     [timeframe],
   );
 
@@ -89,12 +88,17 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
   });
 
   const getPeriodLabel = useMemo(() => {
-    const periodOption = PERIOD_OPTIONS.find(option => option.value === period);
+    const periodOption = PERIOD_OPTIONS.find((option) => option.value === period);
     return periodOption ? periodOption.label.toLowerCase() : 'period';
   }, [period]);
 
   return (
-    <Card className={cn('w-full min-h-[550px] flex flex-col transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25', className)}>
+    <Card
+      className={cn(
+        'w-full min-h-[550px] flex flex-col transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25',
+        className,
+      )}
+    >
       <CardHeader className="p-4 pb-0 space-y-0.2">
         <div className="flex justify-between items-start">
           <CardTitle className="text-base font-medium">Money Flow</CardTitle>
@@ -139,34 +143,39 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
 
         {isLoading && <MoneyFlowSkeleton />}
 
-        {(!isLoading && totalRevenue) && (
+        {!isLoading && totalRevenue && (
           <div className="flex-grow overflow-hidden flex flex-col mt-2">
             <div className="flex-grow overflow-x-auto overflow-y-hidden h-[375px]">
               {error ? (
                 <div className="w-full h-full flex items-center justify-center text-destructive text-xs">
                   Error loading data: {error.message}
                 </div>
-              ) : transformedData.length > 0 && (
-                <Chart
-                  data={transformedData}
-                  period={period}
-                  chartType={chartType}
-                  showIncome={showIncome}
-                  showExpenses={showExpenses}
-                  showRevenue={showRevenue}
-                  currentTimeframe={currentTimeframe}
-                  previousTimeframe={previousTimeframe}
-                  showPreviousPeriod={showPreviousPeriod}
-                />
+              ) : (
+                transformedData.length > 0 && (
+                  <Chart
+                    data={transformedData}
+                    period={period}
+                    chartType={chartType}
+                    showIncome={showIncome}
+                    showExpenses={showExpenses}
+                    showRevenue={showRevenue}
+                    currentTimeframe={currentTimeframe}
+                    previousTimeframe={previousTimeframe}
+                    showPreviousPeriod={showPreviousPeriod}
+                  />
+                )
               )}
             </div>
           </div>
         )}
-
       </CardContent>
 
-      {(!isLoading && totalRevenue) && (
-        <CardFooter className={cn('flex flex-col gap-4 sm:gap-6 lg:flex-row lg:justify-between p-3 transition-all border-t duration-300 ease-in-out')}>
+      {!isLoading && totalRevenue && (
+        <CardFooter
+          className={cn(
+            'flex flex-col gap-4 sm:gap-6 lg:flex-row lg:justify-between p-3 transition-all border-t duration-300 ease-in-out',
+          )}
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:flex-1 lg:grid-cols-4 w-full">
             <SummaryItem
               label="Total Income"

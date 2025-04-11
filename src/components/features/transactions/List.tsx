@@ -9,17 +9,12 @@ import { Separator } from '@/components/ui/separator';
 import Transaction from '@/models/Transaction';
 import { Skeleton } from '@/components/ui/skeleton';
 
-
 interface ListSkeletonProps extends React.ComponentPropsWithoutRef<'div'> {
   groupCount?: number;
   transactionsPerGroup?: number;
 }
 
-export const ListSkeleton: React.FC<ListSkeletonProps> = ({
-                                                groupCount = 3,
-                                                transactionsPerGroup = 5,
-                                                ...props
-                                              }) => (
+export const ListSkeleton: React.FC<ListSkeletonProps> = ({ groupCount = 3, transactionsPerGroup = 5, ...props }) => (
   <div {...props}>
     {Array.from({ length: groupCount }).map((_, groupIndex) => (
       <React.Fragment key={groupIndex}>
@@ -40,9 +35,7 @@ export const ListSkeleton: React.FC<ListSkeletonProps> = ({
             ))}
           </ul>
         </div>
-        {groupIndex < groupCount - 1 && (
-          <Separator className="my-6" />
-        )}
+        {groupIndex < groupCount - 1 && <Separator className="my-6" />}
       </React.Fragment>
     ))}
   </div>
@@ -50,9 +43,8 @@ export const ListSkeleton: React.FC<ListSkeletonProps> = ({
 
 ListSkeleton.displayName = 'TransactionsGroupedListSkeleton';
 
-
 interface Props extends React.ComponentPropsWithoutRef<'div'> {
-  groupedItems: [Moment, Transaction[], number, number][]
+  groupedItems: [Moment, Transaction[], number, number][];
 }
 
 export const List: React.FC<Props> = ({ groupedItems, ...props }) => (
@@ -67,7 +59,9 @@ export const List: React.FC<Props> = ({ groupedItems, ...props }) => (
             <div className="text-sm text-muted-foreground">
               <span>{count} transactions</span>
               <span className="mx-1">•</span>
-              <span><MoneyValue amount={totalValue} /></span>
+              <span>
+                <MoneyValue amount={totalValue} />
+              </span>
             </div>
           </div>
           <ul className="space-y-2">
@@ -78,9 +72,7 @@ export const List: React.FC<Props> = ({ groupedItems, ...props }) => (
             ))}
           </ul>
         </div>
-        {index < groupedItems.length - 1 && (
-          <Separator className="my-6" />
-        )}
+        {index < groupedItems.length - 1 && <Separator className="my-6" />}
       </React.Fragment>
     ))}
   </div>

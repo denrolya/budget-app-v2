@@ -8,8 +8,10 @@ import CurrencySelector from '@/components/layout/HeaderCurrencySelector';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
-  DropdownMenuContent, DropdownMenuGroup,
-  DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
@@ -29,10 +31,14 @@ export const Header: React.FC<Props> = ({ className }) => {
   const { theme, setTheme } = useTheme();
 
   return (
-    <header className={cn('bg-accent/10 backdrop-blur-xl border-b border-accent h-10 md:h-8 flex items-center px-4 justify-between', className)}>
+    <header
+      className={cn(
+        'bg-accent/10 backdrop-blur-xl border-b border-accent h-10 md:h-8 flex items-center px-4 justify-between',
+        className,
+      )}
+    >
       <div className="flex items-center space-x-2">
-        <nav className="hidden md:flex space-x-4">
-        </nav>
+        <nav className="hidden md:flex space-x-4"></nav>
       </div>
 
       <div className="flex items-center space-x-2 md:space-x-4">
@@ -63,23 +69,17 @@ export const Header: React.FC<Props> = ({ className }) => {
                   <DropdownMenuItem onClick={() => setTheme(Theme.RetrowaveLight)}>
                     <Palmtree className="mr-2 h-4 w-4" />
                     <span>Retrowave Light</span>
-                    {theme === Theme.RetrowaveLight && (
-                      <Check className="ml-auto h-4 w-4 text-primary" />
-                    )}
+                    {theme === Theme.RetrowaveLight && <Check className="ml-auto h-4 w-4 text-primary" />}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setTheme(Theme.RetrowaveDark)}>
                     <Palmtree className="mr-2 h-4 w-4" />
                     <span>Retrowave Dark</span>
-                    {theme === Theme.RetrowaveDark && (
-                      <Check className="ml-auto h-4 w-4 text-primary" />
-                    )}
+                    {theme === Theme.RetrowaveDark && <Check className="ml-auto h-4 w-4 text-primary" />}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setTheme(Theme.TronDark)}>
                     <Bike className="mr-2 h-4 w-4" />
                     <span>Tron Dark</span>
-                    {theme === Theme.TronDark && (
-                      <Check className="ml-auto h-4 w-4 text-primary" />
-                    )}
+                    {theme === Theme.TronDark && <Check className="ml-auto h-4 w-4 text-primary" />}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
 
@@ -90,16 +90,12 @@ export const Header: React.FC<Props> = ({ className }) => {
                   <DropdownMenuItem onClick={() => setTheme(Theme.Light)}>
                     <Sun className="mr-2 h-4 w-4" />
                     <span>Light</span>
-                    {theme === Theme.Light && (
-                      <Check className="ml-auto h-4 w-4 text-primary" />
-                    )}
+                    {theme === Theme.Light && <Check className="ml-auto h-4 w-4 text-primary" />}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setTheme(Theme.Dark)}>
                     <Moon className="mr-2 h-4 w-4" />
                     <span>Dark</span>
-                    {theme === Theme.Dark && (
-                      <Check className="ml-auto h-4 w-4 text-primary" />
-                    )}
+                    {theme === Theme.Dark && <Check className="ml-auto h-4 w-4 text-primary" />}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
 
@@ -110,9 +106,7 @@ export const Header: React.FC<Props> = ({ className }) => {
                   <DropdownMenuItem onClick={() => setTheme(Theme.System)}>
                     <Laptop className="mr-2 h-4 w-4" />
                     <span>System</span>
-                    {theme === Theme.System && (
-                      <Check className="ml-auto h-4 w-4 text-primary" />
-                    )}
+                    {theme === Theme.System && <Check className="ml-auto h-4 w-4 text-primary" />}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuSubContent>

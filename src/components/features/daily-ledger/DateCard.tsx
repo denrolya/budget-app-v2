@@ -27,24 +27,29 @@ interface Props {
 
 export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => {
   const baseCurrency = useBaseCurrency();
-  const transactions = items.filter(item => item instanceof Transaction) as Transaction[];
-  const transfers = items.filter(item => item instanceof Transfer) as Transfer[];
+  const transactions = items.filter((item) => item instanceof Transaction) as Transaction[];
+  const transfers = items.filter((item) => item instanceof Transfer) as Transfer[];
   const transactionsCount = transactions.length;
   const transfersCount = transfers.length;
 
-  const { totalIncome, totalExpense } = transactions.reduce((acc, transaction) => {
-    if (transaction.isIncome()) {
-      acc.totalIncome += transaction.convertedValues[baseCurrency];
-    } else {
-      acc.totalExpense += transaction.convertedValues[baseCurrency];
-    }
-    return acc;
-  }, { totalIncome: 0, totalExpense: 0 });
+  const { totalIncome, totalExpense } = transactions.reduce(
+    (acc, transaction) => {
+      if (transaction.isIncome()) {
+        acc.totalIncome += transaction.convertedValues[baseCurrency];
+      } else {
+        acc.totalExpense += transaction.convertedValues[baseCurrency];
+      }
+      return acc;
+    },
+    { totalIncome: 0, totalExpense: 0 },
+  );
 
   const netAmount = totalIncome - totalExpense;
 
-  const transferAmount = transfers.reduce((total, transfer) =>
-    total + transfer.fromExpense.convertedValues[baseCurrency], 0);
+  const transferAmount = transfers.reduce(
+    (total, transfer) => total + transfer.fromExpense.convertedValues[baseCurrency],
+    0,
+  );
 
   const content = (
     <>
@@ -86,22 +91,21 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
 
   return (
     <div
-      className={cn('flex flex-col w-full md:w-[calc(100%/2)] lg:w-[calc(100%/3)] xl:w-[calc(100%/4)] max-h-[calc(100vh-2rem)]', {
-        'order-first md:order-last': index === 0,
-        'order-last md:order-first': index === totalDays - 1,
-      })}
+      className={cn(
+        'flex flex-col w-full md:w-[calc(100%/2)] lg:w-[calc(100%/3)] xl:w-[calc(100%/4)] max-h-[calc(100vh-2rem)]',
+        {
+          'order-first md:order-last': index === 0,
+          'order-last md:order-first': index === totalDays - 1,
+        },
+      )}
     >
       <div className="md:hidden w-full h-full max-h-full bg-background rounded-lg shadow-sm flex flex-col min-w-[300px]">
-        <div className="p-4 flex-grow overflow-y-auto">
-          {content}
-        </div>
+        <div className="p-4 flex-grow overflow-y-auto">{content}</div>
       </div>
 
       <Card className="hidden md:flex md:flex-col h-full max-h-full transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 overflow-hidden min-w-[470px]">
         <CardHeader className="pb-2 flex flex-col h-full overflow-hidden">
-          <div className="flex-grow overflow-y-auto">
-            {content}
-          </div>
+          <div className="flex-grow overflow-y-auto">{content}</div>
         </CardHeader>
       </Card>
     </div>

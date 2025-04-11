@@ -41,10 +41,9 @@ const RateDisplay: React.FC<{
         className="font-mono"
         amount={amount * value}
         currency={to}
-        maximumFractionDigits={decimals} />
-      <sup className="ml-1 mt-2 text-[8px] font-medium text-muted-foreground">
-        {source}
-      </sup>
+        maximumFractionDigits={decimals}
+      />
+      <sup className="ml-1 mt-2 text-[8px] font-medium text-muted-foreground">{source}</sup>
     </div>
   </div>
 );
@@ -137,7 +136,13 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
           <h3 className="font-semibold">Transaction Data</h3>
           <div className="flex justify-between items-center">
             <span className="text-sm">Date</span>
-            <RelativeDatetimeDisplay showRelative showDayBadge badgeSize="sm" variant="default" date={transaction.executedAt} />
+            <RelativeDatetimeDisplay
+              showRelative
+              showDayBadge
+              badgeSize="sm"
+              variant="default"
+              date={transaction.executedAt}
+            />
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm">Category</span>
@@ -145,9 +150,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
               <Badge variant="outline" className="text-xs px-1 py-0 whitespace-nowrap mb-1">
                 {transaction.category.name}
               </Badge>
-              <span className="text-xs text-muted-foreground">
-              {transaction.category.getFullPath().join(' > ')}
-            </span>
+              <span className="text-xs text-muted-foreground">{transaction.category.getFullPath().join(' > ')}</span>
             </div>
           </div>
           <div className="flex justify-between items-center">
@@ -180,7 +183,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
           </>
         )}
 
-        {(transaction.convertedValues && Object.keys(transaction.convertedValues).length > 0) && (
+        {transaction.convertedValues && Object.keys(transaction.convertedValues).length > 0 && (
           <>
             <Separator />
             <div className="grid gap-2">
@@ -244,7 +247,8 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
                             </div>
                           </div>
                         </div>
-                      }>
+                      }
+                    >
                       <div className="flex justify-between items-center cursor-help">
                         <span className="flex items-center space-x-2">
                           <CurrencyIcon currency={currency} />
@@ -266,12 +270,14 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
           </>
         )}
 
-        {(transaction.compensations && transaction.compensations.length > 0) && (
+        {transaction.compensations && transaction.compensations.length > 0 && (
           <>
             <Separator />
             <div className="grid gap-2">
               <h3 className="font-semibold">Compensation Transactions</h3>
-              {transaction.compensations.map(comp => <TransactionListItem isCompensationView key={comp.id} transaction={comp} />)}
+              {transaction.compensations.map((comp) => (
+                <TransactionListItem isCompensationView key={comp.id} transaction={comp} />
+              ))}
             </div>
           </>
         )}
@@ -280,16 +286,15 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
       <div className="flex items-center justify-between mt-6">
         <div className="flex items-center space-x-2">
           <InfoIcon className="h-4 w-4 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">
-            Transaction completed successfully
-          </p>
+          <p className="text-sm text-muted-foreground">Transaction completed successfully</p>
         </div>
         <div className="flex space-x-2">
           <Button
             variant="outline"
             size="sm"
             disabled={isEditing || isDeleting}
-            onClick={() => openForm(FormType.Transaction, transaction)}>
+            onClick={() => openForm(FormType.Transaction, transaction)}
+          >
             {isEditing && (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -308,7 +313,8 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
             size="sm"
             className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
             disabled={isEditing || isDeleting}
-            onClick={() => handleDelete(transaction)}>
+            onClick={() => handleDelete(transaction)}
+          >
             {isDeleting && (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

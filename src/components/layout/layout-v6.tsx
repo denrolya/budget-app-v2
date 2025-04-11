@@ -35,18 +35,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 // Mock data for different exchange rate sources
 const exchangeRateSources = {
   'Central Bank': {
-    USD: { EUR: 0.92, GBP: 0.79, JPY: 148.21, HUF: 354.50 },
-    EUR: { USD: 1.09, GBP: 0.86, JPY: 161.10, HUF: 385.33 },
+    USD: { EUR: 0.92, GBP: 0.79, JPY: 148.21, HUF: 354.5 },
+    EUR: { USD: 1.09, GBP: 0.86, JPY: 161.1, HUF: 385.33 },
     HUF: { USD: 0.0028, EUR: 0.0026, GBP: 0.0022, JPY: 0.42 },
   },
   'Market Average': {
-    USD: { EUR: 0.93, GBP: 0.80, JPY: 148.50, HUF: 355.00 },
-    EUR: { USD: 1.08, GBP: 0.86, JPY: 160.80, HUF: 384.50 },
+    USD: { EUR: 0.93, GBP: 0.8, JPY: 148.5, HUF: 355.0 },
+    EUR: { USD: 1.08, GBP: 0.86, JPY: 160.8, HUF: 384.5 },
     HUF: { USD: 0.0028, EUR: 0.0026, GBP: 0.0022, JPY: 0.42 },
   },
   'Commercial Bank': {
-    USD: { EUR: 0.91, GBP: 0.78, JPY: 147.90, HUF: 353.80 },
-    EUR: { USD: 1.10, GBP: 0.85, JPY: 161.50, HUF: 386.00 },
+    USD: { EUR: 0.91, GBP: 0.78, JPY: 147.9, HUF: 353.8 },
+    EUR: { USD: 1.1, GBP: 0.85, JPY: 161.5, HUF: 386.0 },
     HUF: { USD: 0.0028, EUR: 0.0026, GBP: 0.0022, JPY: 0.41 },
   },
 };
@@ -62,11 +62,17 @@ export const LayoutV6 = () => {
 
   const getExchangeRate = (source: string, from: string, to: string) => {
     if (from === to) return 1;
-    return exchangeRateSources[source as keyof typeof exchangeRateSources][from as keyof (typeof exchangeRateSources)[keyof typeof exchangeRateSources]][to as keyof (typeof exchangeRateSources)[keyof typeof exchangeRateSources][keyof (typeof exchangeRateSources)[keyof typeof exchangeRateSources]]] || 0;
+    return (
+      exchangeRateSources[source as keyof typeof exchangeRateSources][
+        from as keyof (typeof exchangeRateSources)[keyof typeof exchangeRateSources]
+      ][
+        to as keyof (typeof exchangeRateSources)[keyof typeof exchangeRateSources][keyof (typeof exchangeRateSources)[keyof typeof exchangeRateSources]]
+      ] || 0
+    );
   };
 
   const calculateStatistics = (from: string, to: string) => {
-    const rates = Object.keys(exchangeRateSources).map(source => getExchangeRate(source, from, to));
+    const rates = Object.keys(exchangeRateSources).map((source) => getExchangeRate(source, from, to));
     const avg = rates.reduce((a, b) => a + b, 0) / rates.length;
     const min = Math.min(...rates);
     const max = Math.max(...rates);
@@ -111,9 +117,15 @@ export const LayoutV6 = () => {
               </SelectContent>
             </Select>
             <div className="text-xs text-accent-foreground/80 space-x-2">
-              <span>{baseCurrency}/EUR: {getExchangeRate('Central Bank', baseCurrency, 'EUR').toFixed(2)}</span>
-              <span>{baseCurrency}/GBP: {getExchangeRate('Central Bank', baseCurrency, 'GBP').toFixed(2)}</span>
-              <span>{baseCurrency}/JPY: {getExchangeRate('Central Bank', baseCurrency, 'JPY').toFixed(2)}</span>
+              <span>
+                {baseCurrency}/EUR: {getExchangeRate('Central Bank', baseCurrency, 'EUR').toFixed(2)}
+              </span>
+              <span>
+                {baseCurrency}/GBP: {getExchangeRate('Central Bank', baseCurrency, 'GBP').toFixed(2)}
+              </span>
+              <span>
+                {baseCurrency}/JPY: {getExchangeRate('Central Bank', baseCurrency, 'JPY').toFixed(2)}
+              </span>
             </div>
           </div>
           <div className="h-4 w-px bg-accent" />
@@ -164,18 +176,24 @@ export const LayoutV6 = () => {
           <ScrollArea className="flex-1">
             <div className="p-4 space-y-4">
               <div className="space-y-1">
-                <Button variant="ghost"
-                        className={cn('w-full', isSidebarExpanded ? 'justify-start' : 'justify-center')}>
+                <Button
+                  variant="ghost"
+                  className={cn('w-full', isSidebarExpanded ? 'justify-start' : 'justify-center')}
+                >
                   <Home className="h-4 w-4" />
                   {isSidebarExpanded && <span className="ml-2">Overview</span>}
                 </Button>
-                <Button variant="ghost"
-                        className={cn('w-full', isSidebarExpanded ? 'justify-start' : 'justify-center')}>
+                <Button
+                  variant="ghost"
+                  className={cn('w-full', isSidebarExpanded ? 'justify-start' : 'justify-center')}
+                >
                   <CreditCard className="h-4 w-4" />
                   {isSidebarExpanded && <span className="ml-2">Accounts</span>}
                 </Button>
-                <Button variant="ghost"
-                        className={cn('w-full', isSidebarExpanded ? 'justify-start' : 'justify-center')}>
+                <Button
+                  variant="ghost"
+                  className={cn('w-full', isSidebarExpanded ? 'justify-start' : 'justify-center')}
+                >
                   <BarChart2 className="h-4 w-4" />
                   {isSidebarExpanded && <span className="ml-2">Investments</span>}
                 </Button>
@@ -187,18 +205,24 @@ export const LayoutV6 = () => {
                 {isSidebarExpanded && (
                   <div className="text-xs font-semibold text-accent-foreground/60 px-2 py-1">Tools</div>
                 )}
-                <Button variant="ghost"
-                        className={cn('w-full', isSidebarExpanded ? 'justify-start' : 'justify-center')}>
+                <Button
+                  variant="ghost"
+                  className={cn('w-full', isSidebarExpanded ? 'justify-start' : 'justify-center')}
+                >
                   <PiggyBank className="h-4 w-4" />
                   {isSidebarExpanded && <span className="ml-2">Budgets</span>}
                 </Button>
-                <Button variant="ghost"
-                        className={cn('w-full', isSidebarExpanded ? 'justify-start' : 'justify-center')}>
+                <Button
+                  variant="ghost"
+                  className={cn('w-full', isSidebarExpanded ? 'justify-start' : 'justify-center')}
+                >
                   <ArrowRightLeft className="h-4 w-4" />
                   {isSidebarExpanded && <span className="ml-2">Transfers</span>}
                 </Button>
-                <Button variant="ghost"
-                        className={cn('w-full', isSidebarExpanded ? 'justify-start' : 'justify-center')}>
+                <Button
+                  variant="ghost"
+                  className={cn('w-full', isSidebarExpanded ? 'justify-start' : 'justify-center')}
+                >
                   <Briefcase className="h-4 w-4" />
                   {isSidebarExpanded && <span className="ml-2">Financial Planning</span>}
                 </Button>
@@ -249,10 +273,18 @@ export const LayoutV6 = () => {
                 <div key={source} className="space-y-2">
                   <h4 className="text-sm font-medium">{source}</h4>
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>{baseCurrency}/EUR: {getExchangeRate(source, baseCurrency, 'EUR').toFixed(4)}</div>
-                    <div>{baseCurrency}/GBP: {getExchangeRate(source, baseCurrency, 'GBP').toFixed(4)}</div>
-                    <div>{baseCurrency}/JPY: {getExchangeRate(source, baseCurrency, 'JPY').toFixed(2)}</div>
-                    <div>{baseCurrency}/HUF: {getExchangeRate(source, baseCurrency, 'HUF').toFixed(2)}</div>
+                    <div>
+                      {baseCurrency}/EUR: {getExchangeRate(source, baseCurrency, 'EUR').toFixed(4)}
+                    </div>
+                    <div>
+                      {baseCurrency}/GBP: {getExchangeRate(source, baseCurrency, 'GBP').toFixed(4)}
+                    </div>
+                    <div>
+                      {baseCurrency}/JPY: {getExchangeRate(source, baseCurrency, 'JPY').toFixed(2)}
+                    </div>
+                    <div>
+                      {baseCurrency}/HUF: {getExchangeRate(source, baseCurrency, 'HUF').toFixed(2)}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -260,7 +292,9 @@ export const LayoutV6 = () => {
                 <h4 className="text-sm font-medium">Statistics ({baseCurrency}/EUR)</h4>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   {Object.entries(calculateStatistics(baseCurrency, 'EUR')).map(([key, value]) => (
-                    <div key={key}>{key}: {value.toFixed(4)}</div>
+                    <div key={key}>
+                      {key}: {value.toFixed(4)}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -278,23 +312,14 @@ export const LayoutV6 = () => {
         >
           <ArrowRightLeft className="h-4 w-4 mr-2" />
           Currency Converter
-          {isConverterVisible ? (
-            <ChevronDown className="h-4 w-4 ml-2" />
-          ) : (
-            <ChevronUp className="h-4 w-4 ml-2" />
-          )}
+          {isConverterVisible ? <ChevronDown className="h-4 w-4 ml-2" /> : <ChevronUp className="h-4 w-4 ml-2" />}
         </Button>
         {isConverterVisible && (
           <div className="p-4 space-y-4">
             <div className="flex items-center space-x-4">
               <div className="flex-1 space-y-2">
                 <div className="flex items-center space-x-2">
-                  <Input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="w-full"
-                  />
+                  <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full" />
                   <Select value={fromCurrency} onValueChange={setFromCurrency}>
                     <SelectTrigger className="w-[100px]">
                       <SelectValue placeholder="From" />
@@ -332,12 +357,7 @@ export const LayoutV6 = () => {
             </div>
             <div className="flex flex-wrap gap-2">
               {presetAmounts.map((preset) => (
-                <Button
-                  key={preset}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setAmount(preset.toString())}
-                >
+                <Button key={preset} variant="outline" size="sm" onClick={() => setAmount(preset.toString())}>
                   {preset}
                 </Button>
               ))}

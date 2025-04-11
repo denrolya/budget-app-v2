@@ -16,13 +16,13 @@ interface AccountBalanceProps {
 }
 
 export default function AccountBalance({
-                                         percentageChange,
-                                         accounts = [
-                                           { name: 'Checking', balance: 5000, color: '#22c55e' },
-                                           { name: 'Savings', balance: 12000, color: '#f97316' },
-                                           { name: 'Investment', balance: 4374.20, color: '#6366f1' },
-                                         ],
-                                       }: AccountBalanceProps) {
+  percentageChange,
+  accounts = [
+    { name: 'Checking', balance: 5000, color: '#22c55e' },
+    { name: 'Savings', balance: 12000, color: '#f97316' },
+    { name: 'Investment', balance: 4374.2, color: '#6366f1' },
+  ],
+}: AccountBalanceProps) {
   const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
 
   return (
@@ -84,4 +84,3 @@ export default function AccountBalance({
     </Card>
   );
 }
-

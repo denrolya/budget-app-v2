@@ -23,15 +23,7 @@ const MainLoadingScreen: React.FC<Props> = ({ progress }) => (
             </filter>
           </defs>
 
-          <circle
-            cx="50"
-            cy="50"
-            r="45"
-            fill="none"
-            stroke="url(#gradient)"
-            strokeWidth="1"
-            opacity="0.3"
-          />
+          <circle cx="50" cy="50" r="45" fill="none" stroke="url(#gradient)" strokeWidth="1" opacity="0.3" />
 
           <circle
             cx="50"
@@ -60,12 +52,8 @@ const MainLoadingScreen: React.FC<Props> = ({ progress }) => (
       </div>
 
       <div className="mt-8 text-center space-y-4">
-        <h2 className="text-2xl font-bold text-foreground animate-pulse">
-          Revving Up Your Experience
-        </h2>
-        <p className="text-lg text-muted-foreground">
-          Fasten your seatbelt, we're almost there!
-        </p>
+        <h2 className="text-2xl font-bold text-foreground animate-pulse">Revving Up Your Experience</h2>
+        <p className="text-lg text-muted-foreground">Fasten your seatbelt, we're almost there!</p>
       </div>
     </div>
   </div>

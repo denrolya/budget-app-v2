@@ -28,22 +28,25 @@ interface TransactionListItemProps {
 }
 
 export const ListItem: React.FC<TransactionListItemProps> = ({
-                                                               transaction,
-                                                               isCompensationView = false,
-                                                               colorBorder = false,
-                                                             }) => {
+  transaction,
+  isCompensationView = false,
+  colorBorder = false,
+}) => {
   const { openForm } = useFormContext();
-  const isCompensated = transaction.type === Type.Expense && transaction.compensations && transaction.compensations?.length > 0;
+  const isCompensated =
+    transaction.type === Type.Expense && transaction.compensations && transaction.compensations?.length > 0;
   const isCompensation = transaction.category.name === 'Compensation';
   const isDebt = transaction.debt && transaction.debt?.debtor;
 
   const onEdit = () => openForm(FormType.Transaction, transaction);
 
   return (
-    <Card className={cn('shadow-md hover:shadow-lg transition-shadow', {
-      'border-l-4 border-l-green-500': colorBorder && transaction.type === Type.Income,
-      'border-l-4 border-l-red-500': colorBorder && transaction.type === Type.Expense,
-    })}>
+    <Card
+      className={cn('shadow-md hover:shadow-lg transition-shadow', {
+        'border-l-4 border-l-green-500': colorBorder && transaction.type === Type.Income,
+        'border-l-4 border-l-red-500': colorBorder && transaction.type === Type.Expense,
+      })}
+    >
       <CardContent className="p-2">
         <div className="flex items-center space-x-4">
           <div className="flex-grow">
@@ -56,26 +59,26 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
                     <div className="flex justify-between space-x-4">
                       <div className="space-y-1">
                         <h4 className="text-sm font-semibold">@nextjs</h4>
-                        <p className="text-sm">
-                          The React Framework – created and maintained by @vercel.
-                        </p>
+                        <p className="text-sm">The React Framework – created and maintained by @vercel.</p>
                         <div className="flex items-center pt-2">
                           <InfoIcon className="mr-2 h-4 w-4 opacity-70" />{' '}
-                          <span className="text-xs text-muted-foreground">
-                            Joined December 2021
-                          </span>
+                          <span className="text-xs text-muted-foreground">Joined December 2021</span>
                         </div>
                       </div>
-                    </div>}>
-                  <Badge className="text-xs font-mono"
-                         variant={(transaction.type === Type.Income) ? 'success' : 'destructive'}>
+                    </div>
+                  }
+                >
+                  <Badge
+                    className="text-xs font-mono"
+                    variant={transaction.type === Type.Income ? 'success' : 'destructive'}
+                  >
                     <TransactionValue transaction={transaction} />
                   </Badge>
                 </ResponsiveTooltip>
                 <ResponsiveTooltip openDelay={0} content={<p>{transaction.category.name}</p>}>
                   <span className="font-medium truncate max-w-[150px] sm:max-w-none cursor-help">
-                        {transaction.category.name}
-                      </span>
+                    {transaction.category.name}
+                  </span>
                 </ResponsiveTooltip>
                 {(isCompensated || isCompensation) && (
                   <Badge variant="outline" className="text-xs">
@@ -117,9 +120,7 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={onEdit}>
-                          Edit transaction
-                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={onEdit}>Edit transaction</DropdownMenuItem>
                         <DropdownMenuItem>Delete transaction</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

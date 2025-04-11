@@ -45,12 +45,15 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
   const [selectedCategory, setSelectedCategory] = useState<ProcessedCategory | null>(null);
   const [showMonthlyAverage, setShowMonthlyAverage] = useState<boolean>(false);
 
-  const handleTimeframeChange = useCallback((range: Timeframe) => {
-    setTimeframe({
-      after: range.after ? moment(range.after).startOf('day') : timeframe.after,
-      before: range.before ? moment(range.before).endOf('day') : timeframe.before,
-    });
-  }, [setTimeframe]);
+  const handleTimeframeChange = useCallback(
+    (range: Timeframe) => {
+      setTimeframe({
+        after: range.after ? moment(range.after).startOf('day') : timeframe.after,
+        before: range.before ? moment(range.before).endOf('day') : timeframe.before,
+      });
+    },
+    [setTimeframe],
+  );
 
   const { data: currentData, isLoading } = useCategoryTreeStatistics({
     type,
@@ -121,11 +124,7 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
     }
   };
 
-  const breadcrumbs = [
-    { id: 0, name: 'All Categories' },
-    ...categoryStack.slice(1),
-    currentCategory,
-  ].filter(Boolean);
+  const breadcrumbs = [{ id: 0, name: 'All Categories' }, ...categoryStack.slice(1), currentCategory].filter(Boolean);
 
   const amountToDisplay = useMemo(() => {
     if (showMonthlyAverage) {
@@ -137,7 +136,9 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
 
   return (
     <>
-      <Card className={`w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 ${className}`}>
+      <Card
+        className={`w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 ${className}`}
+      >
         <CardHeader className="p-4 pb-0 space-y-0.2">
           <div className="flex justify-between items-start">
             <CardTitle className="text-base font-medium">
@@ -227,21 +228,32 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
                         <ResponsiveTooltip
                           openDelay={1}
                           triggerClassName="truncate flex-1"
-                          content={<>
-                            <code className="font-mono text-xs">#{category.id}</code>: <span className="font-medium">{category.name}</span>
-                          </>}>
+                          content={
+                            <>
+                              <code className="font-mono text-xs">#{category.id}</code>:{' '}
+                              <span className="font-medium">{category.name}</span>
+                            </>
+                          }
+                        >
                           <span className="truncate flex-1">{category.name}</span>
                         </ResponsiveTooltip>
                         <div className="flex items-center space-x-2">
                           <span className="font-mono text-sm whitespace-nowrap">
                             <MoneyValue className="font-medium" useColors={false} amount={category.value} />
-                            <span className="ml-1 text-xs text-muted-foreground">{((category.value / (currentCategory ? currentCategory.value : totalCurrent)) * 100).toFixed(1)}%</span>
+                            <span className="ml-1 text-xs text-muted-foreground">
+                              {(
+                                (category.value / (currentCategory ? currentCategory.value : totalCurrent)) *
+                                100
+                              ).toFixed(1)}
+                              %
+                            </span>
                           </span>
                           <div className="flex">
                             <ResponsiveTooltip
                               openDelay={1}
                               triggerClassName="m-0 p-0"
-                              content="View transactions for this category within selected timeframe">
+                              content="View transactions for this category within selected timeframe"
+                            >
                               <Button
                                 variant="ghost"
                                 size="icon"

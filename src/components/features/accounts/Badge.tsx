@@ -60,12 +60,7 @@ const truncateText = (text: string, maxLength: number) => {
   return text.slice(0, maxLength - 1) + '…';
 };
 
-export default function AccountBadge({
-                                       account,
-                                       size = 'md',
-                                       className,
-                                       tooltip = true,
-                                     }: AccountBadgeProps) {
+export default function AccountBadge({ account, size = 'md', className, tooltip = true }: AccountBadgeProps) {
   const { type, color, nameWithCurrency } = account;
   const Icon = iconMap[type];
 
@@ -84,7 +79,7 @@ export default function AccountBadge({
         'w-fit',
         sizeMap[size],
         maxWidthMap[size],
-        className
+        className,
       )}
       style={{
         backgroundColor: badgeColor,
@@ -109,9 +104,7 @@ export default function AccountBadge({
       openDelay={0}
       content={tooltip ? <AccountDetailsHoverCard account={account} /> : null}
     >
-      <span className="inline-block">
-        {badgeContent}
-      </span>
+      <span className="inline-block">{badgeContent}</span>
     </ResponsiveTooltip>
   );
 }

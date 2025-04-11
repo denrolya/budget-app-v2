@@ -40,14 +40,14 @@ const formatDate = (date: Moment, period: ISO8601Period): string => {
 };
 
 export const Tooltip: React.FC<Props> = ({
-                                           active,
-                                           payload,
-                                           label,
-                                           data,
-                                           period,
-                                           coordinate,
-                                           comparisonMode = 'previousPeriod',
-                                         }) => {
+  active,
+  payload,
+  label,
+  data,
+  period,
+  coordinate,
+  comparisonMode = 'previousPeriod',
+}) => {
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const { x = 0, y = 0 } = coordinate || { x: 0, y: 0 };
 
@@ -99,7 +99,6 @@ export const Tooltip: React.FC<Props> = ({
   const formattedComparisonDate = comparisonData
     ? formatDate(comparisonData.date, period)
     : formatDate(moment(dataPoint.date).subtract(1, periodMapping[period]), period);
-
 
   return createPortal(
     <Card

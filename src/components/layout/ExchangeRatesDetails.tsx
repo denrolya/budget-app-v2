@@ -26,8 +26,15 @@ export const ExchangeRatesDetails: React.FC = () => {
         <div className="hidden md:flex items-center text-xs text-accent-foreground/80 space-x-2 cursor-pointer hover:text-accent-foreground transition-colors">
           {headerCurrencyPairs.map(({ from, to }) => (
             <div className="font-mono flex flex-col items-center" key={`${from}/${to}`}>
-              <span>{from}/{to}</span>
-              <MoneyValue useColors={false} showSymbol={false} amount={getExchangeRate(from, to, fixerExchangeRates) ?? 0} currency={to} />
+              <span>
+                {from}/{to}
+              </span>
+              <MoneyValue
+                useColors={false}
+                showSymbol={false}
+                amount={getExchangeRate(from, to, fixerExchangeRates) ?? 0}
+                currency={to}
+              />
             </div>
           ))}
           <ChevronRight className="h-4 w-4 ml-1" />
@@ -36,9 +43,7 @@ export const ExchangeRatesDetails: React.FC = () => {
       <SheetContent side="right" className="w-full sm:max-w-lg p-0">
         <SheetHeader className="p-4">
           <SheetTitle className="text-lg font-semibold text-primary">Exchange Rates</SheetTitle>
-          <SheetDescription className="text-xs">
-            Current rates for major currencies
-          </SheetDescription>
+          <SheetDescription className="text-xs">Current rates for major currencies</SheetDescription>
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-10rem)] mt-4">
           <ExchangeRatesPresets />

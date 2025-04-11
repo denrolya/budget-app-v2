@@ -24,13 +24,13 @@ interface ConfigContainerProps {
 }
 
 const ConfigContainer: React.FC<ConfigContainerProps> = ({
-                                                           open = false,
-                                                           setOpen,
-                                                           title,
-                                                           onChange,
-                                                           config,
-                                                           children,
-                                                         }) => {
+  open = false,
+  setOpen,
+  title,
+  onChange,
+  config,
+  children,
+}) => {
   const isDesktop = useScreenSize();
   const ConfigWrapper = isDesktop ? Sheet : Drawer;
   const ConfigHeader = isDesktop ? SheetHeader : DrawerHeader;
@@ -42,10 +42,12 @@ const ConfigContainer: React.FC<ConfigContainerProps> = ({
   return (
     <ConfigWrapper open={open} onOpenChange={setOpen}>
       <ConfigTrigger asChild>{children}</ConfigTrigger>
-      <ConfigContent className={cn({
-        'max-w-md overflow-y-auto': isDesktop,
-        'max-h-[85vh] flex flex-col': !isDesktop,
-      })}>
+      <ConfigContent
+        className={cn({
+          'max-w-md overflow-y-auto': isDesktop,
+          'max-h-[85vh] flex flex-col': !isDesktop,
+        })}
+      >
         <ConfigHeader>
           <ConfigTitle>{title}</ConfigTitle>
           <ConfigDescription className="sr-only">Adjust card settings</ConfigDescription>

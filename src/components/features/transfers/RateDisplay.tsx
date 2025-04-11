@@ -19,10 +19,7 @@ const TransferRateComponent: React.FC<TransferRateProps> = ({ transfer, ...props
     [CURRENCY_CODE.USD, CURRENCY_CODE.EUR, CURRENCY_CODE.BTC].includes(toCurrency)
   ) {
     rateDisplay = `1 ${toCurrency} = ${Number(displayRate.toFixed(4))} UAH`;
-  } else if (
-    fromCurrency === CURRENCY_CODE.UAH &&
-    toCurrency === CURRENCY_CODE.HUF
-  ) {
+  } else if (fromCurrency === CURRENCY_CODE.UAH && toCurrency === CURRENCY_CODE.HUF) {
     rateDisplay = `1000 HUF = ${Number(displayRate.toFixed(2))} UAH`;
   } else if (
     fromCurrency === CURRENCY_CODE.HUF &&

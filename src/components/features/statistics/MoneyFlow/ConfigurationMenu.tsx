@@ -131,16 +131,22 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
               <Switch
                 id={id}
                 checked={
-                  id === 'income' ? props.showIncome :
-                    id === 'expenses' ? props.showExpenses :
-                      id === 'revenue' ? props.showRevenue :
-                        props.showPreviousPeriod
+                  id === 'income'
+                    ? props.showIncome
+                    : id === 'expenses'
+                      ? props.showExpenses
+                      : id === 'revenue'
+                        ? props.showRevenue
+                        : props.showPreviousPeriod
                 }
                 onCheckedChange={
-                  id === 'income' ? props.setShowIncome :
-                    id === 'expenses' ? props.setShowExpenses :
-                      id === 'revenue' ? props.setShowRevenue :
-                        props.setShowPreviousPeriod
+                  id === 'income'
+                    ? props.setShowIncome
+                    : id === 'expenses'
+                      ? props.setShowExpenses
+                      : id === 'revenue'
+                        ? props.setShowRevenue
+                        : props.setShowPreviousPeriod
                 }
                 className="scale-75"
               />

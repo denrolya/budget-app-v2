@@ -3,15 +3,22 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 
 interface Transaction {
-  type: 'e' | 'i'
-  amount: number
-  category: string
-  executedAt?: Date
-  note?: string
+  type: 'e' | 'i';
+  amount: number;
+  category: string;
+  executedAt?: Date;
+  note?: string;
 }
 
 export const InputForm: React.FC = () => {
@@ -35,7 +42,7 @@ export const InputForm: React.FC = () => {
       amount: parseFloat(amount.replace(',', '.')),
       category,
       ...(date && { executedAt: new Date(date.trim()) }),
-      ...(note && { note: note.trim() })
+      ...(note && { note: note.trim() }),
     };
   };
 
@@ -72,9 +79,7 @@ export const InputForm: React.FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Transaction Details</DialogTitle>
-            <DialogDescription>
-              Review your transaction details below.
-            </DialogDescription>
+            <DialogDescription>Review your transaction details below.</DialogDescription>
           </DialogHeader>
           {transaction && (
             <div className="grid grid-cols-2 gap-4">
@@ -99,10 +104,14 @@ export const InputForm: React.FC = () => {
             </div>
           )}
           <DialogFooter>
-            <Button onClick={() => {
-              setIsModalOpen(false);
-              setInput('');
-            }}>Close</Button>
+            <Button
+              onClick={() => {
+                setIsModalOpen(false);
+                setInput('');
+              }}
+            >
+              Close
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

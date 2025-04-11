@@ -35,11 +35,11 @@ interface TransactionsDrawerProps {
 }
 
 export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
-                                                                        isOpen,
-                                                                        onOpenChange,
-                                                                        selectedCategory,
-                                                                        timeframe,
-                                                                      }) => {
+  isOpen,
+  onOpenChange,
+  selectedCategory,
+  timeframe,
+}) => {
   const { openForm } = useFormContext();
   const {
     groupedItems: groupedTransactions,

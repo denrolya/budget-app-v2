@@ -34,34 +34,49 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
     }, 300),
   ).current;
 
-  useEffect(() => () => {
-    debouncedOnChange.cancel();
-  }, [debouncedOnChange]);
+  useEffect(
+    () => () => {
+      debouncedOnChange.cancel();
+    },
+    [debouncedOnChange],
+  );
 
   useEffect(() => {
     setLocalAmountRange(data.amountRange);
   }, [data.amountRange]);
 
-  const handleMinAmountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMin = e.target.value === '' ? undefined : parseInt(e.target.value);
-    setLocalAmountRange(prev => [newMin, prev[1]]);
-    debouncedOnChange('amountRange', [newMin, localAmountRange[1]]);
-  }, [localAmountRange, debouncedOnChange]);
+  const handleMinAmountChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newMin = e.target.value === '' ? undefined : parseInt(e.target.value);
+      setLocalAmountRange((prev) => [newMin, prev[1]]);
+      debouncedOnChange('amountRange', [newMin, localAmountRange[1]]);
+    },
+    [localAmountRange, debouncedOnChange],
+  );
 
-  const handleMaxAmountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMax = e.target.value === '' ? undefined : parseInt(e.target.value);
-    setLocalAmountRange(prev => [prev[0], newMax]);
-    debouncedOnChange('amountRange', [localAmountRange[0], newMax]);
-  }, [localAmountRange, debouncedOnChange]);
+  const handleMaxAmountChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newMax = e.target.value === '' ? undefined : parseInt(e.target.value);
+      setLocalAmountRange((prev) => [prev[0], newMax]);
+      debouncedOnChange('amountRange', [localAmountRange[0], newMax]);
+    },
+    [localAmountRange, debouncedOnChange],
+  );
 
-  const handleTimeframeChange = useCallback((range: Timeframe) => {
-    onChange('after', range.after ? range.after : undefined);
-    onChange('before', range.before ? range.before : undefined);
-  }, [onChange]);
+  const handleTimeframeChange = useCallback(
+    (range: Timeframe) => {
+      onChange('after', range.after ? range.after : undefined);
+      onChange('before', range.before ? range.before : undefined);
+    },
+    [onChange],
+  );
 
-  const handleTransactionTypeChange = useCallback((type: TransactionType | undefined) => {
-    onChange('type', data.type === type ? undefined : type);
-  }, [onChange, data.type]);
+  const handleTransactionTypeChange = useCallback(
+    (type: TransactionType | undefined) => {
+      onChange('type', data.type === type ? undefined : type);
+    },
+    [onChange, data.type],
+  );
 
   return (
     <div className="space-y-4">
@@ -114,11 +129,14 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
           after={data.after}
           before={data.before}
           onChange={handleTimeframeChange}
-          presets={FILTER_PRESETS}>
+          presets={FILTER_PRESETS}
+        >
           <Button id="date-range" variant="outline" size="sm" className="h-9 text-sm w-full justify-start">
             <CalendarIcon className="mr-2 h-4 w-4" />
             <span>
-              {data.after && data.before && `${data.after.format(MOMENT_DATEPICKER_FORMAT)} - ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`}
+              {data.after &&
+                data.before &&
+                `${data.after.format(MOMENT_DATEPICKER_FORMAT)} - ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`}
               {!data.after && data.before && `Before ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`}
               {data.after && !data.before && `After ${data.after.format(MOMENT_DATEPICKER_FORMAT)}`}
               {!data.after && !data.before && 'Select date range'}
@@ -200,17 +218,20 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
 };
 
 export const ListFiltersSheet: React.FC<ListFiltersProps> = ({
-                                                               isOpen = false,
-                                                               setIsOpen,
-                                                               data,
-                                                               onChange,
-                                                               onReset,
-                                                             }) => {
+  isOpen = false,
+  setIsOpen,
+  data,
+  onChange,
+  onReset,
+}) => {
   const isDesktop = useScreenSize();
 
-  const handleChange = useCallback(<K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => {
-    onChange(key, value);
-  }, [onChange]);
+  const handleChange = useCallback(
+    <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => {
+      onChange(key, value);
+    },
+    [onChange],
+  );
 
   const FilterWrapper = isDesktop ? Sheet : Drawer;
   const FilterHeader = isDesktop ? SheetHeader : DrawerHeader;
@@ -222,7 +243,8 @@ export const ListFiltersSheet: React.FC<ListFiltersProps> = ({
     <FilterWrapper open={isOpen} onOpenChange={setIsOpen}>
       <FilterContent
         side={isDesktop ? 'right' : undefined}
-        className={isDesktop ? 'w-[400px] sm:w-[540px]' : undefined}>
+        className={isDesktop ? 'w-[400px] sm:w-[540px]' : undefined}
+      >
         <FilterHeader>
           <FilterTitle>Transaction Filters</FilterTitle>
           <FilterDescription className="sr-only">

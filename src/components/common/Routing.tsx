@@ -28,16 +28,86 @@ const ProtectedContent: React.FC = () => {
     <LayoutV9>
       <Routes>
         <Route index element={<Navigate to="/ledger" replace />} />
-        <Route path="dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
-        <Route path="transactions" element={<PrivateRoute><TransactionsListPage /></PrivateRoute>} />
-        <Route path="transactions-new" element={<PrivateRoute><NewTransactionsPage /></PrivateRoute>} />
-        <Route path="transfers" element={<PrivateRoute><TransfersListPage /></PrivateRoute>} />
-        <Route path="ledger" element={<PrivateRoute><DailyLedgerPage /></PrivateRoute>} />
-        <Route path="accounts" element={<PrivateRoute><AccountsManagementPage /></PrivateRoute>} />
-        <Route path="debts" element={<PrivateRoute><DebtsPage /></PrivateRoute>} />
-        <Route path="testing" element={<PrivateRoute><TestingPage /></PrivateRoute>} />
-        <Route path="budget" element={<PrivateRoute><BudgetingPage /></PrivateRoute>} />
-        <Route path="categories" element={<PrivateRoute><CategoriesPage /></PrivateRoute>} />
+        <Route
+          path="dashboard"
+          element={
+            <PrivateRoute>
+              <DashboardPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="transactions"
+          element={
+            <PrivateRoute>
+              <TransactionsListPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="transactions-new"
+          element={
+            <PrivateRoute>
+              <NewTransactionsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="transfers"
+          element={
+            <PrivateRoute>
+              <TransfersListPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="ledger"
+          element={
+            <PrivateRoute>
+              <DailyLedgerPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="accounts"
+          element={
+            <PrivateRoute>
+              <AccountsManagementPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="debts"
+          element={
+            <PrivateRoute>
+              <DebtsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="testing"
+          element={
+            <PrivateRoute>
+              <TestingPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="budget"
+          element={
+            <PrivateRoute>
+              <BudgetingPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="categories"
+          element={
+            <PrivateRoute>
+              <CategoriesPage />
+            </PrivateRoute>
+          }
+        />
         <Route path="*" element={<Navigate to="/ledger" />} />
       </Routes>
     </LayoutV9>

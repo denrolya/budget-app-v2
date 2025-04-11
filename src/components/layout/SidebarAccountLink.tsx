@@ -18,13 +18,19 @@ export const SidebarAccountLink: React.FC<SidebarAccountLinkProps> = ({ account,
     <TooltipTrigger asChild>
       <Link
         to={`/accounts/${account.id}`}
-        className={cn('flex items-center w-full px-2 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground', {
-          'justify-center': !isSidebarExpanded,
-        })}>
-        <div className={cn('flex items-center justify-center', {
-          'w-4 h-4': !isSidebarExpanded,
-          'w-8 h-8': isSidebarExpanded,
-        })}>
+        className={cn(
+          'flex items-center w-full px-2 py-2 text-sm font-medium rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+          {
+            'justify-center': !isSidebarExpanded,
+          },
+        )}
+      >
+        <div
+          className={cn('flex items-center justify-center', {
+            'w-4 h-4': !isSidebarExpanded,
+            'w-8 h-8': isSidebarExpanded,
+          })}
+        >
           <AccountAvatar className="w-full h-full" size="sm" account={account} />
         </div>
         {isSidebarExpanded && (
@@ -47,12 +53,7 @@ export const SidebarAccountLink: React.FC<SidebarAccountLinkProps> = ({ account,
         )}
       </Link>
     </TooltipTrigger>
-    <TooltipContent
-      side="right"
-      align="start"
-      sideOffset={5}
-      alignOffset={-8}
-    >
+    <TooltipContent side="right" align="start" sideOffset={5} alignOffset={-8}>
       <AccountDetailsHoverCard account={account} />
     </TooltipContent>
   </Tooltip>
@@ -60,8 +61,10 @@ export const SidebarAccountLink: React.FC<SidebarAccountLinkProps> = ({ account,
 
 SidebarAccountLink.displayName = 'SidebarAccountLink';
 
-export default memo(SidebarAccountLink, (prevProps, nextProps) =>
-  prevProps.isSidebarExpanded === nextProps.isSidebarExpanded &&
-  prevProps.account.id === nextProps.account.id &&
-  prevProps.account.balance === nextProps.account.balance,
+export default memo(
+  SidebarAccountLink,
+  (prevProps, nextProps) =>
+    prevProps.isSidebarExpanded === nextProps.isSidebarExpanded &&
+    prevProps.account.id === nextProps.account.id &&
+    prevProps.account.balance === nextProps.account.balance,
 );

@@ -6,19 +6,14 @@ import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
 import { useDebts } from '@/contexts/FinanceData';
 import Debt from '@/models/Debt';
 
-type DebtTypeaheadProps =
-  Omit<TypeaheadV2Props<Debt, string>, 'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'>
-  & {
+type DebtTypeaheadProps = Omit<
+  TypeaheadV2Props<Debt, string>,
+  'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'
+> & {
   className?: string;
 };
 
-const DebtTypeahead: React.FC<DebtTypeaheadProps> = ({
-                                                             multiple = false,
-                                                             value,
-                                                             onChange,
-                                                             className,
-                                                             ...props
-                                                           }) => {
+const DebtTypeahead: React.FC<DebtTypeaheadProps> = ({ multiple = false, value, onChange, className, ...props }) => {
   const debts = useDebts();
 
   const renderElement = (el: Debt, _valueField?: keyof Debt, labelField?: keyof Debt): ReactNode => (
@@ -37,9 +32,7 @@ const DebtTypeahead: React.FC<DebtTypeaheadProps> = ({
           amount={el.balance}
           currency={el.currency}
         />
-        {el.archivedAt && (
-          <p className="text-xs text-muted-foreground">Archived</p>
-        )}
+        {el.archivedAt && <p className="text-xs text-muted-foreground">Archived</p>}
       </div>
     </>
   );

@@ -31,15 +31,17 @@ interface TransactionsDrawerProps {
 }
 
 export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
-                                                                        isOpen,
-                                                                        onOpenChange,
-                                                                        selectedCategories,
-                                                                        timeframe,
-                                                                        fetchFromSubcategories = true,
-                                                                      }) => {
+  isOpen,
+  onOpenChange,
+  selectedCategories,
+  timeframe,
+  fetchFromSubcategories = true,
+}) => {
   const { openForm } = useFormContext();
   const { list: allCategories } = useCategories();
-  const categories = selectedCategories.map((id) => allCategories.find((category: Category) => category.id === id)).filter(Boolean);
+  const categories = selectedCategories
+    .map((id) => allCategories.find((category: Category) => category.id === id))
+    .filter(Boolean);
   const {
     groupedItems: groupedTransactions,
     isLoading: isTransactionsLoading,
@@ -55,7 +57,6 @@ export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
     }),
   });
 
-
   useEffect(() => {
     if (isOpen && selectedCategories.length) {
       setFilter('categories', selectedCategories);
@@ -68,7 +69,7 @@ export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Transactions in {categories.map(c => c.name).join(', ')}</DrawerTitle>
+          <DrawerTitle>Transactions in {categories.map((c) => c.name).join(', ')}</DrawerTitle>
           <DrawerDescription>
             {timeframe.after.format(MOMENT_DATEPICKER_FORMAT)} - {timeframe.before.format(MOMENT_DATEPICKER_FORMAT)}
           </DrawerDescription>

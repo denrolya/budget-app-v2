@@ -20,16 +20,16 @@ const MinMaxContent: React.FC<{
   comparison: ComparisonType;
   type: TransactionType;
 }> = ({
-        currentValue,
-        comparisonValue,
-        percentageChange,
-        selectedTimeframe,
-        comparisonTimeframe,
-        comparison,
-        type,
-        minDate,
-        maxDate,
-      }) => (
+  currentValue,
+  comparisonValue,
+  percentageChange,
+  selectedTimeframe,
+  comparisonTimeframe,
+  comparison,
+  type,
+  minDate,
+  maxDate,
+}) => (
   <div className="flex flex-col space-y-1">
     <div className="flex justify-between items-baseline">
       <ResponsiveTooltip
@@ -49,12 +49,7 @@ const MinMaxContent: React.FC<{
       >
         <div className="flex items-baseline gap-1">
           <span className="text-xs text-muted-foreground">Min</span>
-          <MoneyValue
-            className="text-lg font-bold"
-            useColors={false}
-            showSign={false}
-            amount={currentValue.min}
-          />
+          <MoneyValue className="text-lg font-bold" useColors={false} showSign={false} amount={currentValue.min} />
         </div>
       </ResponsiveTooltip>
 
@@ -75,12 +70,7 @@ const MinMaxContent: React.FC<{
       >
         <div className="flex items-baseline gap-1">
           <span className="text-xs text-muted-foreground">Max</span>
-          <MoneyValue
-            className="text-lg font-bold"
-            useColors={false}
-            showSign={false}
-            amount={currentValue.max}
-          />
+          <MoneyValue className="text-lg font-bold" useColors={false} showSign={false} amount={currentValue.max} />
         </div>
       </ResponsiveTooltip>
     </div>

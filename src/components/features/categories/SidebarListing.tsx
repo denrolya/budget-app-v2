@@ -30,16 +30,15 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails })
   const expenseCategories = useExpenseCategoriesTree();
   const incomeCategories = useIncomeCategoriesTree();
 
-  const sortCategories = (categories: Category[]): Category[] =>
-    sortBy(categories, 'name');
+  const sortCategories = (categories: Category[]): Category[] => sortBy(categories, 'name');
 
   const expandParents = useCallback((categories: Category[], searchTerm: string, parentPath: number[] = []) => {
-    categories.forEach(category => {
+    categories.forEach((category) => {
       const currentPath = [...parentPath, category.id];
       if (includes(toLower(category.name), toLower(searchTerm))) {
-        setExpandedCategories(prev => {
+        setExpandedCategories((prev) => {
           const newExpanded = { ...prev };
-          currentPath.forEach(id => {
+          currentPath.forEach((id) => {
             newExpanded[id] = true;
           });
           return newExpanded;
@@ -86,8 +85,14 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails })
     }
   }, [searchTerm]);
 
-  const filteredIncomeCategories = useMemo(() => filterCategories(incomeCategories, searchTerm), [incomeCategories, searchTerm]);
-  const filteredExpenseCategories = useMemo(() => filterCategories(expenseCategories, searchTerm), [expenseCategories, searchTerm]);
+  const filteredIncomeCategories = useMemo(
+    () => filterCategories(incomeCategories, searchTerm),
+    [incomeCategories, searchTerm],
+  );
+  const filteredExpenseCategories = useMemo(
+    () => filterCategories(expenseCategories, searchTerm),
+    [expenseCategories, searchTerm],
+  );
 
   const highlightSearchTerm = (text: string) => {
     if (!searchTerm) return text;
@@ -96,7 +101,9 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails })
       <>
         {parts.map((part, i) =>
           part.toLowerCase() === searchTerm.toLowerCase() ? (
-            <span key={i} className="bg-info">{part}</span>
+            <span key={i} className="bg-info">
+              {part}
+            </span>
           ) : (
             part
           ),
@@ -106,19 +113,18 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails })
   };
 
   const CategoryTree: React.FC<{
-    categories: Category[],
-    expandedCategories: Record<string, boolean>,
-    setExpandedCategories: React.Dispatch<React.SetStateAction<Record<string, boolean>>>,
-    depth?: number
+    categories: Category[];
+    expandedCategories: Record<string, boolean>;
+    setExpandedCategories: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+    depth?: number;
   }> = ({ categories, expandedCategories, setExpandedCategories, depth = 0 }) => {
-
     const handleCategoryClick = (category: Category) => {
       if (isDesktop) {
         onSelect(category);
         setShowDetails(true);
       }
       if (category.children && category.children.length > 0) {
-        setExpandedCategories(prev => ({ ...prev, [category.id]: !prev[category.id] }));
+        setExpandedCategories((prev) => ({ ...prev, [category.id]: !prev[category.id] }));
       }
     };
 
@@ -135,12 +141,9 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails })
         {sortedCategories.map((category) => (
           <React.Fragment key={category.id}>
             <div
-              className={cn(
-                'border-b cursor-pointer hover:bg-accent hover:text-accent-foreground',
-                {
-                  'bg-accent text-accent-foreground': isDesktop && selected?.id === category.id,
-                },
-              )}
+              className={cn('border-b cursor-pointer hover:bg-accent hover:text-accent-foreground', {
+                'bg-accent text-accent-foreground': isDesktop && selected?.id === category.id,
+              })}
               onClick={() => handleCategoryClick(category)}
             >
               <div className="flex items-stretch">
@@ -202,12 +205,7 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails })
         <h2 className="text-lg font-semibold mb-2">Categories</h2>
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search categories"
-            className="pl-8"
-            onChange={handleSearchChange}
-            ref={searchInputRef}
-          />
+          <Input placeholder="Search categories" className="pl-8" onChange={handleSearchChange} ref={searchInputRef} />
         </div>
       </div>
       <div className="border-b">
@@ -219,7 +217,7 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails })
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setCurrentPath(prev => prev.slice(0, index + 1));
+                  setCurrentPath((prev) => prev.slice(0, index + 1));
                   onSelect(category);
                 }}
               >
@@ -245,7 +243,9 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails })
         <TabsContent className="flex-grow overflow-hidden m-0 p-0" value={TransactionType.Income}>
           <ScrollArea className="h-full">
             <CategoryTree
-              categories={currentPath.length > 0 ? currentPath[currentPath.length - 1].children || [] : filteredIncomeCategories}
+              categories={
+                currentPath.length > 0 ? currentPath[currentPath.length - 1].children || [] : filteredIncomeCategories
+              }
               expandedCategories={expandedCategories}
               setExpandedCategories={setExpandedCategories}
             />
@@ -254,7 +254,9 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails })
         <TabsContent className="flex-grow overflow-hidden m-0 p-0" value={TransactionType.Expense}>
           <ScrollArea className="h-full">
             <CategoryTree
-              categories={currentPath.length > 0 ? currentPath[currentPath.length - 1].children || [] : filteredExpenseCategories}
+              categories={
+                currentPath.length > 0 ? currentPath[currentPath.length - 1].children || [] : filteredExpenseCategories
+              }
               expandedCategories={expandedCategories}
               setExpandedCategories={setExpandedCategories}
             />

@@ -1,5 +1,5 @@
 import { ArrowUpDown } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CURRENCY_CODE } from '@/constants/currency';
 import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/contexts/FinanceData';
 
-type RATE_SOURCE = 'mnb' | 'fx' | 'wse'
+type RATE_SOURCE = 'mnb' | 'fx' | 'wse';
 
 const rateSources: RATE_SOURCE[] = ['mnb', 'wse', 'fx'];
 const presetAmounts = [10, 50, 100, 500, 1000, 5000, 10000];
@@ -35,12 +35,12 @@ interface Props {
 }
 
 export const CurrencyConverter: React.FC<Props> = ({
-                                                     defaultFromCurrency = CURRENCY_CODE.HUF,
-                                                     defaultToCurrency = CURRENCY_CODE.EUR,
-                                                     defaultAmount = 1000,
-                                                     open,
-                                                     onOpenChange,
-                                                   }) => {
+  defaultFromCurrency = CURRENCY_CODE.HUF,
+  defaultToCurrency = CURRENCY_CODE.EUR,
+  defaultAmount = 1000,
+  open,
+  onOpenChange,
+}) => {
   const [fromCurrency, setFromCurrency] = useState<CURRENCY_CODE>(defaultFromCurrency);
   const [toCurrency, setToCurrency] = useState<CURRENCY_CODE>(defaultToCurrency);
   const [amount, setAmount] = useState<number>(defaultAmount);
@@ -78,8 +78,9 @@ export const CurrencyConverter: React.FC<Props> = ({
     setAmount((prevAmount) => Math.min(Math.max(prevAmount, 0), 10000));
   }, [fromCurrency, toCurrency]);
 
-  const availableCurrencies = useMemo(() =>
-      Object.keys(rates).filter(currency => currency !== CURRENCY_CODE.BTC || rateSource === 'fx') as CURRENCY_CODE[],
+  const availableCurrencies = useMemo(
+    () =>
+      Object.keys(rates).filter((currency) => currency !== CURRENCY_CODE.BTC || rateSource === 'fx') as CURRENCY_CODE[],
     [rates, rateSource],
   );
 
@@ -97,9 +98,7 @@ export const CurrencyConverter: React.FC<Props> = ({
       <DialogContent className="sm:max-w-[700px] p-4">
         <DialogHeader className="sr-only">
           <DialogTitle className="text-2xl font-bold">Currency Converter</DialogTitle>
-          <DialogDescription>
-            Convert between currencies using the latest exchange rates
-          </DialogDescription>
+          <DialogDescription>Convert between currencies using the latest exchange rates</DialogDescription>
         </DialogHeader>
         <div className="flex space-x-1 mb-4">
           {rateSources.map((source) => (
@@ -129,7 +128,8 @@ export const CurrencyConverter: React.FC<Props> = ({
               <SelectContent>
                 {availableCurrencies.map((currency) => (
                   <SelectItem key={currency} value={currency}>
-                    <CurrencyFlag code={currency} />{currency}
+                    <CurrencyFlag code={currency} />
+                    {currency}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -160,7 +160,8 @@ export const CurrencyConverter: React.FC<Props> = ({
               <SelectContent>
                 {availableCurrencies.map((currency) => (
                   <SelectItem key={currency} value={currency}>
-                    <CurrencyFlag code={currency} />{currency}
+                    <CurrencyFlag code={currency} />
+                    {currency}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -175,13 +176,7 @@ export const CurrencyConverter: React.FC<Props> = ({
         </div>
         <div className="flex flex-wrap gap-2 justify-center">
           {presetAmounts.map((preset) => (
-            <Button
-              key={preset}
-              variant="outline"
-              size="sm"
-              onClick={() => setAmount(preset)}
-              className="flex-grow"
-            >
+            <Button key={preset} variant="outline" size="sm" onClick={() => setAmount(preset)} className="flex-grow">
               {preset}
             </Button>
           ))}

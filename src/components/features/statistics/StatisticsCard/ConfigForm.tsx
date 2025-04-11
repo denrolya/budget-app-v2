@@ -23,26 +23,28 @@ const formSchema = z.object({
   accounts: z.array(z.string()).optional(),
   interval: z.object({
     unit: z.enum(['day', 'week', 'month', 'quarter', 'year'] as const),
-    value: z.number().int().positive()
+    value: z.number().int().positive(),
   }),
-  period: z.object({
-    unit: z.enum(['day', 'week', 'month', 'quarter', 'year'] as const),
-    value: z.number().int().positive()
-  }).optional(),
+  period: z
+    .object({
+      unit: z.enum(['day', 'week', 'month', 'quarter', 'year'] as const),
+      value: z.number().int().positive(),
+    })
+    .optional(),
   comparison: z.enum(['previous', 'same-last-year']),
-  statType: z.enum(['sum', 'daily', 'avg', 'min-max'])
+  statType: z.enum(['sum', 'daily', 'avg', 'min-max']),
 });
 
 interface Props {
-  initialConfig: StatisticsConfig
-  onSubmit: (config: StatisticsConfig) => void
+  initialConfig: StatisticsConfig;
+  onSubmit: (config: StatisticsConfig) => void;
 }
 
 export const ConfigForm: React.FC<Props> = ({ initialConfig, onSubmit }) => {
   const processedConfig = {
     ...initialConfig,
-    categories: initialConfig.categories?.map(cat => cat.toString()),
-    accounts: initialConfig.accounts?.map(acc => acc.toString())
+    categories: initialConfig.categories?.map((cat) => cat.toString()),
+    accounts: initialConfig.accounts?.map((acc) => acc.toString()),
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -174,7 +176,9 @@ export const ConfigForm: React.FC<Props> = ({ initialConfig, onSubmit }) => {
                     </SelectTrigger>
                     <SelectContent>
                       {(['day', 'week', 'month', 'quarter', 'year'] as const).map((unit) => (
-                        <SelectItem key={unit} value={unit}>{unit}(s)</SelectItem>
+                        <SelectItem key={unit} value={unit}>
+                          {unit}(s)
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -190,14 +194,9 @@ export const ConfigForm: React.FC<Props> = ({ initialConfig, onSubmit }) => {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <FormLabel>Custom Period</FormLabel>
-              <FormDescription>
-                Enable to set a custom period different from the interval.
-              </FormDescription>
+              <FormDescription>Enable to set a custom period different from the interval.</FormDescription>
             </div>
-            <Switch
-              checked={usePeriod}
-              onCheckedChange={setUsePeriod}
-            />
+            <Switch checked={usePeriod} onCheckedChange={setUsePeriod} />
           </div>
         </FormItem>
         {usePeriod && (
@@ -229,7 +228,9 @@ export const ConfigForm: React.FC<Props> = ({ initialConfig, onSubmit }) => {
                       </SelectTrigger>
                       <SelectContent>
                         {(['day', 'week', 'month', 'quarter', 'year'] as const).map((unit) => (
-                          <SelectItem key={unit} value={unit}>{unit}(s)</SelectItem>
+                          <SelectItem key={unit} value={unit}>
+                            {unit}(s)
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

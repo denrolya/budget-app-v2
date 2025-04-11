@@ -18,18 +18,18 @@ import { useScreenSize } from '@/hooks/useScreenSize';
 import { Type as TransactionType } from '@/types/transaction';
 
 interface UnifiedChartMenuProps {
-  type: TransactionType,
-  setType: (type: TransactionType) => void,
-  showMonthlyAverage: boolean,
-  setShowMonthlyAverage: (show: boolean) => void,
+  type: TransactionType;
+  setType: (type: TransactionType) => void;
+  showMonthlyAverage: boolean;
+  setShowMonthlyAverage: (show: boolean) => void;
 }
 
 export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
-                                                                    type,
-                                                                    setType,
-                                                                    showMonthlyAverage,
-                                                                    setShowMonthlyAverage,
-                                                                  }) => {
+  type,
+  setType,
+  showMonthlyAverage,
+  setShowMonthlyAverage,
+}) => {
   const isDesktop = useScreenSize();
 
   const MenuContent = () => (
@@ -64,9 +64,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label
-            htmlFor="show-monlty-average"
-            className="flex items-center space-x-2 text-xs cursor-pointer">
+          <Label htmlFor="show-monlty-average" className="flex items-center space-x-2 text-xs cursor-pointer">
             <Sigma className="h-3 w-3" />
             <span>Show Monthly Average Values</span>
           </Label>

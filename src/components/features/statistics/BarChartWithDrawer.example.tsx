@@ -36,45 +36,46 @@ export default function Component() {
   const [tooltipContent, setTooltipContent] = useState<{
     month: string;
     income: number;
-    expenses: number
+    expenses: number;
   } | null>(null);
   const lastTap = useRef(0);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const handleInteraction = useCallback((data: {
-    indexValue: string,
-    data: { month: string; income: number; expenses: number }
-  }) => {
-    const now = Date.now();
-    const DOUBLE_TAP_DELAY = 300; // ms
+  const handleInteraction = useCallback(
+    (data: { indexValue: string; data: { month: string; income: number; expenses: number } }) => {
+      const now = Date.now();
+      const DOUBLE_TAP_DELAY = 300; // ms
 
-    if (now - lastTap.current < DOUBLE_TAP_DELAY) {
-      // Double tap detected
-      setSelectedMonth(data.indexValue);
-      setIsDrawerOpen(true);
-      if (tooltipTimeout.current) {
-        clearTimeout(tooltipTimeout.current);
+      if (now - lastTap.current < DOUBLE_TAP_DELAY) {
+        // Double tap detected
+        setSelectedMonth(data.indexValue);
+        setIsDrawerOpen(true);
+        if (tooltipTimeout.current) {
+          clearTimeout(tooltipTimeout.current);
+        }
+        setTooltipContent(null);
+      } else {
+        // Single tap
+        if (tooltipTimeout.current) {
+          clearTimeout(tooltipTimeout.current);
+        }
+        tooltipTimeout.current = setTimeout(() => {
+          setTooltipContent(data.data);
+        }, 100);
       }
-      setTooltipContent(null);
-    } else {
-      // Single tap
-      if (tooltipTimeout.current) {
-        clearTimeout(tooltipTimeout.current);
-      }
-      tooltipTimeout.current = setTimeout(() => {
-        setTooltipContent(data.data);
-      }, 100);
-    }
 
-    lastTap.current = now;
-  }, []);
+      lastTap.current = now;
+    },
+    [],
+  );
 
   return (
     <Card className="w-full max-w-3xl">
       <CardHeader>
         <CardTitle>Yearly Income and Expenses</CardTitle>
-        <CardDescription>Double-click (desktop) or double-tap (mobile) on a bar for detailed
-                         information</CardDescription>
+        <CardDescription>
+          Double-click (desktop) or double-tap (mobile) on a bar for detailed information
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <TooltipProvider>

@@ -34,10 +34,12 @@ const DailyList: React.FC<Props> = ({ isLoading, groupedItems, after, before }) 
   const sortedDates = useMemo(() => [...dates].sort((a, b) => b.valueOf() - a.valueOf()), [dates]);
 
   return (
-    <div className={cn(
-      'flex flex-col md:flex-row md:-mx-2 mb-6',
-      { 'md:flex-row-reverse': !isDesktop }, // Reverse order for desktop view
-    )}>
+    <div
+      className={cn(
+        'flex flex-col md:flex-row md:-mx-2 mb-6',
+        { 'md:flex-row-reverse': !isDesktop }, // Reverse order for desktop view
+      )}
+    >
       {(isDesktop ? dates : sortedDates).map((date, index) => {
         const foundGroup = groupedItems?.find((group) => group[0].isSame(date, 'day'));
 
@@ -48,16 +50,9 @@ const DailyList: React.FC<Props> = ({ isLoading, groupedItems, after, before }) 
                 'md:w-1/7': isDesktop,
               })}
             >
-              {isLoading && (
-                <DateCardSkeleton index={index} totalDays={totalDays} />
-              )}
+              {isLoading && <DateCardSkeleton index={index} totalDays={totalDays} />}
               {!isLoading && (
-                <DateCard
-                  date={date}
-                  items={foundGroup ? foundGroup[1] : []}
-                  index={index}
-                  totalDays={totalDays}
-                />
+                <DateCard date={date} items={foundGroup ? foundGroup[1] : []} index={index} totalDays={totalDays} />
               )}
             </div>
           </React.Fragment>

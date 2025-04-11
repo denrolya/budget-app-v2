@@ -52,7 +52,7 @@ interface Props {
   chartType: 'line' | 'bar';
   showComparisonInTooltip?: boolean;
   data: Array<{
-    [category: string]: CategoryData[]
+    [category: string]: CategoryData[];
   }>;
   selectedPeriod: ISO8601Period;
   onClick?: (data: any, index: number) => void;
@@ -60,19 +60,19 @@ interface Props {
 }
 
 export const CategoryTimelineChart: React.FC<Props> = ({
-                                                         chartType = 'line',
-                                                         showComparisonInTooltip = true,
-                                                         data,
-                                                         selectedPeriod,
-                                                         onClick,
-                                                         useSeparateAxisForTotals = true,
-                                                       }) => {
+  chartType = 'line',
+  showComparisonInTooltip = true,
+  data,
+  selectedPeriod,
+  onClick,
+  useSeparateAxisForTotals = true,
+}) => {
   const [hiddenSeries, setHiddenSeries] = useState<string[]>([]);
   const { list: allCategories } = useCategories();
   const { theme } = useTheme();
 
   const getCategoryDepth = (categoryName: string) => {
-    const category = allCategories.find(cat => cat.name === categoryName);
+    const category = allCategories.find((cat) => cat.name === categoryName);
     return category ? category.getFullPath().length : 1;
   };
 
@@ -81,9 +81,10 @@ export const CategoryTimelineChart: React.FC<Props> = ({
     return Math.max(2, 6 - depth);
   };
 
-  const totals = useMemo(() => mapValues(data, (values) =>
-    sumBy(values as unknown as CategoryData[], 'value'),
-  ), [data]);
+  const totals = useMemo(
+    () => mapValues(data, (values) => sumBy(values as unknown as CategoryData[], 'value')),
+    [data],
+  );
 
   const chartData = useMemo(() => {
     if (!data) return [];
@@ -140,14 +141,12 @@ export const CategoryTimelineChart: React.FC<Props> = ({
 
   const handleLegendClick = (e: any) => {
     const { dataKey } = e;
-    setHiddenSeries((prev) =>
-      prev.includes(dataKey) ? prev.filter((key) => key !== dataKey) : [...prev, dataKey],
-    );
+    setHiddenSeries((prev) => (prev.includes(dataKey) ? prev.filter((key) => key !== dataKey) : [...prev, dataKey]));
   };
 
   const categories = Object.keys(data);
-  const regularCategories = categories.filter(cat => cat !== 'Total Income' && cat !== 'Total Expense');
-  const totalCategories = categories.filter(cat => cat === 'Total Income' || cat === 'Total Expense');
+  const regularCategories = categories.filter((cat) => cat !== 'Total Income' && cat !== 'Total Expense');
+  const totalCategories = categories.filter((cat) => cat === 'Total Income' || cat === 'Total Expense');
 
   return (
     <div className="w-full h-full min-w-[600px]">
@@ -168,26 +167,13 @@ export const CategoryTimelineChart: React.FC<Props> = ({
             </linearGradient>
           </defs>
           <CartesianGrid {...CHART_STYLES.cartesianGrid} />
-          <XAxis
-            dataKey="date"
-            tickFormatter={formatXAxis}
-            {...CHART_STYLES.xAxis}
-          />
-          <YAxis
-            yAxisId="regular"
-            {...CHART_STYLES.yAxis}
-          />
-          {useSeparateAxisForTotals && (
-            <YAxis
-              yAxisId="total"
-              orientation="right"
-              {...CHART_STYLES.yAxis}
-            />
-          )}
+          <XAxis dataKey="date" tickFormatter={formatXAxis} {...CHART_STYLES.xAxis} />
+          <YAxis yAxisId="regular" {...CHART_STYLES.yAxis} />
+          {useSeparateAxisForTotals && <YAxis yAxisId="total" orientation="right" {...CHART_STYLES.yAxis} />}
           <Tooltip
-            content={(props) => <ChartTooltip
-              selectedPeriod={selectedPeriod}
-              showComparison={showComparisonInTooltip} {...props} />}
+            content={(props) => (
+              <ChartTooltip selectedPeriod={selectedPeriod} showComparison={showComparisonInTooltip} {...props} />
+            )}
           />
           <Legend
             onClick={handleLegendClick}
@@ -232,17 +218,25 @@ export const CategoryTimelineChart: React.FC<Props> = ({
               fill={getColor(category, regularCategories.length + index)}
               strokeWidth={1}
               strokeDasharray="15 8"
-              dot={chartType === 'line' ? {
-                r: 2,
-                fill: getColor(category, regularCategories.length + index),
-                strokeWidth: 0,
-              } : undefined}
-              activeDot={chartType === 'line' ? {
-                r: 6,
-                fill: getColor(category, regularCategories.length + index),
-                strokeWidth: 2,
-                stroke: theme === 'dark' ? '#000' : '#fff',
-              } : undefined}
+              dot={
+                chartType === 'line'
+                  ? {
+                      r: 2,
+                      fill: getColor(category, regularCategories.length + index),
+                      strokeWidth: 0,
+                    }
+                  : undefined
+              }
+              activeDot={
+                chartType === 'line'
+                  ? {
+                      r: 6,
+                      fill: getColor(category, regularCategories.length + index),
+                      strokeWidth: 2,
+                      stroke: theme === 'dark' ? '#000' : '#fff',
+                    }
+                  : undefined
+              }
               hide={hiddenSeries.includes(category)}
               className={cn({
                 'recharts-line fade-line': chartType === 'line',
@@ -257,4 +251,3 @@ export const CategoryTimelineChart: React.FC<Props> = ({
 };
 
 export default CategoryTimelineChart;
-

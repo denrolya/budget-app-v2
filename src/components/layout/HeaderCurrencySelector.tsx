@@ -7,23 +7,28 @@ import { useAuth, useBaseCurrency } from '@/contexts/auth';
 import { confirm } from '@/utils/confirmation';
 
 type CurrencyType = {
-  code: CURRENCY_CODE
-  name: string
-  symbol: string
-  type: 'fiat' | 'crypto'
-  icon?: React.ComponentType<{ className?: string }>
-}
+  code: CURRENCY_CODE;
+  name: string;
+  symbol: string;
+  type: 'fiat' | 'crypto';
+  icon?: React.ComponentType<{ className?: string }>;
+};
 
-type SelectProps = React.ComponentPropsWithoutRef<typeof Select>
+type SelectProps = React.ComponentPropsWithoutRef<typeof Select>;
 
-type CurrencySelectorProps = Omit<SelectProps, 'value' | 'onValueChange'>
+type CurrencySelectorProps = Omit<SelectProps, 'value' | 'onValueChange'>;
 
 export const HeaderCurrencySelector: React.FC<CurrencySelectorProps> = (props) => {
   const { updateCurrency } = useAuth();
   const baseCurrency = useBaseCurrency();
-  const [selectedCurrency, setSelectedCurrency] = useState<CURRENCY_CODE>(baseCurrency || Object.values(CURRENCIES)[0].code);
+  const [selectedCurrency, setSelectedCurrency] = useState<CURRENCY_CODE>(
+    baseCurrency || Object.values(CURRENCIES)[0].code,
+  );
 
-  const fiatCurrencies = useMemo(() => Object.values(CURRENCIES).filter((currency): currency is CurrencyType => currency.type === 'fiat'), []);
+  const fiatCurrencies = useMemo(
+    () => Object.values(CURRENCIES).filter((currency): currency is CurrencyType => currency.type === 'fiat'),
+    [],
+  );
 
   const handleCurrencyChange = async (value: CURRENCY_CODE) => {
     const confirmed = await confirm({
@@ -49,11 +54,7 @@ export const HeaderCurrencySelector: React.FC<CurrencySelectorProps> = (props) =
   };
 
   return (
-    <Select
-      value={selectedCurrency}
-      onValueChange={handleCurrencyChange}
-      {...props}
-    >
+    <Select value={selectedCurrency} onValueChange={handleCurrencyChange} {...props}>
       <SelectTrigger className="w-[80px] text-xs border-none shadow-none bg-transparent hover:bg-transparent focus:ring-0 p-0 h-auto hover:text-accent-foreground transition-colors">
         <SelectValue>
           <div className="flex items-center">

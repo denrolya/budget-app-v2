@@ -35,15 +35,19 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
     }, 0);
   }, []);
 
-  const filteredAccounts = accounts.filter(account =>
-    (showArchived || !account.isArchived()) &&
-    account.nameWithCurrency.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredAccounts = accounts.filter(
+    (account) =>
+      (showArchived || !account.isArchived()) &&
+      account.nameWithCurrency.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const groupedAccounts = Object.values(AccountType).reduce((acc, type) => {
-    acc[type] = filteredAccounts.filter(account => account.type === type);
-    return acc;
-  }, {} as Record<AccountType, Account[]>);
+  const groupedAccounts = Object.values(AccountType).reduce(
+    (acc, type) => {
+      acc[type] = filteredAccounts.filter((account) => account.type === type);
+      return acc;
+    },
+    {} as Record<AccountType, Account[]>,
+  );
 
   return (
     <div className="flex flex-col h-full">
@@ -63,7 +67,10 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
         {Object.values(AccountType).map((type) => {
           if (groupedAccounts[type].length === 0) return null;
 
-          const groupTotal = sumBy(groupedAccounts[type], ({ convertedValues }) => convertedValues?.[baseCurrency] || 0);
+          const groupTotal = sumBy(
+            groupedAccounts[type],
+            ({ convertedValues }) => convertedValues?.[baseCurrency] || 0,
+          );
 
           return (
             <div key={type} className="mb-4">

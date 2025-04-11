@@ -21,7 +21,7 @@ import { ACCOUNT_TYPES_ORDER } from '@/models/Account';
 import { Type as AccountType } from '@/types/account';
 import { percentage } from '@/utils/percentage';
 
-type RouteKey = keyof typeof ROUTES
+type RouteKey = keyof typeof ROUTES;
 
 export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className }) => {
   const totalBalance = useTotalBalance();
@@ -31,7 +31,6 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
   const isDesktop = useScreenSize();
   const { isSidebarExpanded, setIsSidebarExpanded } = useSidebar();
   const { openForm } = useForm();
-
 
   const debtPercentage = useMemo(() => percentage(totalDebt, totalDebt + totalBalance), [totalBalance, totalDebt]);
 
@@ -75,12 +74,16 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
 
   return (
     <aside
-      className={cn('bg-background border-r border-accent flex flex-col h-[calc(100vh-2rem)] transition-all duration-300 ease-in-out z-40', {
-        'fixed inset-y-0 left-0 w-64': !isDesktop && isSidebarExpanded,
-        'fixed inset-y-0 -left-64 w-64': !isDesktop && !isSidebarExpanded,
-        'w-64': isDesktop && isSidebarExpanded,
-        'w-16': isDesktop && !isSidebarExpanded,
-      }, className)}
+      className={cn(
+        'bg-background border-r border-accent flex flex-col h-[calc(100vh-2rem)] transition-all duration-300 ease-in-out z-40',
+        {
+          'fixed inset-y-0 left-0 w-64': !isDesktop && isSidebarExpanded,
+          'fixed inset-y-0 -left-64 w-64': !isDesktop && !isSidebarExpanded,
+          'w-64': isDesktop && isSidebarExpanded,
+          'w-16': isDesktop && !isSidebarExpanded,
+        },
+        className,
+      )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -92,7 +95,8 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
                 key={key}
                 to={ROUTES[key].path}
                 icon={ROUTES[key].icon}
-                isSidebarExpanded={isSidebarExpanded}>
+                isSidebarExpanded={isSidebarExpanded}
+              >
                 {ROUTES[key].label}
               </SidebarLink>
             ))}
@@ -103,36 +107,34 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
 
         <div className="flex-grow overflow-hidden flex flex-col">
           <ScrollArea className="flex-grow px-4">
-            <div aria-labelledby="accounts-heading">
-              {ACCOUNT_TYPES_ORDER.map(renderAccountGroup)}
-            </div>
+            <div aria-labelledby="accounts-heading">{ACCOUNT_TYPES_ORDER.map(renderAccountGroup)}</div>
           </ScrollArea>
         </div>
 
         <div className="flex-shrink-0 mt-auto p-4 border-t border-accent space-y-2">
           <div
-            className={cn('flex flex-col items-start space-y-1 overflow-hidden transition-all duration-300 ease-in-out', {
-              'max-h-20 opacity-100': isSidebarExpanded,
-              'max-h-0 opacity-0': !isSidebarExpanded,
-            })}>
+            className={cn(
+              'flex flex-col items-start space-y-1 overflow-hidden transition-all duration-300 ease-in-out',
+              {
+                'max-h-20 opacity-100': isSidebarExpanded,
+                'max-h-0 opacity-0': !isSidebarExpanded,
+              },
+            )}
+          >
             <div className="w-full flex justify-between items-center">
               <span className="text-xs font-semibold text-accent-foreground/60">Total Balance</span>
-              <MoneyValue
-                className="font-medium text-sm text-mono"
-                amount={totalBalance}
-                currency={baseCurrency} />
+              <MoneyValue className="font-medium text-sm text-mono" amount={totalBalance} currency={baseCurrency} />
             </div>
             <div className="w-full flex justify-between items-center">
               <span className="text-xs font-semibold text-accent-foreground/60">
                 Total Debt
-                <span className="ml-1 text-[10px] text-destructive">
-                  ({debtPercentage.toFixed(0)}%)
-                </span>
+                <span className="ml-1 text-[10px] text-destructive">({debtPercentage.toFixed(0)}%)</span>
               </span>
               <MoneyValue
                 className="font-medium text-sm text-destructive text-mono"
                 amount={totalDebt}
-                currency={baseCurrency} />
+                currency={baseCurrency}
+              />
             </div>
             <div className="w-full flex justify-between items-center">
               <span className="text-xs font-semibold text-accent-foreground/60">Total</span>
@@ -143,7 +145,8 @@ export const Sidebar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ classN
                   'text-accent-foreground': totalDebt + totalBalance === 0,
                 })}
                 amount={totalDebt + totalBalance}
-                currency={baseCurrency} />
+                currency={baseCurrency}
+              />
             </div>
           </div>
           <Button variant="ghost" className="w-full justify-start" onClick={() => openForm(FormType.Account)}>

@@ -10,10 +10,7 @@ interface Props {
   statType: StatisticsType;
 }
 
-const getWidth = (percentage: number): string =>
-   percentage >= 0 ? '100%' : `${100 - Math.abs(percentage)}%`
-;
-
+const getWidth = (percentage: number): string => (percentage >= 0 ? '100%' : `${100 - Math.abs(percentage)}%`);
 const getColor = (percentage: number, type: TransactionType): string => {
   if (type === TransactionType.Expense) {
     return percentage >= 0 ? 'bg-destructive' : 'bg-success';

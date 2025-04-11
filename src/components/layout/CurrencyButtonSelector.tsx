@@ -23,12 +23,15 @@ interface CurrencyButtonSelectorProps extends React.ComponentPropsWithoutRef<'di
 export const CurrencyButtonSelector: React.FC<CurrencyButtonSelectorProps> = ({ className, ...props }) => {
   const { updateCurrency } = useAuth();
   const baseCurrency = useBaseCurrency();
-  const [selectedCurrency, setSelectedCurrency] = useState<CURRENCY_CODE>(baseCurrency || Object.values(CURRENCIES)[0].code);
+  const [selectedCurrency, setSelectedCurrency] = useState<CURRENCY_CODE>(
+    baseCurrency || Object.values(CURRENCIES)[0].code,
+  );
 
-  const fiatCurrencies = useMemo(() =>
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const fiatCurrencies = useMemo(
+    () =>
       Object.entries(CURRENCIES).filter(([_, currency]) => currency.type === 'fiat') as [CURRENCY_CODE, CurrencyType][],
-    []);
+    [],
+  );
 
   const handleCurrencyChange = async (value: CURRENCY_CODE) => {
     if (value === selectedCurrency) return;
@@ -59,7 +62,8 @@ export const CurrencyButtonSelector: React.FC<CurrencyButtonSelectorProps> = ({ 
               'flex-1 h-16 px-2 py-1 text-sm font-medium rounded-md transition-all duration-200',
               'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
               {
-                'bg-primary text-primary-foreground dark:bg-primary dark:text-primary-foreground': selectedCurrency === code,
+                'bg-primary text-primary-foreground dark:bg-primary dark:text-primary-foreground':
+                  selectedCurrency === code,
                 'bg-background text-foreground hover:bg-accent hover:text-accent-foreground': selectedCurrency !== code,
               },
             )}

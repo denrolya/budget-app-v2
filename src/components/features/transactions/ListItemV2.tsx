@@ -41,21 +41,15 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
               {transaction.category.name}
             </Badge>
             {transaction.note ? (
-              <ResponsiveTooltip
-                openDelay={0}
-                content={<p>{transaction.note}</p>}
-                triggerClassName="overflow-hidden"
-              >
-            <span className="text-xs text-muted-foreground truncate block">
-              {transaction.note}
-            </span>
+              <ResponsiveTooltip openDelay={0} content={<p>{transaction.note}</p>} triggerClassName="overflow-hidden">
+                <span className="text-xs text-muted-foreground truncate block">{transaction.note}</span>
               </ResponsiveTooltip>
             ) : (
               <span className="text-xs text-muted-foreground">&nbsp;</span>
             )}
             <span className="text-xs text-muted-foreground whitespace-nowrap">
-          {transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
-        </span>
+              {transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
+            </span>
           </div>
         </div>
         <div className="flex items-center">
@@ -78,7 +72,9 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
                   </Badge>
                 )}
                 {transaction.isDraft && (
-                  <Badge variant="outline" className="bg-primary text-primary-foreground text-[10px] px-1">Draft</Badge>
+                  <Badge variant="outline" className="bg-primary text-primary-foreground text-[10px] px-1">
+                    Draft
+                  </Badge>
                 )}
                 {transaction.compensations && transaction.compensations.length > 0 && (
                   <Badge variant="outline" className="bg-secondary text-secondary-foreground text-[10px] px-1">
@@ -93,7 +89,6 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
     </Card>
   );
 };
-
 
 export const ListItemSkeleton: React.FC = () => (
   <Card className="mb-0.5">
@@ -115,6 +110,5 @@ export const ListItemSkeleton: React.FC = () => (
     </CardContent>
   </Card>
 );
-
 
 export default ListItem;

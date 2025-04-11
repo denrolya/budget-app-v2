@@ -22,10 +22,13 @@ const addValueToNodes = (node: Category): Category & { value: number } => {
 export const CategoriesSunburst: React.FC<CategoriesSunburstProps> = ({ categories }) => {
   const filteredCategories = useMemo(() => categories.map(addValueToNodes), [categories]);
 
-  const data = useMemo(() => ({
-    name: 'Categories',
-    children: filteredCategories,
-  }), [filteredCategories]);
+  const data = useMemo(
+    () => ({
+      name: 'Categories',
+      children: filteredCategories,
+    }),
+    [filteredCategories],
+  );
 
   return (
     <div className="h-[500px]">
@@ -49,7 +52,7 @@ export const CategoriesSunburst: React.FC<CategoriesSunburstProps> = ({ categori
         }}
         motionConfig="wobbly"
         data={data}
-        arcLabel={d => `${d.id} (${d.value})`}
+        arcLabel={(d) => `${d.id} (${d.value})`}
       />
     </div>
   );

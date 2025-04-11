@@ -217,4 +217,3 @@ export const LayoutV2 = () => (
     </div>
   </div>
 );
-

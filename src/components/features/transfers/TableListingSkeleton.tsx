@@ -24,7 +24,9 @@ export const TableListingSkeleton: React.FC<SkeletonProps> = ({ rowsPerGroup = 3
       {[...Array(rowsPerGroup)].map((_, rowIndex) => (
         <TableRow key={`${groupIndex}-${rowIndex}`}>
           <TableCell className="w-4" />
-          <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-12" />
+          </TableCell>
           <TableCell>
             <div className="flex items-center space-x-2">
               <Skeleton className="h-6 w-6 rounded-full" />
@@ -32,12 +34,24 @@ export const TableListingSkeleton: React.FC<SkeletonProps> = ({ rowsPerGroup = 3
               <Skeleton className="h-6 w-6 rounded-full" />
             </div>
           </TableCell>
-          <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-16" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-20" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-20" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-16" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-32" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-16" />
+          </TableCell>
           <TableCell>
             <div className="flex justify-end space-x-2">
               <Skeleton className="h-8 w-8" />
@@ -64,9 +78,7 @@ export const TableListingSkeleton: React.FC<SkeletonProps> = ({ rowsPerGroup = 3
             <TableHead className="w-1/12 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
-          {[...Array(numberOfGroups)].map((_, index) => renderSkeletonGroup(index))}
-        </TableBody>
+        <TableBody>{[...Array(numberOfGroups)].map((_, index) => renderSkeletonGroup(index))}</TableBody>
       </Table>
     </div>
   );

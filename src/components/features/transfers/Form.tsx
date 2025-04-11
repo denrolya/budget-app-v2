@@ -86,27 +86,30 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>((_, r
     },
   });
 
-  const calculateMissingValue = useCallback((formValues: z.infer<typeof formSchema>) => {
-    const amount = formValues.amount || 0;
-    const rate = formValues.rate || 1;
-    const fee = formValues.fee || 0;
-    const result = resultingAmount || 0;
+  const calculateMissingValue = useCallback(
+    (formValues: z.infer<typeof formSchema>) => {
+      const amount = formValues.amount || 0;
+      const rate = formValues.rate || 1;
+      const fee = formValues.fee || 0;
+      const result = resultingAmount || 0;
 
-    switch (calculationMode) {
-      case 'result':
-        setResultingAmount(((amount * rate) - fee).toFixed(2));
-        break;
-      case 'amount':
-        setValue('amount', (result + fee) / rate);
-        break;
-      case 'rate':
-        setValue('rate', (result + fee) / amount);
-        break;
-      case 'fee':
-        setValue('fee', (amount * rate) - result);
-        break;
-    }
-  }, [calculationMode, resultingAmount, setValue]);
+      switch (calculationMode) {
+        case 'result':
+          setResultingAmount((amount * rate - fee).toFixed(2));
+          break;
+        case 'amount':
+          setValue('amount', (result + fee) / rate);
+          break;
+        case 'rate':
+          setValue('rate', (result + fee) / amount);
+          break;
+        case 'fee':
+          setValue('fee', amount * rate - result);
+          break;
+      }
+    },
+    [calculationMode, resultingAmount, setValue],
+  );
 
   useEffect(() => {
     const subscription = watch((value) => calculateMissingValue(value));
@@ -167,7 +170,8 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>((_, r
                     {...field}
                     type="number"
                     readOnly={calculationMode === 'amount'}
-                    onChange={e => field.onChange(e.target.valueAsNumber)} />
+                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -185,7 +189,8 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>((_, r
                     {...field}
                     type="number"
                     readOnly={calculationMode === 'rate'}
-                    onChange={e => field.onChange(e.target.valueAsNumber)} />
+                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -205,7 +210,8 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>((_, r
                     {...field}
                     type="number"
                     readOnly={calculationMode === 'fee'}
-                    onChange={e => field.onChange(e.target.valueAsNumber)} />
+                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -261,9 +267,13 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>((_, r
         <div className="border rounded-md overflow-hidden mt-4">
           <div className="p-3 bg-muted">
             <Label className="text-sm">
-              {calculationMode === 'result' ? 'Resulting Amount' :
-                calculationMode === 'amount' ? 'Calculate Amount' :
-                  calculationMode === 'rate' ? 'Calculate Rate' : 'Calculate Fee'}
+              {calculationMode === 'result'
+                ? 'Resulting Amount'
+                : calculationMode === 'amount'
+                  ? 'Calculate Amount'
+                  : calculationMode === 'rate'
+                    ? 'Calculate Rate'
+                    : 'Calculate Fee'}
             </Label>
             <Input
               type="number"

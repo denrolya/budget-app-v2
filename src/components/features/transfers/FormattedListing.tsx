@@ -17,14 +17,7 @@ interface Props {
   onAdd: () => void;
 }
 
-const FormattedListing: React.FC<Props> = ({
-                                             isLoading,
-                                             isError,
-                                             error,
-                                             groupedItems,
-                                             refetch,
-                                             onAdd,
-                                           }) => (
+const FormattedListing: React.FC<Props> = ({ isLoading, isError, error, groupedItems, refetch, onAdd }) => (
   <>
     {isError && (
       <Alert variant="destructive">
@@ -35,14 +28,14 @@ const FormattedListing: React.FC<Props> = ({
 
     <div className="md:hidden">
       {isLoading && <ListSkeleton />}
-      {(!isLoading && groupedItems.length > 0) && <List groupedItems={groupedItems} />}
-      {(!isLoading && groupedItems.length === 0) && <EmptyTransferState onRefresh={refetch} onAddTransfer={onAdd} />}
+      {!isLoading && groupedItems.length > 0 && <List groupedItems={groupedItems} />}
+      {!isLoading && groupedItems.length === 0 && <EmptyTransferState onRefresh={refetch} onAddTransfer={onAdd} />}
     </div>
-    
+
     <div className="hidden md:block">
       {isLoading && <TableListingSkeleton />}
-      {(!isLoading && groupedItems.length > 0) && <TableListing groupedItems={groupedItems} />}
-      {(!isLoading && groupedItems.length === 0) && <EmptyTransferState onRefresh={refetch} onAddTransfer={onAdd} />}
+      {!isLoading && groupedItems.length > 0 && <TableListing groupedItems={groupedItems} />}
+      {!isLoading && groupedItems.length === 0 && <EmptyTransferState onRefresh={refetch} onAddTransfer={onAdd} />}
     </div>
   </>
 );

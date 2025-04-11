@@ -32,19 +32,23 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
   const baseCurrency = useBaseCurrency();
   const isDesktop = useScreenSize();
 
-  const groupedTransactions: [Moment, Transaction[], number, number][] = useMemo(() => toPairs(
-    groupBy(
-      sortBy(debt.transactions, item => -item.executedAt.valueOf()),
-      item => item.executedAt.format(BACKEND_DATE_FORMAT),
-    ),
-  ).map(([date, items]) => {
-    const totalValue = sumBy(items, item => {
-      const value = item.convertedValues[baseCurrency] || 0;
-      return item.isExpense() ? -value : value;
-    });
-    const totalItems = items.length;
-    return [moment(date), items, totalValue, totalItems];
-  }), [debt.transactions, baseCurrency]);
+  const groupedTransactions: [Moment, Transaction[], number, number][] = useMemo(
+    () =>
+      toPairs(
+        groupBy(
+          sortBy(debt.transactions, (item) => -item.executedAt.valueOf()),
+          (item) => item.executedAt.format(BACKEND_DATE_FORMAT),
+        ),
+      ).map(([date, items]) => {
+        const totalValue = sumBy(items, (item) => {
+          const value = item.convertedValues[baseCurrency] || 0;
+          return item.isExpense() ? -value : value;
+        });
+        const totalItems = items.length;
+        return [moment(date), items, totalValue, totalItems];
+      }),
+    [debt.transactions, baseCurrency],
+  );
 
   const totalTransactionsValue = groupedTransactions.reduce((acc, [, , totalValue]) => acc + totalValue, 0);
   const totalTransactionsCount = debt.transactions.length;
@@ -56,11 +60,7 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
           <CardHeader>
             <CardTitle className="flex flex-row justify-between items-center">
               <span>{debt?.debtor}</span>
-              <MoneyValue
-                badge
-                amount={debt.balance}
-                currency={debt.currency}
-                values={debt.convertedValues} />
+              <MoneyValue badge amount={debt.balance} currency={debt.currency} values={debt.convertedValues} />
             </CardTitle>
             <CardDescription>
               Opened on <RelativeDatetimeDisplay date={debt.createdAt} />
@@ -102,9 +102,7 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
                       </div>
                     </>
                   )}
-                  {groupedTransactions.length === 0 && (
-                    <p>No transactions registered yet</p>
-                  )}
+                  {groupedTransactions.length === 0 && <p>No transactions registered yet</p>}
                 </ScrollArea>
               </CardContent>
               <CardFooter className="p-4">

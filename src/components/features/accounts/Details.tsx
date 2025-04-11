@@ -35,13 +35,7 @@ const AccountDetail: React.FC<Props> = ({ account }) => {
     return { after, before };
   }, [currentDate]);
 
-  const {
-    groupedItems,
-    isLoading,
-    isError,
-    error,
-    setFilter,
-  } = useTransactionsAndTransfers({
+  const { groupedItems, isLoading, isError, error, setFilter } = useTransactionsAndTransfers({
     updateUrl: false,
     excludeTransfers: true,
   });
@@ -139,7 +133,8 @@ const AccountDetail: React.FC<Props> = ({ account }) => {
         <TabsList
           className={cn({
             'grid w-full grid-cols-2': !isDesktop,
-          })}>
+          })}
+        >
           <TabsTrigger value="activity">Activity</TabsTrigger>
           <TabsTrigger value="history">Account History</TabsTrigger>
         </TabsList>
@@ -150,9 +145,7 @@ const AccountDetail: React.FC<Props> = ({ account }) => {
               <CardDescription className="sr-only">List of all transactions for past 7 days</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
-              <ScrollArea className="h-[400px]">
-                {renderActivityContent()}
-              </ScrollArea>
+              <ScrollArea className="h-[400px]">{renderActivityContent()}</ScrollArea>
             </CardContent>
             <CardFooter className="p-4">
               <Button onClick={() => openForm(FormType.Transaction, { account })}>

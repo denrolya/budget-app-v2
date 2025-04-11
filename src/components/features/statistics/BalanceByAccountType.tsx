@@ -33,12 +33,11 @@ export const AccountTypeBalanceCard: React.FC<Props> = ({ type }) => {
   const baseCurrency = useBaseCurrency();
   const accounts = useActiveAccounts();
 
-  const filteredAccounts = accounts.filter(account => account.type === type);
+  const filteredAccounts = accounts.filter((account) => account.type === type);
   const balance = sumBy(filteredAccounts, ({ convertedValues }) => convertedValues?.[baseCurrency] || 0);
   const totalBalance = useTotalBalance();
 
-  const percentage = totalBalance > 0 ? ((balance / totalBalance) * 100) - 100 : 0;
-
+  const percentage = totalBalance > 0 ? (balance / totalBalance) * 100 - 100 : 0;
 
   const Icon = typeIcons[type];
 
@@ -59,7 +58,8 @@ export const AccountTypeBalanceCard: React.FC<Props> = ({ type }) => {
           <div className="flex flex-col flex-grow">
             <p
               className="text-2xl font-bold text-primary"
-              aria-label={`Total ${typeLabels[type]} balance: ${baseCurrency} ${balance}`}>
+              aria-label={`Total ${typeLabels[type]} balance: ${baseCurrency} ${balance}`}
+            >
               <MoneyValue useColors={false} amount={balance} />
             </p>
             <p className="text-xs text-muted-foreground mt-1">

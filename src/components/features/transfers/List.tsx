@@ -14,11 +14,7 @@ interface ListSkeletonProps extends React.ComponentPropsWithoutRef<'div'> {
   transfersPerGroup?: number;
 }
 
-export const ListSkeleton: React.FC<ListSkeletonProps> = ({
-                                                            groupCount = 3,
-                                                            transfersPerGroup = 5,
-                                                            ...props
-                                                          }) => (
+export const ListSkeleton: React.FC<ListSkeletonProps> = ({ groupCount = 3, transfersPerGroup = 5, ...props }) => (
   <div {...props}>
     {Array.from({ length: groupCount }).map((_, groupIndex) => (
       <React.Fragment key={groupIndex}>
@@ -39,9 +35,7 @@ export const ListSkeleton: React.FC<ListSkeletonProps> = ({
             ))}
           </ul>
         </div>
-        {groupIndex < groupCount - 1 && (
-          <Separator className="my-6" />
-        )}
+        {groupIndex < groupCount - 1 && <Separator className="my-6" />}
       </React.Fragment>
     ))}
   </div>
@@ -50,7 +44,7 @@ export const ListSkeleton: React.FC<ListSkeletonProps> = ({
 ListSkeleton.displayName = 'TransfersGroupedListSkeleton';
 
 interface Props extends React.ComponentPropsWithoutRef<'div'> {
-  groupedItems: [Moment, Transfer[], number, number][]
+  groupedItems: [Moment, Transfer[], number, number][];
 }
 
 export const List: React.FC<Props> = ({ groupedItems, ...props }) => (
@@ -65,7 +59,9 @@ export const List: React.FC<Props> = ({ groupedItems, ...props }) => (
             <div className="text-sm text-muted-foreground">
               <span>{count} transfers</span>
               <span className="mx-1">•</span>
-              <span><MoneyValue amount={totalValue} /></span>
+              <span>
+                <MoneyValue amount={totalValue} />
+              </span>
             </div>
           </div>
           <ul className="space-y-2">
@@ -76,9 +72,7 @@ export const List: React.FC<Props> = ({ groupedItems, ...props }) => (
             ))}
           </ul>
         </div>
-        {index < groupedItems.length - 1 && (
-          <Separator className="my-6" />
-        )}
+        {index < groupedItems.length - 1 && <Separator className="my-6" />}
       </React.Fragment>
     ))}
   </div>

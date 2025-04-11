@@ -16,8 +16,7 @@ import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/contexts/auth';
 import { Theme, useTheme } from '@/contexts/theme';
 
-
-type RouteKey = keyof typeof ROUTES
+type RouteKey = keyof typeof ROUTES;
 
 interface Props {
   className?: string;
@@ -29,7 +28,6 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
   const [isDrawerOpen, setDrawerOpen] = useState<boolean>(false);
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<string>('quickAccess');
-
 
   const tabOptions = ['quickAccess', 'exchangeRates', 'settings'];
 
@@ -61,7 +59,12 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
   const navItems = [ROUTES.DASHBOARD, ROUTES.DAILY_LEDGER, ROUTES.TRANSACTION_LIST];
 
   return (
-    <nav className={cn('fixed bottom-0 left-0 right-0 md:hidden bg-background border-t border-border z-10 h-12', className)}>
+    <nav
+      className={cn(
+        'fixed bottom-0 left-0 right-0 md:hidden bg-background border-t border-border z-10 h-12',
+        className,
+      )}
+    >
       <div className="max-w-screen-xl mx-auto h-full relative">
         <ul className="flex justify-between items-center h-full">
           {navItems.slice(0, 2).map((item) => {
@@ -70,9 +73,12 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
               <li className="flex-1 h-full" key={item.path}>
                 <Link
                   className="flex flex-col items-center justify-center w-full h-full text-muted-foreground"
-                  to={item.path}>
+                  to={item.path}
+                >
                   <item.icon className={cn('h-5 w-5', isActive ? 'text-primary' : 'text-muted-foreground')} />
-                  <span className={cn('text-[10px] mt-0.5', isActive ? 'text-primary' : 'text-muted-foreground')}>{item.label}</span>
+                  <span className={cn('text-[10px] mt-0.5', isActive ? 'text-primary' : 'text-muted-foreground')}>
+                    {item.label}
+                  </span>
                 </Link>
               </li>
             );
@@ -96,7 +102,9 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                   className="flex flex-col items-center justify-center w-full h-full text-muted-foreground"
                 >
                   <item.icon className={cn('h-5 w-5', isActive ? 'text-primary' : 'text-muted-foreground')} />
-                  <span className={cn('text-[10px] mt-0.5', isActive ? 'text-primary' : 'text-muted-foreground')}>{item.label}</span>
+                  <span className={cn('text-[10px] mt-0.5', isActive ? 'text-primary' : 'text-muted-foreground')}>
+                    {item.label}
+                  </span>
                 </Link>
               </li>
             );

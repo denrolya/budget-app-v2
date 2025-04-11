@@ -94,14 +94,14 @@ interface Props extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const DateDisplay: React.FC<Props> = ({
-                                        date,
-                                        variant = 'default',
-                                        showRelative = true,
-                                        showTime = true,
-                                        showDayBadge = false,
-                                        badgeSize = 'sm',
-                                        className,
-                                      }) => {
+  date,
+  variant = 'default',
+  showRelative = true,
+  showTime = true,
+  showDayBadge = false,
+  badgeSize = 'sm',
+  className,
+}) => {
   const isCurrentYear = date.year() === moment().year();
 
   const formattedDate = useMemo(() => {
@@ -140,7 +140,9 @@ const DateDisplay: React.FC<Props> = ({
     const sizeClass = BADGE_SIZES[badgeSize];
 
     return (
-      <span className={`inline-flex items-center justify-center ${sizeClass} rounded-full font-normal text-white ${color} mr-2 shadow-md`}>
+      <span
+        className={`inline-flex items-center justify-center ${sizeClass} rounded-full font-normal text-white ${color} mr-2 shadow-md`}
+      >
         {badgeSize !== 'xs' && (badgeSize === 'sm' ? shortName : name)}
       </span>
     );

@@ -3,7 +3,7 @@ import { useSwipeable } from 'react-swipeable';
 import cn from 'classnames';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
-  cards: ReactElement[]
+  cards: ReactElement[];
 }
 
 export const CardStack: React.FC<Props> = ({ cards, className, ...props }) => {
@@ -48,16 +48,8 @@ export const CardStack: React.FC<Props> = ({ cards, className, ...props }) => {
   }, [goToNext, goToPrevious]);
 
   return (
-    <div
-      className={cn('relative w-full max-w-md mx-auto', className)}
-      role="region"
-      aria-label="Card Stack"
-      {...props}
-    >
-      <div
-        {...handlers}
-        className="relative w-full overflow-hidden"
-      >
+    <div className={cn('relative w-full max-w-md mx-auto', className)} role="region" aria-label="Card Stack" {...props}>
+      <div {...handlers} className="relative w-full overflow-hidden">
         {cards.map((card, index) => {
           const offset = (index - currentIndex + cards.length) % cards.length;
           const isCurrentCard = offset === 0;
@@ -67,17 +59,14 @@ export const CardStack: React.FC<Props> = ({ cards, className, ...props }) => {
           return (
             <div
               key={index}
-              className={cn(
-                'w-full transition-all duration-300 ease-in-out',
-                {
-                  'relative': isCurrentCard,
-                  'absolute top-0 left-0': !isCurrentCard,
-                  'z-30': isCurrentCard,
-                  'z-20': isPreviousCard || isNextCard,
-                  'z-10': !isCurrentCard && !isPreviousCard && !isNextCard,
-                  'opacity-0': offset > 2 && offset < cards.length - 1,
-                }
-              )}
+              className={cn('w-full transition-all duration-300 ease-in-out', {
+                relative: isCurrentCard,
+                'absolute top-0 left-0': !isCurrentCard,
+                'z-30': isCurrentCard,
+                'z-20': isPreviousCard || isNextCard,
+                'z-10': !isCurrentCard && !isPreviousCard && !isNextCard,
+                'opacity-0': offset > 2 && offset < cards.length - 1,
+              })}
               style={{
                 transform: `
                   translateX(${isCurrentCard ? dragDistance : 0}px)

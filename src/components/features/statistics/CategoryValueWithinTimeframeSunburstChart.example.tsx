@@ -32,11 +32,16 @@ const processData = (categories: CategoryNode[]): { name: string; children: Cate
   };
 };
 
-const CustomTooltip = ({ id, value, color, percentage }: {
+const CustomTooltip = ({
+  id,
+  value,
+  color,
+  percentage,
+}: {
   id: string;
   value: number;
   color: string;
-  percentage: number
+  percentage: number;
 }) => (
   <div style={{ background: 'white', padding: '9px 12px', border: `1px solid ${color}` }}>
     <strong>{id}</strong>
@@ -45,7 +50,11 @@ const CustomTooltip = ({ id, value, color, percentage }: {
   </div>
 );
 
-export const CategoryValueWithinTimeframeSunburstChart: React.FC<CategoryValueWithinTimeframeSunburstChartProps> = ({ type, after, before }) => {
+export const CategoryValueWithinTimeframeSunburstChart: React.FC<CategoryValueWithinTimeframeSunburstChartProps> = ({
+  type,
+  after,
+  before,
+}) => {
   const { data, isLoading, error } = useCategoryTreeStatistics({ after, before, type });
 
   const processedData = useMemo(() => {
@@ -59,9 +68,12 @@ export const CategoryValueWithinTimeframeSunburstChart: React.FC<CategoryValueWi
   }, [processedData]);
 
   if (isLoading) return <div className="h-[500px] flex items-center justify-center">Loading...</div>;
-  if (error) return <div
-    className="h-[500px] flex items-center justify-center text-red-500"
-    role="alert">Error: {error.message}</div>;
+  if (error)
+    return (
+      <div className="h-[500px] flex items-center justify-center text-red-500" role="alert">
+        Error: {error.message}
+      </div>
+    );
 
   return (
     <div className="h-[500px]" aria-label="Categories Sunburst Chart">
@@ -86,14 +98,9 @@ export const CategoryValueWithinTimeframeSunburstChart: React.FC<CategoryValueWi
           modifiers: [['darker', 1.4]],
         }}
         motionConfig="wobbly"
-        arcLabel={d => `${d.id} (${d.value.toFixed(2)})`}
+        arcLabel={(d) => `${d.id} (${d.value.toFixed(2)})`}
         tooltip={({ id, value, color }) => (
-          <CustomTooltip
-            id={id as string}
-            value={value}
-            color={color}
-            percentage={(value / totalValue) * 100}
-          />
+          <CustomTooltip id={id as string} value={value} color={color} percentage={(value / totalValue) * 100} />
         )}
       />
     </div>
@@ -101,4 +108,3 @@ export const CategoryValueWithinTimeframeSunburstChart: React.FC<CategoryValueWi
 };
 
 export default CategoryValueWithinTimeframeSunburstChart;
-

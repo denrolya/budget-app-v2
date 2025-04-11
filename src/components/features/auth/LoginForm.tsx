@@ -13,7 +13,7 @@ const loginSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 interface Props {
   error: string | null;

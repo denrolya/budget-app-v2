@@ -24,7 +24,7 @@ interface Props {
 export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) => {
   const [openSheetId, setOpenSheetId] = useState<number | null>(null);
   const toggleSheet = (transferId: number) => {
-    setOpenSheetId(prevId => prevId === transferId ? null : transferId);
+    setOpenSheetId((prevId) => (prevId === transferId ? null : transferId));
   };
 
   const handleDelete = (transfer: Transfer) => {
@@ -52,21 +52,25 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
             <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
               <TableRow>
                 <TableCell
-                  colSpan={8} className={cn('font-semibold', 'bg-muted/40', 'px-4', {
-                  'py-0': compact,
-                })}>
+                  colSpan={8}
+                  className={cn('font-semibold', 'bg-muted/40', 'px-4', {
+                    'py-0': compact,
+                  })}
+                >
                   <div className="flex flex-wrap justify-between items-center">
                     <RelativeDatetimeDisplay
                       showDayBadge
                       badgeSize="sm"
                       variant="default"
                       showTime={false}
-                      date={date} />
+                      date={date}
+                    />
                     <SummaryBadge
                       useColors={false}
                       icon={ROUTES.TRANSFER_LIST.icon}
                       count={totalItems}
-                      value={totalValue} />
+                      value={totalValue}
+                    />
                   </div>
                 </TableCell>
               </TableRow>
@@ -75,16 +79,21 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
                   <TableCell
                     className={cn('w-4', {
                       'py-0': compact,
-                    })}></TableCell>
+                    })}
+                  ></TableCell>
                   <TableCell
                     className={cn({
                       'py-0': compact,
-                    })}>
+                    })}
+                  >
                     <Sheet
                       open={openSheetId === transfer.id}
-                      onOpenChange={(open) => setOpenSheetId(open ? transfer.id : null)}>
+                      onOpenChange={(open) => setOpenSheetId(open ? transfer.id : null)}
+                    >
                       <SheetTrigger asChild>
-                        <code className="cursor-help" onClick={() => toggleSheet(transfer.id)}>#{transfer.id}</code>
+                        <code className="cursor-help" onClick={() => toggleSheet(transfer.id)}>
+                          #{transfer.id}
+                        </code>
                       </SheetTrigger>
                       <SheetContent side="right" className="w-full sm:max-w-3xl p-0 overflow-y-auto">
                         <div className="h-full flex flex-col">
@@ -104,25 +113,35 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
                   <TableCell
                     className={cn({
                       'py-0': compact,
-                    })}>
+                    })}
+                  >
                     <div className="flex items-center space-x-2">
                       <AccountBadge
                         size="sm"
                         account={transfer.fromExpense.account}
-                        className={transfer.feeExpense?.account.id === transfer.fromExpense.account.id ? 'ring-2 ring-destructive' : ''}
+                        className={
+                          transfer.feeExpense?.account.id === transfer.fromExpense.account.id
+                            ? 'ring-2 ring-destructive'
+                            : ''
+                        }
                       />
                       <ArrowRight className="h-4 w-4 text-muted-foreground" />
                       <AccountBadge
                         size="sm"
                         account={transfer.toIncome.account}
-                        className={transfer.feeExpense?.account.id === transfer.toIncome.account.id ? 'ring-2 ring-destructive' : ''}
+                        className={
+                          transfer.feeExpense?.account.id === transfer.toIncome.account.id
+                            ? 'ring-2 ring-destructive'
+                            : ''
+                        }
                       />
                     </div>
                   </TableCell>
                   <TableCell
                     className={cn({
                       'py-0': compact,
-                    })}>
+                    })}
+                  >
                     <>
                       <div className="flex flex-row items-center">
                         <MoneyValue
@@ -130,10 +149,7 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
                           currency={transfer.fromExpense.account.currency}
                         />
                         <ArrowRight className="h-4 w-4 text-muted-foreground mx-2" />
-                        <MoneyValue
-                          amount={transfer.toIncome.amount}
-                          currency={transfer.toIncome.account.currency}
-                        />
+                        <MoneyValue amount={transfer.toIncome.amount} currency={transfer.toIncome.account.currency} />
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {transfer.feeExpense && (
@@ -151,7 +167,8 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
                   <TableCell
                     className={cn({
                       'py-0': compact,
-                    })}>
+                    })}
+                  >
                     <div>Rate: {Number(transfer.rate.toFixed(4))}</div>
                     <div className="text-xs text-muted-foreground">
                       <RateDisplay transfer={transfer} />
@@ -160,17 +177,22 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
                   <TableCell
                     className={cn('max-w-xs', 'truncate', {
                       'py-0': compact,
-                    })}>{transfer.note}</TableCell>
+                    })}
+                  >
+                    {transfer.note}
+                  </TableCell>
                   <TableCell
                     className={cn({
                       'py-0': compact,
-                    })}>
+                    })}
+                  >
                     {transfer.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
                   </TableCell>
                   <TableCell
                     className={cn('text-right', {
                       'py-0': compact,
-                    })}>
+                    })}
+                  >
                     <div className="flex justify-end space-x-2">
                       <Button
                         variant="ghost"

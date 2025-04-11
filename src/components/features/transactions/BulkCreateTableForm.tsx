@@ -35,7 +35,7 @@ const formSchema = z.object({
   transactions: z.array(transactionSchema),
 });
 
-type FormValues = z.infer<typeof formSchema>
+type FormValues = z.infer<typeof formSchema>;
 
 const DEFAULT_VALUES = {
   isDraft: false,
@@ -111,7 +111,6 @@ export const BulkCreateTableForm: React.FC = () => {
 
   const addAnotherTransaction = () => append(DEFAULT_VALUES);
 
-
   useHotkeys('ctrl+n', (event) => {
     event.preventDefault();
     addAnotherTransaction();
@@ -126,19 +125,23 @@ export const BulkCreateTableForm: React.FC = () => {
   });
 
   useEffect(() => {
-    const hotkeys = [{
-      windows: 'Ctrl+N',
-      mac: 'Ctrl+N',
-      description: 'Add another transaction when in bulk creation mode',
-    }, {
-      windows: 'Ctrl+S',
-      mac: 'Cmd+S',
-      description: 'Save all transactions',
-    }, {
-      windows: 'Ctrl+X',
-      mac: 'Ctrl+X',
-      description: 'Remove last transaction from the list',
-    }];
+    const hotkeys = [
+      {
+        windows: 'Ctrl+N',
+        mac: 'Ctrl+N',
+        description: 'Add another transaction when in bulk creation mode',
+      },
+      {
+        windows: 'Ctrl+S',
+        mac: 'Cmd+S',
+        description: 'Save all transactions',
+      },
+      {
+        windows: 'Ctrl+X',
+        mac: 'Ctrl+X',
+        description: 'Remove last transaction from the list',
+      },
+    ];
     addPageHotkeys('Bulk Transaction Creation', hotkeys);
 
     return () => {
@@ -156,7 +159,7 @@ export const BulkCreateTableForm: React.FC = () => {
           </div>
         </div>
       )}
-      <Form{...form}>
+      <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Table>
             <TableHeader>
@@ -179,13 +182,11 @@ export const BulkCreateTableForm: React.FC = () => {
                       name={`transactions.${index}.isDraft`}
                       render={({ field }) => (
                         <FormItem className="flex items-center space-y-0 gap-2">
-                          <FormLabel><code>#{index}</code></FormLabel>
+                          <FormLabel>
+                            <code>#{index}</code>
+                          </FormLabel>
                           <FormControl className="p-0 m-0">
-                            <Checkbox
-                              checked={field.value}
-                              className="p-0 m-0"
-                              onCheckedChange={field.onChange}
-                            />
+                            <Checkbox checked={field.value} className="p-0 m-0" onCheckedChange={field.onChange} />
                           </FormControl>
                         </FormItem>
                       )}
@@ -204,12 +205,20 @@ export const BulkCreateTableForm: React.FC = () => {
                                 size="icon"
                                 variant="ghost"
                                 className="w-8 h-8 p-0"
-                                onClick={() => field.onChange(field.value === TransactionType.Expense ? TransactionType.Income : TransactionType.Expense)}
+                                onClick={() =>
+                                  field.onChange(
+                                    field.value === TransactionType.Expense
+                                      ? TransactionType.Income
+                                      : TransactionType.Expense,
+                                  )
+                                }
                               >
-                                {field.value === TransactionType.Expense &&
-                                  <ArrowDownCircle className="h-4 w-4 text-destructive" />}
-                                {field.value === TransactionType.Income &&
-                                  <ArrowUpCircle className="h-4 w-4 text-success" />}
+                                {field.value === TransactionType.Expense && (
+                                  <ArrowDownCircle className="h-4 w-4 text-destructive" />
+                                )}
+                                {field.value === TransactionType.Income && (
+                                  <ArrowUpCircle className="h-4 w-4 text-success" />
+                                )}
                               </Button>
                             </FormControl>
                           </FormItem>
@@ -250,7 +259,7 @@ export const BulkCreateTableForm: React.FC = () => {
                               placeholder="Amount"
                               className="w-full"
                               value={field.value ?? ''}
-                              onChange={e => {
+                              onChange={(e) => {
                                 field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber);
                               }}
                             />

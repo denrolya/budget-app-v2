@@ -39,24 +39,24 @@ interface Props {
 }
 
 const MoneyFlowChart: React.FC<Props> = ({
-                                           currentTimeframe,
-                                           previousTimeframe,
-                                           period,
-                                           data,
-                                           chartType,
-                                           showIncome,
-                                           showExpenses,
-                                           showRevenue,
-                                           showPreviousPeriod,
-                                         }) => {
-  const transformedData = data.map(item => ({
+  currentTimeframe,
+  previousTimeframe,
+  period,
+  data,
+  chartType,
+  showIncome,
+  showExpenses,
+  showRevenue,
+  showPreviousPeriod,
+}) => {
+  const transformedData = data.map((item) => ({
     ...item,
     expenses: -item.expenses,
     previousExpenses: -item.previousExpenses,
   }));
 
   const maxValue = Math.max(
-    ...data.flatMap(item => [
+    ...data.flatMap((item) => [
       item.income,
       item.expenses,
       item.revenue,
@@ -182,11 +182,7 @@ const MoneyFlowChart: React.FC<Props> = ({
   return (
     <div className="w-full h-full min-w-[600px]">
       <ResponsiveContainer width="100%" height={385}>
-        <ComposedChart
-          stackOffset="sign"
-          data={transformedData}
-          margin={{ top: 0, right: 30, bottom: 0, left: -30 }}
-        >
+        <ComposedChart stackOffset="sign" data={transformedData} margin={{ top: 0, right: 30, bottom: 0, left: -30 }}>
           <defs>
             <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="hsl(var(--success) / 0.7)" />
@@ -221,18 +217,8 @@ const MoneyFlowChart: React.FC<Props> = ({
             tickFormatter={formatXAxisTick}
             {...CHART_STYLES.xAxis}
           />
-          <XAxis
-            hide
-            xAxisId={0}
-            dataKey="timestamp"
-            scale="time"
-            type="number"
-            {...CHART_STYLES.xAxis}
-          />
-          <YAxis
-            domain={[-maxValue, maxValue]}
-            {...CHART_STYLES.yAxis}
-          />
+          <XAxis hide xAxisId={0} dataKey="timestamp" scale="time" type="number" {...CHART_STYLES.xAxis} />
+          <YAxis domain={[-maxValue, maxValue]} {...CHART_STYLES.yAxis} />
           <Tooltip
             cursor={false}
             content={(props) => (
@@ -256,4 +242,3 @@ const MoneyFlowChart: React.FC<Props> = ({
 };
 
 export default MoneyFlowChart;
-

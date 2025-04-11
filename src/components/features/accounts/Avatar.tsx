@@ -39,11 +39,11 @@ const currencySizeMap = {
 };
 
 export const AccountAvatar: React.FC<AccountAvatarProps> = ({
-                                                              account,
-                                                              size = 'md',
-                                                              showCurrency = true,
-                                                              className,
-                                                            }) => {
+  account,
+  size = 'md',
+  showCurrency = true,
+  className,
+}) => {
   const { type, color, currency } = account;
   const Icon = iconMap[type];
 
@@ -59,10 +59,7 @@ export const AccountAvatar: React.FC<AccountAvatarProps> = ({
             boxShadow: `inset 0 0 0 1px ${borderColor}`,
           }}
         >
-          <Icon
-            className={cn(iconSizeMap[size], 'text-foreground')}
-            style={{ color: iconColor }}
-          />
+          <Icon className={cn(iconSizeMap[size], 'text-foreground')} style={{ color: iconColor }} />
         </AvatarFallback>
       </Avatar>
       {showCurrency && (

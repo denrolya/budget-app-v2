@@ -7,24 +7,27 @@ import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
 import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
 import Account from '@/models/Account';
 
-type AccountTypeaheadProps =
-  Omit<TypeaheadV2Props<Account, string>, 'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'>
-  & {
+type AccountTypeaheadProps = Omit<
+  TypeaheadV2Props<Account, string>,
+  'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'
+> & {
   className?: string;
 };
 
 const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
-                                                             multiple = false,
-                                                             value,
-                                                             onChange,
-                                                             className,
-                                                             ...props
-                                                           }) => {
+  multiple = false,
+  value,
+  onChange,
+  className,
+  ...props
+}) => {
   const accounts = useAccountsWithDefaultOrder();
 
   const renderElement = (el: Account, _valueField?: keyof Account, labelField?: keyof Account): ReactNode => (
     <>
-      <div className={cn('flex items-center justify-center rounded-full mr-2', el.archivedAt ? 'text-muted' : el.color)}>
+      <div
+        className={cn('flex items-center justify-center rounded-full mr-2', el.archivedAt ? 'text-muted' : el.color)}
+      >
         <AccountAvatar account={el} size="sm" />
       </div>
       <div className="flex-1">
@@ -44,9 +47,7 @@ const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
           amount={el.balance}
           currency={el.currency}
         />
-        {el.archivedAt && (
-          <p className="text-xs text-muted-foreground">Archived</p>
-        )}
+        {el.archivedAt && <p className="text-xs text-muted-foreground">Archived</p>}
       </div>
     </>
   );

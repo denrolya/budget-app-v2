@@ -71,7 +71,13 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
         <div className="flex flex-col space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-sm">Date</span>
-            <RelativeDatetimeDisplay showRelative showDayBadge badgeSize="sm" variant="default" date={transfer.executedAt} />
+            <RelativeDatetimeDisplay
+              showRelative
+              showDayBadge
+              badgeSize="sm"
+              variant="default"
+              date={transfer.executedAt}
+            />
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm">Amount</span>
@@ -81,17 +87,19 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm">From</span>
-            <span className="font-medium"><AccountBadge account={transfer.fromExpense.account} size="md" /></span>
+            <span className="font-medium">
+              <AccountBadge account={transfer.fromExpense.account} size="md" />
+            </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm">To</span>
-            <span className="font-medium"><AccountBadge account={transfer.toIncome.account} size="md" /></span>
+            <span className="font-medium">
+              <AccountBadge account={transfer.toIncome.account} size="md" />
+            </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm">Rate</span>
-            <span className="font-medium font-mono">
-              {renderRate()}
-            </span>
+            <span className="font-medium font-mono">{renderRate()}</span>
           </div>
         </div>
         <Separator />
@@ -104,7 +112,8 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
                 <MoneyValue
                   showSign
                   amount={-(transfer.fromExpense.amount + transfer.feeExpense.amount)}
-                  currency={transfer.fromExpense.account.currency} />
+                  currency={transfer.fromExpense.account.currency}
+                />
               ) : (
                 <MoneyValue amount={-transfer.fromExpense.amount} currency={transfer.fromExpense.account.currency} />
               )}
@@ -117,7 +126,8 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
                 <MoneyValue
                   showSign
                   amount={transfer.feeExpense.amount + transfer.toIncome.amount}
-                  currency={transfer.feeExpense.account.currency} />
+                  currency={transfer.feeExpense.account.currency}
+                />
               ) : (
                 <MoneyValue amount={transfer.toIncome.amount} currency={transfer.toIncome.account.currency} />
               )}
@@ -134,10 +144,12 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
               <div className="flex justify-between items-center">
                 <span className="text-sm">Transfer Fee</span>
                 <span className="font-medium font-mono">
-                  <MoneyValue showSign amount={-transfer.feeExpense.amount} currency={transfer.feeExpense.account.currency} />
-                  <span className="text-sm text-destructive opacity-75 ml-2">
-                    ({calculateFeePercentage()}%)
-                  </span>
+                  <MoneyValue
+                    showSign
+                    amount={-transfer.feeExpense.amount}
+                    currency={transfer.feeExpense.account.currency}
+                  />
+                  <span className="text-sm text-destructive opacity-75 ml-2">({calculateFeePercentage()}%)</span>
                 </span>
               </div>
             </div>
@@ -147,9 +159,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
       </div>
       <div className="flex items-center space-x-2">
         <InfoIcon className="h-4 w-4 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
-          Transfer completed successfully
-        </p>
+        <p className="text-sm text-muted-foreground">Transfer completed successfully</p>
       </div>
     </div>
   );

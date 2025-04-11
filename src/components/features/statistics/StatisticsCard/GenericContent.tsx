@@ -18,14 +18,14 @@ const GenericContent: React.FC<{
   comparison: ComparisonType;
   type: TransactionType;
 }> = ({
-        currentValue,
-        comparisonValue,
-        percentageChange,
-        selectedTimeframe,
-        comparisonTimeframe,
-        comparison,
-        type,
-      }) => (
+  currentValue,
+  comparisonValue,
+  percentageChange,
+  selectedTimeframe,
+  comparisonTimeframe,
+  comparison,
+  type,
+}) => (
   <>
     <div className="flex justify-between items-baseline">
       <ResponsiveTooltip
@@ -48,16 +48,10 @@ const GenericContent: React.FC<{
           amount={currentValue as number}
         />
       </ResponsiveTooltip>
-      <PercentageBadge
-        decimals={0}
-        type={type}
-        percentage={percentageChange as number}
-      />
+      <PercentageBadge decimals={0} type={type} percentage={percentageChange as number} />
     </div>
     <div className="flex justify-between text-xs">
-      <span className="text-muted-foreground">
-        vs {comparison === 'previous' ? 'previous' : 'last year'}
-      </span>
+      <span className="text-muted-foreground">vs {comparison === 'previous' ? 'previous' : 'last year'}</span>
       <ResponsiveTooltip
         openDelay={0}
         desktopComponent="hovercard"

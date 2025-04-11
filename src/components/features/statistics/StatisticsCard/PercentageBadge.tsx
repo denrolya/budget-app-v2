@@ -17,8 +17,10 @@ export const PercentageBadge: React.FC<Props> = ({ percentage, type, decimals = 
   return (
     <span
       className={cn('px-2 py-1 rounded-full text-xs font-medium flex items-center', {
-        'bg-destructive/20 text-destructive': (type === TransactionType.Expense && isIncrease) || (type === TransactionType.Income && !isIncrease),
-        'bg-success/20 text-success': (type === TransactionType.Expense && !isIncrease) || (type === TransactionType.Income && isIncrease),
+        'bg-destructive/20 text-destructive':
+          (type === TransactionType.Expense && isIncrease) || (type === TransactionType.Income && !isIncrease),
+        'bg-success/20 text-success':
+          (type === TransactionType.Expense && !isIncrease) || (type === TransactionType.Income && isIncrease),
       })}
     >
       <Icon className="mr-1 h-3 w-3" />

@@ -70,9 +70,11 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
 
   const id = useMemo(() => generateSlug([title, type, statType, comparison]), [title, type, statType, comparison]);
 
-  const cardTitle = useMemo(() =>
-      title || (categories?.length ? categories.join(', ') : (type === TransactionType.Income ? 'Income' : 'Expenses')),
-    [title, categories, type]);
+  const cardTitle = useMemo(
+    () =>
+      title || (categories?.length ? categories.join(', ') : type === TransactionType.Income ? 'Income' : 'Expenses'),
+    [title, categories, type],
+  );
 
   const periodText = useMemo(() => getPeriodText(timeframe, period), [timeframe, period]);
   const [open, setOpen] = useState(false);
@@ -82,13 +84,15 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
     if (statType !== StatisticsType.Avg || (!currentData && !comparisonData)) return null;
 
     const data = currentData || [];
-    return [{
-      id: type,
-      data: data.map((item: ValueByPeriodData) => ({
-        x: item.after.format('YYYY-MM-DD'),
-        y: item[type]
-      }))
-    }];
+    return [
+      {
+        id: type,
+        data: data.map((item: ValueByPeriodData) => ({
+          x: item.after.format('YYYY-MM-DD'),
+          y: item[type],
+        })),
+      },
+    ];
   }, [currentData, comparisonData, statType, type]);
 
   if (isLoading) {
@@ -133,13 +137,7 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
           </div>
           <div className="flex items-center space-x-2 ml-2">
             <StatTypeBadge type={statType} />
-            <ConfigContainer
-              open={open}
-              setOpen={setOpen}
-              title={config.title}
-              onChange={onChange}
-              config={config}
-            >
+            <ConfigContainer open={open} setOpen={setOpen} title={config.title} onChange={onChange} config={config}>
               <Button variant="ghost" size="icon" className={isDesktop ? 'h-7 w-7 p-0' : 'h-8 w-8 p-0'}>
                 <SettingsIcon className="h-4 w-4" />
                 <span className="sr-only">Open settings</span>
@@ -176,11 +174,7 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                 />
               )}
             </div>
-            <PercentageIndicator
-              percentageChange={percentageChange}
-              type={type}
-              statType={statType}
-            />
+            <PercentageIndicator percentageChange={percentageChange} type={type} statType={statType} />
           </>
         )}
       </CardContent>

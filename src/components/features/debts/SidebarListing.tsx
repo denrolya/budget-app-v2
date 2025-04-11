@@ -39,11 +39,7 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
               <div className="flex items-center gap-2">
                 <h3 className="font-medium">{debt.debtor}</h3>
               </div>
-              <MoneyValue
-                badge
-                amount={debt.balance}
-                currency={debt.currency}
-                values={debt.convertedValues} />
+              <MoneyValue badge amount={debt.balance} currency={debt.currency} values={debt.convertedValues} />
             </div>
             <div className="flex justify-between items-center text-xs text-muted-foreground">
               {debt.closedAt && (
