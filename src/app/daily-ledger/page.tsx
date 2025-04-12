@@ -1,9 +1,12 @@
 import {
+  ArrowDownCircle,
+  ArrowUpCircle,
   CalendarArrowDown,
   CalendarArrowUp,
   CalendarIcon,
   ChevronLeft,
   ChevronRight,
+  CopyPlus,
   Filter,
   FoldVertical,
   LayoutList,
@@ -11,6 +14,9 @@ import {
   Plus,
   RefreshCw,
   RotateCcw,
+  Settings2,
+  SquarePlus,
+  Table,
   Table2,
   UnfoldVertical,
 } from 'lucide-react';
@@ -19,6 +25,19 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSwipeable } from 'react-swipeable';
 
+import FiltersToggleButton from '@/components/common/FiltersToggleButton';
+import { Type as TransactionType } from '@/types/transaction';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import ListingControls from '@/components/features/daily-ledger/ListingControls';
 import { useIsMobile } from '@/hooks/useMobile';
 import SummaryBadge from '@/components/common/SummaryBadge';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
@@ -137,6 +156,8 @@ const timePresets: TimePreset[] = [
   },
 ];
 
+const DEFAULT_TIMEFRAME_PRESET = '30-days';
+
 export const DailyLedgerPage: React.FC = () => {
   const isMobile = useIsMobile();
   const [activeView, setActiveView] = useState<'table' | 'list'>('table');
@@ -144,7 +165,7 @@ export const DailyLedgerPage: React.FC = () => {
   const [isCompactTable, setIsCompactTable] = useState<boolean>(true);
   const [isFiltersOpen, setIsFiltersOpen] = useState<boolean>(false);
   const [showBulkCreate, setShowBulkCreate] = useState<boolean>(false);
-  const [selectedPreset, setSelectedPreset] = useState<string>('30-days');
+  const [selectedPreset, setSelectedPreset] = useState<string>(DEFAULT_TIMEFRAME_PRESET);
   const [customTimeframe, setCustomTimeframe] = useState<{
     after: moment.Moment;
     before: moment.Moment;
@@ -172,7 +193,6 @@ export const DailyLedgerPage: React.FC = () => {
     setShowTransactions,
     showTransfers,
     setShowTransfers,
-    refetch,
   } = useTransactionsAndTransfers({
     updateUrl: true,
     excludeTransfers: true,
@@ -180,7 +200,7 @@ export const DailyLedgerPage: React.FC = () => {
 
   useEffect(() => {
     setFilter('after', timeframe.after);
-    setFilter('before', timeframe.before.clone().endOf('day'));
+    setFilter('before', timeframe.before);
   }, [timeframe, setFilter]);
 
   const onAddTransaction = () => openForm(FormType.Transaction);
@@ -223,16 +243,6 @@ export const DailyLedgerPage: React.FC = () => {
     trackMouse: true,
   });
 
-  const formatTimeframe = (after: moment.Moment, before: moment.Moment) => {
-    if (after.isSame(before, 'month')) {
-      return `${after.format('MMM D')}-${before.format('D, YYYY')}`;
-    } else if (after.isSame(before, 'year')) {
-      return `${after.format('MMM D')} - ${before.format('MMM D, YYYY')}`;
-    } else {
-      return `${after.format('MMM D, YYYY')} - ${before.format('MMM D, YYYY')}`;
-    }
-  };
-
   const summary = useMemo(() => {
     if (!groupedItems)
       return {
@@ -258,22 +268,6 @@ export const DailyLedgerPage: React.FC = () => {
 
     return { transactionsCount, transfersCount, transactionsValue, transfersValue };
   }, [groupedItems]);
-
-  const activeFiltersCount = React.useMemo(() => {
-    let count = 0;
-
-    if (
-      timeframe.after.format(BACKEND_DATE_FORMAT) !== moment().startOf('week').format(BACKEND_DATE_FORMAT) ||
-      timeframe.before.format(BACKEND_DATE_FORMAT) !== moment().endOf('week').format(BACKEND_DATE_FORMAT)
-    )
-      count++;
-    if (transactionFilters.categories.length > 0) count++;
-    if (transactionFilters.accounts.length > 0 || transferFilters.accounts.length > 0) count++;
-    if (transactionFilters.amountRange[0] !== undefined || transactionFilters.amountRange[1] !== undefined) count++;
-    if (transactionFilters.isDraft !== null) count++;
-
-    return count;
-  }, [transactionFilters, transferFilters, timeframe]);
 
   useHotkeys('arrowleft', goToPreviousPeriod);
   useHotkeys('arrowright', goToNextPeriod);
@@ -311,115 +305,161 @@ export const DailyLedgerPage: React.FC = () => {
   }, [addPageHotkeys, removePageHotkeys]);
 
   const handleResetFilters = () => {
-    setFilter('amountRange', [undefined, undefined]);
+    setFilter('amountRange', []);
     setFilter('categories', []);
     setFilter('accounts', []);
-    setFilter('isDraft', null);
+    setFilter('isDraft', undefined);
     setFilter('type', undefined);
     setCustomTimeframe(null);
     setShowTransactions(true);
     setShowTransfers(true);
   };
 
+  const handleTransactionVisibilityToggle = useCallback(
+    (visible: boolean) => {
+      setShowTransactions(visible);
+      if (!visible) {
+        setFilter('categories', []);
+        setFilter('type', undefined);
+        setFilter('isDraft', null);
+      }
+    },
+    [setShowTransactions, setFilter],
+  );
+
+  const handleTransactionTypeChange = useCallback(
+    (type: TransactionType | undefined) => {
+      setFilter('type', transactionFilters.type === type ? undefined : type);
+      setFilter('categories', []); // Reset categories when changing type
+      setShowTransactions(true);
+      setShowTransfers(false);
+    },
+    [setFilter, setShowTransactions, setShowTransfers],
+  );
+
   return (
     <FullHeightPageContent {...swipeHandlers} className="flex flex-col justify-between">
       <Card className="shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
         <CardHeader className="flex flex-col space-y-4 p-0 md:p-3 bg-background md:bg-card">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-            <ResponsiveTooltip
-              openDelay={1}
-              desktopComponent="hovercard"
-              contentClassName="bg-transparent border-none shadow-none"
-              triggerClassName="cursor-help"
-              content={
-                <YearDoughnutTimeframeDisplayChart
-                  data={[
-                    {
-                      after: timeframe.after,
-                      before: timeframe.before,
-                    },
-                  ]}
-                />
-              }
-            >
-              <div className="flex flex-col">
-                <CardTitle className="text-xl font-semibold flex items-center space-x-4">
-                  <CalendarIcon className="mr-2 h-5 w-5 text-muted-foreground flex-shrink-0" />
-                  {formatTimeframe(timeframe.after, timeframe.before)}
-                  <SummaryBadge
-                    icon={ROUTES.TRANSACTION_LIST.icon}
-                    count={summary.transactionsCount}
-                    value={summary.transactionsValue}
-                  />
-                  <SummaryBadge
-                    useColors={false}
-                    icon={ROUTES.TRANSFER_LIST.icon}
-                    count={summary.transfersCount}
-                    value={summary.transfersValue}
-                  />
-                </CardTitle>
-              </div>
-            </ResponsiveTooltip>
-            <div className="flex flex-wrap justify-between gap-2">
-              {activeView === 'table' && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="hidden md:flex"
-                      onClick={() => setIsReversedOrder(!isReversedOrder)}
-                    >
-                      {isReversedOrder && <CalendarArrowDown className="h-4 w-4" />}
-                      {!isReversedOrder && <CalendarArrowUp className="h-4 w-4" />}
-                      <span className="sr-only">Toggle ordering</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Toggle ordering</TooltipContent>
-                </Tooltip>
-              )}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="hidden md:flex data-[state=active]:bg-accent/20 data-[state=active]:ring-2 data-[state=active]:ring-accent"
-                    onClick={() => setActiveView(activeView === 'table' ? 'list' : 'table')}
+            <CardTitle className="text-2xl font-bold">Ledger</CardTitle>
+            <div className="flex flex-wrap justify-end gap-2">
+              <SummaryBadge
+                icon={ROUTES.TRANSACTION_LIST.icon}
+                count={summary.transactionsCount}
+                value={summary.transactionsValue}
+              />
+              <SummaryBadge
+                useColors={false}
+                icon={ROUTES.TRANSFER_LIST.icon}
+                count={summary.transfersCount}
+                value={summary.transfersValue}
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="icon" variant="outline">
+                    <Settings2 className="h-4 w-4" />
+                    <span className="sr-only">View Settings</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  {!isMobile && (
+                    <>
+                      <DropdownMenuLabel>View Mode</DropdownMenuLabel>
+                      <DropdownMenuRadioGroup value={activeView} onValueChange={(v) => setActiveView(v)}>
+                        <DropdownMenuRadioItem value="list">
+                          <LayoutList className="mr-2 h-4 w-4" /> List
+                        </DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="table">
+                          <Table className="mr-2 h-4 w-4" /> Table
+                        </DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuCheckboxItem
+                        disabled={activeView !== 'table'}
+                        checked={isCompactTable}
+                        onCheckedChange={(v) => setIsCompactTable(v)}
+                      >
+                        Compact mode
+                      </DropdownMenuCheckboxItem>
+
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+
+                  <DropdownMenuLabel>Visibility</DropdownMenuLabel>
+                  <DropdownMenuCheckboxItem
+                    checked={showTransactions}
+                    onCheckedChange={handleTransactionVisibilityToggle}
                   >
-                    {activeView === 'table' && <LayoutList className="h-4 w-4" />}
-                    {activeView === 'list' && <Table2 className="h-4 w-4" />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Toggle {activeView === 'table' ? 'List' : 'Table'} View</TooltipContent>
-              </Tooltip>
-              {activeView === 'table' && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Toggle className="hidden md:flex" pressed={isCompactTable} onPressedChange={setIsCompactTable}>
-                      {isCompactTable && <UnfoldVertical className="h-4 w-4" />}
-                      {!isCompactTable && <FoldVertical className="h-4 w-4" />}
-                    </Toggle>
-                  </TooltipTrigger>
-                  <TooltipContent>Toggle compact view</TooltipContent>
-                </Tooltip>
-              )}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={onAddTransaction}>
-                    <Plus className="h-4 w-4" />
-                    <span className="sr-only">New Transaction</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>New Transaction</TooltipContent>
-              </Tooltip>
+                    Transactions
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem checked={showTransfers} onCheckedChange={setShowTransfers}>
+                    Transfers
+                  </DropdownMenuCheckboxItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuLabel>Draft Status</DropdownMenuLabel>
+                  <DropdownMenuRadioGroup
+                    value={
+                      transactionFilters.isDraft === true
+                        ? 'drafts'
+                        : transactionFilters.isDraft === false
+                          ? 'noDrafts'
+                          : 'all'
+                    }
+                    onValueChange={(value) => {
+                      setFilter('isDraft', value === 'drafts' ? true : value === 'noDrafts' ? false : null);
+                      setShowTransfers(value === 'all');
+                    }}
+                  >
+                    <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="drafts">Drafts</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="noDrafts">No Drafts</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuLabel>Transaction Type</DropdownMenuLabel>
+                  <DropdownMenuCheckboxItem
+                    checked={transactionFilters.type === TransactionType.Income || !transactionFilters.type}
+                    onCheckedChange={() =>
+                      handleTransactionTypeChange(
+                        transactionFilters.type === TransactionType.Income ? undefined : TransactionType.Income,
+                      )
+                    }
+                  >
+                    <ArrowDownCircle className="mr-2 h-4 w-4 text-success" /> Income
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={transactionFilters.type === TransactionType.Expense || !transactionFilters.type}
+                    onCheckedChange={() =>
+                      handleTransactionTypeChange(
+                        transactionFilters.type === TransactionType.Expense ? undefined : TransactionType.Expense,
+                      )
+                    }
+                  >
+                    <ArrowUpCircle className="mr-2 h-4 w-4 text-destructive" /> Expense
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <FiltersToggleButton
+                className="flex md:hidden"
+                activeCount={transactionFilters.getModifiedCount()}
+                onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+              />
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Toggle
+                    variant="outline"
                     className="hidden md:flex"
                     pressed={showBulkCreate}
                     onClick={() => setShowBulkCreate(!showBulkCreate)}
                   >
-                    <ListIcon className="h-4 w-4" />
+                    <CopyPlus className="h-4 w-4" />
                     <span className="sr-only">Bulk Create</span>
                   </Toggle>
                 </TooltipTrigger>
@@ -427,52 +467,31 @@ export const DailyLedgerPage: React.FC = () => {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button size="icon" variant="ghost" onClick={refetch}>
-                    <RefreshCw className="h-4 w-4" />
-                    <span className="sr-only">Refresh</span>
+                  <Button variant="outline" size="icon" onClick={onAddTransaction}>
+                    <SquarePlus className="h-4 w-4" />
+                    <span className="sr-only">New Transaction</span>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Refresh</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Toggle className="relative" pressed={isFiltersOpen} onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
-                    <Filter className="h-4 w-4" />
-                    <span className="sr-only">Filter</span>
-                    {activeFiltersCount > 0 && (
-                      <Badge className="absolute -top-2 -right-2 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
-                        {activeFiltersCount}
-                      </Badge>
-                    )}
-                  </Toggle>
-                </TooltipTrigger>
-                <TooltipContent>Filters</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={handleResetFilters}>
-                    <RotateCcw className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Reset all filters</p>
-                </TooltipContent>
+                <TooltipContent>New Transaction</TooltipContent>
               </Tooltip>
             </div>
           </div>
           <div className="mb-4">
             {!isMobile && (
-              <CompactInlineFilters
+              <ListingControls
+                isLoading={isLoading}
                 transactionFilters={transactionFilters}
                 transferFilters={transferFilters}
                 setFilter={setFilter}
-                showTransactions={showTransactions}
                 setShowTransactions={setShowTransactions}
-                showTransfers={showTransfers}
                 setShowTransfers={setShowTransfers}
                 timeframe={timeframe}
                 setCustomTimeframe={setCustomTimeframe}
+                activeView={activeView}
+                isReversedOrder={isReversedOrder}
+                setIsReversedOrder={setIsReversedOrder}
+                handleResetFilters={handleResetFilters}
+                onFiltersDialogToggle={() => setIsFiltersOpen(!isFiltersOpen)}
               />
             )}
 
@@ -486,6 +505,7 @@ export const DailyLedgerPage: React.FC = () => {
             )}
           </div>
         </CardHeader>
+
         <CardContent className="p-0 bg-background md:bg-card flex-grow overflow-hidden">
           <ScrollArea className="h-full overflow-auto">
             <div className="flex-grow overflow-hidden">

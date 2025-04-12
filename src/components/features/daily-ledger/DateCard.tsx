@@ -100,7 +100,7 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
       )}
     >
       <div className="md:hidden w-full h-full max-h-full bg-background rounded-lg shadow-sm flex flex-col min-w-[300px]">
-        <div className="p-4 flex-grow overflow-y-auto">{content}</div>
+        <div className="p-0 md:p-4 flex-grow overflow-y-auto">{content}</div>
       </div>
 
       <Card className="hidden md:flex md:flex-col h-full max-h-full transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 overflow-hidden min-w-[470px]">

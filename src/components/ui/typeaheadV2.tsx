@@ -7,7 +7,8 @@ import cn from 'classnames';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 
-export interface TypeaheadV2Props<T, V extends string | number> extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
+export interface TypeaheadV2Props<T, V extends string | number>
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
   multiple?: boolean;
   options: T[];
   valueField: string;
@@ -19,21 +20,24 @@ export interface TypeaheadV2Props<T, V extends string | number> extends Omit<Rea
   onChange: (value: V | V[] | null) => void;
 }
 
-export const TypeaheadV2 = <T, V extends string | number>({
-                                                            multiple = false,
-                                                            options,
-                                                            valueField,
-                                                            labelField,
-                                                            groupBy,
-                                                            renderElement,
-                                                            placeholder = 'Select options...',
-                                                            emptyMessage = 'No options found.',
-                                                            value,
-                                                            onChange,
-                                                            className,
-                                                            ...inputProps
-                                                          }: TypeaheadV2Props<T, V>,
-                                                          ref: React.Ref<HTMLInputElement>,
+const HIDE_DROPDOWN_TIMEOUT = 150;
+
+export const TypeaheadV2 = <T, V extends string | number>(
+  {
+    multiple = false,
+    options,
+    valueField,
+    labelField,
+    groupBy,
+    renderElement,
+    placeholder = 'Select options...',
+    emptyMessage = 'No options found.',
+    value,
+    onChange,
+    className,
+    ...inputProps
+  }: TypeaheadV2Props<T, V>,
+  ref: React.Ref<HTMLInputElement>,
 ) => {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -56,14 +60,14 @@ export const TypeaheadV2 = <T, V extends string | number>({
   // @ts-ignore
   const selectedValues = useMemo<V[]>(() => {
     if (multiple) {
-      return Array.isArray(value) ? value : (value != null ? [value] : []);
+      return Array.isArray(value) ? value : value != null ? [value] : [];
     } else {
       return value != null ? [value] : [];
     }
   }, [multiple, value]);
 
   const selectedOptions = useMemo(() => {
-    return options.filter(option => selectedValues.includes(option[valueField] as V));
+    return options.filter((option) => selectedValues.includes(option[valueField] as V));
   }, [options, selectedValues, valueField]);
 
   const groupedOptions = useMemo(() => {
@@ -71,14 +75,17 @@ export const TypeaheadV2 = <T, V extends string | number>({
       return [{ label: '', options: options }];
     }
 
-    const groups = options.reduce((acc, option) => {
-      const groupLabel = option[groupBy] || '';
-      if (!acc[groupLabel as string]) {
-        acc[groupLabel as string] = [];
-      }
-      acc[groupLabel as string].push(option);
-      return acc;
-    }, {} as Record<string, T[]>);
+    const groups = options.reduce(
+      (acc, option) => {
+        const groupLabel = option[groupBy] || '';
+        if (!acc[groupLabel as string]) {
+          acc[groupLabel as string] = [];
+        }
+        acc[groupLabel as string].push(option);
+        return acc;
+      },
+      {} as Record<string, T[]>,
+    );
 
     return Object.entries(groups).map(([label, groupOptions]) => ({
       label,
@@ -87,60 +94,72 @@ export const TypeaheadV2 = <T, V extends string | number>({
   }, [options, groupBy]);
 
   const filteredOptions = useMemo(() => {
-    return groupedOptions.map(group => ({
-      ...group,
-      options: group.options.filter(option =>
-        String(option[labelField]).toLowerCase().includes(inputValue.toLowerCase()) &&
-        !selectedValues.includes(option[valueField] as V),
-      ),
-    })).filter(group => group.options.length > 0);
+    return groupedOptions
+      .map((group) => ({
+        ...group,
+        options: group.options.filter(
+          (option) =>
+            String(option[labelField]).toLowerCase().includes(inputValue.toLowerCase()) &&
+            !selectedValues.includes(option[valueField] as V),
+        ),
+      }))
+      .filter((group) => group.options.length > 0);
   }, [groupedOptions, inputValue, labelField, selectedValues, valueField]);
 
-  const handleSelect = useCallback((option: T) => {
-    const optionValue = option[valueField] as V;
-    if (multiple) {
-      const newValue = selectedValues.includes(optionValue)
-        ? selectedValues.filter(v => v !== optionValue)
-        : [...selectedValues, optionValue];
-      onChange(newValue);
-    } else {
-      onChange(optionValue);
-      setOpen(false);
-    }
-    setInputValue('');
-    setHighlightedIndex(-1);
-  }, [multiple, onChange, selectedValues, valueField]);
+  const handleSelect = useCallback(
+    (option: T) => {
+      const optionValue = option[valueField] as V;
+      if (multiple) {
+        const newValue = selectedValues.includes(optionValue)
+          ? selectedValues.filter((v) => v !== optionValue)
+          : [...selectedValues, optionValue];
+        onChange(newValue);
+      } else {
+        onChange(optionValue);
+        setOpen(false);
+      }
+      setInputValue('');
+      setHighlightedIndex(-1);
+    },
+    [multiple, onChange, selectedValues, valueField],
+  );
 
-  const handleRemove = useCallback((optionValue: V) => {
-    if (multiple) {
-      const newValue = selectedValues.filter(v => v !== optionValue);
-      onChange(newValue);
-    } else {
-      onChange(null);
-    }
-    setInputValue('');
-  }, [multiple, onChange, selectedValues]);
+  const handleRemove = useCallback(
+    (optionValue: V) => {
+      if (multiple) {
+        const newValue = selectedValues.filter((v) => v !== optionValue);
+        onChange(newValue);
+      } else {
+        onChange(null);
+      }
+      setInputValue('');
+    },
+    [multiple, onChange, selectedValues],
+  );
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    const flatFilteredOptions = filteredOptions.flatMap(group => group.options);
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setHighlightedIndex(prev => (prev < flatFilteredOptions.length - 1 ? prev + 1 : 0));
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setHighlightedIndex(prev => (prev > 0 ? prev - 1 : flatFilteredOptions.length - 1));
-    } else if (e.key === 'Enter' && highlightedIndex !== -1) {
-      e.preventDefault();
-      handleSelect(flatFilteredOptions[highlightedIndex]);
-    } else if (e.key === 'Escape') {
-      setOpen(false);
-    } else if (e.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
-      const newValue = selectedValues.slice(0, -1);
-      onChange(multiple ? newValue : (newValue[0] || null));
-    }
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      const flatFilteredOptions = filteredOptions.flatMap((group) => group.options);
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev < flatFilteredOptions.length - 1 ? prev + 1 : 0));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : flatFilteredOptions.length - 1));
+      } else if (e.key === 'Enter' && highlightedIndex !== -1) {
+        e.preventDefault();
+        handleSelect(flatFilteredOptions[highlightedIndex]);
+      } else if (e.key === 'Escape') {
+        setOpen(false);
+      } else if (e.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
+        const newValue = selectedValues.slice(0, -1);
+        onChange(multiple ? newValue : newValue[0] || null);
+      }
 
-    inputProps.onKeyDown?.(e);
-  }, [inputValue, multiple, onChange, selectedValues, filteredOptions, highlightedIndex, handleSelect, inputProps]);
+      inputProps.onKeyDown?.(e);
+    },
+    [inputValue, multiple, onChange, selectedValues, filteredOptions, highlightedIndex, handleSelect, inputProps],
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -189,12 +208,14 @@ export const TypeaheadV2 = <T, V extends string | number>({
               <Badge
                 variant="outline"
                 className="whitespace-nowrap text-xs shadow-md py-0 px-1 bg-background"
-                key={option[valueField] as React.Key}>
+                key={option[valueField] as React.Key}
+              >
                 <span className="truncate max-w-[100px]">{String(option[labelField])}</span>
                 <Button
                   variant="ghost"
                   size="sm"
                   className="ml-1 h-4 w-4 p-0"
+                  tabIndex={-1}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleRemove(option[valueField] as V);
@@ -216,11 +237,15 @@ export const TypeaheadV2 = <T, V extends string | number>({
                 setOpen(true);
                 inputProps.onFocus?.(e);
               }}
-              onBlur={(() => {
-                setOpen(false);
-              })}
+              onBlur={() =>
+                setTimeout(() => {
+                  setOpen(false);
+                }, HIDE_DROPDOWN_TIMEOUT)
+              }
               placeholder={selectedOptions.length === 0 ? placeholder : ''}
-              className={cn('flex-1 bg-transparent outline-none placeholder:text-muted-foreground min-w-[50px]', { 'w-0 p-0': !multiple && selectedOptions.length > 0 })}
+              className={cn('flex-1 bg-transparent outline-none placeholder:text-muted-foreground min-w-[50px]', {
+                'w-0 p-0': !multiple && selectedOptions.length > 0,
+              })}
             />
           </div>
           <ScrollBar orientation="horizontal" className="h-0.5" />
@@ -245,26 +270,29 @@ export const TypeaheadV2 = <T, V extends string | number>({
       {open && !inputProps.disabled && (
         <div
           className="absolute z-50 w-full left-0 mt-1 bg-popover border border-input rounded-md shadow-md overflow-hidden"
-          ref={dropdownRef}>
+          ref={dropdownRef}
+        >
           <ScrollArea className="max-h-[300px] overflow-y-auto" tabIndex={-1}>
             <div className="p-1">
-              {filteredOptions.length === 0 && (
-                <div className="p-2 text-sm text-muted-foreground">{emptyMessage}</div>
-              )}
+              {filteredOptions.length === 0 && <div className="p-2 text-sm text-muted-foreground">{emptyMessage}</div>}
               {filteredOptions.map((group, groupIndex) => (
                 <div key={group.label || groupIndex}>
                   {groupBy && group.label && (
-                    <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground capitalize">{group.label}</div>
+                    <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground capitalize">
+                      {group.label}
+                    </div>
                   )}
                   {group.options.map((option, index) => {
-                    const flatIndex = filteredOptions.slice(0, groupIndex).reduce((acc, g) => acc + g.options.length, 0) + index;
+                    const flatIndex =
+                      filteredOptions.slice(0, groupIndex).reduce((acc, g) => acc + g.options.length, 0) + index;
                     return (
                       <div
                         key={option[valueField] as React.Key}
-                        ref={el => optionRefs.current[flatIndex] = el}
+                        ref={(el) => (optionRefs.current[flatIndex] = el)}
                         className={cn('flex items-center px-2 py-1.5 text-sm cursor-pointer', {
                           'bg-accent text-accent-foreground': highlightedIndex === flatIndex,
-                          'text-popover-foreground hover:bg-accent hover:text-accent-foreground': highlightedIndex !== flatIndex,
+                          'text-popover-foreground hover:bg-accent hover:text-accent-foreground':
+                            highlightedIndex !== flatIndex,
                         })}
                         onClick={() => handleSelect(option)}
                         onMouseEnter={() => setHighlightedIndex(flatIndex)}
@@ -273,7 +301,8 @@ export const TypeaheadV2 = <T, V extends string | number>({
                           className={cn('mr-2 h-4 w-4', {
                             'opacity-0': !selectedValues.includes(option[valueField] as V),
                             'opacity-100': selectedValues.includes(option[valueField] as V),
-                          })} />
+                          })}
+                        />
                         {renderElement(option, valueField, labelField)}
                       </div>
                     );
@@ -290,4 +319,7 @@ export const TypeaheadV2 = <T, V extends string | number>({
 
 TypeaheadV2.displayName = 'TypeaheadV2';
 
-export default forwardRef(<T, V extends string | number>(props: TypeaheadV2Props<T, V>, ref: React.Ref<HTMLInputElement>) => TypeaheadV2<T, V>(props, ref));
+export default forwardRef(
+  <T, V extends string | number>(props: TypeaheadV2Props<T, V>, ref: React.Ref<HTMLInputElement>) =>
+    TypeaheadV2<T, V>(props, ref),
+);

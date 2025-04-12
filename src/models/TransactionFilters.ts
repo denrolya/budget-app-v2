@@ -1,4 +1,5 @@
 import moment, { Moment } from 'moment';
+import isEqual from 'lodash/isEqual';
 
 import { Type as TransactionType } from '@/types/transaction';
 import BaseFilters from '@/models/BaseFilters';
@@ -17,6 +18,8 @@ interface TransactionFiltersProps {
 }
 
 export class TransactionFilters extends BaseFilters {
+  private _defaults: TransactionFiltersProps;
+
   searchTerm!: string;
   before!: Moment;
   after!: Moment;
@@ -28,19 +31,59 @@ export class TransactionFilters extends BaseFilters {
   isDraft?: boolean;
   type?: TransactionType;
 
-  constructor(props: TransactionFiltersProps = {}) {
+  constructor(initial: TransactionFiltersProps = {}) {
     super();
 
-    this.searchTerm = props.searchTerm ?? '';
-    this.before = props.before ?? moment();
-    this.after = props.after ?? moment().subtract(30, 'days');
-    this.amountRange = props.amountRange ?? [];
-    this.categories = props.categories ?? [];
-    this.excludedCategories = props.excludedCategories ?? [];
-    this.accounts = props.accounts ?? [];
-    this.withNestedCategories = props.withNestedCategories ?? false;
-    this.isDraft = props.isDraft ?? undefined;
-    this.type = props.type ?? undefined;
+    // Fill missing fields with fallbacks
+    const filled: TransactionFiltersProps = {
+      searchTerm: initial.searchTerm ?? '',
+      before: initial.before ?? moment(),
+      after: initial.after ?? moment().subtract(30, 'days'),
+      amountRange: initial.amountRange ?? [],
+      categories: initial.categories ?? [],
+      excludedCategories: initial.excludedCategories ?? [],
+      accounts: initial.accounts ?? [],
+      withNestedCategories: initial.withNestedCategories ?? false,
+      isDraft: initial.isDraft,
+      type: initial.type,
+    };
+
+    // Store original values as "defaults"
+    this._defaults = {
+      ...filled,
+      before: filled.before.clone(),
+      after: filled.after.clone(),
+    };
+
+    // Assign to current instance
+    Object.assign(this, filled);
+  }
+
+  reset() {
+    Object.assign(this, {
+      ...this._defaults,
+      before: this._defaults.before.clone(),
+      after: this._defaults.after.clone(),
+    });
+  }
+
+  getModifiedCount(): number {
+    let count = 0;
+
+    const keys = Object.keys(this._defaults) as (keyof TransactionFiltersProps)[];
+    for (const key of keys) {
+      const current = this[key];
+      const original = this._defaults[key];
+
+      if (moment.isMoment(current) && moment.isMoment(original)) {
+        if (!current.isSame(original, 'day')) count++;
+        continue;
+      }
+
+      if (!isEqual(current, original)) count++;
+    }
+
+    return count;
   }
 
   static isApplicable(key: unknown): key is keyof TransactionFilters {

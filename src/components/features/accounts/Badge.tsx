@@ -60,14 +60,14 @@ const truncateText = (text: string, maxLength: number) => {
   return text.slice(0, maxLength - 1) + '…';
 };
 
-export default function AccountBadge({ account, size = 'md', className, tooltip = true }: AccountBadgeProps) {
-  const { type, color, nameWithCurrency } = account;
+export const AccountBadge = ({ account, size = 'md', className, tooltip = true }: AccountBadgeProps) => {
+  const { type, color, displayName } = account;
   const Icon = iconMap[type];
 
   const badgeColor = account.isArchived() ? 'var(--muted-foreground)' : color;
   const textColor = account.isArchived() ? 'var(--muted-foreground)' : getContrastColor(color);
 
-  const truncatedText = truncateText(nameWithCurrency, charLimitMap[size]);
+  const truncatedText = truncateText(displayName, charLimitMap[size]);
 
   const badgeContent = (
     <Badge
@@ -104,7 +104,9 @@ export default function AccountBadge({ account, size = 'md', className, tooltip 
       openDelay={0}
       content={tooltip ? <AccountDetailsHoverCard account={account} /> : null}
     >
-      <span className="inline-block">{badgeContent}</span>
+      <span className="inline-block shit">{badgeContent}</span>
     </ResponsiveTooltip>
   );
-}
+};
+
+export default AccountBadge;

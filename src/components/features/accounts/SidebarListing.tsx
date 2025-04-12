@@ -37,8 +37,7 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
 
   const filteredAccounts = accounts.filter(
     (account) =>
-      (showArchived || !account.isArchived()) &&
-      account.nameWithCurrency.toLowerCase().includes(searchTerm.toLowerCase()),
+      (showArchived || !account.isArchived()) && account.displayName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const groupedAccounts = Object.values(AccountType).reduce(
@@ -90,7 +89,7 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-2">
                       <AccountAvatar size="sm" account={account} />
-                      <h3 className="font-medium">{account.nameWithCurrency}</h3>
+                      <h3 className="font-medium">{account.displayName}</h3>
                     </div>
                     <MoneyValue
                       badge

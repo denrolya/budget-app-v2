@@ -103,7 +103,7 @@ const AccountDetail: React.FC<Props> = ({ account }) => {
             <AccountAvatar account={account} />
             <div>
               <CardTitle className="flex space-x-2 items-center">
-                <span>{account.nameWithCurrency}</span>
+                <span>{account.displayName}</span>
                 <MoneyValue
                   badge
                   showSign

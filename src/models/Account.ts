@@ -47,12 +47,8 @@ export default class Account {
     this.convertedValues = data.convertedValues || undefined;
   }
 
-  get nameWithCurrency(): string {
-    return `[${CURRENCIES[this.currency].symbol}] ${this.name}`;
-  }
-
   get displayName(): string {
-    return `[${CURRENCIES[this.currency].symbol}] ${this.name}`;
+    return `${CURRENCIES[this.currency].symbol} ${this.name}`;
   }
 
   isArchived(): boolean {

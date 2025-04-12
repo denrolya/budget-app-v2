@@ -55,11 +55,9 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
     amount: z.string().refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
       message: 'Amount must be a positive number',
     }),
-    category: z
-      .string()
-      .refine((val) => allCategories.some((category) => category.id.toString() === val), {
-        message: 'Invalid category',
-      }),
+    category: z.string().refine((val) => allCategories.some((category) => category.id.toString() === val), {
+      message: 'Invalid category',
+    }),
     account: z
       .string()
       .refine((val) => accounts.some((account) => account.id.toString() === val), { message: 'Invalid account' }),
@@ -145,7 +143,7 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
           .filter((category) => category.type === selectedType)
           .map((category) => ({ value: category.id.toString(), label: category.name }));
       case 'account':
-        return accounts.map((account) => ({ value: account.id.toString(), label: account.nameWithCurrency }));
+        return accounts.map((account) => ({ value: account.id.toString(), label: account.displayName }));
       default:
         return [];
     }
@@ -319,9 +317,7 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
                 watch('category')}
             </span>
             <Label>Account:</Label>
-            <span>
-              {accounts.find((a) => a.id.toString() === watch('account'))?.nameWithCurrency || watch('account')}
-            </span>
+            <span>{accounts.find((a) => a.id.toString() === watch('account'))?.displayName || watch('account')}</span>
             <Label>Is Draft:</Label>
             <span>{watch('isDraft') ? 'Yes' : 'No'}</span>
             <Label>Executed At:</Label>

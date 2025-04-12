@@ -33,7 +33,7 @@ const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
         <AccountAvatar account={el} size="sm" />
       </div>
       <div className="flex-1">
-        <p className="text-sm font-medium">{labelField ? String(el[labelField]) : el.nameWithCurrency}</p>
+        <p className="text-sm font-medium">{labelField ? String(el[labelField]) : el.displayName}</p>
         <p className="text-xs text-muted-foreground">
           {el.type.charAt(0).toUpperCase() + el.type.slice(1)} • {el.currency}
         </p>
@@ -57,7 +57,7 @@ const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
   return (
     <TypeaheadV2<Account, string>
       valueField="id"
-      labelField="nameWithCurrency"
+      labelField="displayName"
       groupBy="type"
       placeholder={multiple ? 'Select accounts...' : 'Select account...'}
       multiple={multiple}

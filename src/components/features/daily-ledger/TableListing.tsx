@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { BACKEND_DATE_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
+import { BACKEND_DATE_FORMAT, MOMENT_DATETIME_FORM_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactionMutations } from '@/hooks/useTransactionMutations';
@@ -123,110 +123,98 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
   const renderEditableCell = (item: Transaction, field: EditableField, content: React.ReactNode) => {
     const isEditing = editingCell?.itemId === item.id && editingCell?.field === field;
 
-    if (isEditing) {
-      let inputElement;
-
-      switch (field) {
-        case 'account':
-          inputElement = (
-            <AccountTypeahead
-              autoFocus
-              multiple={false}
-              disabled={isUpdating}
-              value={editValue?.id || editValue}
-              onChange={(v) => setEditValue(v)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSave(item);
-                if (e.key === 'Escape') handleCancel();
-              }}
-            />
-          );
-          break;
-        case 'amount':
-          inputElement = (
-            <Input
-              autoFocus
-              type="number"
-              disabled={isUpdating}
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSave(item);
-                if (e.key === 'Escape') handleCancel();
-              }}
-            />
-          );
-          break;
-        case 'category':
-          if ('category' in item) {
-            inputElement = (
-              <CategoryTypeahead
-                autoFocus
-                valueField="id"
-                multiple={false}
-                disabled={isUpdating}
-                type={item.type}
-                value={editValue?.id || editValue}
-                onChange={(v) => setEditValue(v)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSave(item);
-                  if (e.key === 'Escape') handleCancel();
-                }}
-              />
-            );
-          }
-          break;
-        case 'executedAt':
-          inputElement = (
-            <Input
-              autoFocus
-              type="datetime-local"
-              disabled={isUpdating}
-              value={moment(editValue as string).format('YYYY-MM-DDTHH:mm')}
-              onChange={(e) => setEditValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSave(item);
-                if (e.key === 'Escape') handleCancel();
-              }}
-            />
-          );
-          break;
-        default:
-          inputElement = (
-            <Input
-              autoFocus
-              disabled={isUpdating}
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSave(item);
-                if (e.key === 'Escape') handleCancel();
-              }}
-            />
-          );
-      }
-
+    if (!isEditing) {
       return (
-        <div className="flex items-center space-x-2">
-          <div className="flex-grow">{inputElement}</div>
-          <div className="flex-shrink-0">
-            <Button variant="ghost" size="icon" onClick={() => handleSave(item)} className="h-8 w-8 p-0">
-              <Check className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleCancel} className="h-8 w-8 p-0">
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+        <div
+          className="cursor-pointer hover:bg-muted p-1 rounded transition-colors"
+          onClick={() => handleEdit(Number(item.id), field, item[field] as string)}
+        >
+          {content}
         </div>
       );
     }
+    const onKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') handleSave(item);
+      if (e.key === 'Escape') handleCancel();
+    };
+    let inputElement;
+
+    switch (field) {
+      case 'account':
+        inputElement = (
+          <AccountTypeahead
+            autoFocus
+            multiple={false}
+            disabled={isUpdating}
+            value={editValue?.id || editValue}
+            onKeyDown={onKeyDown}
+            onChange={(v) => setEditValue(v)}
+          />
+        );
+        break;
+      case 'amount':
+        inputElement = (
+          <Input
+            autoFocus
+            type="number"
+            disabled={isUpdating}
+            value={editValue}
+            onKeyDown={onKeyDown}
+            onChange={(e) => setEditValue(e.target.value)}
+          />
+        );
+        break;
+      case 'category':
+        if ('category' in item) {
+          inputElement = (
+            <CategoryTypeahead
+              autoFocus
+              valueField="id"
+              multiple={false}
+              disabled={isUpdating}
+              type={item.type}
+              value={editValue?.id || editValue}
+              onKeyDown={onKeyDown}
+              onChange={(v) => setEditValue(v)}
+            />
+          );
+        }
+        break;
+      case 'executedAt':
+        inputElement = (
+          <Input
+            autoFocus
+            type="datetime-local"
+            disabled={isUpdating}
+            value={moment(editValue as string).format(MOMENT_DATETIME_FORM_FORMAT)}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={onKeyDown}
+          />
+        );
+        break;
+      default:
+        inputElement = (
+          <Input
+            autoFocus
+            disabled={isUpdating}
+            value={editValue}
+            onKeyDown={onKeyDown}
+            onChange={(e) => setEditValue(e.target.value)}
+          />
+        );
+    }
 
     return (
-      <div
-        className="cursor-pointer hover:bg-muted/50 p-1 rounded transition-colors"
-        onClick={() => handleEdit(Number(item.id), field, item[field] as string)}
-      >
-        {content}
+      <div className="flex items-center space-x-2">
+        <div className="flex-grow">{inputElement}</div>
+        <div className="flex-shrink-0">
+          <Button variant="ghost" size="icon" onClick={() => handleSave(item)} className="h-8 w-8 p-0">
+            <Check className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={handleCancel} className="h-8 w-8 p-0">
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     );
   };
@@ -354,12 +342,8 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                     })}
                   >
                     <TableCell
-                      className={cn('w-4', {
-                        'py-0': compact,
-                      })}
-                    ></TableCell>
-                    <TableCell
-                      className={cn({
+                      colSpan={2}
+                      className={cn('pl-4', {
                         'py-0': compact,
                       })}
                     >

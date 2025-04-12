@@ -12,7 +12,7 @@ interface Props {
 const DetailsHoverCard: React.FC<Props> = ({ account }) => (
   <div>
     <h3 className="font-bold mb-2">
-      <AccountAvatar className="mr-2" account={account} /> {account.nameWithCurrency}
+      <AccountAvatar className="mr-2" account={account} /> {account.displayName}
     </h3>
     <p className="text-sm mb-1">
       {'Balance: '}

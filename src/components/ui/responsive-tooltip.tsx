@@ -11,9 +11,9 @@ interface WrapperProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Wrapper = React.forwardRef<HTMLDivElement, WrapperProps>(({ children, className, ...props }, ref) => (
-  <div ref={ref} className={className} {...props}>
+  <span ref={ref} className={className} {...props}>
     {children}
-  </div>
+  </span>
 ));
 Wrapper.displayName = 'Wrapper';
 
