@@ -48,48 +48,45 @@ export const useTransactions = (options: UseTransactionsOptions = {}): UseTransa
     excludeTransfers = false,
   } = options;
 
-  const { pagination, filters, sort, setFilter, resetFilters, setSort, isError, error, refetch, data, ...listState } =
-    useListState<TransactionFilters, TransformedResponse, Transaction>({
-      initialPerPage,
-      initialFilters,
-      initialSort,
-      updateUrl,
-      queryKeyBase,
-      searchParamKeys: {
-        searchTerm: 'q',
-        before: 'before',
-        after: 'after',
-        status: 'status',
-        amountRange: 'amount',
-        categories: 'categories',
-        accounts: 'accounts',
-        withNestedCategories: 'withNestedCategories',
-        isDraft: 'isDraft',
-      },
-      formatMoment: BACKEND_DATE_FORMAT,
-      queryFn: async (
-        page: number,
-        perPage: number,
-        filters: TransactionFilters,
-        sort: Sorting,
-      ): Promise<TransformedResponse> => {
-        const response = await transactionService.fetchTransactions({
-          page,
-          perPage,
-          filters,
-          sort,
-          excludeTransfers,
-        });
+  const { data, ...listState } = useListState<TransactionFilters, TransformedResponse, Transaction>({
+    initialPerPage,
+    initialFilters,
+    initialSort,
+    updateUrl,
+    queryKeyBase,
+    searchParamKeys: {
+      searchTerm: 'q',
+      before: 'before',
+      after: 'after',
+      status: 'status',
+      amountRange: 'amount',
+      categories: 'categories',
+      accounts: 'accounts',
+      withNestedCategories: 'withNestedCategories',
+      isDraft: 'isDraft',
+    },
+    formatMoment: BACKEND_DATE_FORMAT,
+    queryFn: async (
+      page: number,
+      perPage: number,
+      filters: TransactionFilters,
+      sort: Sorting,
+    ): Promise<TransformedResponse> => {
+      const response = await transactionService.fetchTransactions({
+        page,
+        perPage,
+        filters,
+        sort,
+        excludeTransfers,
+      });
 
-        return {
-          items: response.items?.map((item) => createTransaction(item)) || [],
-          totalValue: response?.totalValue || 0,
-          totalItems: response?.totalItems || 0,
-        };
-      },
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-    });
+      return {
+        items: response.items?.map((item) => createTransaction(item)) || [],
+        totalValue: response?.totalValue || 0,
+        totalItems: response?.totalItems || 0,
+      };
+    },
+  });
 
   const queryClient = useQueryClient();
   const handleFormSubmit = useCallback(() => {
@@ -99,16 +96,16 @@ export const useTransactions = (options: UseTransactionsOptions = {}): UseTransa
   const { createTransaction } = TransactionFactory();
 
   useEffect(() => {
-    if (isError) {
+    if (listState.isError) {
       toast.error('Failed to fetch transactions', {
-        description: error?.message || 'An unexpected error occurred.',
+        description: listState.error?.message || 'An unexpected error occurred.',
         action: {
           label: 'Retry',
-          onClick: () => refetch(),
+          onClick: () => listState.refetch(),
         },
       });
     }
-  }, [isError, error, refetch]);
+  }, [listState.isError, listState.error, listState.refetch]);
 
   const items = useMemo(() => data?.items ?? [], [data]);
   const totalValue = data?.totalValue || 0;
@@ -132,15 +129,6 @@ export const useTransactions = (options: UseTransactionsOptions = {}): UseTransa
 
   return {
     ...listState,
-    error,
-    isError,
-    refetch,
-    pagination,
-    filters,
-    setFilter,
-    resetFilters,
-    sort,
-    setSort,
     items,
     groupedItems,
     totalValue,

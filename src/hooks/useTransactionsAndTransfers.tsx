@@ -46,7 +46,7 @@ export const useTransactionsAndTransfers = ({
     excludeTransfers,
   });
   const {
-    transfers,
+    items: transfers,
     isLoading: isLoadingTransfers,
     isError: isErrorTransfers,
     error: errorTransfers,

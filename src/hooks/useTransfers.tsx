@@ -1,20 +1,20 @@
-import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import groupBy from 'lodash/groupBy';
 import sortBy from 'lodash/sortBy';
 import sumBy from 'lodash/sumBy';
 import toPairs from 'lodash/toPairs';
 import moment, { Moment } from 'moment/moment';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 
-import { useBaseCurrency } from '@/contexts/auth';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
+import { useBaseCurrency } from '@/contexts/auth';
 import { FormType, useFormSubmitListener } from '@/contexts/Form';
-import { useListState } from '@/hooks/useListState';
+import { UseListReturn, useListState } from '@/hooks/useListState';
 import { TransactionFactory } from '@/models/Transaction';
 import Transfer from '@/models/Transfer';
 import { TransferFilters } from '@/models/TransferFilters';
-import { transferService, FetchResponse as FetchTransfersResponse } from '@/services/api/transfer';
+import { transferService } from '@/services/api/transfer';
 
 interface Sorting {
   field: string;
@@ -34,28 +34,13 @@ interface TransformedResponse {
   totalItems: number;
 }
 
-export const useTransfers = (options: UseTransfersOptions = {}): {
-  transfers: Transfer[];
+export type UseTransfersReturn = Omit<UseListReturn<TransferFilters, TransformedResponse>, 'data'> & {
+  items: Transfer[];
   groupedItems: [Moment, Transfer[], number, number][];
-  isLoading: boolean;
-  isError: boolean;
-  error: Error | null;
-  refetch: () => void;
-  pagination: {
-    currentPage: number;
-    perPage: number;
-    totalPages: number;
-    totalItems: number;
-    setCurrentPage: (page: number) => void;
-    setPerPage: (perPage: number) => void;
-  };
-  filters: TransferFilters;
-  setFilter: <K extends keyof TransferFilters>(key: K, value: TransferFilters[K] | undefined | null) => void;
-  resetFilters: () => void;
-  sort: Sorting;
-  setSort: (sort: Sorting) => void;
-  isFetching: boolean;
-} => {
+  totalValue: number;
+};
+
+export const useTransfers = (options: UseTransfersOptions = {}): UseTransfersReturn => {
   const baseCurrency = useBaseCurrency();
 
   const {
@@ -66,19 +51,11 @@ export const useTransfers = (options: UseTransfersOptions = {}): {
     queryKey = 'transfers',
   } = options;
 
-  const {
-    pagination: { currentPage, perPage },
-    filters,
-    sort,
-    setCurrentPage,
-    setPerPage,
-    setFilter,
-    resetFilters,
-    setSort,
-  } = useListState<TransferFilters, Transfer>({
+  const { data, ...listState } = useListState<TransferFilters, TransformedResponse, Transfer>({
     initialPerPage,
     initialFilters,
     initialSort,
+    updateUrl,
     searchParamKeys: {
       searchTerm: 'q',
       before: 'before',
@@ -87,7 +64,31 @@ export const useTransfers = (options: UseTransfersOptions = {}): {
       accounts: 'accounts',
     },
     formatMoment: BACKEND_DATE_FORMAT,
-    updateUrl,
+    queryFn: async (
+      page: number,
+      perPage: number,
+      filters: TransferFilters,
+      sort: Sorting,
+    ): Promise<TransformedResponse> => {
+      const response = await transferService.fetchTransfers({
+        page,
+        perPage,
+        filters,
+        sort,
+      });
+
+      return {
+        totalItems: response?.totalItems || 0,
+        items:
+          response.items?.map(
+            (item) =>
+              new Transfer({
+                ...item,
+                transactions: item.transactions.map((transaction) => createTransaction(transaction)),
+              }),
+          ) || [],
+      };
+    },
   });
 
   const queryClient = useQueryClient();
@@ -97,76 +98,37 @@ export const useTransfers = (options: UseTransfersOptions = {}): {
   useFormSubmitListener([FormType.Transaction, FormType.Transfer], handleFormSubmit);
   const { createTransaction } = TransactionFactory();
 
-  const { data, error, isPending, isError, isFetching, refetch }: UseQueryResult<TransformedResponse, Error> = useQuery({
-    queryKey: [queryKey, currentPage, perPage, filters, sort],
-    queryFn: async (): Promise<FetchTransfersResponse> => await transferService.fetchTransfers({
-      page: currentPage,
-      perPage,
-      filters,
-      sort,
-    }),
-    select: (data: FetchTransfersResponse): TransformedResponse => ({
-      totalItems: data?.totalItems || 0,
-      items: data.items?.map((item) => new Transfer({
-        ...item,
-        transactions: item.transactions.map((transaction) => createTransaction(transaction)),
-      })) || [],
-    }),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-  });
-
-  const handleError = useCallback(() => {
-    if (isError) {
+  useEffect(() => {
+    if (listState.isError) {
       toast.error('Failed to fetch transfers', {
-        description: error?.message || 'An unexpected error occurred.',
+        description: listState.error?.message || 'An unexpected error occurred.',
         action: {
           label: 'Retry',
-          onClick: () => refetch(),
+          onClick: () => listState.refetch(),
         },
       });
     }
-  }, [isError, error, refetch]);
+  }, [listState.isError, listState.error, listState.refetch]);
 
-  useMemo(handleError, [handleError]);
-
-  const transfers = useMemo(() => data?.items ?? [], [data]);
-  const totalItems = data?.totalItems ?? 0;
-  const totalPages = useMemo(() => Math.ceil(totalItems / perPage) || 0, [totalItems, perPage]);
-
-  const groupedItems: [Moment, Transfer[], number, number][] = useMemo(() => toPairs(
-    groupBy(
-      sortBy(transfers, item => -item.executedAt.valueOf()),
-      item => item.executedAt.format(BACKEND_DATE_FORMAT),
-    ),
-  ).map(([date, items]) => {
-    const totalValue = sumBy(items, ({ fromExpense }) => fromExpense.convertedValues[baseCurrency] || 0);
-    const totalItems = items.length;
-    return [moment(date), items, totalValue, totalItems];
-  }), [transfers, baseCurrency]);
+  const items = useMemo(() => data?.items ?? [], [data]);
+  const groupedItems: [Moment, Transfer[], number, number][] = useMemo(
+    () =>
+      toPairs(
+        groupBy(
+          sortBy(items, (item) => -item.executedAt.valueOf()),
+          (item) => item.executedAt.format(BACKEND_DATE_FORMAT),
+        ),
+      ).map(([date, items]) => {
+        const totalValue = sumBy(items, ({ fromExpense }) => fromExpense.convertedValues[baseCurrency] || 0);
+        const totalItems = items.length;
+        return [moment(date), items, totalValue, totalItems];
+      }),
+    [items, baseCurrency],
+  );
 
   return {
-    transfers,
+    ...listState,
+    items,
     groupedItems,
-    isLoading: isPending,
-    isError,
-    error: error || null,
-    refetch,
-    pagination: {
-      currentPage,
-      perPage,
-      totalPages,
-      totalItems,
-      setCurrentPage,
-      setPerPage,
-    },
-    filters,
-    setFilter,
-    resetFilters,
-    sort,
-    setSort,
-    isFetching,
   };
 };

@@ -58,8 +58,8 @@ export type UseListReturn<FilterType, DataType> = Omit<UseListState<FilterType>,
     setSort: (sort: Sorting) => void;
   };
 
-const DEFAULT_STALE_TIME = 5 * 60 * 1000;
-const DEFAULT_GC_TIME = 10 * 60 * 1000;
+const DEFAULT_STALE_TIME = 5 * 60 * 1000; // 5 minutes
+const DEFAULT_GC_TIME = 10 * 60 * 1000; // 10 minutes
 
 /**
  * TODO: Split into { pagination, filters, sort } with methods inside
