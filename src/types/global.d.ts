@@ -1,19 +1,15 @@
-import { Moment } from 'moment';
+import moment, { Moment } from 'moment';
 
 import { DebugLogger } from '@/utils/DebugLogger';
 
 declare global {
-  let logger: DebugLogger | {
-    info: (message: any, component?: string) => void;
-    warn: (message: any, component?: string) => void;
-    error: (message: any, component?: string) => void;
-  };
-}
-
-
-export interface DateRange {
-  after: Moment;
-  before: Moment;
+  let logger:
+    | DebugLogger
+    | {
+        info: (message: any, component?: string) => void;
+        warn: (message: any, component?: string) => void;
+        error: (message: any, component?: string) => void;
+      };
 }
 
 export interface Timeframe {
@@ -21,15 +17,26 @@ export interface Timeframe {
   before: Moment;
 }
 
+export interface TimeframeStep {
+  unit: moment.unitOfTime.DurationConstructor;
+  amount: number;
+}
+
 export interface TimeframeOption {
   label: string;
   value: TimeframeValue;
-  getDateRange: (now: Moment) => DateRange;
+  getDateRange: (now: Moment) => Timeframe;
 }
 
-export type TimeframeValue = typeof COMMON_TIMEFRAMES[number] | typeof TIMEFRAME_VALUES[number];
+export type TimeframeValue = (typeof COMMON_TIMEFRAMES)[number] | (typeof TIMEFRAME_VALUES)[number];
 
-export type ISO8601Period = `P${number}Y` | `P${number}W` | `P${number}D` | `P${number}H` | `P${number}M` | `P${number}S`;
+export type ISO8601Period =
+  | `P${number}Y`
+  | `P${number}W`
+  | `P${number}D`
+  | `P${number}H`
+  | `P${number}M`
+  | `P${number}S`;
 
 export interface PeriodOption {
   label: string;

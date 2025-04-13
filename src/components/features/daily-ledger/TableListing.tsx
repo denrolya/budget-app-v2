@@ -34,11 +34,19 @@ interface Props {
   groupedItems: [Moment, (Transaction | Transfer)[], number, number, number, number][];
   after: Moment;
   before: Moment;
+  showEmptyDays?: boolean;
   isReversedOrder?: boolean;
   compact?: boolean;
 }
 
-const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversedOrder = false, compact = true }) => {
+const TableListing: React.FC<Props> = ({
+  groupedItems,
+  after,
+  before,
+  showEmptyDays = true,
+  isReversedOrder = false,
+  compact = true,
+}) => {
   const { updateTransaction, deleteTransaction, isUpdating } = useTransactionMutations();
   const { openForm } = useFormContext();
   const [editingCell, setEditingCell] = useState<{ itemId: number; field: EditableField } | null>(null);
@@ -291,6 +299,8 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
               (group) => group[0].isSame(date, 'day'),
             ) || [null, [], 0, 0, 0, 0];
 
+            if (!showEmptyDays && items.length === 0) return null;
+
             return (
               <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
                 <TableRow
@@ -352,7 +362,7 @@ const TableListing: React.FC<Props> = ({ groupedItems, after, before, isReversed
                         onOpenChange={(open) => setOpenSheetId(open ? Number(item.id) : null)}
                       >
                         <SheetTrigger asChild>
-                          <code className="cursor-help" onClick={() => toggleSheet(Number(item.id))}>
+                          <code className="cursor-context-menu" onClick={() => toggleSheet(Number(item.id))}>
                             #{item.id}
                           </code>
                         </SheetTrigger>

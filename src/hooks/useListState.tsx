@@ -5,22 +5,13 @@ import moment from 'moment';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import { FilterModel } from '@/models/BaseFilters';
 import { Sorting } from '@/types/pagination';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 
-export interface FilterModel {
-  setFilter<K extends keyof this>(key: K, value: this[K]): void;
-}
-
-export interface PaginationState {
+interface PaginationState {
   currentPage: number;
   perPage: number;
-}
-
-export interface UseListState<FilterType> {
-  pagination: PaginationState;
-  filters: FilterType;
-  sort: Sorting;
 }
 
 type SetFilterFunction<T> = <K extends keyof T>(key: K, value: T[K]) => void;
@@ -43,7 +34,7 @@ interface UseListStateOptions<FilterType extends FilterModel, DataType> {
   additionalFetchDependencies?: unknown[];
 }
 
-export type UseListReturn<FilterType, DataType> = Omit<UseListState<FilterType>, 'pagination'> &
+export type UseListReturn<FilterType, DataType> = Omit<UseListState<FilterType>, 'pagination' | 'sort'> &
   UseQueryResult<DataType, Error> & {
     pagination: {
       totalItems: number;
@@ -53,10 +44,20 @@ export type UseListReturn<FilterType, DataType> = Omit<UseListState<FilterType>,
       setCurrentPage: (page: number) => void;
       setPerPage: (perPage: number) => void;
     };
+    sort: {
+      field: string;
+      direction: 'asc' | 'desc';
+      setSort: (sort: Sorting) => void;
+    };
     setFilter: SetFilterFunction<FilterType>;
     resetFilters: () => void;
-    setSort: (sort: Sorting) => void;
   };
+
+export interface UseListState<FilterType> {
+  pagination: PaginationState;
+  filters: FilterType;
+  sort: Sorting;
+}
 
 const DEFAULT_STALE_TIME = 5 * 60 * 1000; // 5 minutes
 const DEFAULT_GC_TIME = 10 * 60 * 1000; // 10 minutes
@@ -229,10 +230,6 @@ export const useListState = <FilterType extends FilterModel, DataType extends { 
   });
 
   return {
-    setFilter,
-    resetFilters,
-    setSort,
-    ...state,
     pagination: {
       ...state.pagination,
       totalItems: response.data?.totalItems || 0,
@@ -240,6 +237,13 @@ export const useListState = <FilterType extends FilterModel, DataType extends { 
       setCurrentPage,
       setPerPage,
     },
+    sort: {
+      ...state.sort,
+      setSort,
+    },
+    filters: state.filters,
+    resetFilters,
+    setFilter,
     ...response,
   };
 };

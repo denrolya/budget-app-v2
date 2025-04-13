@@ -1,8 +1,7 @@
 import moment, { Moment } from 'moment';
-import isEqual from 'lodash/isEqual';
 
-import { Type as TransactionType } from '@/types/transaction';
 import BaseFilters from '@/models/BaseFilters';
+import { Type as TransactionType } from '@/types/transaction';
 
 interface TransactionFiltersProps {
   searchTerm?: string;

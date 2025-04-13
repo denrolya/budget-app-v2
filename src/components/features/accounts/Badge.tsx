@@ -98,7 +98,7 @@ export const AccountBadge = ({ account, size = 'md', className, tooltip = true }
     <ResponsiveTooltip
       desktopComponent="hovercard"
       triggerClassName={cn({
-        'cursor-pointer': tooltip,
+        'cursor-help': tooltip,
       })}
       contentClassName="bg-transparent border-none shadow-none"
       openDelay={0}

@@ -138,7 +138,19 @@ export default defineConfig({
       include: ['src/**/*.ts', 'src/**/*.tsx'], // Only include source files
       exclude: ['node_modules', 'dist', '__tests__', 'src/setupTests.ts'], // Exclude tests and setup
     },
-    include: ['__tests__/**/*.spec.ts', '__tests__/**/*.spec.tsx', '**/__tests__/**/*.spec.ts', '**/__tests__/**/*.spec.tsx'],
+    include: [
+      '__tests__/**/*.spec.ts',
+      '__tests__/**/*.spec.tsx',
+      '**/__tests__/**/*.spec.ts',
+      '**/__tests__/**/*.spec.tsx',
+    ],
     exclude: [...configDefaults.exclude], // Use default excludes from Vitest
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler', // or "modern"
+      },
+    },
   },
 });

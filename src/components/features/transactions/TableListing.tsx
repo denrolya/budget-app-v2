@@ -280,12 +280,12 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
               >
                 <TableCell
                   colSpan={2}
-                  className={cn({
+                  className={cn('pl-4', {
                     'py-0': compact,
                   })}
                 >
                   <Sheet>
-                    <SheetTrigger className="m-0 cursor-help" asChild>
+                    <SheetTrigger className="m-0 cursor-context-menu" asChild>
                       <code>#{transaction.id}</code>
                     </SheetTrigger>
                     <SheetContent side="right" className="w-full sm:max-w-3xl p-0 overflow-y-auto">

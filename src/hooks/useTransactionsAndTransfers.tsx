@@ -51,16 +51,16 @@ export const useTransactionsAndTransfers = ({
   const setFilter = useCallback(
     (type: keyof CombinedFilters, value: any) => {
       if (TransactionFilters.isApplicable(type)) {
-        transactionsState.setFilter(type as keyof TransactionFilters, value);
+        transactionsState.filters.setFilter(type as keyof TransactionFilters, value);
         if (type === 'categories' && value.length > 0) {
           setShowTransfers(false);
         }
       }
       if (TransferFilters.isApplicable(type)) {
-        transfersState.setFilter(type as keyof TransferFilters, value);
+        transfersState.filters.setFilter(type as keyof TransferFilters, value);
       }
     },
-    [transactionsState.setFilter, transfersState.setFilter],
+    [transactionsState.filters.setFilter, transfersState.filters.setFilter],
   );
 
   const filteredItems = useMemo(() => {
@@ -105,9 +105,9 @@ export const useTransactionsAndTransfers = ({
   }, [transactionsState.refetch, transfersState.refetch]);
 
   const resetFilters = useCallback(() => {
-    transactionsState.resetFilters();
-    transfersState.resetFilters();
-  }, [transactionsState.resetFilters, transfersState.resetFilters]);
+    transactionsState.filters.reset();
+    transfersState.filters.reset();
+  }, [transactionsState.filters.reset, transfersState.filters.reset]);
 
   return {
     filteredItems,

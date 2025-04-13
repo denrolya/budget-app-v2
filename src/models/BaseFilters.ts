@@ -1,7 +1,10 @@
 import isEqual from 'lodash/isEqual';
 import moment from 'moment/moment';
 
-import { FilterModel } from '@/hooks/useListState';
+export interface FilterModel {
+  reset(): void;
+  setFilter<K extends keyof this>(key: K, value: this[K]): void;
+}
 
 abstract class BaseFilters implements FilterModel {
   [key: string]: any;

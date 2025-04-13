@@ -23,6 +23,8 @@ const ConvertedCurrenciesTooltip: React.FC<ConvertedCurrenciesTooltipProps> = ({
 
   return (
     <ResponsiveTooltip
+      triggerClassName="cursor-help"
+      desktopComponent="hovercard"
       content={
         <ul>
           {Object.entries(convertedValues).map(([code, val]) => {

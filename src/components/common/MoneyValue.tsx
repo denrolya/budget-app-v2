@@ -100,7 +100,7 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
   );
 
   let displayedContent = badge ? (
-    <Badge className={cn(className)} variant={badgeVariant}>
+    <Badge className={className} variant={badgeVariant}>
       {content}
     </Badge>
   ) : (

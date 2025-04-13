@@ -1,8 +1,7 @@
 import { ArrowDownCircle, ArrowUpCircle, FilterIcon } from 'lucide-react';
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { useIsMobile } from '@/hooks/useMobile';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
@@ -12,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
+import { useIsMobile } from '@/hooks/useMobile';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { TransferFilters } from '@/models/TransferFilters';
 import { Timeframe } from '@/types/global';
@@ -27,8 +27,8 @@ interface ListFiltersContentProps {
   setShowTransactions: (value: boolean) => void;
   showTransfers: boolean;
   setShowTransfers: (value: boolean) => void;
-  timeframe: { after: Moment; before: Moment };
-  setCustomTimeframe: (range: { after: Moment; before: Moment } | null) => void;
+  timeframe: Timeframe;
+  setTimeframe: (timeframe: Timeframe | null) => void;
 }
 
 interface ListFiltersProps extends ListFiltersContentProps {
@@ -45,7 +45,7 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
   showTransfers,
   setShowTransfers,
   timeframe,
-  setCustomTimeframe,
+  setTimeframe,
 }) => {
   const [filtersActive, setFiltersActive] = useState<boolean>(false);
 
@@ -65,12 +65,12 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
 
   const handleTimeframeChange = useCallback(
     (range: Timeframe) => {
-      setCustomTimeframe({
+      setTimeframe({
         after: range.after ? moment(range.after).startOf('day') : timeframe.after,
         before: range.before ? moment(range.before).endOf('day') : timeframe.before,
       });
     },
-    [setCustomTimeframe],
+    [setTimeframe],
   );
 
   const handleAmountRangeChange = useCallback(
@@ -125,10 +125,10 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
     setFilter('accounts', []);
     setFilter('isDraft', null);
     setFilter('type', undefined);
-    setCustomTimeframe(null);
+    setTimeframe(null);
     setShowTransactions(true);
     setShowTransfers(true);
-  }, [setFilter, setCustomTimeframe, setShowTransactions, setShowTransfers]);
+  }, [setFilter, setTimeframe, setShowTransactions, setShowTransfers]);
 
   return (
     <div className="space-y-6">

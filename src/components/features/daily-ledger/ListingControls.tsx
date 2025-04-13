@@ -1,12 +1,11 @@
-import { CalendarArrowDown, CalendarArrowUp, Filter, RotateCcw } from 'lucide-react';
+import { CalendarArrowDown, CalendarArrowUp, RotateCcw } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
-import { Badge } from '@/components/ui/badge';
+import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
@@ -27,7 +26,7 @@ interface ListingControlsProps {
   setShowTransactions: (value: boolean) => void;
   setShowTransfers: (value: boolean) => void;
   timeframe: { after: Moment; before: Moment };
-  setCustomTimeframe: (range: { after: Moment; before: Moment } | null) => void;
+  setTimeframe: (range: { after: Moment; before: Moment } | null) => void;
   activeView: 'table' | 'list';
   isReversedOrder: boolean;
   setIsReversedOrder: (value: boolean) => void;
@@ -43,7 +42,7 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
   setShowTransactions,
   setShowTransfers,
   timeframe,
-  setCustomTimeframe,
+  setTimeframe,
   activeView,
   isReversedOrder,
   setIsReversedOrder,
@@ -68,12 +67,12 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
 
   const handleTimeframeChange = useCallback(
     (range: Timeframe) => {
-      setCustomTimeframe({
+      setTimeframe({
         after: range.after ? range.after.startOf('day') : timeframe.after,
         before: range.before ? range.before.endOf('day') : timeframe.before,
       });
     },
-    [setCustomTimeframe],
+    [setTimeframe],
   );
 
   const handleAmountRangeChange = useCallback(
@@ -181,6 +180,8 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
           />
         </div>
 
+        <Separator orientation="vertical" className="h-8" />
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -200,6 +201,8 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
             <p>Reset all filters</p>
           </TooltipContent>
         </Tooltip>
+
+        <Separator orientation="vertical" className="h-8" />
 
         <FiltersToggleButton activeCount={transactionFilters.getModifiedCount()} onClick={onFiltersDialogToggle} />
       </div>
