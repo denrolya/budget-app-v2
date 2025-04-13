@@ -23,16 +23,16 @@ interface UseTransactionsAndTransfersOptions {
 type CombinedFilters = TransactionFilters & TransferFilters;
 
 export const useTransactionsAndTransfers = ({
-                                              initialTransactionFilters = new TransactionFilters(),
-                                              initialTransferFilters = new TransferFilters(),
-                                              updateUrl = false,
-                                              excludeTransfers = true,
-                                            }: UseTransactionsAndTransfersOptions) => {
+  initialTransactionFilters = new TransactionFilters(),
+  initialTransferFilters = new TransferFilters(),
+  updateUrl = false,
+  excludeTransfers = true,
+}: UseTransactionsAndTransfersOptions) => {
   const [showTransactions, setShowTransactions] = useState<boolean>(true);
   const [showTransfers, setShowTransfers] = useState<boolean>(true);
   const baseCurrency = useBaseCurrency();
   const {
-    transactions,
+    items: transactions,
     isLoading: isLoadingTransactions,
     isError: isErrorTransactions,
     error: errorTransactions,
@@ -63,17 +63,20 @@ export const useTransactionsAndTransfers = ({
   const isError = isErrorTransactions || isErrorTransfers;
   const error = errorTransactions || errorTransfers;
 
-  const setFilter = useCallback((type: keyof CombinedFilters, value: any) => {
-    if (TransactionFilters.isApplicable(type)) {
-      setTransactionFilter(type as keyof TransactionFilters, value);
-      if (type === 'categories' && value.length > 0) {
-        setShowTransfers(false);
+  const setFilter = useCallback(
+    (type: keyof CombinedFilters, value: any) => {
+      if (TransactionFilters.isApplicable(type)) {
+        setTransactionFilter(type as keyof TransactionFilters, value);
+        if (type === 'categories' && value.length > 0) {
+          setShowTransfers(false);
+        }
       }
-    }
-    if (TransferFilters.isApplicable(type)) {
-      setTransferFilter(type as keyof TransferFilters, value);
-    }
-  }, [setTransactionFilter, setTransferFilter]);
+      if (TransferFilters.isApplicable(type)) {
+        setTransferFilter(type as keyof TransferFilters, value);
+      }
+    },
+    [setTransactionFilter, setTransferFilter],
+  );
 
   const filteredItems = useMemo(() => {
     let items: (Transaction | Transfer)[] = [];
@@ -82,30 +85,34 @@ export const useTransactionsAndTransfers = ({
     return items.sort((a, b) => b.executedAt.valueOf() - a.executedAt.valueOf());
   }, [transactions, transfers, showTransactions, showTransfers]);
 
-  const groupedItems: [Moment, (Transaction | Transfer)[], number, number, number, number][] = useMemo(() => toPairs(
-    groupBy(
-      sortBy(filteredItems, item => -item.executedAt.valueOf()),
-      item => item.executedAt.format(BACKEND_DATE_FORMAT),
-    ),
-  ).map(([date, items]) => {
-    let transactionsValue = 0;
-    let transfersValue = 0;
-    let transactionsCount = 0;
-    let transfersCount = 0;
+  const groupedItems: [Moment, (Transaction | Transfer)[], number, number, number, number][] = useMemo(
+    () =>
+      toPairs(
+        groupBy(
+          sortBy(filteredItems, (item) => -item.executedAt.valueOf()),
+          (item) => item.executedAt.format(BACKEND_DATE_FORMAT),
+        ),
+      ).map(([date, items]) => {
+        let transactionsValue = 0;
+        let transfersValue = 0;
+        let transactionsCount = 0;
+        let transfersCount = 0;
 
-    items.forEach(item => {
-      if (item instanceof Transaction) {
-        const value = item.convertedValues[baseCurrency] || 0;
-        transactionsValue += item.isExpense() ? -value : value;
-        transactionsCount++;
-      } else if (item instanceof Transfer) {
-        transfersValue += item.fromExpense.convertedValues[baseCurrency] || 0;
-        transfersCount++;
-      }
-    });
+        items.forEach((item) => {
+          if (item instanceof Transaction) {
+            const value = item.convertedValues[baseCurrency] || 0;
+            transactionsValue += item.isExpense() ? -value : value;
+            transactionsCount++;
+          } else if (item instanceof Transfer) {
+            transfersValue += item.fromExpense.convertedValues[baseCurrency] || 0;
+            transfersCount++;
+          }
+        });
 
-    return [moment(date), items, transactionsValue, transfersValue, transactionsCount, transfersCount];
-  }), [filteredItems, baseCurrency]);
+        return [moment(date), items, transactionsValue, transfersValue, transactionsCount, transfersCount];
+      }),
+    [filteredItems, baseCurrency],
+  );
 
   const refetch = useCallback(() => {
     refetchTransactions();

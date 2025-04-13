@@ -40,19 +40,17 @@ const BASE_URL = '/api/v2/transaction';
 
 export const transactionService = {
   async fetchTransactions({
-                            page = 1,
-                            perPage = 30,
-                            filters,
-                            sort,
-                            excludeTransfers,
-                          }: FetchTransactionsParams): Promise<FetchResponse> {
+    page = 1,
+    perPage = 30,
+    filters,
+    sort,
+    excludeTransfers,
+  }: FetchTransactionsParams): Promise<FetchResponse> {
     const url = this.buildUrl({ page, perPage, filters, sort });
 
     const result: TransactionResponse = await axiosFetcher(url);
 
-    const filteredList = excludeTransfers
-      ? result.list.filter((t: any) => !t.transfer?.id)
-      : result.list;
+    const filteredList = excludeTransfers ? result.list.filter((t: any) => !t.transfer?.id) : result.list;
 
     return {
       items: filteredList,
@@ -61,7 +59,12 @@ export const transactionService = {
     };
   },
 
-  buildUrl({ page, perPage, filters, sort }: {
+  buildUrl({
+    page,
+    perPage,
+    filters,
+    sort,
+  }: {
     page: number;
     perPage: number;
     filters: TransactionFilters;
@@ -101,15 +104,15 @@ export const transactionService = {
     }
 
     if (filters.categories && filters.categories.length > 0) {
-      filters.categories.forEach(category => query.append('categories[]', String(category)));
+      filters.categories.forEach((category) => query.append('categories[]', String(category)));
     }
 
     if (filters.excludedCategories && filters.excludedCategories.length > 0) {
-      filters.excludedCategories.forEach(category => query.append('excludedCategories[]', String(category)));
+      filters.excludedCategories.forEach((category) => query.append('excludedCategories[]', String(category)));
     }
 
     if (filters.accounts && filters.accounts.length > 0) {
-      filters.accounts.forEach(account => query.append('accounts[]', String(account)));
+      filters.accounts.forEach((account) => query.append('accounts[]', String(account)));
     }
 
     if (filters.withNestedCategories !== undefined) {
@@ -133,9 +136,9 @@ export const transactionService = {
 
   formatData(values: Partial<RawTransactionDTO | Transaction>, existingData?: Transaction) {
     return {
-      account: (values.account instanceof Account) ? values.account.id : values.account,
+      account: values.account instanceof Account ? values.account.id : values.account,
       amount: values?.amount?.toString(),
-      category: (values.category instanceof Category) ? values.category.id : values.category,
+      category: values.category instanceof Category ? values.category.id : values.category,
       executedAt: moment(values.executedAt).toISOString(),
       isDraft: values.isDraft ?? false,
       note: values.note || '',
@@ -166,7 +169,11 @@ export const transactionService = {
     return api.post(`/api/transactions/${data.type}`, this.formatData(data));
   },
 
-  updateTransaction(id: string | number, updates: Partial<RawTransactionDTO | Transaction>, originalTransaction: Transaction) {
+  updateTransaction(
+    id: string | number,
+    updates: Partial<RawTransactionDTO | Transaction>,
+    originalTransaction: Transaction,
+  ) {
     return api.put(`/api/transactions/${id}`, this.formatData(updates, originalTransaction));
   },
 

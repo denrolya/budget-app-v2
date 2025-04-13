@@ -1,3 +1,4 @@
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
 import moment from 'moment';
@@ -14,7 +15,6 @@ export interface FilterModel {
 export interface PaginationState {
   currentPage: number;
   perPage: number;
-  totalPages: number;
 }
 
 export interface UseListState<FilterType> {
@@ -25,7 +25,7 @@ export interface UseListState<FilterType> {
 
 type SetFilterFunction<T> = <K extends keyof T>(key: K, value: T[K]) => void;
 
-interface UseListStateOptions<FilterType extends FilterModel> {
+interface UseListStateOptions<FilterType extends FilterModel, DataType> {
   initialPerPage?: number;
   initialFilters: FilterType;
   initialSort?: Sorting;
@@ -34,59 +34,89 @@ interface UseListStateOptions<FilterType extends FilterModel> {
   };
   formatMoment?: string;
   updateUrl?: boolean;
+  queryFn: (page: number, perPage: number, filters: FilterType, sort: Sorting) => Promise<DataType>;
+  queryKeyBase?: string;
+  enabled?: boolean;
+  staleTime?: number;
+  gcTime?: number;
+  select?: <TSelected = unknown>(data: DataType) => TSelected;
+  additionalFetchDependencies?: unknown[];
 }
 
-export const useListState = <FilterType extends FilterModel, ItemType>({
-                                                                         initialPerPage = 20,
-                                                                         initialFilters,
-                                                                         initialSort,
-                                                                         searchParamKeys = {},
-                                                                         formatMoment = BACKEND_DATE_FORMAT,
-                                                                         updateUrl = true,
-                                                                       }: UseListStateOptions<FilterType>) => {
+export type UseListReturn<FilterType, DataType> = Omit<UseListState<FilterType>, 'pagination'> &
+  UseQueryResult<DataType, Error> & {
+    pagination: {
+      totalItems: number;
+      totalPages: number;
+      perPage: number;
+      currentPage: number;
+      setCurrentPage: (page: number) => void;
+      setPerPage: (perPage: number) => void;
+    };
+    setFilter: SetFilterFunction<FilterType>;
+    resetFilters: () => void;
+    setSort: (sort: Sorting) => void;
+  };
+
+const DEFAULT_STALE_TIME = 5 * 60 * 1000;
+const DEFAULT_GC_TIME = 10 * 60 * 1000;
+
+/**
+ * TODO: Split into { pagination, filters, sort } with methods inside
+ */
+export const useListState = <FilterType extends FilterModel, DataType extends { totalItems: number }, ItemType>({
+  enabled = true,
+  initialPerPage = 20,
+  initialFilters,
+  initialSort,
+  searchParamKeys = {},
+  formatMoment = BACKEND_DATE_FORMAT,
+  updateUrl = true,
+  queryFn,
+  queryKeyBase,
+  staleTime = DEFAULT_STALE_TIME,
+  gcTime = DEFAULT_GC_TIME,
+  select,
+  additionalFetchDependencies = [],
+}: UseListStateOptions<FilterType, DataType>): UseListReturn<FilterType, DataType> => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const getInitialState = useCallback((): UseListState<FilterType> => ({
-    pagination: {
-      currentPage: parseInt(searchParams.get('page') || '1', 10),
-      perPage: parseInt(searchParams.get('perPage') || initialPerPage.toString(), 10),
-      totalPages: parseInt(searchParams.get('totalPages') || '0', 10),
-    },
-    filters: initialFilters,
-    sort: {
-      field: (searchParams.get('sortField') as keyof ItemType) || initialSort?.field,
-      direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || initialSort?.direction,
-    },
-  }), [searchParams, initialPerPage, initialFilters, initialSort]);
+  const getInitialState = useCallback(
+    (): UseListState<FilterType> => ({
+      pagination: {
+        currentPage: parseInt(searchParams.get('page') || '1', 10),
+        perPage: parseInt(searchParams.get('perPage') || initialPerPage.toString(), 10),
+      },
+      filters: initialFilters,
+      sort: {
+        field: (searchParams.get('sortField') as keyof ItemType) || initialSort?.field,
+        direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || initialSort?.direction,
+      },
+    }),
+    [searchParams, initialPerPage, initialFilters, initialSort],
+  );
 
   const [state, setState] = useState<UseListState<FilterType>>(getInitialState);
 
   const prevStateRef = useRef(state);
 
   const setCurrentPage = useCallback((page: number) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       pagination: { ...prev.pagination, currentPage: page },
     }));
   }, []);
 
   const setPerPage = useCallback((perPage: number) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       pagination: { ...prev.pagination, totalPages: 0, currentPage: 1, perPage: perPage },
     }));
   }, []);
 
-  const setTotalPages = useCallback((count: number) => {
-    setState(prev => ({
-      ...prev,
-      pagination: { ...prev.pagination, totalPages: count },
-    }));
-  }, []);
-
   const setFilter: SetFilterFunction<FilterType> = useCallback((key, value) => {
     setState((prev) => {
-      const updatedFilters = new (prev.filters.constructor as { new(): FilterType })();
+      const updatedFilters = new (prev.filters.constructor as { new (): FilterType })();
       Object.assign(updatedFilters, prev.filters);
       updatedFilters.setFilter(key, value);
 
@@ -99,7 +129,7 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
   }, []);
 
   const resetFilters = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       filters: initialFilters,
       pagination: { ...prev.pagination, currentPage: 1 },
@@ -107,38 +137,42 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
   }, [initialFilters]);
 
   const setSort = useCallback(({ field, direction }: Sorting) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       sort: { field, direction },
     }));
   }, []);
 
   const updateSearchParamsDebounced = useMemo(
-    () => debounce((params: URLSearchParams) => {
-      if (updateUrl) {
-        for (const [key, value] of params.entries()) {
-          if (!value) {
-            params.delete(key);
+    () =>
+      debounce((params: URLSearchParams) => {
+        if (updateUrl) {
+          for (const [key, value] of params.entries()) {
+            if (!value) {
+              params.delete(key);
+            }
           }
+          setSearchParams(params);
         }
-        setSearchParams(params);
-      }
-    }, 300),
+      }, 300),
     [setSearchParams, updateUrl],
   );
 
   useEffect(() => {
     if (!updateUrl) return;
 
-    const hasStateChanged = !isEqual({
-      pagination: state.pagination,
-      filters: state.filters,
-      sort: state.sort,
-    }, {
-      pagination: prevStateRef.current.pagination,
-      filters: prevStateRef.current.filters,
-      sort: prevStateRef.current.sort,
-    });
+    const hasStateChanged = !isEqual(
+      {
+        pagination: state.pagination,
+        filters: state.filters,
+        sort: state.sort,
+      },
+      {
+        pagination: prevStateRef.current.pagination,
+        filters: prevStateRef.current.filters,
+        sort: prevStateRef.current.sort,
+      },
+    );
 
     if (!hasStateChanged) return;
 
@@ -166,23 +200,46 @@ export const useListState = <FilterType extends FilterModel, ItemType>({
     return () => {
       updateSearchParamsDebounced.cancel();
     };
-  }, [
-    state,
-    prevStateRef,
-    searchParamKeys,
-    formatMoment,
-    updateSearchParamsDebounced,
-    updateUrl,
-    initialFilters,
-  ]);
+  }, [state, prevStateRef, searchParamKeys, formatMoment, updateSearchParamsDebounced, updateUrl, initialFilters]);
 
-  return useMemo(() => ({
-    ...state,
-    setCurrentPage,
-    setPerPage,
+  const queryKey = [
+    queryKeyBase,
+    state.pagination.currentPage,
+    state.pagination.perPage,
+    state.filters,
+    state.sort,
+    ...additionalFetchDependencies,
+  ];
+
+  const response = useQuery<DataType, Error>({
+    enabled,
+    select,
+    queryKey,
+    queryFn: (() =>
+      queryFn(
+        state.pagination.currentPage,
+        state.pagination.perPage,
+        state.filters,
+        state.sort,
+      )) as () => Promise<DataType>,
+    staleTime,
+    gcTime,
+    retry: 3,
+    retryDelay: (attempt: number) => Math.min(1000 * 2 ** attempt, 30000),
+  });
+
+  return {
     setFilter,
     resetFilters,
     setSort,
-    setTotalPages,
-  }), [state, setCurrentPage, setPerPage, setFilter, setSort, setTotalPages, resetFilters]);
+    ...state,
+    pagination: {
+      ...state.pagination,
+      totalItems: response.data?.totalItems || 0,
+      totalPages: Math.ceil(response.data?.totalItems || 0 / state.pagination.perPage),
+      setCurrentPage,
+      setPerPage,
+    },
+    ...response,
+  };
 };
