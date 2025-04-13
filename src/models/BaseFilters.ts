@@ -1,3 +1,6 @@
+import isEqual from 'lodash/isEqual';
+import moment from 'moment/moment';
+
 import { FilterModel } from '@/hooks/useListState';
 
 abstract class BaseFilters implements FilterModel {
@@ -11,6 +14,29 @@ abstract class BaseFilters implements FilterModel {
     if (key in this) {
       this[key] = value;
     }
+  }
+
+  reset() {
+    Object.assign(this, this._defaults);
+  }
+
+  getModifiedCount(): number {
+    let count = 0;
+
+    const keys = Object.keys(this._defaults);
+    for (const key of keys) {
+      const current = this[key];
+      const original = this._defaults[key];
+
+      if (moment.isMoment(current) && moment.isMoment(original)) {
+        if (!current.isSame(original, 'day')) count++;
+        continue;
+      }
+
+      if (!isEqual(current, original)) count++;
+    }
+
+    return count;
   }
 
   static isApplicable(key: string): boolean {

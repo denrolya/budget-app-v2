@@ -31,59 +31,44 @@ export const useTransactionsAndTransfers = ({
   const [showTransactions, setShowTransactions] = useState<boolean>(true);
   const [showTransfers, setShowTransfers] = useState<boolean>(true);
   const baseCurrency = useBaseCurrency();
-  const {
-    items: transactions,
-    isLoading: isLoadingTransactions,
-    isError: isErrorTransactions,
-    error: errorTransactions,
-    filters: transactionFilters,
-    setFilter: setTransactionFilter,
-    refetch: refetchTransactions,
-  } = useTransactions({
+  const transactionsState = useTransactions({
     initialPerPage: 99999,
     initialFilters: initialTransactionFilters,
     updateUrl,
     excludeTransfers,
   });
-  const {
-    items: transfers,
-    isLoading: isLoadingTransfers,
-    isError: isErrorTransfers,
-    error: errorTransfers,
-    filters: transferFilters,
-    setFilter: setTransferFilter,
-    refetch: refetchTransfers,
-  } = useTransfers({
+
+  const transfersState = useTransfers({
     initialPerPage: 99999,
     initialFilters: initialTransferFilters,
     updateUrl,
   });
 
-  const isLoading = isLoadingTransactions || isLoadingTransfers;
-  const isError = isErrorTransactions || isErrorTransfers;
-  const error = errorTransactions || errorTransfers;
+  const isLoading = transactionsState.isLoading || transfersState.isLoading;
+  const isError = transactionsState.isError || transfersState.isError;
+  const error = transactionsState.error || transfersState.error;
 
   const setFilter = useCallback(
     (type: keyof CombinedFilters, value: any) => {
       if (TransactionFilters.isApplicable(type)) {
-        setTransactionFilter(type as keyof TransactionFilters, value);
+        transactionsState.setFilter(type as keyof TransactionFilters, value);
         if (type === 'categories' && value.length > 0) {
           setShowTransfers(false);
         }
       }
       if (TransferFilters.isApplicable(type)) {
-        setTransferFilter(type as keyof TransferFilters, value);
+        transfersState.setFilter(type as keyof TransferFilters, value);
       }
     },
-    [setTransactionFilter, setTransferFilter],
+    [transactionsState.setFilter, transfersState.setFilter],
   );
 
   const filteredItems = useMemo(() => {
     let items: (Transaction | Transfer)[] = [];
-    if (showTransactions) items = items.concat(transactions);
-    if (showTransfers) items = items.concat(transfers);
+    if (showTransactions) items = items.concat(transactionsState.items);
+    if (showTransfers) items = items.concat(transfersState.items);
     return items.sort((a, b) => b.executedAt.valueOf() - a.executedAt.valueOf());
-  }, [transactions, transfers, showTransactions, showTransfers]);
+  }, [transactionsState.items, transfersState.items, showTransactions, showTransfers]);
 
   const groupedItems: [Moment, (Transaction | Transfer)[], number, number, number, number][] = useMemo(
     () =>
@@ -115,25 +100,31 @@ export const useTransactionsAndTransfers = ({
   );
 
   const refetch = useCallback(() => {
-    refetchTransactions();
-    refetchTransfers();
-  }, [refetchTransactions, refetchTransfers]);
+    transactionsState.refetch();
+    transfersState.refetch();
+  }, [transactionsState.refetch, transfersState.refetch]);
+
+  const resetFilters = useCallback(() => {
+    transactionsState.resetFilters();
+    transfersState.resetFilters();
+  }, [transactionsState.resetFilters, transfersState.resetFilters]);
 
   return {
-    transactions,
-    transfers,
     filteredItems,
     groupedItems,
     isLoading,
     isError,
     error,
     setFilter,
-    transactionFilters,
-    transferFilters,
     showTransactions,
     setShowTransactions,
     showTransfers,
     setShowTransfers,
     refetch,
+    resetFilters,
+    transactions: transactionsState.items,
+    transfers: transfersState.items,
+    transactionFilters: transactionsState.filters,
+    transferFilters: transfersState.filters,
   };
 };

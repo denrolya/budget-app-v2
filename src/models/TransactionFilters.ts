@@ -48,7 +48,6 @@ export class TransactionFilters extends BaseFilters {
       type: initial.type,
     };
 
-    // Store original values as "defaults"
     this._defaults = {
       ...filled,
       before: filled.before.clone(),
@@ -65,25 +64,6 @@ export class TransactionFilters extends BaseFilters {
       before: this._defaults.before.clone(),
       after: this._defaults.after.clone(),
     });
-  }
-
-  getModifiedCount(): number {
-    let count = 0;
-
-    const keys = Object.keys(this._defaults) as (keyof TransactionFiltersProps)[];
-    for (const key of keys) {
-      const current = this[key];
-      const original = this._defaults[key];
-
-      if (moment.isMoment(current) && moment.isMoment(original)) {
-        if (!current.isSame(original, 'day')) count++;
-        continue;
-      }
-
-      if (!isEqual(current, original)) count++;
-    }
-
-    return count;
   }
 
   static isApplicable(key: unknown): key is keyof TransactionFilters {

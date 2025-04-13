@@ -19,14 +19,34 @@ export class TransferFilters extends BaseFilters {
   amountRange!: number[];
   accounts!: string[];
 
-  constructor(props: TransferFiltersProps = {}) {
+  constructor(initial: TransferFiltersProps = {}) {
     super();
 
-    this.searchTerm = props.searchTerm ?? '';
-    this.before = props.before ?? moment().endOf('year');
-    this.after = props.after ?? moment().startOf('year');
-    this.amountRange = props.amountRange ?? [];
-    this.accounts = props.accounts ?? [];
+    // Fill missing fields with fallbacks
+    const filled: TransferFiltersProps = {
+      searchTerm: initial.searchTerm ?? '',
+      before: initial.before ?? moment().endOf('year'),
+      after: initial.after ?? moment().startOf('year'),
+      amountRange: initial.amountRange ?? [],
+      accounts: initial.accounts ?? [],
+    };
+
+    this._defaults = {
+      ...filled,
+      before: filled.before.clone(),
+      after: filled.after.clone(),
+    };
+
+    // Assign to current instance
+    Object.assign(this, filled);
+  }
+
+  reset() {
+    Object.assign(this, {
+      ...this._defaults,
+      before: this._defaults.before.clone(),
+      after: this._defaults.after.clone(),
+    });
   }
 
   static isApplicable(key: unknown): key is keyof TransferFilters {

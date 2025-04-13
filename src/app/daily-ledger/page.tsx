@@ -1,24 +1,13 @@
 import {
   ArrowDownCircle,
   ArrowUpCircle,
-  CalendarArrowDown,
-  CalendarArrowUp,
-  CalendarIcon,
   ChevronLeft,
   ChevronRight,
   CopyPlus,
-  Filter,
-  FoldVertical,
   LayoutList,
-  ListIcon,
-  Plus,
-  RefreshCw,
-  RotateCcw,
   Settings2,
   SquarePlus,
   Table,
-  Table2,
-  UnfoldVertical,
 } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -26,7 +15,16 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useSwipeable } from 'react-swipeable';
 
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
-import { Type as TransactionType } from '@/types/transaction';
+import SummaryBadge from '@/components/common/SummaryBadge';
+import DailyList from '@/components/features/daily-ledger/DailyList';
+import ListFiltersSheet from '@/components/features/daily-ledger/ListFiltersSheet';
+import ListingControls from '@/components/features/daily-ledger/ListingControls';
+import TableListing from '@/components/features/daily-ledger/TableListing';
+import TableListingSkeleton from '@/components/features/daily-ledger/TableListingSkeleton';
+import BulkCreateTableForm from '@/components/features/transactions/BulkCreateTableForm';
+import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -37,30 +35,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import ListingControls from '@/components/features/daily-ledger/ListingControls';
-import { useIsMobile } from '@/hooks/useMobile';
-import SummaryBadge from '@/components/common/SummaryBadge';
-import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
-import CompactInlineFilters from '@/components/features/daily-ledger/CompactInlineFilters';
-import DailyList from '@/components/features/daily-ledger/DailyList';
-import ListFiltersSheet from '@/components/features/daily-ledger/ListFiltersSheet';
-import TableListing from '@/components/features/daily-ledger/TableListing';
-import TableListingSkeleton from '@/components/features/daily-ledger/TableListingSkeleton';
-import BulkCreateTableForm from '@/components/features/transactions/BulkCreateTableForm';
-import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
+import { useIsMobile } from '@/hooks/useMobile';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
+import { Type as TransactionType } from '@/types/transaction';
 
 type TimePreset = {
   label: string;
@@ -187,6 +171,7 @@ export const DailyLedgerPage: React.FC = () => {
     isError,
     error,
     setFilter,
+    resetFilters,
     transactionFilters,
     transferFilters,
     showTransactions,
@@ -305,11 +290,7 @@ export const DailyLedgerPage: React.FC = () => {
   }, [addPageHotkeys, removePageHotkeys]);
 
   const handleResetFilters = () => {
-    setFilter('amountRange', []);
-    setFilter('categories', []);
-    setFilter('accounts', []);
-    setFilter('isDraft', undefined);
-    setFilter('type', undefined);
+    resetFilters();
     setCustomTimeframe(null);
     setShowTransactions(true);
     setShowTransfers(true);
