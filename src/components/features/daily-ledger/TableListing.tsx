@@ -441,7 +441,7 @@ const TableListing: React.FC<Props> = ({
                         renderEditableCell(
                           item,
                           'amount',
-                          <TransactionValue className="font-mono text-xs antialiased" transaction={item} />,
+                          <TransactionValue revert className="font-mono text-xs antialiased" transaction={item} />,
                         )
                       )}
                     </TableCell>

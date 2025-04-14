@@ -60,7 +60,7 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="flex flex-col 3xl:flex-row h-[calc(100vh-2rem)] md:overflow-hidden bg-background">
-      <main className="flex-1 overflow-auto p-6 pb-[187px] lg:pb-17 3xl:p-6">
+      <main className="flex-1 overflow-auto p-6 pb-[187px] lg:pb-17 3xl:p-6 bg-muted">
         <div className="flex flex-col lg:flex-row gap-4 mb-6">
           <div className="w-full xl:w-3/5 3xl:w-2/3">
             <MoneyFlow />
@@ -73,7 +73,7 @@ const DashboardPage: React.FC = () => {
         <CategoriesTimeline className="mb-6" />
       </main>
 
-      <div className="3xl:hidden fixed bottom-[47px] md:bottom-0  left-0 w-full h-[180px] bg-gradient-to-b from-background/0 to-background">
+      <div className="3xl:hidden fixed bottom-[47px] md:bottom-0 left-0 w-full h-[180px] bg-gradient-to-b from-background/0 to-background">
         <div
           ref={scrollRef}
           className="flex overflow-x-auto snap-x snap-mandatory h-full py-4 px-6"

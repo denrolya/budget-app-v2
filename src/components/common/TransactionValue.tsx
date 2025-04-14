@@ -48,15 +48,27 @@ export const TransactionValue: React.FC<Props> = ({
   const hasConversion =
     baseValue !== undefined && currency !== baseCurrencyCode && Math.abs(amount) !== Math.abs(baseValue);
 
-  // Elegant content: if a conversion exists, show the base conversion with the original as a subtext.
-  const content = hasConversion ? (
-    <>
-      <span>{baseFormatted}</span>
-      <span className="text-xs opacity-75 hidden md:inline ml-1">| {originalFormatted}</span>
-    </>
-  ) : (
-    <span>{originalFormatted}</span>
-  );
+  let content;
+
+  if (hasConversion) {
+    if (revert) {
+      content = (
+        <>
+          <span>{originalFormatted}</span>
+          <span className="text-xs opacity-75 hidden md:inline ml-1">| {baseFormatted}</span>
+        </>
+      );
+    } else {
+      content = (
+        <>
+          <span>{baseFormatted}</span>
+          <span className="text-xs opacity-75 hidden md:inline ml-1">| {originalFormatted}</span>
+        </>
+      );
+    }
+  } else {
+    content = <span>{originalFormatted}</span>;
+  }
 
   // Wrap with badge if required.
   let displayedContent = badge ? (
@@ -64,7 +76,18 @@ export const TransactionValue: React.FC<Props> = ({
       {content}
     </Badge>
   ) : (
-    <span className={cn(transaction.isExpense() ? 'text-destructive' : 'text-success', className)}>{content}</span>
+    <span
+      className={cn(
+        'text-nowrap',
+        {
+          'text-destructive': transaction.isExpense(),
+          'text-success': transaction.isIncome(),
+        },
+        className,
+      )}
+    >
+      {content}
+    </span>
   );
 
   if (showValuesTooltip && convertedValues && Object.keys(convertedValues).length > 0) {

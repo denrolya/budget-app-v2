@@ -18,6 +18,7 @@ interface MoneyValueProps extends React.ComponentPropsWithoutRef<'span'> {
   badge?: boolean;
   revertColors?: boolean;
   useColors?: boolean;
+  revert?: boolean;
 }
 
 const getBadgeVariant = (
@@ -44,6 +45,7 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
   badge = false,
   revertColors = false,
   useColors = true,
+  revert = false,
 }) => {
   const baseCurrencyCode = useBaseCurrency();
   const baseCurrency = CURRENCIES[baseCurrencyCode];
@@ -83,21 +85,35 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
     </>
   );
 
-  const content = (
-    <span id={id} className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}>
-      {shouldShowConvertedValue ? (
-        <>
-          {renderMoneyElement(baseValue, baseCurrency.symbol, baseCurrency.code)}
-          <span className="text-xs opacity-75 hidden md:inline ml-1">
-            {' | '}
-            {renderMoneyElement(amount, symbol, currency)}
-          </span>
-        </>
-      ) : (
-        renderMoneyElement(amount, symbol, currency || baseCurrency.code)
-      )}
-    </span>
-  );
+  let content;
+
+  if (shouldShowConvertedValue) {
+    let firstValue, secondValue;
+
+    if (revert) {
+      firstValue = renderMoneyElement(amount, symbol, currency);
+      secondValue = renderMoneyElement(baseValue, baseCurrency.symbol, baseCurrency.code);
+    } else {
+      firstValue = renderMoneyElement(baseValue, baseCurrency.symbol, baseCurrency.code);
+      secondValue = renderMoneyElement(amount, symbol, currency);
+    }
+
+    content = (
+      <span id={id} className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}>
+        {firstValue}
+        <span className="text-xs opacity-75 hidden md:inline ml-1">
+          {' | '}
+          {secondValue}
+        </span>
+      </span>
+    );
+  } else {
+    content = (
+      <span id={id} className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}>
+        {renderMoneyElement(amount, symbol, currency || baseCurrency.code)}
+      </span>
+    );
+  }
 
   let displayedContent = badge ? (
     <Badge className={className} variant={badgeVariant}>
