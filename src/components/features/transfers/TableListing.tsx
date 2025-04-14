@@ -91,7 +91,7 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
                       onOpenChange={(open) => setOpenSheetId(open ? transfer.id : null)}
                     >
                       <SheetTrigger asChild>
-                        <code className="cursor-help" onClick={() => toggleSheet(transfer.id)}>
+                        <code className="cursor-context-menu" onClick={() => toggleSheet(transfer.id)}>
                           #{transfer.id}
                         </code>
                       </SheetTrigger>
@@ -145,33 +145,40 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
                     <>
                       <div className="flex flex-row items-center">
                         <MoneyValue
+                          className="font-mono text-xs antialiased"
                           amount={-transfer.fromExpense.amount}
                           currency={transfer.fromExpense.account.currency}
                         />
                         <ArrowRight className="h-4 w-4 text-muted-foreground mx-2" />
-                        <MoneyValue amount={transfer.toIncome.amount} currency={transfer.toIncome.account.currency} />
+                        <MoneyValue
+                          className="font-mono text-xs antialiased"
+                          amount={transfer.toIncome.amount}
+                          currency={transfer.toIncome.account.currency}
+                        />
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-muted-foreground">
                         {transfer.feeExpense && (
-                          <div className="flex items-center">
+                          <small className="flex items-center">
                             <span className="mr-1">Fee:</span>
                             <MoneyValue
+                              className="font-mono"
+                              useColors={false}
                               amount={-transfer.feeExpense.amount}
                               currency={transfer.feeExpense.account.currency}
                             />
-                          </div>
+                          </small>
                         )}
                       </div>
                     </>
                   </TableCell>
                   <TableCell
-                    className={cn({
+                    className={cn('text-xs', {
                       'py-0': compact,
                     })}
                   >
-                    <div>Rate: {Number(transfer.rate.toFixed(4))}</div>
+                    <RateDisplay transfer={transfer} />
                     <div className="text-xs text-muted-foreground">
-                      <RateDisplay transfer={transfer} />
+                      <span>Rate: {Number(transfer.rate.toFixed(4))}</span>
                     </div>
                   </TableCell>
                   <TableCell

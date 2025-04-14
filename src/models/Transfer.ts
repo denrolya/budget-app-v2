@@ -20,13 +20,7 @@ export class Transfer {
   toIncome: Transaction;
   feeExpense: Transaction | undefined;
 
-  constructor({
-                id,
-                rate,
-                note,
-                executedAt,
-                transactions,
-              }: TransferProps) {
+  constructor({ id, rate, note, executedAt, transactions }: TransferProps) {
     this.id = id;
     this.rate = rate;
     this.note = note;
@@ -57,8 +51,10 @@ export class Transfer {
     const toCurrency = this.toIncome.account.currency;
 
     if (
-      (fromCurrency === CURRENCY_CODE.UAH && [CURRENCY_CODE.USD, CURRENCY_CODE.EUR, CURRENCY_CODE.BTC].includes(toCurrency)) ||
-      ([CURRENCY_CODE.USD, CURRENCY_CODE.EUR, CURRENCY_CODE.BTC].includes(fromCurrency) && toCurrency === CURRENCY_CODE.UAH)
+      (fromCurrency === CURRENCY_CODE.UAH &&
+        [CURRENCY_CODE.USD, CURRENCY_CODE.EUR, CURRENCY_CODE.BTC].includes(toCurrency)) ||
+      ([CURRENCY_CODE.USD, CURRENCY_CODE.EUR, CURRENCY_CODE.BTC].includes(fromCurrency) &&
+        toCurrency === CURRENCY_CODE.UAH)
     ) {
       return fromCurrency === CURRENCY_CODE.UAH ? 1 / this.rate : this.rate;
     }
@@ -67,12 +63,14 @@ export class Transfer {
       (fromCurrency === CURRENCY_CODE.UAH && toCurrency === CURRENCY_CODE.HUF) ||
       (fromCurrency === CURRENCY_CODE.HUF && toCurrency === CURRENCY_CODE.UAH)
     ) {
-      return fromCurrency === CURRENCY_CODE.UAH ? this.rate * 1000 : (1 / this.rate) * 1000;
+      return fromCurrency !== CURRENCY_CODE.UAH ? this.rate * 1000 : (1 / this.rate) * 1000;
     }
 
     if (
-      (fromCurrency === CURRENCY_CODE.HUF && [CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.BTC].includes(toCurrency)) ||
-      ([CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.BTC].includes(fromCurrency) && toCurrency === CURRENCY_CODE.HUF)
+      (fromCurrency === CURRENCY_CODE.HUF &&
+        [CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.BTC].includes(toCurrency)) ||
+      ([CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.BTC].includes(fromCurrency) &&
+        toCurrency === CURRENCY_CODE.HUF)
     ) {
       return fromCurrency === CURRENCY_CODE.HUF ? 1 / this.rate : this.rate;
     }

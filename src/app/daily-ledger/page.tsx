@@ -1,14 +1,4 @@
-import {
-  ArrowDownCircle,
-  ArrowUpCircle,
-  ChevronLeft,
-  ChevronRight,
-  CopyPlus,
-  LayoutList,
-  Settings2,
-  SquarePlus,
-  Table,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, CopyPlus, SquarePlus } from 'lucide-react';
 import { Moment } from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
@@ -19,6 +9,7 @@ import { useTimeframe } from '@/app/daily-ledger/hooks/useTimeframe';
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import SummaryBadge from '@/components/common/SummaryBadge';
 import DailyList from '@/components/features/daily-ledger/DailyList';
+import DisplayMenu from '@/components/features/daily-ledger/DisplayMenu';
 import ListFiltersSheet from '@/components/features/daily-ledger/ListFiltersSheet';
 import ListingControls from '@/components/features/daily-ledger/ListingControls';
 import TableListing from '@/components/features/daily-ledger/TableListing';
@@ -27,16 +18,6 @@ import BulkCreateTableForm from '@/components/features/transactions/BulkCreateTa
 import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
@@ -137,16 +118,6 @@ export const DailyLedgerPage: React.FC = () => {
     setShowTransfers(true);
   };
 
-  const handleTransactionTypeChange = useCallback(
-    (type: TransactionType | undefined) => {
-      setFilter('type', transactionFilters.type === type ? undefined : type);
-      setFilter('categories', []); // Reset categories when changing type
-      setShowTransactions(true);
-      setShowTransfers(false);
-    },
-    [setFilter, setShowTransactions, setShowTransfers],
-  );
-
   const selectedTimeframeStepIndex = TIMEFRAME_STEP_PRESETS.findIndex(
     (p) => p.amount === step?.amount && p.unit === step?.unit,
   );
@@ -169,112 +140,22 @@ export const DailyLedgerPage: React.FC = () => {
                 count={summary.transfersCount}
                 value={summary.transfersValue}
               />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="icon" variant="outline">
-                    <Settings2 className="h-4 w-4" />
-                    <span className="sr-only">View Settings</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  {!isMobile && (
-                    <>
-                      <DropdownMenuLabel>View Mode</DropdownMenuLabel>
-                      <DropdownMenuRadioGroup value={activeView} onValueChange={(v) => setActiveView(v)}>
-                        <DropdownMenuRadioItem value="list">
-                          <LayoutList className="mr-2 h-4 w-4" /> List
-                        </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="table">
-                          <Table className="mr-2 h-4 w-4" /> Table
-                        </DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-
-                      <DropdownMenuSeparator />
-
-                      <DropdownMenuCheckboxItem
-                        disabled={activeView !== 'table'}
-                        checked={showEmpty}
-                        onCheckedChange={(v) => setShowEmpty(v)}
-                      >
-                        Show empty days
-                      </DropdownMenuCheckboxItem>
-
-                      <DropdownMenuSeparator />
-
-                      <DropdownMenuCheckboxItem
-                        disabled={activeView !== 'table'}
-                        checked={isCompactTable}
-                        onCheckedChange={(v) => setIsCompactTable(v)}
-                      >
-                        Compact mode
-                      </DropdownMenuCheckboxItem>
-
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-
-                  <DropdownMenuLabel>Visibility</DropdownMenuLabel>
-                  <DropdownMenuCheckboxItem checked={showTransactions} onCheckedChange={setShowTransactions}>
-                    Transactions
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem checked={showTransfers} onCheckedChange={setShowTransfers}>
-                    Transfers
-                  </DropdownMenuCheckboxItem>
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuLabel>Draft Status</DropdownMenuLabel>
-                  <DropdownMenuRadioGroup
-                    value={
-                      transactionFilters.isDraft === true
-                        ? 'drafts'
-                        : transactionFilters.isDraft === false
-                          ? 'noDrafts'
-                          : 'all'
-                    }
-                    onValueChange={(value) => {
-                      setFilter('isDraft', value === 'drafts' ? true : value === 'noDrafts' ? false : null);
-                      setShowTransfers(value === 'all');
-                    }}
-                  >
-                    <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="drafts">Drafts</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="noDrafts">No Drafts</DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuLabel>Transaction Type</DropdownMenuLabel>
-                  <DropdownMenuCheckboxItem
-                    disabled={!showTransactions}
-                    checked={
-                      showTransactions &&
-                      (transactionFilters.type === TransactionType.Income || !transactionFilters.type)
-                    }
-                    onCheckedChange={() =>
-                      handleTransactionTypeChange(
-                        transactionFilters.type === TransactionType.Income ? undefined : TransactionType.Income,
-                      )
-                    }
-                  >
-                    <ArrowDownCircle className="mr-2 h-4 w-4 text-success" /> Income
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    disabled={!showTransactions}
-                    checked={
-                      showTransactions &&
-                      (transactionFilters.type === TransactionType.Expense || !transactionFilters.type)
-                    }
-                    onCheckedChange={() =>
-                      handleTransactionTypeChange(
-                        transactionFilters.type === TransactionType.Expense ? undefined : TransactionType.Expense,
-                      )
-                    }
-                  >
-                    <ArrowUpCircle className="mr-2 h-4 w-4 text-destructive" /> Expense
-                  </DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <DisplayMenu
+                activeView={activeView}
+                setActiveView={setActiveView}
+                setShowEmpty={setShowEmpty}
+                showEmpty={showEmpty}
+                isCompactTable={isCompactTable}
+                setIsCompactTable={setIsCompactTable}
+                showTransactions={showTransactions}
+                setShowTransactions={setShowTransactions}
+                showTransfers={showTransfers}
+                setShowTransfers={setShowTransfers}
+                transactionFilters={transactionFilters}
+                setFilter={setFilter}
+                isReversedOrder={isReversedOrder}
+                setIsReversedOrder={setIsReversedOrder}
+              />
               <FiltersToggleButton
                 className="flex md:hidden"
                 activeCount={transactionFilters.getModifiedCount()}

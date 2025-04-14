@@ -330,7 +330,11 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
                     'py-0': compact,
                   })}
                 >
-                  {renderEditableCell(transaction, 'amount', <TransactionValue transaction={transaction} />)}
+                  {renderEditableCell(
+                    transaction,
+                    'amount',
+                    <TransactionValue className="font-mono text-xs antialiased" transaction={transaction} />,
+                  )}
                 </TableCell>
                 <TableCell
                   className={cn({

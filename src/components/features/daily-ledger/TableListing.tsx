@@ -263,9 +263,17 @@ const TableListing: React.FC<Props> = ({
   const renderTransferAmounts = (transfer: Transfer) => (
     <>
       <div className="flex flex-row items-center">
-        <MoneyValue amount={-transfer.fromExpense.amount} currency={transfer.fromExpense.account.currency} />
+        <MoneyValue
+          className="font-mono text-xs antialiased"
+          amount={-transfer.fromExpense.amount}
+          currency={transfer.fromExpense.account.currency}
+        />
         <ArrowRight className="h-4 w-4 text-muted-foreground mx-2" />
-        <MoneyValue amount={transfer.toIncome.amount} currency={transfer.toIncome.account.currency} />
+        <MoneyValue
+          className="font-mono text-xs antialiased"
+          amount={transfer.toIncome.amount}
+          currency={transfer.toIncome.account.currency}
+        />
       </div>
       <div className="text-xs text-muted-foreground">
         {transfer.feeExpense && (
@@ -405,19 +413,17 @@ const TableListing: React.FC<Props> = ({
                           <AccountBadge
                             size="sm"
                             account={item.fromExpense.account}
-                            className={
-                              item.feeExpense?.account.id === item.fromExpense.account.id
-                                ? 'ring-2 ring-destructive'
-                                : ''
-                            }
+                            className={cn({
+                              'ring-2 ring-destructive': item.feeExpense?.account.id === item.fromExpense.account.id,
+                            })}
                           />
                           <ArrowRight className="h-4 w-4 text-muted-foreground" />
                           <AccountBadge
                             size="sm"
                             account={item.toIncome.account}
-                            className={
-                              item.feeExpense?.account.id === item.toIncome.account.id ? 'ring-2 ring-destructive' : ''
-                            }
+                            className={cn({
+                              'ring-2 ring-destructive': item.feeExpense?.account.id === item.toIncome.account.id,
+                            })}
                           />
                         </div>
                       )}
@@ -432,11 +438,15 @@ const TableListing: React.FC<Props> = ({
                       {'fromExpense' in item ? (
                         <div>{renderTransferAmounts(item)}</div>
                       ) : (
-                        renderEditableCell(item, 'amount', <TransactionValue transaction={item} />)
+                        renderEditableCell(
+                          item,
+                          'amount',
+                          <TransactionValue className="font-mono text-xs antialiased" transaction={item} />,
+                        )
                       )}
                     </TableCell>
                     <TableCell
-                      className={cn({
+                      className={cn('text-xs', {
                         'py-0': compact,
                       })}
                     >
@@ -453,9 +463,9 @@ const TableListing: React.FC<Props> = ({
                         )}
                       {item instanceof Transfer && (
                         <>
-                          <div>Rate: {Number(item.rate.toFixed(4))}</div>
-                          <div className="text-xs text-muted-foreground">
-                            <RateDisplay transfer={item} />
+                          <RateDisplay transfer={item} />
+                          <div className="text-muted-foreground">
+                            <span>Rate: {Number(item.rate.toFixed(4))}</span>
                           </div>
                         </>
                       )}

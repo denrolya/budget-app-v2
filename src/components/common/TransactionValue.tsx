@@ -13,6 +13,7 @@ interface Props extends React.ComponentPropsWithoutRef<'span'> {
   maximumFractionDigits?: number;
   badge?: boolean;
   showValuesTooltip?: boolean;
+  revert?: boolean;
 }
 
 export const TransactionValue: React.FC<Props> = ({
@@ -21,6 +22,7 @@ export const TransactionValue: React.FC<Props> = ({
   maximumFractionDigits,
   badge = false,
   showValuesTooltip = true,
+  revert = false,
 }) => {
   const baseCurrencyCode = useBaseCurrency();
   const baseCurrency = CURRENCIES[baseCurrencyCode];
