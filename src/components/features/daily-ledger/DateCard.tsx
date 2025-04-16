@@ -2,6 +2,7 @@ import { CalendarX } from 'lucide-react';
 import { Moment } from 'moment';
 import React from 'react';
 
+import { Badge } from '@/components/ui/badge';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import SummaryBadge from '@/components/common/SummaryBadge';
 import TransactionListItem, {
@@ -10,7 +11,7 @@ import TransactionListItem, {
 import TransferListItem, {
   ListItemSkeleton as TransferListItemSkeleton,
 } from '@/components/features/transfers/ListItem';
-import { Card, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROUTES } from '@/constants/routes';
 import { useBaseCurrency } from '@/contexts/auth';
@@ -53,39 +54,28 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
 
   const content = (
     <>
-      <div className="flex flex-col space-y-2 pb-3 border-b border-border">
+      <div className="flex flex-wrap justify-between border-b py-3">
         <h4 className="text-lg font-semibold flex items-center">
           <RelativeDatetimeDisplay showDayBadge badgeSize="sm" variant="default" showTime={false} date={date} />
         </h4>
-        <div className="flex flex-wrap gap-2 text-sm">
+        <div className="flex flex-wrap gap-2 text-sm pr-3">
           <SummaryBadge icon={ROUTES.TRANSACTION_LIST.icon} count={transactionsCount} value={netAmount} />
           <SummaryBadge icon={ROUTES.TRANSFER_LIST.icon} count={transfersCount} value={transferAmount} />
         </div>
       </div>
-      <div className="flex-grow overflow-auto max-w-full pt-3">
-        {items.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-            <CalendarX className="w-10 h-10 text-muted-foreground mb-3" />
-            <h3 className="text-base font-medium text-foreground mb-1">No entries for today</h3>
-            <p className="text-sm text-muted-foreground max-w-xs">
-              There are no financial activities recorded for this date.
-            </p>
-          </div>
-        )}
-        {items.length > 0 && (
-          <ul className="space-y-3">
-            {items.map((item) => (
-              <li key={item.id} className="max-w-full">
-                {item instanceof Transaction ? (
-                  <TransactionListItem transaction={item} />
-                ) : (
-                  <TransferListItem transfer={item} />
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {items.length > 0 && (
+        <ul className="pt-4 pb-4 md:pb-0 flex flex-col gap-4 flex-grow overflow-auto max-w-full">
+          {items.map((item) => (
+            <li key={item.id} className="max-w-full">
+              {item instanceof Transaction ? (
+                <TransactionListItem transaction={item} />
+              ) : (
+                <TransferListItem transfer={item} />
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </>
   );
 
@@ -99,14 +89,12 @@ export const DateCard: React.FC<Props> = ({ date, items, index, totalDays }) => 
         },
       )}
     >
-      <div className="md:hidden w-full h-full max-h-full bg-background rounded-lg shadow-sm flex flex-col min-w-[300px]">
-        <div className="p-0 md:p-4 flex-grow overflow-y-auto">{content}</div>
+      <div className="md:hidden w-full h-full max-h-full bg-background rounded-lg shadow-none md:shadow-sm flex flex-col min-w-[300px]">
+        <div className="p-0 md:p-4 flex-grow overflow-visible">{content}</div>
       </div>
 
       <Card className="hidden md:flex md:flex-col h-full max-h-full transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 overflow-hidden min-w-[470px]">
-        <CardHeader className="pb-2 flex flex-col h-full overflow-hidden">
-          <div className="flex-grow overflow-y-auto">{content}</div>
-        </CardHeader>
+        <CardContent className="h-full flex-grow overflow-y-auto p-4">{content}</CardContent>
       </Card>
     </div>
   );

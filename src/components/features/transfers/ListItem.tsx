@@ -17,7 +17,7 @@ interface TransferItemProps {
 }
 
 export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
-  <Card className="mb-0.5 border-l-4 border-l-primary ease-in-out hover:shadow-md dark:hover:shadow-primary/25 transition-colors relative group overflow-visible">
+  <Card className="border-l-4 border-l-primary ease-in-out hover:shadow-md dark:hover:shadow-primary/25 transition-colors relative group overflow-visible">
     <CardContent className="p-2 flex flex-col space-y-1 hover:no-underline">
       <div className="flex flex-row items-center justify-between">
         <div className="flex-grow flex items-center space-x-2 overflow-x-auto">

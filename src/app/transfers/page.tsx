@@ -1,6 +1,5 @@
 import { Edit, Filter, Plus, RefreshCw, Trash2 } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
+import React, { useState } from 'react';
 
 import { Toggle } from '@/components/ui/toggle';
 import Pagination from '@/components/common/Pagination';
@@ -13,11 +12,12 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
+import { useListHotkeys as useHotkeys } from '@/app/transfers/hooks/useHotkeys';
 import { useTransfers } from '@/hooks/useTransfers';
 
 export const TransfersListPage: React.FC = () => {
   const [isFiltersOpen, setIsFiltersOpen] = useState<boolean>(false);
+  const [selectedTransfers] = useState<number[]>([]);
   const {
     groupedItems,
     isLoading,
@@ -32,41 +32,17 @@ export const TransfersListPage: React.FC = () => {
   } = useTransfers();
   const { openForm } = useFormContext();
   const onAddTransfer = () => openForm(FormType.Transfer);
-  const [selectedTransfers] = useState<number[]>([]);
-  const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
 
-  const activeFiltersCount = useMemo(() => {
-    let count = 0;
-    if (filters.after || filters.before) count++;
-    if (filters.categories?.length > 0) count++;
-    if (filters.accounts?.length > 0) count++;
-    if (filters.amountRange[0] !== 0 || filters.amountRange[1] !== Infinity) count++;
-    if (filters.withNestedCategories) count++;
-    if (filters.isDraft) count++;
-    return count;
-  }, [filters]);
-
-  useHotkeys('f', () => setIsFiltersOpen(!isFiltersOpen), {}, [isFiltersOpen]);
-
-  useEffect(() => {
-    const hotkeys = [
-      {
-        windows: 'F',
-        mac: 'F',
-        description: 'Toggle Filters Dialog',
-      },
-    ];
-    addPageHotkeys('Transfers', hotkeys);
-
-    return () => {
-      removePageHotkeys('Transfers');
-    };
-  }, [addPageHotkeys, removePageHotkeys]);
+  useHotkeys({
+    onFiltersToggle: () => setIsFiltersOpen(!isFiltersOpen),
+    onPrevPage: () => currentPage > 1 && setCurrentPage(currentPage - 1),
+    onNextPage: () => currentPage < totalPages && setCurrentPage(currentPage + 1),
+  });
 
   return (
     <FullHeightPageContent>
       <Card className="shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
-        <CardHeader className="flex flex-col space-y-4 p-0 md:p-3 bg-background md:bg-card">
+        <CardHeader className="flex flex-col space-y-4 p-0 md:p-3 bg-background md:bg-card border-b-none md:border-b">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
             <CardTitle className="text-2xl font-bold">Transfers</CardTitle>
             <div className="flex flex-wrap gap-2">
@@ -93,9 +69,9 @@ export const TransfersListPage: React.FC = () => {
                   <Toggle className="relative" pressed={isFiltersOpen} onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
                     <Filter className="h-4 w-4" />
                     <span className="sr-only">Filter</span>
-                    {activeFiltersCount > 0 && (
+                    {filters.activeCount > 0 && (
                       <Badge className="absolute -top-2 -right-2 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
-                        {activeFiltersCount}
+                        {filters.activeCount}
                       </Badge>
                     )}
                   </Toggle>
@@ -140,7 +116,7 @@ export const TransfersListPage: React.FC = () => {
             />
           </ScrollArea>
         </CardContent>
-        <CardFooter className="flex justify-end p-4 md:p-6 bg-background md:bg-card">
+        <CardFooter className="flex justify-end p-2 bg-background md:bg-card">
           <Pagination
             isLoading={isLoading}
             currentPage={currentPage}

@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, CopyPlus, SquarePlus } from 'lucide-react';
 import { Moment } from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
 
 import { TIMEFRAME_STEP_PRESETS } from '@/app/daily-ledger/constants';
@@ -26,7 +26,6 @@ import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useIsMobile } from '@/hooks/useMobile';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
-import { Type as TransactionType } from '@/types/transaction';
 
 export const DailyLedgerPage: React.FC = () => {
   const isMobile = useIsMobile();
@@ -125,10 +124,10 @@ export const DailyLedgerPage: React.FC = () => {
   return (
     <FullHeightPageContent {...swipeHandlers} className="flex flex-col justify-between">
       <Card className="shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
-        <CardHeader className="flex flex-col space-y-4 p-0 md:p-3 bg-background md:bg-card">
+        <CardHeader className="flex flex-col space-y-4 p-0 md:p-3 bg-background md:bg-card border-b-none md:border-b">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
             <CardTitle className="text-2xl font-bold">Ledger</CardTitle>
-            <div className="flex flex-wrap justify-end gap-2">
+            <div className="flex flex-wrap md:justify-end justify-between gap-2">
               <SummaryBadge
                 icon={ROUTES.TRANSACTION_LIST.icon}
                 count={summary.transactionsCount}
@@ -158,7 +157,7 @@ export const DailyLedgerPage: React.FC = () => {
               />
               <FiltersToggleButton
                 className="flex md:hidden"
-                activeCount={transactionFilters.getModifiedCount()}
+                activeCount={transactionFilters.activeCount}
                 onClick={() => setIsFiltersOpen(!isFiltersOpen)}
               />
               <Tooltip>
@@ -186,34 +185,32 @@ export const DailyLedgerPage: React.FC = () => {
               </Tooltip>
             </div>
           </div>
-          <div className="mb-4">
-            {!isMobile && (
-              <ListingControls
-                isLoading={isLoading}
-                transactionFilters={transactionFilters}
-                transferFilters={transferFilters}
-                setFilter={setFilter}
-                setShowTransactions={setShowTransactions}
-                setShowTransfers={setShowTransfers}
-                timeframe={timeframe}
-                setTimeframe={setTimeframe}
-                activeView={activeView}
-                isReversedOrder={isReversedOrder}
-                setIsReversedOrder={setIsReversedOrder}
-                handleResetFilters={handleResetFilters}
-                onFiltersDialogToggle={() => setIsFiltersOpen(!isFiltersOpen)}
-              />
-            )}
+          {!isMobile && (
+            <ListingControls
+              isLoading={isLoading}
+              transactionFilters={transactionFilters}
+              transferFilters={transferFilters}
+              setFilter={setFilter}
+              setShowTransactions={setShowTransactions}
+              setShowTransfers={setShowTransfers}
+              timeframe={timeframe}
+              setTimeframe={setTimeframe}
+              activeView={activeView}
+              isReversedOrder={isReversedOrder}
+              setIsReversedOrder={setIsReversedOrder}
+              handleResetFilters={handleResetFilters}
+              onFiltersDialogToggle={() => setIsFiltersOpen(!isFiltersOpen)}
+            />
+          )}
 
-            {showBulkCreate && <BulkCreateTableForm />}
+          {showBulkCreate && <BulkCreateTableForm />}
 
-            {isError && (
-              <div className="p-4 bg-destructive/10 text-destructive rounded-md m-4">
-                <p className="font-medium">Error:</p>
-                <p>{error?.message || 'An unexpected error occurred.'}</p>
-              </div>
-            )}
-          </div>
+          {isError && (
+            <div className="p-4 bg-destructive/10 text-destructive rounded-md m-4">
+              <p className="font-medium">Error:</p>
+              <p>{error?.message || 'An unexpected error occurred.'}</p>
+            </div>
+          )}
         </CardHeader>
 
         <CardContent className="p-0 bg-background md:bg-card flex-grow overflow-hidden">
@@ -259,35 +256,33 @@ export const DailyLedgerPage: React.FC = () => {
             </div>
           </ScrollArea>
         </CardContent>
-        <CardFooter className="flex justify-end p-4 md:p-6 bg-background md:bg-card">
-          <div className="flex items-center justify-end gap-2 mt-4">
-            <Button size="icon" variant="outline" onClick={goToPreviousPeriod} disabled={isLoading}>
-              <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only">Previous</span>
-            </Button>
-            <Select
-              value={String(selectedTimeframeStepIndex)}
-              onValueChange={(val) => {
-                const index = parseInt(val, 10);
-                setStep(TIMEFRAME_STEP_PRESETS[index]);
-              }}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select time period" />
-              </SelectTrigger>
-              <SelectContent>
-                {TIMEFRAME_STEP_PRESETS.map((preset, index) => (
-                  <SelectItem key={`${preset.amount}-${preset.unit}`} value={String(index)}>
-                    {preset.amount} {preset.unit}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button size="icon" variant="outline" onClick={goToNextPeriod} disabled={isLoading}>
-              <ChevronRight className="h-4 w-4" />
-              <span className="sr-only">Next</span>
-            </Button>
-          </div>
+        <CardFooter className="p-2 bg-background md:bg-card border-t justify-between md:justify-end gap-2">
+          <Button size="icon" variant="outline" onClick={goToPreviousPeriod} disabled={isLoading}>
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Previous</span>
+          </Button>
+          <Select
+            value={String(selectedTimeframeStepIndex)}
+            onValueChange={(val) => {
+              const index = parseInt(val, 10);
+              setStep(TIMEFRAME_STEP_PRESETS[index]);
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select time period" />
+            </SelectTrigger>
+            <SelectContent>
+              {TIMEFRAME_STEP_PRESETS.map((preset, index) => (
+                <SelectItem key={`${preset.amount}-${preset.unit}`} value={String(index)}>
+                  {preset.amount} {preset.unit}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button size="icon" variant="outline" onClick={goToNextPeriod} disabled={isLoading}>
+            <ChevronRight className="h-4 w-4" />
+            <span className="sr-only">Next</span>
+          </Button>
         </CardFooter>
       </Card>
 

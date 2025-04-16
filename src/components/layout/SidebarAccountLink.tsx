@@ -37,6 +37,7 @@ export const SidebarAccountLink: React.FC<SidebarAccountLinkProps> = ({ account,
           <div className="flex-grow min-w-0 ml-3 overflow-hidden">
             <p className="text-sm font-medium truncate">{account.displayName}</p>
             <MoneyValue
+              revert
               showValuesTooltip={false}
               showSign={false}
               maximumFractionDigits={2}

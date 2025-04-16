@@ -31,7 +31,6 @@ interface UseListStateOptions<FilterType extends FilterModel, DataType> {
   staleTime?: number;
   gcTime?: number;
   select?: <TSelected = unknown>(data: DataType) => TSelected;
-  additionalFetchDependencies?: unknown[];
 }
 
 export type UseListReturn<FilterType, DataType> = Omit<UseListState<FilterType>, 'pagination' | 'sort'> &
@@ -59,46 +58,43 @@ export interface UseListState<FilterType> {
   sort: Sorting;
 }
 
-const DEFAULT_STALE_TIME = 5 * 60 * 1000; // 5 minutes
-const DEFAULT_GC_TIME = 10 * 60 * 1000; // 10 minutes
+const DEFAULT_STALE_TIME = 5 * 60 * 1000;
+const DEFAULT_GC_TIME = 10 * 60 * 1000;
 
-/**
- * TODO: Split into { pagination, filters, sort } with methods inside
- */
-export const useListState = <FilterType extends FilterModel, DataType extends { totalItems: number }, ItemType>({
-  enabled = true,
-  initialPerPage = 20,
-  initialFilters,
-  initialSort,
-  searchParamKeys = {},
-  formatMoment = BACKEND_DATE_FORMAT,
-  updateUrl = true,
-  queryFn,
-  queryKeyBase,
-  staleTime = DEFAULT_STALE_TIME,
-  gcTime = DEFAULT_GC_TIME,
-  select,
+export const useListState = <FilterType extends FilterModel, DataType extends { totalItems: number }, ItemType>(
+  {
+    enabled = true,
+    initialPerPage = 20,
+    initialFilters,
+    initialSort,
+    searchParamKeys = {},
+    formatMoment = BACKEND_DATE_FORMAT,
+    updateUrl = true,
+    queryFn,
+    queryKeyBase,
+    staleTime = DEFAULT_STALE_TIME,
+    gcTime = DEFAULT_GC_TIME,
+    select,
+  }: UseListStateOptions<FilterType, DataType>,
   additionalFetchDependencies = [],
-}: UseListStateOptions<FilterType, DataType>): UseListReturn<FilterType, DataType> => {
+): UseListReturn<FilterType, DataType> => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const getInitialState = useCallback(
-    (): UseListState<FilterType> => ({
-      pagination: {
-        currentPage: parseInt(searchParams.get('page') || '1', 10),
-        perPage: parseInt(searchParams.get('perPage') || initialPerPage.toString(), 10),
-      },
-      filters: initialFilters,
-      sort: {
-        field: (searchParams.get('sortField') as keyof ItemType) || initialSort?.field,
-        direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || initialSort?.direction,
-      },
-    }),
-    [searchParams, initialPerPage, initialFilters, initialSort],
-  );
+  const getInitialState = (): UseListState<FilterType> => ({
+    pagination: {
+      currentPage: parseInt(searchParams.get('page') || '1', 10),
+      perPage: parseInt(searchParams.get('perPage') || initialPerPage.toString(), 10),
+    },
+    filters:
+      (initialFilters.constructor as any).fromSearchParams?.(searchParams, searchParamKeys, formatMoment) ??
+      initialFilters,
+    sort: {
+      field: (searchParams.get('sortField') as keyof ItemType) || initialSort?.field,
+      direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || initialSort?.direction,
+    },
+  });
 
-  const [state, setState] = useState<UseListState<FilterType>>(getInitialState);
-
+  const [state, setState] = useState<UseListState<FilterType>>(() => getInitialState());
   const prevStateRef = useRef(state);
 
   const setCurrentPage = useCallback((page: number) => {
@@ -111,7 +107,7 @@ export const useListState = <FilterType extends FilterModel, DataType extends { 
   const setPerPage = useCallback((perPage: number) => {
     setState((prev) => ({
       ...prev,
-      pagination: { ...prev.pagination, totalPages: 0, currentPage: 1, perPage: perPage },
+      pagination: { ...prev.pagination, totalPages: 0, currentPage: 1, perPage },
     }));
   }, []);
 
@@ -123,8 +119,8 @@ export const useListState = <FilterType extends FilterModel, DataType extends { 
 
       return {
         ...prev,
-        pagination: { ...prev.pagination, currentPage: 1 },
         filters: updatedFilters,
+        pagination: { ...prev.pagination, currentPage: 1 },
       };
     });
   }, []);
@@ -182,6 +178,7 @@ export const useListState = <FilterType extends FilterModel, DataType extends { 
     params.set('perPage', state.pagination.perPage.toString());
 
     Object.entries(state.filters).forEach(([key, value]) => {
+      if (key === '_defaults') return;
       const searchParamKey = searchParamKeys[key as keyof FilterType] || key;
       const defaultValue = initialFilters[key as keyof FilterType];
       if (value !== undefined && value !== null && value !== '' && !isEqual(value, defaultValue)) {
@@ -201,28 +198,36 @@ export const useListState = <FilterType extends FilterModel, DataType extends { 
     return () => {
       updateSearchParamsDebounced.cancel();
     };
-  }, [state, prevStateRef, searchParamKeys, formatMoment, updateSearchParamsDebounced, updateUrl, initialFilters]);
+  }, [state, searchParamKeys, formatMoment, updateSearchParamsDebounced, updateUrl, initialFilters]);
 
-  const queryKey = [
-    queryKeyBase,
-    state.pagination.currentPage,
-    state.pagination.perPage,
-    state.filters,
-    state.sort,
-    ...additionalFetchDependencies,
-  ];
+  // Normalize filters and sort for stable queryKey
+  const serializedFilters = useMemo(() => JSON.stringify(state.filters), [state.filters]);
+  const serializedSort = useMemo(() => JSON.stringify(state.sort), [state.sort]);
+
+  const queryKey = useMemo(
+    () => [
+      queryKeyBase,
+      state.pagination.currentPage,
+      state.pagination.perPage,
+      serializedFilters,
+      serializedSort,
+      ...additionalFetchDependencies,
+    ],
+    [
+      queryKeyBase,
+      state.pagination.currentPage,
+      state.pagination.perPage,
+      serializedFilters,
+      serializedSort,
+      ...additionalFetchDependencies,
+    ],
+  );
 
   const response = useQuery<DataType, Error>({
     enabled,
     select,
     queryKey,
-    queryFn: (() =>
-      queryFn(
-        state.pagination.currentPage,
-        state.pagination.perPage,
-        state.filters,
-        state.sort,
-      )) as () => Promise<DataType>,
+    queryFn: () => queryFn(state.pagination.currentPage, state.pagination.perPage, state.filters, state.sort),
     staleTime,
     gcTime,
     retry: 3,
@@ -233,7 +238,7 @@ export const useListState = <FilterType extends FilterModel, DataType extends { 
     pagination: {
       ...state.pagination,
       totalItems: response.data?.totalItems || 0,
-      totalPages: Math.ceil(response.data?.totalItems || 0 / state.pagination.perPage),
+      totalPages: Math.ceil((response.data?.totalItems || 0) / state.pagination.perPage),
       setCurrentPage,
       setPerPage,
     },

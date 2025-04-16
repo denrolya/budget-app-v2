@@ -1,5 +1,7 @@
 import isEqual from 'lodash/isEqual';
-import moment from 'moment/moment';
+import moment from 'moment';
+
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 
 export interface FilterModel {
   reset(): void;
@@ -8,6 +10,27 @@ export interface FilterModel {
 
 abstract class BaseFilters implements FilterModel {
   [key: string]: any;
+
+  static fromSearchParams<T extends FilterModel>(
+    this: new () => T,
+    params: URLSearchParams,
+    map: Record<string, string> = {},
+    format = BACKEND_DATE_FORMAT,
+  ): T {
+    const instance = new this();
+
+    Object.keys(instance).forEach((key) => {
+      const paramKey = map[key] || key;
+      const rawValue = params.get(paramKey);
+      if (rawValue !== null) {
+        const isDate = moment(rawValue, format, true).isValid();
+        const value = isDate ? moment(rawValue, format) : rawValue;
+        instance.setFilter(key as keyof T, value);
+      }
+    });
+
+    return instance;
+  }
 
   protected constructor(filters: Record<string, any> = {}) {
     Object.assign(this, filters);
@@ -23,7 +46,7 @@ abstract class BaseFilters implements FilterModel {
     Object.assign(this, this._defaults);
   }
 
-  getModifiedCount(): number {
+  get activeCount(): number {
     let count = 0;
 
     const keys = Object.keys(this._defaults);

@@ -26,78 +26,76 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
   };
 
   return (
-    <div className="relative mb-4 mt-4">
-      <Card
-        className={cn('ease-in-out hover:shadow-md dark:hover:shadow-primary/25 transition-colors group', {
-          'border-l-2 border-l-green-500': colorBorder && transaction.isIncome(),
-          'border-l-2 border-l-red-500': colorBorder && transaction.isExpense(),
-        })}
-      >
-        <CardContent className="p-2 flex flex-col space-y-1">
-          <div className="flex flex-row items-center justify-between">
-            <div className="flex-grow flex items-center space-x-2 overflow-x-auto">
-              <TransactionValue className="text-xs" transaction={transaction} />
-              <AccountBadge size="sm" account={transaction.account} />
-              {transaction?.debt?.debtor && (
-                <Badge variant="outline" className="text-[10px] flex items-center px-1">
-                  <User className="h-3 w-3 mr-1" />
-                  {transaction.debt.debtor}
-                </Badge>
-              )}
-              {transaction.isDraft && (
-                <Badge variant="outline" className="bg-primary text-primary-foreground text-[10px] px-1">
-                  Draft
-                </Badge>
-              )}
-              {transaction.compensations && transaction.compensations.length > 0 && (
-                <Badge variant="outline" className="bg-secondary text-secondary-foreground text-[10px] px-1">
-                  Compensated
-                </Badge>
-              )}
-            </div>
+    <Card
+      className={cn('ease-in-out hover:shadow-md dark:hover:shadow-primary/25 transition-colors group relative', {
+        'border-l-2 border-l-green-500': colorBorder && transaction.isIncome(),
+        'border-l-2 border-l-red-500': colorBorder && transaction.isExpense(),
+      })}
+    >
+      <CardContent className="p-2 flex flex-col space-y-1">
+        <div className="flex flex-row items-center justify-between">
+          <div className="flex-grow flex items-center space-x-2 overflow-x-auto">
+            <TransactionValue className="text-xs" transaction={transaction} />
+            <AccountBadge size="sm" account={transaction.account} />
+            {transaction?.debt?.debtor && (
+              <Badge variant="outline" className="text-[10px] flex items-center px-1">
+                <User className="h-3 w-3 mr-1" />
+                {transaction.debt.debtor}
+              </Badge>
+            )}
+            {transaction.isDraft && (
+              <Badge variant="outline" className="bg-primary text-primary-foreground text-[10px] px-1">
+                Draft
+              </Badge>
+            )}
+            {transaction.compensations && transaction.compensations.length > 0 && (
+              <Badge variant="outline" className="bg-secondary text-secondary-foreground text-[10px] px-1">
+                Compensated
+              </Badge>
+            )}
+          </div>
 
-            <div className="flex flex-row items-center space-x-2">
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                {transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
-              </span>
-              <div className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                <Sheet>
-                  <SheetTrigger className="m-0" asChild>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
-                    <SheetHeader>
-                      <SheetTitle>Transaction Details</SheetTitle>
-                      <SheetDescription classname="sr-only">Transaction details for {transaction.id}</SheetDescription>
-                    </SheetHeader>
-                    <Details transaction={transaction} />
-                  </SheetContent>
-                </Sheet>
-              </div>
+          <div className="flex flex-row items-center space-x-2">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              {transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
+            </span>
+            <div className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+              <Sheet>
+                <SheetTrigger className="m-0" asChild>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
+                  <SheetHeader>
+                    <SheetTitle>Transaction Details</SheetTitle>
+                    <SheetDescription classname="sr-only">Transaction details for {transaction.id}</SheetDescription>
+                  </SheetHeader>
+                  <Details transaction={transaction} />
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
-          {transaction.note && (
-            <ResponsiveTooltip
-              openDelay={0}
-              content={<p>{transaction.note}</p>}
-              triggerClassName="w-full overflow-hidden"
-            >
-              <p className="text-sm text-muted-foreground truncate overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
-                {truncateNote(transaction.note, 50)}
-              </p>
-            </ResponsiveTooltip>
-          )}
-        </CardContent>
-      </Card>
+        </div>
+        {transaction.note && (
+          <ResponsiveTooltip
+            openDelay={0}
+            content={<p>{transaction.note}</p>}
+            triggerClassName="w-full overflow-hidden"
+          >
+            <p className="text-sm text-muted-foreground truncate overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
+              {truncateNote(transaction.note, 50)}
+            </p>
+          </ResponsiveTooltip>
+        )}
+      </CardContent>
       <Badge
         variant="outline"
         className="absolute top-0 left-0 -translate-y-1/2 text-xs px-1 py-0 whitespace-nowrap z-10 bg-background shadow-md"
       >
         {transaction.category.name}
       </Badge>
-    </div>
+    </Card>
   );
 };
 

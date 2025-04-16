@@ -17,7 +17,7 @@ interface TransactionFiltersProps {
 }
 
 export class TransactionFilters extends BaseFilters {
-  private _defaults: TransactionFiltersProps;
+  private readonly _defaults: TransactionFiltersProps;
 
   searchTerm!: string;
   before!: Moment;

@@ -1,6 +1,9 @@
 import { Moment } from 'moment';
 import React from 'react';
 
+import SummaryBadge from '@/components/common/SummaryBadge';
+import { ROUTES } from '@/constants/routes';
+import { cn } from '@/lib/utils';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
@@ -52,19 +55,15 @@ export const List: React.FC<Props> = ({ groupedItems, ...props }) => (
     {groupedItems.map(([date, transactions, totalValue, count], index) => (
       <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
         <div className="space-y-2">
-          <div className="flex flex-col space-y-1 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-            <h2 className="text-lg font-semibold">
-              <RelativeDatetimeDisplay showTime={false} date={date} />
-            </h2>
-            <div className="text-sm text-muted-foreground">
-              <span>{count} transactions</span>
-              <span className="mx-1">•</span>
-              <span>
-                <MoneyValue amount={totalValue} />
-              </span>
+          <div className="flex flex-wrap justify-between border-b py-3">
+            <h4 className="text-lg font-semibold flex items-center">
+              <RelativeDatetimeDisplay showDayBadge badgeSize="sm" variant="default" showTime={false} date={date} />
+            </h4>
+            <div className="flex flex-wrap gap-2 text-sm pr-3">
+              <SummaryBadge icon={ROUTES.TRANSACTION_LIST.icon} count={count} value={totalValue} />
             </div>
           </div>
-          <ul className="space-y-2">
+          <ul className="pt-4 pb-4 md:pb-0 flex flex-col gap-4 flex-grow overflow-auto max-w-full">
             {transactions.map((transaction) => (
               <li key={transaction.id}>
                 <ListItem transaction={transaction} />
@@ -72,7 +71,6 @@ export const List: React.FC<Props> = ({ groupedItems, ...props }) => (
             ))}
           </ul>
         </div>
-        {index < groupedItems.length - 1 && <Separator className="my-6" />}
       </React.Fragment>
     ))}
   </div>
