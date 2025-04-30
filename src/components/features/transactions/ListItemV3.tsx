@@ -28,8 +28,8 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
   return (
     <Card
       className={cn('ease-in-out hover:shadow-md dark:hover:shadow-primary/25 transition-colors group relative', {
-        'border-l-2 border-l-green-500': colorBorder && transaction.isIncome(),
-        'border-l-2 border-l-red-500': colorBorder && transaction.isExpense(),
+        'border-l-2 border-success': colorBorder && transaction.isIncome(),
+        'border-l-2 border-destructive': colorBorder && transaction.isExpense(),
       })}
     >
       <CardContent className="p-2 flex flex-col space-y-1">
@@ -69,7 +69,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
                 <SheetContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
                   <SheetHeader>
                     <SheetTitle>Transaction Details</SheetTitle>
-                    <SheetDescription classname="sr-only">Transaction details for {transaction.id}</SheetDescription>
+                    <SheetDescription className="sr-only">Transaction details for {transaction.id}</SheetDescription>
                   </SheetHeader>
                   <Details transaction={transaction} />
                 </SheetContent>

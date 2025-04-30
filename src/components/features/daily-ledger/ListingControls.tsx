@@ -101,12 +101,11 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
 
       <div className="flex-grow w-[26rem]">
         <AccountTypeahead
-          id="accounts"
           multiple
+          id="accounts"
+          valueField="id"
           value={[...new Set([...transactionFilters.accounts, ...transferFilters.accounts])]}
-          onChange={(accounts) => {
-            setFilter('accounts', accounts);
-          }}
+          onChange={(accounts) => setFilter('accounts', accounts)}
           placeholder="Accounts"
           className="w-full"
         />

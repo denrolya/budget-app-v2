@@ -1,8 +1,6 @@
-import { CalendarX } from 'lucide-react';
 import { Moment } from 'moment';
 import React from 'react';
 
-import { Badge } from '@/components/ui/badge';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import SummaryBadge from '@/components/common/SummaryBadge';
 import TransactionListItem, {

@@ -20,6 +20,7 @@ const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
   multiple = false,
   value,
   onChange,
+  valueField = 'id',
   className,
   ...props
 }) => {
@@ -56,7 +57,7 @@ const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
 
   return (
     <TypeaheadV2<Account, string>
-      valueField="id"
+      valueField={valueField as keyof Account}
       labelField="displayName"
       groupBy="type"
       placeholder={multiple ? 'Select accounts...' : 'Select account...'}

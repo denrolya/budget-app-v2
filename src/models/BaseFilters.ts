@@ -5,7 +5,8 @@ import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 
 export interface FilterModel {
   reset(): void;
-  setFilter<K extends keyof this>(key: K, value: this[K]): void;
+
+  setFilter<K extends keyof this>(key: K, value: this[K]): this;
 }
 
 abstract class BaseFilters implements FilterModel {
@@ -36,10 +37,10 @@ abstract class BaseFilters implements FilterModel {
     Object.assign(this, filters);
   }
 
-  setFilter<K extends keyof this>(key: K, value: this[K]): void {
-    if (key in this) {
-      this[key] = value;
-    }
+  setFilter<K extends keyof this>(key: K, value: this[K]): this {
+    const clone = this.clone();
+    clone[key] = value;
+    return clone;
   }
 
   reset() {
@@ -67,6 +68,12 @@ abstract class BaseFilters implements FilterModel {
 
   static isApplicable(key: string): boolean {
     return key in this.prototype;
+  }
+
+  clone(): this {
+    const clone = new (this.constructor as { new (): this })();
+    Object.assign(clone, this);
+    return clone;
   }
 }
 

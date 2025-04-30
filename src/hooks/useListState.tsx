@@ -111,19 +111,15 @@ export const useListState = <FilterType extends FilterModel, DataType extends { 
     }));
   }, []);
 
-  const setFilter: SetFilterFunction<FilterType> = useCallback((key, value) => {
-    setState((prev) => {
-      const updatedFilters = new (prev.filters.constructor as { new (): FilterType })();
-      Object.assign(updatedFilters, prev.filters);
-      updatedFilters.setFilter(key, value);
-
-      return {
+  const setFilter: SetFilterFunction<FilterType> = useCallback(
+    (key, value) =>
+      setState((prev) => ({
         ...prev,
-        filters: updatedFilters,
+        filters: prev.filters.setFilter(key, value),
         pagination: { ...prev.pagination, currentPage: 1 },
-      };
-    });
-  }, []);
+      })),
+    [],
+  );
 
   const resetFilters = useCallback(() => {
     setState((prev) => ({

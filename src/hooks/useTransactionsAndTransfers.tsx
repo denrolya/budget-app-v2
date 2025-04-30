@@ -2,7 +2,7 @@ import groupBy from 'lodash/groupBy';
 import sortBy from 'lodash/sortBy';
 import toPairs from 'lodash/toPairs';
 import moment, { Moment } from 'moment';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
@@ -51,16 +51,16 @@ export const useTransactionsAndTransfers = ({
   const setFilter = useCallback(
     (type: keyof CombinedFilters, value: any) => {
       if (TransactionFilters.isApplicable(type)) {
-        transactionsState.filters.setFilter(type as keyof TransactionFilters, value);
+        transactionsState.setFilter(type as keyof TransactionFilters, value);
         if (type === 'categories' && value.length > 0) {
           setShowTransfers(false);
         }
       }
       if (TransferFilters.isApplicable(type)) {
-        transfersState.filters.setFilter(type as keyof TransferFilters, value);
+        transfersState.setFilter(type as keyof TransferFilters, value);
       }
     },
-    [transactionsState.filters.setFilter, transfersState.filters.setFilter],
+    [transactionsState.setFilter, transfersState.setFilter],
   );
 
   const filteredItems = useMemo(() => {
