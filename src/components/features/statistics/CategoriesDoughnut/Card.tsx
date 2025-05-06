@@ -52,7 +52,7 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
         before: range.before ? moment(range.before).endOf('day') : timeframe.before,
       });
     },
-    [setTimeframe],
+    [timeframe.after, timeframe.before],
   );
 
   const { data: currentData, isLoading } = useCategoryTreeStatistics({
@@ -61,26 +61,41 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
     before: timeframe.before,
   });
 
-  const processData = (data: any[]): ProcessedCategory[] =>
-    data?.map((category) => ({
-      id: category.id,
-      name: category.name,
-      value: category.total,
-      children: category.children ? processData(category.children) : undefined,
-    })) || [];
+  const processData = useCallback(
+    (data: any[]): ProcessedCategory[] =>
+      data?.map((category) => ({
+        id: category.id,
+        name: category.name,
+        value: category.total,
+        children: category.children ? processData(category.children) : undefined,
+      })) || [],
+    [],
+  );
 
   const { rootCategories, totalCurrent } = useMemo(() => {
     const rootCategories = processData(currentData);
     const totalCurrent = rootCategories.reduce((sum, cat) => sum + cat.value, 0);
     return { rootCategories, totalCurrent };
-  }, [currentData]);
+  }, [currentData, processData]);
 
   const currentCategories = currentCategory ? currentCategory.children || [] : rootCategories;
 
-  const calculateMonthlyAverage = (value: number) => {
-    const totalMonths = moment(timeframe.before).diff(moment(timeframe.after), 'months', true);
-    return totalMonths > 0 ? value / totalMonths : value;
-  };
+  const calculateMonthlyAverage = useCallback(
+    (value: number) => {
+      const now = moment();
+      const { before, after } = timeframe;
+
+      let totalMonths: number;
+
+      if (moment(before).isAfter(now)) {
+        totalMonths = now.diff(moment(after), 'months');
+      } else {
+        totalMonths = moment(before).diff(moment(after), 'months');
+      }
+      return totalMonths > 0 ? value / totalMonths : value;
+    },
+    [timeframe],
+  );
 
   const chartData = useMemo(() => {
     const data = currentCategory ? currentCategories : rootCategories;
@@ -91,7 +106,7 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
       })),
       'value',
     ).reverse();
-  }, [currentCategories, rootCategories, showMonthlyAverage, calculateMonthlyAverage]);
+  }, [currentCategory, currentCategories, rootCategories, showMonthlyAverage, calculateMonthlyAverage]);
 
   const handleCategoryStep = (category: ProcessedCategory) => {
     if (category.children && category.children.length > 0) {
@@ -146,6 +161,7 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
             </CardTitle>
             <div className="flex items-center">
               <ConfigurationMenu
+                timeframe={timeframe}
                 type={type}
                 setType={setType}
                 showMonthlyAverage={showMonthlyAverage}

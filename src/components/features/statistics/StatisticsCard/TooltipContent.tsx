@@ -17,10 +17,10 @@ const TooltipContent: React.FC<{
 }> = ({ label, amount, date, selectedTimeframe, comparisonTimeframe, comparison }) => (
   <>
     <div className="flex justify-between items-center">
-      <p className="text-xs font-medium">
+      <p className="text-xs font-medium text-nowrap">
         {formatShortDate(selectedTimeframe.after)} - {formatShortDate(selectedTimeframe.before)}
       </p>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-muted-foreground text-nowrap">
         {formatShortDate(comparisonTimeframe.after)} - {formatShortDate(comparisonTimeframe.before)}
       </p>
     </div>

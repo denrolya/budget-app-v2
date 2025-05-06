@@ -2,6 +2,7 @@ import cn from 'classnames';
 import { ArrowDownCircle, ArrowUpCircle, Sigma, SettingsIcon } from 'lucide-react';
 import React from 'react';
 
+import { Timeframe } from '@/types/global';
 import { useIsMobile } from '@/hooks/useMobile';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,6 +19,7 @@ import { Switch } from '@/components/ui/switch';
 import { Type as TransactionType } from '@/types/transaction';
 
 interface UnifiedChartMenuProps {
+  timeframe: Timeframe;
   type: TransactionType;
   setType: (type: TransactionType) => void;
   showMonthlyAverage: boolean;
@@ -25,6 +27,7 @@ interface UnifiedChartMenuProps {
 }
 
 export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
+  timeframe,
   type,
   setType,
   showMonthlyAverage,
@@ -62,20 +65,22 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="show-monlty-average" className="flex items-center space-x-2 text-xs cursor-pointer">
-            <Sigma className="h-3 w-3" />
-            <span>Show Monthly Average Values</span>
-          </Label>
-          <Switch
-            id="show-monlty-average"
-            className="scale-75"
-            checked={showMonthlyAverage}
-            onCheckedChange={() => setShowMonthlyAverage(!showMonthlyAverage)}
-          />
+      {timeframe.before.diff(timeframe.after, 'months') > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="show-monlty-average" className="flex items-center space-x-2 text-xs cursor-pointer">
+              <Sigma className="h-3 w-3" />
+              <span>Show Monthly Average Values</span>
+            </Label>
+            <Switch
+              id="show-monlty-average"
+              className="scale-75"
+              checked={showMonthlyAverage}
+              onCheckedChange={() => setShowMonthlyAverage(!showMonthlyAverage)}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 
