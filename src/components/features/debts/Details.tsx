@@ -6,6 +6,7 @@ import { ArrowUpDown, Plus } from 'lucide-react';
 import moment, { Moment } from 'moment/moment';
 import React, { useMemo, useState } from 'react';
 
+import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/useMobile';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { MoneyValue } from '@/components/common/MoneyValue';
@@ -62,22 +63,25 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
               <span>{debt?.debtor}</span>
               <MoneyValue badge amount={debt.balance} currency={debt.currency} values={debt.convertedValues} />
             </CardTitle>
-            <CardDescription>
-              <p>
-                Opened on <RelativeDatetimeDisplay date={debt.createdAt} />
-              </p>
-              <p>
-                {totalTransactionsCount} transactions{' '}
-                {totalTransactionsCount > 0 && (
-                  <>
-                    of total value: <MoneyValue showSign amount={totalTransactionsValue} currency={debt.currency} />
-                  </>
-                )}
-              </p>
-            </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">{debt?.note}</p>
+            <section className="border-b border-t py-4">
+              <p className="text-xs">
+                <strong>Opened on:</strong> <RelativeDatetimeDisplay date={debt.createdAt} />
+              </p>
+              <p className="text-xs">
+                <strong>Number of Transactions:</strong> {totalTransactionsCount}
+              </p>
+              <p className="text-xs">
+                <strong>Of total value: </strong>
+                <MoneyValue showSign amount={totalTransactionsValue} currency={debt.currency} />
+              </p>
+            </section>
+
+            <section className="mt-4">
+              <h4>Note:</h4>
+              <p className="text-sm text-muted-foreground">{debt?.note}</p>
+            </section>
           </CardContent>
           <CardFooter>
             <Button variant="outline" size="sm">

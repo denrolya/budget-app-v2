@@ -64,25 +64,30 @@ const PageWithSidebar: PageWithSidebarComponent = ({
 
 const Header: React.FC<
   React.ComponentPropsWithoutRef<'header'> & {
-    title?: string;
+    title?: ReactNode;
     onBack?: () => void;
     overrideContent?: boolean;
   }
 > = ({ children, className = '', title, onBack, overrideContent = false, ...props }) => (
-  <header className={cn('bg-background border-b p-4 flex justify-between items-center', className)} {...props}>
-    {!overrideContent && (
-      <>
-        <div className="flex items-center">
-          <Button variant="ghost" size="icon" className="mr-2" onClick={onBack} aria-label="Back to list">
-            <ChevronLeft className="h-6 w-6" />
-          </Button>
-          <h1 className="text-xl font-bold">{title}</h1>
-        </div>
-        <div className="flex space-x-2">{children}</div>
-      </>
-    )}
-    {overrideContent && children}
-  </header>
+  <>
+    <header className={cn('bg-background border-b p-4', className)} {...props}>
+      {!overrideContent && (
+        <>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <Button variant="ghost" size="icon" className="mr-2" onClick={onBack} aria-label="Back to list">
+                <ChevronLeft className="h-6 w-6" />
+              </Button>
+              {typeof title === 'string' && <h1 className="text-xl font-bold">{title}</h1>}
+              {typeof title !== 'string' && title}
+            </div>
+            <div className="flex space-x-2">{children}</div>
+          </div>
+        </>
+      )}
+      {overrideContent && children}
+    </header>
+  </>
 );
 
 const Sidebar: React.FC<React.ComponentPropsWithoutRef<'aside'>> = ({ children, className = '', ...props }) => (

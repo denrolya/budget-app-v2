@@ -1,6 +1,8 @@
-import { Download, Edit } from 'lucide-react';
+import { ChevronLeft, Download, Edit } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { MoneyValue } from '@/components/common/MoneyValue';
+import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import DebtDetails from '@/components/features/debts/Details';
 import SidebarListing from '@/components/features/debts/SidebarListing';
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
@@ -31,19 +33,15 @@ export const DebtsManagementPage: React.FC = () => {
       )}
 
       <PageWithSidebar.Content>
-        {(selectedDebt) && (
-          <DebtDetails debt={selectedDebt} />
-        )}
+        {selectedDebt && <DebtDetails debt={selectedDebt} />}
 
-        {(!selectedDebt) && (
+        {!selectedDebt && (
           <div className="flex items-center justify-center h-full bg-muted">
             <div className="text-center space-y-4 h-full">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
                 <Icon className="h-8 w-8 text-primary/60" />
               </div>
-              <p className="text-muted-foreground max-w-[250px]">
-                Select a category from the sidebar to view details
-              </p>
+              <p className="text-muted-foreground max-w-[250px]">Select a category from the sidebar to view details</p>
             </div>
           </div>
         )}
