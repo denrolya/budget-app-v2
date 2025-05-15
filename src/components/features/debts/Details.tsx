@@ -63,7 +63,17 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
               <MoneyValue badge amount={debt.balance} currency={debt.currency} values={debt.convertedValues} />
             </CardTitle>
             <CardDescription>
-              Opened on <RelativeDatetimeDisplay date={debt.createdAt} />
+              <p>
+                Opened on <RelativeDatetimeDisplay date={debt.createdAt} />
+              </p>
+              <p>
+                {totalTransactionsCount} transactions{' '}
+                {totalTransactionsCount > 0 && (
+                  <>
+                    of total value: <MoneyValue showSign amount={totalTransactionsValue} currency={debt.currency} />
+                  </>
+                )}
+              </p>
             </CardDescription>
           </CardHeader>
           <CardContent>
