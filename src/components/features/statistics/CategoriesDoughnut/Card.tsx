@@ -152,11 +152,11 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
   return (
     <>
       <Card
-        className={`w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 ${className}`}
+        className={`flex flex-col h-full w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 ${className}`}
       >
         <CardHeader className="p-4 pb-0 space-y-0.2">
           <div className="flex justify-between items-start">
-            <CardTitle className="text-base font-medium">
+            <CardTitle className="tracking-tight text-lg font-bold mb-2">
               {type === TransactionType.Expense ? 'Expenses' : 'Income'}
             </CardTitle>
             <div className="flex items-center">
@@ -170,7 +170,7 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-4 pt-0">
+        <CardContent className="p-4 pt-0 flex-1">
           <DaterangePickerWithPresets
             after={timeframe.after}
             before={timeframe.before}
@@ -205,8 +205,8 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
 
           {isLoading && <Skeleton />}
           {!isLoading && currentCategories.length > 0 && (
-            <div className="flex flex-col md:flex-row">
-              <div className="w-full md:w-1/2 h-64 md:h-96">
+            <div className="flex flex-col">
+              <div className="w-full h-64 md:h-96">
                 <ResponsivePie
                   data={chartData}
                   margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
@@ -232,59 +232,66 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
                   onClick={(node) => handleCategoryStep(node.data as ProcessedCategory)}
                 />
               </div>
-              <div className="w-full md:w-1/2 mt-4 md:mt-0 md:ml-4">
+              <div className="w-full mt-4">
                 <ScrollArea className="h-64 md:h-96">
-                  <div className="space-y-1">
-                    {chartData.map((category) => (
-                      <div
-                        className="flex items-center justify-between text-sm p-1 rounded hover:bg-muted/50 transition-colors cursor-pointer"
-                        key={category.id}
-                        onClick={() => handleCategoryStep(category)}
-                      >
-                        <ResponsiveTooltip
-                          openDelay={1}
-                          triggerClassName="truncate flex-1"
-                          content={
-                            <>
-                              <code className="font-mono text-xs">#{category.id}</code>:{' '}
-                              <span className="font-medium">{category.name}</span>
-                            </>
-                          }
+                  <div className="overflow-x-auto">
+                    <div className="w-max min-w-full space-y-1">
+                      {chartData.map((category) => (
+                        <div
+                          className="flex items-center justify-between text-sm p-1 rounded hover:bg-muted/50 transition-colors cursor-pointer"
+                          key={category.id}
+                          onClick={() => handleCategoryStep(category)}
                         >
-                          <span className="truncate flex-1">{category.name}</span>
-                        </ResponsiveTooltip>
-                        <div className="flex items-center space-x-2">
-                          <span className="font-mono text-sm whitespace-nowrap">
-                            <MoneyValue className="font-medium" useColors={false} amount={category.value} />
-                            <span className="ml-1 text-xs text-muted-foreground">
-                              {(
-                                (category.value / (currentCategory ? currentCategory.value : totalCurrent)) *
-                                100
-                              ).toFixed(1)}
-                              %
+                          <ResponsiveTooltip
+                            openDelay={1}
+                            triggerClassName="truncate flex-1"
+                            content={
+                              <>
+                                <code className="font-mono text-xs">#{category.id}</code>:{' '}
+                                <span className="font-medium">{category.name}</span>
+                              </>
+                            }
+                          >
+                            <span className="truncate flex-1">
+                              {category.name}
+                              {category.value > 0 && (
+                                <small className="ml-1 text-xs text-muted-foreground">
+                                  (
+                                  {(
+                                    (category.value / (currentCategory ? currentCategory.value : totalCurrent)) *
+                                    100
+                                  ).toFixed()}
+                                  %)
+                                </small>
+                              )}
                             </span>
-                          </span>
-                          <div className="flex">
-                            <ResponsiveTooltip
-                              openDelay={1}
-                              triggerClassName="m-0 p-0"
-                              content="View transactions for this category within selected timeframe"
-                            >
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                aria-label="View transactions"
-                                onClick={() => handleCategoryClick(category)}
+                          </ResponsiveTooltip>
+                          <div className="flex items-center space-x-2">
+                            <span className="font-mono text-sm whitespace-nowrap">
+                              <MoneyValue className="font-medium" useColors={false} amount={category.value} />
+                            </span>
+                            <div className="flex">
+                              <ResponsiveTooltip
+                                openDelay={1}
+                                triggerClassName="m-0 p-0"
+                                content="View transactions for this category within selected timeframe"
                               >
-                                <CreditCard className="h-4 w-4" />
-                                <span className="sr-only">View transactions</span>
-                              </Button>
-                            </ResponsiveTooltip>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  aria-label="View transactions"
+                                  onClick={() => handleCategoryClick(category)}
+                                >
+                                  <CreditCard className="h-4 w-4" />
+                                  <span className="sr-only">View transactions</span>
+                                </Button>
+                              </ResponsiveTooltip>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </ScrollArea>
               </div>

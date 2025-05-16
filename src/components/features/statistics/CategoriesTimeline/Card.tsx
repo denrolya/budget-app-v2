@@ -28,15 +28,15 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
   const [selectedPeriod, setSelectedPeriod] = useState<ISO8601Period>('P1M');
   const [selectedCategories, setSelectedCategories] = useState<number[]>([1, 6, 73, 147]);
   const [debouncedCategories, setDebouncedCategories] = useState<number[]>(selectedCategories);
-  const [showExpenseReference, setShowExpenseReference] = useState<boolean>(true);
-  const [showIncomeReference, setShowIncomeReference] = useState<boolean>(true);
+  const [showExpenseReference, setShowExpenseReference] = useState<boolean>(false);
+  const [showIncomeReference, setShowIncomeReference] = useState<boolean>(false);
   const [showComparisonInTooltip, setShowComparisonInTooltip] = useState<boolean>(true);
   const [useSeparateAxisForTotals, setUseSeparateAxisForTotals] = useState<boolean>(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [selectedTimeframeForTransactions, setSelectedTimeframeForTransactions] = useState<TransactionsTimeframe>(null);
   const [fetchTransactionsFromSubcategories, setFetchTransactionsFromSubcategories] = useState<boolean>(false);
   const [timeframe, setTimeframe] = useState<Timeframe>({
-    after: moment().subtract(2, 'year').startOf('year'),
+    after: moment().subtract(1, 'year').startOf('year'),
     before: moment(),
   });
 
@@ -128,7 +128,7 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
       >
         <CardHeader className="p-4 pb-0 space-y-0.2">
           <div className="flex justify-between items-start">
-            <CardTitle className="text-base font-medium">Categories Timeline</CardTitle>
+            <CardTitle className="tracking-tight text-lg font-bold mb-2">Categories Timeline</CardTitle>
             <ConfigurationMenu
               chartType={chartType}
               setChartType={setChartType}

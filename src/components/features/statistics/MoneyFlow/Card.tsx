@@ -1,4 +1,4 @@
-import { Calendar } from 'lucide-react';
+import { BarChart, Calendar } from 'lucide-react';
 import moment from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 
@@ -7,7 +7,9 @@ import Chart from '@/components/features/statistics/MoneyFlow/Chart';
 import ConfigurationMenu from '@/components/features/statistics/MoneyFlow/ConfigurationMenu';
 import MoneyFlowSkeleton from '@/components/features/statistics/MoneyFlow/Skeleton';
 import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { PERIOD_OPTIONS, TIMEFRAME_OPTIONS } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
@@ -101,7 +103,7 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
     >
       <CardHeader className="p-4 pb-0 space-y-0.2">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-base font-medium">Money Flow</CardTitle>
+          <CardTitle className="tracking-tight text-lg font-bold mb-2">Money Flow</CardTitle>
           <ConfigurationMenu
             chartType={chartType}
             setChartType={setChartType}
@@ -171,48 +173,91 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
       </CardContent>
 
       {!isLoading && totalRevenue && (
-        <CardFooter
-          className={cn(
-            'flex flex-col gap-4 sm:gap-6 lg:flex-row lg:justify-between p-3 transition-all border-t duration-300 ease-in-out',
-          )}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:flex-1 lg:grid-cols-4 w-full">
-            <SummaryItem
-              label="Total Income"
-              value={totalIncome}
-              comparisonValue={previousTotalIncome}
-              comparisonPercentage={incomeChangePercent}
-            />
-            <SummaryItem
-              label="Total Expenses"
-              value={totalExpenses}
-              comparisonValue={previousTotalExpenses}
-              comparisonPercentage={expensesChangePercent}
-            />
-            <SummaryItem
-              label={`Avg. ${getPeriodLabel} Income`}
-              value={avgPeriodIncome}
-              comparisonValue={previousAvgPeriodIncome}
-              comparisonPercentage={incomeChangePercent}
-            />
-            <SummaryItem
-              label={`Avg. ${getPeriodLabel} Expenses`}
-              value={avgPeriodExpenses}
-              comparisonValue={previousAvgPeriodExpenses}
-              comparisonPercentage={expensesChangePercent}
-            />
+        <CardFooter className="flex flex-col w-full p-0 border-t text-sm">
+          {/* Desktop summary row with bottom border */}
+          <div className="hidden lg:flex w-full divide-x divide-muted-foreground/20 border-b border-muted px-2">
+            {[
+              {
+                label: 'Total Income',
+                value: totalIncome,
+                comparisonValue: previousTotalIncome,
+                comparisonPercentage: incomeChangePercent,
+              },
+              {
+                label: 'Total Expenses',
+                value: totalExpenses,
+                comparisonValue: previousTotalExpenses,
+                comparisonPercentage: expensesChangePercent,
+              },
+              {
+                label: 'Net Revenue',
+                value: totalRevenue,
+                comparisonValue: previousTotalRevenue,
+                comparisonPercentage: revenueChangePercent,
+                colors: true,
+                showSign: true,
+              },
+            ].map((item, index) => (
+              <div key={index} className="flex-1 px-3 py-2 flex justify-center items-center">
+                <SummaryItem {...item} className="text-center" />
+              </div>
+            ))}
           </div>
-          <div className="w-full lg:w-1/5">
-            <SummaryItem
-              colors
-              showSign
-              label="Net Revenue"
-              className="h-full"
-              value={totalRevenue}
-              comparisonValue={previousTotalRevenue}
-              comparisonPercentage={revenueChangePercent}
-            />
-          </div>
+
+          {/* Dialog + Full-width trigger button */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-muted-foreground py-2 px-3 flex justify-center items-center gap-1 rounded-none rounded-b-xl"
+              >
+                <BarChart className="h-4 w-4" />
+                <span>Show Summary</span>
+              </Button>
+            </DialogTrigger>
+
+            <DialogContent className="max-w-lg w-full">
+              <DialogHeader>
+                <DialogTitle>Summary Statistics</DialogTitle>
+              </DialogHeader>
+
+              <div className="flex flex-col gap-3 text-sm">
+                <SummaryItem
+                  label="Total Income"
+                  value={totalIncome}
+                  comparisonValue={previousTotalIncome}
+                  comparisonPercentage={incomeChangePercent}
+                />
+                <SummaryItem
+                  label="Total Expenses"
+                  value={totalExpenses}
+                  comparisonValue={previousTotalExpenses}
+                  comparisonPercentage={expensesChangePercent}
+                />
+                <SummaryItem
+                  label={`Avg. ${getPeriodLabel} Income`}
+                  value={avgPeriodIncome}
+                  comparisonValue={previousAvgPeriodIncome}
+                  comparisonPercentage={incomeChangePercent}
+                />
+                <SummaryItem
+                  label={`Avg. ${getPeriodLabel} Expenses`}
+                  value={avgPeriodExpenses}
+                  comparisonValue={previousAvgPeriodExpenses}
+                  comparisonPercentage={expensesChangePercent}
+                />
+                <SummaryItem
+                  label="Net Revenue"
+                  value={totalRevenue}
+                  comparisonValue={previousTotalRevenue}
+                  comparisonPercentage={revenueChangePercent}
+                  colors
+                  showSign
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
         </CardFooter>
       )}
     </Card>

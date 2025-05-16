@@ -3,7 +3,6 @@ import isEqual from 'lodash/isEqual';
 import { SettingsIcon } from 'lucide-react';
 import React, { memo, useMemo, useState } from 'react';
 
-import { useIsMobile } from '@/hooks/useMobile';
 import ConfigContainer from '@/components/features/statistics/StatisticsCard/ConfigContainer';
 import GenericContent from '@/components/features/statistics/StatisticsCard/GenericContent';
 import MinMaxContent from '@/components/features/statistics/StatisticsCard/MinMaxContent';
@@ -13,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
+import { useIsMobile } from '@/hooks/useMobile';
 import { Interval, StatisticsConfig, StatisticsType } from '@/types/statistics';
 import { Type as TransactionType } from '@/types/transaction';
 import { PercentageChange, StatisticsData, ValueByPeriodData } from '@/types/valueByPeriodStatistics';
@@ -101,7 +101,7 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
 
   return (
     <Card
-      className="w-[300px] h-[140px] overflow-hidden transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 relative flex-none snap-center"
+      className="min-w-[300px] h-[140px] overflow-hidden transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 relative flex-none snap-center"
       id={id}
     >
       {chartData && (

@@ -75,7 +75,7 @@ export const Tooltip: React.FC<Props> = ({
     if (active && payload && payload.length && dataPoint) {
       const tooltipWidth = 320;
       const tooltipHeight = 200;
-      const margin = 10;
+      const margin = 0;
 
       let top = Math.min(y, window.innerHeight - tooltipHeight - margin);
       let left = Math.min(x, window.innerWidth - tooltipWidth - margin);
