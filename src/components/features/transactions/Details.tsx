@@ -1,6 +1,7 @@
 import { Bitcoin, DollarSign, Edit, Euro, InfoIcon, Loader2, Trash2 } from 'lucide-react';
 import React from 'react';
 
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import TransactionValue from '@/components/common/TransactionValue';
@@ -124,70 +125,66 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
 
   return (
     <>
-      <div className="grid gap-4">
-        <div className="flex justify-between">
-          <span className="capitalize">
-            {transaction.type} <code>#{transaction.id}</code>
-            {transaction.isDraft && <Badge variant="outline">Draft</Badge>}
-          </span>
-          <TransactionValue badge transaction={transaction} />
-        </div>
-        <div className="grid gap-2">
-          <h3 className="font-semibold">Transaction Data</h3>
+      <div>
+        <section className="border-t mt-2 space-y-2 py-4">
+          <h3 className="tracking-tight text-lg font-semibold">Transaction Data</h3>
           <div className="flex justify-between items-center">
-            <span className="text-sm">Date</span>
-            <RelativeDatetimeDisplay
-              showRelative
-              showDayBadge
-              badgeSize="sm"
-              variant="default"
-              date={transaction.executedAt}
+            <span className="tracking-tight font-normal">Amount</span>
+            <MoneyValue
+              showValuesTooltip={false}
+              className="text-xs font-mono"
+              amount={transaction.amount * (transaction.isExpense() ? -1 : 1)}
+              currency={transaction.account.currency}
             />
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm">Category</span>
-            <div className="flex flex-col items-end">
-              <Badge variant="outline" className="text-xs px-1 py-0 whitespace-nowrap mb-1">
-                {transaction.category.name}
-              </Badge>
-              <span className="text-xs text-muted-foreground">{transaction.category.getFullPath().join(' > ')}</span>
-            </div>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-sm">Account</span>
+            <span className="tracking-tight font-normal">Account</span>
             <span className="font-medium">
-              <AccountBadge size="md" account={transaction.account} />
+              <AccountBadge size="sm" account={transaction.account} />
             </span>
           </div>
-          {isDebt && (
+          <div className="flex justify-between items-center">
+            <span className="tracking-tight font-normal">Date</span>
+            <RelativeDatetimeDisplay
+              showRelative={false}
+              showDayBadge={false}
+              variant="default"
+              className="text-xs font-mono tracking-tighter text-muted-foreground"
+              date={transaction.executedAt}
+            />
+          </div>
+          <div>
             <div className="flex justify-between items-center">
-              <span className="text-sm">Debtor</span>
+              <span className="tracking-tight font-normal">Category</span>
+              <div className="flex flex-col items-end">
+                <Badge variant="outline" className="text-xs px-1 py-0 whitespace-nowrap mb-1">
+                  {transaction.category.name}
+                </Badge>
+              </div>
+            </div>
+            <p className="text-xs text-right text-muted-foreground">{transaction.category.getFullPath().join(' > ')}</p>
+          </div>
+          {isDebt && (
+            <div className="flex justify-between items-center text-xs">
+              <span className="tracking-tight font-normal">Debtor</span>
               <span className="font-medium">{transaction.debt?.debtor}</span>
             </div>
           )}
-          <div className="flex justify-between items-center">
-            <span className="text-sm">Amount</span>
-            <span className="font-medium font-mono">
-              <MoneyValue useColors={false} amount={transaction.amount} currency={transaction.account.currency} />
-            </span>
-          </div>
-        </div>
+        </section>
 
         {transaction.note && (
-          <>
-            <Separator />
+          <section className="border-t mt-2 space-y-2 py-4">
             <div className="flex items-center space-x-2">
               <InfoIcon className="h-4 w-4 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">{transaction.note}</p>
             </div>
-          </>
+          </section>
         )}
 
         {transaction.convertedValues && Object.keys(transaction.convertedValues).length > 0 && (
-          <>
-            <Separator />
+          <section className="border-t mt-2 space-y-2 py-4">
             <div className="grid gap-2">
-              <h3 className="font-semibold">Converted Values (At Time of Transaction)</h3>
+              <h3 className="tracking-tight text-lg font-semibold mb-2">Converted Values (At Time of Transaction)</h3>
               <div className="space-y-2">
                 {currencyOrder.map((currency) => {
                   const value = transaction.convertedValues[currency];
@@ -206,7 +203,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
                           <div>
                             <h4 className="font-semibold">Historical Rate</h4>
                             <p className="text-sm text-muted-foreground">
-                              {transaction.executedAt.format('DD-MM-YYYY')}
+                              {transaction.executedAt.format(BACKEND_DATE_FORMAT)}
                             </p>
                             <RateDisplay
                               value={value / transaction.amount}
@@ -250,13 +247,13 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
                       }
                     >
                       <div className="flex justify-between items-center cursor-help">
-                        <span className="flex items-center space-x-2">
+                        <span className="flex items-center space-x-2 tracking-tight font-normal">
                           <CurrencyIcon currency={currency} />
                           <span>{currency}</span>
                         </span>
                         <MoneyValue
                           useColors={false}
-                          className="font-medium font-mono"
+                          className="text-xs font-mono text-muted-foreground"
                           amount={value}
                           currency={currency}
                           maximumFractionDigits={isBTC ? 8 : 2}
@@ -267,7 +264,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
                 })}
               </div>
             </div>
-          </>
+          </section>
         )}
 
         {transaction.compensations && transaction.compensations.length > 0 && (

@@ -54,7 +54,7 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
               </SheetTrigger>
               <SheetContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
                 <SheetHeader>
-                  <SheetTitle>Transfer Details</SheetTitle>
+                  <SheetTitle className="tracking-tight text-xl font-bold">Transfer Details</SheetTitle>
                 </SheetHeader>
                 <TransferDetails transfer={transfer} />
               </SheetContent>

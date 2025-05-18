@@ -260,7 +260,7 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
             >
               <TableCell
                 colSpan={8}
-                className={cn('font-semibold', 'bg-muted/40', 'px-4', {
+                className={cn('bg-muted/40', 'px-4', {
                   'py-0': compact,
                 })}
               >
@@ -280,20 +280,24 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
               >
                 <TableCell
                   colSpan={2}
-                  className={cn('pl-4', {
+                  className={cn('pl-4', 'w-[1%]', {
                     'py-0': compact,
                   })}
                 >
                   <Sheet>
-                    <SheetTrigger className="m-0 cursor-context-menu" asChild>
-                      <code>#{transaction.id}</code>
+                    <SheetTrigger className="m-0" asChild>
+                      <code className="cursor-context-menu tracking-tighter text-xs antialiased select-all text-muted-foreground">
+                        #{transaction.id}
+                      </code>
                     </SheetTrigger>
-                    <SheetContent side="right" className="w-full sm:max-w-3xl p-0 overflow-y-auto">
+                    <SheetContent side="right" className="w-full sm:max-w-xl p-0 overflow-y-auto">
                       <div className="h-full flex flex-col">
                         <SheetHeader className="p-6 pb-0">
                           <SheetTitle>Transaction Details</SheetTitle>
-                          <SheetDescription className="sr-only">
-                            Detailed information about transaction #{transaction.id}
+                          <SheetDescription className="flex justify-between items-center">
+                            <span>
+                              ID: <code className="text-muted-foreground">#{transaction.id}</code>
+                            </span>
                           </SheetDescription>
                         </SheetHeader>
                         <div className="flex-grow overflow-y-auto p-6">

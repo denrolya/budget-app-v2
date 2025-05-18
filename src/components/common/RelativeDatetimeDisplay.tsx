@@ -151,12 +151,12 @@ const DateDisplay: React.FC<Props> = ({
   return (
     <span className={`inline-flex items-center ${className}`}>
       {showDayBadge && dayVisual}
-      <span className="inline-flex items-center">
-        <span className={`font-medium ${variant === 'verbose' ? 'text-base' : 'text-sm'}`}>{formattedDate}</span>
+      <>
+        <span>{formattedDate}</span>
         {showRelative && variant !== 'relative' && (
-          <span className="text-xs font-light text-gray-400 ml-2">({relativeTime})</span>
+          <small className="font-light text-muted-foreground ml-1">({relativeTime})</small>
         )}
-      </span>
+      </>
     </span>
   );
 };

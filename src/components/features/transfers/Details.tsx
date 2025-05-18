@@ -3,6 +3,7 @@
 import { InfoIcon } from 'lucide-react';
 import React from 'react';
 
+import RateDisplay from '@/components/features/transfers/RateDisplay';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountBadge from '@/components/features/accounts/Badge';
@@ -15,46 +16,6 @@ interface TransferDetailsProps {
 }
 
 export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
-  const fromCurrency = transfer.fromExpense.account.currency;
-  const toCurrency = transfer.toIncome.account.currency;
-  const rate = transfer.rate;
-
-  const renderRate = () => {
-    if ((fromCurrency === 'UAH' && toCurrency === 'USD') || (fromCurrency === 'USD' && toCurrency === 'UAH')) {
-      return (
-        <>
-          <MoneyValue useColors={false} amount={1} currency={toCurrency} />
-          {' = '}
-          <MoneyValue useColors={false} amount={1 / rate} currency={fromCurrency} />
-        </>
-      );
-    } else if ((fromCurrency === 'UAH' && toCurrency === 'EUR') || (fromCurrency === 'EUR' && toCurrency === 'UAH')) {
-      return (
-        <>
-          <MoneyValue useColors={false} amount={1} currency={toCurrency} />
-          {' = '}
-          <MoneyValue useColors={false} amount={1 / rate} currency={fromCurrency} />
-        </>
-      );
-    } else if ((fromCurrency === 'HUF' && toCurrency === 'UAH') || (fromCurrency === 'UAH' && toCurrency === 'HUF')) {
-      return (
-        <>
-          <MoneyValue useColors={false} amount={1000} currency={fromCurrency} />
-          {' = '}
-          <MoneyValue useColors={false} amount={rate * 1000} currency={toCurrency} />
-        </>
-      );
-    } else {
-      return (
-        <>
-          <MoneyValue useColors={false} amount={1} currency={fromCurrency} />
-          {' = '}
-          <MoneyValue useColors={false} amount={rate} currency={toCurrency} />
-        </>
-      );
-    }
-  };
-
   const calculateFeePercentage = () => {
     if (transfer.hasFee()) {
       const feeAmount = transfer.feeExpense.amount;
@@ -66,76 +27,84 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full border-t">
       <div className="flex flex-col space-y-4 py-4">
         <div className="flex flex-col space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-sm">Date</span>
-            <RelativeDatetimeDisplay
-              showRelative
-              showDayBadge
-              badgeSize="sm"
-              variant="default"
-              date={transfer.executedAt}
+            <span className="tracking-tight font-normal">Amount</span>
+            <MoneyValue
+              useColors={false}
+              className="text-xs font-mono text-muted-foreground"
+              amount={transfer.amount}
+              currency={transfer.fromExpense.account.currency}
             />
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm">Amount</span>
-            <span className="font-medium font-mono">
-              <MoneyValue useColors={false} amount={transfer.amount} currency={transfer.fromExpense.account.currency} />
-            </span>
+            <span className="tracking-tight font-normal">From</span>
+            <AccountBadge size="sm" account={transfer.fromExpense.account} />
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm">From</span>
-            <span className="font-medium">
-              <AccountBadge account={transfer.fromExpense.account} size="md" />
-            </span>
+            <span className="tracking-tight font-normal">To</span>
+            <AccountBadge size="sm" account={transfer.toIncome.account} />
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm">To</span>
-            <span className="font-medium">
-              <AccountBadge account={transfer.toIncome.account} size="md" />
-            </span>
+            <span className="tracking-tight font-normal">Rate</span>
+            <RateDisplay
+              className="text-xs font-mono tracking-tighter text-muted-foreground"
+              useSymbol
+              transfer={transfer}
+            />
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm">Rate</span>
-            <span className="font-medium font-mono">{renderRate()}</span>
+            <span className="tracking-tight font-normal">Date</span>
+            <RelativeDatetimeDisplay
+              showRelative={false}
+              showDayBadge={false}
+              variant="default"
+              className="text-xs font-mono tracking-tighter text-muted-foreground"
+              date={transfer.executedAt}
+            />
           </div>
         </div>
         <Separator />
-        <div className="flex flex-col space-y-2">
-          <h3 className="font-semibold">Related Transactions</h3>
-          <div className="flex justify-between items-center">
-            <span className="text-sm">Sender</span>
-            <span className="font-medium font-mono">
-              {transfer?.feeExpense?.account.id === transfer.fromExpense.account.id ? (
-                <MoneyValue
-                  showSign
-                  amount={-(transfer.fromExpense.amount + transfer.feeExpense.amount)}
-                  currency={transfer.fromExpense.account.currency}
-                />
-              ) : (
-                <MoneyValue amount={-transfer.fromExpense.amount} currency={transfer.fromExpense.account.currency} />
-              )}
-            </span>
+        <section>
+          <h3 className="tracking-tight text-lg font-semibold mb-2">Related Transactions</h3>
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between items-center">
+              <span className="tracking-tight font-normal">Sender</span>
+              <span className="text-xs font-mono">
+                {transfer?.feeExpense?.account.id === transfer.fromExpense.account.id ? (
+                  <MoneyValue
+                    showSign
+                    amount={-(transfer.fromExpense.amount + transfer.feeExpense.amount)}
+                    currency={transfer.fromExpense.account.currency}
+                  />
+                ) : (
+                  <MoneyValue amount={-transfer.fromExpense.amount} currency={transfer.fromExpense.account.currency} />
+                )}
+              </span>
+            </div>
+            <TransactionListItem transaction={transfer.fromExpense} />
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-sm">Recipient</span>
-            <span className="font-medium text-success font-mono">
-              {transfer?.feeExpense?.account.id === transfer.toIncome.account.id ? (
-                <MoneyValue
-                  showSign
-                  amount={transfer.feeExpense.amount + transfer.toIncome.amount}
-                  currency={transfer.feeExpense.account.currency}
-                />
-              ) : (
-                <MoneyValue amount={transfer.toIncome.amount} currency={transfer.toIncome.account.currency} />
-              )}
-            </span>
+
+          <div className="flex flex-col gap-2 mt-3">
+            <div className="flex justify-between items-center">
+              <span className="tracking-tight font-normal">Recipient</span>
+              <span className="text-xs font-mono">
+                {transfer?.feeExpense?.account.id === transfer.toIncome.account.id ? (
+                  <MoneyValue
+                    showSign
+                    amount={transfer.feeExpense.amount + transfer.toIncome.amount}
+                    currency={transfer.feeExpense.account.currency}
+                  />
+                ) : (
+                  <MoneyValue amount={transfer.toIncome.amount} currency={transfer.toIncome.account.currency} />
+                )}
+              </span>
+            </div>
+            <TransactionListItem transaction={transfer.toIncome} />
           </div>
-        </div>
-        <TransactionListItem transaction={transfer.fromExpense} />
-        <TransactionListItem transaction={transfer.toIncome} />
+        </section>
         {transfer.hasFee() && (
           <>
             <Separator />

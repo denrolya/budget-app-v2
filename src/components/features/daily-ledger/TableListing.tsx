@@ -264,13 +264,13 @@ const TableListing: React.FC<Props> = ({
     <>
       <div className="flex flex-row items-center">
         <MoneyValue
-          className="font-mono text-xs antialiased"
+          className="text-xs"
           amount={-transfer.fromExpense.amount}
           currency={transfer.fromExpense.account.currency}
         />
         <ArrowRight className="h-4 w-4 text-muted-foreground mx-2" />
         <MoneyValue
-          className="font-mono text-xs antialiased"
+          className="text-xs"
           amount={transfer.toIncome.amount}
           currency={transfer.toIncome.account.currency}
         />
@@ -326,15 +326,14 @@ const TableListing: React.FC<Props> = ({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <span className="font-semibold">
-                          <RelativeDatetimeDisplay
-                            showDayBadge
-                            badgeSize="sm"
-                            variant="default"
-                            showTime={false}
-                            date={date}
-                          />
-                        </span>
+                        <RelativeDatetimeDisplay
+                          showDayBadge
+                          className="font-normal"
+                          badgeSize="sm"
+                          variant="default"
+                          showTime={false}
+                          date={date}
+                        />
                       </div>
                       <div className="flex items-center space-x-4">
                         <SummaryBadge
@@ -361,7 +360,7 @@ const TableListing: React.FC<Props> = ({
                   >
                     <TableCell
                       colSpan={2}
-                      className={cn('pl-4', {
+                      className={cn('pl-4', 'w-[1%]', {
                         'py-0': compact,
                       })}
                     >
@@ -370,17 +369,20 @@ const TableListing: React.FC<Props> = ({
                         onOpenChange={(open) => setOpenSheetId(open ? Number(item.id) : null)}
                       >
                         <SheetTrigger asChild>
-                          <code className="cursor-context-menu" onClick={() => toggleSheet(Number(item.id))}>
+                          <code className="cursor-context-menu tracking-tighter text-xs antialiased select-all text-">
                             #{item.id}
                           </code>
                         </SheetTrigger>
-                        <SheetContent side="right" className="w-full sm:max-w-3xl p-0 overflow-y-auto">
+                        <SheetContent side="right" className="p-0 overflow-y-auto">
                           <div className="h-full flex flex-col">
                             <SheetHeader className="p-6 pb-0">
-                              <SheetTitle>{'fromExpense' in item ? 'Transfer' : 'Transaction'} Details</SheetTitle>
-                              <SheetDescription className="sr-only">
-                                Detailed information about {'fromExpense' in item ? 'transfer' : 'transaction'} #
-                                {item.id}
+                              <SheetTitle className="tracking-tight text-xl font-bold">
+                                {'fromExpense' in item ? 'Transfer' : 'Transaction'} Details
+                              </SheetTitle>
+                              <SheetDescription className="flex justify-between items-center">
+                                <span>
+                                  ID: <code className="text-muted-foreground">#{item.id}</code>
+                                </span>
                               </SheetDescription>
                             </SheetHeader>
                             <div className="flex-grow overflow-y-auto p-6">
@@ -441,7 +443,7 @@ const TableListing: React.FC<Props> = ({
                         renderEditableCell(
                           item,
                           'amount',
-                          <TransactionValue revert className="font-mono text-xs antialiased" transaction={item} />,
+                          <TransactionValue revert className="font-mono tracking-tighter text-xs" transaction={item} />,
                         )
                       )}
                     </TableCell>

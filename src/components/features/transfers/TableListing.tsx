@@ -53,7 +53,7 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
               <TableRow>
                 <TableCell
                   colSpan={8}
-                  className={cn('font-semibold', 'bg-muted/40', 'px-4', {
+                  className={cn('bg-muted/40', 'px-4', {
                     'py-0': compact,
                   })}
                 >
@@ -77,12 +77,8 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
               {transfers.map((transfer) => (
                 <TableRow key={transfer.id}>
                   <TableCell
-                    className={cn('w-4', {
-                      'py-0': compact,
-                    })}
-                  ></TableCell>
-                  <TableCell
-                    className={cn({
+                    colSpan={2}
+                    className={cn('ml-4 w-[1%]', {
                       'py-0': compact,
                     })}
                   >
@@ -91,16 +87,18 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
                       onOpenChange={(open) => setOpenSheetId(open ? transfer.id : null)}
                     >
                       <SheetTrigger asChild>
-                        <code className="cursor-context-menu" onClick={() => toggleSheet(transfer.id)}>
+                        <code className="cursor-context-menu tracking-tighter text-xs antialiased select-all text-muted-foreground">
                           #{transfer.id}
                         </code>
                       </SheetTrigger>
-                      <SheetContent side="right" className="w-full sm:max-w-3xl p-0 overflow-y-auto">
+                      <SheetContent side="right" className="p-0 overflow-y-auto">
                         <div className="h-full flex flex-col">
                           <SheetHeader className="p-6 pb-0">
-                            <SheetTitle>Transfer Details</SheetTitle>
-                            <SheetDescription className="sr-only">
-                              Detailed information about transfer #{transfer.id}
+                            <SheetTitle className="tracking-tight text-xl font-bold">Transfer Details</SheetTitle>
+                            <SheetDescription className="flex justify-between items-center">
+                              <span>
+                                ID: <code className="text-muted-foreground">#{transfer.id}</code>
+                              </span>
                             </SheetDescription>
                           </SheetHeader>
                           <div className="flex-grow overflow-y-auto p-6">

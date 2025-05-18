@@ -55,14 +55,14 @@ export const TransactionValue: React.FC<Props> = ({
       content = (
         <>
           <span>{originalFormatted}</span>
-          <span className="text-xs opacity-75 hidden md:inline ml-1">| {baseFormatted}</span>
+          <span className="text-xs opacity-75 hidden md:inline ml-0.5">| {baseFormatted}</span>
         </>
       );
     } else {
       content = (
         <>
           <span>{baseFormatted}</span>
-          <span className="text-xs opacity-75 hidden md:inline ml-1">| {originalFormatted}</span>
+          <span className="text-xs opacity-75 hidden md:inline ml-0.5">| {originalFormatted}</span>
         </>
       );
     }
@@ -72,13 +72,13 @@ export const TransactionValue: React.FC<Props> = ({
 
   // Wrap with badge if required.
   let displayedContent = badge ? (
-    <Badge className="text-xs" variant={transaction.isIncome() ? 'success' : 'destructive'}>
+    <Badge className="text-xs tracking-tight" variant={transaction.isIncome() ? 'success' : 'destructive'}>
       {content}
     </Badge>
   ) : (
     <span
       className={cn(
-        'text-nowrap',
+        'font-mono inline-block font-numeric tabular-nums slashed-zero leading-none whitespace-nowrap antialiased tracking-tight',
         {
           'text-destructive': transaction.isExpense(),
           'text-success': transaction.isIncome(),

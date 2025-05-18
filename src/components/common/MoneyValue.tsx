@@ -80,7 +80,7 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
   const renderMoneyElement = (value: number, currencySymbol: string, currencyCode?: CURRENCY_CODE) => (
     <>
       {showSign && amount !== 0 && <span>{amount < 0 ? '- ' : '+ '}</span>}
-      {showSymbol && <span className="mr-1">{currencySymbol}</span>}
+      {showSymbol && <span className="mr-0.5">{currencySymbol}</span>}
       <span>{formatMoney(value, currencyCode, maximumFractionDigits)}</span>
     </>
   );
@@ -99,7 +99,13 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
     }
 
     content = (
-      <span id={id} className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}>
+      <span
+        id={id}
+        className={cn(
+          'inline-block font-numeric tabular-nums slashed-zero leading-none whitespace-nowrap antialiased tracking-tight font-mono',
+          className,
+        )}
+      >
         {firstValue}
         <span className="text-xs opacity-75 hidden md:inline ml-1">
           {' | '}
@@ -109,7 +115,13 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
     );
   } else {
     content = (
-      <span id={id} className={cn('inline-block whitespace-nowrap font-numeric tabular-nums slashed-zero', className)}>
+      <span
+        id={id}
+        className={cn(
+          'inline-block font-numeric tabular-nums slashed-zero leading-none whitespace-nowrap antialiased tracking-tight font-mono',
+          className,
+        )}
+      >
         {renderMoneyElement(amount, symbol, currency || baseCurrency.code)}
       </span>
     );

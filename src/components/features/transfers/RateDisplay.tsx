@@ -1,34 +1,30 @@
 import React from 'react';
 
-import { CURRENCY_CODE } from '@/constants/currency';
+import { formatTransferExchangeRate } from '@/utils/formatTransferExchangeRate';
+import { CURRENCIES } from '@/constants/currency';
 import Transfer from '@/models/Transfer';
 
 interface TransferRateProps extends React.ComponentPropsWithoutRef<'span'> {
   transfer: Transfer;
+  useSymbol?: boolean;
 }
 
-const TransferRateComponent: React.FC<TransferRateProps> = ({ transfer, ...props }) => {
-  const fromCurrency = transfer.fromExpense.account.currency;
-  const toCurrency = transfer.toIncome.account.currency;
-  const displayRate = transfer.displayRate;
+const TransferRateComponent: React.FC<TransferRateProps> = ({ transfer, useSymbol = false, className, ...props }) => {
+  const [from, to] = formatTransferExchangeRate(
+    [transfer.fromExpense.account.currency, transfer.toIncome.account.currency],
+    transfer.displayRate,
+  );
 
-  let rateDisplay = `1 ${fromCurrency} = ${Number(displayRate.toFixed(4))} ${toCurrency}`;
+  const getCurrencyDisplay = (currencyCode: string) =>
+    (useSymbol ? CURRENCIES[currencyCode].symbol || currencyCode : currencyCode) as string;
 
-  if (
-    fromCurrency === CURRENCY_CODE.UAH &&
-    [CURRENCY_CODE.USD, CURRENCY_CODE.EUR, CURRENCY_CODE.BTC].includes(toCurrency)
-  ) {
-    rateDisplay = `1 ${toCurrency} = ${Number(displayRate.toFixed(4))} UAH`;
-  } else if (fromCurrency === CURRENCY_CODE.UAH && toCurrency === CURRENCY_CODE.HUF) {
-    rateDisplay = `1000 HUF = ${Number(displayRate.toFixed(2))} UAH`;
-  } else if (
-    fromCurrency === CURRENCY_CODE.HUF &&
-    [CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.BTC].includes(toCurrency)
-  ) {
-    rateDisplay = `1 ${toCurrency} = ${Number(displayRate.toFixed(4))} HUF`;
-  }
+  const rateDisplay = `${from.amount} ${getCurrencyDisplay(from.currency)} = ${to.amount} ${getCurrencyDisplay(to.currency)}`;
 
-  return <span {...props}>{rateDisplay}</span>;
+  return (
+    <span className={className} {...props}>
+      {rateDisplay}
+    </span>
+  );
 };
 
 export default TransferRateComponent;
