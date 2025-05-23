@@ -102,12 +102,12 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
       <span
         id={id}
         className={cn(
-          'inline-block font-numeric tabular-nums slashed-zero leading-none whitespace-nowrap antialiased tracking-tight font-mono',
+          'inline-block font-numeric',
           className,
         )}
       >
         {firstValue}
-        <span className="text-xs opacity-75 hidden md:inline ml-1">
+        <span className="text-[95%] opacity-75 hidden md:inline ml-1">
           {' | '}
           {secondValue}
         </span>
@@ -118,7 +118,7 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
       <span
         id={id}
         className={cn(
-          'inline-block font-numeric tabular-nums slashed-zero leading-none whitespace-nowrap antialiased tracking-tight font-mono',
+          'inline-block font-numeric',
           className,
         )}
       >

@@ -264,23 +264,23 @@ const TableListing: React.FC<Props> = ({
     <>
       <div className="flex flex-row items-center">
         <MoneyValue
-          className="text-xs font-semibold tracking-tighter"
+          className="font-semibold tracking-tighter"
           amount={-transfer.fromExpense.amount}
           currency={transfer.fromExpense.account.currency}
         />
         <ArrowRight className="h-4 w-4 text-muted-foreground mx-2" />
         <MoneyValue
-          className="text-xs font-semibold tracking-tighter"
+          className="font-semibold tracking-tighter"
           amount={transfer.toIncome.amount}
           currency={transfer.toIncome.account.currency}
         />
       </div>
-      <div className="text-xs text-muted-foreground">
+      <div className="text-muted-foreground">
         {transfer.feeExpense && (
-          <div className="flex items-center">
+          <small className="flex items-center">
             <span className="mr-1">Fee:</span>
             <MoneyValue amount={-transfer.feeExpense.amount} currency={transfer.feeExpense.account.currency} />
-          </div>
+          </small>
         )}
       </div>
     </>
@@ -353,7 +353,7 @@ const TableListing: React.FC<Props> = ({
                 {items.map((item) => (
                   <TableRow
                     key={item.id}
-                    className={cn({
+                    className={cn('text-xs', {
                       'bg-warning/20 hover:bg-warning/30': item instanceof Transaction && item.isDraft,
                     })}
                   >
@@ -368,7 +368,7 @@ const TableListing: React.FC<Props> = ({
                         onOpenChange={(open) => setOpenSheetId(open ? Number(item.id) : null)}
                       >
                         <SheetTrigger asChild>
-                          <code className="cursor-context-menu tracking-tighter text-xs antialiased select-all text-">
+                          <code className="cursor-context-menu tracking-tighter antialiased select-all">
                             #{item.id}
                           </code>
                         </SheetTrigger>
@@ -442,12 +442,12 @@ const TableListing: React.FC<Props> = ({
                         renderEditableCell(
                           item,
                           'amount',
-                          <TransactionValue revert className="text-xs font-semibold" transaction={item} />,
+                          <TransactionValue revert className="font-semibold" transaction={item} />,
                         )
                       )}
                     </TableCell>
                     <TableCell
-                      className={cn('text-xs', {
+                      className={cn({
                         'py-0': compact,
                       })}
                     >
@@ -457,7 +457,7 @@ const TableListing: React.FC<Props> = ({
                           'category',
                           <Badge
                             variant="outline"
-                            className="text-xs px-1 py-0 whitespace-nowrap bg-background shadow-md"
+                            className="px-1 py-0 whitespace-nowrap bg-background shadow-md"
                           >
                             {item.category.name}
                           </Badge>,
@@ -465,14 +465,14 @@ const TableListing: React.FC<Props> = ({
                       {item instanceof Transfer && (
                         <>
                           <RateDisplay transfer={item} />
-                          <div className="text-muted-foreground">
+                          <small className="flex text-muted-foreground">
                             <span>Rate: {Number(item.rate.toFixed(4))}</span>
-                          </div>
+                          </small>
                         </>
                       )}
                     </TableCell>
                     <TableCell
-                      className={cn({
+                      className={cn('text-muted-foreground', {
                         'py-0': compact,
                       })}
                     >

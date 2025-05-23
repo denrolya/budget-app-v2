@@ -36,13 +36,13 @@ const ConvertedCurrenciesTooltip: React.FC<ConvertedCurrenciesTooltipProps> = ({
               <li
                 key={code}
                 className={cn('flex justify-between items-center p-1 rounded', {
-                  'bg-warning/10 border border-warning font-bold': isOriginal,
+                  'bg-warning/10 border border-warning font-semibold': isOriginal,
                 })}
               >
                 <div className="flex items-center space-x-1">
                   <span>{code}</span>
                 </div>
-                <span className="text-xs">{formatted}</span>
+                <span className="font-numeric text-xs">{formatted}</span>
               </li>
             );
           })}

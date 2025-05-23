@@ -12,6 +12,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .font-numeric {
+    @apply lining-nums tabular-nums slashed-zero leading-none whitespace-nowrap antialiased tracking-tighter font-mono;
+  }
+}
+
 @layer base {
   :root {
     @include light.theme;

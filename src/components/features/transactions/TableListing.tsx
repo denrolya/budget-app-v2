@@ -273,7 +273,7 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
             {transactions.map((transaction) => (
               <TableRow
                 key={transaction.id}
-                className={cn({
+                className={cn( 'text-xs', {
                   'bg-warning/20 hover:bg-warning/30': transaction.isDraft,
                   'hover:bg-muted/50': !transaction.isDraft,
                 })}
@@ -286,7 +286,7 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
                 >
                   <Sheet>
                     <SheetTrigger className="m-0" asChild>
-                      <code className="cursor-context-menu tracking-tighter text-xs antialiased select-all text-muted-foreground">
+                      <code className="cursor-context-menu tracking-tighter antialiased select-all text-muted-foreground">
                         #{transaction.id}
                       </code>
                     </SheetTrigger>
@@ -324,7 +324,7 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
                   {renderEditableCell(
                     transaction,
                     'category',
-                    <Badge variant="outline" className="text-xs px-1 py-0 whitespace-nowrap bg-background shadow-md">
+                    <Badge variant="outline" className="px-1 py-0 whitespace-nowrap bg-background shadow-md">
                       {transaction.category.name}
                     </Badge>,
                   )}
@@ -337,7 +337,7 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
                   {renderEditableCell(
                     transaction,
                     'amount',
-                    <TransactionValue className="font-mono text-xs antialiased" transaction={transaction} />,
+                    <TransactionValue revert className="font-semibold" transaction={transaction} />,
                   )}
                 </TableCell>
                 <TableCell
@@ -348,7 +348,7 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
                   {renderEditableCell(transaction, 'account', <AccountBadge size="sm" account={transaction.account} />)}
                 </TableCell>
                 <TableCell
-                  className={cn({
+                  className={cn('text-muted-foreground', {
                     'py-0': compact,
                   })}
                 >

@@ -14,6 +14,7 @@ interface Props extends React.ComponentPropsWithoutRef<'span'> {
   badge?: boolean;
   showValuesTooltip?: boolean;
   revert?: boolean;
+  showSign?: boolean;
 }
 
 export const TransactionValue: React.FC<Props> = ({
@@ -23,6 +24,7 @@ export const TransactionValue: React.FC<Props> = ({
   badge = false,
   showValuesTooltip = true,
   revert = false,
+  showSign = false,
 }) => {
   const baseCurrencyCode = useBaseCurrency();
   const baseCurrency = CURRENCIES[baseCurrencyCode];
@@ -35,9 +37,19 @@ export const TransactionValue: React.FC<Props> = ({
   const baseValue = convertedValues?.[baseCurrency.code];
 
   // Helper to format money values using the transaction's sign logic.
-  const formatMoney = (value: number, currencyCode: CURRENCY_CODE, currencySymbol: string) => {
-    const sign = (transaction.isIncome() && value >= 0) || (transaction.isExpense() && value < 0) ? '+' : '-';
-    return `${sign} ${currencySymbol} ${formatMoneyValue(value, currencyCode, maximumFractionDigits)}`;
+  const formatMoney = (
+    value: number,
+    currencyCode: CURRENCY_CODE,
+    currencySymbol: string,
+  ) => {
+    const shouldShowPlus = transaction.isIncome() && value >= 0;
+    const shouldShowMinus = transaction.isExpense() && value < 0;
+    const sign = showSign ? (shouldShowPlus ? '+' : shouldShowMinus ? '-' : '') : '';
+    return `${sign ? sign + ' ' : ''}${currencySymbol} ${formatMoneyValue(
+      value,
+      currencyCode,
+      maximumFractionDigits,
+    )}`;
   };
 
   // Format the original and converted (base) values.
@@ -55,14 +67,14 @@ export const TransactionValue: React.FC<Props> = ({
       content = (
         <>
           <span>{originalFormatted}</span>
-          <span className="text-xs opacity-75 hidden md:inline ml-0.5">| {baseFormatted}</span>
+          <span className="text-[95%] opacity-75 hidden md:inline ml-0.5">| {baseFormatted}</span>
         </>
       );
     } else {
       content = (
         <>
           <span>{baseFormatted}</span>
-          <span className="text-xs opacity-75 hidden md:inline ml-0.5">| {originalFormatted}</span>
+          <span className="text-[95%] opacity-75 hidden md:inline ml-0.5">| {originalFormatted}</span>
         </>
       );
     }
@@ -78,7 +90,7 @@ export const TransactionValue: React.FC<Props> = ({
   ) : (
     <span
       className={cn(
-        'inline-block font-numeric tabular-nums slashed-zero leading-none whitespace-nowrap tracking-tighter font-mono antialiased',
+        'inline-block font-numeric',
         {
           'text-destructive': transaction.isExpense(),
           'text-success': transaction.isIncome(),
