@@ -1,15 +1,15 @@
 @mixin theme {
-  --background: 240 10% 3.9%;
+  --background: 255 8% 9%;
   --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
+  --card: 255 8% 10.5%;
   --card-foreground: 0 0% 98%;
-  --popover: 240 10% 3.9%;
+  --popover: 258 10% 9%;
   --popover-foreground: 0 0% 98%;
   --primary: 0 0% 98%;
   --primary-foreground: 240 5.9% 10%;
   --secondary: 240 3.7% 25%;
   --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
+  --muted: 240 3.7% 20%;
   --muted-foreground: 240 5% 64.9%;
   --accent: 240 3.7% 15.9%;
   --accent-foreground: 0 0% 98%;
@@ -21,9 +21,9 @@
   --warning-foreground: 48 100% 96%;
   --info: 180 66% 40%;
   --info-foreground: 180 100% 96%;
-  --border: 240 3.7% 15.9%;
+  --border: 255 6% 18%;
   --input: 240 3.7% 15.9%;
-  --ring: 240 4.9% 83.9%;
+  --ring: 240 4.9% 60%;
   --radius: 0.5rem;
 
   --chart-1: 12 70% 45%;

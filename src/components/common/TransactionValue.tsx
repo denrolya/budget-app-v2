@@ -78,7 +78,7 @@ export const TransactionValue: React.FC<Props> = ({
   ) : (
     <span
       className={cn(
-        'font-mono inline-block font-numeric tabular-nums slashed-zero leading-none whitespace-nowrap antialiased tracking-tight',
+        'inline-block font-numeric tabular-nums slashed-zero leading-none whitespace-nowrap tracking-tighter font-mono antialiased',
         {
           'text-destructive': transaction.isExpense(),
           'text-success': transaction.isIncome(),

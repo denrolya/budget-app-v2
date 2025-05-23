@@ -24,7 +24,7 @@ export const LayoutV9: React.FC<React.PropsWithChildren> = ({ children }) => (
                 <Sidebar className="hidden md:block overflow-y-auto fixed top-8 left-0 w-16" />
 
                 <main
-                  className="flex-1 overflow-y-auto md:ml-16 pb-0 bg-background md:bg-muted"
+                  className="flex-1 overflow-y-auto md:ml-16 pb-0"
                   id="main-content"
                   tabIndex={-1}
                 >

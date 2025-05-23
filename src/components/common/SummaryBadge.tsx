@@ -15,7 +15,7 @@ const SummaryBadge: React.FC<Props> = ({ count, value, icon: Icon, useColors = t
   <div className="relative inline-flex" {...props}>
     <Badge variant="outline" className="text-xs py-1 pl-2 pr-3 flex items-center space-x-2 bg-background">
       <Icon className="h-3.5 w-3.5" />
-      <MoneyValue className="font-medium text-xs font-mono antialiased" useColors={useColors} amount={value} />
+      <MoneyValue className="leading-none whitespace-nowrap tracking-tighter font-mono antialiased" useColors={useColors} amount={value} />
     </Badge>
 
     {count > 0 && (

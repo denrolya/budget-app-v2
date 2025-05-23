@@ -264,13 +264,13 @@ const TableListing: React.FC<Props> = ({
     <>
       <div className="flex flex-row items-center">
         <MoneyValue
-          className="text-xs"
+          className="text-xs font-semibold tracking-tighter"
           amount={-transfer.fromExpense.amount}
           currency={transfer.fromExpense.account.currency}
         />
         <ArrowRight className="h-4 w-4 text-muted-foreground mx-2" />
         <MoneyValue
-          className="text-xs"
+          className="text-xs font-semibold tracking-tighter"
           amount={transfer.toIncome.amount}
           currency={transfer.toIncome.account.currency}
         />
@@ -315,7 +315,6 @@ const TableListing: React.FC<Props> = ({
                   className={cn({
                     'bg-success/10': transactionsValue > 0,
                     'bg-destructive/10': transactionsValue < 0,
-                    'bg-muted/20': items.length === 0,
                   })}
                 >
                   <TableCell
@@ -354,7 +353,7 @@ const TableListing: React.FC<Props> = ({
                 {items.map((item) => (
                   <TableRow
                     key={item.id}
-                    className={cn('bg-muted/20', {
+                    className={cn({
                       'bg-warning/20 hover:bg-warning/30': item instanceof Transaction && item.isDraft,
                     })}
                   >
@@ -443,7 +442,7 @@ const TableListing: React.FC<Props> = ({
                         renderEditableCell(
                           item,
                           'amount',
-                          <TransactionValue revert className="font-mono tracking-tighter text-xs" transaction={item} />,
+                          <TransactionValue revert className="text-xs font-semibold" transaction={item} />,
                         )
                       )}
                     </TableCell>
