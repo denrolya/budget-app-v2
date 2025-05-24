@@ -8,6 +8,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
+import { CSVUploader } from '@/components/features/transactions/CSVUploader';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
@@ -162,8 +163,8 @@ export const BulkCreateTableForm: React.FC = () => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Table>
-            <TableHeader>
-              <TableRow>
+            <TableHeader className="block w-full">
+              <TableRow className="grid grid-cols-7 w-full">
                 <TableHead>Draft</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Amount</TableHead>
@@ -173,9 +174,9 @@ export const BulkCreateTableForm: React.FC = () => {
                 <TableHead className="w-[50px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
-              {fields.map((field, index) => (
-                <TableRow key={field.id}>
+            <TableBody className="block max-h-[300px] overflow-y-auto w-full">
+            {fields.map((field, index) => (
+                <TableRow key={field.id} className="table w-full overflow-y-auto">
                   <TableCell className="text-right py-0">
                     <FormField
                       control={form.control}
@@ -338,6 +339,9 @@ export const BulkCreateTableForm: React.FC = () => {
             </TableBody>
           </Table>
           <div className="flex justify-end items-center space-x-2 mt-4">
+            <div className="w-[300px]">
+              <CSVUploader onComplete={replace} />
+            </div>
             <Button type="button" variant="outline" onClick={addAnotherTransaction}>
               <Plus className="mr-2 h-4 w-4" /> Add Transaction
             </Button>

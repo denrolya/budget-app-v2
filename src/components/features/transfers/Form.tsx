@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
 import moment from 'moment';
@@ -8,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { toast } from 'sonner';
 
+import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
 import { useForm as useFormContext } from '@/contexts/Form';
 import { useFinanceData } from '@/contexts/FinanceData';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
@@ -51,7 +50,7 @@ export const TransferForm = forwardRef<TransferFormRef, TransferFormProps>((_, r
       rate: 0,
       fee: undefined,
       feeAccount: undefined,
-      executedAt: moment().format('YYYY-MM-DDTHH:mm'),
+      executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
       note: undefined,
     },
     mode: 'onChange',

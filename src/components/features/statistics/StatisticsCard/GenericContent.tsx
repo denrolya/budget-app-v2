@@ -65,9 +65,7 @@ const GenericContent: React.FC<{
           />
         }
       >
-        <span>
-          <MoneyValue className="font-medium" useColors={false} amount={comparisonValue as number} />
-        </span>
+          <MoneyValue className="font-semibold" useColors={false} amount={comparisonValue as number} />
       </ResponsiveTooltip>
     </div>
   </>

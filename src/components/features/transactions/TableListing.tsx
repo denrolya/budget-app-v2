@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { BACKEND_DATE_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
+import { BACKEND_DATE_FORMAT, MOMENT_DATETIME_FORM_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useTransactionMutations } from '@/hooks/useTransactionMutations';
@@ -191,7 +191,7 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
               autoFocus
               type="datetime-local"
               disabled={isUpdating}
-              value={moment(editValue as string).format('YYYY-MM-DDTHH:mm')}
+              value={moment(editValue as string).format(MOMENT_DATETIME_FORM_FORMAT)}
               onChange={(e) => setEditValue(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, transaction)}
             />
