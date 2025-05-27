@@ -2,7 +2,7 @@ import cn from 'classnames';
 import { Moment } from 'moment';
 import React, { useMemo } from 'react';
 
-import { useIsMobile } from '@/hooks/useMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import Transaction from '@/models/Transaction';

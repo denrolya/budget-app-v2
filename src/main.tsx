@@ -2,14 +2,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 
-import Routing from '@/components/common/Routing';
-import { AuthProvider } from '@/contexts/auth';
-import { Theme, ThemeProvider } from '@/contexts/theme';
-import store from '@/store';
 import { logger } from '@/utils/DebugLogger';
+import { Theme, ThemeProvider } from '@/contexts/theme';
+import { AuthProvider } from '@/contexts/auth';
+import Routing from '@/components/common/Routing';
 
 import '@/assets/styles/index.scss';
 
@@ -74,13 +72,11 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme={Theme.System}>
         <AuthProvider>
-          <Provider store={store}>
-            <Router>
-              <PWAWrapper>
-                <Routing />
-              </PWAWrapper>
-            </Router>
-          </Provider>
+          <Router>
+            <PWAWrapper>
+              <Routing />
+            </PWAWrapper>
+          </Router>
         </AuthProvider>
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />

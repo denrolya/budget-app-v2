@@ -1,12 +1,12 @@
-import cn from 'classnames';
 import { Bike, LogOut, Monitor, Moon, MoreHorizontal, Palmtree, Plus, Sun } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSwipeable } from 'react-swipeable';
 
+import { cn } from '@/lib/utils';
 import ExchangeRatesPresets from '@/components/common/ExchangeRatesPresets';
 import DraftTransactionForm from '@/components/features/transactions/DraftForm';
-import { CurrencyButtonSelector } from '@/components/layout/CurrencyButtonSelector';
+import CurrencyButtonSelector from '@/components/layout/header/CurrencyButtonSelector';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { ScrollArea } from '@/components/ui/scroll-area';

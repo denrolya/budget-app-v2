@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
-import { useIsMobile } from '@/hooks/useMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { TransferFilters } from '@/models/TransferFilters';
 import { Timeframe } from '@/types/global';

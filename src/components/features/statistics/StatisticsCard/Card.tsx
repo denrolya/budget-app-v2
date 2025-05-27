@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
-import { useIsMobile } from '@/hooks/useMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Interval, StatisticsConfig, StatisticsType } from '@/types/statistics';
 import { Type as TransactionType } from '@/types/transaction';
 import { PercentageChange, StatisticsData, ValueByPeriodData } from '@/types/valueByPeriodStatistics';

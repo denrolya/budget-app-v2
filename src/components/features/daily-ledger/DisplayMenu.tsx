@@ -1,7 +1,7 @@
 import { ArrowDownCircle, ArrowUpCircle, LayoutList, Settings2, Table } from 'lucide-react';
 import React, { useCallback } from 'react';
 
-import { useIsMobile } from '@/hooks/useMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,

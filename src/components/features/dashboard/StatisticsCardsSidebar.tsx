@@ -30,7 +30,7 @@ const StatisticsCardsSidebar: React.FC<Props> = ({ configs, groups }) => {
   );
 
   return (
-    <div className="fixed right-0 z-50 group">
+    <div className="fixed right-0 z-50 group hidden lg:block">
       {/* Floating handle */}
       <div className="absolute top-1/2 right-0 -translate-y-1/2 bg-muted px-1.5 py-2 rounded-l-md shadow cursor-pointer group-hover:opacity-0 transition-opacity duration-300">
         <div className="w-1.5 h-8 bg-primary rounded-full" />

@@ -3,6 +3,7 @@ import { useHotkeys as useReactHotkeysHook } from 'react-hotkeys-hook';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { HotkeysDialog } from '@/components/common/HotkeysDialog';
+import { useSidebar } from '@/components/ui/sidebar';
 import { ROUTES } from '@/constants/routes';
 import { useFinanceData } from '@/contexts/FinanceData';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
@@ -11,6 +12,7 @@ import { Hotkey, HotkeyCategory, HotkeysContextType } from '@/types/hotkeys';
 export const HotkeysContext = createContext<HotkeysContextType | null>(null);
 
 export const navigationHotkeys: Hotkey[] = [
+  { windows: 'S', mac: 'S', description: 'Open/Close Sidebar' },
   { windows: 'H', mac: 'H', description: 'Open/Close this window' },
   { windows: 'L', mac: 'L', description: 'Open Daily Ledger page' },
   { windows: 'T', mac: 'T', description: 'Open Transactions page' },
@@ -60,6 +62,7 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
   const [currentPage, setCurrentPage] = useState<string>('Global');
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const navigate = useNavigate();
+  const { toggleSidebar } = useSidebar();
   const location = useLocation();
   const { openForm } = useFormContext();
   const { toggleCurrencyConverter } = useFinanceData();
@@ -111,6 +114,15 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
       toggleCurrencyConverter();
     },
     [toggleCurrencyConverter],
+  );
+
+  useReactHotkeysHook(
+    's',
+    (event) => {
+      event.preventDefault();
+      toggleSidebar();
+    },
+    [toggleSidebar],
   );
 
   useReactHotkeysHook(

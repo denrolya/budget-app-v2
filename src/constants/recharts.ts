@@ -14,7 +14,7 @@ export const CHART_STYLES = {
     domain: ['dataMin', 'dataMax'],
     tick: {
       fontSize: 10,
-      fill: 'hsl(var(--muted-foreground))',
+      fill: 'hsl(var(--muted-foreground) / 0.4)',
       opacity: 0.5,
     } as CSSProperties,
     tickLine: false,

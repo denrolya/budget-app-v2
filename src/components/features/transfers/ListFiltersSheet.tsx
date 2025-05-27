@@ -3,7 +3,7 @@ import { CalendarIcon, FilterIcon } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { useIsMobile } from '@/hooks/useMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { Button } from '@/components/ui/button';

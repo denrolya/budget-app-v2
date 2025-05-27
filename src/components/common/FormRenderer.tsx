@@ -2,7 +2,7 @@ import { Loader2 } from 'lucide-react';
 import React, { forwardRef, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
-import { useIsMobile } from '@/hooks/useMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import AccountForm from '@/components/features/accounts/Form';
 import TransactionForm from '@/components/features/transactions/Form';
 import TransferForm from '@/components/features/transfers/Form';

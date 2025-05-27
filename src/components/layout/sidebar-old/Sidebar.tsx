@@ -4,7 +4,7 @@ import sumBy from 'lodash/sumBy';
 import { Plus } from 'lucide-react';
 import React, { useMemo } from 'react';
 
-import { useIsMobile } from '@/hooks/useMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountLink from '@/components/layout/SidebarAccountLink';
 import SidebarLink from '@/components/layout/SidebarLink';

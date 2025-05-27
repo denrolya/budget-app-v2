@@ -85,18 +85,18 @@ const DashboardPage: React.FC = () => {
         </Tabs>
 
         <div className="flex flex-col-reverse xl:flex-row gap-6 mb-6">
-          <div className="w-full xl:w-3/5 3xl:w-2/3 flex flex-col gap-6 xl:order-1 order-1">
+          <div className="w-full xl:w-3/4 3xl:w-4/5 flex flex-col gap-6 xl:order-1 order-1">
             <MoneyFlow />
             <CategoriesTimeline className="order-3 xl:order-2" />
           </div>
 
-          <div className="w-full xl:w-2/5 3xl:w-1/3 order-2 xl:order-2">
+          <div className="w-full xl:w-1/4 3xl:w-1/5 order-2 xl:order-2">
             <CategoriesDoughnut className="h-full" />
           </div>
         </div>
       </main>
 
-      <div className="3xl:hidden fixed bottom-[47px] md:bottom-0 left-0 w-full h-[180px] bg-gradient-to-b from-background/0 to-background">
+      <div className="lg:hidden fixed bottom-[47px] md:bottom-0 left-0 w-full h-[180px] bg-gradient-to-b from-background/0 to-background">
         <div
           ref={scrollRef}
           className="flex overflow-x-auto snap-x snap-mandatory h-full py-4 px-6"

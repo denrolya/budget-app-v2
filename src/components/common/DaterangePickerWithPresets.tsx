@@ -2,7 +2,7 @@ import { CalendarIcon } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useState } from 'react';
 
-import { useIsMobile } from '@/hooks/useMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';

@@ -3,7 +3,7 @@ import { AlertCircle, ArrowUpDown, Plus } from 'lucide-react';
 import moment from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { useIsMobile } from '@/hooks/useMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountAvatar from '@/components/features/accounts/Avatar';

@@ -20,7 +20,7 @@ interface CurrencyButtonSelectorProps extends React.ComponentPropsWithoutRef<'di
   className?: string;
 }
 
-export const CurrencyButtonSelector: React.FC<CurrencyButtonSelectorProps> = ({ className, ...props }) => {
+const CurrencyButtonSelector: React.FC<CurrencyButtonSelectorProps> = ({ className, ...props }) => {
   const { updateCurrency } = useAuth();
   const baseCurrency = useBaseCurrency();
   const [selectedCurrency, setSelectedCurrency] = useState<CURRENCY_CODE>(
@@ -79,3 +79,5 @@ export const CurrencyButtonSelector: React.FC<CurrencyButtonSelectorProps> = ({ 
     </div>
   );
 };
+
+export default CurrencyButtonSelector;

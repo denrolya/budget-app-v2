@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useIsMobile } from '@/hooks/useMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import ConfigForm from '@/components/features/statistics/StatisticsCard/ConfigForm';
 import {

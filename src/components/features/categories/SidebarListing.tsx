@@ -4,7 +4,7 @@ import { ChevronRight, Folder, FolderClosed, FolderOpenDot, Info, Search } from 
 import moment from 'moment/moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { useIsMobile } from '@/hooks/useMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

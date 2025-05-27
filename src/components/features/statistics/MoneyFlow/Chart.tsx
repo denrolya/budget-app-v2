@@ -36,35 +36,30 @@ interface Props {
   showExpenses: boolean;
   showRevenue: boolean;
   showPreviousPeriod: boolean;
+  showYearBoundary: boolean;
+  showMonthBoundary: boolean;
+  showSeasonBoundary: boolean;
 }
 
 const MoneyFlowChart: React.FC<Props> = ({
-  currentTimeframe,
-  previousTimeframe,
-  period,
-  data,
-  chartType,
-  showIncome,
-  showExpenses,
-  showRevenue,
-  showPreviousPeriod,
-}) => {
+                                           currentTimeframe,
+                                           previousTimeframe,
+                                           period,
+                                           data,
+                                           chartType,
+                                           showIncome,
+                                           showExpenses,
+                                           showRevenue,
+                                           showPreviousPeriod,
+                                           showYearBoundary,
+                                           showMonthBoundary,
+                                           showSeasonBoundary,
+                                         }) => {
   const transformedData = data.map((item) => ({
     ...item,
     expenses: -item.expenses,
     previousExpenses: -item.previousExpenses,
   }));
-
-  const maxValue = Math.max(
-    ...data.flatMap((item) => [
-      item.income,
-      item.expenses,
-      item.revenue,
-      showPreviousPeriod ? item.previousIncome : 0,
-      showPreviousPeriod ? item.previousExpenses : 0,
-      showPreviousPeriod ? item.previousRevenue : 0,
-    ]),
-  );
 
   const renderChart = (isCurrentTimeframe: boolean) => {
     if (isCurrentTimeframe || showPreviousPeriod) {
@@ -116,7 +111,7 @@ const MoneyFlowChart: React.FC<Props> = ({
             <>
               {showIncome && (
                 <Line
-                  type="monotone"
+                  type="bump"
                   xAxisId={xAxisId}
                   dataKey={dataKeys.income}
                   stroke={'hsl(var(--success))'}
@@ -128,7 +123,7 @@ const MoneyFlowChart: React.FC<Props> = ({
               )}
               {showExpenses && (
                 <Line
-                  type="monotone"
+                  type="bump"
                   xAxisId={xAxisId}
                   dataKey={dataKeys.expenses}
                   stroke={'hsl(var(--destructive))'}
@@ -140,7 +135,7 @@ const MoneyFlowChart: React.FC<Props> = ({
               )}
               {showRevenue && (
                 <Line
-                  type="monotone"
+                  type="bump"
                   xAxisId={xAxisId}
                   dataKey={dataKeys.revenue}
                   stroke={'hsl(var(--secondary))'}
@@ -157,6 +152,76 @@ const MoneyFlowChart: React.FC<Props> = ({
     }
     return null;
   };
+
+  const findClosestTimestamp = (timestamps: number[], target: number): number => timestamps.reduce((prev, curr) =>
+      Math.abs(curr - target) < Math.abs(prev - target) ? curr : prev,
+    );
+
+  const generateNonOverlappingBoundaries = (
+    dataTimestamps: number[],
+    start: Moment,
+    end: Moment,
+    period: ISO8601Period,
+    enabled: Record<'year' | 'month' | 'season', boolean>,
+  ) => {
+    const taken = new Set<number>();
+    const yearBoundaries: number[] = [];
+    const seasonBoundaries: number[] = [];
+    const monthBoundaries: number[] = [];
+
+    const snapTimestamp = (cursor: Moment) => {
+      const target = cursor.unix();
+      return findClosestTimestamp(dataTimestamps, target);
+    };
+
+    if (enabled.year) {
+      const cursor = moment(start).startOf('year').add(1, 'year');
+      while (cursor.isBefore(end)) {
+        const ts = snapTimestamp(cursor);
+        if (!taken.has(ts)) {
+          yearBoundaries.push(ts);
+          taken.add(ts);
+        }
+        cursor.add(1, 'year');
+      }
+    }
+
+    if (enabled.season) {
+      const cursor = moment(start).startOf('month').add(1, 'month');
+      while (cursor.isBefore(end)) {
+        if ([0, 3, 6, 9].includes(cursor.month())) {
+          const ts = snapTimestamp(cursor);
+          if (!taken.has(ts)) {
+            seasonBoundaries.push(ts);
+            taken.add(ts);
+          }
+        }
+        cursor.add(1, 'month');
+      }
+    }
+
+    if (enabled.month && period !== 'P1M') {
+      const cursor = moment(start).startOf('month').add(1, 'month');
+      while (cursor.isBefore(end)) {
+        const ts = snapTimestamp(cursor);
+        if (!taken.has(ts)) {
+          monthBoundaries.push(ts);
+          taken.add(ts);
+        }
+        cursor.add(1, 'month');
+      }
+    }
+
+    return { yearBoundaries, seasonBoundaries, monthBoundaries };
+  };
+
+  const { yearBoundaries, seasonBoundaries, monthBoundaries } = generateNonOverlappingBoundaries(
+    transformedData.map((item) => item.timestamp),
+    currentTimeframe.after,
+    currentTimeframe.before,
+    period,
+    { year: showYearBoundary, season: showSeasonBoundary, month: showMonthBoundary },
+  );
 
   const formatXAxisTick = (timestamp: number) => {
     const date = moment.unix(timestamp);
@@ -218,7 +283,7 @@ const MoneyFlowChart: React.FC<Props> = ({
             {...CHART_STYLES.xAxis}
           />
           <XAxis hide xAxisId={0} dataKey="timestamp" scale="time" type="number" {...CHART_STYLES.xAxis} />
-          <YAxis domain={[-maxValue, maxValue]} {...CHART_STYLES.yAxis} />
+          <YAxis {...CHART_STYLES.yAxis} />
           <Tooltip
             cursor={false}
             content={(props) => (
@@ -232,6 +297,53 @@ const MoneyFlowChart: React.FC<Props> = ({
             )}
           />
           <CartesianGrid {...CHART_STYLES.cartesianGrid} />
+          {yearBoundaries.map((timestamp) => (
+            <ReferenceLine
+              key={`year-${timestamp}`}
+              x={timestamp}
+              stroke="hsl(var(--destructive))"
+              strokeDasharray="14 14"
+              label={{
+                position: 'bottom',
+                value: moment.unix(timestamp).format('YYYY'),
+                fill: 'hsl(var(--destructive))',
+                fontSize: 12,
+                fontWeight: 500,
+              }}
+            />
+          ))}
+
+          {seasonBoundaries.map((timestamp) => (
+            <ReferenceLine
+              key={`season-${timestamp}`}
+              x={timestamp}
+              stroke="hsl(var(--warning) / 0.9)"
+              strokeDasharray="10 10"
+              label={{
+                position: 'bottom',
+                value: ['Spring', 'Summer', 'Autumn', 'Winter'][Math.floor(moment.unix(timestamp).month() / 3)],
+                fill: 'hsl(var(--warning) / 0.9)',
+                fontSize: 10,
+                fontWeight: 400,
+              }}
+            />
+          ))}
+
+          {monthBoundaries.map((timestamp) => (
+            <ReferenceLine
+              key={`month-${timestamp}`}
+              x={timestamp}
+              stroke="hsl(var(--info) / 0.7)"
+              strokeDasharray="6 6"
+              label={{
+                position: 'bottom',
+                value: moment.unix(timestamp).format('MMM'),
+                fill: 'hsl(var(--info) / 0.7)',
+                fontSize: 10,
+                fontWeight: 400,
+              }}
+            />
+          ))}
           <ReferenceLine {...CHART_STYLES.referenceLine} />
           {renderChart(false)}
           {renderChart(true)}

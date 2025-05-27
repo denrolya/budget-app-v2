@@ -1,11 +1,10 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
 
-import { CURRENCY_CODE } from '@/constants/currency';
-import MoneyValue from '@/components/common/MoneyValue';
 import ExchangeRatesPresets from '@/components/common/ExchangeRatesPresets';
+import MoneyValue from '@/components/common/MoneyValue';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { CURRENCY_CODE } from '@/constants/currency';
 import { useFixerExchangeRates } from '@/contexts/FinanceData';
 import { getExchangeRate } from '@/utils/getExchangeRates';
 
@@ -23,21 +22,23 @@ export const ExchangeRatesDetails: React.FC = () => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <div className="hidden md:flex items-center text-xs text-accent-foreground/80 space-x-2 cursor-pointer hover:text-accent-foreground transition-colors">
+        <div className="hidden md:flex items-center text-xs space-x-2">
           {headerCurrencyPairs.map(({ from, to }) => (
-            <div className="font-mono flex flex-col items-center" key={`${from}/${to}`}>
-              <span>
+            <div
+              className="flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              key={`${from}/${to}`}>
+              <span className="antialiased">
                 {from}/{to}
               </span>
               <MoneyValue
                 useColors={false}
                 showSymbol={false}
+                className="font-semibold"
                 amount={getExchangeRate(from, to, fixerExchangeRates) ?? 0}
                 currency={to}
               />
             </div>
           ))}
-          <ChevronRight className="h-4 w-4 ml-1" />
         </div>
       </SheetTrigger>
       <SheetContent side="right" className="w-full sm:max-w-lg p-0">

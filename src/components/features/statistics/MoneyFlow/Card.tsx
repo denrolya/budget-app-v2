@@ -27,6 +27,9 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
   const [showExpenses, setShowExpenses] = useState<boolean>(true);
   const [showRevenue, setShowRevenue] = useState<boolean>(false);
   const [showPreviousPeriod, setShowPreviousPeriod] = useState<boolean>(true);
+  const [showYearBoundary, setShowYearBoundary] = useState<boolean>(true);
+  const [showMonthBoundary, setShowMonthBoundary] = useState<boolean>(true);
+  const [showSeasonBoundary, setShowSeasonBoundary] = useState<boolean>(true);
 
   const selectedTimeframeOption = useMemo(
     () => TIMEFRAME_OPTIONS.find((t) => t.value === timeframe) || TIMEFRAME_OPTIONS[2],
@@ -116,6 +119,12 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
             showPreviousPeriod={showPreviousPeriod}
             setShowPreviousPeriod={setShowPreviousPeriod}
             availablePeriods={availablePeriods}
+            showYearBoundary={showYearBoundary}
+            showSeasonBoundary={showSeasonBoundary}
+            showMonthBoundary={showMonthBoundary}
+            setShowMonthBoundary={setShowMonthBoundary}
+            setShowYearBoundary={setShowYearBoundary}
+            setShowSeasonBoundary={setShowSeasonBoundary}
             period={period}
             setPeriod={(value: PeriodValue) => setPeriod(value)}
             setTimeframe={(value: TimeframeValue) => setTimeframe(value)}
@@ -164,6 +173,9 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
                     currentTimeframe={currentTimeframe}
                     previousTimeframe={previousTimeframe}
                     showPreviousPeriod={showPreviousPeriod}
+                    showYearBoundary={showYearBoundary}
+                    showSeasonBoundary={showSeasonBoundary}
+                    showMonthBoundary={showMonthBoundary}
                   />
                 )
               )}

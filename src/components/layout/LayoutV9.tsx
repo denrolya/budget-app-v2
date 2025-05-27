@@ -1,41 +1,36 @@
 import React from 'react';
 
+import Sidebar from '@/components/layout/sidebar/Sidebar';
 import { FormRenderer } from '@/components/common/FormRenderer';
-import HotkeysProvider from '@/contexts/Hotkeys';
-import Header from '@/components/layout/Header';
+import Header from '@/components/layout/header/Header';
 import MobileNavigation from '@/components/layout/MobileNavigation';
-import Sidebar from '@/components/layout/Sidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import FinanceDataProvider from '@/contexts/FinanceData';
 import { FormProvider } from '@/contexts/Form';
-import { SidebarProvider } from '@/contexts/sidebar';
+import HotkeysProvider from '@/contexts/Hotkeys';
 
 export const LayoutV9: React.FC<React.PropsWithChildren> = ({ children }) => (
   <FinanceDataProvider>
     <TooltipProvider>
       <FormProvider>
-        <SidebarProvider>
+        <SidebarProvider defaultOpen={false}>
           <HotkeysProvider>
-            <div className="flex flex-col min-h-screen">
-              <Header className="fixed top-0 left-0 right-0 z-10 hidden md:flex" />
+            <Sidebar />
+            <SidebarInset>
+              <div className="flex flex-col min-h-screen">
+                <Header className="hidden md:flex" />
 
-              <div className="flex flex-1 md:pt-8">
-                <Sidebar className="hidden md:block overflow-y-auto fixed top-8 left-0 w-16" />
+                <div className="flex flex-1 flex-col">
+                  <div className="@container/main flex flex-1 flex-col gap-2">{children}</div>
+                </div>
 
-                <main
-                  className="flex-1 overflow-y-auto md:ml-16 pb-0"
-                  id="main-content"
-                  tabIndex={-1}
-                >
-                  {children}
-
-                  <MobileNavigation />
-                  <FormRenderer />
-                  <Toaster />
-                </main>
+                <MobileNavigation />
+                <FormRenderer />
+                <Toaster />
               </div>
-            </div>
+            </SidebarInset>
           </HotkeysProvider>
         </SidebarProvider>
       </FormProvider>

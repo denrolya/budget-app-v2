@@ -33,8 +33,8 @@ const iconSizeMap = {
 };
 
 const currencySizeMap = {
-  sm: 'text-[6px] h-2.5',
-  md: 'text-[8px] h-3',
+  sm: 'text-3xs h-2.5',
+  md: 'text-2xs h-3',
   lg: 'text-xs h-4',
 };
 

@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useAuth, useBaseCurrency } from '@/contexts/auth';
 import { confirm } from '@/utils/confirmation';
+import { cn } from '@/lib/utils';
 
 type CurrencyType = {
   code: CURRENCY_CODE;
@@ -55,7 +56,12 @@ export const HeaderCurrencySelector: React.FC<CurrencySelectorProps> = (props) =
 
   return (
     <Select value={selectedCurrency} onValueChange={handleCurrencyChange} {...props}>
-      <SelectTrigger className="w-[80px] text-xs border-none shadow-none bg-transparent hover:bg-transparent focus:ring-0 p-0 h-auto hover:text-accent-foreground transition-colors">
+      <SelectTrigger
+        className={cn(
+          'w-[80px] text-xs border-none shadow-none bg-transparent hover:bg-transparent focus:ring-0 p-0 h-auto hover:text-accent-foreground transition-colors',
+          props.className,
+        )}
+      >
         <SelectValue>
           <div className="flex items-center">
             {renderCurrencyIcon(CURRENCIES[selectedCurrency] as CurrencyType)}

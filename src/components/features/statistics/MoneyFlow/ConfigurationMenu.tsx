@@ -1,8 +1,7 @@
-import { BarChart, LineChart, PieChart, SettingsIcon, TrendingDown, TrendingUp } from 'lucide-react';
+import { BarChart, CalendarX, LineChart, PieChart, SettingsIcon, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
 
-import { useIsMobile } from '@/hooks/useMobile';
-import { PeriodValue } from '@/types/global';
+import Switch from '@/components/features/statistics/MoneyFlow/ConfigurationMenuSwitch';
 import { Button } from '@/components/ui/button';
 import {
   Drawer,
@@ -15,8 +14,9 @@ import {
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Switch } from '@/components/ui/switch';
 import { TIMEFRAME_OPTIONS } from '@/constants/datetime';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { PeriodValue } from '@/types/global';
 
 interface UnifiedChartMenuProps {
   timeframe: string;
@@ -34,6 +34,12 @@ interface UnifiedChartMenuProps {
   showPreviousPeriod: boolean;
   setShowPreviousPeriod: (value: boolean) => void;
   availablePeriods: { value: string; label: string }[];
+  showYearBoundary: boolean;
+  setShowYearBoundary: (value: boolean) => void;
+  showMonthBoundary: boolean;
+  setShowMonthBoundary: (value: boolean) => void;
+  showSeasonBoundary: boolean;
+  setShowSeasonBoundary: (value: boolean) => void;
 }
 
 interface OptionButtonProps {
@@ -122,36 +128,42 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
             { id: 'expenses', label: 'Expenses', icon: TrendingDown, color: 'text-destructive' },
             { id: 'revenue', label: 'Revenue', icon: PieChart, color: 'text-secondary' },
             { id: 'previous-period', label: 'Previous Period', icon: TrendingUp, color: 'text-muted-foreground' },
-          ].map(({ id, label, icon: Icon, color }) => (
-            <div key={id} className="flex items-center justify-between">
-              <Label htmlFor={id} className="flex items-center space-x-2 text-xs cursor-pointer">
-                <Icon className={`h-3 w-3 ${color}`} />
-                <span>{label}</span>
-              </Label>
-              <Switch
-                id={id}
-                checked={
-                  id === 'income'
-                    ? props.showIncome
-                    : id === 'expenses'
-                      ? props.showExpenses
-                      : id === 'revenue'
-                        ? props.showRevenue
-                        : props.showPreviousPeriod
-                }
-                onCheckedChange={
-                  id === 'income'
-                    ? props.setShowIncome
-                    : id === 'expenses'
-                      ? props.setShowExpenses
-                      : id === 'revenue'
-                        ? props.setShowRevenue
-                        : props.setShowPreviousPeriod
-                }
-                className="scale-75"
-              />
-            </div>
+          ].map(({ id, label, icon, color }) => (
+            <Switch
+              label={label}
+              icon={icon}
+              iconClassName={color}
+              checked={id === 'income'
+                ? props.showIncome
+                : id === 'expenses'
+                  ? props.showExpenses
+                  : id === 'revenue'
+                    ? props.showRevenue
+                    : props.showPreviousPeriod}
+              onChange={id === 'income'
+                ? props.setShowIncome
+                : id === 'expenses'
+                  ? props.setShowExpenses
+                  : id === 'revenue'
+                    ? props.setShowRevenue
+                    : props.setShowPreviousPeriod} />
           ))}
+
+          <Switch
+            label="Show Year Boundary"
+            icon={CalendarX}
+            checked={props.showYearBoundary}
+            onChange={props.setShowYearBoundary} />
+          <Switch
+            label="Show Season Boundary"
+            icon={CalendarX}
+            checked={props.showSeasonBoundary}
+            onChange={props.setShowSeasonBoundary} />
+          <Switch
+            label="Show Month Boundary"
+            icon={CalendarX}
+            checked={props.showMonthBoundary}
+            onChange={props.setShowMonthBoundary} />
         </div>
       </div>
     </div>

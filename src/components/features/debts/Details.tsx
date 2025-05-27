@@ -7,7 +7,7 @@ import moment, { Moment } from 'moment/moment';
 import React, { useMemo, useState } from 'react';
 
 import { Separator } from '@/components/ui/separator';
-import { useIsMobile } from '@/hooks/useMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
