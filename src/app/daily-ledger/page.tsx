@@ -122,7 +122,7 @@ export const DailyLedgerPage: React.FC = () => {
   );
 
   return (
-    <section {...swipeHandlers} className="h-full p-4">
+    <FullHeightPageContent {...swipeHandlers}>
       <Card className="shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
         <CardHeader className="flex flex-col space-y-4 p-0 md:p-3 bg-background md:bg-card border-b-none md:border-b">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
@@ -299,7 +299,7 @@ export const DailyLedgerPage: React.FC = () => {
         timeframe={timeframe}
         setTimeframe={setTimeframe}
       />
-    </section>
+    </FullHeightPageContent>
   );
 };
 
