@@ -3,6 +3,16 @@ import moment from 'moment';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 
+export interface FilterConstructor<T extends BaseFilters = BaseFilters> {
+  new(): T;
+
+  fromSearchParams(
+    params: URLSearchParams,
+    map: Record<string, string>,
+    format: string,
+  ): T;
+}
+
 export interface FilterModel {
   reset(): void;
 
@@ -18,17 +28,26 @@ abstract class BaseFilters implements FilterModel {
     map: Record<string, string> = {},
     format = BACKEND_DATE_FORMAT,
   ): T {
-    const instance = new this();
+    let instance = new this();
 
-    Object.keys(instance).forEach((key) => {
-      const paramKey = map[key] || key;
-      const rawValue = params.get(paramKey);
-      if (rawValue !== null) {
-        const isDate = moment(rawValue, format, true).isValid();
-        const value = isDate ? moment(rawValue, format) : rawValue;
-        instance.setFilter(key as keyof T, value);
-      }
-    });
+    Object
+      .keys(instance)
+      .filter(key => key[0] !== '_')
+      .forEach((key) => {
+        const paramKey = map[key] || key;
+        const rawValue = params.get(paramKey);
+        if (rawValue !== null) {
+          const isDate = moment(rawValue, format, true).isValid();
+          const isArray = rawValue.includes(',');
+          const value = isDate
+            ? moment(rawValue, format)
+            : isArray
+              ? rawValue.split(',')
+              : rawValue;
+
+          instance = instance.setFilter(key as keyof T, value);
+        }
+      });
 
     return instance;
   }
@@ -71,7 +90,7 @@ abstract class BaseFilters implements FilterModel {
   }
 
   clone(): this {
-    const clone = new (this.constructor as { new (): this })();
+    const clone = new (this.constructor as { new(): this })();
     Object.assign(clone, this);
     return clone;
   }

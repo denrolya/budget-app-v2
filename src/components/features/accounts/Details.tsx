@@ -36,7 +36,7 @@ const AccountDetail: React.FC<Props> = ({ account }) => {
   }, [currentDate]);
 
   const { groupedItems, isLoading, isError, error, setFilter } = useTransactionsAndTransfers({
-    updateUrl: false,
+    updateUrl: true,
     excludeTransfers: true,
   });
 

@@ -51,7 +51,7 @@ export const useTransfers = (options: UseTransfersOptions = {}): UseTransfersRet
     queryKey = 'transfers',
   } = options;
 
-  const { data, ...listState } = useListState<TransferFilters, TransformedResponse, Transfer>({
+  const { data, ...listState } = useListState<TransferFilters, TransformedResponse>({
     initialPerPage,
     initialFilters,
     initialSort,

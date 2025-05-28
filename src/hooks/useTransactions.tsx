@@ -48,7 +48,7 @@ export const useTransactions = (options: UseTransactionsOptions = {}): UseTransa
     excludeTransfers = false,
   } = options;
 
-  const { data, ...listState } = useListState<TransactionFilters, TransformedResponse, Transaction>({
+  const { data, ...listState } = useListState<TransactionFilters, TransformedResponse>({
     initialPerPage,
     initialFilters,
     initialSort,

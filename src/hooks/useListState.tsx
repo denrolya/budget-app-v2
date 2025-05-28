@@ -1,12 +1,12 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
-import moment from 'moment';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import { FilterModel } from '@/models/BaseFilters';
-import { Sorting } from '@/types/pagination';
+import { buildListStateSearchParams } from '@/utils/buildListStateSearchQueryParams';
+import { type Sorting } from '@/types/pagination';
+import BaseFilters, { type FilterConstructor } from '@/models/BaseFilters';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 
 interface PaginationState {
@@ -16,7 +16,7 @@ interface PaginationState {
 
 type SetFilterFunction<T> = <K extends keyof T>(key: K, value: T[K]) => void;
 
-interface UseListStateOptions<FilterType extends FilterModel, DataType> {
+interface UseListStateOptions<FilterType extends BaseFilters, DataType> {
   initialPerPage?: number;
   initialFilters: FilterType;
   initialSort?: Sorting;
@@ -35,22 +35,22 @@ interface UseListStateOptions<FilterType extends FilterModel, DataType> {
 
 export type UseListReturn<FilterType, DataType> = Omit<UseListState<FilterType>, 'pagination' | 'sort'> &
   UseQueryResult<DataType, Error> & {
-    pagination: {
-      totalItems: number;
-      totalPages: number;
-      perPage: number;
-      currentPage: number;
-      setCurrentPage: (page: number) => void;
-      setPerPage: (perPage: number) => void;
-    };
-    sort: {
-      field: string;
-      direction: 'asc' | 'desc';
-      setSort: (sort: Sorting) => void;
-    };
-    setFilter: SetFilterFunction<FilterType>;
-    resetFilters: () => void;
+  pagination: {
+    totalItems: number;
+    totalPages: number;
+    perPage: number;
+    currentPage: number;
+    setCurrentPage: (page: number) => void;
+    setPerPage: (perPage: number) => void;
   };
+  sort: {
+    field: string;
+    direction: 'asc' | 'desc';
+    setSort: (sort: Sorting) => void;
+  };
+  setFilter: SetFilterFunction<FilterType>;
+  resetFilters: () => void;
+};
 
 export interface UseListState<FilterType> {
   pagination: PaginationState;
@@ -61,7 +61,7 @@ export interface UseListState<FilterType> {
 const DEFAULT_STALE_TIME = 5 * 60 * 1000;
 const DEFAULT_GC_TIME = 10 * 60 * 1000;
 
-export const useListState = <FilterType extends FilterModel, DataType extends { totalItems: number }, ItemType>(
+export const useListState = <FilterType extends BaseFilters, DataType extends { totalItems: number }>(
   {
     enabled = true,
     initialPerPage = 20,
@@ -79,6 +79,8 @@ export const useListState = <FilterType extends FilterModel, DataType extends { 
   additionalFetchDependencies = [],
 ): UseListReturn<FilterType, DataType> => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const hasSearchParams = [...searchParams.keys()].length > 0;
+  const FilterClass = initialFilters.constructor as FilterConstructor<FilterType>;
 
   const getInitialState = (): UseListState<FilterType> => ({
     pagination: {
@@ -86,11 +88,12 @@ export const useListState = <FilterType extends FilterModel, DataType extends { 
       perPage: parseInt(searchParams.get('perPage') || initialPerPage.toString(), 10),
     },
     filters:
-      (initialFilters.constructor as any).fromSearchParams?.(searchParams, searchParamKeys, formatMoment) ??
-      initialFilters,
+      hasSearchParams && typeof FilterClass.fromSearchParams === 'function'
+        ? (FilterClass.fromSearchParams(searchParams, searchParamKeys as Record<string, string>, formatMoment) as FilterType)
+        : initialFilters,
     sort: {
-      field: (searchParams.get('sortField') as keyof ItemType) || initialSort?.field,
-      direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || initialSort?.direction,
+      field: searchParams.get('sortField') || initialSort?.field || '',
+      direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || initialSort?.direction || 'asc',
     },
   });
 
@@ -154,39 +157,15 @@ export const useListState = <FilterType extends FilterModel, DataType extends { 
   useEffect(() => {
     if (!updateUrl) return;
 
-    const hasStateChanged = !isEqual(
-      {
-        pagination: state.pagination,
-        filters: state.filters,
-        sort: state.sort,
-      },
-      {
-        pagination: prevStateRef.current.pagination,
-        filters: prevStateRef.current.filters,
-        sort: prevStateRef.current.sort,
-      },
-    );
-
+    const hasStateChanged = !isEqual(state, prevStateRef.current);
     if (!hasStateChanged) return;
 
-    const params = new URLSearchParams();
-    params.set('page', state.pagination.currentPage.toString());
-    params.set('perPage', state.pagination.perPage.toString());
-
-    Object.entries(state.filters).forEach(([key, value]) => {
-      if (key === '_defaults') return;
-      const searchParamKey = searchParamKeys[key as keyof FilterType] || key;
-      const defaultValue = initialFilters[key as keyof FilterType];
-      if (value !== undefined && value !== null && value !== '' && !isEqual(value, defaultValue)) {
-        const formattedValue = moment.isMoment(value) ? value.format(formatMoment) : value.toString();
-        params.set(searchParamKey, formattedValue);
-      }
-    });
-
-    if (state.sort.field && state.sort.direction) {
-      params.set('sortField', state.sort.field.toString());
-      params.set('sortDirection', state.sort.direction);
-    }
+    const params = buildListStateSearchParams(
+      state,
+      { filters: initialFilters, initialPerPage, initialSort },
+      searchParamKeys as Record<string, string>,
+      formatMoment,
+    );
 
     updateSearchParamsDebounced(params);
     prevStateRef.current = state;
@@ -194,7 +173,7 @@ export const useListState = <FilterType extends FilterModel, DataType extends { 
     return () => {
       updateSearchParamsDebounced.cancel();
     };
-  }, [state, searchParamKeys, formatMoment, updateSearchParamsDebounced, updateUrl, initialFilters]);
+  }, [state, searchParamKeys, formatMoment, updateSearchParamsDebounced, updateUrl, initialFilters, initialPerPage, initialSort]);
 
   // Normalize filters and sort for stable queryKey
   const serializedFilters = useMemo(() => JSON.stringify(state.filters), [state.filters]);
