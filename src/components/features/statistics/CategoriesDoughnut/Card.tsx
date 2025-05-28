@@ -248,7 +248,7 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
                             content={
                               <>
                                 <code className="font-mono text-xs">#{category.id}</code>:{' '}
-                                <span className="font-medium">{category.name}</span>
+                                <span>{category.name}</span>
                               </>
                             }
                           >
@@ -267,9 +267,7 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
                             </span>
                           </ResponsiveTooltip>
                           <div className="flex items-center space-x-2">
-                            <span className="font-mono text-sm whitespace-nowrap">
-                              <MoneyValue className="font-medium" useColors={false} amount={category.value} />
-                            </span>
+                            <MoneyValue useColors={false} amount={category.value} />
                             <div className="flex">
                               <ResponsiveTooltip
                                 openDelay={1}
@@ -301,9 +299,7 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
         <CardFooter className="p-4 border-t">
           <div className="w-full flex items-center justify-between min-h-[48px]">
             <span className="text-sm font-medium">Total</span>
-            <span className="text-lg font-semibold">
-              <MoneyValue className="font-mono" useColors={false} amount={amountToDisplay} />
-            </span>
+            <MoneyValue className="text-lg font-semibold" useColors={false} amount={amountToDisplay} />
           </div>
         </CardFooter>
       </Card>

@@ -1,7 +1,8 @@
-import { BarChart, Calendar } from 'lucide-react';
+import { BarChart, Calendar as CalendarIcon, Calendar } from 'lucide-react';
 import moment from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 
+import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
 import ConfigurationMenu from '@/components/features/statistics/MoneyFlow/ConfigurationMenu';
@@ -134,23 +135,23 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
         <CardDescription className="sr-only">Money flow statistics for the selected period.</CardDescription>
       </CardHeader>
       <CardContent className="p-0 flex-grow overflow-hidden flex flex-col">
-        <ResponsiveTooltip
-          openDelay={1}
-          desktopComponent="hovercard"
-          contentClassName="bg-transparent border-none shadow-none"
-          triggerClassName="cursor-help inline-flex flex-row px-4"
-          content={<YearDoughnutTimeframeDisplayChart data={[previousTimeframe, currentTimeframe]} />}
+        <DaterangePickerWithPresets
+          after={currentTimeframe.after}
+          before={currentTimeframe.before}
+          onChange={() => {}}
         >
-          <span className="text-xs flex items-center">
-            <Calendar className="inline h-3 w-3 mr-1" />
-            {formatShortDate(currentTimeframe.after)} - {formatShortDate(currentTimeframe.before)}
+          <span className="cursor-pointer hover:underline inline-flex flex-row px-4">
+            <span className="text-xs flex items-center">
+              <CalendarIcon className="inline h-3 w-3 mr-1" />
+              {formatShortDate(currentTimeframe.after)} - {formatShortDate(currentTimeframe.before)}
+            </span>
+            <span className="ml-1 text-xs text-muted-foreground flex items-center">
+              {' vs '}
+              <Calendar className="inline h-3 w-3 mx-1" />
+              {formatShortDate(previousTimeframe.after)} - {formatShortDate(previousTimeframe.before)}
+            </span>
           </span>
-          <span className="ml-1 text-xs text-muted-foreground flex items-center">
-            {' vs '}
-            <Calendar className="inline h-3 w-3 mx-1" />
-            {formatShortDate(previousTimeframe.after)} - {formatShortDate(previousTimeframe.before)}
-          </span>
-        </ResponsiveTooltip>
+        </DaterangePickerWithPresets>
 
         {isLoading && <MoneyFlowSkeleton />}
 

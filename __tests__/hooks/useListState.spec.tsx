@@ -26,13 +26,15 @@ vi.mock('react-router-dom', async () => {
 class DummyFilterModel extends BaseFilters {
   foo: string;
   date: Moment;
+  accounts: number[] | string[];
 
-  constructor(foo: string, date: moment.Moment) {
+  constructor(foo: string, date: moment.Moment, accounts: number[] | string[] = []) {
     super();
 
     const filled = {
       foo: foo ?? '',
       date: date ?? moment(),
+      accounts: [...accounts],
     };
 
     this._defaults = {
@@ -467,5 +469,26 @@ describe('useListState', () => {
     );
 
     expect(params.get('date')).toBe('2024-02-01');
+  });
+
+  it('serializes array values as CSV in search params', () => {
+    const filters = new DummyFilterModel('foo', moment('2024-01-01'), ['22', '29']);
+
+    const params = buildListStateSearchParams(
+      {
+        pagination: { currentPage: 1, perPage: 20 },
+        filters,
+        sort: { field: '', direction: 'asc' },
+      },
+      {
+        filters: new DummyFilterModel('foo', moment('2024-01-01'), []),
+        initialPerPage: 20,
+        initialSort: { field: '', direction: 'asc' },
+      },
+      {},
+      'YYYY-MM-DD',
+    );
+
+    expect(params.get('accounts')).toBe('22,29');
   });
 });

@@ -47,8 +47,8 @@ const DashboardPage: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col 3xl:flex-row h-[calc(100vh-2rem)] md:overflow-hidden bg-background">
-      <main className="flex-1 overflow-auto p-6 pb-[187px] lg:pb-17 3xl:p-6">
+    <>
+      <section className="h-full overflow-auto pb-[187px] lg:p-4">
         <h2 className="tracking-tight text-2xl font-bold mb-4 hidden md:block">Dashboard</h2>
 
         <Tabs defaultValue="overview" className="hidden lg:block mb-4">
@@ -84,7 +84,7 @@ const DashboardPage: React.FC = () => {
           ))}
         </Tabs>
 
-        <div className="flex flex-col-reverse xl:flex-row gap-6 mb-6">
+        <div className="flex flex-col-reverse xl:flex-row gap-6">
           <div className="w-full xl:w-3/4 3xl:w-4/5 flex flex-col gap-6 xl:order-1 order-1">
             <MoneyFlow />
             <CategoriesTimeline className="order-3 xl:order-2" />
@@ -94,7 +94,7 @@ const DashboardPage: React.FC = () => {
             <CategoriesDoughnut className="h-full" />
           </div>
         </div>
-      </main>
+      </section>
 
       <div className="lg:hidden fixed bottom-[47px] md:bottom-0 left-0 w-full h-[180px] bg-gradient-to-b from-background/0 to-background">
         <div
@@ -142,7 +142,7 @@ const DashboardPage: React.FC = () => {
       </div>
 
       <StatisticsCardsSidebar configs={configs} groups={groups} />
-    </div>
+    </>
   );
 };
 

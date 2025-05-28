@@ -1,9 +1,9 @@
 import React from 'react';
 
-import Sidebar from '@/components/layout/sidebar/Sidebar';
 import { FormRenderer } from '@/components/common/FormRenderer';
 import Header from '@/components/layout/header/Header';
 import MobileNavigation from '@/components/layout/MobileNavigation';
+import Sidebar from '@/components/layout/sidebar/Sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -15,16 +15,14 @@ export const LayoutV9: React.FC<React.PropsWithChildren> = ({ children }) => (
   <FinanceDataProvider>
     <TooltipProvider>
       <FormProvider>
-        <SidebarProvider defaultOpen={false}>
+        <SidebarProvider defaultOpen={false} className="overflow-hidden">
           <HotkeysProvider>
             <Sidebar />
             <SidebarInset>
-              <div className="flex flex-col min-h-screen">
+              <div className="flex flex-col h-screen">
                 <Header className="hidden md:flex" />
 
-                <div className="flex flex-1 flex-col">
-                  <div className="@container/main flex flex-1 flex-col gap-2">{children}</div>
-                </div>
+                <main className="flex flex-col 3xl:flex-row h-full md:overflow-hidden bg-background">{children}</main>
 
                 <MobileNavigation />
                 <FormRenderer />

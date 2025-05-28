@@ -1,15 +1,16 @@
 import moment, { Moment } from 'moment';
 
+import { COMMON_TIMEFRAMES } from '@/constants/datetime';
 import { DebugLogger } from '@/utils/DebugLogger';
 
 declare global {
   let logger:
     | DebugLogger
     | {
-        info: (message: any, component?: string) => void;
-        warn: (message: any, component?: string) => void;
-        error: (message: any, component?: string) => void;
-      };
+    info: (message: any, component?: string) => void;
+    warn: (message: any, component?: string) => void;
+    error: (message: any, component?: string) => void;
+  };
 }
 
 export interface Timeframe {
