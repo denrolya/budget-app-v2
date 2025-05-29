@@ -12,7 +12,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import CustomTooltip from '@/components/features/statistics/MoneyFlow/Tooltip';
+import CustomTooltip from '@/components/features/statistics/MoneyFlow/ChartTooltip';
 import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import { CHART_STYLES } from '@/constants/recharts';
 import { ISO8601Period } from '@/types/global';
@@ -189,7 +189,7 @@ const MoneyFlowChart: React.FC<Props> = ({
     if (enabled.season) {
       const cursor = moment(start).startOf('month').add(1, 'month');
       while (cursor.isBefore(end)) {
-        if ([0, 3, 6, 9].includes(cursor.month())) {
+        if ([0, 2, 5, 8].includes(cursor.month())) {
           const ts = snapTimestamp(cursor);
           if (!taken.has(ts)) {
             seasonBoundaries.push(ts);

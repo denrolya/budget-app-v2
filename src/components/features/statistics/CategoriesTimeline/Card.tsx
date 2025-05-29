@@ -6,13 +6,13 @@ import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithP
 import Chart from '@/components/features/statistics/CategoriesTimeline/Chart';
 import ConfigurationMenu from '@/components/features/statistics/CategoriesTimeline/ConfigurationMenu';
 import TransactionsDrawer from '@/components/features/statistics/CategoriesTimeline/TransactionsDrawer';
-import { useTimeframeControl } from '@/components/features/statistics/GenericTimeline/useTimeframeControl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTimelineStatistics } from '@/hooks/statistics/useTimelineStatisticsRequest';
+import { useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { cn } from '@/lib/utils';
 import { Timeframe } from '@/types/global';
-import { formatShortDate } from '@/utils/formatShortDate';
+import { formatRange } from '@/utils/formatShortDate';
 
 type TransactionsTimeframe = {
   after: Moment;
@@ -169,7 +169,7 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
             <span className="cursor-pointer hover:underline inline-flex flex-row px-4">
               <span className="text-xs flex items-center">
                 <CalendarIcon className="inline h-3 w-3 mr-1" />
-                {formatShortDate(timeframe.after)} - {formatShortDate(timeframe.before)}
+                {formatRange(timeframe)}
               </span>
             </span>
           </DaterangePickerWithPresets>

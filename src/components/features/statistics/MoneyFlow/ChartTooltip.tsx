@@ -50,15 +50,15 @@ const periodMapping: Record<ISO8601Period, moment.unitOfTime.DurationConstructor
   P1Y: 'year',
 };
 
-export const Tooltip: React.FC<Props> = ({
-                                           active,
-                                           payload,
-                                           label,
-                                           data,
-                                           period,
-                                           coordinate,
-                                           comparisonMode = 'previousTimeframe',
-                                         }) => {
+export const ChartTooltip: React.FC<Props> = ({
+                                                active,
+                                                payload,
+                                                label,
+                                                data,
+                                                period,
+                                                coordinate,
+                                                comparisonMode = 'previousTimeframe',
+                                              }) => {
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const { x = 0, y = 0 } = coordinate || { x: 0, y: 0 };
 
@@ -105,22 +105,23 @@ export const Tooltip: React.FC<Props> = ({
 
   const formattedCurrentDate = formatDate(dataPoint.date, period);
 
-  const unit = periodMapping[period] || 'month';
-  const formattedComparisonDate = comparisonData
-    ? formatDate(comparisonData.date, period)
-    : formatDate(moment(dataPoint.date).subtract(1, unit), period);
+  let formattedComparisonDate: string;
+
+  if (comparisonMode === 'previousPeriod') {
+    const unit = periodMapping[period] || 'month';
+    formattedComparisonDate = formatDate(moment(dataPoint.date).subtract(1, unit), period);
+  } else {
+    formattedComparisonDate = formatDate(dataPoint.date, period);
+  }
 
   return createPortal(
     <Card
-      className="fixed z-50 w-[320px] shadow-lg p-4"
+      className="fixed z-50 w-[320px] shadow-lg"
       style={{ top: position.top, left: position.left }}
       onClick={(e) => e.stopPropagation()}
     >
-      <CardContent className="p-0">
-        <div className="flex justify-between items-center mb-2">
-          <p className="text-xs font-medium">{formattedCurrentDate}</p>
-          <p className="text-xs text-muted-foreground">{formattedComparisonDate}</p>
-        </div>
+      <CardContent className="p-2">
+        <p className="text-xs font-medium mb-1">{formattedCurrentDate} <span className="text-muted-foreground">| {formattedComparisonDate}</span></p>
         <Separator className="mb-2" />
         <IncomeExpensesComparison
           currentIncome={dataPoint.income}
@@ -134,4 +135,4 @@ export const Tooltip: React.FC<Props> = ({
   );
 };
 
-export default memo(Tooltip);
+export default memo(ChartTooltip);

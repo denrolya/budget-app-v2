@@ -22,6 +22,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCategoryTreeStatistics } from '@/hooks/statistics/useCategoryTreeStatistics';
+import { useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { Timeframe } from '@/types/global';
 import { Type as TransactionType } from '@/types/transaction';
 import { formatShortDate } from '@/utils/formatShortDate';
@@ -37,13 +38,21 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
   const [currentCategory, setCurrentCategory] = useState<ProcessedCategory | null>(null);
   const [categoryStack, setCategoryStack] = useState<ProcessedCategory[]>([]);
   const [type, setType] = useState<TransactionType>(TransactionType.Expense);
-  const [timeframe, setTimeframe] = useState<Timeframe>({
-    after: moment().startOf('month'),
-    before: moment().endOf('month'),
-  });
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<ProcessedCategory | null>(null);
   const [showMonthlyAverage, setShowMonthlyAverage] = useState<boolean>(false);
+
+  const {
+    timeframe,
+    setTimeframe,
+  } = useTimeframeControl({
+    defaultTimeframe: {
+      after: moment().startOf('month'),
+      before: moment().endOf('month'),
+    },
+    enablePreviousTimeframe: false,
+    enablePeriod: false,
+  });
 
   const handleTimeframeChange = useCallback(
     (range: Timeframe) => {

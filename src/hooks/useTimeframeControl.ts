@@ -1,42 +1,17 @@
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 import { useEffect, useMemo, useState } from 'react';
 
-import { ISO8601Period } from '@/types/global';
-
-export interface Timeframe {
-  after: Moment;
-  before: Moment;
-}
-
-export interface Preset {
-  label: string;
-  value: string;
-  getDateRange: (now: Moment) => Timeframe;
-}
-
-interface PeriodOption {
-  label: string;
-  value: ISO8601Period;
-}
+import { PERIOD_OPTIONS } from '@/constants/datetime';
+import { ISO8601Period, Timeframe, TimeframeOption, PeriodOption } from '@/types/global';
 
 export interface UseTimeframeControlOptions {
   defaultPreset?: string;
   defaultTimeframe?: Timeframe;
   defaultPeriod?: ISO8601Period;
-  presets?: Preset[];
+  presets?: TimeframeOption[];
   enablePreviousTimeframe?: boolean;
   enablePeriod?: boolean;
 }
-
-// Define supported periods and their durations
-const PERIOD_OPTIONS: PeriodOption[] = [
-  { label: '1 Day', value: 'P1D' },
-  { label: '1 Week', value: 'P1W' },
-  { label: '1 Month', value: 'P1M' },
-  { label: '3 Months', value: 'P3M' },
-  { label: '6 Months', value: 'P6M' },
-  { label: '1 Year', value: 'P1Y' },
-];
 
 const getPeriodDuration = (period: ISO8601Period): moment.Duration => {
   switch (period) {
@@ -132,13 +107,13 @@ export const useTimeframeControl = ({
   }, [enablePreviousTimeframe, preset, timeframe]);
 
   const setPreset = (newPreset?: string) => {
-    setManualTimeframe(undefined); // clear manual override
+    setManualTimeframe(undefined);
     setPresetInternal(newPreset);
   };
 
   const setTimeframe = (tf: Timeframe) => {
     setManualTimeframe(tf);
-    setPresetInternal(undefined); // clear preset override
+    setPresetInternal(undefined);
   };
 
   return {

@@ -1,6 +1,29 @@
 import moment, { Moment } from 'moment';
 
-export const formatShortDate = (date: Moment) => {
-  const currentYear = moment().year();
-  return date.year() === currentYear ? date.format('MMM D') : date.format('MMM D, YYYY');
+import { Timeframe } from '@/types/global';
+
+export const formatShortDate = (date: Moment): string => {
+  const today = moment();
+
+  if (date.isSame(today, 'day')) {
+    return 'Today';
+  }
+
+  return date.format(date.isSame(today, 'year') ? 'MMM D' : 'MMM D, YYYY');
+};
+
+export const formatRange = (timeframe: Timeframe): string => {
+  const { after, before } = timeframe;
+
+  if (after.isSame(before, 'day')) {
+    return formatShortDate(after);
+  }
+
+  const sameMonth = after.isSame(before, 'month') && after.isSame(before, 'year');
+
+  if (sameMonth) {
+    return `${formatShortDate(after)}–${before.format('D')}`;
+  }
+
+  return `${formatShortDate(after)}–${formatShortDate(before)}`;
 };

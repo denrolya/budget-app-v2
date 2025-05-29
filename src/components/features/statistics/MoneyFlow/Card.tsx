@@ -2,7 +2,6 @@ import { BarChart, Calendar as CalendarIcon, Calendar } from 'lucide-react';
 import React, { memo, useMemo, useState } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
-import { useTimeframeControl } from '@/components/features/statistics/GenericTimeline/useTimeframeControl';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
 import ConfigurationMenu from '@/components/features/statistics/MoneyFlow/ConfigurationMenu';
 import MoneyFlowSkeleton from '@/components/features/statistics/MoneyFlow/Skeleton';
@@ -10,11 +9,13 @@ import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MOMENT_DATE_GENERIC_FORMAT, PERIOD_OPTIONS, TIMEFRAME_OPTIONS } from '@/constants/datetime';
+import { PERIOD_OPTIONS, TIMEFRAME_OPTIONS } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
+import { useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { cn } from '@/lib/utils';
 import { PeriodValue, TimeframeValue } from '@/types/global';
+import { formatRange } from '@/utils/formatShortDate';
 
 export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
@@ -116,11 +117,11 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
           <span className="cursor-pointer hover:underline inline-flex flex-row px-4">
             <span className="text-xs flex items-center">
               <CalendarIcon className="inline h-3 w-3 mr-1" />
-              {currentTimeframe.after.format(MOMENT_DATE_GENERIC_FORMAT)} - {currentTimeframe.before.format(MOMENT_DATE_GENERIC_FORMAT)}
-              <span className="ml-1 text-xs text-muted-foreground flex items-center">
+              {formatRange(currentTimeframe)}
+              <span className="ml-1 text-muted-foreground flex items-center">
                 {' vs '}
                 <Calendar className="inline h-3 w-3 mx-1" />
-                {previousTimeframe.after.format(MOMENT_DATE_GENERIC_FORMAT)} - {previousTimeframe.before.format(MOMENT_DATE_GENERIC_FORMAT)}
+                {formatRange(previousTimeframe)}
               </span>
             </span>
           </span>

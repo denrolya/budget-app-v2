@@ -149,8 +149,10 @@ export const PERIOD_OPTIONS: PeriodOption[] = [
   { label: '1 Day', value: 'P1D' },
   { label: '1 Week', value: 'P1W' },
   { label: '1 Month', value: 'P1M' },
+  { label: '3 Months', value: 'P3M' },
+  { label: '6 Months', value: 'P6M' },
+  { label: '1 Year', value: 'P1Y' },
 ];
-
 
 export const FILTER_PRESETS = [
   {
