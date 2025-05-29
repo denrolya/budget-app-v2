@@ -1,3 +1,4 @@
+import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
 import React from 'react';
 import moment from 'moment';
 
@@ -20,7 +21,7 @@ const TestingPage: React.FC = () => {
   const accounts = useActiveAccountsWithDefaultOrder();
 
   return (
-    <section className="p-4">
+    <FullHeightPageContent>
       <Tabs defaultValue="nivo-charts">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="nivo-charts">Nivo Charts</TabsTrigger>
@@ -57,7 +58,7 @@ const TestingPage: React.FC = () => {
           <TreeDND />
         </TabsContent>
       </Tabs>
-    </section>
+    </FullHeightPageContent>
   );
 };
 

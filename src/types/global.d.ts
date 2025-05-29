@@ -26,7 +26,7 @@ export interface TimeframeStep {
 export interface TimeframeOption {
   label: string;
   value: TimeframeValue;
-  getDateRange: (now: Moment) => Timeframe;
+  range: Timeframe;
 }
 
 export type TimeframeValue = (typeof COMMON_TIMEFRAMES)[number] | (typeof TIMEFRAME_VALUES)[number];

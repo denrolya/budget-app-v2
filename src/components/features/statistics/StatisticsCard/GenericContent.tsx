@@ -31,6 +31,7 @@ const GenericContent: React.FC<{
       <ResponsiveTooltip
         openDelay={0}
         desktopComponent="hovercard"
+        contentClassName="p-2 rounded-xl text-xs"
         content={
           <TooltipContent
             label="Current Value"
@@ -50,11 +51,12 @@ const GenericContent: React.FC<{
       </ResponsiveTooltip>
       <PercentageBadge decimals={0} type={type} percentage={percentageChange as number} />
     </div>
-    <div className="flex justify-between text-xs">
-      <span className="text-muted-foreground">vs {comparison === 'previous' ? 'previous' : 'last year'}</span>
+    <div className="flex justify-between items-center">
+      <span className="text-muted-foreground text-xs">vs {comparison === 'previous' ? 'previous' : 'last year'}</span>
       <ResponsiveTooltip
         openDelay={0}
         desktopComponent="hovercard"
+        contentClassName="p-2 rounded-xl text-xs"
         content={
           <TooltipContent
             label="Comparison Value"
@@ -65,7 +67,7 @@ const GenericContent: React.FC<{
           />
         }
       >
-          <MoneyValue className="font-semibold" useColors={false} amount={comparisonValue as number} />
+          <MoneyValue className="font-semibold text-xs" useColors={false} amount={comparisonValue as number} />
       </ResponsiveTooltip>
     </div>
   </>

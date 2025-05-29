@@ -32,6 +32,15 @@ const getPeriodDuration = (period: ISO8601Period): moment.Duration => {
   }
 };
 
+/**
+ * TODO: When setting timeframe using setTimeframe(externally) previousTimeframe is not updated
+ * @param defaultPreset
+ * @param defaultTimeframe
+ * @param defaultPeriod
+ * @param presets
+ * @param enablePreviousTimeframe
+ * @param enablePeriod
+ */
 export const useTimeframeControl = ({
                                       defaultPreset,
                                       defaultTimeframe,
@@ -48,7 +57,7 @@ export const useTimeframeControl = ({
 
   const timeframe = useMemo<Timeframe>(() => {
     const now = moment();
-    if (preset && selectedPreset) return selectedPreset.getDateRange(now);
+    if (preset && selectedPreset) return selectedPreset.range;
     if (manualTimeframe) return manualTimeframe;
 
     return {

@@ -51,11 +51,11 @@ export const ResponsiveTooltip: React.FC<Props> = ({
 
   if (desktopComponent === 'hovercard') {
     return (
-      <HoverCard openDelay={openDelay} closeDelay={closeDelay} className={cn(contentClassName)}>
+      <HoverCard openDelay={openDelay} closeDelay={closeDelay}>
         <HoverCardTrigger asChild>
           <Wrapper className={triggerClassName}>{children}</Wrapper>
         </HoverCardTrigger>
-        <HoverCardContent>{content}</HoverCardContent>
+        <HoverCardContent className={cn(contentClassName)}>{content}</HoverCardContent>
       </HoverCard>
     );
   }

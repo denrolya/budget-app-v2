@@ -46,7 +46,7 @@ export const BalanceProgressBar: React.FC<Props> = ({ accounts }) => {
             <React.Fragment key={group[0].type}>
               {groupIndex > 0 && <div className="w-2 bg-gray-300 dark:bg-gray-600 z-10 mx-1"></div>}
               <div className="flex flex-grow relative">
-                <div className="absolute top-0 left-2 text-xs font-semibold text-gray-600 dark:text-gray-300 z-20 mt-1">
+                <div className="absolute top-0 left-2 text-sm text-primary-foreground z-20 mt-1 capitalize font-bold">
                   {group[0].type}
                 </div>
                 {group.map((account) => {
@@ -68,16 +68,13 @@ export const BalanceProgressBar: React.FC<Props> = ({ accounts }) => {
                           }}
                         >
                           {percentage > 5 && (
-                            <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white drop-shadow-md">
-                              {percentage.toFixed(1)}%
+                            <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white drop-shadow-md">
+                              {percentage.toFixed(0)}%
                             </span>
                           )}
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent
-                        side="top"
-                        className="bg-gray-800 dark:bg-gray-700 text-white p-4 rounded-lg shadow-lg border border-gray-700 dark:border-gray-600"
-                      >
+                      <TooltipContent>
                         <div className="font-semibold text-lg">{account.displayName}</div>
                         <div className="text-sm text-gray-300">{account.type}</div>
                         <div className="text-md mt-2">
@@ -89,7 +86,7 @@ export const BalanceProgressBar: React.FC<Props> = ({ accounts }) => {
                             values={account.convertedValues}
                           />
                         </div>
-                        <div className="text-sm text-gray-300 mt-1">{percentage.toFixed(2)}% of total</div>
+                        <div className="text-sm text-gray-300 mt-1">{percentage.toFixed(0)}% of total</div>
                       </TooltipContent>
                     </Tooltip>
                   );

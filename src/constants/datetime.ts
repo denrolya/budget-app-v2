@@ -1,4 +1,4 @@
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 
 import { PeriodOption, Timeframe, TimeframeOption } from '@/types/global';
 
@@ -17,82 +17,82 @@ export const TIMEFRAME_OPTIONS: TimeframeOption[] = [
   {
     label: '1D',
     value: '1D',
-    getDateRange: (now: Moment) => ({
-      after: now.clone().subtract(1, 'day').startOf('day'),
-      before: now.clone().endOf('day'),
-    }),
+    range: {
+      after: moment().subtract(1, 'day').startOf('day'),
+      before: moment().endOf('day'),
+    },
   },
   {
     label: 'WTD',
     value: 'WTD',
-    getDateRange: (now: Moment) => ({
-      after: now.clone().startOf('isoWeek').startOf('day'),
-      before: now.clone().endOf('day'),
-    }),
+    range: {
+      after: moment().startOf('isoWeek').startOf('day'),
+      before: moment().endOf('day'),
+    },
   },
   {
     label: 'MTD',
     value: 'MTD',
-    getDateRange: (now: Moment) => ({
-      after: now.clone().startOf('month').startOf('day'),
-      before: now.clone().endOf('day'),
-    }),
+    range: {
+      after: moment().startOf('month').startOf('day'),
+      before: moment().endOf('day'),
+    },
   },
   {
     label: '1M',
     value: '1M',
-    getDateRange: (now: Moment) => ({
-      after: now.clone().subtract(1, 'month').startOf('day'),
-      before: now.clone().endOf('day'),
-    }),
+    range: {
+      after: moment().subtract(1, 'month').startOf('day'),
+      before: moment().endOf('day'),
+    },
   },
   {
     label: '3M',
     value: '3M',
-    getDateRange: (now: Moment) => ({
-      after: now.clone().subtract(3, 'months').startOf('day'),
-      before: now.clone().endOf('day'),
-    }),
+    range: {
+      after: moment().subtract(3, 'months').startOf('day'),
+      before: moment().endOf('day'),
+    },
   },
   {
     label: '6M',
     value: '6M',
-    getDateRange: (now: Moment) => ({
-      after: now.clone().subtract(6, 'months').startOf('day'),
-      before: now.clone().endOf('day'),
-    }),
+    range: {
+      after: moment().subtract(6, 'months').startOf('day'),
+      before: moment().endOf('day'),
+    },
   },
   {
     label: 'YTD',
     value: 'YTD',
-    getDateRange: (now: Moment) => ({
-      after: now.clone().startOf('year').startOf('day'),
-      before: now.clone().endOf('day'),
-    }),
+    range: {
+      after: moment().startOf('year').startOf('day'),
+      before: moment().endOf('day'),
+    },
   },
   {
     label: '1Y',
     value: '1Y',
-    getDateRange: (now: Moment) => ({
-      after: now.clone().subtract(1, 'year').startOf('day'),
-      before: now.clone().endOf('day'),
-    }),
+    range: {
+      after: moment().subtract(1, 'year').startOf('day'),
+      before: moment().endOf('day'),
+    },
   },
   {
     label: '3Y',
     value: '3Y',
-    getDateRange: (now: Moment) => ({
-      after: now.clone().subtract(3, 'years').startOf('day'),
-      before: now.clone().endOf('day'),
-    }),
+    range: {
+      after: moment().subtract(3, 'years').startOf('day'),
+      before: moment().endOf('day'),
+    },
   },
   {
     label: '5Y',
     value: '5Y',
-    getDateRange: (now: Moment) => ({
-      after: now.clone().subtract(5, 'years').startOf('day'),
-      before: now.clone().endOf('day'),
-    }),
+    range: {
+      after: moment().subtract(5, 'years').startOf('day'),
+      before: moment().endOf('day'),
+    },
   },
 ] as const;
 
@@ -114,6 +114,14 @@ export const DASHBOARD_TIMEFRAME_OPTIONS: Array<{ label: string, range: Timefram
     range: { after: moment().month(8).startOf('month'), before: moment().month(11).endOf('month') },
   },
   {
+    label: 'MTD',
+    value: 'MTD',
+    range: {
+      after: moment().startOf('month').startOf('day'),
+      before: moment().endOf('day'),
+    },
+  },
+  {
     label: 'Prev Month',
     range: {
       after: moment().subtract(1, 'month').startOf('month'),
@@ -121,6 +129,14 @@ export const DASHBOARD_TIMEFRAME_OPTIONS: Array<{ label: string, range: Timefram
     },
   },
   { label: 'This Month', range: { after: moment().startOf('month'), before: moment().endOf('month') } },
+  {
+    label: 'YTD',
+    value: 'YTD',
+    range: {
+      after: moment().startOf('year').startOf('day'),
+      before: moment().endOf('day'),
+    },
+  },
   { label: 'This Year', range: { after: moment().startOf('year'), before: moment().endOf('year') } },
   {
     label: 'Last Year',

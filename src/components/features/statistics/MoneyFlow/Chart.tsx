@@ -39,9 +39,11 @@ interface Props {
   showYearBoundary: boolean;
   showMonthBoundary: boolean;
   showSeasonBoundary: boolean;
+  isStacked?: boolean;
 }
 
 const MoneyFlowChart: React.FC<Props> = ({
+                                           isStacked = true,
                                            currentTimeframe,
                                            previousTimeframe,
                                            period,
@@ -154,8 +156,8 @@ const MoneyFlowChart: React.FC<Props> = ({
   };
 
   const findClosestTimestamp = (timestamps: number[], target: number): number => timestamps.reduce((prev, curr) =>
-      Math.abs(curr - target) < Math.abs(prev - target) ? curr : prev,
-    );
+    Math.abs(curr - target) < Math.abs(prev - target) ? curr : prev,
+  );
 
   const generateNonOverlappingBoundaries = (
     dataTimestamps: number[],
