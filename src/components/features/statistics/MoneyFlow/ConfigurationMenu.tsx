@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/drawer';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { TIMEFRAME_OPTIONS } from '@/constants/datetime';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { PeriodValue } from '@/types/global';
@@ -97,27 +96,24 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
 
       <div className="space-y-2">
         <Label className="text-xs font-medium">Chart Type</Label>
-        <RadioGroup
-          value={props.chartType}
-          onValueChange={(value) => props.setChartType(value as 'bar' | 'line')}
-          className="flex space-x-2"
-        >
-          {[
-            { value: 'bar', label: 'Bar', icon: BarChart },
-            { value: 'line', label: 'Line', icon: LineChart },
-          ].map(({ value, label, icon: Icon }) => (
-            <div key={value} className="flex items-center">
-              <RadioGroupItem value={value} id={value} className="sr-only peer" />
-              <Label
-                htmlFor={value}
-                className="flex items-center space-x-1 rounded-md px-2 py-1 text-xs cursor-pointer peer-checked:bg-primary peer-checked:text-primary-foreground hover:bg-muted"
-              >
-                <Icon className="h-3 w-3" />
-                <span>{label}</span>
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            className="flex items-center px-2 py-1 space-x-1"
+            variant={props.chartType === 'line' ? 'default' : 'outline'}
+            onClick={() => props.setChartType('line')}
+          >
+            <LineChart className="h-4 w-4" />
+            Line
+          </Button>
+          <Button
+            className="flex items-center px-2 py-1 space-x-1"
+            variant={props.chartType === 'bar' ? 'default' : 'outline'}
+            onClick={() => props.setChartType('bar')}
+          >
+            <BarChart className="h-4 w-4" />
+            Bar
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -130,6 +126,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
             { id: 'previous-period', label: 'Previous Period', icon: TrendingUp, color: 'text-muted-foreground' },
           ].map(({ id, label, icon, color }) => (
             <Switch
+              key={id}
               label={label}
               icon={icon}
               iconClassName={color}

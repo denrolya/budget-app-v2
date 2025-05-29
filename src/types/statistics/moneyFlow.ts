@@ -1,6 +1,6 @@
 import { Moment } from 'moment';
 
-import { PERIOD_OPTIONS } from '@/constants/datetime';
+import { ISO8601Period } from '@/types/global';
 
 export interface TransformedData {
   timestamp: number;
@@ -14,14 +14,13 @@ export interface TransformedData {
 }
 
 export interface UseMoneyFlowParams {
-  period: string;
+  period: ISO8601Period;
   currentTimeframe: { after: Moment; before: Moment };
   previousTimeframe: { after: Moment; before: Moment };
   baseCurrency: string;
 }
 
 export interface UseMoneyFlowReturn {
-  availablePeriods: typeof PERIOD_OPTIONS;
   transformedData: TransformedData[];
   isLoading: boolean;
   error: Error | null;

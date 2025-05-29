@@ -6,11 +6,12 @@ import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithP
 import Chart from '@/components/features/statistics/CategoriesTimeline/Chart';
 import ConfigurationMenu from '@/components/features/statistics/CategoriesTimeline/ConfigurationMenu';
 import TransactionsDrawer from '@/components/features/statistics/CategoriesTimeline/TransactionsDrawer';
+import { useTimeframeControl } from '@/components/features/statistics/GenericTimeline/useTimeframeControl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTimelineStatistics } from '@/hooks/statistics/useTimelineStatisticsRequest';
 import { cn } from '@/lib/utils';
-import { ISO8601Period, Timeframe } from '@/types/global';
+import { Timeframe } from '@/types/global';
 import { formatShortDate } from '@/utils/formatShortDate';
 
 type TransactionsTimeframe = {
@@ -25,7 +26,6 @@ interface ChartEvent {
 
 export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({ className }) => {
   const [chartType, setChartType] = useState<'line' | 'bar'>('line');
-  const [selectedPeriod, setSelectedPeriod] = useState<ISO8601Period>('P1M');
   const [selectedCategories, setSelectedCategories] = useState<number[]>([1, 6, 73, 147]);
   const [debouncedCategories, setDebouncedCategories] = useState<number[]>(selectedCategories);
   const [showExpenseReference, setShowExpenseReference] = useState<boolean>(false);
@@ -35,9 +35,20 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [selectedTimeframeForTransactions, setSelectedTimeframeForTransactions] = useState<TransactionsTimeframe>(null);
   const [fetchTransactionsFromSubcategories, setFetchTransactionsFromSubcategories] = useState<boolean>(false);
-  const [timeframe, setTimeframe] = useState<Timeframe>({
-    after: moment().subtract(1, 'year').startOf('year'),
-    before: moment(),
+
+  const {
+    timeframe,
+    setTimeframe,
+    period: selectedPeriod,
+    setPeriod: setSelectedPeriod,
+  } = useTimeframeControl({
+    defaultPeriod: 'P1M',
+    enablePreviousTimeframe: false,
+    enablePeriod: true,
+    defaultTimeframe: {
+      after: moment().subtract(1, 'year').startOf('year'),
+      before: moment(),
+    },
   });
 
   const { data, isLoading, error } = useTimelineStatistics(

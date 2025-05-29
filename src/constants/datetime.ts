@@ -3,6 +3,7 @@ import moment, { Moment } from 'moment';
 import { PeriodOption, Timeframe, TimeframeOption } from '@/types/global';
 
 export const BACKEND_DATE_FORMAT = 'YYYY-MM-DD';
+export const MOMENT_DATE_GENERIC_FORMAT = 'DD-MM-YYYY';
 export const MOMENT_TIME_VIEW_FORMAT = 'HH:mm';
 export const MOMENT_DATE_VIEW_FORMAT = 'MMM Do, YYYY';
 export const MOMENT_DATE_VIEW_FORMAT_2 = 'MMM D, YYYY';

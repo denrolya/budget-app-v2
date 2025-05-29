@@ -1,6 +1,6 @@
+import moment from 'moment';
 import { useEffect, useMemo } from 'react';
 
-import { PERIOD_OPTIONS } from '@/constants/datetime';
 import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
 import { TransformedData, UseMoneyFlowParams, UseMoneyFlowReturn } from '@/types/statistics/moneyFlow';
 
@@ -10,17 +10,6 @@ export const useMoneyFlow = ({
                                previousTimeframe,
                                baseCurrency,
                              }: UseMoneyFlowParams): UseMoneyFlowReturn => {
-
-  const availablePeriods = useMemo(() => {
-    const durationInDays = currentTimeframe.before.diff(currentTimeframe.after, 'days');
-    return PERIOD_OPTIONS.filter(option => {
-      if (durationInDays <= 1) return option.value === 'P1D';
-      if (durationInDays <= 7) return ['PT1H', 'P1D'].includes(option.value);
-      if (durationInDays <= 31) return ['P1D', 'P1W'].includes(option.value);
-      return true;
-    });
-  }, [currentTimeframe]);
-
   const {
     data: currentDataBackend,
     isLoading: isCurrentLoading,
@@ -53,31 +42,33 @@ export const useMoneyFlow = ({
   const transformedData: TransformedData[] = useMemo(() => {
     if (!currentDataBackend?.length || !previousDataBackend?.length) return [];
 
-    const periodUnit = period.includes('P1D') ? 'days' : period.includes('P1W') ? 'weeks' : 'months';
+    const maxLength = Math.max(currentDataBackend.length, previousDataBackend.length);
+    const baseDate = currentDataBackend[0]?.after.clone() ?? moment(); // fallback just in case
 
-    const maxPeriods = Math.max(currentDataBackend.length, previousDataBackend.length);
+    const periodUnit =
+      period === 'P1D' ? 'days' :
+        period === 'P1W' ? 'weeks' :
+          'months';
 
-    return Array.from({ length: maxPeriods }, (_, index) => {
-      const currentDate = currentDataBackend[0].after.clone().add(index, periodUnit);
-      const previousDate = previousDataBackend[0].after.clone().add(index, periodUnit);
+    return Array.from({ length: maxLength }, (_, index) => {
+      const date = baseDate.clone().add(index, periodUnit);
 
-      const currentItem = currentDataBackend.find(item => item.after.isSame(currentDate, periodUnit)) || {
+      const currentItem = currentDataBackend[index] || {
         income: 0,
         expense: 0,
-        after: currentDate,
       };
-      const previousItem = previousDataBackend.find(item => item.after.isSame(previousDate, periodUnit)) || {
+
+      const previousItem = previousDataBackend[index] || {
         income: 0,
         expense: 0,
-        after: previousDate,
       };
 
       return {
-        timestamp: currentItem.after.unix(),
+        timestamp: date.unix(),
+        date,
         income: currentItem.income,
         expenses: currentItem.expense,
         revenue: currentItem.income - currentItem.expense,
-        date: currentItem.after,
         previousIncome: previousItem.income,
         previousExpenses: previousItem.expense,
         previousRevenue: previousItem.income - previousItem.expense,
@@ -145,7 +136,6 @@ export const useMoneyFlow = ({
     : 0;
 
   return {
-    availablePeriods,
     transformedData,
     isLoading: isCurrentLoading || isPreviousLoading,
     error: currentError || previousError,

@@ -1,9 +1,8 @@
 import { BarChart, Calendar as CalendarIcon, Calendar } from 'lucide-react';
-import moment from 'moment';
 import React, { memo, useMemo, useState } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
-import YearDoughnutTimeframeDisplayChart from '@/components/common/YearDoughnutTimeframeDisplayChart';
+import { useTimeframeControl } from '@/components/features/statistics/GenericTimeline/useTimeframeControl';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
 import ConfigurationMenu from '@/components/features/statistics/MoneyFlow/ConfigurationMenu';
 import MoneyFlowSkeleton from '@/components/features/statistics/MoneyFlow/Skeleton';
@@ -11,18 +10,14 @@ import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { PERIOD_OPTIONS, TIMEFRAME_OPTIONS } from '@/constants/datetime';
+import { MOMENT_DATE_GENERIC_FORMAT, PERIOD_OPTIONS, TIMEFRAME_OPTIONS } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
 import { cn } from '@/lib/utils';
-import { ISO8601Period, PeriodValue, TimeframeValue } from '@/types/global';
-import { formatShortDate } from '@/utils/formatShortDate';
+import { PeriodValue, TimeframeValue } from '@/types/global';
 
 export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({ className }) => {
   const baseCurrency = useBaseCurrency();
-  const [timeframe, setTimeframe] = useState<TimeframeValue>(TIMEFRAME_OPTIONS[6].value);
-  const [period, setPeriod] = useState<ISO8601Period>(PERIOD_OPTIONS[2].value);
   const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
   const [showIncome, setShowIncome] = useState<boolean>(true);
   const [showExpenses, setShowExpenses] = useState<boolean>(true);
@@ -32,44 +27,22 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
   const [showMonthBoundary, setShowMonthBoundary] = useState<boolean>(true);
   const [showSeasonBoundary, setShowSeasonBoundary] = useState<boolean>(true);
 
-  const selectedTimeframeOption = useMemo(
-    () => TIMEFRAME_OPTIONS.find((t) => t.value === timeframe) || TIMEFRAME_OPTIONS[2],
-    [timeframe],
-  );
-
-  const now = moment();
-  const { currentTimeframe, previousTimeframe } = useMemo(() => {
-    const currentTimeframe = selectedTimeframeOption.getDateRange(now);
-    let previousTimeframe;
-
-    if (selectedTimeframeOption.value === 'WTD') {
-      previousTimeframe = {
-        after: currentTimeframe.after.clone().subtract(1, 'week').startOf('isoWeek'),
-        before: currentTimeframe.after.clone().subtract(1, 'week').endOf('isoWeek'),
-      };
-    } else if (selectedTimeframeOption.value === 'MTD') {
-      previousTimeframe = {
-        after: currentTimeframe.after.clone().subtract(1, 'month').startOf('month'),
-        before: currentTimeframe.after.clone().subtract(1, 'month').endOf('month'),
-      };
-    } else if (selectedTimeframeOption.value === 'YTD') {
-      previousTimeframe = {
-        after: currentTimeframe.after.clone().subtract(1, 'year').startOf('year'),
-        before: currentTimeframe.after.clone().subtract(1, 'year').endOf('year'),
-      };
-    } else {
-      const duration = moment.duration(currentTimeframe.before.diff(currentTimeframe.after));
-      previousTimeframe = {
-        after: currentTimeframe.after.clone().subtract(duration),
-        before: currentTimeframe.after.clone().subtract(1, 'second'),
-      };
-    }
-
-    return { currentTimeframe, previousTimeframe };
-  }, [selectedTimeframeOption, now]);
-
   const {
+    timeframe: currentTimeframe,
+    previousTimeframe,
+    setTimeframe,
+    preset,
+    setPreset,
+    period,
+    setPeriod,
     availablePeriods,
+  } = useTimeframeControl({
+    defaultPreset: TIMEFRAME_OPTIONS[6].value,
+    presets: TIMEFRAME_OPTIONS,
+    enablePreviousTimeframe: true,
+    enablePeriod: true,
+  });
+  const {
     transformedData,
     isLoading,
     error,
@@ -128,8 +101,8 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
             setShowSeasonBoundary={setShowSeasonBoundary}
             period={period}
             setPeriod={(value: PeriodValue) => setPeriod(value)}
-            setTimeframe={(value: TimeframeValue) => setTimeframe(value)}
-            timeframe={timeframe}
+            setTimeframe={(value: TimeframeValue) => setPreset(value)}
+            timeframe={preset}
           />
         </div>
         <CardDescription className="sr-only">Money flow statistics for the selected period.</CardDescription>
@@ -138,17 +111,17 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
         <DaterangePickerWithPresets
           after={currentTimeframe.after}
           before={currentTimeframe.before}
-          onChange={() => {}}
+          onChange={setTimeframe}
         >
           <span className="cursor-pointer hover:underline inline-flex flex-row px-4">
             <span className="text-xs flex items-center">
               <CalendarIcon className="inline h-3 w-3 mr-1" />
-              {formatShortDate(currentTimeframe.after)} - {formatShortDate(currentTimeframe.before)}
-            </span>
-            <span className="ml-1 text-xs text-muted-foreground flex items-center">
-              {' vs '}
-              <Calendar className="inline h-3 w-3 mx-1" />
-              {formatShortDate(previousTimeframe.after)} - {formatShortDate(previousTimeframe.before)}
+              {currentTimeframe.after.format(MOMENT_DATE_GENERIC_FORMAT)} - {currentTimeframe.before.format(MOMENT_DATE_GENERIC_FORMAT)}
+              <span className="ml-1 text-xs text-muted-foreground flex items-center">
+                {' vs '}
+                <Calendar className="inline h-3 w-3 mx-1" />
+                {previousTimeframe.after.format(MOMENT_DATE_GENERIC_FORMAT)} - {previousTimeframe.before.format(MOMENT_DATE_GENERIC_FORMAT)}
+              </span>
             </span>
           </span>
         </DaterangePickerWithPresets>

@@ -4,10 +4,11 @@ import { createPortal } from 'react-dom';
 import { TooltipProps } from 'recharts';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
-import { ISO8601Period } from '@/types/global';
-import { Separator } from '@/components/ui/separator';
-import { Card, CardContent } from '@/components/ui/card';
 import IncomeExpensesComparison from '@/components/features/statistics/MoneyFlow/IncomeExpensesComparison';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { MOMENT_DATE_GENERIC_FORMAT } from '@/constants/datetime';
+import { ISO8601Period } from '@/types/global';
 
 interface TransformedData {
   timestamp: number;
@@ -24,7 +25,7 @@ interface Props extends TooltipProps<ValueType, NameType> {
   data: TransformedData[];
   currentTimeframe: { after: Moment; before: Moment };
   previousTimeframe: { after: Moment; before: Moment };
-  period: '1 day' | '1 week' | '1 month';
+  period: ISO8601Period;
   comparisonMode?: 'previousPeriod' | 'previousTimeframe';
 }
 
@@ -36,18 +37,28 @@ const formatDate = (date: Moment, period: ISO8601Period): string => {
       return date.format('MMM D');
     case 'P1M':
       return date.format('MMM YYYY');
+    default:
+      return date.format(MOMENT_DATE_GENERIC_FORMAT);
   }
 };
 
+const periodMapping: Record<ISO8601Period, moment.unitOfTime.DurationConstructor> = {
+  P1D: 'day',
+  P1W: 'week',
+  P1M: 'month',
+  P3M: 'month',
+  P1Y: 'year',
+};
+
 export const Tooltip: React.FC<Props> = ({
-  active,
-  payload,
-  label,
-  data,
-  period,
-  coordinate,
-  comparisonMode = 'previousPeriod',
-}) => {
+                                           active,
+                                           payload,
+                                           label,
+                                           data,
+                                           period,
+                                           coordinate,
+                                           comparisonMode = 'previousTimeframe',
+                                         }) => {
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const { x = 0, y = 0 } = coordinate || { x: 0, y: 0 };
 
@@ -65,9 +76,12 @@ export const Tooltip: React.FC<Props> = ({
         return previousYearData.length > 0 ? previousYearData[previousYearData.length - 1] : null;
       }
     } else {
-      const currentDate = dataPoint.date;
-      const comparisonDate = moment(currentDate).subtract(1, 'year');
-      return data.find((item) => item.date.isSame(comparisonDate, 'day')) || null;
+      return {
+        ...dataPoint,
+        income: dataPoint.previousIncome,
+        expenses: dataPoint.previousExpenses,
+        revenue: dataPoint.previousRevenue,
+      };
     }
   }, [label, dataPoint, data, comparisonMode]);
 
@@ -90,15 +104,11 @@ export const Tooltip: React.FC<Props> = ({
   if (!active || !dataPoint) return null;
 
   const formattedCurrentDate = formatDate(dataPoint.date, period);
-  const periodMapping: Record<'1 day' | '1 week' | '1 month', moment.unitOfTime.DurationConstructor> = {
-    '1 day': 'day',
-    '1 week': 'week',
-    '1 month': 'month',
-  };
 
+  const unit = periodMapping[period] || 'month';
   const formattedComparisonDate = comparisonData
     ? formatDate(comparisonData.date, period)
-    : formatDate(moment(dataPoint.date).subtract(1, periodMapping[period]), period);
+    : formatDate(moment(dataPoint.date).subtract(1, unit), period);
 
   return createPortal(
     <Card
