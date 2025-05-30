@@ -13,43 +13,40 @@
   --muted-foreground: 240 5% 64.9%;
   --accent: 240 3.7% 15.9%;
   --accent-foreground: 0 0% 98%;
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 0 0% 98%;
-  --success: 142 76% 36%;
-  --success-foreground: 210 40% 98%;
-  --warning: 48 95% 53%;
-  --warning-foreground: 48 100% 96%;
-  --info: 180 66% 40%;
-  --info-foreground: 180 100% 96%;
+  --destructive: 0 50% 50%;
+  --destructive-foreground: 43 20% 90%;
+
+  --success: 142 35% 45%;
+  --success-foreground: 43 20% 90%;
+
+  --warning: 43 50% 45%;
+  --warning-foreground: 0 0% 90%;
+
+  --info: 210 25% 50%;
+  --info-foreground: 43 20% 90%;
+
   --border: 255 6% 18%;
   --input: 240 3.7% 15.9%;
   --ring: 240 4.9% 60%;
   --radius: 0.5rem;
 
-  --chart-1: 12 70% 45%;
-  --chart-2: 173 50% 32%;
-  --chart-3: 197 30% 20%;
-  --chart-4: 43 65% 50%;
-  --chart-5: 27 75% 50%;
-  --chart-6: 230 45% 45%;
-  --chart-7: 291 40% 45%;
-  --chart-8: 150 45% 35%;
-  --chart-9: 52 85% 50%;
-  --chart-10: 324 60% 35%;
+  --chart-1: 12 35% 40%;
+  --chart-2: 173 25% 30%;
+  --chart-3: 197 15% 18%;
+  --chart-4: 43 40% 40%;
+  --chart-5: 27 45% 40%;
+  --chart-6: 230 25% 40%;
+  --chart-7: 291 25% 40%;
+  --chart-8: 150 30% 30%;
+  --chart-9: 52 45% 45%;
+  --chart-10: 324 35% 30%;
 
-  --chart-text-color: 215 20% 65%;
-  --chart-crosshair-color: 262 83% 58%;
-  --chart-tooltip-background: 222 47% 11%;
-  --chart-tooltip-text-color: 210 40% 98%;
+  --chart-text-color: 43 10% 75%;
+  --chart-crosshair-color: 262 45% 50%;
+  --chart-tooltip-background: 0 0% 12%;
+  --chart-tooltip-text-color: 43 20% 90%;
 
-
-  --sidebar-background: 255 8% 10.5%;         /* аналог card */
-  --sidebar-foreground: 0 0% 98%;             /* как foreground */
-  --sidebar-primary: 0 0% 98%;                /* как primary */
-  --sidebar-primary-foreground: 240 5.9% 10%; /* как primary-foreground */
-  --sidebar-accent: 240 3.7% 20%;             /* чуть светлее accent */
-  --sidebar-accent-foreground: 0 0% 98%;      /* как accent-foreground */
-  --sidebar-border: 255 6% 18%;               /* как border */
-  --sidebar-ring: 240 4.9% 60%;               /* как ring */
+  --sidebar-background: 255 8% 10.5%;
+  --sidebar-foreground: 0 0% 98%;
 }
 

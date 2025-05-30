@@ -1,9 +1,3 @@
-import { ResponsivePie } from '@nivo/pie';
-import sortBy from 'lodash/sortBy';
-import { Calendar as CalendarIcon, CreditCard } from 'lucide-react';
-import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
-
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import ConfigurationMenu from '@/components/features/statistics/CategoriesDoughnut/ConfigurationMenu';
@@ -24,8 +18,13 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCategoryTreeStatistics } from '@/hooks/statistics/useCategoryTreeStatistics';
 import { useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { Timeframe } from '@/types/global';
-import { Type as TransactionType } from '@/types/transaction';
+import { Type, Type as TransactionType } from '@/types/transaction';
 import { formatShortDate } from '@/utils/formatShortDate';
+import { ResponsivePie } from '@nivo/pie';
+import sortBy from 'lodash/sortBy';
+import { Calendar as CalendarIcon, CreditCard } from 'lucide-react';
+import moment from 'moment';
+import React, { useCallback, useMemo, useState } from 'react';
 
 interface ProcessedCategory {
   id: number;
@@ -224,6 +223,7 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
                   cornerRadius={3}
                   activeOuterRadiusOffset={8}
                   borderWidth={1}
+                  colors={{ scheme: type === Type.Expense ? 'red_grey' : 'greens' }}
                   borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
                   enableArcLinkLabels={false}
                   enableArcLabels={false}
@@ -231,9 +231,9 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
                     <div className="bg-popover text-popover-foreground p-2 rounded shadow-md">
                       <strong>{data.name}</strong>
                       <div>
-                        <MoneyValue className="font-mono" useColors={false} amount={value} />
+                        <MoneyValue useColors={false} amount={value} />
                         <span className="ml-1 text-xs text-muted-foreground">
-                          {((value / (currentCategory ? currentCategory.value : totalCurrent)) * 100).toFixed(1)}%
+                          {((value / (currentCategory ? currentCategory.value : totalCurrent)) * 100).toFixed(0)}%
                         </span>
                       </div>
                     </div>

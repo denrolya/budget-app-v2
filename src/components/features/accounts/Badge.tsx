@@ -100,11 +100,11 @@ export const AccountBadge = ({ account, size = 'md', className, tooltip = true }
       triggerClassName={cn({
         'cursor-help': tooltip,
       })}
-      contentClassName="bg-transparent border-none shadow-none"
+      contentClassName="p-2 rounded-lg"
       openDelay={0}
       content={tooltip ? <AccountDetailsHoverCard account={account} /> : null}
     >
-      <span className="inline-block shit">{badgeContent}</span>
+      <span className="inline-block">{badgeContent}</span>
     </ResponsiveTooltip>
   );
 };

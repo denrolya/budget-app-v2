@@ -68,13 +68,13 @@ const DATE_FORMATS: {
 };
 
 const DAY_STYLES = {
-  1: { color: 'bg-red-500', name: 'MON', shortName: 'M' },
-  2: { color: 'bg-orange-500', name: 'TUE', shortName: 'T' },
-  3: { color: 'bg-yellow-500', name: 'WED', shortName: 'W' },
-  4: { color: 'bg-green-500', name: 'THU', shortName: 'T' },
-  5: { color: 'bg-sky-500', name: 'FRI', shortName: 'F' },
-  6: { color: 'bg-blue-500', name: 'SAT', shortName: 'S' },
-  0: { color: 'bg-violet-500', name: 'SUN', shortName: 'S' },
+  1: { color: 'bg-red-700', name: 'MON', shortName: 'M' },
+  2: { color: 'bg-orange-700', name: 'TUE', shortName: 'T' },
+  3: { color: 'bg-yellow-700', name: 'WED', shortName: 'W' },
+  4: { color: 'bg-green-700', name: 'THU', shortName: 'T' },
+  5: { color: 'bg-sky-700', name: 'FRI', shortName: 'F' },
+  6: { color: 'bg-blue-700', name: 'SAT', shortName: 'S' },
+  0: { color: 'bg-violet-700', name: 'SUN', shortName: 'S' },
 };
 
 const BADGE_SIZES = {

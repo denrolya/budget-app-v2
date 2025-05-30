@@ -23,6 +23,7 @@ const ConvertedCurrenciesTooltip: React.FC<ConvertedCurrenciesTooltipProps> = ({
 
   return (
     <ResponsiveTooltip
+      contentClassName="p-2 rounded-lg"
       triggerClassName="cursor-help"
       desktopComponent="hovercard"
       content={
