@@ -15,7 +15,7 @@ export interface TransformedData {
 
 export interface UseMoneyFlowParams {
   period: ISO8601Period;
-  currentTimeframe: { after: Moment; before: Moment };
+  timeframe: { after: Moment; before: Moment };
   previousTimeframe: { after: Moment; before: Moment };
   baseCurrency: string;
 }

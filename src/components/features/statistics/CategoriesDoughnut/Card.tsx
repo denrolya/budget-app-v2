@@ -1,3 +1,9 @@
+import { ResponsivePie } from '@nivo/pie';
+import sortBy from 'lodash/sortBy';
+import { Calendar as CalendarIcon, CreditCard } from 'lucide-react';
+import moment from 'moment';
+import React, { useCallback, useMemo, useState } from 'react';
+
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import ConfigurationMenu from '@/components/features/statistics/CategoriesDoughnut/ConfigurationMenu';
@@ -16,15 +22,10 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCategoryTreeStatistics } from '@/hooks/statistics/useCategoryTreeStatistics';
-import { useTimeframeControl } from '@/hooks/useTimeframeControl';
+import { UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { Timeframe } from '@/types/global';
 import { Type, Type as TransactionType } from '@/types/transaction';
 import { formatShortDate } from '@/utils/formatShortDate';
-import { ResponsivePie } from '@nivo/pie';
-import sortBy from 'lodash/sortBy';
-import { Calendar as CalendarIcon, CreditCard } from 'lucide-react';
-import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
 
 interface ProcessedCategory {
   id: number;
@@ -33,7 +34,14 @@ interface ProcessedCategory {
   children?: ProcessedCategory[];
 }
 
-export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({ className }) => {
+interface Props extends React.ComponentPropsWithoutRef<'div'> {
+  controlledTimeframe: UseTimeframeControl;
+}
+
+export const CategoriesDoughnutCard: React.FC<Props> = ({
+                                                          controlledTimeframe,
+                                                          className,
+                                                        }) => {
   const [currentCategory, setCurrentCategory] = useState<ProcessedCategory | null>(null);
   const [categoryStack, setCategoryStack] = useState<ProcessedCategory[]>([]);
   const [type, setType] = useState<TransactionType>(TransactionType.Expense);
@@ -41,10 +49,7 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
   const [selectedCategory, setSelectedCategory] = useState<ProcessedCategory | null>(null);
   const [showMonthlyAverage, setShowMonthlyAverage] = useState<boolean>(false);
 
-  const {
-    timeframe,
-    setTimeframe,
-  } = useTimeframeControl({
+  const fallback = useTimeframeControl({
     defaultTimeframe: {
       after: moment().startOf('month'),
       before: moment().endOf('month'),
@@ -52,6 +57,11 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
     enablePreviousTimeframe: false,
     enablePeriod: false,
   });
+
+  const {
+    timeframe = fallback.timeframe,
+    setTimeframe = fallback.setTimeframe,
+  } = controlledTimeframe ?? {};
 
   const handleTimeframeChange = useCallback(
     (range: Timeframe) => {
@@ -179,18 +189,20 @@ export const CategoriesDoughnutCard: React.FC<React.ComponentPropsWithoutRef<'di
           </div>
         </CardHeader>
         <CardContent className="p-4 pt-0 flex-1">
-          <DaterangePickerWithPresets
-            after={timeframe.after}
-            before={timeframe.before}
-            onChange={handleTimeframeChange}
-          >
-            <span className="cursor-pointer hover:underline inline-flex flex-row mb-2">
-              <span className="text-xs flex items-center">
-                <CalendarIcon className="inline h-3 w-3 mr-1" />
-                {formatShortDate(timeframe.after)} - {formatShortDate(timeframe.before)}
+          {!controlledTimeframe?.timeframe?.after && (
+            <DaterangePickerWithPresets
+              after={timeframe.after}
+              before={timeframe.before}
+              onChange={handleTimeframeChange}
+            >
+              <span className="cursor-pointer hover:underline inline-flex flex-row mb-2">
+                <span className="text-xs flex items-center">
+                  <CalendarIcon className="inline h-3 w-3 mr-1" />
+                  {formatShortDate(timeframe.after)} - {formatShortDate(timeframe.before)}
+                </span>
               </span>
-            </span>
-          </DaterangePickerWithPresets>
+            </DaterangePickerWithPresets>
+          )}
 
           <Breadcrumb>
             <BreadcrumbList className="flex-wrap">

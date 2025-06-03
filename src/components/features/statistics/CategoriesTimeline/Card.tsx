@@ -9,7 +9,7 @@ import TransactionsDrawer from '@/components/features/statistics/CategoriesTimel
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTimelineStatistics } from '@/hooks/statistics/useTimelineStatisticsRequest';
-import { useTimeframeControl } from '@/hooks/useTimeframeControl';
+import { UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { cn } from '@/lib/utils';
 import { Timeframe } from '@/types/global';
 import { formatRange } from '@/utils/formatShortDate';
@@ -24,7 +24,14 @@ interface ChartEvent {
   activePayload?: unknown[];
 }
 
-export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({ className }) => {
+interface Props extends React.ComponentPropsWithoutRef<'div'> {
+  controlledTimeframe: UseTimeframeControl;
+}
+
+export const CategoriesTimelineCard: React.FC<Props> = ({
+                                                          controlledTimeframe,
+                                                          className,
+                                                        }) => {
   const [chartType, setChartType] = useState<'line' | 'bar'>('line');
   const [selectedCategories, setSelectedCategories] = useState<number[]>([1, 6, 73, 147]);
   const [debouncedCategories, setDebouncedCategories] = useState<number[]>(selectedCategories);
@@ -36,12 +43,8 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
   const [selectedTimeframeForTransactions, setSelectedTimeframeForTransactions] = useState<TransactionsTimeframe>(null);
   const [fetchTransactionsFromSubcategories, setFetchTransactionsFromSubcategories] = useState<boolean>(false);
 
-  const {
-    timeframe,
-    setTimeframe,
-    period: selectedPeriod,
-    setPeriod: setSelectedPeriod,
-  } = useTimeframeControl({
+
+  const fallback = useTimeframeControl({
     defaultPeriod: 'P1M',
     enablePreviousTimeframe: false,
     enablePeriod: true,
@@ -51,16 +54,23 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
     },
   });
 
+  const {
+    timeframe = fallback.timeframe,
+    setTimeframe = fallback.setTimeframe,
+    period = fallback.period,
+    setPeriod = fallback.setPeriod,
+  } = controlledTimeframe ?? {};
+
   const { data, isLoading, error } = useTimelineStatistics(
     {
+      period,
       after: timeframe.after,
       before: timeframe.before,
-      period: selectedPeriod,
       categories: debouncedCategories,
       fetchIncomeReference: showIncomeReference,
       fetchExpenseReference: showExpenseReference,
     },
-    [selectedPeriod, debouncedCategories],
+    [period, debouncedCategories],
   );
 
   const debouncedSetCategories = useCallback((newCategories: number[]) => {
@@ -143,8 +153,8 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
             <ConfigurationMenu
               chartType={chartType}
               setChartType={setChartType}
-              selectedPeriod={selectedPeriod}
-              setSelectedPeriod={setSelectedPeriod}
+              selectedPeriod={period}
+              setSelectedPeriod={setPeriod}
               selectedCategories={selectedCategories}
               setSelectedCategories={setSelectedCategories}
               showExpenseReference={showExpenseReference}
@@ -161,18 +171,20 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <DaterangePickerWithPresets
-            after={timeframe.after}
-            before={timeframe.before}
-            onChange={handleTimeframeChange}
-          >
-            <span className="cursor-pointer hover:underline inline-flex flex-row px-4">
-              <span className="text-xs flex items-center">
-                <CalendarIcon className="inline h-3 w-3 mr-1" />
-                {formatRange(timeframe)}
+          {!controlledTimeframe?.timeframe?.after && (
+            <DaterangePickerWithPresets
+              after={timeframe.after}
+              before={timeframe.before}
+              onChange={handleTimeframeChange}
+            >
+              <span className="cursor-pointer hover:underline inline-flex flex-row px-4">
+                <span className="text-xs flex items-center">
+                  <CalendarIcon className="inline h-3 w-3 mr-1" />
+                  {formatRange(timeframe)}
+                </span>
               </span>
-            </span>
-          </DaterangePickerWithPresets>
+            </DaterangePickerWithPresets>
+          )}
           <div className="flex-grow overflow-hidden flex flex-col mt-2">
             <div className="flex-grow overflow-x-auto overflow-y-hidden h-[390px]">
               {isLoading && <Skeleton className="h-full w-full" />}
@@ -180,7 +192,7 @@ export const CategoriesTimelineCard: React.FC<React.ComponentPropsWithoutRef<'di
                 <Chart
                   chartType={chartType}
                   data={data}
-                  selectedPeriod={selectedPeriod}
+                  selectedPeriod={period}
                   showComparisonInTooltip={showComparisonInTooltip}
                   onClick={onChartClick}
                   useSeparateAxisForTotals={useSeparateAxisForTotals}

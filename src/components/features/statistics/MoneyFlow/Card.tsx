@@ -1,5 +1,5 @@
 import { BarChart, Calendar as CalendarIcon, Calendar } from 'lucide-react';
-import React, { memo, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import Chart from '@/components/features/statistics/MoneyFlow/Chart';
@@ -12,12 +12,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { PERIOD_OPTIONS, TIMEFRAME_OPTIONS } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
-import { useTimeframeControl } from '@/hooks/useTimeframeControl';
+import { UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { cn } from '@/lib/utils';
 import { PeriodValue, TimeframeValue } from '@/types/global';
 import { formatRange } from '@/utils/formatShortDate';
 
-export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({ className }) => {
+interface Props extends React.ComponentPropsWithoutRef<'div'> {
+  controlledTimeframe: UseTimeframeControl;
+}
+
+export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className }) => {
   const baseCurrency = useBaseCurrency();
   const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
   const [showIncome, setShowIncome] = useState<boolean>(true);
@@ -28,21 +32,24 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
   const [showMonthBoundary, setShowMonthBoundary] = useState<boolean>(true);
   const [showSeasonBoundary, setShowSeasonBoundary] = useState<boolean>(true);
 
-  const {
-    timeframe: currentTimeframe,
-    previousTimeframe,
-    setTimeframe,
-    preset,
-    setPreset,
-    period,
-    setPeriod,
-    availablePeriods,
-  } = useTimeframeControl({
+  const fallback = useTimeframeControl({
     defaultPreset: TIMEFRAME_OPTIONS[6].value,
     presets: TIMEFRAME_OPTIONS,
     enablePreviousTimeframe: true,
     enablePeriod: true,
   });
+
+  const {
+    timeframe = fallback.timeframe,
+    previousTimeframe = fallback.previousTimeframe,
+    setTimeframe = fallback.setTimeframe,
+    preset = fallback.preset,
+    setPreset = fallback.setPreset,
+    period = fallback.period,
+    setPeriod = fallback.setPeriod,
+    availablePeriods = fallback.availablePeriods,
+  } = controlledTimeframe ?? {};
+
   const {
     transformedData,
     isLoading,
@@ -62,7 +69,7 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
     previousAvgPeriodExpenses,
   } = useMoneyFlow({
     period,
-    currentTimeframe,
+    timeframe,
     previousTimeframe,
     baseCurrency,
   });
@@ -109,23 +116,25 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
         <CardDescription className="sr-only">Money flow statistics for the selected period.</CardDescription>
       </CardHeader>
       <CardContent className="p-0 flex-grow overflow-hidden flex flex-col">
-        <DaterangePickerWithPresets
-          after={currentTimeframe.after}
-          before={currentTimeframe.before}
-          onChange={setTimeframe}
-        >
-          <span className="cursor-pointer hover:underline inline-flex flex-row px-4">
-            <span className="text-xs flex items-center">
-              <CalendarIcon className="inline h-3 w-3 mr-1" />
-              {formatRange(currentTimeframe)}
-              <span className="ml-1 text-muted-foreground flex items-center">
-                {' vs '}
-                <Calendar className="inline h-3 w-3 mx-1" />
-                {formatRange(previousTimeframe)}
+        {!controlledTimeframe?.timeframe?.after && (
+          <DaterangePickerWithPresets
+            after={timeframe.after}
+            before={timeframe.before}
+            onChange={setTimeframe}
+          >
+            <span className="cursor-pointer hover:underline inline-flex flex-row px-4">
+              <span className="text-xs flex items-center">
+                <CalendarIcon className="inline h-3 w-3 mr-1" />
+                {formatRange(timeframe)}
+                <span className="ml-1 text-muted-foreground flex items-center">
+                  {' vs '}
+                  <Calendar className="inline h-3 w-3 mx-1" />
+                  {formatRange(previousTimeframe)}
+                </span>
               </span>
             </span>
-          </span>
-        </DaterangePickerWithPresets>
+          </DaterangePickerWithPresets>
+        )}
 
         {isLoading && <MoneyFlowSkeleton />}
 
@@ -145,7 +154,7 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
                     showIncome={showIncome}
                     showExpenses={showExpenses}
                     showRevenue={showRevenue}
-                    currentTimeframe={currentTimeframe}
+                    currentTimeframe={timeframe}
                     previousTimeframe={previousTimeframe}
                     showPreviousPeriod={showPreviousPeriod}
                     showYearBoundary={showYearBoundary}
@@ -226,13 +235,11 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
                   label={`Avg. ${getPeriodLabel} Income`}
                   value={avgPeriodIncome}
                   comparisonValue={previousAvgPeriodIncome}
-                  comparisonPercentage={incomeChangePercent}
                 />
                 <SummaryItem
                   label={`Avg. ${getPeriodLabel} Expenses`}
                   value={avgPeriodExpenses}
                   comparisonValue={previousAvgPeriodExpenses}
-                  comparisonPercentage={expensesChangePercent}
                 />
                 <SummaryItem
                   label="Net Revenue"
@@ -251,4 +258,4 @@ export const MoneyFlowCard: React.FC<React.ComponentPropsWithoutRef<'div'>> = ({
   );
 };
 
-export default memo(MoneyFlowCard);
+export default MoneyFlowCard;

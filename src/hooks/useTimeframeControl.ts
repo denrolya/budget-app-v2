@@ -13,6 +13,17 @@ export interface UseTimeframeControlOptions {
   enablePeriod?: boolean;
 }
 
+export interface UseTimeframeControl {
+  period: ISO8601Period;
+  setPeriod: (period: ISO8601Period) => void;
+  availablePeriods: PeriodOption[];
+  timeframe: Timeframe;
+  setTimeframe: (tf: Timeframe) => void;
+  preset: string;
+  setPreset: (preset: string) => void;
+  previousTimeframe?: Timeframe;
+}
+
 const getPeriodDuration = (period: ISO8601Period): moment.Duration => {
   switch (period) {
     case 'P1D':
@@ -48,7 +59,7 @@ export const useTimeframeControl = ({
                                       presets = [],
                                       enablePreviousTimeframe = false,
                                       enablePeriod = false,
-                                    }: UseTimeframeControlOptions) => {
+                                    }: UseTimeframeControlOptions): UseTimeframeControl => {
   const [preset, setPresetInternal] = useState<string | undefined>(defaultPreset);
   const [manualTimeframe, setManualTimeframe] = useState<Timeframe | undefined>(defaultTimeframe);
   const [period, setPeriodInternal] = useState<ISO8601Period>(defaultPeriod);

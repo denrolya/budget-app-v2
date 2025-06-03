@@ -1,12 +1,11 @@
+import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
+import { TransformedData, UseMoneyFlowParams, UseMoneyFlowReturn } from '@/types/statistics/moneyFlow';
 import moment from 'moment';
 import { useEffect, useMemo } from 'react';
 
-import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
-import { TransformedData, UseMoneyFlowParams, UseMoneyFlowReturn } from '@/types/statistics/moneyFlow';
-
 export const useMoneyFlow = ({
                                period,
-                               currentTimeframe,
+                               timeframe,
                                previousTimeframe,
                                baseCurrency,
                              }: UseMoneyFlowParams): UseMoneyFlowReturn => {
@@ -17,8 +16,8 @@ export const useMoneyFlow = ({
     refetch: refetchCurrentPeriodData,
   } = useValueByPeriodStatisticsRequest({
     period,
-    after: currentTimeframe.after,
-    before: currentTimeframe.before,
+    after: timeframe.after,
+    before: timeframe.before,
     queryKey: 'money-flow-selected',
   });
 
@@ -107,6 +106,11 @@ export const useMoneyFlow = ({
       };
     }
 
+    const periodUnit = period === 'P1D' ? 'days' : period === 'P1W' ? 'weeks' : 'months';
+
+    const currentPeriodCount = moment(timeframe.before).diff(moment(timeframe.after), periodUnit);
+    const previousPeriodCount = moment(previousTimeframe.before).diff(moment(previousTimeframe.after), periodUnit);
+
     const currentIncome = transformedData.reduce((sum, d) => sum + d.income, 0);
     const currentExpenses = transformedData.reduce((sum, d) => sum + d.expenses, 0);
     const previousIncome = transformedData.reduce((sum, d) => sum + d.previousIncome, 0);
@@ -122,14 +126,14 @@ export const useMoneyFlow = ({
       previousTotalIncome: previousIncome,
       previousTotalExpenses: previousExpenses,
       previousTotalRevenue: previousIncome - previousExpenses,
-      avgPeriodIncome: currentIncome / transformedData.length,
-      avgPeriodExpenses: currentExpenses / transformedData.length,
+      avgPeriodIncome: currentPeriodCount ? currentIncome / currentPeriodCount : 0,
+      avgPeriodExpenses: currentPeriodCount ? currentExpenses / currentPeriodCount : 0,
       incomeChangePercent: previousIncome !== 0 ? (incomeChange / Math.abs(previousIncome)) * 100 : 0,
       expensesChangePercent: previousExpenses !== 0 ? (expensesChange / Math.abs(previousExpenses)) * 100 : 0,
-      previousAvgPeriodIncome: previousIncome / transformedData.length,
-      previousAvgPeriodExpenses: previousExpenses / transformedData.length,
+      previousAvgPeriodIncome: previousPeriodCount ? previousIncome / previousPeriodCount : 0,
+      previousAvgPeriodExpenses: previousPeriodCount ? previousExpenses / previousPeriodCount : 0,
     };
-  }, [transformedData]);
+  }, [transformedData, period, timeframe, previousTimeframe]);
 
   const revenueChangePercent = previousTotalRevenue !== 0
     ? ((totalRevenue - previousTotalRevenue) / Math.abs(previousTotalRevenue)) * 100
