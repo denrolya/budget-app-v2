@@ -1,4 +1,4 @@
-import { BarChart, Calendar as CalendarIcon, Calendar } from 'lucide-react';
+import { Calendar as CalendarIcon, Calendar } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
@@ -6,15 +6,13 @@ import Chart from '@/components/features/statistics/MoneyFlow/Chart';
 import ConfigurationMenu from '@/components/features/statistics/MoneyFlow/ConfigurationMenu';
 import MoneyFlowSkeleton from '@/components/features/statistics/MoneyFlow/Skeleton';
 import SummaryItem from '@/components/features/statistics/MoneyFlow/SummaryItem';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { PERIOD_OPTIONS, TIMEFRAME_OPTIONS } from '@/constants/datetime';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
 import { UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { cn } from '@/lib/utils';
-import { PeriodValue, TimeframeValue } from '@/types/global';
+import { PeriodValue } from '@/types/global';
 import { formatRange } from '@/utils/formatShortDate';
 
 interface Props extends React.ComponentPropsWithoutRef<'div'> {
@@ -43,8 +41,6 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
     timeframe = fallback.timeframe,
     previousTimeframe = fallback.previousTimeframe,
     setTimeframe = fallback.setTimeframe,
-    preset = fallback.preset,
-    setPreset = fallback.setPreset,
     period = fallback.period,
     setPeriod = fallback.setPeriod,
     availablePeriods = fallback.availablePeriods,
@@ -63,10 +59,6 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
     previousTotalRevenue,
     incomeChangePercent,
     expensesChangePercent,
-    avgPeriodIncome,
-    avgPeriodExpenses,
-    previousAvgPeriodIncome,
-    previousAvgPeriodExpenses,
   } = useMoneyFlow({
     period,
     timeframe,
@@ -109,8 +101,6 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
             setShowSeasonBoundary={setShowSeasonBoundary}
             period={period}
             setPeriod={(value: PeriodValue) => setPeriod(value)}
-            setTimeframe={(value: TimeframeValue) => setPreset(value)}
-            timeframe={preset}
           />
         </div>
         <CardDescription className="sr-only">Money flow statistics for the selected period.</CardDescription>
@@ -170,7 +160,6 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
 
       {!isLoading && totalRevenue && (
         <CardFooter className="flex flex-col w-full p-0 border-t text-sm">
-          {/* Desktop summary row with bottom border */}
           <div className="hidden lg:flex w-full divide-x divide-muted-foreground/20 border-b border-muted px-2">
             {[
               {
@@ -199,59 +188,6 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
               </div>
             ))}
           </div>
-
-          {/* Dialog + Full-width trigger button */}
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full text-muted-foreground py-2 px-3 flex justify-center items-center gap-1 rounded-none rounded-b-xl"
-              >
-                <BarChart className="h-4 w-4" />
-                <span>Show Summary</span>
-              </Button>
-            </DialogTrigger>
-
-            <DialogContent className="max-w-lg w-full">
-              <DialogHeader>
-                <DialogTitle>Summary Statistics</DialogTitle>
-              </DialogHeader>
-
-              <div className="flex flex-col gap-3 text-sm">
-                <SummaryItem
-                  label="Total Income"
-                  value={totalIncome}
-                  comparisonValue={previousTotalIncome}
-                  comparisonPercentage={incomeChangePercent}
-                />
-                <SummaryItem
-                  label="Total Expenses"
-                  value={totalExpenses}
-                  comparisonValue={previousTotalExpenses}
-                  comparisonPercentage={expensesChangePercent}
-                />
-                <SummaryItem
-                  label={`Avg. ${getPeriodLabel} Income`}
-                  value={avgPeriodIncome}
-                  comparisonValue={previousAvgPeriodIncome}
-                />
-                <SummaryItem
-                  label={`Avg. ${getPeriodLabel} Expenses`}
-                  value={avgPeriodExpenses}
-                  comparisonValue={previousAvgPeriodExpenses}
-                />
-                <SummaryItem
-                  label="Net Revenue"
-                  value={totalRevenue}
-                  comparisonValue={previousTotalRevenue}
-                  comparisonPercentage={revenueChangePercent}
-                  colors
-                  showSign
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
         </CardFooter>
       )}
     </Card>

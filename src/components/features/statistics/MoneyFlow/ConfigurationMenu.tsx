@@ -13,13 +13,10 @@ import {
 } from '@/components/ui/drawer';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { TIMEFRAME_OPTIONS } from '@/constants/datetime';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { PeriodValue } from '@/types/global';
 
 interface UnifiedChartMenuProps {
-  timeframe: string;
-  setTimeframe: (value: string) => void;
   period: string;
   setPeriod: (value: PeriodValue) => void;
   chartType: 'bar' | 'line';
@@ -64,21 +61,6 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
 
   const MenuContent = () => (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Timeframe</Label>
-        <div className="flex flex-wrap gap-2">
-          {TIMEFRAME_OPTIONS.map((option) => (
-            <OptionButton
-              key={option.value}
-              value={option.value}
-              label={option.label}
-              currentValue={props.timeframe}
-              onChange={props.setTimeframe}
-            />
-          ))}
-        </div>
-      </div>
-
       <div className="space-y-2">
         <Label className="text-xs font-medium">Period</Label>
         <div className="flex flex-wrap gap-2">

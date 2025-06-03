@@ -1,7 +1,8 @@
-import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
-import { TransformedData, UseMoneyFlowParams, UseMoneyFlowReturn } from '@/types/statistics/moneyFlow';
 import moment from 'moment';
 import { useEffect, useMemo } from 'react';
+
+import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
+import { TransformedData, UseMoneyFlowParams, UseMoneyFlowReturn } from '@/types/statistics/moneyFlow';
 
 export const useMoneyFlow = ({
                                period,
@@ -53,11 +54,15 @@ export const useMoneyFlow = ({
       const date = baseDate.clone().add(index, periodUnit);
 
       const currentItem = currentDataBackend[index] || {
+        after: timeframe.after.clone(),
+        before: timeframe.before.clone(),
         income: 0,
         expense: 0,
       };
 
       const previousItem = previousDataBackend[index] || {
+        after: previousTimeframe.after.clone(),
+        before: previousTimeframe.before.clone(),
         income: 0,
         expense: 0,
       };
@@ -65,6 +70,14 @@ export const useMoneyFlow = ({
       return {
         timestamp: date.unix(),
         date,
+        currentPeriod: {
+          after: currentItem.after.clone(),
+          before: currentItem.before.clone(),
+        },
+        comparisonPeriod: {
+          after: previousItem.after.clone(),
+          before: previousItem.before.clone(),
+        },
         income: currentItem.income,
         expenses: currentItem.expense,
         revenue: currentItem.income - currentItem.expense,
@@ -73,7 +86,7 @@ export const useMoneyFlow = ({
         previousRevenue: previousItem.income - previousItem.expense,
       };
     });
-  }, [currentDataBackend, previousDataBackend, period]);
+  }, [currentDataBackend, previousDataBackend, period, timeframe, previousTimeframe]);
 
   const {
     totalIncome,
