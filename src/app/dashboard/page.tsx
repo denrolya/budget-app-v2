@@ -1,7 +1,5 @@
-import { Calendar, Calendar as CalendarIcon } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
-import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import StatisticsCardsSidebar from '@/components/features/dashboard/StatisticsCardsSidebar';
 import BalanceByAccountType from '@/components/features/statistics/BalanceByAccountType';
 import CategoriesDoughnut from '@/components/features/statistics/CategoriesDoughnut/Card';
@@ -11,11 +9,8 @@ import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card
 import TotalBalanceCard from '@/components/features/statistics/TotalBalanceCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cardConfigs } from '@/constants/dashboard-config';
-import { TIMEFRAME_OPTIONS } from '@/constants/datetime';
-import { useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { Type as AccountType } from '@/types/account';
 import { StatisticsConfig } from '@/types/statistics';
-import { formatRange } from '@/utils/formatShortDate';
 import { generateSlug } from '@/utils/generateSlug';
 
 const DashboardPage: React.FC = () => {
@@ -23,12 +18,6 @@ const DashboardPage: React.FC = () => {
   const groups = Object.keys(configs);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
-  const globalTimeframe = useTimeframeControl({
-    defaultPreset: TIMEFRAME_OPTIONS[6].value,
-    presets: TIMEFRAME_OPTIONS,
-    enablePreviousTimeframe: true,
-    enablePeriod: true,
-  });
 
   const handleConfigChange = (newConfig: Partial<StatisticsConfig>) => {
     console.log(newConfig);
@@ -60,27 +49,7 @@ const DashboardPage: React.FC = () => {
   return (
     <>
       <section className="h-full w-full overflow-auto pb-[187px] lg:p-4">
-        <div className="flex flex-row justify-between">
-          <h2 className="tracking-tight text-2xl font-bold mb-4 hidden md:block">Dashboard</h2>
-
-          <DaterangePickerWithPresets
-            after={globalTimeframe.timeframe.after}
-            before={globalTimeframe.timeframe.before}
-            onChange={globalTimeframe.setTimeframe}
-          >
-            <span className="cursor-pointer hover:underline inline-flex flex-row px-4">
-              <span className="text-xs flex items-center">
-                <CalendarIcon className="inline h-3 w-3 mr-1" />
-                {formatRange(globalTimeframe.timeframe)}
-                <span className="ml-1 text-muted-foreground flex items-center">
-                  {' vs '}
-                  <Calendar className="inline h-3 w-3 mx-1" />
-                  {formatRange(globalTimeframe.previousTimeframe)}
-                </span>
-              </span>
-            </span>
-          </DaterangePickerWithPresets>
-        </div>
+        <h2 className="tracking-tight text-2xl font-bold mb-4 hidden md:block">Dashboard</h2>
 
         <Tabs defaultValue="overview" className="hidden lg:block mb-4">
           <TabsList>
@@ -117,12 +86,12 @@ const DashboardPage: React.FC = () => {
 
         <div className="flex flex-col-reverse xl:flex-row gap-6">
           <div className="w-full xl:w-3/4 3xl:w-4/5 flex flex-col gap-6 xl:order-1 order-1">
-            <MoneyFlow controlledTimeframe={globalTimeframe} />
-            <CategoriesTimeline className="order-3 xl:order-2" controlledTimeframe={globalTimeframe} />
+            <MoneyFlow />
+            <CategoriesTimeline className="order-3 xl:order-2" />
           </div>
 
           <div className="w-full xl:w-1/4 3xl:w-1/5 order-2 xl:order-2">
-            <CategoriesDoughnut className="h-full" controlledTimeframe={globalTimeframe} />
+            <CategoriesDoughnut className="h-full" />
           </div>
         </div>
       </section>
