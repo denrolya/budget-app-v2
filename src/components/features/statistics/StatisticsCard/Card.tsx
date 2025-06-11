@@ -21,6 +21,7 @@ import { generateSlug } from '@/utils/generateSlug';
 interface Props {
   onChange: (newConfig: Partial<StatisticsConfig>) => void;
   config: StatisticsConfig;
+  showPercentageIndicator?: boolean;
 }
 
 const getPeriodText = (timeframe: Interval, period?: Interval): string => {
@@ -52,7 +53,7 @@ const StatisticsCardSkeleton = () => (
   </Card>
 );
 
-export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
+export const StatisticsCard: React.FC<Props> = ({ showPercentageIndicator = false, config, onChange }) => {
   const { title, type, categories, timeframe, period, comparison, statType } = config;
   const {
     currentData,
@@ -174,7 +175,9 @@ export const StatisticsCard: React.FC<Props> = ({ config, onChange }) => {
                 />
               )}
             </div>
-            <PercentageIndicator percentageChange={percentageChange} type={type} statType={statType} />
+            {showPercentageIndicator && (
+              <PercentageIndicator percentageChange={percentageChange} type={type} statType={statType} />
+            )}
           </>
         )}
       </CardContent>
