@@ -174,7 +174,7 @@ export const BulkCreateTableForm: React.FC = () => {
                 <TableHead className="w-[50px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="block max-h-[300px] overflow-y-auto w-full">
+            <TableBody className="block max-h-[300px] overflow-visible w-full relative z-10">
             {fields.map((field, index) => (
                 <TableRow key={field.id} className="table w-full overflow-y-auto">
                   <TableCell className="text-right py-0">
@@ -233,7 +233,7 @@ export const BulkCreateTableForm: React.FC = () => {
                             <FormLabel className="sr-only">Category</FormLabel>
                             <CategoryTypeahead
                               {...field}
-                              autoFocus
+                              autoFocus={index === fields.length - 1}
                               valueField="id"
                               multiple={false}
                               type={form.watch(`transactions.${index}.type`)}
@@ -339,12 +339,12 @@ export const BulkCreateTableForm: React.FC = () => {
             </TableBody>
           </Table>
           <div className="flex justify-end items-center space-x-2 mt-4">
-            <div className="w-[300px]">
-              <CSVUploader onComplete={replace} />
-            </div>
             <Button type="button" variant="outline" onClick={addAnotherTransaction}>
               <Plus className="mr-2 h-4 w-4" /> Add Transaction
             </Button>
+            <div className="w-[300px]">
+              <CSVUploader onComplete={replace} />
+            </div>
             <Button type="submit" variant="default" disabled={isSubmitting}>
               <Save className="mr-2 h-4 w-4" /> {isSubmitting ? 'Saving...' : 'Save All'}
             </Button>

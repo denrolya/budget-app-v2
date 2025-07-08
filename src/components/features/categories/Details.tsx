@@ -17,6 +17,7 @@ interface Props {
 }
 
 export const CategoryDetails: React.FC<Props> = ({ category }) => {
+  console.log(category);
   const { openForm } = useFormContext();
   const [activeTab, setActiveTab] = useState('activity');
   const {

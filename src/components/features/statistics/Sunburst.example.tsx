@@ -9,6 +9,7 @@ import Category from '@/models/Category';
 interface CategoriesSunburstProps {
   categories: Category[];
   type?: TransactionType;
+  height?: number | string;
 }
 
 const addValueToNodes = (node: Category): Category & { value: number } => {
@@ -19,7 +20,7 @@ const addValueToNodes = (node: Category): Category & { value: number } => {
   return newNode;
 };
 
-export const CategoriesSunburst: React.FC<CategoriesSunburstProps> = ({ categories }) => {
+export const CategoriesSunburst: React.FC<CategoriesSunburstProps> = ({ categories, height = 500 }) => {
   const filteredCategories = useMemo(() => categories.map(addValueToNodes), [categories]);
 
   const data = useMemo(
@@ -31,7 +32,7 @@ export const CategoriesSunburst: React.FC<CategoriesSunburstProps> = ({ categori
   );
 
   return (
-    <div className="h-[500px]">
+    <div style={{ height }}>
       <ResponsiveSunburst
         margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
         id="name"

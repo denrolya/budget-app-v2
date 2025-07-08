@@ -18,14 +18,15 @@ interface Props {
   selected: Category | null;
   onSelect: (category: Category | null) => void;
   setShowDetails: (show: boolean) => void;
+  selectedType: TransactionType;
+  setSelectedType: (type: TransactionType) => void;
 }
 
-const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails }) => {
+const SidebarListing: React.FC<Props> = ({ selected, selectedType, setSelectedType, onSelect, setShowDetails }) => {
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [currentPath, setCurrentPath] = useState<Category[]>([]);
-  const [activeTab, setActiveTab] = useState<TransactionType>(TransactionType.Expense);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const expenseCategories = useExpenseCategoriesTree();
   const incomeCategories = useIncomeCategoriesTree();
@@ -228,9 +229,9 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect, setShowDetails })
         </ScrollArea>
       </div>
       <Tabs
-        value={activeTab}
+        value={selectedType}
         onValueChange={(value) => {
-          setActiveTab(value as TransactionType);
+          setSelectedType(value as TransactionType);
           setCurrentPath([]);
           onSelect(null);
         }}
