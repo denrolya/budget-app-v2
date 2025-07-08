@@ -6,13 +6,15 @@ import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
+import { cn } from '@/lib/utils';
 
 interface Props {
   after: Moment;
   before: Moment;
+  compact?: boolean;
 }
 
-export const TableListingSkeleton: React.FC<Props> = ({ after, before }) => {
+export const TableListingSkeleton: React.FC<Props> = ({ after, before, compact = false }) => {
   const dates = useMemo(() => {
     const dates = [];
     const currentDate = after.clone();
@@ -42,7 +44,7 @@ export const TableListingSkeleton: React.FC<Props> = ({ after, before }) => {
           {dates.map((date) => (
             <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
               <TableRow>
-                <TableCell colSpan={8} className="font-semibold bg-muted px-4">
+                <TableCell colSpan={8} className={cn('font-semibold','bg-muted', 'px-4', { 'py-0': compact })}>
                   <div className="flex flex-wrap justify-between items-center">
                     <RelativeDatetimeDisplay
                       showDayBadge
@@ -60,30 +62,36 @@ export const TableListingSkeleton: React.FC<Props> = ({ after, before }) => {
               </TableRow>
               {Array.from({ length: 3 }).map((_, index) => (
                 <TableRow key={index}>
-                  <TableCell className="w-4"></TableCell>
-                  <TableCell>
+                  <TableCell
+                    className={cn('w-4', {
+                      'p-0': compact,
+                    })}></TableCell>
+                  <TableCell className={cn({ 'p-0': compact })}>
                     <Skeleton className="w-12 h-4" />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={cn({ 'p-0': compact })}>
                     <div className="flex items-center space-x-2">
                       <Skeleton className="w-16 h-6 rounded-full" />
                       <ArrowRight className="h-4 w-4 text-muted-foreground" />
                       <Skeleton className="w-16 h-6 rounded-full" />
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={cn({ 'p-0': compact })}>
                     <Skeleton className="w-24 h-6" />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={cn({ 'p-0': compact })}>
                     <Skeleton className="w-20 h-6" />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={cn({ 'p-0': compact })}>
                     <Skeleton className="w-32 h-4" />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={cn({ 'p-0': compact })}>
                     <Skeleton className="w-16 h-4" />
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell
+                    className={cn('text-right', {
+                      'p-0': compact,
+                    })}>
                     <div className="flex justify-end space-x-2">
                       <Skeleton className="w-8 h-8 rounded-full" />
                       <Skeleton className="w-8 h-8 rounded-full" />

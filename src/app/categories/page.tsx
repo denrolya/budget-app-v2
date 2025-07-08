@@ -13,7 +13,7 @@ export const CategoryManagementPage: React.FC = () => {
   const { icon: Icon } = ROUTES.CATEGORIES_PAGE;
 
   return (
-    <PageWithSidebar>
+    <PageWithSidebar contentScrollable={false}>
       <PageWithSidebar.Sidebar>
         <SidebarListing
           selected={selectedCategory}
@@ -30,13 +30,13 @@ export const CategoryManagementPage: React.FC = () => {
           <DetailsHeader selectedCategory={selectedCategory} onCategorySelect={setSelectedCategory} />
         </PageWithSidebar.Header>
       )}
-      <PageWithSidebar.Content className="p-4">
+      <PageWithSidebar.Content>
         {(selectedCategory && showDetails) && (
           <CategoryDetails category={selectedCategory} />
         )}
 
         {(!selectedCategory || !showDetails) && (
-          <div className="flex items-center justify-center h-full bg-muted -m-4">
+          <div className="flex items-center justify-center h-full bg-muted">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
                 <Icon className="h-8 w-8 text-primary/60" />

@@ -81,12 +81,27 @@ export const CategoriesDoughnutCard: React.FC<Props> = ({
 
   const processData = useCallback(
     (data: any[]): ProcessedCategory[] =>
-      data?.map((category) => ({
-        id: category.id,
-        name: category.name,
-        value: category.total,
-        children: category.children ? processData(category.children) : undefined,
-      })) || [],
+      data?.map((category) => {
+        const children = category.children ? processData(category.children) : [];
+
+        const totalChildrenValue = children.reduce((sum, child) => sum + child.value, 0);
+        const uncategorizedValue = category.total - totalChildrenValue;
+
+        if (uncategorizedValue > 0) {
+          children.push({
+            id: category.id,
+            name: `Uncategorized in ${category.name}`,
+            value: uncategorizedValue,
+          });
+        }
+
+        return {
+          id: category.id,
+          name: category.name,
+          value: category.total,
+          children,
+        };
+      }) || [],
     [],
   );
 

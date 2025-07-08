@@ -220,7 +220,10 @@ export const DailyLedgerPage: React.FC = () => {
               <div className="hidden md:block h-full overflow-auto">
                 {activeView === 'table' && (
                   <>
-                    {isLoading && <TableListingSkeleton after={timeframe.after} before={timeframe.before} />}
+                    {isLoading && <TableListingSkeleton
+                      after={timeframe.after}
+                      before={timeframe.before}
+                      compact={isCompactTable} />}
                     {!isLoading && (
                       <TableListing
                         isLoading={isLoading}

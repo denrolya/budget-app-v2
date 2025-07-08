@@ -22,7 +22,7 @@ export const LayoutV9: React.FC<React.PropsWithChildren> = ({ children }) => (
               <div className="flex flex-col h-screen">
                 <Header className="hidden md:flex" />
 
-                <main className="flex flex-col 3xl:flex-row h-full md:overflow-hidden bg-background">{children}</main>
+                <main className="flex flex-col h-full md:overflow-hidden bg-background">{children}</main>
 
                 <MobileNavigation />
                 <FormRenderer />

@@ -1,6 +1,6 @@
 import groupBy from 'lodash/groupBy';
 import sumBy from 'lodash/sumBy';
-import { ChevronRightIcon, PiggyBank } from 'lucide-react';
+import { ChevronRightIcon } from 'lucide-react';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
 import AccountAvatar from '@/components/features/accounts/Avatar';
@@ -32,6 +32,7 @@ const NavAccounts = () => {
     return (
       <Collapsible
         asChild
+        defaultOpen
         className="group/collapsible"
         key={`account-group-${type}`}
         onOpenChange={(isOpen) => {
@@ -46,11 +47,8 @@ const NavAccounts = () => {
         <SidebarMenuItem id={`account-group-${type}`}>
           <CollapsibleTrigger asChild>
             <SidebarMenuButton tooltip={type} className="capitalize hover:bg-accent data-[state=open]:bg-accent">
-              <PiggyBank />
-              <span className="flex-1 text-left">
-                {type}:{' '}
-                <MoneyValue className="ml-0.5 font-bold" amount={groupTotal} currency={baseCurrency} />
-              </span>
+              {type}:{' '}
+              <MoneyValue className="ml-0.5 font-bold" amount={groupTotal} currency={baseCurrency} />
               <ChevronRightIcon className="ml-auto transition-transform duration-800 group-data-[state=open]/collapsible:rotate-90" />
             </SidebarMenuButton>
           </CollapsibleTrigger>
@@ -73,7 +71,7 @@ const NavAccounts = () => {
                           className={cn('items-center text-xs font-semibold', {
                             'text-destructive': account.balance < 0,
                             'text-success': account.balance > 0,
-                            'text-muted-foreground': account.balance === 0,
+                            'text-muted-foreground': account.isEmpty(),
                           })}
                           amount={account.balance}
                           currency={account.currency}

@@ -63,7 +63,7 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
         </div>
       </div>
       <ScrollArea className="flex-1">
-        {Object.values(AccountType).map((type) => {
+        {Object.values(AccountType).map((type, index) => {
           if (groupedAccounts[type].length === 0) return null;
 
           const groupTotal = sumBy(
@@ -72,8 +72,8 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
           );
 
           return (
-            <div key={type} className="mb-4">
-              <h3 className="px-4 py-2 text-sm font-semibold text-muted-foreground capitalize flex justify-between">
+            <div key={type}>
+              <h3 className="px-4 py-2 text-sm bg-accent rounded-sm font-semibold text-muted-foreground capitalize flex justify-between">
                 <span>{type}</span>
                 <MoneyValue amount={groupTotal} currency={baseCurrency} />
               </h3>

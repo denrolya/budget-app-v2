@@ -40,7 +40,7 @@ export const CategoryDetails: React.FC<Props> = ({ category }) => {
   const onAddTransaction = () => openForm(FormType.Transaction, { category });
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col p-4">
       <div className="flex-1 overflow-auto">
         <Tabs className="space-y-4" value={activeTab} onValueChange={setActiveTab}>
           <TabsList>

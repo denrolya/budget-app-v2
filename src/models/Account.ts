@@ -47,6 +47,18 @@ export default class Account {
     this.convertedValues = data.convertedValues || undefined;
   }
 
+  isPositive() {
+    return this.balance > 0;
+  }
+
+  isNegative() {
+    return this.balance < 0;
+  }
+
+  isEmpty() {
+    return this.currency !== CURRENCIES.BTC.code ? this.balance.toFixed(0) === '0' : this.balance === 0;
+  }
+
   get displayName(): string {
     return `${CURRENCIES[this.currency].symbol} ${this.name}`;
   }
