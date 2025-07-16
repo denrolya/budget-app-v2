@@ -55,6 +55,14 @@ const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
     </>
   );
 
+  const filterFn: TypeaheadV2Props<Account, string>['filterFn'] = (account, input) => {
+    const query = input.toLowerCase();
+    return (
+      account.displayName.toLowerCase().includes(query) ||
+      account.currency.toLowerCase().includes(query)
+    );
+  };
+
   return (
     <TypeaheadV2<Account, string>
       valueField={valueField as keyof Account}
@@ -67,6 +75,7 @@ const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
       value={value}
       onChange={onChange}
       className={className}
+      filterFn={filterFn}
       {...props}
     />
   );

@@ -18,6 +18,7 @@ export interface TypeaheadV2Props<T, V extends string | number>
   emptyMessage?: string;
   value: V | V[] | null | undefined;
   onChange: (value: V | V[] | null) => void;
+  filterFn?: (option: T, inputValue: string) => boolean;
 }
 
 const HIDE_DROPDOWN_TIMEOUT = 150;
@@ -35,6 +36,7 @@ export const TypeaheadV2 = <T, V extends string | number>(
     value,
     onChange,
     className,
+    filterFn,
     ...inputProps
   }: TypeaheadV2Props<T, V>,
   ref: React.Ref<HTMLInputElement>,
@@ -97,14 +99,17 @@ export const TypeaheadV2 = <T, V extends string | number>(
     return groupedOptions
       .map((group) => ({
         ...group,
-        options: group.options.filter(
-          (option) =>
-            String(option[labelField]).toLowerCase().includes(inputValue.toLowerCase()) &&
-            !selectedValues.includes(option[valueField] as V),
-        ),
+        options: group.options.filter((option) => {
+          const matches = filterFn
+            ? filterFn(option, inputValue) // custom logic
+            : String(option[labelField]).toLowerCase().includes(inputValue.toLowerCase());
+
+          const isSelected = selectedValues.includes(option[valueField] as V);
+          return matches && !isSelected;
+        }),
       }))
       .filter((group) => group.options.length > 0);
-  }, [groupedOptions, inputValue, labelField, selectedValues, valueField]);
+  }, [groupedOptions, inputValue, labelField, selectedValues, valueField, filterFn]);
 
   const handleSelect = useCallback(
     (option: T) => {

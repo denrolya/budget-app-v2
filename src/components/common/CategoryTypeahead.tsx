@@ -47,6 +47,19 @@ const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     options = expenseCategories;
   }
 
+  const sortedOptions = options
+    .slice()
+    .sort((a, b) => a.getFullPath().join(' > ').localeCompare(b.getFullPath().join(' > ')));
+
+  const filterFn: TypeaheadV2Props<Category, string>['filterFn'] = (option, input) => {
+    const normalizedInput = input.toLowerCase();
+    return (
+      option.name.toLowerCase().includes(normalizedInput) ||
+      option.parent?.name?.toLowerCase().includes(normalizedInput) ||
+      option.root?.name?.toLowerCase().includes(normalizedInput)
+    );
+  };
+
   return (
     <TypeaheadV2<Category, number>
       labelField="name"
@@ -54,11 +67,12 @@ const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
       groupBy={type as TransactionType}
       placeholder={multiple ? 'Select categories...' : 'Select a category...'}
       multiple={multiple}
-      options={options}
+      options={sortedOptions}
       renderElement={renderElement}
       value={value}
       onChange={onChange}
       className={className}
+      filterFn={filterFn}
       {...props}
     />
   );
