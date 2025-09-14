@@ -20,6 +20,7 @@ export interface AccountRawData {
   balance: number;
   archivedAt?: string | null;
   convertedValues?: Record<string, number>;
+  isDisplayedOnSidebar: boolean;
 }
 
 export default class Account {
@@ -33,6 +34,7 @@ export default class Account {
   archivedAt?: Moment | null;
   color: string;
   convertedValues?: Record<string, number>;
+  isDisplayedOnSidebar: boolean;
 
   constructor(data: AccountRawData) {
     this.id = data.id;
@@ -45,6 +47,7 @@ export default class Account {
     this.archivedAt = data.archivedAt ? moment(data.archivedAt) : null;
     this.color = `var(--account-${this.type.toLowerCase()}-${this.currency})`;
     this.convertedValues = data.convertedValues || undefined;
+    this.isDisplayedOnSidebar = data.isDisplayedOnSidebar;
   }
 
   isPositive() {
