@@ -1,9 +1,9 @@
 import cn from 'classnames';
-import { AlertCircle, ArrowUpDown, Plus } from 'lucide-react';
+import { AlertCircle, ArrowUpDown, Plus, Star, StarOff } from 'lucide-react';
 import moment from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountAvatar from '@/components/features/accounts/Avatar';
@@ -16,14 +16,17 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 import Account from '@/models/Account';
+import { confirm } from '@/utils/confirmation';
 
 interface Props {
   account: Account;
+  onAccountUpdate: (account: Account, diff: Partial<Account>) => void;
 }
 
-const AccountDetail: React.FC<Props> = ({ account }) => {
+const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
   const isMobile = useIsMobile();
   const { openForm } = useFormContext();
   const currentDate = moment().startOf('day');
@@ -95,6 +98,22 @@ const AccountDetail: React.FC<Props> = ({ account }) => {
     );
   };
 
+  const toggleSidebarVisibility = async () => {
+    const confirmed = await confirm({
+      title: account.isDisplayedOnSidebar ? 'Hide from sidebar?' : 'Show in sidebar?',
+      description: account.isDisplayedOnSidebar
+        ? `${account.name} will no longer be shown in the sidebar.`
+        : `${account.name} will be added to your sidebar.`,
+      confirmText: account.isDisplayedOnSidebar ? 'Hide' : 'Show',
+      cancelText: 'Cancel',
+    });
+
+    if (!confirmed) return;
+
+    account.isDisplayedOnSidebar = !account.isDisplayedOnSidebar;
+    onAccountUpdate(account, { isDisplayedOnSidebar: account.isDisplayedOnSidebar });
+  };
+
   return (
     <>
       <Card className="mb-4">
@@ -111,6 +130,24 @@ const AccountDetail: React.FC<Props> = ({ account }) => {
                   currency={account.currency}
                   values={account.convertedValues}
                 />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={toggleSidebarVisibility}
+                      aria-label={account.isDisplayedOnSidebar ? 'Hide from sidebar' : 'Show in sidebar'}
+                    >
+                      {account.isDisplayedOnSidebar ? <Star className="h-4 w-4" /> : <StarOff className="h-4 w-4" />}
+                      <span className="sr-only">{account.isDisplayedOnSidebar ? 'Hide from sidebar' : 'Show in sidebar'}</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">
+                    <p>{account.isDisplayedOnSidebar ? 'Pinned to sidebar' : 'Pin to sidebar'}</p>
+                  </TooltipContent>
+                </Tooltip>
               </CardTitle>
               <CardDescription>
                 Created: <RelativeDatetimeDisplay date={account.createdAt} />

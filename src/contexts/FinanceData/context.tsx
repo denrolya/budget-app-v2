@@ -1,19 +1,20 @@
 import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { AlertCircle } from 'lucide-react';
-import React, { createContext, ReactNode, useCallback, useEffect, useState } from 'react';
 import moment from 'moment';
+import React, { createContext, ReactNode, useCallback, useEffect, useState } from 'react';
 
-import Transaction from '@/models/Transaction';
-import { DebtDTO } from '@/types/debt';
+import CurrencyConverter from '@/components/common/CurrencyConverter';
 import MainLoadingScreen from '@/components/layout/MainLoadingScreen';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import Account, { AccountRawData } from '@/models/Account';
+import Account from '@/models/Account';
 import Category, { CategoryTreeBuilder } from '@/models/Category';
-import { axiosFetcher } from '@/services/api';
 import Debt from '@/models/Debt';
-import { RawTransactionDTO, ConvertedValues } from '@/types/transaction';
-import CurrencyConverter from '@/components/common/CurrencyConverter';
+import Transaction from '@/models/Transaction';
+import { axiosFetcher } from '@/services/api';
+import { accountService } from '@/services/api/account';
+import { DebtDTO } from '@/types/debt';
+import { ConvertedValues, RawTransactionDTO } from '@/types/transaction';
 
 export type ExchangeRatesData = {
   fixer: ConvertedValues;
@@ -97,31 +98,10 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
   const accountsQuery: UseQueryResult<Account[], Error> = useQuery({
     queryKey: ['accounts'],
     queryFn: async () => {
-      const rawAccounts: AccountRawData[] = await axiosFetcher(ENDPOINTS.accounts);
-
       if (!exchangeRatesQuery.data) throw new Error('Exchange rates not available');
-
-      const convertBalance = (balance: number, currency: string, rates: ExchangeRates) => {
-        const convertedValues: Record<string, number> = {};
-        for (const [code, rate] of Object.entries(rates)) {
-          if (currency !== code) {
-            convertedValues[code] = balance * (rate / rates[currency]);
-          } else {
-            convertedValues[code] = balance;
-          }
-        }
-        return convertedValues;
-      };
-
-      return rawAccounts.map(
-        (account: AccountRawData) =>
-          new Account({
-            ...account,
-            convertedValues: convertBalance(account.balance, account.currency, exchangeRatesQuery.data.fixer!),
-          }),
-      );
+      return accountService.fetchList(exchangeRatesQuery.data.fixer as Record<string, number>);
     },
-    enabled: !!exchangeRatesQuery.data, // Fetch accounts only when exchange rates are available
+    enabled: !!exchangeRatesQuery.data,
     ...queryOptions,
   });
 
@@ -206,11 +186,11 @@ export const FinanceDataProvider: React.FC<{ children: ReactNode }> = ({ childre
   const financeData: FinanceData = isLoading
     ? INITIAL_STATE
     : {
-        accounts: accountsQuery.data!,
-        debts: debtsQuery.data!,
-        categories: categoriesQuery.data!,
-        exchangeRates: exchangeRatesQuery.data!,
-      };
+      accounts: accountsQuery.data!,
+      debts: debtsQuery.data!,
+      categories: categoriesQuery.data!,
+      exchangeRates: exchangeRatesQuery.data!,
+    };
 
   const retry = useCallback((): void => {
     setProgress(0);

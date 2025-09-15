@@ -1,6 +1,8 @@
 import { Download, Edit } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { useFinanceData } from '@/contexts/FinanceData';
+import { accountService } from '@/services/api/account';
 import AccountDetails from '@/components/features/accounts/Details';
 import SidebarListing from '@/components/features/accounts/SidebarListing';
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
@@ -11,6 +13,13 @@ import Account from '@/models/Account';
 export const AccountsManagementPage: React.FC = () => {
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const { icon: Icon } = ROUTES.ACCOUNT_LIST;
+  const { updateAccount } = useFinanceData();
+
+  const onAccountUpdate = async (account: Account, diff: Partial<Account>) => {
+    await accountService.update(account.id, diff);
+    updateAccount(account);
+    setSelectedAccount(account);
+  };
 
   return (
     <PageWithSidebar contentScrollable={true}>
@@ -31,7 +40,7 @@ export const AccountsManagementPage: React.FC = () => {
       )}
       <PageWithSidebar.Content className="p-4">
         {(selectedAccount) && (
-          <AccountDetails account={selectedAccount} />
+          <AccountDetails account={selectedAccount} onAccountUpdate={onAccountUpdate} />
         )}
 
         {(!selectedAccount) && (
