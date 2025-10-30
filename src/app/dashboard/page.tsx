@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import StatisticsCardsSidebar from '@/components/features/dashboard/StatisticsCardsSidebar';
 import BalanceByAccountType from '@/components/features/statistics/BalanceByAccountType';
 import CategoriesDoughnut from '@/components/features/statistics/CategoriesDoughnut/Card';
+import AccountsDoughnut from '@/components/features/statistics/AccountsDoughnut/Card';
 import CategoriesTimeline from '@/components/features/statistics/CategoriesTimeline/Card';
 import MoneyFlow from '@/components/features/statistics/MoneyFlow/Card';
 import StatisticsCard from '@/components/features/statistics/StatisticsCard/Card';
@@ -84,15 +85,18 @@ const DashboardPage: React.FC = () => {
           ))}
         </Tabs>
 
-        <div className="flex flex-col-reverse xl:flex-row gap-6">
-          <div className="w-full xl:w-3/4 3xl:w-4/5 flex flex-col gap-6 xl:order-1 order-1">
-            <MoneyFlow />
-            <CategoriesTimeline className="order-3 xl:order-2" />
-          </div>
+        <div className="grid gap-6 grid-cols-1 xl:grid-cols-12">
+          {/* Left Doughnut (Accounts) */}
+          <AccountsDoughnut className="order-3 xl:order-1 xl:col-span-3 3xl:col-span-2 aspect-square" />
 
-          <div className="w-full xl:w-1/4 3xl:w-1/5 order-2 xl:order-2">
-            <CategoriesDoughnut className="h-full" />
-          </div>
+          {/* Center Chart (Money Flow) */}
+          <MoneyFlow className="order-2 xl:order-2 xl:col-span-6 3xl:col-span-8 xl:col-start-4 3xl:col-start-3 min-h-[360px] md:min-h-[420px] 2xl:min-h-[480px]" />
+
+          {/* Right Doughnut (Categories) */}
+          <CategoriesDoughnut className="order-1 xl:order-3 xl:col-span-3 3xl:col-span-2 aspect-square" />
+
+          {/* Timeline below center */}
+          <CategoriesTimeline className="order-4 xl:order-4 xl:col-span-6 3xl:col-span-8 xl:col-start-4 3xl:col-start-3 min-h-[320px]" />
         </div>
       </section>
 
