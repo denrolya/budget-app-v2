@@ -3,10 +3,10 @@ import { AlertCircle, ArrowUpDown, Plus, Star, StarOff } from 'lucide-react';
 import moment from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
-import AccountAvatar from '@/components/features/accounts/Avatar';
+import AccountPill from '@/components/features/accounts/Pill';
 import DailyList from '@/components/features/daily-ledger/DailyList';
 import TableListing from '@/components/features/daily-ledger/TableListing';
 import TableListingSkeleton from '@/components/features/daily-ledger/TableListingSkeleton';
@@ -119,10 +119,9 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
       <Card className="mb-4">
         <CardHeader>
           <div className="flex items-center space-x-4 mb-2">
-            <AccountAvatar account={account} />
             <div>
               <CardTitle className="flex space-x-2 items-center">
-                <span>{account.displayName}</span>
+                <AccountPill variant="inline" showName account={account} />
                 <MoneyValue
                   badge
                   showSign

@@ -9,7 +9,7 @@ import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import SummaryBadge from '@/components/common/SummaryBadge';
 import TransactionValue from '@/components/common/TransactionValue';
-import AccountBadge from '@/components/features/accounts/Badge';
+import AccountPill from '@/components/features/accounts/Pill';
 import Details from '@/components/features/transactions/Details';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -345,7 +345,7 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
                     'py-0': compact,
                   })}
                 >
-                  {renderEditableCell(transaction, 'account', <AccountBadge size="sm" account={transaction.account} />)}
+                  {renderEditableCell(transaction, 'account', <AccountPill size="sm" account={transaction.account} />)}
                 </TableCell>
                 <TableCell
                   className={cn('text-muted-foreground', {

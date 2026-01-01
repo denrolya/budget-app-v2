@@ -3,7 +3,7 @@ import { memo } from 'react';
 import { Link } from 'react-router-dom';
 
 import MoneyValue from '@/components/common/MoneyValue';
-import AccountAvatar from '@/components/features/accounts/Avatar';
+import AccountPill from '@/components/features/accounts/Pill';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import Account from '@/models/Account';
 import AccountDetailsHoverCard from '@/components/features/accounts/DetailsHoverCard';
@@ -31,7 +31,7 @@ export const SidebarAccountLink: React.FC<SidebarAccountLinkProps> = ({ account,
             'w-8 h-8': isSidebarExpanded,
           })}
         >
-          <AccountAvatar className="w-full h-full" size="sm" account={account} />
+          <AccountPill size="sm" account={account} />
         </div>
         {isSidebarExpanded && (
           <div className="flex-grow min-w-0 ml-3 overflow-hidden">

@@ -1,13 +1,11 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import cn from 'classnames';
-import { ReactNode } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
-import AccountAvatar from '@/components/features/accounts/Avatar';
 import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
 import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
 import Account from '@/models/Account';
+import AccountPill from '@/components/features/accounts/Pill';
 
 type AccountTypeaheadProps = Omit<
   TypeaheadV2Props<Account, string>,
@@ -17,58 +15,67 @@ type AccountTypeaheadProps = Omit<
 };
 
 const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
-  multiple = false,
-  value,
-  onChange,
-  valueField = 'id',
-  className,
-  ...props
-}) => {
+                                                             multiple = false,
+                                                             value,
+                                                             onChange,
+                                                             className,
+                                                             ...props
+                                                           }) => {
   const accounts = useAccountsWithDefaultOrder();
 
-  const renderElement = (el: Account, _valueField?: keyof Account, labelField?: keyof Account): ReactNode => (
-    <>
-      <div
-        className={cn('flex items-center justify-center rounded-full mr-2', el.archivedAt ? 'text-muted' : el.color)}
-      >
-        <AccountAvatar account={el} size="sm" />
-      </div>
-      <div className="flex-1">
-        <p className="text-sm font-medium">{labelField ? String(el[labelField]) : el.displayName}</p>
-        <p className="text-xs text-muted-foreground">
-          {el.type.charAt(0).toUpperCase() + el.type.slice(1)} • {el.currency}
-        </p>
-      </div>
-      <div className="text-right">
-        <MoneyValue
-          showSign
-          className={cn('font-medium', 'text-xs', 'text-mono', {
-            'text-destructive': el.balance < 0,
-            'text-success': el.balance > 0,
-            'text-muted-foreground': el.balance === 0,
-          })}
-          amount={el.balance}
-          currency={el.currency}
-        />
-        {el.archivedAt && <p className="text-xs text-muted-foreground">Archived</p>}
-      </div>
-    </>
-  );
+  const renderElement = useCallback((account: Account): ReactNode => {
+    const isArchived = !!account.archivedAt;
 
-  const filterFn: TypeaheadV2Props<Account, string>['filterFn'] = (account, input) => {
-    const query = input.toLowerCase();
     return (
-      account.displayName.toLowerCase().includes(query) ||
-      account.currency.toLowerCase().includes(query)
+      <div className="flex w-full items-center gap-3 min-w-0">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 min-w-0">
+            <AccountPill
+              account={account}
+              size="sm"
+              tooltip={false}
+              showMarker
+              showName
+              className="max-w-full"
+            />
+            {isArchived && (
+              <span className="text-2xs text-muted-foreground shrink-0">Archived</span>
+            )}
+          </div>
+        </div>
+
+        <div className="shrink-0 text-right">
+          <MoneyValue
+            showSign
+            className={cn('text-xs tabular-nums font-medium', {
+              'text-destructive': account.balance < 0,
+              'text-muted-foreground': account.balance === 0,
+            })}
+            amount={account.balance}
+            currency={account.currency}
+          />
+        </div>
+      </div>
     );
-  };
+  }, []);
+
+  const filterFn: TypeaheadV2Props<Account, string>['filterFn'] = useCallback((account, input) => {
+    const q = input.trim().toLowerCase();
+    if (!q) return true;
+
+    return (
+      account.displayName.toLowerCase().includes(q) ||
+      account.currency.toLowerCase().includes(q) ||
+      account.type.toLowerCase().includes(q)
+    );
+  }, []);
 
   return (
     <TypeaheadV2<Account, string>
-      valueField={valueField as keyof Account}
+      valueField="id"
       labelField="displayName"
       groupBy="type"
-      placeholder={multiple ? 'Select accounts...' : 'Select account...'}
+      placeholder={multiple ? 'Select accounts…' : 'Select account…'}
       multiple={multiple}
       options={accounts}
       renderElement={renderElement}

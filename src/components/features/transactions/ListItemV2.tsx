@@ -3,7 +3,7 @@ import { Eye, User } from 'lucide-react';
 import React from 'react';
 
 import TransactionValue from '@/components/common/TransactionValue';
-import AccountBadge from '@/components/features/accounts/Badge';
+import AccountPill from '@/components/features/accounts/Pill';
 import Details from '@/components/features/transactions/Details';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,7 +33,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
       <CardContent className="p-2 grid grid-cols-[1fr_auto] gap-2">
         <div className="grid grid-cols-1 gap-2">
           <div className="flex justify-between items-center">
-            <AccountBadge account={transaction.account} size="sm" />
+            <AccountPill account={transaction.account} size="sm" />
             <TransactionValue transaction={transaction} className="text-xs" />
           </div>
           <div className="grid grid-cols-[auto_1fr_auto] gap-2 items-center">

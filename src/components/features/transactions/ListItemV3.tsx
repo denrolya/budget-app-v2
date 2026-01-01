@@ -3,7 +3,7 @@ import { Eye, User } from 'lucide-react';
 import React from 'react';
 
 import TransactionValue from '@/components/common/TransactionValue';
-import AccountBadge from '@/components/features/accounts/Badge';
+import AccountPill from '@/components/features/accounts/Pill';
 import Details from '@/components/features/transactions/Details';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -36,7 +36,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
         <div className="flex flex-row items-center justify-between">
           <div className="flex-grow flex items-center space-x-2 overflow-x-auto">
             <TransactionValue className="text-xs" transaction={transaction} />
-            <AccountBadge size="sm" account={transaction.account} />
+            <AccountPill size="sm" account={transaction.account} />
             {transaction?.debt?.debtor && (
               <Badge variant="outline" className="text-[10px] flex items-center px-1">
                 <User className="h-3 w-3 mr-1" />

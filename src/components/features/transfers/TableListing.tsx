@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import SummaryBadge from '@/components/common/SummaryBadge';
-import AccountBadge from '@/components/features/accounts/Badge';
+import AccountPill from '@/components/features/accounts/Pill';
 import Details from '@/components/features/transfers/Details';
 import RateDisplay from '@/components/features/transfers/RateDisplay';
 import { Button } from '@/components/ui/button';
@@ -114,7 +114,7 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
                     })}
                   >
                     <div className="flex items-center space-x-2">
-                      <AccountBadge
+                      <AccountPill
                         size="sm"
                         account={transfer.fromExpense.account}
                         className={
@@ -124,7 +124,7 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
                         }
                       />
                       <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                      <AccountBadge
+                      <AccountPill
                         size="sm"
                         account={transfer.toIncome.account}
                         className={

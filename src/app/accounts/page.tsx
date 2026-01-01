@@ -1,14 +1,15 @@
 import { Download, Edit } from 'lucide-react';
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 
-import { useFinanceData } from '@/contexts/FinanceData';
-import { accountService } from '@/services/api/account';
 import AccountDetails from '@/components/features/accounts/Details';
 import SidebarListing from '@/components/features/accounts/SidebarListing';
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/constants/routes';
+import { useFinanceData } from '@/contexts/FinanceData';
 import Account from '@/models/Account';
+import { accountService } from '@/services/api/account';
 
 export const AccountsManagementPage: React.FC = () => {
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
@@ -19,37 +20,40 @@ export const AccountsManagementPage: React.FC = () => {
     await accountService.update(account.id, diff);
     updateAccount(account);
     setSelectedAccount(account);
+    console.log({ account });
+    toast.success('Account is now displayed on sidebar by default');
   };
 
   return (
     <PageWithSidebar contentScrollable={true}>
-      <PageWithSidebar.Sidebar>
+      <PageWithSidebar.Sidebar ariaLabel="Accounts sidebar">
         <SidebarListing selected={selectedAccount} onSelect={setSelectedAccount} />
       </PageWithSidebar.Sidebar>
+
       {selectedAccount && (
         <PageWithSidebar.Header title="Account Details" onBack={() => setSelectedAccount(null)}>
-          <Button variant="outline" size="icon">
-            <Download className="h-4 w-4" />
-            <span className="sr-only">Export</span>
+          <Button variant="outline" size="icon" aria-label="Export">
+            <Download className="h-4 w-4" aria-hidden="true" />
           </Button>
-          <Button variant="outline" size="icon">
-            <Edit className="h-4 w-4" />
-            <span className="sr-only">Edit</span>
+          <Button variant="outline" size="icon" aria-label="Edit">
+            <Edit className="h-4 w-4" aria-hidden="true" />
           </Button>
         </PageWithSidebar.Header>
       )}
-      <PageWithSidebar.Content className="p-4">
-        {(selectedAccount) && (
-          <AccountDetails account={selectedAccount} onAccountUpdate={onAccountUpdate} />
-        )}
 
-        {(!selectedAccount) && (
-          <div className="flex items-center justify-center h-full bg-muted -m-4">
+      {/* Make content area a flex container so the empty state can truly center */}
+      <PageWithSidebar.Content className="min-h-0 h-full">
+        {selectedAccount ? (
+          <div className="p-4">
+            <AccountDetails account={selectedAccount} onAccountUpdate={onAccountUpdate} />
+          </div>
+        ) : (
+          <div className="flex flex-1 items-center justify-center bg-muted">
             <div className="text-center space-y-4">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <Icon className="h-8 w-8 text-primary/60" />
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <Icon className="h-8 w-8 text-primary/60" aria-hidden="true" />
               </div>
-              <p className="text-muted-foreground max-w-[250px]">
+              <p className="text-muted-foreground max-w-xs">
                 Select an account from the sidebar to view details
               </p>
             </div>

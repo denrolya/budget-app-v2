@@ -2,7 +2,7 @@ import React from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
-import AccountAvatar from '@/components/features/accounts/Avatar';
+import AccountPill from '@/components/features/accounts/Pill';
 import Account from '@/models/Account';
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
 const DetailsHoverCard: React.FC<Props> = ({ account }) => (
   <div>
     <h3 className="font-bold mb-2">
-      <AccountAvatar className="mr-2" account={account} /> {account.displayName}
+      <AccountPill size="sm" account={account} />
     </h3>
     <p className="text-sm mb-1">
       {'Balance: '}

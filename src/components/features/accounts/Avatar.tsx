@@ -1,84 +1,80 @@
 import cn from 'classnames';
-import { CreditCard, Globe, HelpCircle, Wallet } from 'lucide-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
-import { Type as AccountType } from '@/types/account';
 import Account from '@/models/Account';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Type as AccountType } from '@/types/account';
 
 interface AccountAvatarProps {
   account: Account;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
-  showCurrency?: boolean;
+  showCurrency?: boolean; // keep prop for compatibility; unused
 }
 
-const iconMap: Record<AccountType, React.ElementType> = {
-  internet: Globe,
-  cash: Wallet,
-  bank: CreditCard,
-  basic: HelpCircle,
-};
-
+// “marker-sized” footprints (sm becomes tiny bullet, not avatar)
 const sizeMap = {
-  sm: 'h-6 w-6',
-  md: 'h-8 w-8',
-  lg: 'h-12 w-12',
+  sm: 'h-3 w-3', // tiny
+  md: 'h-4 w-4', // still small
+  lg: 'h-4 w-4', // map to md
+} as const;
+
+type ShapeKind = 'circle' | 'square' | 'diamond' | 'hollow-square';
+
+const shapeKindByType: Record<AccountType, ShapeKind> = {
+  bank: 'square',
+  cash: 'circle',
+  internet: 'diamond',
+  basic: 'hollow-square',
 };
 
-const iconSizeMap = {
-  sm: 'h-3 w-3',
-  md: 'h-4 w-4',
-  lg: 'h-6 w-6',
-};
-
-const currencySizeMap = {
-  sm: 'text-3xs h-2.5',
-  md: 'text-2xs h-3',
-  lg: 'text-xs h-4',
+const shapeClass: Record<ShapeKind, string> = {
+  circle: 'rounded-full',
+  square: 'rounded-[0.2rem]',
+  'hollow-square': 'rounded-[0.2rem]',
+  // diamond uses clip-path, so no rounding class needed
+  diamond: '',
 };
 
 export const AccountAvatar: React.FC<AccountAvatarProps> = ({
-  account,
-  size = 'md',
-  showCurrency = true,
-  className,
-}) => {
-  const { type, color, currency } = account;
-  const Icon = iconMap[type];
+                                                              account,
+                                                              size = 'md',
+                                                              className,
+                                                            }) => {
+  const normalizedSize = size === 'lg' ? 'md' : size;
+  const isArchived = account.isArchived();
+  const color = isArchived ? 'var(--muted-foreground)' : account.color;
 
-  const borderColor = account.isArchived() ? 'var(--muted-foreground)' : color;
-  const iconColor = account.isArchived() ? 'var(--muted-foreground)' : `${color}`;
+  const shape = shapeKindByType[account.type];
+
+  const ariaLabel = useMemo(() => {
+    const parts = [account.displayName, `type ${account.type}`, `currency ${account.currency}`];
+    if (isArchived) parts.push('archived');
+    return parts.join(', ');
+  }, [account.displayName, account.type, account.currency, isArchived]);
+
+  const isHollow = shape === 'hollow-square' || isArchived;
 
   return (
-    <div className={cn('relative inline-block', sizeMap[size])}>
-      <Avatar className={cn('bg-background w-full h-full', className)}>
-        <AvatarFallback
-          className="bg-background flex items-center justify-center"
-          style={{
-            boxShadow: `inset 0 0 0 1px ${borderColor}`,
-          }}
-        >
-          <Icon className={cn(iconSizeMap[size], 'text-foreground')} style={{ color: iconColor }} />
-        </AvatarFallback>
-      </Avatar>
-      {showCurrency && (
-        <div
-          className={cn(
-            'absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/3',
-            'rounded-full bg-background px-1 flex items-center justify-center',
-            currencySizeMap[size],
-            'border border-background',
-          )}
-          style={{
-            color: borderColor,
-            boxShadow: `0 0 0 1px ${borderColor}`,
-          }}
-        >
-          {currency}
-        </div>
+    <span
+      className={cn(
+        'inline-block shrink-0 align-middle',
+        // prevent any layout weirdness in flex rows
+        'flex-none',
+        sizeMap[normalizedSize],
+        shapeClass[shape],
+        className,
       )}
-    </div>
+      role="img"
+      aria-label={ariaLabel}
+      title={ariaLabel}
+      style={{
+        // diamond rendered via clip-path, others via border-radius
+        clipPath: shape === 'diamond' ? 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' : undefined,
+
+        backgroundColor: isHollow ? 'transparent' : color,
+        boxShadow: `inset 0 0 0 1px ${color}`,
+      }}
+    />
   );
 };
 

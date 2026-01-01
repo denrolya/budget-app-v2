@@ -2,7 +2,7 @@ import { ArrowRightLeft, Eye } from 'lucide-react';
 import React from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
-import AccountBadge from '@/components/features/accounts/Badge';
+import AccountPill from '@/components/features/accounts/Pill';
 import TransferDetails from '@/components/features/transfers/Details';
 import FeeIndicator from '@/components/features/transfers/ListItemFeeIndicator';
 import { Button } from '@/components/ui/button';
@@ -28,9 +28,9 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
             currency={transfer.fromExpense.account.currency}
           />
           <span className="text-muted-foreground hidden sm:flex items-center space-x-1">
-            <AccountBadge account={transfer.fromExpense.account} size="sm" className="flex-shrink-0" />
+            <AccountPill account={transfer.fromExpense.account} size="sm" className="flex-shrink-0" />
             <ArrowRightLeft className="h-3 w-3 flex-shrink-0" />
-            <AccountBadge account={transfer.toIncome.account} size="sm" className="flex-shrink-0" />
+            <AccountPill account={transfer.toIncome.account} size="sm" className="flex-shrink-0" />
           </span>
           {transfer.feeExpense && transfer.hasFee() && (
             <FeeIndicator

@@ -2,7 +2,7 @@ import cn from 'classnames';
 import { Eye, InfoIcon, MoreHorizontal, User } from 'lucide-react';
 import React from 'react';
 
-import AccountBadge from '@/components/features/accounts/Badge';
+import AccountPill from '@/components/features/accounts/Pill';
 import { Details } from '@/components/features/transactions/Details';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -129,7 +129,7 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
               </div>
             </div>
             <div className="mt-1 text-xs text-muted-foreground flex justify-between">
-              <AccountBadge account={transaction.account} size="sm" />
+              <AccountPill account={transaction.account} size="sm" />
               <span>{transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}</span>
             </div>
           </div>

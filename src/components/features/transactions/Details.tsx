@@ -5,7 +5,7 @@ import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import TransactionValue from '@/components/common/TransactionValue';
-import AccountBadge from '@/components/features/accounts/Badge';
+import AccountPill from '@/components/features/accounts/Pill';
 import { ListItem as TransactionListItem } from '@/components/features/transactions/ListItem';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -140,7 +140,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
           <div className="flex justify-between items-center">
             <span className="tracking-tight font-normal">Account</span>
             <span className="font-medium">
-              <AccountBadge size="sm" account={transaction.account} />
+              <AccountPill size="sm" account={transaction.account} />
             </span>
           </div>
           <div className="flex justify-between items-center">

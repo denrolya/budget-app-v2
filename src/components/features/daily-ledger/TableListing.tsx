@@ -10,7 +10,7 @@ import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import SummaryBadge from '@/components/common/SummaryBadge';
 import TransactionValue from '@/components/common/TransactionValue';
-import AccountBadge from '@/components/features/accounts/Badge';
+import AccountPill from '@/components/features/accounts/Pill';
 import TransactionDetails from '@/components/features/transactions/Details';
 import TransferDetails from '@/components/features/transfers/Details';
 import RateDisplay from '@/components/features/transfers/RateDisplay';
@@ -411,7 +411,7 @@ const TableListing: React.FC<Props> = ({
                     >
                       {item instanceof Transfer && (
                         <div className="flex items-center space-x-2">
-                          <AccountBadge
+                          <AccountPill
                             size="sm"
                             account={item.fromExpense.account}
                             className={cn({
@@ -419,7 +419,7 @@ const TableListing: React.FC<Props> = ({
                             })}
                           />
                           <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                          <AccountBadge
+                          <AccountPill
                             size="sm"
                             account={item.toIncome.account}
                             className={cn({
@@ -429,7 +429,7 @@ const TableListing: React.FC<Props> = ({
                         </div>
                       )}
                       {item instanceof Transaction &&
-                        renderEditableCell(item, 'account', <AccountBadge size="sm" account={item.account} />)}
+                        renderEditableCell(item, 'account', <AccountPill size="sm" account={item.account} />)}
                     </TableCell>
                     <TableCell
                       className={cn({
