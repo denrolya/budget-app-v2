@@ -200,7 +200,7 @@ export const AccountPill: React.FC<AccountPillProps> = ({
   return (
     <ResponsiveTooltip
       desktopComponent="hovercard"
-      triggerClassName="cursor-help"
+      triggerClassName="cursor-help flex items-center"
       contentClassName="p-2 rounded-lg"
       openDelay={0}
       content={<AccountDetailsHoverCard account={resolvedAccount} />}

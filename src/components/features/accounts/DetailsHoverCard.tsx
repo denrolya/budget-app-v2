@@ -10,23 +10,24 @@ interface Props {
 }
 
 const DetailsHoverCard: React.FC<Props> = ({ account }) => (
-  <div>
-    <h3 className="font-bold mb-2">
-      <AccountPill size="sm" account={account} />
+  <div className="flex-col space-y-1">
+    <h3 className="font-bold">
+      <AccountPill size="sm" variant="inline" account={account} />
     </h3>
-    <p className="text-sm mb-1">
+    <p className="text-xs">
       {'Balance: '}
       <MoneyValue
-        showSign
-        showValuesTooltip={false}
+        revert
         className="font-semibold"
-        maximumFractionDigits={2}
+        showSign={false}
+        showValuesTooltip={false}
         amount={account.balance}
         currency={account.currency}
+        values={account.convertedValues}
       />
     </p>
-    <p className="text-sm mb-1">
-      Last Transaction: <RelativeDatetimeDisplay date={account.updatedAt} />
+    <p className="text-2xs">
+      Last Transaction: <RelativeDatetimeDisplay className="inline" date={account.updatedAt} />
     </p>
   </div>
 );

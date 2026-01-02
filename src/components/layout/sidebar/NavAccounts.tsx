@@ -95,7 +95,7 @@ const NavAccounts = () => {
 
             {/* Name block */}
             <div className="min-w-0 flex-1 overflow-hidden">
-              <AccountPill showName size="sm" variant="inline" account={a} />
+              <AccountPill showName tooltip={false} size="sm" variant="inline" account={a} />
             </div>
 
             {/* Amount block - must be able to shrink */}

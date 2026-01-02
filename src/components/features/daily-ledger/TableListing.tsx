@@ -413,23 +413,25 @@ const TableListing: React.FC<Props> = ({
                         <div className="flex items-center space-x-2">
                           <AccountPill
                             size="sm"
-                            account={item.fromExpense.account}
+                            variant={item.feeExpense?.account.id === item.fromExpense.account.id ? 'pill' : 'inline'}
                             className={cn({
                               'ring-2 ring-destructive': item.feeExpense?.account.id === item.fromExpense.account.id,
                             })}
+                            account={item.fromExpense.account}
                           />
                           <ArrowRight className="h-4 w-4 text-muted-foreground" />
                           <AccountPill
                             size="sm"
-                            account={item.toIncome.account}
+                            variant={item.feeExpense?.account.id === item.toIncome.account.id ? 'pill' : 'inline'}
                             className={cn({
                               'ring-2 ring-destructive': item.feeExpense?.account.id === item.toIncome.account.id,
                             })}
+                            account={item.toIncome.account}
                           />
                         </div>
                       )}
                       {item instanceof Transaction &&
-                        renderEditableCell(item, 'account', <AccountPill size="sm" account={item.account} />)}
+                        renderEditableCell(item, 'account', <AccountPill size="sm" variant="inline" account={item.account} />)}
                     </TableCell>
                     <TableCell
                       className={cn({
