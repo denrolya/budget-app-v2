@@ -1,29 +1,61 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import cn from 'classnames';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useId,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 export interface TypeaheadV2Props<T, V extends string | number>
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
   multiple?: boolean;
+
   options: T[];
-  valueField: string;
-  labelField: string;
-  groupBy?: string;
-  renderElement: (element: T, valueField?: keyof T, labelField?: keyof T) => React.ReactNode;
+
+  /** Key names on T (kept as strings for API stability) */
+  valueField: keyof T & string;
+  labelField: keyof T & string;
+  groupBy?: keyof T & string;
+
+  /** Custom option renderer (you own the layout) */
+  renderElement: (element: T, valueField: keyof T & string, labelField: keyof T & string) => React.ReactNode;
+
   emptyMessage?: string;
+
   value: V | V[] | null | undefined;
   onChange: (value: V | V[] | null) => void;
+
   filterFn?: (option: T, inputValue: string) => boolean;
+
+  /**
+   * When true, we don't render the leading checkmark column at all.
+   * Use this when you typically exclude already selected options.
+   */
+  hideCheckmarkColumn?: boolean;
 }
 
 const HIDE_DROPDOWN_TIMEOUT = 150;
 
-export const TypeaheadV2 = <T, V extends string | number>(
+type Group<T> = { label: string; options: T[] };
+
+const normalizeSelected = <V extends string | number>(value: V | V[] | null | undefined, multiple: boolean): V[] => {
+  if (value == null) return [];
+  if (multiple) return Array.isArray(value) ? value : [value];
+  return Array.isArray(value) ? (value[0] != null ? [value[0]] : []) : [value];
+};
+
+const getKey = <T, >(obj: T, field: keyof T & string): string => String((obj as any)[field]);
+const getLabel = <T, >(obj: T, field: keyof T & string): string => String((obj as any)[field]);
+
+function TypeaheadV2Inner<T, V extends string | number>(
   {
     multiple = false,
     options,
@@ -31,98 +63,93 @@ export const TypeaheadV2 = <T, V extends string | number>(
     labelField,
     groupBy,
     renderElement,
-    placeholder = 'Select options...',
+    placeholder = 'Select options…',
     emptyMessage = 'No options found.',
     value,
     onChange,
     className,
     filterFn,
+    hideCheckmarkColumn = true,
+    disabled,
+    onKeyDown,
+    onFocus,
     ...inputProps
   }: TypeaheadV2Props<T, V>,
   ref: React.Ref<HTMLInputElement>,
-) => {
+) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // @ts-ignore
-  useImperativeHandle(ref, () => ({
-    focus: () => {
-      inputRef.current?.focus();
-    },
-    blur: () => {
-      inputRef.current?.blur();
-    },
-  }));
+  const listboxId = useId();
 
-  // @ts-ignore
-  const selectedValues = useMemo<V[]>(() => {
-    if (multiple) {
-      return Array.isArray(value) ? value : value != null ? [value] : [];
-    } else {
-      return value != null ? [value] : [];
-    }
-  }, [multiple, value]);
+  useImperativeHandle(ref, () => inputRef.current as HTMLInputElement, []);
+
+  const selectedValues = useMemo(() => normalizeSelected(value, multiple), [value, multiple]);
 
   const selectedOptions = useMemo(() => {
-    return options.filter((option) => selectedValues.includes(option[valueField] as V));
+    if (selectedValues.length === 0) return [];
+    const selectedSet = new Set(selectedValues.map(String));
+    return options.filter((o) => selectedSet.has(getKey(o, valueField)));
   }, [options, selectedValues, valueField]);
 
-  const groupedOptions = useMemo(() => {
-    if (!groupBy) {
-      return [{ label: '', options: options }];
+  const groupedOptions: Group<T>[] = useMemo(() => {
+    if (!groupBy) return [{ label: '', options }];
+
+    const map = new Map<string, T[]>();
+    for (const option of options) {
+      const label = String((option as any)[groupBy] ?? '');
+      const arr = map.get(label);
+      if (arr) arr.push(option);
+      else map.set(label, [option]);
     }
-
-    const groups = options.reduce(
-      (acc, option) => {
-        const groupLabel = option[groupBy] || '';
-        if (!acc[groupLabel as string]) {
-          acc[groupLabel as string] = [];
-        }
-        acc[groupLabel as string].push(option);
-        return acc;
-      },
-      {} as Record<string, T[]>,
-    );
-
-    return Object.entries(groups).map(([label, groupOptions]) => ({
-      label,
-      options: groupOptions,
-    }));
+    return Array.from(map.entries()).map(([label, groupOptions]) => ({ label, options: groupOptions }));
   }, [options, groupBy]);
 
-  const filteredOptions = useMemo(() => {
-    return groupedOptions
-      .map((group) => ({
-        ...group,
-        options: group.options.filter((option) => {
-          const matches = filterFn
-            ? filterFn(option, inputValue) // custom logic
-            : String(option[labelField]).toLowerCase().includes(inputValue.toLowerCase());
+  const filteredGroups: Group<T>[] = useMemo(() => {
+    const q = inputValue.trim().toLowerCase();
+    const selectedSet = new Set(selectedValues.map(String));
 
-          const isSelected = selectedValues.includes(option[valueField] as V);
-          return matches && !isSelected;
-        }),
-      }))
-      .filter((group) => group.options.length > 0);
-  }, [groupedOptions, inputValue, labelField, selectedValues, valueField, filterFn]);
+    const matchesDefault = (option: T) => getLabel(option, labelField).toLowerCase().includes(q);
+
+    return groupedOptions
+      .map((group) => {
+        const groupOptions = group.options.filter((option) => {
+          const optionValue = getKey(option, valueField);
+          if (selectedSet.has(optionValue)) return false;
+
+          if (!q) return true;
+          return filterFn ? filterFn(option, inputValue) : matchesDefault(option);
+        });
+
+        return { ...group, options: groupOptions };
+      })
+      .filter((g) => g.options.length > 0);
+  }, [groupedOptions, inputValue, selectedValues, valueField, labelField, filterFn]);
+
+  const flatFilteredOptions = useMemo(() => filteredGroups.flatMap((g) => g.options), [filteredGroups]);
+
+  const closeDropdownSoon = useCallback(() => {
+    window.setTimeout(() => setOpen(false), HIDE_DROPDOWN_TIMEOUT);
+  }, []);
 
   const handleSelect = useCallback(
     (option: T) => {
-      const optionValue = option[valueField] as V;
+      const optionValue = getKey(option, valueField) as unknown as V;
+
       if (multiple) {
-        const newValue = selectedValues.includes(optionValue)
-          ? selectedValues.filter((v) => v !== optionValue)
-          : [...selectedValues, optionValue];
-        onChange(newValue);
+        const exists = selectedValues.some((v) => String(v) === String(optionValue));
+        const next = exists ? selectedValues.filter((v) => String(v) !== String(optionValue)) : [...selectedValues, optionValue];
+        onChange(next);
       } else {
         onChange(optionValue);
         setOpen(false);
       }
+
       setInputValue('');
       setHighlightedIndex(-1);
     },
@@ -132,8 +159,8 @@ export const TypeaheadV2 = <T, V extends string | number>(
   const handleRemove = useCallback(
     (optionValue: V) => {
       if (multiple) {
-        const newValue = selectedValues.filter((v) => v !== optionValue);
-        onChange(newValue);
+        const next = selectedValues.filter((v) => String(v) !== String(optionValue));
+        onChange(next);
       } else {
         onChange(null);
       }
@@ -142,41 +169,63 @@ export const TypeaheadV2 = <T, V extends string | number>(
     [multiple, onChange, selectedValues],
   );
 
-  const handleKeyDown = useCallback(
+  const handleKeyDownInternal = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      const flatFilteredOptions = filteredOptions.flatMap((group) => group.options);
       if (e.key === 'ArrowDown') {
         e.preventDefault();
+        setOpen(true);
         setHighlightedIndex((prev) => (prev < flatFilteredOptions.length - 1 ? prev + 1 : 0));
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
+        setOpen(true);
         setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : flatFilteredOptions.length - 1));
       } else if (e.key === 'Enter' && highlightedIndex !== -1) {
         e.preventDefault();
-        handleSelect(flatFilteredOptions[highlightedIndex]);
+        const option = flatFilteredOptions[highlightedIndex];
+        if (option) handleSelect(option);
       } else if (e.key === 'Escape') {
         setOpen(false);
       } else if (e.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
-        const newValue = selectedValues.slice(0, -1);
-        onChange(multiple ? newValue : newValue[0] || null);
+        const next = selectedValues.slice(0, -1);
+        onChange(multiple ? next : next[0] ?? null);
       }
 
-      inputProps.onKeyDown?.(e);
+      onKeyDown?.(e);
     },
-    [inputValue, multiple, onChange, selectedValues, filteredOptions, highlightedIndex, handleSelect, inputProps],
+    [
+      flatFilteredOptions,
+      highlightedIndex,
+      handleSelect,
+      inputValue,
+      multiple,
+      onChange,
+      selectedValues,
+      onKeyDown,
+    ],
   );
 
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    setHighlightedIndex(-1);
+    setOpen(true);
+  }, []);
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
+    const onDocMouseDown = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+
+      // Close if click is outside both the input wrapper AND the dropdown.
+      const inputRoot = inputRef.current?.closest('[data-typeahead-root="true"]') as HTMLElement | null;
+      if (inputRoot && inputRoot.contains(target)) return;
+
+      if (dropdownRef.current && dropdownRef.current.contains(target)) return;
+
+      setOpen(false);
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    document.addEventListener('mousedown', onDocMouseDown);
+    return () => document.removeEventListener('mousedown', onDocMouseDown);
   }, []);
 
   useEffect(() => {
@@ -185,76 +234,91 @@ export const TypeaheadV2 = <T, V extends string | number>(
     }
   }, [open, highlightedIndex]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-    setHighlightedIndex(-1);
-    if (!open) {
-      setOpen(true);
-    }
-  };
+  const inputHasSelection = selectedOptions.length > 0;
 
   return (
-    <div className={cn('relative w-full', className)} ref={containerRef}>
+    <div className={cn('relative w-full', className)} data-typeahead-root="true">
       <div
         className={cn(
-          'flex items-center gap-1 px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
-          inputProps.disabled && 'opacity-50 cursor-not-allowed',
+          'flex items-center gap-1 px-3 py-2 rounded-md border border-input bg-background ring-offset-background',
+          'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
+          disabled && 'opacity-50 cursor-not-allowed',
         )}
+        role="combobox"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listboxId}
+        onMouseDown={(e) => {
+          // Prevent input losing focus when clicking inside the container
+          if (!disabled) e.preventDefault();
+        }}
         onClick={() => {
-          if (!inputProps.disabled) {
-            setOpen(true);
-            inputRef.current?.focus();
-          }
+          if (disabled) return;
+          setOpen(true);
+          inputRef.current?.focus();
         }}
       >
-        <ScrollArea>
-          <div className="flex-1 flex items-center gap-1 min-w-0">
-            {selectedOptions.map((option) => (
-              <Badge
-                variant="outline"
-                className="whitespace-nowrap text-xs shadow-md py-0 px-1 bg-background"
-                key={option[valueField] as React.Key}
-              >
-                <span className="truncate max-w-[100px]">{String(option[labelField])}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ml-1 h-4 w-4 p-0"
-                  tabIndex={-1}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemove(option[valueField] as V);
-                  }}
-                  disabled={inputProps.disabled}
+        <ScrollArea className="flex-1 min-w-0">
+          <div className="flex items-center gap-1 min-w-0">
+            {selectedOptions.map((option) => {
+              const k = getKey(option, valueField);
+              const label = getLabel(option, labelField);
+
+              return (
+                <Badge
+                  variant="outline"
+                  className="whitespace-nowrap text-xs shadow-md py-0 px-1 bg-background"
+                  key={k}
                 >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))}
+                  <span className="truncate max-w-[100px]">{label}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="ml-1 h-4 w-4 p-0"
+                    tabIndex={-1}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemove((k as unknown) as V);
+                    }}
+                    disabled={disabled}
+                    aria-label={`Remove ${label}`}
+                  >
+                    <X className="h-3 w-3" aria-hidden="true" />
+                  </Button>
+                </Badge>
+              );
+            })}
+
             <input
               {...inputProps}
-              autoComplete="off"
               ref={inputRef}
+              autoComplete="off"
+              disabled={disabled}
               value={inputValue}
               onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
+              onKeyDown={handleKeyDownInternal}
               onFocus={(e) => {
-                setOpen(true);
-                inputProps.onFocus?.(e);
+                if (!disabled) setOpen(true);
+                onFocus?.(e);
               }}
-              onBlur={() =>
-                setTimeout(() => {
-                  setOpen(false);
-                }, HIDE_DROPDOWN_TIMEOUT)
-              }
-              placeholder={selectedOptions.length === 0 ? placeholder : ''}
-              className={cn('flex-1 bg-transparent outline-none placeholder:text-muted-foreground min-w-[50px]', {
-                'w-0 p-0': !multiple && selectedOptions.length > 0,
-              })}
+              onBlur={() => {
+                if (!disabled) closeDropdownSoon();
+              }}
+              placeholder={!inputHasSelection ? placeholder : ''}
+              className={cn(
+                'flex-1 min-w-[50px] bg-transparent outline-none placeholder:text-muted-foreground',
+                !multiple && inputHasSelection && 'w-0 p-0',
+              )}
+              aria-autocomplete="list"
+              aria-controls={listboxId}
+              aria-activedescendant={highlightedIndex >= 0 ? `${listboxId}-opt-${highlightedIndex}` : undefined}
             />
           </div>
+
           <ScrollBar orientation="horizontal" className="h-0.5" />
         </ScrollArea>
+
         <Button
           tabIndex={-1}
           type="button"
@@ -263,68 +327,97 @@ export const TypeaheadV2 = <T, V extends string | number>(
           className="h-4 w-4 p-0 hover:bg-transparent ml-auto"
           onClick={(e) => {
             e.stopPropagation();
-            if (!inputProps.disabled) {
-              setOpen(!open);
-            }
+            if (!disabled) setOpen((v) => !v);
           }}
-          disabled={inputProps.disabled}
+          disabled={disabled}
+          aria-label={open ? 'Close options' : 'Open options'}
         >
-          <ChevronsUpDown className="h-4 w-4 opacity-50" />
+          <ChevronsUpDown className="h-4 w-4 opacity-50" aria-hidden="true" />
         </Button>
       </div>
-      {open && !inputProps.disabled && (
+
+      {open && !disabled && (
         <div
           className="absolute z-50 w-full left-0 mt-1 bg-popover border border-input rounded-md shadow-md overflow-hidden"
           ref={dropdownRef}
         >
           <ScrollArea className="max-h-[300px] overflow-y-auto" tabIndex={-1}>
-            <div className="p-1">
-              {filteredOptions.length === 0 && <div className="p-2 text-sm text-muted-foreground">{emptyMessage}</div>}
-              {filteredOptions.map((group, groupIndex) => (
-                <div key={group.label || groupIndex}>
-                  {groupBy && group.label && (
-                    <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground capitalize">
-                      {group.label}
-                    </div>
-                  )}
-                  {group.options.map((option, index) => {
-                    const flatIndex =
-                      filteredOptions.slice(0, groupIndex).reduce((acc, g) => acc + g.options.length, 0) + index;
-                    return (
-                      <div
-                        key={option[valueField] as React.Key}
-                        ref={(el) => (optionRefs.current[flatIndex] = el)}
-                        className={cn('flex items-center px-2 py-1.5 text-sm cursor-pointer', {
-                          'bg-accent text-accent-foreground': highlightedIndex === flatIndex,
-                          'text-popover-foreground hover:bg-accent hover:text-accent-foreground':
-                            highlightedIndex !== flatIndex,
-                        })}
-                        onClick={() => handleSelect(option)}
-                        onMouseEnter={() => setHighlightedIndex(flatIndex)}
-                      >
-                        <Check
-                          className={cn('mr-2 h-4 w-4', {
-                            'opacity-0': !selectedValues.includes(option[valueField] as V),
-                            'opacity-100': selectedValues.includes(option[valueField] as V),
-                          })}
-                        />
-                        {renderElement(option, valueField, labelField)}
-                      </div>
-                    );
-                  })}
+            <div className="p-1 min-w-0" role="listbox" id={listboxId} aria-label="Options">
+              {filteredGroups.length === 0 && (
+                <div className="p-2 text-sm text-muted-foreground" role="status">
+                  {emptyMessage}
                 </div>
-              ))}
+              )}
+
+              {filteredGroups.map((group, groupIndex) => {
+                const groupOffset = filteredGroups
+                  .slice(0, groupIndex)
+                  .reduce((acc, g) => acc + g.options.length, 0);
+
+                return (
+                  <div key={group.label || groupIndex}>
+                    {groupBy && group.label && (
+                      <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground capitalize">
+                        {group.label}
+                      </div>
+                    )}
+
+                    {group.options.map((option, index) => {
+                      const flatIndex = groupOffset + index;
+                      const optionKey = getKey(option, valueField);
+                      const isHighlighted = highlightedIndex === flatIndex;
+
+                      return (
+                        <div
+                          key={optionKey}
+                          id={`${listboxId}-opt-${flatIndex}`}
+                          ref={(el) => {
+                            optionRefs.current[flatIndex] = el;
+                          }}
+                          role="option"
+                          aria-selected={false}
+                          className={cn(
+                            'flex items-center px-2 py-1.5 text-sm cursor-pointer min-w-0',
+                            isHighlighted
+                              ? 'bg-accent text-accent-foreground'
+                              : 'text-popover-foreground hover:bg-accent hover:text-accent-foreground',
+                          )}
+                          onMouseEnter={() => setHighlightedIndex(flatIndex)}
+                          onMouseDown={(e) => {
+                            // Avoid blur before selection
+                            e.preventDefault();
+                          }}
+                          onClick={() => handleSelect(option)}
+                        >
+                          {!hideCheckmarkColumn && (
+                            <span className="mr-2 flex h-4 w-4 items-center justify-center shrink-0" aria-hidden="true">
+                              {/* For this component, option list never contains already selected items.
+                                  Keep Check only if you later allow selection toggling without exclusion. */}
+                              <Check className="h-4 w-4 opacity-0" />
+                            </span>
+                          )}
+
+                          {renderElement(option, valueField, labelField)}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
             </div>
           </ScrollArea>
         </div>
       )}
     </div>
   );
-};
+}
 
-TypeaheadV2.displayName = 'TypeaheadV2';
+TypeaheadV2Inner.displayName = 'TypeaheadV2';
 
-export default forwardRef(
-  <T, V extends string | number>(props: TypeaheadV2Props<T, V>, ref: React.Ref<HTMLInputElement>) =>
-    TypeaheadV2<T, V>(props, ref),
-);
+const TypeaheadV2 = forwardRef(TypeaheadV2Inner) as unknown as <T, V extends string | number>(
+  props: TypeaheadV2Props<T, V> & { ref?: React.Ref<HTMLInputElement> },
+) => React.ReactElement;
+
+
+export default TypeaheadV2;
+export { TypeaheadV2 };

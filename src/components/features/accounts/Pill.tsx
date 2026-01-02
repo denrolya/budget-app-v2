@@ -61,10 +61,10 @@ const sizeMap = {
 
 const Marker = ({ account, size }: { account: Account; size: 'sm' | 'md' | 'lg' }) => {
   const isArchived = account.isArchived();
-  const color = isArchived ? 'var(--muted-foreground)' : account.color;
+  const color = isArchived ? 'hsl(var(--muted-foreground))' : account.color;
 
   const shape = shapeKindByType[account.type];
-  const isHollow = isArchived || shape === 'hollow-square';
+  const isHollow = shape === 'hollow-square';
 
   return (
     <span
@@ -104,7 +104,6 @@ export const AccountPill: React.FC<AccountPillProps> = ({
                                                         }) => {
   const accounts = useAccounts();
 
-  // Canonical account lookup (prevents stale embedded account data)
   const resolvedAccount = useMemo(() => {
     const id = String(account.id);
     return accounts.find((a) => String(a.id) === id) ?? account;
@@ -126,22 +125,20 @@ export const AccountPill: React.FC<AccountPillProps> = ({
   const isInline = variant === 'inline';
   const isFilled = tone === 'filled' && !isInline;
 
-  // Filled pill: marker in same color is redundant + low contrast => suppress it
-  const effectiveShowMarker = showMarker && !isFilled;
+  // Filled pill: marker in same color is redundant; BUT archived should still show it (muted marker is useful).
+  const effectiveShowMarker = showMarker && (!isFilled || isArchived);
 
-  const nameNode =
-    showName ? (
-      <span
-        className={cn(
-          'min-w-0 truncate',
-          // inline: inherit typography from parent; no defaults
-          isInline ? 'leading-none' : sizeMap[size].text,
-          textClassName,
-        )}
-      >
-        {resolvedAccount.displayName}
-      </span>
-    ) : null;
+  const nameNode = showName ? (
+    <span
+      className={cn(
+        'min-w-0 truncate',
+        isInline ? 'leading-none' : sizeMap[size].text,
+        textClassName,
+      )}
+    >
+      {resolvedAccount.displayName}
+    </span>
+  ) : null;
 
   const content = (
     <>
@@ -154,7 +151,6 @@ export const AccountPill: React.FC<AccountPillProps> = ({
     <span
       className={cn(
         'inline-flex items-center gap-2 min-w-0 max-w-full align-middle',
-        // do not impose any typography in inline mode
         isArchived && 'opacity-70',
         className,
       )}

@@ -345,7 +345,7 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
                     'py-0': compact,
                   })}
                 >
-                  {renderEditableCell(transaction, 'account', <AccountPill size="sm" account={transaction.account} />)}
+                  {renderEditableCell(transaction, 'account', <AccountPill size="sm" variant="inline" account={transaction.account} />)}
                 </TableCell>
                 <TableCell
                   className={cn('text-muted-foreground', {

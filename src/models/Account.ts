@@ -63,7 +63,7 @@ export default class Account {
   }
 
   get displayName(): string {
-    return this.name;
+    return `${CURRENCIES[this.currency].symbol} ${this.name}`;
   }
 
   isArchived(): boolean {

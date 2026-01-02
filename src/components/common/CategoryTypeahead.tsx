@@ -1,6 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-import React from 'react';
+import React, { ReactNode, useMemo } from 'react';
 
 import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
 import { useExpenseCategories, useIncomeCategories } from '@/contexts/FinanceData';
@@ -16,18 +14,27 @@ type CategoryTypeaheadProps = Omit<
 };
 
 const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
-  multiple = false,
-  value,
-  onChange,
-  valueField = 'id',
-  className,
-  type,
-  ...props
-}) => {
+                                                               multiple = false,
+                                                               value,
+                                                               onChange,
+                                                               className,
+                                                               type,
+                                                               ...props
+                                                             }) => {
   const incomeCategories = useIncomeCategories();
   const expenseCategories = useExpenseCategories();
 
-  const renderElement: TypeaheadV2Props<Category, string>['renderElement'] = (el) => (
+  const options = useMemo(() => {
+    if (type === TransactionType.Income) return incomeCategories;
+    if (type === TransactionType.Expense) return expenseCategories;
+    return incomeCategories.concat(expenseCategories);
+  }, [expenseCategories, incomeCategories, type]);
+
+  const sortedOptions = useMemo(() => options
+    .slice()
+    .sort((a, b) => a.getFullPath().join(' > ').localeCompare(b.getFullPath().join(' > '))), [options]);
+
+  const renderElement: TypeaheadV2Props<Category, string>['renderElement'] = (el): ReactNode => (
     <>
       <div className="flex flex-col">
         <span>{el.name}</span>
@@ -40,32 +47,29 @@ const CategoryTypeahead: React.FC<CategoryTypeaheadProps> = ({
     </>
   );
 
-  let options = incomeCategories.concat(expenseCategories);
-  if (type === TransactionType.Income) {
-    options = incomeCategories;
-  } else if (type === TransactionType.Expense) {
-    options = expenseCategories;
-  }
-
-  const sortedOptions = options
-    .slice()
-    .sort((a, b) => a.getFullPath().join(' > ').localeCompare(b.getFullPath().join(' > ')));
-
   const filterFn: TypeaheadV2Props<Category, string>['filterFn'] = (option, input) => {
-    const normalizedInput = input.toLowerCase();
+    const q = input.trim().toLowerCase();
+    if (!q) return true;
+
+    const name = option.name.toLowerCase();
+    const parentName = (option.parent?.name ?? '').toLowerCase();
+    const rootName = (option.root?.name ?? '').toLowerCase();
+    const path = option.getFullPath().join(' > ').toLowerCase();
+
     return (
-      option.name.toLowerCase().includes(normalizedInput) ||
-      option.parent?.name?.toLowerCase().includes(normalizedInput) ||
-      option.root?.name?.toLowerCase().includes(normalizedInput)
+      name.includes(q) ||
+      parentName.includes(q) ||
+      rootName.includes(q) ||
+      path.includes(q)
     );
   };
 
   return (
-    <TypeaheadV2<Category, number>
+    <TypeaheadV2<Category, string>
       labelField="name"
-      valueField={valueField as keyof Category}
-      groupBy={type as TransactionType}
-      placeholder={multiple ? 'Select categories...' : 'Select a category...'}
+      groupBy="type"
+      valueField="id"
+      placeholder={multiple ? 'Select categories…' : 'Select a category…'}
       multiple={multiple}
       options={sortedOptions}
       renderElement={renderElement}

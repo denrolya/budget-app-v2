@@ -116,22 +116,24 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
                     <div className="flex items-center space-x-2">
                       <AccountPill
                         size="sm"
-                        account={transfer.fromExpense.account}
+                        variant={transfer.feeExpense?.account.id === transfer.fromExpense.account.id ? 'pill' : 'inline'}
                         className={
                           transfer.feeExpense?.account.id === transfer.fromExpense.account.id
                             ? 'ring-2 ring-destructive'
                             : ''
                         }
+                        account={transfer.fromExpense.account}
                       />
                       <ArrowRight className="h-4 w-4 text-muted-foreground" />
                       <AccountPill
                         size="sm"
-                        account={transfer.toIncome.account}
+                        variant={transfer.feeExpense?.account.id === transfer.toIncome.account.id ? 'pill' : 'inline'}
                         className={
                           transfer.feeExpense?.account.id === transfer.toIncome.account.id
                             ? 'ring-2 ring-destructive'
                             : ''
                         }
+                        account={transfer.toIncome.account}
                       />
                     </div>
                   </TableCell>

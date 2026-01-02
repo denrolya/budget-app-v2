@@ -121,7 +121,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
           <div className="flex items-center space-x-4 mb-2">
             <div>
               <CardTitle className="flex space-x-2 items-center">
-                <AccountPill variant="inline" showName account={account} />
+                <AccountPill showName variant="inline" tooltip={false} account={account} />
                 <MoneyValue
                   badge
                   showSign
