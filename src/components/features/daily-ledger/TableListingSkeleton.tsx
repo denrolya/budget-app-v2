@@ -1,4 +1,3 @@
-import { ArrowRight } from 'lucide-react';
 import { Moment } from 'moment';
 import React, { useMemo } from 'react';
 
@@ -7,32 +6,51 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { cn } from '@/lib/utils';
+import { ListingRowSkeleton as TransferListingRowSkeleton } from '@/components/features/transfers/TableListingSkeleton';
+import { ListingRowSkeleton as TransactionListingRowSkeleton } from '@/components/features/transactions/TableListingSkeleton';
 
 interface Props {
   after: Moment;
   before: Moment;
   compact?: boolean;
+  rowsPerDay?: number;
+  isReversedOrder?: boolean;
+  showEmptyDays?: boolean;
 }
 
-export const TableListingSkeleton: React.FC<Props> = ({ after, before, compact = false }) => {
+export const TableListingSkeleton: React.FC<Props> = ({
+                                                        after,
+                                                        before,
+                                                        compact = true,
+                                                        rowsPerDay = 3,
+                                                        isReversedOrder = true,
+                                                        showEmptyDays = true,
+                                                      }) => {
   const dates = useMemo(() => {
-    const dates = [];
-    const currentDate = after.clone();
-    while (currentDate.isSameOrBefore(before)) {
-      dates.push(currentDate.clone());
-      currentDate.add(1, 'day');
+    const out: Moment[] = [];
+    const current = after.clone();
+    while (current.isSameOrBefore(before)) {
+      out.push(current.clone());
+      current.add(1, 'day');
     }
-    return dates.reverse(); // Reverse to show most recent dates first
-  }, [after, before]);
+    return isReversedOrder ? out.reverse() : out;
+  }, [after, before, isReversedOrder]);
+
+  const rowPadClass = compact ? 'py-0' : undefined;
+
+  const dayRows = useMemo(() => {
+    if (!showEmptyDays) return dates.slice(0, Math.min(dates.length, 7));
+    return dates;
+  }, [dates, showEmptyDays]);
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" role="status" aria-label="Loading transactions and transfers table">
       <Table className="w-full">
         <TableHeader className="sr-only">
           <TableRow>
-            <TableHead className="w-4"></TableHead>
+            <TableHead className="w-4" />
             <TableHead className="w-1/12">ID</TableHead>
-            <TableHead className="w-2/12">Type</TableHead>
+            <TableHead className="w-2/12">Account/Transfer</TableHead>
             <TableHead className="w-2/12">Amount</TableHead>
             <TableHead className="w-2/12">Category/Rate</TableHead>
             <TableHead className="w-2/12">Note</TableHead>
@@ -40,66 +58,45 @@ export const TableListingSkeleton: React.FC<Props> = ({ after, before, compact =
             <TableHead className="w-1/12 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
-          {dates.map((date) => (
+
+        <TableBody aria-busy="true">
+          {dayRows.map((date) => (
             <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
-              <TableRow>
-                <TableCell colSpan={8} className={cn('font-semibold','bg-muted', 'px-4', { 'py-0': compact })}>
-                  <div className="flex flex-wrap justify-between items-center">
+              {/* Day header skeleton */}
+              <TableRow aria-hidden="true">
+                <TableCell colSpan={8} className={cn('bg-muted/40 px-4', rowPadClass)}>
+                  <div className="flex flex-wrap justify-between items-center gap-2">
                     <RelativeDatetimeDisplay
                       showDayBadge
                       badgeSize="sm"
                       variant="default"
                       showTime={false}
-                      date={date}
-                    />
-                    <div className="text-sm flex flex-row space-x-4 font-normal">
-                      <Skeleton className="h-6 w-32" />
-                      <Skeleton className="h-6 w-32" />
+                      date={date} />
+                    <div className="flex items-center gap-3 font-normal">
+                      <Skeleton className="h-6 w-28 sm:w-32" />
+                      <Skeleton className="h-6 w-28 sm:w-32" />
                     </div>
                   </div>
                 </TableCell>
               </TableRow>
-              {Array.from({ length: 3 }).map((_, index) => (
-                <TableRow key={index}>
-                  <TableCell
-                    className={cn('w-4', {
-                      'p-0': compact,
-                    })}></TableCell>
-                  <TableCell className={cn({ 'p-0': compact })}>
-                    <Skeleton className="w-12 h-4" />
-                  </TableCell>
-                  <TableCell className={cn({ 'p-0': compact })}>
-                    <div className="flex items-center space-x-2">
-                      <Skeleton className="w-16 h-6 rounded-full" />
-                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                      <Skeleton className="w-16 h-6 rounded-full" />
-                    </div>
-                  </TableCell>
-                  <TableCell className={cn({ 'p-0': compact })}>
-                    <Skeleton className="w-24 h-6" />
-                  </TableCell>
-                  <TableCell className={cn({ 'p-0': compact })}>
-                    <Skeleton className="w-20 h-6" />
-                  </TableCell>
-                  <TableCell className={cn({ 'p-0': compact })}>
-                    <Skeleton className="w-32 h-4" />
-                  </TableCell>
-                  <TableCell className={cn({ 'p-0': compact })}>
-                    <Skeleton className="w-16 h-4" />
-                  </TableCell>
-                  <TableCell
-                    className={cn('text-right', {
-                      'p-0': compact,
-                    })}>
-                    <div className="flex justify-end space-x-2">
-                      <Skeleton className="w-8 h-8 rounded-full" />
-                      <Skeleton className="w-8 h-8 rounded-full" />
-                      <Skeleton className="w-8 h-8 rounded-full" />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+
+              {/* Item rows skeleton: mix tx + transfer row skeletons */}
+              {Array.from({ length: rowsPerDay }).map((_, index) => {
+                // deterministic mix; tweak ratio as desired
+                const isTransfer = index % 3 === 0;
+
+                return isTransfer ? (
+                  <TransferListingRowSkeleton
+                    key={`${date.format(BACKEND_DATE_FORMAT)}-tr-${index}`}
+                    compact={compact}
+                  />
+                ) : (
+                  <TransactionListingRowSkeleton
+                    key={`${date.format(BACKEND_DATE_FORMAT)}-tx-${index}`}
+                    compact={compact}
+                  />
+                );
+              })}
             </React.Fragment>
           ))}
         </TableBody>

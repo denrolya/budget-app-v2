@@ -1,3 +1,4 @@
+
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
@@ -76,7 +77,7 @@ export const useListState = <FilterType extends BaseFilters, DataType extends { 
     gcTime = DEFAULT_GC_TIME,
     select,
   }: UseListStateOptions<FilterType, DataType>,
-  additionalFetchDependencies = [],
+  additionalFetchDependencies: unknown[] = [],
 ): UseListReturn<FilterType, DataType> => {
   const [searchParams, setSearchParams] = useSearchParams();
   const hasSearchParams = [...searchParams.keys()].length > 0;
@@ -89,7 +90,11 @@ export const useListState = <FilterType extends BaseFilters, DataType extends { 
     },
     filters:
       hasSearchParams && typeof FilterClass.fromSearchParams === 'function'
-        ? (FilterClass.fromSearchParams(searchParams, searchParamKeys as Record<string, string>, formatMoment) as FilterType)
+        ? (FilterClass.fromSearchParams(
+          searchParams,
+          searchParamKeys as Record<string, string>,
+          formatMoment,
+        ) as FilterType)
         : initialFilters,
     sort: {
       field: searchParams.get('sortField') || initialSort?.field || '',
@@ -110,7 +115,7 @@ export const useListState = <FilterType extends BaseFilters, DataType extends { 
   const setPerPage = useCallback((perPage: number) => {
     setState((prev) => ({
       ...prev,
-      pagination: { ...prev.pagination, totalPages: 0, currentPage: 1, perPage },
+      pagination: { ...prev.pagination, currentPage: 1, perPage },
     }));
   }, []);
 
@@ -142,17 +147,22 @@ export const useListState = <FilterType extends BaseFilters, DataType extends { 
   const updateSearchParamsDebounced = useMemo(
     () =>
       debounce((params: URLSearchParams) => {
-        if (updateUrl) {
-          for (const [key, value] of params.entries()) {
-            if (!value) {
-              params.delete(key);
-            }
-          }
-          setSearchParams(params);
+        if (!updateUrl) return;
+
+        for (const [key, value] of params.entries()) {
+          if (!value) params.delete(key);
         }
+        setSearchParams(params);
       }, 300),
     [setSearchParams, updateUrl],
   );
+
+  const stateAsParams = useMemo(() => buildListStateSearchParams(
+      state,
+      { filters: initialFilters, initialPerPage, initialSort },
+      searchParamKeys as Record<string, string>,
+      formatMoment,
+    ), [state, initialFilters, initialPerPage, initialSort, searchParamKeys, formatMoment]);
 
   useEffect(() => {
     if (!updateUrl) return;
@@ -160,42 +170,18 @@ export const useListState = <FilterType extends BaseFilters, DataType extends { 
     const hasStateChanged = !isEqual(state, prevStateRef.current);
     if (!hasStateChanged) return;
 
-    const params = buildListStateSearchParams(
-      state,
-      { filters: initialFilters, initialPerPage, initialSort },
-      searchParamKeys as Record<string, string>,
-      formatMoment,
-    );
-
-    updateSearchParamsDebounced(params);
+    updateSearchParamsDebounced(new URLSearchParams(stateAsParams));
     prevStateRef.current = state;
 
     return () => {
       updateSearchParamsDebounced.cancel();
     };
-  }, [state, searchParamKeys, formatMoment, updateSearchParamsDebounced, updateUrl, initialFilters, initialPerPage, initialSort]);
+  }, [state, stateAsParams, updateSearchParamsDebounced, updateUrl]);
 
-  // Normalize filters and sort for stable queryKey
-  const serializedFilters = useMemo(() => JSON.stringify(state.filters), [state.filters]);
-  const serializedSort = useMemo(() => JSON.stringify(state.sort), [state.sort]);
-
+  // Use URL params as the canonical, deterministic query key part
   const queryKey = useMemo(
-    () => [
-      queryKeyBase,
-      state.pagination.currentPage,
-      state.pagination.perPage,
-      serializedFilters,
-      serializedSort,
-      ...additionalFetchDependencies,
-    ],
-    [
-      queryKeyBase,
-      state.pagination.currentPage,
-      state.pagination.perPage,
-      serializedFilters,
-      serializedSort,
-      ...additionalFetchDependencies,
-    ],
+    () => [queryKeyBase, stateAsParams.toString(), ...additionalFetchDependencies],
+    [queryKeyBase, stateAsParams, additionalFetchDependencies],
   );
 
   const response = useQuery<DataType, Error>({

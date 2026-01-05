@@ -1,30 +1,60 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
-import { formatTransferExchangeRate } from '@/utils/formatTransferExchangeRate';
-import { CURRENCIES } from '@/constants/currency';
+import { CURRENCY_CODE, CURRENCIES } from '@/constants/currency';
+import { cn } from '@/lib/utils';
 import Transfer from '@/models/Transfer';
+import { formatTransferExchangeRate } from '@/utils/formatTransferExchangeRate';
 
-interface TransferRateProps extends React.ComponentPropsWithoutRef<'span'> {
+type Props = Omit<React.ComponentPropsWithoutRef<'span'>, 'children'> & {
   transfer: Transfer;
   useSymbol?: boolean;
-}
+  showWhenSameCurrency?: boolean;
+};
 
-const TransferRateComponent: React.FC<TransferRateProps> = ({ transfer, useSymbol = false, className, ...props }) => {
-  const [from, to] = formatTransferExchangeRate(
-    [transfer.fromExpense.account.currency, transfer.toIncome.account.currency],
-    transfer.displayRate,
-  );
+const RateDisplay: React.FC<Props> = ({
+                                        transfer,
+                                        useSymbol = false,
+                                        showWhenSameCurrency = false,
+                                        className,
+                                        ...props
+                                      }) => {
+  const fromCurrency = transfer.fromExpense.account.currency as CURRENCY_CODE;
+  const toCurrency = transfer.toIncome.account.currency as CURRENCY_CODE;
 
-  const getCurrencyDisplay = (currencyCode: string) =>
-    (useSymbol ? CURRENCIES[currencyCode].symbol || currencyCode : currencyCode) as string;
+  const sameCurrency = fromCurrency === toCurrency;
 
-  const rateDisplay = `${from.amount} ${getCurrencyDisplay(from.currency)} = ${to.amount} ${getCurrencyDisplay(to.currency)}`;
+  const { equationText, ariaLabel } = useMemo(() => {
+    const getCurrencyLabel = (currencyCode: CURRENCY_CODE) =>
+      useSymbol ? CURRENCIES[currencyCode]?.symbol || currencyCode : currencyCode;
+
+    const [from, to] = formatTransferExchangeRate([fromCurrency, toCurrency], transfer.displayRate);
+
+    const fromCode = from.currency as CURRENCY_CODE;
+    const toCode = to.currency as CURRENCY_CODE;
+
+    const equation = `${from.amount} ${getCurrencyLabel(fromCode)} = ${to.amount} ${getCurrencyLabel(toCode)}`;
+
+    return {
+      equationText: equation,
+      ariaLabel: `Exchange rate: ${equation}`,
+    };
+  }, [fromCurrency, toCurrency, transfer.displayRate, useSymbol]);
+
+  // Hook already ran; safe to return now.
+  if (sameCurrency && !showWhenSameCurrency) return null;
+  if (!equationText) return null;
 
   return (
-    <span className={className} {...props}>
-      {rateDisplay}
+    <span
+      className={cn('tabular-nums whitespace-nowrap text-xs text-muted-foreground', className)}
+      aria-label={ariaLabel}
+      {...props}
+    >
+      {equationText}
     </span>
   );
 };
 
-export default TransferRateComponent;
+RateDisplay.displayName = 'TransferRateDisplay';
+
+export default RateDisplay;

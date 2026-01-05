@@ -12,7 +12,7 @@ interface Props {
 const DetailsHoverCard: React.FC<Props> = ({ account }) => (
   <div className="flex-col space-y-1">
     <h3 className="font-bold">
-      <AccountPill size="sm" variant="inline" account={account} />
+      <AccountPill size="sm" variant="inline" tooltip={false} account={account} />
     </h3>
     <p className="text-xs">
       {'Balance: '}

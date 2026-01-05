@@ -14,7 +14,7 @@ import { UseListReturn, useListState } from '@/hooks/useListState';
 import Transaction, { TransactionFactory } from '@/models/Transaction';
 import { TransactionFilters } from '@/models/TransactionFilters';
 import { transactionService } from '@/services/api/transaction';
-import { Sorting } from '@/types/pagination';
+import { type Sorting } from '@/types/pagination';
 
 interface UseTransactionsOptions {
   initialPerPage?: number;
@@ -37,8 +37,23 @@ export type UseTransactionsReturn = Omit<UseListReturn<TransactionFilters, Trans
   totalValue: number;
 };
 
+const groupTransactionsByDay = (items: Transaction[], baseCurrency: string): [Moment, Transaction[], number, number][] => toPairs(
+    groupBy(
+      sortBy(items, (item) => -item.executedAt.valueOf()),
+      (item) => item.executedAt.format(BACKEND_DATE_FORMAT),
+    ),
+  ).map(([date, dayItems]) => {
+    const totalValue = sumBy(dayItems, (item) => {
+      const value = item.convertedValues?.[baseCurrency] || 0;
+      return item.isExpense() ? -value : value;
+    });
+
+    return [moment(date), dayItems, totalValue, dayItems.length];
+  });
+
 export const useTransactions = (options: UseTransactionsOptions = {}): UseTransactionsReturn => {
   const baseCurrency = useBaseCurrency();
+
   const {
     initialPerPage = 50,
     initialFilters = new TransactionFilters(),
@@ -47,6 +62,9 @@ export const useTransactions = (options: UseTransactionsOptions = {}): UseTransa
     queryKeyBase = 'transactions',
     excludeTransfers = false,
   } = options;
+
+  // Must be created before queryFn uses it
+  const { createTransaction } = TransactionFactory();
 
   const { data, ...listState } = useListState<TransactionFilters, TransformedResponse>({
     initialPerPage,
@@ -66,12 +84,7 @@ export const useTransactions = (options: UseTransactionsOptions = {}): UseTransa
       isDraft: 'isDraft',
     },
     formatMoment: BACKEND_DATE_FORMAT,
-    queryFn: async (
-      page: number,
-      perPage: number,
-      filters: TransactionFilters,
-      sort: Sorting,
-    ): Promise<TransformedResponse> => {
+    queryFn: async (page, perPage, filters, sort) => {
       const response = await transactionService.fetchTransactions({
         page,
         perPage,
@@ -81,51 +94,37 @@ export const useTransactions = (options: UseTransactionsOptions = {}): UseTransa
       });
 
       return {
-        items: response.items?.map((item) => createTransaction(item)) || [],
-        totalValue: response?.totalValue || 0,
-        totalItems: response?.totalItems || 0,
+        items: response.items?.map((item) => createTransaction(item)) ?? [],
+        totalValue: response?.totalValue ?? 0,
+        totalItems: response?.totalItems ?? 0,
       };
     },
   });
 
+  // Refetch after Transaction/Transfer form submits
   const queryClient = useQueryClient();
   const handleFormSubmit = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: [queryKeyBase] });
   }, [queryClient, queryKeyBase]);
   useFormSubmitListener([FormType.Transaction, FormType.Transfer], handleFormSubmit);
-  const { createTransaction } = TransactionFactory();
 
+  // Toast on error
   useEffect(() => {
-    if (listState.isError) {
-      toast.error('Failed to fetch transactions', {
-        description: listState.error?.message || 'An unexpected error occurred.',
-        action: {
-          label: 'Retry',
-          onClick: () => listState.refetch(),
-        },
-      });
-    }
+    if (!listState.isError) return;
+
+    toast.error('Failed to fetch transactions', {
+      description: listState.error?.message || 'An unexpected error occurred.',
+      action: {
+        label: 'Retry',
+        onClick: () => listState.refetch(),
+      },
+    });
   }, [listState.isError, listState.error, listState.refetch]);
 
   const items = useMemo(() => data?.items ?? [], [data]);
-  const totalValue = data?.totalValue || 0;
-  const groupedItems: [Moment, Transaction[], number, number][] = useMemo(
-    () =>
-      toPairs(
-        groupBy(
-          sortBy(items, (item) => -item.executedAt.valueOf()),
-          (item) => item.executedAt.format(BACKEND_DATE_FORMAT),
-        ),
-      ).map(([date, items]) => {
-        const totalValue = sumBy(items, (item) => {
-          const value = item.convertedValues[baseCurrency] || 0;
-          return item.isExpense() ? -value : value;
-        });
-        const totalItems = items.length;
-        return [moment(date), items, totalValue, totalItems];
-      }),
-    [items, baseCurrency],
-  );
+  const totalValue = data?.totalValue ?? 0;
+
+  const groupedItems = useMemo(() => groupTransactionsByDay(items, baseCurrency), [items, baseCurrency]);
 
   return {
     ...listState,

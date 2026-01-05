@@ -76,6 +76,9 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
     [setFilter, setShowTransactions, setShowTransfers],
   );
 
+  const transactionAccounts = Array.isArray(transactionFilters.accounts) ? transactionFilters.accounts : [];
+  const transferAccounts = Array.isArray(transferFilters.accounts) ? transferFilters.accounts : [];
+
   return (
     <div className="flex flex-row items-center justify-between flex-wrap gap-2 relative">
       <DaterangePickerWithPresets after={timeframe.after} before={timeframe.before} onChange={handleTimeframeChange} />
@@ -103,8 +106,7 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
         <AccountTypeahead
           multiple
           id="accounts"
-          valueField="id"
-          value={[...new Set([...transactionFilters.accounts, ...transferFilters.accounts])]}
+          value={[...new Set([...transferAccounts, ...transactionAccounts])]}
           onChange={(accounts) => setFilter('accounts', accounts)}
           placeholder="Accounts"
           className="w-full"
