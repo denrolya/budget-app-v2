@@ -11,7 +11,6 @@ import LoginPage from '@/app/login/page';
 import TestingPage from '@/app/testing-page/page';
 import TransactionsListPage from '@/app/transactions/page';
 import TransfersListPage from '@/app/transfers/page';
-import NewTransactionsPage from '@/components/features/transactions/TableWithFiltersMock';
 import LayoutV9 from '@/components/layout/LayoutV9';
 import FinanceDataProvider from '@/contexts/FinanceData';
 import RequireAuth from '@/components/common/RequireAuth';
@@ -20,20 +19,19 @@ const AppShell: React.FC = () => (
     <FinanceDataProvider>
       <LayoutV9>
         <Routes>
-          <Route index element={<Navigate to="/ledger" replace />} />
+          <Route index element={<Navigate replace to="/ledger" />} />
 
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/transactions" element={<TransactionsListPage />} />
-          <Route path="/transactions-new" element={<NewTransactionsPage />} />
-          <Route path="/transfers" element={<TransfersListPage />} />
-          <Route path="/ledger" element={<DailyLedgerPage />} />
-          <Route path="/accounts/*" element={<AccountsManagementPage />} />
-          <Route path="/debts" element={<DebtsPage />} />
-          <Route path="/testing" element={<TestingPage />} />
-          <Route path="/budget" element={<BudgetingPage />} />
-          <Route path="/categories" element={<CategoriesPage />} />
+          <Route element={<DashboardPage />} path="/dashboard" />
+          <Route element={<TransactionsListPage />} path="/transactions" />
+          <Route element={<TransfersListPage />} path="/transfers" />
+          <Route element={<DailyLedgerPage />} path="/ledger" />
+          <Route element={<AccountsManagementPage />} path="/accounts/*" />
+          <Route element={<DebtsPage />} path="/debts" />
+          <Route element={<TestingPage />} path="/testing" />
+          <Route element={<BudgetingPage />} path="/budget" />
+          <Route element={<CategoriesPage />} path="/categories" />
 
-          <Route path="*" element={<Navigate to="/ledger" replace />} />
+          <Route element={<Navigate replace to="/ledger" />} path="*" />
         </Routes>
       </LayoutV9>
     </FinanceDataProvider>
@@ -41,15 +39,15 @@ const AppShell: React.FC = () => (
 
 const Routing: React.FC = () => (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route element={<LoginPage />} path="/login" />
 
       {/* Auth-protected app */}
       <Route element={<RequireAuth />}>
-        <Route path="/*" element={<AppShell />} />
+        <Route element={<AppShell />} path="/*" />
       </Route>
 
       {/* Fallback */}
-      <Route path="*" element={<Navigate to="/ledger" replace />} />
+      <Route element={<Navigate replace to="/ledger" />} path="*" />
     </Routes>
   );
 

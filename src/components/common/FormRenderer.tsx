@@ -45,7 +45,7 @@ const FormContent = forwardRef<{ submitForm: () => Promise<void> }, FormContentP
   const { key, formType } = props;
   const FormComponent = formComponents[formType];
 
-  return <FormComponent ref={ref} key={key} />;
+  return <FormComponent key={key} ref={ref} />;
 });
 
 export const FormRenderer: React.FC = () => {
@@ -94,21 +94,21 @@ export const FormRenderer: React.FC = () => {
 
   const content = (
     <FormContent
-      ref={formRef}
       formType={formState.type as FormType}
-      values={formState.values}
-      onClose={closeForm}
       setFormState={updateFormState}
+      values={formState.values}
       key={formKey}
+      onClose={closeForm}
+      ref={formRef}
     />
   );
 
   const footer = (
     <div className="flex justify-end space-x-2">
-      <Button type="submit" onClick={() => handleSubmit(false)} disabled={isLoading || !formState.isValid}>
+      <Button disabled={isLoading || !formState.isValid} type="submit" onClick={() => handleSubmit(false)}>
         {isEditMode ? 'Update' : 'Create'}
       </Button>
-      <Button type="button" onClick={() => handleSubmit(true)} disabled={isLoading || !formState.isValid}>
+      <Button disabled={isLoading || !formState.isValid} type="button" onClick={() => handleSubmit(true)}>
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

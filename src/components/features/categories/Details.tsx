@@ -43,7 +43,7 @@ export const CategoryDetails: React.FC<Props> = ({ category }) => {
   return (
     <div className="h-full flex flex-col p-4">
       <div className="flex-1 overflow-auto">
-        <Tabs className="space-y-4" value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} className="space-y-4" onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="activity">Transactions</TabsTrigger>
             <TabsTrigger value="data">Data</TabsTrigger>
@@ -64,10 +64,10 @@ export const CategoryDetails: React.FC<Props> = ({ category }) => {
                 </div>
                 <ScrollArea className="h-[400px] p-0">
                   <FormattedListing
-                    isLoading={isTransactionsLoading}
-                    isError={isTransactionsError}
                     error={transactionsError}
                     groupedItems={groupedTransactions}
+                    isError={isTransactionsError}
+                    isLoading={isTransactionsLoading}
                     refetch={refetchTransactions}
                     onAdd={onAddTransaction}
                   />

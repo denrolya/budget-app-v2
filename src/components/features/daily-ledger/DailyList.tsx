@@ -1,10 +1,9 @@
-import cn from 'classnames';
 import { Moment } from 'moment';
 import React, { useMemo } from 'react';
 
-import { useIsMobile } from '@/hooks/use-mobile';
 import DateCard, { DateCardSkeleton } from '@/components/features/daily-ledger/DateCard';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
+import { useIsMobile } from '@/hooks/use-mobile';
 import Transaction from '@/models/Transaction';
 import Transfer from '@/models/Transfer';
 
@@ -13,51 +12,65 @@ interface Props {
   groupedItems: [Moment, (Transaction | Transfer)[], number, number, number, number][];
   after: Moment;
   before: Moment;
+  reversed?: boolean;
 }
 
-const DailyList: React.FC<Props> = ({ isLoading, groupedItems, after, before }) => {
+const COLUMN_W = 'w-[420px]';
+
+const DailyList: React.FC<Props> = ({ isLoading, groupedItems, after, before, reversed }) => {
   const isMobile = useIsMobile();
 
   const dates = useMemo(() => {
-    const dates = [];
-    const currentDate = after.clone();
-    while (currentDate.isSameOrBefore(before)) {
-      dates.push(currentDate.clone());
-      currentDate.add(1, 'day');
+    const out: Moment[] = [];
+    const d = after.clone();
+    while (d.isSameOrBefore(before, 'day')) {
+      out.push(d.clone());
+      d.add(1, 'day');
     }
-    return dates;
+    return out;
   }, [after, before]);
 
-  const totalDays = dates.length;
+  const orderedDates = useMemo(() => {
+    const arr = [...dates];
+    if (reversed) arr.reverse();
+    return arr;
+  }, [dates, reversed]);
 
-  // Sort dates in descending order for mobile view
-  const sortedDates = useMemo(() => [...dates].sort((a, b) => b.valueOf() - a.valueOf()), [dates]);
+  const totalDays = orderedDates.length;
 
   return (
-    <div
-      className={cn(
-        'flex flex-col md:flex-row md:-mx-2 mb-6',
-        { 'md:flex-row-reverse': isMobile }, // Reverse order for desktop view
-      )}
-    >
-      {(!isMobile ? dates : sortedDates).map((date, index) => {
-        const foundGroup = groupedItems?.find((group) => group[0].isSame(date, 'day'));
+    <div className="h-full w-max min-w-full">
+      {!isMobile && (
+        <div className="flex h-full gap-4 p-4">
+          {orderedDates.map((date, index) => {
+            const group = groupedItems?.find((g) => g[0].isSame(date, 'day'));
+            const items = group ? group[1] : [];
 
-        return (
-          <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
-            <div
-              className={cn('w-full px-0 md:px-2', {
-                'md:w-1/7': !isMobile,
-              })}
-            >
-              {isLoading && <DateCardSkeleton index={index} totalDays={totalDays} />}
-              {!isLoading && (
-                <DateCard date={date} items={foundGroup ? foundGroup[1] : []} index={index} totalDays={totalDays} />
-              )}
-            </div>
-          </React.Fragment>
-        );
-      })}
+            return (
+              <div className={`shrink-0 ${COLUMN_W} h-full`} key={date.format(BACKEND_DATE_FORMAT)}>
+                {isLoading && <DateCardSkeleton index={index} totalDays={totalDays} />}
+                {!isLoading && <DateCard date={date} index={index} items={items} totalDays={totalDays} />}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {isMobile && (
+        <div className="flex flex-col gap-4 p-4">
+          {orderedDates.map((date, index) => {
+            const group = groupedItems?.find((g) => g[0].isSame(date, 'day'));
+            const items = group ? group[1] : [];
+
+            return (
+              <div className="w-full" key={date.format(BACKEND_DATE_FORMAT)}>
+                {isLoading && <DateCardSkeleton index={index} totalDays={totalDays} />}
+                {!isLoading && <DateCard date={date} index={index} items={items} totalDays={totalDays} />}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

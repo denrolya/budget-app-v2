@@ -30,7 +30,7 @@ export const DetailsHeader: React.FC<Props> = ({ selectedCategory, onCategorySel
   return (
     <div className="flex justify-between items-start sm:items-center w-full">
       <div className="flex items-center space-x-3">
-        <Button variant="ghost" size="icon" onClick={() => onCategorySelect(null)}>
+        <Button size="icon" variant="ghost" onClick={() => onCategorySelect(null)}>
           <ChevronLeft className="h-5 w-5" />
           <span className="sr-only">Back to list</span>
         </Button>
@@ -62,11 +62,11 @@ export const DetailsHeader: React.FC<Props> = ({ selectedCategory, onCategorySel
         </div>
       </div>
       <div className="flex space-x-2">
-        <Button variant="outline" size="icon">
+        <Button size="icon" variant="outline">
           <Download className="h-4 w-4" />
           <span className="sr-only">Download</span>
         </Button>
-        <Button variant="outline" size="icon" onClick={handleEditClick}>
+        <Button size="icon" variant="outline" onClick={handleEditClick}>
           <Edit className="h-4 w-4" />
           <span className="sr-only">Edit</span>
         </Button>

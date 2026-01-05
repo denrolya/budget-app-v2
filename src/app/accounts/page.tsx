@@ -16,22 +16,21 @@ const AccountsManagementPage: React.FC = () => {
   const navigate = useNavigate();
   const { accountId } = useParams<{ accountId: string }>();
 
-  // You can keep this page dumb: sidebar + nested routes for content.
   return (
     <PageWithSidebar contentScrollable>
       <PageWithSidebar.Sidebar ariaLabel="Accounts sidebar">
         <SidebarListing
           selectedId={accountId ?? null}
-          onSelect={(acc: Account) => navigate(`/accounts/${acc.id}`)}
           onClear={() => navigate('/accounts')}
+          onSelect={(acc: Account) => navigate(`/accounts/${acc.id}`)}
         />
       </PageWithSidebar.Sidebar>
 
       <PageWithSidebar.Content className="min-h-0 h-full">
         <Routes>
           <Route index element={<AccountsIndex />} />
-          <Route path=":accountId" element={<AccountDetailsRoute />} />
-          <Route path="*" element={<Navigate to="/accounts" replace />} />
+          <Route element={<AccountDetailsRoute />} path=":accountId" />
+          <Route element={<Navigate replace to="/accounts" />} path="*" />
         </Routes>
       </PageWithSidebar.Content>
     </PageWithSidebar>
@@ -60,19 +59,19 @@ const AccountDetailsRoute: React.FC = () => {
     toast.success('Account is now displayed on sidebar by default');
   };
 
-  if (!accountId) return <Navigate to="/accounts" replace />;
+  if (!accountId) return <Navigate replace to="/accounts" />;
 
-  if (!data) return null; // Or a loader, depending on how your provider works
-  if (!account) return <Navigate to="/accounts" replace />; // Or a NotFound view
+  if (!data) return null;
+  if (!account) return <Navigate replace to="/accounts" />;
 
   return (
     <>
       <PageWithSidebar.Header title="Account Details" onBack={() => navigate('/accounts')}>
-        <Button variant="outline" size="icon" aria-label="Export">
-          <Download className="h-4 w-4" aria-hidden="true" />
+        <Button aria-label="Export" size="icon" variant="outline">
+          <Download aria-hidden="true" className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="icon" aria-label="Edit">
-          <Edit className="h-4 w-4" aria-hidden="true" />
+        <Button aria-label="Edit" size="icon" variant="outline">
+          <Edit aria-hidden="true" className="h-4 w-4" />
         </Button>
       </PageWithSidebar.Header>
 

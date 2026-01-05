@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
+import AccountPill from '@/components/features/accounts/Pill';
 import ResponsiveTooltip from '@/components/ui/responsive-tooltip';
 import { useBaseCurrency } from '@/contexts/auth';
 import { useAccounts } from '@/contexts/FinanceData';
@@ -88,27 +89,21 @@ export const WalletBar: React.FC<Props> = ({ className }) => {
           <div className="text-sm text-muted-foreground">Your wallet</div>
           <MoneyValue
             amount={totalBaseValue}
-            currency={baseCurrency as any}
-            values={{ [baseCurrency]: totalBaseValue }}
-            useColors={false}
-            showValuesTooltip={false}
             className="text-2xl font-semibold tracking-tight"
+            currency={baseCurrency as any}
+            showValuesTooltip={false}
+            useColors={false}
+            values={{ [baseCurrency]: totalBaseValue }}
           />
         </div>
 
         <div className="text-xs text-muted-foreground">Accounts shown: {accountsShown}</div>
       </header>
 
-      {/* Strip */}
       <div
-        className={cn(
-          'w-full',
-          'overflow-hidden',
-          'rounded-lg border bg-background/40',
-          // no horizontal padding here -> no accidental width math issues
-        )}
-        role="group"
         aria-label="Wallet distribution by accounts"
+        className={cn('w-full', 'overflow-hidden', 'rounded-lg border bg-background/40')}
+        role="group"
       >
         <div className="flex h-12 w-full items-stretch">
           {segments.map((segment) => {
@@ -116,7 +111,7 @@ export const WalletBar: React.FC<Props> = ({ className }) => {
 
             const tooltipContent = (
               <div className="space-y-1">
-                <div className="font-medium">{segment.account.displayName}</div>
+                <AccountPill account={segment.account} tooltip={false} variant="inline" />
                 <div className="text-xs text-muted-foreground capitalize">Type: {segment.typeLabel}</div>
 
                 <div className="pt-1 text-sm">
@@ -125,8 +120,8 @@ export const WalletBar: React.FC<Props> = ({ className }) => {
                     <MoneyValue
                       amount={segment.account.balance}
                       currency={segment.account.currency as any}
-                      values={segment.account.convertedValues ?? {}}
                       useColors={false}
+                      values={segment.account.convertedValues ?? {}}
                     />
                   </div>
                 </div>
@@ -138,21 +133,20 @@ export const WalletBar: React.FC<Props> = ({ className }) => {
             return (
               <div
                 key={segment.key}
+                aria-label={`${segment.account.displayName}, ${segment.percent.toFixed(2)} percent`}
                 className={cn(
                   'relative h-full min-w-0',
                   // type boundary divider (does not consume width)
                   segment.isTypeBoundary && 'border-l border-border/70',
                 )}
-                style={{ flex: `0 0 ${segment.percent}%` }}
                 role="img"
-                aria-label={`${segment.account.displayName}, ${segment.percent.toFixed(2)} percent`}
+                style={{ flex: `0 0 ${segment.percent}%` }}
               >
-                {/* full-hit tooltip area */}
                 <ResponsiveTooltip
+                  content={tooltipContent}
+                  contentClassName="max-w-[22rem]"
                   desktopComponent="hovercard"
                   openDelay={150}
-                  contentClassName="max-w-[22rem]"
-                  content={tooltipContent}
                   triggerClassName="block h-full w-full"
                 >
                   <span
@@ -165,7 +159,6 @@ export const WalletBar: React.FC<Props> = ({ className }) => {
                   />
                 </ResponsiveTooltip>
 
-                {/* Account label: top-left inside the segment */}
                 {showAccountLabel && (
                   <div className="pointer-events-none absolute left-1 top-1">
                     <span
@@ -176,7 +169,7 @@ export const WalletBar: React.FC<Props> = ({ className }) => {
                         'backdrop-blur supports-[backdrop-filter]:bg-background/60',
                       )}
                     >
-                      <span className="truncate max-w-[10rem]">{segment.account.name}</span>
+                      <AccountPill account={segment.account} showMarker={false} tooltip={false} variant="inline" />
                       <span className="text-muted-foreground tabular-nums">{segment.percent.toFixed(0)}%</span>
                     </span>
                   </div>

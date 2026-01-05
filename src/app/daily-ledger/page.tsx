@@ -96,20 +96,13 @@ export const DailyLedgerPage: React.FC = () => {
     setIsBulkCreateOpen((prev) => !prev);
   }, []);
 
-  const {
-    timeframe,
-    setTimeframe,
-    step,
-    setStep,
-    goToNextPeriod,
-    goToPreviousPeriod,
-    reset: resetTimeframe,
-  } = useTimeframe({
-    onChange: ({ after, before }: { after: Moment; before: Moment }) => {
-      setFilter('after', after);
-      setFilter('before', before);
-    },
-  });
+  const { timeframe, setTimeframe, step, setStep, goToNextPeriod, goToPreviousPeriod, reset: resetTimeframe } =
+    useTimeframe({
+      onChange: ({ after, before }: { after: Moment; before: Moment }) => {
+        setFilter('after', after);
+        setFilter('before', before);
+      },
+    });
 
   useLedgerHotkeys({
     onPrev: goToPreviousPeriod,
@@ -143,61 +136,58 @@ export const DailyLedgerPage: React.FC = () => {
 
   return (
     <FullHeightPageContent {...swipeHandlers}>
-      <Card className="shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
-        {/* HEADER (unified with TransactionsListPage) */}
+      <Card className="w-full min-w-0 shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
         <CardHeader className="p-0 md:p-3 bg-background md:bg-card md:border-b">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <CardTitle className="text-2xl font-bold">Ledger</CardTitle>
 
-            <div role="toolbar" aria-label="Ledger actions" className="flex flex-wrap items-center gap-2">
+            <div aria-label="Ledger actions" role="toolbar" className="flex flex-wrap items-center gap-2">
               <SummaryBadge
-                icon={ROUTES.TRANSACTION_LIST.icon}
                 count={summary.transactionsCount}
-                value={summary.transactionsValue}
-              />
+                icon={ROUTES.TRANSACTION_LIST.icon}
+                value={summary.transactionsValue} />
               <SummaryBadge
-                useColors={false}
-                icon={ROUTES.TRANSFER_LIST.icon}
                 count={summary.transfersCount}
-                value={summary.transfersValue}
-              />
+                icon={ROUTES.TRANSFER_LIST.icon}
+                useColors={false}
+                value={summary.transfersValue} />
 
               <DisplayMenu
                 activeView={activeView}
-                setActiveView={setActiveView}
-                setShowEmpty={setShowEmptyDays}
-                showEmpty={showEmptyDays}
                 isCompactTable={isCompactTable}
-                setIsCompactTable={setIsCompactTable}
-                showTransactions={showTransactions}
-                setShowTransactions={setShowTransactions}
-                showTransfers={showTransfers}
-                setShowTransfers={setShowTransfers}
-                transactionFilters={transactionFilters}
-                setFilter={setFilter}
                 isReversedOrder={isReversedOrder}
+                setActiveView={setActiveView}
+                setFilter={setFilter}
+                setIsCompactTable={setIsCompactTable}
                 setIsReversedOrder={setIsReversedOrder}
+                setShowEmpty={setShowEmptyDays}
+                setShowTransactions={setShowTransactions}
+                setShowTransfers={setShowTransfers}
+                showEmpty={showEmptyDays}
+                showTransactions={showTransactions}
+                showTransfers={showTransfers}
+                transactionFilters={transactionFilters}
               />
 
               <FiltersToggleButton
-                className="flex md:hidden"
                 activeCount={transactionFilters.activeCount}
-                onClick={toggleFilters}
                 aria-label={filtersToggleAriaLabel}
+                className="flex md:hidden"
+                onClick={toggleFilters}
               />
 
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Toggle
+                    aria-label={bulkCreateAriaLabel}
+                    aria-pressed={isBulkCreateOpen}
+                    pressed={isBulkCreateOpen}
                     type="button"
                     variant="outline"
                     className="hidden md:flex"
-                    pressed={isBulkCreateOpen}
                     onPressedChange={setIsBulkCreateOpen}
-                    aria-label={bulkCreateAriaLabel}
-                    aria-pressed={isBulkCreateOpen}
                   >
-                    <CopyPlus className="h-4 w-4" aria-hidden="true" />
+                    <CopyPlus aria-hidden="true" className="h-4 w-4" />
                   </Toggle>
                 </TooltipTrigger>
                 <TooltipContent>Bulk Create</TooltipContent>
@@ -206,13 +196,12 @@ export const DailyLedgerPage: React.FC = () => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
+                    aria-label="New transaction"
+                    size="icon"
                     type="button"
                     variant="outline"
-                    size="icon"
-                    onClick={openNewTransactionForm}
-                    aria-label="New transaction"
-                  >
-                    <SquarePlus className="h-4 w-4" aria-hidden="true" />
+                    onClick={openNewTransactionForm}>
+                    <SquarePlus aria-hidden="true" className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>New Transaction</TooltipContent>
@@ -221,23 +210,22 @@ export const DailyLedgerPage: React.FC = () => {
           </div>
         </CardHeader>
 
-        {/* CONTENT (same structural rules as TransactionsListPage) */}
-        <CardContent className="p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
+        <CardContent className="w-full min-w-0 p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
           {!isMobile && (
             <div className="shrink-0">
               <ListingControls
+                activeView={activeView}
+                handleResetFilters={handleResetFilters}
                 isLoading={isLoading}
-                transactionFilters={transactionFilters}
-                transferFilters={transferFilters}
+                isReversedOrder={isReversedOrder}
                 setFilter={setFilter}
+                setIsReversedOrder={setIsReversedOrder}
                 setShowTransactions={setShowTransactions}
                 setShowTransfers={setShowTransfers}
-                timeframe={timeframe}
                 setTimeframe={setTimeframe}
-                activeView={activeView}
-                isReversedOrder={isReversedOrder}
-                setIsReversedOrder={setIsReversedOrder}
-                handleResetFilters={handleResetFilters}
+                timeframe={timeframe}
+                transactionFilters={transactionFilters}
+                transferFilters={transferFilters}
                 onFiltersDialogToggle={toggleFilters}
               />
             </div>
@@ -253,64 +241,58 @@ export const DailyLedgerPage: React.FC = () => {
 
           {isError && (
             <div className="shrink-0 px-4 py-3">
-              <div className="rounded-md bg-destructive/10 p-4 text-destructive" role="alert" aria-live="polite">
+              <div aria-live="polite" role="alert" className="rounded-md bg-destructive/10 p-4 text-destructive">
                 <p className="font-medium">Error:</p>
                 <p>{error?.message || 'An unexpected error occurred.'}</p>
               </div>
             </div>
           )}
 
-          <ScrollArea className="flex-1 min-h-0" aria-label="Ledger listing">
-            <div className="min-h-full">
-              {!isMobile && activeView === 'table' && (
-                <>
-                  {isLoading ? (
-                    <TableListingSkeleton after={timeframe.after} before={timeframe.before} compact={isCompactTable} />
-                  ) : (
-                    <TableListing
-                      isLoading={isLoading}
-                      showEmptyDays={showEmptyDays}
-                      groupedItems={groupedItems}
-                      after={timeframe.after}
-                      before={timeframe.before}
-                      isReversedOrder={isReversedOrder}
-                      compact={isCompactTable}
-                    />
-                  )}
-                </>
-              )}
+          {activeView === 'table' && (
+            <ScrollArea aria-label="Ledger table listing" className="flex-1 min-h-0 w-full min-w-0">
+              <div className="min-h-full w-full min-w-0">
+                {isLoading && (
+                  <TableListingSkeleton after={timeframe.after} before={timeframe.before} compact={isCompactTable} />
+                )}
+                {!isLoading && (
+                  <TableListing
+                    after={timeframe.after}
+                    before={timeframe.before}
+                    compact={isCompactTable}
+                    groupedItems={groupedItems}
+                    isLoading={isLoading}
+                    isReversedOrder={isReversedOrder}
+                    showEmptyDays={showEmptyDays}
+                  />
+                )}
+              </div>
+            </ScrollArea>
+          )}
 
-              {!isMobile && activeView === 'list' && (
+          {activeView === 'list' && (
+            <div aria-label="Ledger daily columns" className="flex-1 min-h-0 w-full min-w-0 overflow-hidden">
+              <div className="h-full w-full min-w-0 overflow-x-auto overflow-y-hidden">
                 <DailyList
-                  isLoading={isLoading}
-                  groupedItems={groupedItems}
                   after={timeframe.after}
                   before={timeframe.before}
-                />
-              )}
-
-              {isMobile && (
-                <DailyList
-                  isLoading={isLoading}
                   groupedItems={groupedItems}
-                  after={timeframe.after}
-                  before={timeframe.before}
+                  isLoading={isLoading}
+                  reversed={isMobile}
                 />
-              )}
+              </div>
             </div>
-          </ScrollArea>
+          )}
         </CardContent>
 
         <CardFooter className="flex items-center justify-between md:justify-end gap-2 p-2 bg-background md:bg-card border-t">
           <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            onClick={goToPreviousPeriod}
-            disabled={isLoading}
             aria-label="Previous period"
-          >
-            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+            disabled={isLoading}
+            size="icon"
+            type="button"
+            variant="outline"
+            onClick={goToPreviousPeriod}>
+            <ChevronLeft aria-hidden="true" className="h-4 w-4" />
           </Button>
 
           <Select
@@ -321,12 +303,12 @@ export const DailyLedgerPage: React.FC = () => {
               if (next) setStep(next);
             }}
           >
-            <SelectTrigger className="w-44" aria-label="Select time period">
+            <SelectTrigger aria-label="Select time period" className="w-44">
               <SelectValue placeholder="Select time period" />
             </SelectTrigger>
             <SelectContent>
               {TIMEFRAME_STEP_PRESETS.map((preset, index) => (
-                <SelectItem key={`${preset.amount}-${preset.unit}`} value={String(index)}>
+                <SelectItem value={String(index)} key={`${preset.amount}-${preset.unit}`}>
                   {preset.amount} {preset.unit}
                 </SelectItem>
               ))}
@@ -334,29 +316,29 @@ export const DailyLedgerPage: React.FC = () => {
           </Select>
 
           <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            onClick={goToNextPeriod}
+            aria-label="Next period"
             disabled={isLoading}
-            aria-label="Next period">
-            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            size="icon"
+            type="button"
+            variant="outline"
+            onClick={goToNextPeriod}>
+            <ChevronRight aria-hidden="true" className="h-4 w-4" />
           </Button>
         </CardFooter>
       </Card>
 
       <ListFiltersSheet
         isOpen={isFiltersOpen}
+        setFilter={setFilter}
         setIsOpen={setIsFiltersOpen}
+        setShowTransactions={setShowTransactions}
+        setShowTransfers={setShowTransfers}
+        setTimeframe={setTimeframe}
+        showTransactions={showTransactions}
+        showTransfers={showTransfers}
+        timeframe={timeframe}
         transactionFilters={transactionFilters}
         transferFilters={transferFilters}
-        setFilter={setFilter}
-        showTransactions={showTransactions}
-        setShowTransactions={setShowTransactions}
-        showTransfers={showTransfers}
-        setShowTransfers={setShowTransfers}
-        timeframe={timeframe}
-        setTimeframe={setTimeframe}
       />
     </FullHeightPageContent>
   );

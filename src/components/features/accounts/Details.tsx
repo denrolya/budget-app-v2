@@ -76,10 +76,10 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
       <>
         <div className="md:hidden">
           <DailyList
-            isLoading={isLoading}
-            groupedItems={groupedItems}
             after={dateRange.after}
             before={dateRange.before}
+            groupedItems={groupedItems}
+            isLoading={isLoading}
           />
         </div>
 
@@ -87,10 +87,10 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
           {isLoading && <TableListingSkeleton after={dateRange.after} before={dateRange.before} />}
           {!isLoading && (
             <TableListing
-              isLoading={isLoading}
-              groupedItems={groupedItems}
               after={dateRange.after}
               before={dateRange.before}
+              groupedItems={groupedItems}
+              isLoading={isLoading}
             />
           )}
         </div>
@@ -121,7 +121,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
           <div className="flex items-center space-x-4 mb-2">
             <div>
               <CardTitle className="flex space-x-2 items-center">
-                <AccountPill showName variant="inline" tooltip={false} account={account} />
+                <AccountPill showName account={account} tooltip={false} variant="inline" />
                 <MoneyValue
                   badge
                   showSign
@@ -132,12 +132,12 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
+                      aria-label={account.isDisplayedOnSidebar ? 'Hide from sidebar' : 'Show in sidebar'}
+                      size="icon"
                       type="button"
                       variant="ghost"
-                      size="icon"
                       className="h-8 w-8"
                       onClick={toggleSidebarVisibility}
-                      aria-label={account.isDisplayedOnSidebar ? 'Hide from sidebar' : 'Show in sidebar'}
                     >
                       {account.isDisplayedOnSidebar ? <Star className="h-4 w-4" /> : <StarOff className="h-4 w-4" />}
                       <span className="sr-only">{account.isDisplayedOnSidebar ? 'Hide from sidebar' : 'Show in sidebar'}</span>
@@ -158,7 +158,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
           <p className="text-sm text-muted-foreground">Notes here</p>
         </CardContent>
         <CardFooter>
-          <Button variant="outline" size="sm">
+          <Button size="sm" variant="outline">
             <ArrowUpDown className="mr-2 h-4 w-4" />
             Edit Balance
           </Button>
@@ -205,7 +205,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
                     { id: 2, date: '2023-07-01', action: 'Repayment received', details: 'Repayment of $250' },
                     { id: 3, date: '2023-08-01', action: 'Repayment received', details: 'Repayment of $250' },
                   ].map((event) => (
-                    <li key={event.id} className="flex justify-between items-center">
+                    <li className="flex justify-between items-center" key={event.id}>
                       <div>
                         <p className="font-medium">{event.action}</p>
                         <p className="text-sm text-muted-foreground">{event.details}</p>

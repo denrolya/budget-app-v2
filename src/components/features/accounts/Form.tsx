@@ -89,8 +89,8 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
     <Form {...form}>
       <form className="space-y-6">
         <FormField
-          name="currency"
           control={form.control}
+          name="currency"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Currency</FormLabel>
@@ -98,9 +98,11 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
                 <div className="grid grid-cols-5 gap-4">
                   {Object.entries(currencyInfo).map(([value, info]) => (
                     <Button
-                      key={value}
                       type="button"
                       variant={field.value === value ? 'default' : 'outline'}
+                      style={{
+                        backgroundColor: field.value === value ? info.color : undefined,
+                      }}
                       className={cn(
                         'flex-1 h-14 text-sm font-medium border-2 rounded-md transition-all duration-200 hover:bg-accent hover:text-accent-foreground',
                         {
@@ -108,9 +110,7 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
                           'border-transparent': field.value !== value,
                         },
                       )}
-                      style={{
-                        backgroundColor: field.value === value ? info.color : undefined,
-                      }}
+                      key={value}
                       onClick={() => field.onChange(value)}
                     >
                       <div className="flex flex-col items-center justify-center space-y-2">
@@ -140,10 +140,8 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
                     { value: 'other', label: 'Other', icon: MoreHorizontal },
                   ].map((option) => (
                     <Button
-                      key={option.value}
                       type="button"
                       variant={field.value === option.value ? 'default' : 'outline'}
-                      className={getButtonStyle(option.value, 'type')}
                       style={{
                         backgroundColor:
                           field.value === option.value
@@ -152,6 +150,8 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
                               ]
                             : undefined,
                       }}
+                      className={getButtonStyle(option.value, 'type')}
+                      key={option.value}
                       onClick={() => field.onChange(option.value)}
                     >
                       <div className="flex flex-col items-center justify-center space-y-2">
@@ -187,8 +187,8 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
               <FormLabel>Initial Balance</FormLabel>
               <FormControl>
                 <Input
-                  type="number"
                   placeholder="Enter initial balance"
+                  type="number"
                   {...field}
                   onChange={(e) => field.onChange(parseFloat(e.target.value))}
                 />
