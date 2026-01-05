@@ -83,32 +83,32 @@ export const TransactionsListPage: React.FC = () => {
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <CardTitle className="text-2xl font-bold">Transactions</CardTitle>
 
-            <div role="toolbar" aria-label="Transactions actions" className="flex flex-wrap items-center gap-2">
+            <div aria-label="Transactions actions" role="toolbar" className="flex flex-wrap items-center gap-2">
               <SummaryBadge
-                icon={ROUTES.TRANSACTION_LIST.icon}
                 count={totalItems}
+                icon={ROUTES.TRANSACTION_LIST.icon}
                 value={totalValue}
               />
 
               <FiltersToggleButton
-                className="flex md:hidden"
                 activeCount={filters.activeCount}
-                onClick={toggleFilters}
                 aria-label={filtersToggleAriaLabel}
+                className="flex md:hidden"
+                onClick={toggleFilters}
               />
 
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Toggle
+                    aria-label={bulkCreateAriaLabel}
+                    aria-pressed={isBulkCreateOpen}
+                    pressed={isBulkCreateOpen}
                     type="button"
                     variant="outline"
                     className="hidden md:flex"
-                    pressed={isBulkCreateOpen}
                     onPressedChange={setIsBulkCreateOpen}
-                    aria-label={bulkCreateAriaLabel}
-                    aria-pressed={isBulkCreateOpen}
                   >
-                    <CopyPlus className="h-4 w-4" aria-hidden="true" />
+                    <CopyPlus aria-hidden="true" className="h-4 w-4" />
                   </Toggle>
                 </TooltipTrigger>
                 <TooltipContent>Bulk Create</TooltipContent>
@@ -117,13 +117,13 @@ export const TransactionsListPage: React.FC = () => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
+                    aria-label="New transaction"
+                    size="icon"
                     type="button"
                     variant="outline"
-                    size="icon"
                     onClick={openNewTransactionForm}
-                    aria-label="New transaction"
                   >
-                    <SquarePlus className="h-4 w-4" aria-hidden="true" />
+                    <SquarePlus aria-hidden="true" className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>New Transaction</TooltipContent>
@@ -132,14 +132,14 @@ export const TransactionsListPage: React.FC = () => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
+                    aria-label="Export current transactions to CSV"
+                    disabled={isExportingCsv}
+                    size="icon"
                     type="button"
                     variant="ghost"
-                    size="icon"
                     onClick={exportCsv}
-                    disabled={isExportingCsv}
-                    aria-label="Export current transactions to CSV"
                   >
-                    <Download className="h-4 w-4" aria-hidden="true" />
+                    <Download aria-hidden="true" className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Export CSV</TooltipContent>
@@ -148,14 +148,14 @@ export const TransactionsListPage: React.FC = () => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
+                    aria-label="Refresh transactions list"
+                    disabled={isLoading}
+                    size="icon"
                     type="button"
                     variant="ghost"
-                    size="icon"
                     onClick={refreshList}
-                    disabled={isLoading}
-                    aria-label="Refresh transactions list"
                   >
-                    <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                    <RefreshCw aria-hidden="true" className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Refresh</TooltipContent>
@@ -169,10 +169,10 @@ export const TransactionsListPage: React.FC = () => {
             <div className="shrink-0">
               <InlineFilters
                 data={filters}
-                onChange={setFilter}
-                onReset={resetFilters}
                 isLoading={isLoading}
+                onChange={setFilter}
                 onFiltersDialogToggle={toggleFilters}
+                onReset={resetFilters}
               />
             </div>
           )}
@@ -185,12 +185,12 @@ export const TransactionsListPage: React.FC = () => {
             </div>
           )}
 
-          <ScrollArea className="flex-1 min-h-0" aria-label="Transactions list">
+          <ScrollArea aria-label="Transactions list" className="flex-1 min-h-0">
             <FormattedListing
-              isLoading={isLoading}
-              isError={isError}
               error={error}
               groupedItems={groupedItems}
+              isError={isError}
+              isLoading={isLoading}
               refetch={refetch}
               onAdd={openNewTransactionForm}
             />
@@ -199,31 +199,31 @@ export const TransactionsListPage: React.FC = () => {
 
         <CardFooter className="flex justify-end p-2 bg-background md:bg-card border-t">
           <Pagination
-            isLoading={isLoading}
             currentPage={currentPage}
+            isLoading={isLoading}
+            perPage={perPage}
+            totalItems={totalItems}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
             onPerPageChange={setPerPage}
-            perPage={perPage}
-            totalItems={totalItems}
           />
         </CardFooter>
       </Card>
 
       {isUpdatingBannerVisible && (
         <div
-          className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded shadow"
-          role="status"
           aria-live="polite"
+          role="status"
+          className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded shadow"
         >
           Updating…
         </div>
       )}
 
       <ListFiltersSheet
+        data={filters}
         isOpen={isFiltersOpen}
         setIsOpen={setIsFiltersOpen}
-        data={filters}
         onChange={setFilter}
         onReset={resetFilters}
       />

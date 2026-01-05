@@ -31,7 +31,7 @@ const FormattedListing: React.FC<Props> = ({ isLoading, isError, error, groupedI
 
       {!isLoading && groupedItems.length > 0 && <List groupedItems={groupedItems} />}
 
-      {!isLoading && !groupedItems.length && <EmptyTransactionState onRefresh={refetch} onAddTransaction={onAdd} />}
+      {!isLoading && !groupedItems.length && <EmptyTransactionState onAddTransaction={onAdd} onRefresh={refetch} />}
     </div>
 
     <div className="hidden md:block">
@@ -39,7 +39,7 @@ const FormattedListing: React.FC<Props> = ({ isLoading, isError, error, groupedI
 
       {!isLoading && groupedItems.length > 0 && <TableListing groupedItems={groupedItems} />}
 
-      {!isLoading && !groupedItems.length && <EmptyTransactionState onRefresh={refetch} onAddTransaction={onAdd} />}
+      {!isLoading && !groupedItems.length && <EmptyTransactionState onAddTransaction={onAdd} onRefresh={refetch} />}
     </div>
   </>
 );

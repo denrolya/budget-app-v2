@@ -55,10 +55,10 @@ export const List: React.FC<Props> = ({ groupedItems, ...props }) => (
         <div className="space-y-2">
           <div className="flex flex-wrap justify-between border-b py-3">
             <h4 className="text-lg font-semibold flex items-center">
-              <RelativeDatetimeDisplay showDayBadge badgeSize="sm" variant="default" showTime={false} date={date} />
+              <RelativeDatetimeDisplay showDayBadge badgeSize="sm" date={date} showTime={false} variant="default" />
             </h4>
             <div className="flex flex-wrap gap-2 text-sm pr-3">
-              <SummaryBadge icon={ROUTES.TRANSACTION_LIST.icon} count={count} value={totalValue} />
+              <SummaryBadge count={count} icon={ROUTES.TRANSACTION_LIST.icon} value={totalValue} />
             </div>
           </div>
           <ul className="pt-4 pb-4 md:pb-0 flex flex-col gap-4 flex-grow overflow-auto max-w-full">

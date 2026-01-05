@@ -20,7 +20,6 @@ import Transfer from '@/models/Transfer';
 interface Props {
   date: Moment;
   items: (Transaction | Transfer)[];
-  totalDays: number;
 }
 
 type Totals = {
