@@ -1,7 +1,8 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import cn from 'classnames';
+import { cn } from '@/lib/utils';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import React, {
   forwardRef,
@@ -14,8 +15,110 @@ import React, {
   useState,
 } from 'react';
 
+const HIDE_DROPDOWN_TIMEOUT = 150;
+
+const typeaheadVariants = cva('relative w-full', {
+  variants: {
+    size: {
+      default: '',
+      sm: '',
+      lg: '',
+    },
+  },
+  defaultVariants: {
+    size: 'default',
+  },
+});
+
+const typeaheadControlVariants = cva(
+  cn(
+    'flex items-center gap-1 rounded-md border border-input bg-background ring-offset-background',
+    'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
+    'transition-colors',
+  ),
+  {
+    variants: {
+      size: {
+        default: 'min-h-9 px-3 py-2 text-sm',
+        sm: 'min-h-8 px-2.5 py-1.5 text-xs',
+        lg: 'min-h-10 px-4 py-2 text-base',
+      },
+    },
+    defaultVariants: {
+      size: 'default',
+    },
+  },
+);
+
+const typeaheadInputVariants = cva('flex-1 bg-transparent outline-none placeholder:text-muted-foreground', {
+  variants: {
+    size: {
+      default: 'min-w-[50px] text-sm',
+      sm: 'min-w-[40px] text-xs',
+      lg: 'min-w-[60px] text-base',
+    },
+  },
+  defaultVariants: {
+    size: 'default',
+  },
+});
+
+const typeaheadChipVariants = cva('whitespace-nowrap shadow-md bg-background', {
+  variants: {
+    size: {
+      default: 'text-xs py-0 px-1',
+      sm: 'text-xs py-0 px-1',
+      lg: 'text-sm py-0 px-1.5',
+    },
+  },
+  defaultVariants: {
+    size: 'default',
+  },
+});
+
+const chevronButtonVariants = cva('ml-auto p-0 hover:bg-transparent', {
+  variants: {
+    size: {
+      default: 'h-4 w-4',
+      sm: 'h-4 w-4',
+      lg: 'h-5 w-5',
+    },
+  },
+  defaultVariants: {
+    size: 'default',
+  },
+});
+
+const chevronIconVariants = cva('', {
+  variants: {
+    size: {
+      default: 'h-4 w-4',
+      sm: 'h-4 w-4',
+      lg: 'h-5 w-5',
+    },
+  },
+  defaultVariants: {
+    size: 'default',
+  },
+});
+
+type Group<T> = { label: string; options: T[] };
+
+const normalizeSelected = <V extends string | number>(
+  value: V | V[] | null | undefined,
+  multiple: boolean,
+): V[] => {
+  if (value == null) return [];
+  if (multiple) return Array.isArray(value) ? value : [value];
+  return Array.isArray(value) ? (value[0] != null ? [value[0]] : []) : [value];
+};
+
+const getKey = <T, >(obj: T, field: keyof T & string): string => String((obj as any)[field]);
+const getLabel = <T, >(obj: T, field: keyof T & string): string => String((obj as any)[field]);
+
 export interface TypeaheadV2Props<T, V extends string | number>
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'size'>,
+    VariantProps<typeof typeaheadVariants> {
   multiple?: boolean;
 
   options: T[];
@@ -42,22 +145,10 @@ export interface TypeaheadV2Props<T, V extends string | number>
   hideCheckmarkColumn?: boolean;
 }
 
-const HIDE_DROPDOWN_TIMEOUT = 150;
-
-type Group<T> = { label: string; options: T[] };
-
-const normalizeSelected = <V extends string | number>(value: V | V[] | null | undefined, multiple: boolean): V[] => {
-  if (value == null) return [];
-  if (multiple) return Array.isArray(value) ? value : [value];
-  return Array.isArray(value) ? (value[0] != null ? [value[0]] : []) : [value];
-};
-
-const getKey = <T, >(obj: T, field: keyof T & string): string => String((obj as any)[field]);
-const getLabel = <T, >(obj: T, field: keyof T & string): string => String((obj as any)[field]);
-
 function TypeaheadV2Inner<T, V extends string | number>(
   {
     multiple = false,
+    size = 'default',
     options,
     valueField,
     labelField,
@@ -111,18 +202,17 @@ function TypeaheadV2Inner<T, V extends string | number>(
   }, [options, groupBy]);
 
   const filteredGroups: Group<T>[] = useMemo(() => {
-    const q = inputValue.trim().toLowerCase();
+    const query = inputValue.trim().toLowerCase();
     const selectedSet = new Set(selectedValues.map(String));
 
-    const matchesDefault = (option: T) => getLabel(option, labelField).toLowerCase().includes(q);
+    const matchesDefault = (option: T) => getLabel(option, labelField).toLowerCase().includes(query);
 
     return groupedOptions
       .map((group) => {
         const groupOptions = group.options.filter((option) => {
           const optionValue = getKey(option, valueField);
           if (selectedSet.has(optionValue)) return false;
-
-          if (!q) return true;
+          if (!query) return true;
           return filterFn ? filterFn(option, inputValue) : matchesDefault(option);
         });
 
@@ -143,7 +233,9 @@ function TypeaheadV2Inner<T, V extends string | number>(
 
       if (multiple) {
         const exists = selectedValues.some((v) => String(v) === String(optionValue));
-        const next = exists ? selectedValues.filter((v) => String(v) !== String(optionValue)) : [...selectedValues, optionValue];
+        const next = exists
+          ? selectedValues.filter((v) => String(v) !== String(optionValue))
+          : [...selectedValues, optionValue];
         onChange(next);
       } else {
         onChange(optionValue);
@@ -170,42 +262,33 @@ function TypeaheadV2Inner<T, V extends string | number>(
   );
 
   const handleKeyDownInternal = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
         setOpen(true);
         setHighlightedIndex((prev) => (prev < flatFilteredOptions.length - 1 ? prev + 1 : 0));
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
         setOpen(true);
         setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : flatFilteredOptions.length - 1));
-      } else if (e.key === 'Enter' && highlightedIndex !== -1) {
-        e.preventDefault();
+      } else if (event.key === 'Enter' && highlightedIndex !== -1) {
+        event.preventDefault();
         const option = flatFilteredOptions[highlightedIndex];
         if (option) handleSelect(option);
-      } else if (e.key === 'Escape') {
+      } else if (event.key === 'Escape') {
         setOpen(false);
-      } else if (e.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
+      } else if (event.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
         const next = selectedValues.slice(0, -1);
         onChange(multiple ? next : next[0] ?? null);
       }
 
-      onKeyDown?.(e);
+      onKeyDown?.(event);
     },
-    [
-      flatFilteredOptions,
-      highlightedIndex,
-      handleSelect,
-      inputValue,
-      multiple,
-      onChange,
-      selectedValues,
-      onKeyDown,
-    ],
+    [flatFilteredOptions, highlightedIndex, handleSelect, inputValue, multiple, onChange, selectedValues, onKeyDown],
   );
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
+  const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
     setHighlightedIndex(-1);
     setOpen(true);
   }, []);
@@ -215,7 +298,6 @@ function TypeaheadV2Inner<T, V extends string | number>(
       const target = event.target as Node | null;
       if (!target) return;
 
-      // Close if click is outside both the input wrapper AND the dropdown.
       const inputRoot = inputRef.current?.closest('[data-typeahead-root="true"]') as HTMLElement | null;
       if (inputRoot && inputRoot.contains(target)) return;
 
@@ -237,19 +319,14 @@ function TypeaheadV2Inner<T, V extends string | number>(
   const inputHasSelection = selectedOptions.length > 0;
 
   return (
-    <div className={cn('relative w-full', className)} data-typeahead-root="true">
+    <div className={cn(typeaheadVariants({ size }), className)} data-typeahead-root="true">
       <div
-        className={cn(
-          'flex items-center gap-1 px-3 py-2 rounded-md border border-input bg-background ring-offset-background',
-          'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
-          disabled && 'opacity-50 cursor-not-allowed',
-        )}
+        className={cn(typeaheadControlVariants({ size }), disabled && 'opacity-50 cursor-not-allowed')}
         role="combobox"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listboxId}
         onMouseDown={(e) => {
-          // Prevent input losing focus when clicking inside the container
           if (!disabled) e.preventDefault();
         }}
         onClick={() => {
@@ -261,15 +338,11 @@ function TypeaheadV2Inner<T, V extends string | number>(
         <ScrollArea className="flex-1 min-w-0">
           <div className="flex items-center gap-1 min-w-0">
             {selectedOptions.map((option) => {
-              const k = getKey(option, valueField);
+              const key = getKey(option, valueField);
               const label = getLabel(option, labelField);
 
               return (
-                <Badge
-                  variant="outline"
-                  className="whitespace-nowrap text-xs shadow-md py-0 px-1 bg-background"
-                  key={k}
-                >
+                <Badge key={key} variant="outline" className={cn(typeaheadChipVariants({ size }))}>
                   <span className="truncate max-w-[100px]">{label}</span>
                   <Button
                     type="button"
@@ -279,7 +352,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
                     tabIndex={-1}
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleRemove((k as unknown) as V);
+                      handleRemove(key as unknown as V);
                     }}
                     disabled={disabled}
                     aria-label={`Remove ${label}`}
@@ -306,10 +379,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
                 if (!disabled) closeDropdownSoon();
               }}
               placeholder={!inputHasSelection ? placeholder : ''}
-              className={cn(
-                'flex-1 min-w-[50px] bg-transparent outline-none placeholder:text-muted-foreground',
-                !multiple && inputHasSelection && 'w-0 p-0',
-              )}
+              className={cn(typeaheadInputVariants({ size }), !multiple && inputHasSelection && 'w-0 p-0')}
               aria-autocomplete="list"
               aria-controls={listboxId}
               aria-activedescendant={highlightedIndex >= 0 ? `${listboxId}-opt-${highlightedIndex}` : undefined}
@@ -324,7 +394,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
           type="button"
           variant="ghost"
           size="sm"
-          className="h-4 w-4 p-0 hover:bg-transparent ml-auto"
+          className={cn(chevronButtonVariants({ size }))}
           onClick={(e) => {
             e.stopPropagation();
             if (!disabled) setOpen((v) => !v);
@@ -332,7 +402,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
           disabled={disabled}
           aria-label={open ? 'Close options' : 'Open options'}
         >
-          <ChevronsUpDown className="h-4 w-4 opacity-50" aria-hidden="true" />
+          <ChevronsUpDown className={cn('opacity-50', chevronIconVariants({ size }))} aria-hidden="true" />
         </Button>
       </div>
 
@@ -377,22 +447,19 @@ function TypeaheadV2Inner<T, V extends string | number>(
                           role="option"
                           aria-selected={false}
                           className={cn(
-                            'flex items-center px-2 py-1.5 text-sm cursor-pointer min-w-0',
+                            'flex items-center px-2 py-1.5 cursor-pointer min-w-0 text-sm',
                             isHighlighted
                               ? 'bg-accent text-accent-foreground'
                               : 'text-popover-foreground hover:bg-accent hover:text-accent-foreground',
                           )}
                           onMouseEnter={() => setHighlightedIndex(flatIndex)}
                           onMouseDown={(e) => {
-                            // Avoid blur before selection
                             e.preventDefault();
                           }}
                           onClick={() => handleSelect(option)}
                         >
                           {!hideCheckmarkColumn && (
                             <span className="mr-2 flex h-4 w-4 items-center justify-center shrink-0" aria-hidden="true">
-                              {/* For this component, option list never contains already selected items.
-                                  Keep Check only if you later allow selection toggling without exclusion. */}
                               <Check className="h-4 w-4 opacity-0" />
                             </span>
                           )}
@@ -417,7 +484,6 @@ TypeaheadV2Inner.displayName = 'TypeaheadV2';
 const TypeaheadV2 = forwardRef(TypeaheadV2Inner) as unknown as <T, V extends string | number>(
   props: TypeaheadV2Props<T, V> & { ref?: React.Ref<HTMLInputElement> },
 ) => React.ReactElement;
-
 
 export default TypeaheadV2;
 export { TypeaheadV2 };

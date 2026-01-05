@@ -1,35 +1,25 @@
-import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, FileText, Layers, RotateCcw } from 'lucide-react';
-import { Moment } from 'moment';
-import React, { useCallback, useMemo } from 'react';
+import FiltersToggleButton from '@/components/common/FiltersToggleButton';
+import debounce from 'lodash/debounce';
+import { ArrowDownCircle, ArrowUpCircle, CalendarIcon, FileText, Layers, RotateCcw } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import AccountTypeahead from '@/components/common/AccountTypeahead';
 import CategoryTypeahead from '@/components/common/CategoryTypeahead';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
-import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { FILTER_PRESETS, MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { cn } from '@/lib/utils';
 import { TransactionFilters } from '@/models/TransactionFilters';
-import { TransferFilters } from '@/models/TransferFilters';
 import { Timeframe } from '@/types/global';
 import { Type as TransactionType } from '@/types/transaction';
 
-type CombinedFilters = TransactionFilters & TransferFilters;
-
-interface ListingControlsProps {
+interface Props {
+  data: TransactionFilters;
+  onChange: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => void;
+  onReset: () => void;
   isLoading?: boolean;
-  transactionFilters: TransactionFilters;
-  transferFilters: TransferFilters;
-  setFilter: (type: keyof CombinedFilters, value: any) => void;
-  setShowTransactions: (value: boolean) => void;
-  setShowTransfers: (value: boolean) => void;
-  timeframe: { after: Moment; before: Moment };
-  setTimeframe: (range: { after: Moment; before: Moment } | null) => void;
-  activeView: 'table' | 'list';
-  isReversedOrder: boolean;
-  setIsReversedOrder: (value: boolean) => void;
-  handleResetFilters: () => void;
   onFiltersDialogToggle: () => void;
 }
 
@@ -43,79 +33,92 @@ const Divider: React.FC = () => (
   <span aria-hidden="true" className="hidden md:block h-6 w-px bg-border mx-1.5" />
 );
 
-export const ListingControls: React.FC<ListingControlsProps> = ({
-                                                                  isLoading,
-                                                                  transactionFilters,
-                                                                  transferFilters,
-                                                                  setFilter,
-                                                                  setShowTransactions,
-                                                                  setShowTransfers,
-                                                                  timeframe,
-                                                                  setTimeframe,
-                                                                  activeView,
-                                                                  isReversedOrder,
-                                                                  setIsReversedOrder,
-                                                                  handleResetFilters,
-                                                                  onFiltersDialogToggle,
-                                                                }) => {
-  const accountsValue = useMemo(() => {
-    const t = Array.isArray(transactionFilters.accounts) ? transactionFilters.accounts : [];
-    const tr = Array.isArray(transferFilters.accounts) ? transferFilters.accounts : [];
-    return [...new Set([...t, ...tr])];
-  }, [transactionFilters.accounts, transferFilters.accounts]);
+const InlineFilters: React.FC<Props> = ({ data, onChange, onReset, isLoading, onFiltersDialogToggle }) => {
+  const [localAmountRange, setLocalAmountRange] = useState(data.amountRange);
 
-  const handleTimeframeChange = useCallback(
-    (range: Timeframe) => {
-      setTimeframe({
-        after: range.after ? range.after.startOf('day') : timeframe.after,
-        before: range.before ? range.before.endOf('day') : timeframe.before,
-      });
-    },
-    [setTimeframe, timeframe.after, timeframe.before],
-  );
+  const debouncedOnChange = useRef(
+    debounce(<K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => {
+      onChange(key, value);
+    }, 250),
+  ).current;
 
-  const dateLabel = useMemo(
-    () => `${timeframe.after.format('DD MMM')} - ${timeframe.before.format('DD MMM')}`,
-    [timeframe.after, timeframe.before],
-  );
+  useEffect(() => () => debouncedOnChange.cancel(), [debouncedOnChange]);
 
-  const showOrderToggle = activeView === 'table';
-  const OrderIcon = isReversedOrder ? CalendarArrowUp : CalendarArrowDown;
+  useEffect(() => {
+    setLocalAmountRange(data.amountRange);
+  }, [data.amountRange]);
 
-  const isIncome = transactionFilters.type === TransactionType.Income;
-  const isExpense = transactionFilters.type === TransactionType.Expense;
+  const dateLabel = useMemo(() => {
+    const { after, before } = data;
+    if (after && before)
+      return `${after.format(MOMENT_DATEPICKER_FORMAT)} - ${before.format(MOMENT_DATEPICKER_FORMAT)}`;
+    if (!after && before) return `Before ${before.format(MOMENT_DATEPICKER_FORMAT)}`;
+    if (after && !before) return `After ${after.format(MOMENT_DATEPICKER_FORMAT)}`;
+    return 'Date';
+  }, [data.after, data.before]);
+
+  const isIncome = data.type === TransactionType.Income;
+  const isExpense = data.type === TransactionType.Expense;
 
   const setType = useCallback(
     (type: TransactionType) => {
-      setFilter('type', transactionFilters.type === type ? undefined : type);
+      onChange('type', data.type === type ? undefined : type);
     },
-    [setFilter, transactionFilters.type],
+    [data.type, onChange],
   );
 
   const toggleDraft = useCallback(() => {
-    setFilter('isDraft', !transactionFilters.isDraft);
-  }, [setFilter, transactionFilters.isDraft]);
+    debouncedOnChange('isDraft', !data.isDraft);
+  }, [data.isDraft, debouncedOnChange]);
 
   const toggleNestedCategories = useCallback(() => {
-    setFilter('withNestedCategories', !transactionFilters.withNestedCategories);
-  }, [setFilter, transactionFilters.withNestedCategories]);
+    debouncedOnChange('withNestedCategories', !data.withNestedCategories);
+  }, [data.withNestedCategories, debouncedOnChange]);
 
-  const canReset = Boolean(transactionFilters.activeCount) && !isLoading;
+  const handleTimeframeChange = useCallback(
+    (range: Timeframe) => {
+      onChange('after', range.after ?? undefined);
+      onChange('before', range.before ?? undefined);
+    },
+    [onChange],
+  );
+
+  const handleMinAmountChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newMin = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
+      setLocalAmountRange((prev) => [newMin, prev[1]]);
+      debouncedOnChange('amountRange', [newMin, localAmountRange[1]]);
+    },
+    [debouncedOnChange, localAmountRange],
+  );
+
+  const handleMaxAmountChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newMax = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
+      setLocalAmountRange((prev) => [prev[0], newMax]);
+      debouncedOnChange('amountRange', [localAmountRange[0], newMax]);
+    },
+    [debouncedOnChange, localAmountRange],
+  );
+
+  const canReset = data.activeCount > 0 && !isLoading;
 
   return (
     <div className="border-b bg-muted/30 supports-[backdrop-filter]:bg-muted/30">
       <div
         role="toolbar"
-        aria-label="Ledger filters"
+        aria-label="Transaction filters"
         className="flex flex-wrap items-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2"
       >
-        {/* DATE + ORDER */}
+        {/* DATE */}
         <div className="flex items-center gap-1.5">
           <div role="group" aria-label="Date range" className="flex items-center">
             <DaterangePickerWithPresets
-              after={timeframe.after}
-              before={timeframe.before}
-              onChange={handleTimeframeChange}>
+              after={data.after}
+              before={data.before}
+              onChange={handleTimeframeChange}
+              presets={FILTER_PRESETS}
+            >
               <Button
                 type="button"
                 variant="outline"
@@ -128,25 +131,6 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
               </Button>
             </DaterangePickerWithPresets>
           </div>
-
-          {showOrderToggle && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className={ICON_BTN}
-                  onClick={() => setIsReversedOrder(!isReversedOrder)}
-                  aria-label="Toggle ordering"
-                  aria-pressed={isReversedOrder}
-                >
-                  <OrderIcon className="h-4 w-4" aria-hidden="true" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Toggle ordering</TooltipContent>
-            </Tooltip>
-          )}
         </div>
 
         <Divider />
@@ -156,8 +140,8 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
           <div className={cn('flex items-center', TYPEAHEAD_W)} role="group" aria-label="Accounts filter">
             <AccountTypeahead
               multiple
-              value={accountsValue}
-              onChange={(accounts) => setFilter('accounts', accounts)}
+              value={data.accounts}
+              onChange={(accounts) => onChange('accounts', accounts)}
               placeholder="Accounts"
               className="w-full"
               aria-label="Filter by accounts"
@@ -169,14 +153,8 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
           <div className={cn('flex items-center', TYPEAHEAD_W)} role="group" aria-label="Categories filter">
             <CategoryTypeahead
               multiple
-              value={transactionFilters.categories}
-              onChange={(categories) => {
-                setFilter('categories', categories);
-                if (categories?.length) {
-                  setShowTransactions(true);
-                  setShowTransfers(false);
-                }
-              }}
+              value={data.categories}
+              onChange={(categories) => onChange('categories', categories)}
               placeholder="Categories"
               className="w-full"
               aria-label="Filter by categories"
@@ -187,12 +165,12 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
             <TooltipTrigger asChild>
               <Button
                 type="button"
-                variant={transactionFilters.withNestedCategories ? 'secondary' : 'outline'}
+                variant={data.withNestedCategories ? 'secondary' : 'outline'}
                 size="icon"
                 className={ICON_BTN}
                 onClick={toggleNestedCategories}
                 aria-label="Nested categories"
-                aria-pressed={transactionFilters.withNestedCategories}
+                aria-pressed={data.withNestedCategories}
               >
                 <Layers className="h-4 w-4" aria-hidden="true" />
               </Button>
@@ -208,28 +186,20 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
           <div role="group" aria-label="Amount range" className="flex items-center gap-1.5">
             <Input
               type="number"
-              value={transactionFilters.amountRange[0] ?? ''}
-              onChange={(e) =>
-                setFilter('amountRange', [
-                  e.target.value === '' ? undefined : Number(e.target.value),
-                  transactionFilters.amountRange[1],
-                ])
-              }
+              value={localAmountRange[0] ?? ''}
+              onChange={handleMinAmountChange}
               className={cn(H, AMOUNT_W, 'bg-background')}
               placeholder="Min"
+              inputMode="numeric"
               aria-label="Minimum amount"
             />
             <Input
               type="number"
-              value={transactionFilters.amountRange[1] ?? ''}
-              onChange={(e) =>
-                setFilter('amountRange', [
-                  transactionFilters.amountRange[0],
-                  e.target.value === '' ? undefined : Number(e.target.value),
-                ])
-              }
+              value={localAmountRange[1] ?? ''}
+              onChange={handleMaxAmountChange}
               className={cn(H, AMOUNT_W, 'bg-background')}
               placeholder="Max"
+              inputMode="numeric"
               aria-label="Maximum amount"
             />
           </div>
@@ -246,6 +216,7 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
                 onClick={() => setType(TransactionType.Income)}
                 aria-pressed={isIncome}
               >
+                <ArrowDownCircle className="mr-1.5 h-4 w-4" aria-hidden="true" />
                 Income
               </Button>
 
@@ -259,6 +230,7 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
                 onClick={() => setType(TransactionType.Expense)}
                 aria-pressed={isExpense}
               >
+                <ArrowUpCircle className="mr-1.5 h-4 w-4" aria-hidden="true" />
                 Expense
               </Button>
             </div>
@@ -270,12 +242,12 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
             <TooltipTrigger asChild>
               <Button
                 type="button"
-                variant={transactionFilters.isDraft ? 'secondary' : 'outline'}
+                variant={data.isDraft ? 'secondary' : 'outline'}
                 size="icon"
                 className={ICON_BTN}
                 onClick={toggleDraft}
                 aria-label="Only drafts"
-                aria-pressed={transactionFilters.isDraft}
+                aria-pressed={data.isDraft}
               >
                 <FileText className="h-4 w-4" aria-hidden="true" />
               </Button>
@@ -284,7 +256,7 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
           </Tooltip>
         </div>
 
-        {/* RIGHT ACTIONS */}
+        {/* RESET */}
         <div className="ml-0 md:ml-auto flex items-center gap-1.5">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -293,8 +265,8 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
                 variant="outline"
                 size="icon"
                 className={ICON_BTN}
+                onClick={onReset}
                 disabled={!canReset}
-                onClick={handleResetFilters}
                 aria-label="Reset filters"
               >
                 <RotateCcw className={cn('h-4 w-4', isLoading && 'animate-spin')} aria-hidden="true" />
@@ -303,11 +275,11 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
             <TooltipContent>Reset filters</TooltipContent>
           </Tooltip>
 
-          <FiltersToggleButton activeCount={transactionFilters.activeCount} onClick={onFiltersDialogToggle} />
+          <FiltersToggleButton activeCount={data.activeCount} onClick={onFiltersDialogToggle} />
         </div>
       </div>
     </div>
   );
 };
 
-export default ListingControls;
+export default InlineFilters;

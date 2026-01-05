@@ -41,11 +41,11 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
           </div>
           <div className="flex justify-between items-center">
             <span className="tracking-tight font-normal">From</span>
-            <AccountPill size="sm" account={transfer.fromExpense.account} />
+            <AccountPill size="sm" variant="inline" account={transfer.fromExpense.account} />
           </div>
           <div className="flex justify-between items-center">
             <span className="tracking-tight font-normal">To</span>
-            <AccountPill size="sm" account={transfer.toIncome.account} />
+            <AccountPill size="sm" variant="inline" account={transfer.toIncome.account} />
           </div>
           <div className="flex justify-between items-center">
             <span className="tracking-tight font-normal">Rate</span>

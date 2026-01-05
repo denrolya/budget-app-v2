@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, CopyPlus, SquarePlus } from 'lucide-react';
 import { Moment } from 'moment';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
 
 import { TIMEFRAME_STEP_PRESETS } from '@/app/daily-ledger/constants';
@@ -27,29 +27,44 @@ import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
 
+type ViewMode = 'table' | 'list';
+
+interface Summary {
+  transactionsCount: number;
+  transfersCount: number;
+  transactionsValue: number;
+  transfersValue: number;
+}
+
+const computeSummary = (groupedItems: any[] | undefined | null): Summary => {
+  if (!groupedItems) return { transactionsCount: 0, transfersCount: 0, transactionsValue: 0, transfersValue: 0 };
+
+  let transactionsCount = 0;
+  let transfersCount = 0;
+  let transfersValue = 0;
+  let transactionsValue = 0;
+
+  groupedItems.forEach(([, , groupTransactionsValue, groupTransfersValue, groupTransactionsCount, groupTransfersCount]) => {
+    transactionsCount += groupTransactionsCount;
+    transfersCount += groupTransfersCount;
+    transactionsValue += groupTransactionsValue;
+    transfersValue += groupTransfersValue;
+  });
+
+  return { transactionsCount, transfersCount, transactionsValue, transfersValue };
+};
+
 export const DailyLedgerPage: React.FC = () => {
   const isMobile = useIsMobile();
   const { openForm } = useFormContext();
-  const [showEmpty, setShowEmpty] = useState<boolean>(true);
-  const [activeView, setActiveView] = useState<'table' | 'list'>('table');
-  const [isReversedOrder, setIsReversedOrder] = useState<boolean>(true);
-  const [isCompactTable, setIsCompactTable] = useState<boolean>(true);
-  const [isFiltersOpen, setIsFiltersOpen] = useState<boolean>(false);
-  const [showBulkCreate, setShowBulkCreate] = useState<boolean>(false);
-  const {
-    timeframe,
-    setTimeframe,
-    step,
-    setStep,
-    goToNextPeriod,
-    goToPreviousPeriod,
-    reset: resetTimeframe,
-  } = useTimeframe({
-    onChange: ({ after, before }: { after: Moment; before: Moment }) => {
-      setFilter('after', after);
-      setFilter('before', before);
-    },
-  });
+
+  const [showEmptyDays, setShowEmptyDays] = useState(true);
+  const [activeView, setActiveView] = useState<ViewMode>('table');
+  const [isReversedOrder, setIsReversedOrder] = useState(true);
+  const [isCompactTable, setIsCompactTable] = useState(true);
+
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
 
   const {
     groupedItems,
@@ -69,7 +84,39 @@ export const DailyLedgerPage: React.FC = () => {
     excludeTransfers: true,
   });
 
-  const onAddTransaction = () => openForm(FormType.Transaction);
+  const openNewTransactionForm = useCallback(() => {
+    openForm(FormType.Transaction);
+  }, [openForm]);
+
+  const toggleFilters = useCallback(() => {
+    setIsFiltersOpen((prev) => !prev);
+  }, []);
+
+  const toggleBulkCreate = useCallback(() => {
+    setIsBulkCreateOpen((prev) => !prev);
+  }, []);
+
+  const {
+    timeframe,
+    setTimeframe,
+    step,
+    setStep,
+    goToNextPeriod,
+    goToPreviousPeriod,
+    reset: resetTimeframe,
+  } = useTimeframe({
+    onChange: ({ after, before }: { after: Moment; before: Moment }) => {
+      setFilter('after', after);
+      setFilter('before', before);
+    },
+  });
+
+  useLedgerHotkeys({
+    onPrev: goToPreviousPeriod,
+    onNext: goToNextPeriod,
+    toggleFilters,
+    toggleBulkCreate,
+  });
 
   const swipeHandlers = useSwipeable({
     onSwipedLeft: goToNextPeriod,
@@ -77,57 +124,32 @@ export const DailyLedgerPage: React.FC = () => {
     trackMouse: true,
   });
 
-  const summary = useMemo(() => {
-    if (!groupedItems)
-      return {
-        transactionsCount: 0,
-        transfersCount: 0,
-        transactionsValue: 0,
-        transfersValue: 0,
-      };
+  const summary = useMemo(() => computeSummary(groupedItems), [groupedItems]);
 
-    let transactionsCount = 0;
-    let transfersCount = 0;
-    let transfersValue = 0;
-    let transactionsValue = 0;
-
-    groupedItems.forEach(
-      ([, , groupTransactionsValue, groupTransfersValue, groupTransactionsCount, groupTransfersCount]) => {
-        transactionsCount += groupTransactionsCount;
-        transfersCount += groupTransfersCount;
-        transactionsValue += groupTransactionsValue;
-        transfersValue += groupTransfersValue;
-      },
-    );
-
-    return { transactionsCount, transfersCount, transactionsValue, transfersValue };
-  }, [groupedItems]);
-
-  useLedgerHotkeys({
-    onPrev: goToPreviousPeriod,
-    onNext: goToNextPeriod,
-    toggleFilters: () => setIsFiltersOpen(!isFiltersOpen),
-    toggleBulkCreate: () => setShowBulkCreate(!showBulkCreate),
-  });
-
-  const handleResetFilters = () => {
+  const handleResetFilters = useCallback(() => {
     resetTimeframe();
     resetFilters();
     setShowTransactions(true);
     setShowTransfers(true);
-  };
+  }, [resetFilters, resetTimeframe, setShowTransactions, setShowTransfers]);
 
-  const selectedTimeframeStepIndex = TIMEFRAME_STEP_PRESETS.findIndex(
-    (p) => p.amount === step?.amount && p.unit === step?.unit,
+  const selectedTimeframeStepIndex = useMemo(
+    () => TIMEFRAME_STEP_PRESETS.findIndex((p) => p.amount === step?.amount && p.unit === step?.unit),
+    [step?.amount, step?.unit],
   );
+
+  const bulkCreateAriaLabel = isBulkCreateOpen ? 'Hide bulk create' : 'Show bulk create';
+  const filtersToggleAriaLabel = isFiltersOpen ? 'Close filters' : 'Open filters';
 
   return (
     <FullHeightPageContent {...swipeHandlers}>
       <Card className="shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
-        <CardHeader className="flex flex-col space-y-4 p-0 md:p-3 bg-background md:bg-card border-b-none md:border-b">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+        {/* HEADER (unified with TransactionsListPage) */}
+        <CardHeader className="p-0 md:p-3 bg-background md:bg-card md:border-b">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <CardTitle className="text-2xl font-bold">Ledger</CardTitle>
-            <div className="flex flex-wrap md:justify-end justify-between gap-2">
+
+            <div role="toolbar" aria-label="Ledger actions" className="flex flex-wrap items-center gap-2">
               <SummaryBadge
                 icon={ROUTES.TRANSACTION_LIST.icon}
                 count={summary.transactionsCount}
@@ -139,11 +161,12 @@ export const DailyLedgerPage: React.FC = () => {
                 count={summary.transfersCount}
                 value={summary.transfersValue}
               />
+
               <DisplayMenu
                 activeView={activeView}
                 setActiveView={setActiveView}
-                setShowEmpty={setShowEmpty}
-                showEmpty={showEmpty}
+                setShowEmpty={setShowEmptyDays}
+                showEmpty={showEmptyDays}
                 isCompactTable={isCompactTable}
                 setIsCompactTable={setIsCompactTable}
                 showTransactions={showTransactions}
@@ -155,123 +178,150 @@ export const DailyLedgerPage: React.FC = () => {
                 isReversedOrder={isReversedOrder}
                 setIsReversedOrder={setIsReversedOrder}
               />
+
               <FiltersToggleButton
                 className="flex md:hidden"
                 activeCount={transactionFilters.activeCount}
-                onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                onClick={toggleFilters}
+                aria-label={filtersToggleAriaLabel}
               />
+
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Toggle
+                    type="button"
                     variant="outline"
                     className="hidden md:flex"
-                    pressed={showBulkCreate}
-                    onClick={() => setShowBulkCreate(!showBulkCreate)}
+                    pressed={isBulkCreateOpen}
+                    onPressedChange={setIsBulkCreateOpen}
+                    aria-label={bulkCreateAriaLabel}
+                    aria-pressed={isBulkCreateOpen}
                   >
-                    <CopyPlus className="h-4 w-4" />
-                    <span className="sr-only">Bulk Create</span>
+                    <CopyPlus className="h-4 w-4" aria-hidden="true" />
                   </Toggle>
                 </TooltipTrigger>
                 <TooltipContent>Bulk Create</TooltipContent>
               </Tooltip>
+
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon" onClick={onAddTransaction}>
-                    <SquarePlus className="h-4 w-4" />
-                    <span className="sr-only">New Transaction</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={openNewTransactionForm}
+                    aria-label="New transaction"
+                  >
+                    <SquarePlus className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>New Transaction</TooltipContent>
               </Tooltip>
             </div>
           </div>
-          {!isMobile && (
-            <ListingControls
-              isLoading={isLoading}
-              transactionFilters={transactionFilters}
-              transferFilters={transferFilters}
-              setFilter={setFilter}
-              setShowTransactions={setShowTransactions}
-              setShowTransfers={setShowTransfers}
-              timeframe={timeframe}
-              setTimeframe={setTimeframe}
-              activeView={activeView}
-              isReversedOrder={isReversedOrder}
-              setIsReversedOrder={setIsReversedOrder}
-              handleResetFilters={handleResetFilters}
-              onFiltersDialogToggle={() => setIsFiltersOpen(!isFiltersOpen)}
-            />
-          )}
-
-          {showBulkCreate && <BulkCreateTableForm />}
-
-          {isError && (
-            <div className="p-4 bg-destructive/10 text-destructive rounded-md m-4">
-              <p className="font-medium">Error:</p>
-              <p>{error?.message || 'An unexpected error occurred.'}</p>
-            </div>
-          )}
         </CardHeader>
 
-        <CardContent className="p-0 bg-background md:bg-card flex-grow overflow-hidden">
-          <ScrollArea className="h-full overflow-auto">
-            <div className="flex-grow overflow-hidden">
-              {/* Desktop View */}
-              <div className="hidden md:block h-full overflow-auto">
-                {activeView === 'table' && (
-                  <>
-                    {isLoading && <TableListingSkeleton
+        {/* CONTENT (same structural rules as TransactionsListPage) */}
+        <CardContent className="p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
+          {!isMobile && (
+            <div className="shrink-0">
+              <ListingControls
+                isLoading={isLoading}
+                transactionFilters={transactionFilters}
+                transferFilters={transferFilters}
+                setFilter={setFilter}
+                setShowTransactions={setShowTransactions}
+                setShowTransfers={setShowTransfers}
+                timeframe={timeframe}
+                setTimeframe={setTimeframe}
+                activeView={activeView}
+                isReversedOrder={isReversedOrder}
+                setIsReversedOrder={setIsReversedOrder}
+                handleResetFilters={handleResetFilters}
+                onFiltersDialogToggle={toggleFilters}
+              />
+            </div>
+          )}
+
+          {isBulkCreateOpen && (
+            <div className="shrink-0 border-b bg-muted/50 supports-[backdrop-filter]:bg-muted/50">
+              <div className="px-4 py-3">
+                <BulkCreateTableForm />
+              </div>
+            </div>
+          )}
+
+          {isError && (
+            <div className="shrink-0 px-4 py-3">
+              <div className="rounded-md bg-destructive/10 p-4 text-destructive" role="alert" aria-live="polite">
+                <p className="font-medium">Error:</p>
+                <p>{error?.message || 'An unexpected error occurred.'}</p>
+              </div>
+            </div>
+          )}
+
+          <ScrollArea className="flex-1 min-h-0" aria-label="Ledger listing">
+            <div className="min-h-full">
+              {!isMobile && activeView === 'table' && (
+                <>
+                  {isLoading ? (
+                    <TableListingSkeleton after={timeframe.after} before={timeframe.before} compact={isCompactTable} />
+                  ) : (
+                    <TableListing
+                      isLoading={isLoading}
+                      showEmptyDays={showEmptyDays}
+                      groupedItems={groupedItems}
                       after={timeframe.after}
                       before={timeframe.before}
-                      compact={isCompactTable} />}
-                    {!isLoading && (
-                      <TableListing
-                        isLoading={isLoading}
-                        showEmptyDays={showEmpty}
-                        groupedItems={groupedItems}
-                        after={timeframe.after}
-                        before={timeframe.before}
-                        isReversedOrder={isReversedOrder}
-                        compact={isCompactTable}
-                      />
-                    )}
-                  </>
-                )}
-                {activeView === 'list' && (
-                  <DailyList
-                    isLoading={isLoading}
-                    groupedItems={groupedItems}
-                    after={timeframe.after}
-                    before={timeframe.before}
-                  />
-                )}
-              </div>
+                      isReversedOrder={isReversedOrder}
+                      compact={isCompactTable}
+                    />
+                  )}
+                </>
+              )}
 
-              {/* Mobile View (always uses DailyList) */}
-              <div className="md:hidden h-full overflow-auto">
+              {!isMobile && activeView === 'list' && (
                 <DailyList
                   isLoading={isLoading}
                   groupedItems={groupedItems}
                   after={timeframe.after}
                   before={timeframe.before}
                 />
-              </div>
+              )}
+
+              {isMobile && (
+                <DailyList
+                  isLoading={isLoading}
+                  groupedItems={groupedItems}
+                  after={timeframe.after}
+                  before={timeframe.before}
+                />
+              )}
             </div>
           </ScrollArea>
         </CardContent>
-        <CardFooter className="p-2 bg-background md:bg-card border-t justify-between md:justify-end gap-2">
-          <Button size="icon" variant="outline" onClick={goToPreviousPeriod} disabled={isLoading}>
-            <ChevronLeft className="h-4 w-4" />
-            <span className="sr-only">Previous</span>
+
+        <CardFooter className="flex items-center justify-between md:justify-end gap-2 p-2 bg-background md:bg-card border-t">
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            onClick={goToPreviousPeriod}
+            disabled={isLoading}
+            aria-label="Previous period"
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           </Button>
+
           <Select
             value={String(selectedTimeframeStepIndex)}
             onValueChange={(val) => {
-              const index = parseInt(val, 10);
-              setStep(TIMEFRAME_STEP_PRESETS[index]);
+              const index = Number.parseInt(val, 10);
+              const next = TIMEFRAME_STEP_PRESETS[index];
+              if (next) setStep(next);
             }}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-44" aria-label="Select time period">
               <SelectValue placeholder="Select time period" />
             </SelectTrigger>
             <SelectContent>
@@ -282,9 +332,15 @@ export const DailyLedgerPage: React.FC = () => {
               ))}
             </SelectContent>
           </Select>
-          <Button size="icon" variant="outline" onClick={goToNextPeriod} disabled={isLoading}>
-            <ChevronRight className="h-4 w-4" />
-            <span className="sr-only">Next</span>
+
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            onClick={goToNextPeriod}
+            disabled={isLoading}
+            aria-label="Next period">
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
           </Button>
         </CardFooter>
       </Card>

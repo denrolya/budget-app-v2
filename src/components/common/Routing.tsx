@@ -11,133 +11,46 @@ import LoginPage from '@/app/login/page';
 import TestingPage from '@/app/testing-page/page';
 import TransactionsListPage from '@/app/transactions/page';
 import TransfersListPage from '@/app/transfers/page';
-import PrivateRoute from '@/components/common/PrivateRoute';
 import NewTransactionsPage from '@/components/features/transactions/TableWithFiltersMock';
 import LayoutV9 from '@/components/layout/LayoutV9';
-import { useAuth } from '@/contexts/auth';
-import FinanceDataProvider, { useFinanceData } from '@/contexts/FinanceData';
+import FinanceDataProvider from '@/contexts/FinanceData';
+import RequireAuth from '@/components/common/RequireAuth';
 
-const ProtectedContent: React.FC = () => {
-  const { data, error } = useFinanceData();
+const AppShell: React.FC = () => (
+    <FinanceDataProvider>
+      <LayoutV9>
+        <Routes>
+          <Route index element={<Navigate to="/ledger" replace />} />
 
-  if (error || !data) {
-    return <Navigate to="/login" replace />;
-  }
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/transactions" element={<TransactionsListPage />} />
+          <Route path="/transactions-new" element={<NewTransactionsPage />} />
+          <Route path="/transfers" element={<TransfersListPage />} />
+          <Route path="/ledger" element={<DailyLedgerPage />} />
+          <Route path="/accounts/*" element={<AccountsManagementPage />} />
+          <Route path="/debts" element={<DebtsPage />} />
+          <Route path="/testing" element={<TestingPage />} />
+          <Route path="/budget" element={<BudgetingPage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
 
-  return (
-    <LayoutV9>
-      <Routes>
-        <Route index element={<Navigate to="/ledger" replace />} />
-        <Route
-          path="dashboard"
-          element={
-            <PrivateRoute>
-              <DashboardPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="transactions"
-          element={
-            <PrivateRoute>
-              <TransactionsListPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="transactions-new"
-          element={
-            <PrivateRoute>
-              <NewTransactionsPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="transfers"
-          element={
-            <PrivateRoute>
-              <TransfersListPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="ledger"
-          element={
-            <PrivateRoute>
-              <DailyLedgerPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="accounts"
-          element={
-            <PrivateRoute>
-              <AccountsManagementPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="debts"
-          element={
-            <PrivateRoute>
-              <DebtsPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="testing"
-          element={
-            <PrivateRoute>
-              <TestingPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="budget"
-          element={
-            <PrivateRoute>
-              <BudgetingPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="categories"
-          element={
-            <PrivateRoute>
-              <CategoriesPage />
-            </PrivateRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/ledger" />} />
-      </Routes>
-    </LayoutV9>
+          <Route path="*" element={<Navigate to="/ledger" replace />} />
+        </Routes>
+      </LayoutV9>
+    </FinanceDataProvider>
   );
-};
 
-const Routing: React.FC = () => {
-  const { isAuthenticated, isInitialized, isLoading } = useAuth();
-
-  if (!isInitialized || isLoading) {
-    return null;
-  }
-
-  return (
+const Routing: React.FC = () => (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      {isAuthenticated ? (
-        <Route
-          path="/*"
-          element={
-            <FinanceDataProvider>
-              <ProtectedContent />
-            </FinanceDataProvider>
-          }
-        />
-      ) : (
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      )}
+
+      {/* Auth-protected app */}
+      <Route element={<RequireAuth />}>
+        <Route path="/*" element={<AppShell />} />
+      </Route>
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/ledger" replace />} />
     </Routes>
   );
-};
 
 export default Routing;

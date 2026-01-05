@@ -2,6 +2,7 @@ import groupBy from 'lodash/groupBy';
 import sumBy from 'lodash/sumBy';
 import { ChevronRightIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 import { memo, useEffect, useId, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
 import AccountPill from '@/components/features/accounts/Pill';
@@ -82,17 +83,15 @@ const NavAccounts = () => {
     return (
       <SidebarMenuSubItem>
         <SidebarMenuSubButton asChild>
-          {/* Overflow control: min-w-0 on flex parent, overflow-hidden on label + amounts */}
-          <div
-            role="button"
-            tabIndex={0}
+          {/* Link preserves styling and semantics; no role="button" needed */}
+          <Link
+            to={`/accounts/${a.id}`}
             className={cn(
               'flex h-9 w-full items-center gap-2 pr-2',
-              'min-w-0 overflow-hidden', // critical: prevent child overflow -> horizontal scrollbar
+              'min-w-0 overflow-hidden',
             )}
             aria-label={`Account ${a.displayName}`}
           >
-
             {/* Name block */}
             <div className="min-w-0 flex-1 overflow-hidden">
               <AccountPill showName tooltip={false} size="sm" variant="inline" account={a} />
@@ -126,7 +125,7 @@ const NavAccounts = () => {
                 </span>
               )}
             </div>
-          </div>
+          </Link>
         </SidebarMenuSubButton>
       </SidebarMenuSubItem>
     );
@@ -158,7 +157,6 @@ const NavAccounts = () => {
               >
                 <span className="truncate text-xs font-medium text-muted-foreground">{type}</span>
 
-                {/* Prevent total from forcing overflow */}
                 <span className="ml-auto flex min-w-0 items-center gap-2">
                   <span className="min-w-0 max-w-[8rem] truncate text-xs font-semibold tabular-nums">
                     <MoneyValue amount={totalInBase} showSign={false} />
@@ -187,10 +185,7 @@ const NavAccounts = () => {
 
   return (
     <SidebarGroup
-      className={cn(
-        'group-data-[collapsible=icon]:hidden mt-auto',
-        'overflow-x-hidden', // last line of defense against accidental horizontal scroll
-      )}
+      className={cn('group-data-[collapsible=icon]:hidden mt-auto', 'overflow-x-hidden')}
       aria-label="Accounts sidebar"
     >
       {/* pinned toggle bar */}

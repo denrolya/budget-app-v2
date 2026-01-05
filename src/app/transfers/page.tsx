@@ -1,23 +1,30 @@
-import { Edit, Filter, Plus, RefreshCw, Trash2 } from 'lucide-react';
-import React, { useState } from 'react';
+import { Edit, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
 
-import { Toggle } from '@/components/ui/toggle';
+import { useListHotkeys as useHotkeys } from '@/app/transfers/hooks/useHotkeys';
+import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import Pagination from '@/components/common/Pagination';
+import SummaryBadge from '@/components/common/SummaryBadge';
 import FormattedListing from '@/components/features/transfers/FormattedListing';
+import InlineFilters from '@/components/features/transfers/InlineFilters';
 import ListFiltersSheet from '@/components/features/transfers/ListFiltersSheet';
 import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useListHotkeys as useHotkeys } from '@/app/transfers/hooks/useHotkeys';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useTransfers } from '@/hooks/useTransfers';
 
 export const TransfersListPage: React.FC = () => {
-  const [isFiltersOpen, setIsFiltersOpen] = useState<boolean>(false);
-  const [selectedTransfers] = useState<number[]>([]);
+  const isMobile = useIsMobile();
+  const { openForm } = useFormContext();
+
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [selectedTransfers] = useState<number[]>([]); // placeholder until bulk-select is implemented
+
   const {
     groupedItems,
     isLoading,
@@ -29,74 +36,106 @@ export const TransfersListPage: React.FC = () => {
     setFilter,
     resetFilters,
     isFetching,
+    totalValue,
   } = useTransfers();
-  const { openForm } = useFormContext();
-  const onAddTransfer = () => openForm(FormType.Transfer);
+
+  const isUpdatingBannerVisible = isFetching && !isLoading;
+
+  const openNewTransferForm = useCallback(() => {
+    openForm(FormType.Transfer);
+  }, [openForm]);
+
+  const toggleFilters = useCallback(() => {
+    setIsFiltersOpen((prev) => !prev);
+  }, []);
+
+  const refreshList = useCallback(() => {
+    void refetch();
+  }, [refetch]);
 
   useHotkeys({
-    onFiltersToggle: () => setIsFiltersOpen(!isFiltersOpen),
+    onFiltersToggle: toggleFilters,
     onPrevPage: () => currentPage > 1 && setCurrentPage(currentPage - 1),
     onNextPage: () => currentPage < totalPages && setCurrentPage(currentPage + 1),
   });
 
+  const bulkSelectionVisible = selectedTransfers.length > 0;
+  const filtersToggleAriaLabel = isFiltersOpen ? 'Close filters' : 'Open filters';
+
   return (
     <FullHeightPageContent>
       <Card className="shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
-        <CardHeader className="flex flex-col space-y-4 p-0 md:p-3 bg-background md:bg-card border-b-none md:border-b">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+        <CardHeader className="p-0 md:p-3 bg-background md:bg-card md:border-b">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <CardTitle className="text-2xl font-bold">Transfers</CardTitle>
-            <div className="flex flex-wrap gap-2">
+
+            <div role="toolbar" aria-label="Transfers actions" className="flex flex-wrap items-center gap-2">
+              <SummaryBadge
+                useColors={false}
+                icon={ROUTES.TRANSFER_LIST.icon}
+                count={totalItems}
+                value={totalValue}
+              />
+
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={onAddTransfer}>
-                    <Plus className="h-4 w-4" />
-                    <span className="sr-only">New Transfer</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={openNewTransferForm}
+                    aria-label="Create a new transfer"
+                  >
+                    <Plus className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>New Transfer</TooltipContent>
               </Tooltip>
+
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={refetch}>
-                    <RefreshCw className="h-4 w-4" />
-                    <span className="sr-only">Refresh</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={refreshList}
+                    disabled={isLoading}
+                    aria-label="Refresh transfers list"
+                  >
+                    <RefreshCw className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Refresh</TooltipContent>
               </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Toggle className="relative" pressed={isFiltersOpen} onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
-                    <Filter className="h-4 w-4" />
-                    <span className="sr-only">Filter</span>
-                    {filters.activeCount > 0 && (
-                      <Badge className="absolute -top-2 -right-2 px-1 py-0.5 text-[0.6rem] min-w-[1.2rem] h-[1.2rem] flex items-center justify-center rounded-full">
-                        {filters.activeCount}
-                      </Badge>
-                    )}
-                  </Toggle>
-                </TooltipTrigger>
-                <TooltipContent>Filter</TooltipContent>
-              </Tooltip>
+
+              <FiltersToggleButton
+                className="flex md:hidden"
+                activeCount={filters.activeCount}
+                onClick={toggleFilters}
+                aria-label={filtersToggleAriaLabel}
+              />
             </div>
           </div>
-          {selectedTransfers.length > 0 && (
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-muted-foreground">{selectedTransfers.length} transfer(s) selected</span>
+
+          {bulkSelectionVisible && (
+            <div className="flex items-center gap-2 px-3 pb-3 md:px-0 md:pb-0">
+              <span className="text-sm text-muted-foreground" aria-live="polite">
+                {selectedTransfers.length} transfer(s) selected
+              </span>
+
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <Edit className="h-4 w-4" />
-                    <span className="sr-only">Bulk Edit</span>
+                  <Button type="button" variant="outline" size="icon" aria-label="Bulk edit selected transfers">
+                    <Edit className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Bulk Edit</TooltipContent>
               </Tooltip>
+
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Bulk Delete</span>
+                  <Button type="button" variant="outline" size="icon" aria-label="Bulk delete selected transfers">
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Bulk Delete</TooltipContent>
@@ -104,19 +143,33 @@ export const TransfersListPage: React.FC = () => {
             </div>
           )}
         </CardHeader>
-        <CardContent className="p-0 bg-background md:bg-card flex-grow overflow-hidden">
-          <ScrollArea className="h-full">
+
+        <CardContent className="p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
+          {!isMobile && (
+            <div className="shrink-0">
+              <InlineFilters
+                data={filters}
+                onChange={setFilter}
+                onReset={resetFilters}
+                isLoading={isLoading}
+                onFiltersDialogToggle={toggleFilters}
+              />
+            </div>
+          )}
+
+          <ScrollArea className="flex-1 min-h-0" aria-label="Transfers list">
             <FormattedListing
               isLoading={isLoading}
               isError={isError}
               error={error}
               groupedItems={groupedItems}
               refetch={refetch}
-              onAdd={onAddTransfer}
+              onAdd={openNewTransferForm}
             />
           </ScrollArea>
         </CardContent>
-        <CardFooter className="flex justify-end p-2 bg-background md:bg-card">
+
+        <CardFooter className="flex justify-end p-2 bg-background md:bg-card border-t">
           <Pagination
             isLoading={isLoading}
             currentPage={currentPage}
@@ -129,8 +182,14 @@ export const TransfersListPage: React.FC = () => {
         </CardFooter>
       </Card>
 
-      {isFetching && !isLoading && (
-        <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded">Updating...</div>
+      {isUpdatingBannerVisible && (
+        <div
+          className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded shadow"
+          role="status"
+          aria-live="polite"
+        >
+          Updating…
+        </div>
       )}
 
       <ListFiltersSheet

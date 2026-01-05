@@ -13,12 +13,13 @@ import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
 import Account from '@/models/Account';
 import { Type as AccountType } from '@/types/account';
 
-interface Props {
-  selected: Account | null;
+interface SidebarListingProps {
+  selectedId: string | null;
   onSelect: (account: Account) => void;
+  onClear?: () => void;
 }
 
-const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
+const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, onClear }) => {
   const baseCurrency = useBaseCurrency();
   const accounts = useAccountsWithDefaultOrder();
 
@@ -30,7 +31,17 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
 
   const handleAccountSelect = useCallback(
     (account: Account) => {
+      const isAlreadySelected = selectedId === String(account.id);
+
+      // Clicking the selected item toggles back to /accounts (index state) if consumer supports it.
+      if (isAlreadySelected && onClear) {
+        onClear();
+        return;
+      }
+
       onSelect(account);
+
+      // Smooth scroll to selected (after route changes render)
       setTimeout(() => {
         selectedAccountRef.current?.scrollIntoView({
           behavior: 'smooth',
@@ -38,7 +49,7 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
         });
       }, 0);
     },
-    [onSelect],
+    [onClear, onSelect, selectedId],
   );
 
   const filteredAccounts = useMemo(() => {
@@ -61,7 +72,13 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
   );
 
   return (
-    <div className="flex h-full flex-col overflow-x-hidden" aria-label="Accounts list">
+    <div
+      className="flex h-full flex-col overflow-x-hidden"
+      aria-label="Accounts list"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape' && onClear) onClear();
+      }}
+    >
       {/* Header */}
       <div className="p-4 border-b">
         <h2 className="text-lg font-semibold mb-2">Accounts</h2>
@@ -106,7 +123,6 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
                 >
                   <span className="min-w-0 flex-1 truncate">{type}</span>
 
-                  {/* No truncation: allow wrap in extreme cases */}
                   <span className="text-sm font-semibold tabular-nums text-foreground text-right whitespace-normal break-words">
                     <MoneyValue amount={groupTotal} currency={baseCurrency} showSign={false} />
                   </span>
@@ -114,7 +130,8 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
 
                 <div role="group" aria-label={`${type} accounts`} className="overflow-x-hidden">
                   {items.map((account) => {
-                    const isSelected = selected?.id === account.id;
+                    const accountIdStr = String(account.id);
+                    const isSelected = selectedId === accountIdStr;
                     const isArchived = account.isArchived();
 
                     const nativeAmount = account.balance;
@@ -164,7 +181,7 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
                             </div>
                           </div>
 
-                          {/* Right: NO TRUNCATION; wrap instead */}
+                          {/* Right */}
                           <div className="flex flex-col items-end gap-0.5 text-right min-w-0 overflow-x-hidden">
                             <span
                               className={cn(
