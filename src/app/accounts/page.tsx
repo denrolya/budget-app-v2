@@ -1,6 +1,6 @@
 import { Download, Edit } from 'lucide-react';
 import React, { useMemo } from 'react';
-import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useMatch, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import AccountDetails from '@/components/features/accounts/Details';
@@ -9,22 +9,30 @@ import WalletBar from '@/components/features/accounts/WalletBar';
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { Button } from '@/components/ui/button';
 import { useFinanceData } from '@/contexts/FinanceData';
+import { useIsMobile } from '@/hooks/use-mobile';
 import Account from '@/models/Account';
 import { accountService } from '@/services/api/account';
 
 const AccountsManagementPage: React.FC = () => {
   const navigate = useNavigate();
-  const { accountId } = useParams<{ accountId: string }>();
+  const isMobile = useIsMobile();
+
+  const accountMatch = useMatch('/accounts/:accountId');
+  const selectedAccountId = accountMatch?.params?.accountId ?? null;
+
+  const showSidebar = !isMobile || !selectedAccountId;
 
   return (
     <PageWithSidebar contentScrollable>
-      <PageWithSidebar.Sidebar ariaLabel="Accounts sidebar">
-        <SidebarListing
-          selectedId={accountId ?? null}
-          onClear={() => navigate('/accounts')}
-          onSelect={(acc: Account) => navigate(`/accounts/${acc.id}`)}
-        />
-      </PageWithSidebar.Sidebar>
+      {showSidebar && (
+        <PageWithSidebar.Sidebar ariaLabel="Accounts sidebar">
+          <SidebarListing
+            selectedId={selectedAccountId}
+            onClear={() => navigate('/accounts')}
+            onSelect={(acc: Account) => navigate(`/accounts/${acc.id}`)}
+          />
+        </PageWithSidebar.Sidebar>
+      )}
 
       <PageWithSidebar.Content className="min-h-0 h-full">
         <Routes>
@@ -60,7 +68,6 @@ const AccountDetailsRoute: React.FC = () => {
   };
 
   if (!accountId) return <Navigate replace to="/accounts" />;
-
   if (!data) return null;
   if (!account) return <Navigate replace to="/accounts" />;
 

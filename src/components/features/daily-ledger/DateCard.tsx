@@ -11,6 +11,7 @@ import TransferListItem, {
 } from '@/components/features/transfers/ListItem';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
 import { useBaseCurrency } from '@/contexts/auth';
 import Transaction from '@/models/Transaction';
@@ -19,64 +20,87 @@ import Transfer from '@/models/Transfer';
 interface Props {
   date: Moment;
   items: (Transaction | Transfer)[];
-  index: number;
   totalDays: number;
 }
+
+type Totals = {
+  transactionsCount: number;
+  transfersCount: number;
+  netAmount: number;
+  transferAmount: number;
+};
+
+const computeTotals = (items: (Transaction | Transfer)[], baseCurrency: string): Totals => {
+  let transactionsCount = 0;
+  let transfersCount = 0;
+
+  let income = 0;
+  let expense = 0;
+  let transferAmount = 0;
+
+  items.forEach((it) => {
+    if (it instanceof Transaction) {
+      transactionsCount += 1;
+      const v = it.convertedValues?.[baseCurrency] ?? 0;
+      if (it.isIncome()) income += v;
+      else expense += v;
+      return;
+    }
+
+    const tr = it as Transfer;
+    transfersCount += 1;
+    transferAmount += tr.fromExpense?.convertedValues?.[baseCurrency] ?? 0;
+  });
+
+  return {
+    transactionsCount,
+    transfersCount,
+    netAmount: income - expense,
+    transferAmount,
+  };
+};
 
 export const DateCard: React.FC<Props> = ({ date, items }) => {
   const baseCurrency = useBaseCurrency();
 
-  const { transactions, transfers } = useMemo(() => {
-    const t: Transaction[] = [];
-    const tr: Transfer[] = [];
-    items.forEach((it) => {
-      if (it instanceof Transaction) t.push(it);
-      else tr.push(it as Transfer);
-    });
-    return { transactions: t, transfers: tr };
-  }, [items]);
+  const { transactionsCount, transfersCount, netAmount, transferAmount } = useMemo(
+    () => computeTotals(items, baseCurrency),
+    [items, baseCurrency],
+  );
 
-  const transactionsCount = transactions.length;
-  const transfersCount = transfers.length;
-
-  const { netAmount, transferAmount } = useMemo(() => {
-    let income = 0;
-    let expense = 0;
-    transactions.forEach((tx) => {
-      const v = tx.convertedValues?.[baseCurrency] ?? 0;
-      if (tx.isIncome()) income += v;
-      else expense += v;
-    });
-
-    let trAmount = 0;
-    transfers.forEach((tr) => {
-      trAmount += tr.fromExpense?.convertedValues?.[baseCurrency] ?? 0;
-    });
-
-    return { netAmount: income - expense, transferAmount: trAmount };
-  }, [transactions, transfers, baseCurrency]);
+  const headingId = useMemo(() => `daily-ledger-day-${date.format(BACKEND_DATE_FORMAT)}`, [date]);
 
   return (
     <Card className="h-full w-full overflow-hidden">
-      <CardContent className="h-full p-0 flex flex-col">
-        <div className="flex items-start justify-between gap-3 border-b px-4 py-3">
-          <h4 className="text-lg font-semibold">
-            <RelativeDatetimeDisplay showDayBadge badgeSize="sm" date={date} showTime={false} variant="default" />
-          </h4>
+      <CardContent aria-labelledby={headingId} className="flex h-full flex-col p-0">
+        <header className="border-b px-4 py-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h4 className="text-base font-semibold leading-tight">
+              <RelativeDatetimeDisplay
+                showDayBadge
+                badgeSize="sm"
+                date={date}
+                showTime={false}
+                variant="default"
+              />
+            </h4>
 
-          <div className="flex flex-wrap gap-2 text-sm">
-            <SummaryBadge count={transactionsCount} icon={ROUTES.TRANSACTION_LIST.icon} value={netAmount} />
-            <SummaryBadge count={transfersCount} icon={ROUTES.TRANSFER_LIST.icon} value={transferAmount} />
+            <div aria-label="Day summary" className="flex flex-wrap items-center gap-2 text-sm">
+              <SummaryBadge count={transactionsCount} icon={ROUTES.TRANSACTION_LIST.icon} value={netAmount} />
+              <SummaryBadge count={transfersCount} icon={ROUTES.TRANSFER_LIST.icon} value={transferAmount} />
+            </div>
           </div>
-        </div>
+        </header>
 
-        <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
+        <div aria-label="Items" role="region" className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
+          {items.length === 0 && <div className="text-sm text-muted-foreground">No items</div>}
+
           {items.length > 0 && (
-            <ul className="flex flex-col gap-4">
+            <ul aria-label="Transactions and transfers" role="list" className="flex flex-col gap-4">
               {items.map((item) => (
                 <li className="max-w-full" key={item.id}>
                   {item instanceof Transaction && <TransactionListItem transaction={item} />}
-                  {item instanceof Transfer && <TransferListItem transfer={item} />}
+                  {item instanceof Transfer && <TransferListItem transfer={item as Transfer} />}
                 </li>
               ))}
             </ul>
@@ -87,30 +111,37 @@ export const DateCard: React.FC<Props> = ({ date, items }) => {
   );
 };
 
-export const DateCardSkeleton: React.FC<{ index: number; totalDays: number }> = React.memo(() => (
-    <Card className="h-full w-full overflow-hidden">
-      <CardContent className="h-full p-0 flex flex-col">
-        <div className="border-b px-4 py-3">
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-5 w-5" />
-            <Skeleton className="h-6 w-32" />
-          </div>
-          <div className="mt-2 flex gap-3">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 w-24" />
-          </div>
+export const DateCardSkeleton: React.FC = React.memo(() => (
+  <Card aria-busy="true" className="h-full w-full overflow-hidden">
+    <CardContent className="flex h-full flex-col p-0">
+      <div className="border-b px-4 py-3">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-5 w-5" />
+          <Skeleton className="h-6 w-32" />
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
-          <ul className="flex flex-col gap-4">
-            <li>{Math.random() > 0.5 ? <TransactionListItemSkeleton /> : <TransferListItemSkeleton />}</li>
-            <li>{Math.random() > 0.5 ? <TransactionListItemSkeleton /> : <TransferListItemSkeleton />}</li>
-            <li>{Math.random() > 0.5 ? <TransactionListItemSkeleton /> : <TransferListItemSkeleton />}</li>
-          </ul>
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <Skeleton className="h-10 w-full sm:flex-1" />
+          <Skeleton className="h-10 w-full sm:flex-1" />
         </div>
-      </CardContent>
-    </Card>
-  ));
+      </div>
+
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
+        <ul aria-label="Loading items" role="list" className="flex flex-col gap-4">
+          <li>
+            <TransactionListItemSkeleton />
+          </li>
+          <li>
+            <TransferListItemSkeleton />
+          </li>
+          <li>
+            <TransactionListItemSkeleton />
+          </li>
+        </ul>
+      </div>
+    </CardContent>
+  </Card>
+));
 
 DateCard.displayName = 'DailyLedgerDateCard';
 DateCardSkeleton.displayName = 'DailyLedgerDateCardSkeleton';

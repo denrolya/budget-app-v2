@@ -134,6 +134,10 @@ export const DailyLedgerPage: React.FC = () => {
   const bulkCreateAriaLabel = isBulkCreateOpen ? 'Hide bulk create' : 'Show bulk create';
   const filtersToggleAriaLabel = isFiltersOpen ? 'Close filters' : 'Open filters';
 
+  const showDesktopTable = !isMobile && activeView === 'table';
+  const showDesktopDaily = !isMobile && activeView === 'list';
+  const showMobileDaily = isMobile;
+
   return (
     <FullHeightPageContent {...swipeHandlers}>
       <Card className="w-full min-w-0 shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
@@ -145,29 +149,33 @@ export const DailyLedgerPage: React.FC = () => {
               <SummaryBadge
                 count={summary.transactionsCount}
                 icon={ROUTES.TRANSACTION_LIST.icon}
-                value={summary.transactionsValue} />
+                value={summary.transactionsValue}
+              />
               <SummaryBadge
                 count={summary.transfersCount}
                 icon={ROUTES.TRANSFER_LIST.icon}
                 useColors={false}
-                value={summary.transfersValue} />
-
-              <DisplayMenu
-                activeView={activeView}
-                isCompactTable={isCompactTable}
-                isReversedOrder={isReversedOrder}
-                setActiveView={setActiveView}
-                setFilter={setFilter}
-                setIsCompactTable={setIsCompactTable}
-                setIsReversedOrder={setIsReversedOrder}
-                setShowEmpty={setShowEmptyDays}
-                setShowTransactions={setShowTransactions}
-                setShowTransfers={setShowTransfers}
-                showEmpty={showEmptyDays}
-                showTransactions={showTransactions}
-                showTransfers={showTransfers}
-                transactionFilters={transactionFilters}
+                value={summary.transfersValue}
               />
+
+              {!isMobile && (
+                <DisplayMenu
+                  activeView={activeView}
+                  isCompactTable={isCompactTable}
+                  isReversedOrder={isReversedOrder}
+                  setActiveView={setActiveView}
+                  setFilter={setFilter}
+                  setIsCompactTable={setIsCompactTable}
+                  setIsReversedOrder={setIsReversedOrder}
+                  setShowEmpty={setShowEmptyDays}
+                  setShowTransactions={setShowTransactions}
+                  setShowTransfers={setShowTransfers}
+                  showEmpty={showEmptyDays}
+                  showTransactions={showTransactions}
+                  showTransfers={showTransfers}
+                  transactionFilters={transactionFilters}
+                />
+              )}
 
               <FiltersToggleButton
                 activeCount={transactionFilters.activeCount}
@@ -200,7 +208,8 @@ export const DailyLedgerPage: React.FC = () => {
                     size="icon"
                     type="button"
                     variant="outline"
-                    onClick={openNewTransactionForm}>
+                    onClick={openNewTransactionForm}
+                  >
                     <SquarePlus aria-hidden="true" className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
@@ -248,7 +257,7 @@ export const DailyLedgerPage: React.FC = () => {
             </div>
           )}
 
-          {activeView === 'table' && (
+          {showDesktopTable && (
             <ScrollArea aria-label="Ledger table listing" className="flex-1 min-h-0 w-full min-w-0">
               <div className="min-h-full w-full min-w-0">
                 {isLoading && (
@@ -269,7 +278,7 @@ export const DailyLedgerPage: React.FC = () => {
             </ScrollArea>
           )}
 
-          {activeView === 'list' && (
+          {showDesktopDaily && (
             <div aria-label="Ledger daily columns" className="flex-1 min-h-0 w-full min-w-0 overflow-hidden">
               <div className="h-full w-full min-w-0 overflow-x-auto overflow-y-hidden">
                 <DailyList
@@ -277,9 +286,22 @@ export const DailyLedgerPage: React.FC = () => {
                   before={timeframe.before}
                   groupedItems={groupedItems}
                   isLoading={isLoading}
-                  reversed={isMobile}
                 />
               </div>
+            </div>
+          )}
+
+          {showMobileDaily && (
+            <div aria-label="Ledger daily list" className="flex-1 min-h-0 w-full min-w-0 overflow-hidden">
+              <ScrollArea aria-label="Ledger daily list scroll" className="h-full w-full">
+                <DailyList
+                  reversed
+                  after={timeframe.after}
+                  before={timeframe.before}
+                  groupedItems={groupedItems}
+                  isLoading={isLoading}
+                />
+              </ScrollArea>
             </div>
           )}
         </CardContent>
@@ -291,7 +313,8 @@ export const DailyLedgerPage: React.FC = () => {
             size="icon"
             type="button"
             variant="outline"
-            onClick={goToPreviousPeriod}>
+            onClick={goToPreviousPeriod}
+          >
             <ChevronLeft aria-hidden="true" className="h-4 w-4" />
           </Button>
 
@@ -321,7 +344,8 @@ export const DailyLedgerPage: React.FC = () => {
             size="icon"
             type="button"
             variant="outline"
-            onClick={goToNextPeriod}>
+            onClick={goToNextPeriod}
+          >
             <ChevronRight aria-hidden="true" className="h-4 w-4" />
           </Button>
         </CardFooter>

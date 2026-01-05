@@ -1,8 +1,6 @@
-import { ChevronLeft, Download, Edit } from 'lucide-react';
+import { Download, Edit } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { MoneyValue } from '@/components/common/MoneyValue';
-import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import DebtDetails from '@/components/features/debts/Details';
 import SidebarListing from '@/components/features/debts/SidebarListing';
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
@@ -21,11 +19,11 @@ export const DebtsManagementPage: React.FC = () => {
       </PageWithSidebar.Sidebar>
       {selectedDebt && (
         <PageWithSidebar.Header title="Debt Details" onBack={() => setSelectedDebt(null)}>
-          <Button variant="outline" size="icon">
+          <Button size="icon" variant="outline">
             <Download className="h-4 w-4" />
             <span className="sr-only">Export</span>
           </Button>
-          <Button variant="outline" size="icon">
+          <Button size="icon" variant="outline">
             <Edit className="h-4 w-4" />
             <span className="sr-only">Edit</span>
           </Button>

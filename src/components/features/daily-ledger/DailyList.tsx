@@ -38,40 +38,52 @@ const DailyList: React.FC<Props> = ({ isLoading, groupedItems, after, before, re
 
   const totalDays = orderedDates.length;
 
-  return (
-    <div className="h-full w-max min-w-full">
-      {!isMobile && (
-        <div className="flex h-full gap-4 p-4">
-          {orderedDates.map((date, index) => {
-            const group = groupedItems?.find((g) => g[0].isSame(date, 'day'));
-            const items = group ? group[1] : [];
+  const itemsByDay = useMemo(() => {
+    const map = new Map<string, (Transaction | Transfer)[]>();
+    groupedItems?.forEach((g) => {
+      map.set(g[0].format(BACKEND_DATE_FORMAT), g[1] ?? []);
+    });
+    return map;
+  }, [groupedItems]);
 
-            return (
-              <div className={`shrink-0 ${COLUMN_W} h-full`} key={date.format(BACKEND_DATE_FORMAT)}>
-                {isLoading && <DateCardSkeleton index={index} totalDays={totalDays} />}
-                {!isLoading && <DateCard date={date} index={index} items={items} totalDays={totalDays} />}
-              </div>
-            );
-          })}
+  return (
+    <>
+      {!isMobile && (
+        <div className="h-full w-max min-w-full">
+          <div className="flex h-full gap-4 p-4">
+            {orderedDates.map((date, index) => {
+              const key = date.format(BACKEND_DATE_FORMAT);
+              const items = itemsByDay.get(key) ?? [];
+
+              return (
+                <div className={`shrink-0 ${COLUMN_W} h-full`} key={key}>
+                  {isLoading && <DateCardSkeleton totalDays={totalDays} />}
+                  {!isLoading && <DateCard date={date} items={items} totalDays={totalDays} />}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
       {isMobile && (
-        <div className="flex flex-col gap-4 p-4">
-          {orderedDates.map((date, index) => {
-            const group = groupedItems?.find((g) => g[0].isSame(date, 'day'));
-            const items = group ? group[1] : [];
+        <div className="w-full">
+          <div className="flex flex-col gap-4 p-4 pb-8">
+            {orderedDates.map((date, index) => {
+              const key = date.format(BACKEND_DATE_FORMAT);
+              const items = itemsByDay.get(key) ?? [];
 
-            return (
-              <div className="w-full" key={date.format(BACKEND_DATE_FORMAT)}>
-                {isLoading && <DateCardSkeleton index={index} totalDays={totalDays} />}
-                {!isLoading && <DateCard date={date} index={index} items={items} totalDays={totalDays} />}
-              </div>
-            );
-          })}
+              return (
+                <div className="w-full" key={key}>
+                  {isLoading && <DateCardSkeleton totalDays={totalDays} />}
+                  {!isLoading && <DateCard date={date} items={items} totalDays={totalDays} />}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
