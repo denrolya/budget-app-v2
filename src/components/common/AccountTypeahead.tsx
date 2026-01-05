@@ -44,15 +44,15 @@ const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
             <AccountPill
               showMarker
               showName
-              variant="inline"
-              size="sm"
-              className="min-w-0"
-              tooltip={false}
               account={account}
+              size="sm"
+              tooltip={false}
+              variant="inline"
+              className="min-w-0"
             />
 
             {isArchived && (
-              <span className="shrink-0 text-2xs text-muted-foreground" aria-label="Archived">
+              <span aria-label="Archived" className="shrink-0 text-2xs text-muted-foreground">
                 Archived
               </span>
             )}
@@ -62,13 +62,13 @@ const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
         <div className="shrink-0 text-right">
           <MoneyValue
             showSign
+            amount={account.balance}
+            currency={account.currency}
             className={cn(
               'tabular-nums font-medium whitespace-nowrap text-xs',
               account.balance < 0 && 'text-destructive',
               account.balance === 0 && 'text-muted-foreground',
             )}
-            amount={account.balance}
-            currency={account.currency}
           />
         </div>
       </div>
@@ -95,17 +95,17 @@ const AccountTypeahead: React.FC<AccountTypeaheadProps> = ({
   return (
     <TypeaheadV2<Account, string>
       hideCheckmarkColumn
-      valueField="id"
-      labelField="displayName"
+      filterFn={filterFn}
       groupBy="type"
-      placeholder={multiple ? 'Select accounts…' : 'Select account…'}
+      labelField="displayName"
       multiple={multiple}
       options={accounts}
+      placeholder={multiple ? 'Select accounts…' : 'Select account…'}
       renderElement={renderElement}
       value={value}
-      onChange={onChange}
+      valueField="id"
       className={className}
-      filterFn={filterFn}
+      onChange={onChange}
       {...props}
     />
   );

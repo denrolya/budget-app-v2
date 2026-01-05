@@ -115,6 +115,7 @@ const normalizeSelected = <V extends string | number>(
 
 const getKey = <T, >(obj: T, field: keyof T & string): string => String((obj as any)[field]);
 const getLabel = <T, >(obj: T, field: keyof T & string): string => String((obj as any)[field]);
+const getRawValue = <T, V extends string | number>(obj: T, field: keyof T & string): V => (obj as any)[field] as V;
 
 export interface TypeaheadV2Props<T, V extends string | number>
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'size'>,
@@ -229,16 +230,16 @@ function TypeaheadV2Inner<T, V extends string | number>(
 
   const handleSelect = useCallback(
     (option: T) => {
-      const optionValue = getKey(option, valueField) as unknown as V;
+      const rawValue = getRawValue<T, V>(option, valueField);
 
       if (multiple) {
-        const exists = selectedValues.some((v) => String(v) === String(optionValue));
+        const exists = selectedValues.some((v) => String(v) === String(rawValue));
         const next = exists
-          ? selectedValues.filter((v) => String(v) !== String(optionValue))
-          : [...selectedValues, optionValue];
+          ? selectedValues.filter((v) => String(v) !== String(rawValue))
+          : [...selectedValues, rawValue];
         onChange(next);
       } else {
-        onChange(optionValue);
+        onChange(rawValue);
         setOpen(false);
       }
 
@@ -340,6 +341,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
             {selectedOptions.map((option) => {
               const key = getKey(option, valueField);
               const label = getLabel(option, labelField);
+              const rawValue = getRawValue<T, V>(option, valueField);
 
               return (
                 <Badge key={key} variant="outline" className={cn(typeaheadChipVariants({ size }))}>
@@ -352,7 +354,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
                     tabIndex={-1}
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleRemove(key as unknown as V);
+                      handleRemove(rawValue);
                     }}
                     disabled={disabled}
                     aria-label={`Remove ${label}`}

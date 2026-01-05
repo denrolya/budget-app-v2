@@ -189,9 +189,9 @@ export const BulkCreateTableForm: React.FC = () => {
       <Form {...form}>
         {/* CRITICAL: isolate + z-index to ensure dropdown is above the rest of the page */}
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          aria-label="Bulk create transactions"
           className="relative isolate z-40"
-          aria-label="Bulk create transactions">
+          onSubmit={form.handleSubmit(onSubmit)}>
           {/* Table region must be above siblings too */}
           <div className={cn('relative z-40', footerReserve)}>
             <Table>
@@ -214,7 +214,7 @@ export const BulkCreateTableForm: React.FC = () => {
                   const autoFocusCategory = index === fields.length - 1;
 
                   return (
-                    <TableRow key={row.id} className="table w-full">
+                    <TableRow className="table w-full" key={row.id}>
                       <TableCell className={cn('text-right', cellY)}>
                         <FormField
                           control={form.control}
@@ -245,11 +245,11 @@ export const BulkCreateTableForm: React.FC = () => {
                                 <FormItem className="space-y-0">
                                   <FormControl>
                                     <Button
-                                      type="button"
+                                      aria-label="Toggle transaction type"
                                       size="icon"
+                                      type="button"
                                       variant="ghost"
                                       className={compactIconBtn}
-                                      aria-label="Toggle transaction type"
                                       onClick={() => field.onChange(next)}
                                     >
                                       {isExpense ? (
@@ -265,17 +265,17 @@ export const BulkCreateTableForm: React.FC = () => {
                           />
 
                           <FormField
-                            name={`transactions.${index}.category`}
                             control={form.control}
+                            name={`transactions.${index}.category`}
                             render={({ field }) => (
                               <FormItem className="space-y-0 w-full">
                                 <FormLabel className="sr-only">Category</FormLabel>
                                 <CategoryTypeahead
                                   {...field}
                                   autoFocus={autoFocusCategory}
-                                  valueField="id"
                                   multiple={false}
                                   type={type}
+                                  valueField="id"
                                   className={cn(compactControl, 'w-full justify-between', {
                                     'text-muted-foreground': !field.value,
                                   })}
@@ -296,10 +296,10 @@ export const BulkCreateTableForm: React.FC = () => {
                               <FormControl>
                                 <Input
                                   {...field}
-                                  type="number"
                                   placeholder="Amount"
-                                  className={cn(compactControl, 'w-full')}
+                                  type="number"
                                   value={field.value ?? ''}
+                                  className={cn(compactControl, 'w-full')}
                                   onChange={(e) => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)}
                                 />
                               </FormControl>
@@ -311,8 +311,8 @@ export const BulkCreateTableForm: React.FC = () => {
 
                       <TableCell className={cellY}>
                         <FormField
-                          name={`transactions.${index}.account`}
                           control={form.control}
+                          name={`transactions.${index}.account`}
                           render={({ field }) => (
                             <FormItem className="space-y-0">
                               <FormLabel className="sr-only">Account</FormLabel>
@@ -362,12 +362,12 @@ export const BulkCreateTableForm: React.FC = () => {
                       <TableCell className={cn('w-[50px]', cellY)}>
                         <div className="flex justify-end">
                           <Button
-                            type="button"
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => removeRow(index)}
-                            className={compactIconBtn}
                             aria-label={`Remove row ${index}`}
+                            size="icon"
+                            type="button"
+                            variant="ghost"
+                            className={compactIconBtn}
+                            onClick={() => removeRow(index)}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
@@ -383,7 +383,7 @@ export const BulkCreateTableForm: React.FC = () => {
           {/* Sticky footer, but LOW z so dropdown (z-50 inside isolated context) stays above */}
           <div className="sticky bottom-0 z-10 border-t bg-background/95 supports-[backdrop-filter]:bg-background/80 backdrop-blur">
             <div className="flex flex-wrap justify-end items-center gap-2 px-2 py-2">
-              <Button type="button" variant="outline" onClick={addRow} disabled={isSubmitting} className="h-9">
+              <Button disabled={isSubmitting} type="button" variant="outline" className="h-9" onClick={addRow}>
                 <Plus className="mr-2 h-4 w-4" /> Add Transaction
               </Button>
 
@@ -391,7 +391,7 @@ export const BulkCreateTableForm: React.FC = () => {
                 <CSVUploader onComplete={replace} />
               </div>
 
-              <Button type="submit" variant="default" disabled={isSubmitting} className="h-9">
+              <Button disabled={isSubmitting} type="submit" variant="default" className="h-9">
                 <Save className="mr-2 h-4 w-4" /> {isSubmitting ? 'Saving...' : 'Save All'}
               </Button>
             </div>
