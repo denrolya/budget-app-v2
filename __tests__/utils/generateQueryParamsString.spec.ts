@@ -3,7 +3,7 @@ import qs from 'qs';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { Type as TransactionType } from '@/types/transaction';
-import { generateQueryParamsString } from '@/utils/generateQueryParamsString'; // adjust import based on your file structure
+import { generateQueryParamsString } from '@/lib/generateQueryParamsString'; // adjust import based on your file structure
 
 describe('generateQueryParamsString', () => {
   it('should generate query string with default formats and no optional params', () => {

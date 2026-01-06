@@ -13,7 +13,7 @@ import {
   ValueByPeriodData,
   ValueByPeriodParams,
 } from '@/types/valueByPeriodStatistics';
-import { generatePreviousTimeframe } from '@/utils/generatePreviousTimeframe';
+import { generatePreviousTimeframe } from '@/lib/datetime/generatePreviousTimeframe';
 
 const getDateRange = (timeframe: Interval, after?: Moment, before?: Moment): [Moment, Moment] => {
   const { value, unit } = timeframe;

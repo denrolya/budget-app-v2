@@ -6,7 +6,7 @@ import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useBaseCurrency } from '@/contexts/auth';
 import { cn } from '@/lib/utils';
 import Transaction from '@/models/Transaction';
-import { formatMoney as formatMoneyValue } from '@/utils/formatMoney';
+import { formatMoney as formatMoneyValue } from '@/lib/formatMoney';
 
 interface Props extends React.ComponentPropsWithoutRef<'span'> {
   transaction: Transaction;

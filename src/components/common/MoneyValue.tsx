@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useBaseCurrency } from '@/contexts/auth';
 import { cn } from '@/lib/utils';
-import { formatMoney } from '@/utils/formatMoney';
+import { formatMoney } from '@/lib/formatMoney';
 
 interface MoneyValueProps extends React.ComponentPropsWithoutRef<'span'> {
   currency?: CURRENCY_CODE;

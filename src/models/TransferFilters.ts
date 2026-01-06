@@ -2,7 +2,7 @@ import moment, { Moment } from 'moment';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import BaseFilters from '@/models/BaseFilters';
-import { readParamArray, readParamMoment, readParamNumberArray, readParamString } from '@/utils/searchParams';
+import { readParamArray, readParamMoment, readParamNumberArray, readParamString } from '@/lib/url/searchParams';
 
 interface TransferFiltersProps {
   searchTerm?: string;

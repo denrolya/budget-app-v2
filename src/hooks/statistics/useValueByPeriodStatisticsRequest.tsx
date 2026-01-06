@@ -10,7 +10,7 @@ import {
   ValueByPeriodData,
   ValueByPeriodDataDTO,
 } from '@/types/valueByPeriodStatistics';
-import { generateQueryParamsString } from '@/utils/generateQueryParamsString';
+import { generateQueryParamsString } from '@/lib/url/generateQueryParamsString';
 
 const URL = '/api/v2/statistics/value-by-period';
 

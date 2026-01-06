@@ -5,7 +5,7 @@ import { CURRENCY_CODE } from '@/constants/currency';
 import User from '@/models/User';
 import { api } from '@/services/api';
 import storage from '@/services/storage';
-import { parseJwt } from '@/utils/parseJWT';
+import { parseJwt } from '@/lib/parseJWT';
 
 interface AuthContextType {
   isAuthenticated: boolean;

@@ -7,7 +7,7 @@ import { useCategories } from '@/contexts/FinanceData';
 import Category from '@/models/Category';
 import { axiosFetcher } from '@/services/api';
 import { Type as TransactionType } from '@/types/transaction';
-import { generateQueryParamsString } from '@/utils/generateQueryParamsString';
+import { generateQueryParamsString } from '@/lib/url/generateQueryParamsString';
 
 const URL = '/api/v2/statistics/category/tree';
 

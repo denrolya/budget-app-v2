@@ -3,7 +3,7 @@ import React from 'react';
 import ResponsiveTooltip from '@/components/ui/responsive-tooltip';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { cn } from '@/lib/utils';
-import { formatMoney as formatMoneyValue } from '@/utils/formatMoney';
+import { formatMoney as formatMoneyValue } from '@/lib/formatMoney';
 
 interface ConvertedCurrenciesTooltipProps {
   originalCurrency: CURRENCY_CODE;

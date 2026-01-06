@@ -5,7 +5,7 @@ import { memo, useEffect, useId, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
-import AccountPill from '@/components/features/accounts/Pill';
+import AccountPill from '@/features/accounts/components/Pill';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   SidebarGroup,

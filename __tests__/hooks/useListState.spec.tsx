@@ -4,9 +4,9 @@ import moment, { Moment } from 'moment';
 import * as ReactRouterDom from 'react-router-dom';
 import { vi } from 'vitest';
 
+import { buildListStateSearchParams } from '@/lib/buildListStateSearchQueryParams';
 import BaseFilters from '@/models/BaseFilters';
 import { useListState } from '@/hooks/useListState';
-import { buildListStateSearchParams } from '@/utils/buildListStateSearchQueryParams';
 
 const setSearchParamsMock = vi.fn();
 const getSearchParamsMock = vi.fn(() => new URLSearchParams());

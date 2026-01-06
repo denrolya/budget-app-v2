@@ -15,7 +15,7 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useAuth, useBaseCurrency } from '@/contexts/auth';
-import { confirm } from '@/utils/confirmation';
+import { confirm } from '@/lib/confirmation';
 
 type CurrencyType = {
   code: CURRENCY_CODE;

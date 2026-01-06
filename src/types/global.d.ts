@@ -1,7 +1,7 @@
 import moment, { Moment } from 'moment';
 
 import { COMMON_TIMEFRAMES } from '@/constants/datetime';
-import { DebugLogger } from '@/utils/DebugLogger';
+import { DebugLogger } from '@/services/DebugLogger';
 
 declare global {
   let logger:

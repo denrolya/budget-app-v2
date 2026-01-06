@@ -19,7 +19,7 @@ import { FormType, useForm } from '@/contexts/Form';
 import { useSidebar } from '@/contexts/sidebar';
 import { ACCOUNT_TYPES_ORDER } from '@/models/Account';
 import { Type as AccountType } from '@/types/account';
-import { percentage } from '@/utils/percentage';
+import { percentage } from '@/lib/percentage';
 
 type RouteKey = keyof typeof ROUTES;
 

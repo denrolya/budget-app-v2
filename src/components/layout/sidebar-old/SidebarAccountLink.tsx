@@ -3,10 +3,10 @@ import { memo } from 'react';
 import { Link } from 'react-router-dom';
 
 import MoneyValue from '@/components/common/MoneyValue';
-import AccountPill from '@/components/features/accounts/Pill';
+import AccountPill from '@/features/accounts/components/Pill';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import Account from '@/models/Account';
-import AccountDetailsHoverCard from '@/components/features/accounts/DetailsHoverCard';
+import AccountDetailsHoverCard from '@/features/accounts/components/DetailsHoverCard';
 
 interface SidebarAccountLinkProps {
   account: Account;

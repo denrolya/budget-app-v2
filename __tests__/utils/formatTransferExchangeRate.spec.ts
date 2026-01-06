@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { CURRENCY_CODE } from '@/constants/currency';
-import { formatTransferExchangeRate } from '@/utils/formatTransferExchangeRate';
+import { formatTransferExchangeRate } from '@/lib/formatTransferExchangeRate';
 
 describe('formatTransferExchangeRate', () => {
   it('handles UAH to BTC conversion', () => {

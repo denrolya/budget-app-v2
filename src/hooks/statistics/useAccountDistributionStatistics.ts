@@ -8,7 +8,7 @@ import { useAccounts } from '@/contexts/FinanceData';
 import type Account from '@/models/Account';
 import { axiosFetcher } from '@/services/api';
 import { Type as TransactionType } from '@/types/transaction';
-import { generateQueryParamsString } from '@/utils/generateQueryParamsString';
+import { generateQueryParamsString } from '@/lib/url/generateQueryParamsString';
 
 const URL = '/api/v2/statistics/account-distribution';
 

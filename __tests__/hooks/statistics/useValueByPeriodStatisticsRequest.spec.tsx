@@ -71,7 +71,8 @@ describe('useValueByPeriodStatisticsRequest', () => {
   });
 
   it.skip('should handle API error and log it correctly', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+    });
 
     // Mock axiosFetcher to reject with an error
     mockAxiosFetcher.mockRejectedValueOnce(new Error('API Error'));

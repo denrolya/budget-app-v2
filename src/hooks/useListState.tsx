@@ -5,7 +5,7 @@ import isEqual from 'lodash/isEqual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import { buildListStateSearchParams } from '@/utils/buildListStateSearchQueryParams';
+import { buildListStateSearchParams } from '@/lib/url/buildListStateSearchQueryParams';
 import { type Sorting } from '@/types/pagination';
 import BaseFilters, { type FilterConstructor } from '@/models/BaseFilters';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';

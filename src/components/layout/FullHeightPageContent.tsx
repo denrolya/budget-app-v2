@@ -9,13 +9,20 @@ interface Props extends React.ComponentPropsWithoutRef<'section'> {
 export const FullHeightPageContent = React.forwardRef<HTMLElement, Props>(
   ({ className, children, ...props }, ref) => (
     <section
+      role="main"
+      className={cn(
+        'w-full min-h-0 flex flex-col',
+        'h-[calc(100dvh-3rem)] md:h-full',
+        'p-2 md:p-4',
+        'overflow-hidden',
+        className,
+      )}
       ref={ref}
-      className={cn('w-full h-full p-4 mx-auto overflow-auto', className)}
       {...props}
     >
       {children}
     </section>
-  )
+  ),
 );
 
 FullHeightPageContent.displayName = 'FullHeightPageContent';

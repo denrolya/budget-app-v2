@@ -11,7 +11,7 @@ import {
   useMonobankExchangeRates,
   useWiseExchangeRates,
 } from '@/contexts/FinanceData';
-import { getExchangeRate } from '@/utils/getExchangeRates';
+import { getExchangeRate } from '@/lib/getExchangeRates';
 
 interface RateComparisonProps {
   from: CURRENCY_CODE;

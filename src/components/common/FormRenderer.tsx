@@ -3,9 +3,9 @@ import React, { forwardRef, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { useIsMobile } from '@/hooks/use-mobile';
-import AccountForm from '@/components/features/accounts/Form';
-import TransactionForm from '@/components/features/transactions/Form';
-import TransferForm from '@/components/features/transfers/Form';
+import AccountForm from '@/features/accounts/components/Form';
+import TransactionForm from '@/features/transactions/components/Form';
+import TransferForm from '@/features/transfers/components/Form';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

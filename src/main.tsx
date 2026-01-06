@@ -4,7 +4,7 @@ import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
 
-import { logger } from '@/utils/DebugLogger';
+import { logger } from '@/services/DebugLogger';
 import { Theme, ThemeProvider } from '@/contexts/theme';
 import { AuthProvider } from '@/contexts/auth';
 import Routing from '@/components/common/Routing';

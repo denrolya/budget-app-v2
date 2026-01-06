@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useAuth, useBaseCurrency } from '@/contexts/auth';
-import { confirm } from '@/utils/confirmation';
+import { confirm } from '@/lib/confirmation';
 import { cn } from '@/lib/utils';
 
 type CurrencyType = {

@@ -5,7 +5,7 @@ import { useSwipeable } from 'react-swipeable';
 
 import { cn } from '@/lib/utils';
 import ExchangeRatesPresets from '@/components/common/ExchangeRatesPresets';
-import DraftTransactionForm from '@/components/features/transactions/DraftForm';
+import DraftTransactionForm from '@/features/transactions/components/DraftForm';
 import CurrencyButtonSelector from '@/components/layout/header/CurrencyButtonSelector';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
@@ -72,8 +72,8 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
             return (
               <li className="flex-1 h-full" key={item.path}>
                 <Link
-                  className="flex flex-col items-center justify-center w-full h-full text-muted-foreground"
                   to={item.path}
+                  className="flex flex-col items-center justify-center w-full h-full text-muted-foreground"
                 >
                   <item.icon className={cn('h-5 w-5', isActive ? 'text-primary' : 'text-muted-foreground')} />
                   <span className={cn('text-[10px] mt-0.5', isActive ? 'text-primary' : 'text-muted-foreground')}>
@@ -86,8 +86,8 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
           <li className="flex-1 h-full flex items-center justify-center">
             <DraftTransactionForm>
               <Button
-                className="w-14 h-14 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-600 shadow-lg -mt-8"
                 aria-label="New draft transaction"
+                className="w-14 h-14 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-600 shadow-lg -mt-8"
               >
                 <Plus className="h-6 w-6" />
               </Button>
@@ -96,7 +96,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
           {navItems.slice(2).map((item) => {
             const isActive = location.pathname === item.path;
             return (
-              <li key={item.path} className="flex-1 h-full">
+              <li className="flex-1 h-full" key={item.path}>
                 <Link
                   to={item.path}
                   className="flex flex-col items-center justify-center w-full h-full text-muted-foreground"
@@ -122,7 +122,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                   <DrawerTitle>More options</DrawerTitle>
                 </DrawerHeader>
                 <div className="p-4" {...swipeHandlers}>
-                  <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+                  <Tabs value={activeTab} className="w-full" onValueChange={handleTabChange}>
                     <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="quickAccess">Quick Access</TabsTrigger>
                       <TabsTrigger value="exchangeRates">Rates</TabsTrigger>
