@@ -1,0 +1,14 @@
+{
+    "entry": [
+        "src/main.tsx",
+        "src/**/*.{ts,tsx}",
+        "src/features/**/Page.{ts,tsx}",
+        "src/features/**/page.{ts,tsx}"
+    ],
+    "project": ["tsconfig.json"],
+    "ignore": [
+        "**/*.test.*",
+        "**/*.spec.*",
+        "**/vite-env.d.ts"
+    ]
+}
