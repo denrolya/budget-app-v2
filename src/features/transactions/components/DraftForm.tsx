@@ -6,8 +6,6 @@ import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
-import { useFormLogic } from '@/hooks/useFormLogic';
-import { useForm as useFormContext } from '@/contexts/Form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -21,10 +19,13 @@ import {
 } from '@/components/ui/drawer';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useAccountsWithDefaultOrder, useCategories, useFinanceData } from '@/contexts/FinanceData';
-import Category from '@/models/Category';
-import { Type as TransactionType } from '@/types/transaction';
-import { transactionService } from '@/services/api/transaction';
+import { useForm as useFormContext } from '@/contexts/Form';
+import Category from '@/features/categories/models/Category';
+import { useAccountsWithDefaultOrder, useCategories } from '@/hooks/financeData';
+import { useFormLogic } from '@/hooks/useFormLogic';
+
+import { useMutations } from '../api';
+import { Type as TransactionType } from '../types';
 
 interface Props {
   children: React.ReactNode;
@@ -37,33 +38,36 @@ interface TransactionFormRef {
 export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(({ children }, ref) => {
   const { list: allCategories } = useCategories();
   const accounts = useAccountsWithDefaultOrder();
+
+  const { create: createTransaction, isCreating } = useMutations();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [step, setStep] = useState<'type' | 'amount' | 'category' | 'account'>('type');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
-  const { refetchAccounts } = useFinanceData();
-  const {
-    submitForm,
-    updateFormState,
-    formState: { values: data },
-  } = useFormContext();
 
-  const transactionSchema = z.object({
-    type: z.nativeEnum(TransactionType),
-    amount: z.string().refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
-      message: 'Amount must be a positive number',
-    }),
-    category: z.string().refine((val) => allCategories.some((category) => category.id.toString() === val), {
-      message: 'Invalid category',
-    }),
-    account: z
-      .string()
-      .refine((val) => accounts.some((account) => account.id.toString() === val), { message: 'Invalid account' }),
-    isDraft: z.boolean(),
-    executedAt: z.string(),
-  });
+  const { submitForm, updateFormState } = useFormContext();
+
+  const transactionSchema = useMemo(
+    () =>
+      z.object({
+        type: z.nativeEnum(TransactionType),
+        amount: z.string().refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
+          message: 'Amount must be a positive number',
+        }),
+        category: z.string().refine((val) => allCategories.some((category) => category.id.toString() === val), {
+          message: 'Invalid category',
+        }),
+        account: z
+          .string()
+          .refine((val) => accounts.some((account) => account.id.toString() === val), { message: 'Invalid account' }),
+        isDraft: z.boolean(),
+        executedAt: z.string(),
+      }),
+    [allCategories, accounts],
+  );
+
   type TransactionFormData = z.infer<typeof transactionSchema>;
 
   const form = useForm<TransactionFormData>({
@@ -78,6 +82,7 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
     },
     mode: 'onChange',
   });
+
   const {
     control,
     handleSubmit,
@@ -91,10 +96,23 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
   const selectedType = watch('type');
 
   useEffect(() => {
-    if (isPopoverOpen) {
-      inputRef.current?.focus();
-    }
+    if (isPopoverOpen) inputRef.current?.focus();
   }, [isPopoverOpen, step]);
+
+  const resetForm = useCallback(() => {
+    setStep('type');
+    reset({
+      type: undefined,
+      amount: '',
+      category: '',
+      account: '',
+      isDraft: true,
+      executedAt: moment().toISOString(),
+    });
+    setInputValue('');
+    setIsPopoverOpen(false);
+    setIsModalOpen(false);
+  }, [reset]);
 
   const moveToNextStep = useCallback(() => {
     setStep((currentStep) => {
@@ -121,12 +139,12 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
   const handleSelect = useCallback(
     async (selectedValue: string) => {
       setValue(step, selectedValue);
-      const isValid = await validateStep();
-      if (isValid) {
-        reset({ ...watch(), [step]: selectedValue });
-        setInputValue('');
-        moveToNextStep();
-      }
+      const ok = await validateStep();
+      if (!ok) return;
+
+      reset({ ...watch(), [step]: selectedValue });
+      setInputValue('');
+      moveToNextStep();
     },
     [setValue, step, validateStep, reset, watch, moveToNextStep],
   );
@@ -159,61 +177,6 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
     return placeholders[step];
   }, [step]);
 
-  const { formRef } = useFormLogic({
-    form,
-    setFormState: updateFormState,
-    onSubmit: async (values: z.infer<typeof transactionSchema>) => {
-      setIsSubmitting(true);
-      try {
-        const response = await transactionService.createTransaction({
-          type: data.type,
-          amount: parseFloat(data.amount),
-          category: parseInt(data.category),
-          account: parseInt(data.account),
-          isDraft: data.isDraft,
-          executedAt: data.executedAt,
-        });
-        logger.info(response, 'Draft Transaction Created:');
-
-        await refetchAccounts();
-        submitForm(values);
-        setIsModalOpen(false);
-        resetForm();
-        toast.success('Transaction submitted successfully!', {
-          action: {
-            label: 'Close',
-            onClick: () => toast.dismiss(),
-          },
-        });
-      } catch (error) {
-        console.error('Form submission failed:', error);
-        toast.error('Failed to submit transaction. Please try again.', {
-          action: {
-            label: 'Close',
-            onClick: () => toast.dismiss(),
-          },
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-  });
-  useImperativeHandle(ref, () => formRef.current!);
-
-  const resetForm = useCallback(() => {
-    setStep('type');
-    reset({
-      type: undefined,
-      amount: '',
-      category: '',
-      account: '',
-      isDraft: true,
-      executedAt: moment().toISOString(),
-    });
-    setInputValue('');
-    setIsPopoverOpen(false);
-  }, [reset]);
-
   const isValidInput = useCallback(
     (value: string) => {
       switch (step) {
@@ -232,6 +195,42 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
     [step, allCategories, accounts],
   );
 
+  const { formRef } = useFormLogic({
+    form,
+    setFormState: updateFormState,
+    onSubmit: async (values: TransactionFormData) => {
+      try {
+        // Use the values we are submitting (not context snapshot).
+        await createTransaction({
+          type: values.type,
+          amount: Number.parseFloat(values.amount),
+          category: Number.parseInt(values.category, 10),
+          account: Number.parseInt(values.account, 10),
+          isDraft: values.isDraft,
+          executedAt: values.executedAt,
+        });
+
+        submitForm(values);
+        toast.success('Transaction submitted successfully!', {
+          action: { label: 'Close', onClick: () => toast.dismiss() },
+        });
+
+        resetForm();
+      } catch (error: any) {
+        // mutations already toast errors in your hook; this is a hard fallback
+        toast.error('Failed to submit transaction. Please try again.', {
+          description: error?.message,
+          action: { label: 'Close', onClick: () => toast.dismiss() },
+        });
+        throw error;
+      }
+    },
+  });
+
+  useImperativeHandle(ref, () => formRef.current!);
+
+  const isSubmitting = isCreating; // single source of truth
+
   return (
     <div className="space-y-4">
       <Popover
@@ -242,51 +241,53 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
         }}
       >
         <PopoverTrigger asChild>{children}</PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0" align="start">
+
+        <PopoverContent align="start" className="w-[300px] p-0">
           <Command>
             <Controller
-              name={step}
               control={control}
+              name={step}
               render={({ field }) => (
                 <CommandInput
-                  ref={inputRef}
                   placeholder={getPlaceholder}
                   value={inputValue}
-                  onValueChange={(value) => {
-                    setInputValue(value);
-                    field.onChange(value);
-                    if (step === 'amount') {
-                      setValue('amount', value);
-                    }
-                  }}
                   onKeyDown={async (e) => {
                     if (e.key === 'Enter' && inputValue && isValidInput(inputValue)) {
                       e.preventDefault();
                       await handleSelect(inputValue);
                     }
                   }}
+                  onValueChange={(value) => {
+                    setInputValue(value);
+                    field.onChange(value);
+                    if (step === 'amount') setValue('amount', value);
+                  }}
+                  ref={inputRef}
                 />
               )}
             />
+
             <CommandList>
               <CommandEmpty>No results found</CommandEmpty>
               <CommandGroup heading={step.charAt(0).toUpperCase() + step.slice(1)}>
                 {getCommandItems.map((item) => (
-                  <CommandItem key={item.value} value={item.value} onSelect={handleSelect}>
+                  <CommandItem value={item.value} key={item.value} onSelect={handleSelect}>
                     {item.label}
                   </CommandItem>
                 ))}
               </CommandGroup>
             </CommandList>
           </Command>
+
           <div className="p-2 flex justify-between items-center border-t">
             <span className="text-sm text-muted-foreground">
               Step {['type', 'amount', 'category', 'account'].indexOf(step) + 1} of 4
             </span>
             <Button
-              size="sm"
-              onClick={() => inputValue && isValidInput(inputValue) && handleSelect(inputValue)}
               disabled={!inputValue || !isValidInput(inputValue)}
+              size="sm"
+              type="button"
+              onClick={() => inputValue && isValidInput(inputValue) && handleSelect(inputValue)}
             >
               {step === 'account' ? 'Finish' : 'Next'}
             </Button>
@@ -306,51 +307,57 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
             <DrawerTitle>Transaction Details</DrawerTitle>
             <DrawerDescription>Review your transaction details below.</DrawerDescription>
           </DrawerHeader>
+
           <div className="grid grid-cols-2 gap-4">
             <Label>Type:</Label>
             <span>{watch('type')}</span>
+
             <Label>Amount:</Label>
             <span>{watch('amount')}</span>
+
             <Label>Category:</Label>
             <span>
               {(allCategories as Category[]).find((c) => c.id.toString() === watch('category'))?.name ||
                 watch('category')}
             </span>
+
             <Label>Account:</Label>
             <span>{accounts.find((a) => a.id.toString() === watch('account'))?.displayName || watch('account')}</span>
+
             <Label>Is Draft:</Label>
             <span>{watch('isDraft') ? 'Yes' : 'No'}</span>
+
             <Label>Executed At:</Label>
             <span>{moment(watch('executedAt')).format('YYYY-MM-DD HH:mm:ss')}</span>
           </div>
+
           <DrawerFooter>
             <Button
+              disabled={isSubmitting || !isValid}
               type="button"
               variant="outline"
-              disabled={isSubmitting || !isValid}
-              onClick={() => {
-                setIsModalOpen(false);
-                resetForm();
-              }}
+              onClick={() => resetForm()}
             >
               Cancel
             </Button>
+
             <Button
+              disabled={isSubmitting || !isValid}
               type="button"
               onClick={() => {
                 if (formRef.current?.submitForm) {
                   handleSubmit(formRef.current.submitForm)();
                 }
               }}
-              disabled={isSubmitting || !isValid}
             >
-              {isSubmitting && (
+              {isSubmitting ? (
                 <span className="flex items-center">
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   {' Submitting...'}
                 </span>
+              ) : (
+                'Submit'
               )}
-              {!isSubmitting && 'Submit'}
             </Button>
           </DrawerFooter>
         </DrawerContent>
@@ -358,5 +365,7 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
     </div>
   );
 });
+
+DraftForm.displayName = 'DraftForm';
 
 export default DraftForm;

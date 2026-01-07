@@ -3,9 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSwipeable } from 'react-swipeable';
 
-import { cn } from '@/lib/utils';
 import ExchangeRatesPresets from '@/components/common/ExchangeRatesPresets';
-import DraftTransactionForm from '@/features/transactions/components/DraftForm';
 import CurrencyButtonSelector from '@/components/layout/header/CurrencyButtonSelector';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
@@ -13,8 +11,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ROUTES } from '@/constants/routes';
-import { useAuth } from '@/contexts/auth';
 import { Theme, useTheme } from '@/contexts/theme';
+import { useAuth } from '@/features/auth';
+import DraftTransactionForm from '@/features/transactions/components/DraftForm';
+import { cn } from '@/lib/utils';
 
 type RouteKey = keyof typeof ROUTES;
 

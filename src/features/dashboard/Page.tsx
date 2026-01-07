@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cardConfigs } from '@/constants/dashboard-config';
-import { Type as AccountType } from '@/types/account';
+import { Type as AccountType } from '@/features/accounts';
 import { StatisticsConfig } from '@/types/statistics';
 import { generateSlug } from '@/lib/url/generateSlug';
 import StatisticsCardsSidebar from '@/features/dashboard/components/StatisticsCardsSidebar';

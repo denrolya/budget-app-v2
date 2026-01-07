@@ -13,9 +13,9 @@ import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FILTER_PRESETS, MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
-import { TransactionFilters } from '@/models/TransactionFilters';
+import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
 import { Timeframe } from '@/types/global';
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 
 interface ListFiltersProps {
   isOpen?: boolean;

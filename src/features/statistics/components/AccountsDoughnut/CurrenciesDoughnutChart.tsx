@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
-import PieChart from '@/components/features/statistics/AccountsDoughnut/Chart';
+import PieChart from './Chart';
 
 const CurrenciesDoughnutChart: React.FC<{
   currencies: { code: string; display: string; value: number }[];
@@ -39,7 +39,7 @@ const CurrenciesDoughnutChart: React.FC<{
   );
 
   // render your breadcrumbs externally using `currency` state if you like.
-  return <PieChart data={data} total={total} colorScheme={scheme} onSliceClick={onSliceClick} />;
+  return <PieChart colorScheme={scheme} data={data} total={total} onSliceClick={onSliceClick} />;
 };
 
 export default CurrenciesDoughnutChart;

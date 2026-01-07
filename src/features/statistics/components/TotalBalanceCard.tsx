@@ -4,8 +4,8 @@ import React from 'react';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useBaseCurrency } from '@/contexts/auth';
-import { useTotalBalance, useTotalDebt } from '@/contexts/FinanceData';
+import { useBaseCurrency } from '@/features/auth';
+import { useTotalBalance, useTotalDebt } from '@/hooks/financeData';
 
 export const TotalBalanceCard: React.FC = () => {
   const baseCurrency = useBaseCurrency();

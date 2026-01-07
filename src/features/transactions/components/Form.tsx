@@ -8,10 +8,10 @@ import { toast } from 'sonner';
 import z from 'zod';
 
 import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
-import { useTransactionMutations } from '@/hooks/useTransactionMutations';
+import { useMutations } from '@/features/transactions/api/mutations';
 import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
 import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
-import DebtTypeahead from '@/components/common/DebtTypeahead';
+import DebtTypeahead from '@/features/debts/components/DebtTypeahead';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -20,8 +20,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm as useFormContext } from '@/contexts/Form';
 import { useFormLogic } from '@/hooks/useFormLogic';
-import Transaction from '@/models/Transaction';
-import { Type as TransactionType } from '@/types/transaction';
+import Transaction from '@/features/transactions/models/Transaction';
+import { Type as TransactionType } from '@/features/transactions';
 
 interface TransactionFormProps {
   key: string;
@@ -53,7 +53,7 @@ export const formSchema = z.object({
 });
 
 export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>((_, ref) => {
-  const { createTransaction, updateTransaction } = useTransactionMutations();
+  const { create: createTransaction, update: updateTransaction } = useMutations();
   const {
     updateFormState,
     formState: { values: data },
@@ -133,8 +133,8 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
         />
 
         <FormField
-          name="type"
           control={form.control}
+          name="type"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Transaction Type</FormLabel>
@@ -170,8 +170,8 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
         />
 
         <FormField
-          name="debt"
           control={form.control}
+          name="debt"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Debt</FormLabel>
@@ -188,16 +188,16 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
         />
 
         <FormField
-          name="category"
           control={form.control}
+          name="category"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
               <CategoryTypeahead
                 {...field}
                 autoFocus
-                type={form.watch('type')}
                 multiple={false}
+                type={form.watch('type')}
                 className={cn('w-full justify-between', {
                   'text-muted-foreground': !field.value,
                 })}
@@ -209,16 +209,16 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
 
         <div className="flex space-x-4">
           <FormField
-            name="amount"
             control={form.control}
+            name="amount"
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel>Amount</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
-                    type="number"
                     placeholder="Enter amount"
+                    type="number"
                     value={field.value ?? ''}
                     onChange={(e) => {
                       field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber);
@@ -231,8 +231,8 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
           />
 
           <FormField
-            name="account"
             control={form.control}
+            name="account"
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel>Account</FormLabel>
@@ -272,14 +272,14 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               <FormControl>
                 <Textarea
                   {...field}
-                  ref={noteRef}
                   placeholder="Add a note..."
-                  className="min-h-[2.5rem] resize-none overflow-hidden"
                   style={{ height: noteHeight }}
+                  className="min-h-[2.5rem] resize-none overflow-hidden"
                   onChange={(e) => {
                     field.onChange(e);
                     setNoteHeight(`${e.target.scrollHeight}px`);
                   }}
+                  ref={noteRef}
                 />
               </FormControl>
               <FormMessage />
@@ -291,7 +291,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
           <div>
             <Label>Compensations</Label>
             {fields.map((field, index) => (
-              <div key={field.id} className="mt-2 p-2 border border-border rounded-md space-y-2">
+              <div className="mt-2 p-2 border border-border rounded-md space-y-2" key={field.id}>
                 <FormField control={form.control} name={`compensations.${index}.id`} render={() => null} />
                 <div className="flex items-center gap-2">
                   <FormField
@@ -302,8 +302,8 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                         <FormControl>
                           <Input
                             {...field}
-                            type="number"
                             placeholder="Amount"
+                            type="number"
                             className="w-full"
                             onChange={(e) => field.onChange(e.target.valueAsNumber)}
                           />
@@ -342,7 +342,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                       </FormItem>
                     )}
                   />
-                  <Button type="button" variant="destructive" onClick={() => remove(index)} className="p-2 h-9 w-9">
+                  <Button type="button" variant="destructive" className="p-2 h-9 w-9" onClick={() => remove(index)}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 
 import { CURRENCY_CODE, CURRENCIES } from '@/constants/currency';
 import { cn } from '@/lib/utils';
-import Transfer from '@/models/Transfer';
+import Transfer from '@/features/transfers/models/Transfer';
 import { formatTransferExchangeRate } from '@/lib/formatTransferExchangeRate';
 
 type Props = Omit<React.ComponentPropsWithoutRef<'span'>, 'children'> & {

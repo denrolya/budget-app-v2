@@ -3,8 +3,8 @@
 import React, { useMemo } from 'react';
 import { ResponsiveSunburst } from '@nivo/sunburst';
 
-import { Type as TransactionType } from '@/types/transaction';
-import Category from '@/models/Category';
+import { Type as TransactionType } from '@/features/transactions';
+import Category from '@/features/categories/models/Category';
 
 interface CategoriesSunburstProps {
   categories: Category[];

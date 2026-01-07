@@ -4,8 +4,8 @@ import React, { useMemo } from 'react';
 import DateCard, { DateCardSkeleton } from '@/features/daily-ledger/components/DateCard';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useIsMobile } from '@/hooks/use-mobile';
-import Transaction from '@/models/Transaction';
-import Transfer from '@/models/Transfer';
+import Transaction from '@/features/transactions/models/Transaction';
+import Transfer from '@/features/transfers/models/Transfer';
 
 interface Props {
   isLoading: boolean;

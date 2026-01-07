@@ -3,9 +3,9 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
-import { useAuth, useBaseCurrency } from '@/contexts/auth';
-import { cn } from '@/lib/utils';
+import { useAuth, useBaseCurrency } from '@/features/auth';
 import { confirm } from '@/lib/confirmation';
+import { cn } from '@/lib/utils';
 
 type CurrencyType = {
   code: CURRENCY_CODE;
@@ -55,7 +55,6 @@ const CurrencyButtonSelector: React.FC<CurrencyButtonSelectorProps> = ({ classNa
       <div className="flex w-full justify-between space-x-2">
         {fiatCurrencies.map(([code, info]) => (
           <Button
-            key={code}
             type="button"
             variant="outline"
             className={cn(
@@ -67,6 +66,7 @@ const CurrencyButtonSelector: React.FC<CurrencyButtonSelectorProps> = ({ classNa
                 'bg-background text-foreground hover:bg-accent hover:text-accent-foreground': selectedCurrency !== code,
               },
             )}
+            key={code}
             onClick={() => handleCurrencyChange(code)}
           >
             <div className="flex flex-col items-center justify-center space-y-1">

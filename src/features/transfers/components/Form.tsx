@@ -1,23 +1,24 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import cn from 'classnames';
-import { ArrowLeftRight } from 'lucide-react';
+import { ArrowLeftRight, Loader2 } from 'lucide-react';
 import moment from 'moment';
-import { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
-import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
-import { useFinanceData } from '@/contexts/FinanceData';
 import { useForm as useFormContext } from '@/contexts/Form';
+import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
+import { useAccountsWithDefaultOrder } from '@/hooks/financeData';
 import { useFormLogic } from '@/hooks/useFormLogic';
-import { api } from '@/services/api';
+
+import { useMutations } from '../api';
 
 const formSchema = z
   .object({
@@ -67,9 +68,9 @@ interface TransferFormRef {
 }
 
 export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
-  const finance = useFinanceData();
-  const { refetchAccounts } = finance;
+  const accounts = useAccountsWithDefaultOrder();
   const { submitForm, updateFormState } = useFormContext();
+  const { create: createTransfer, isCreating } = useMutations();
 
   const [rateMode, setRateMode] = useState<RateMode>('toPerFrom');
   const [rateText, setRateText] = useState('0');
@@ -107,9 +108,6 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
   const feeAccount = watched[5];
   const feeIncluded = !!watched[6];
 
-  // Currency lookup (defensive)
-  const accounts: any[] | undefined = (finance as any).accounts ?? (finance as any).data?.accounts ?? [];
-
   const fromCurrency = useMemo(() => {
     if (!Number.isFinite(from as number)) return undefined;
     return accounts.find((a) => a.id === (from as number))?.currency;
@@ -138,18 +136,17 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
     return feeNum > 0 && feeAccount != null && from != null && feeAccount === from;
   }, [fee, feeAccount, from]);
 
-  useMemo(() => {
+  // If fee inclusion becomes invalid, force it off (side-effect => useEffect)
+  useEffect(() => {
     if (feeIncluded && !canIncludeFee) {
       setValue('feeIncludedInAmount', false, { shouldDirty: true, shouldValidate: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canIncludeFee]);
+  }, [feeIncluded, canIncludeFee, setValue]);
 
-  // Sync rate text with canonical + view mode (don’t fight user while typing; normalize on blur)
-  useMemo(() => {
+  // Sync rateText with canonical rate + view mode (side-effect => useEffect)
+  useEffect(() => {
     const displayed = rateMode === 'toPerFrom' ? rate : rate > 0 ? 1 / rate : 0;
     setRateText(String(Number.isFinite(displayed) ? displayed : 0));
-
   }, [rateMode, rate]);
 
   const normalizeRateOnBlur = () => {
@@ -192,28 +189,27 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
       try {
         const feeNum = Number.isFinite(values.fee as number) ? (values.fee as number) : 0;
         const feeFrom = values.feeAccount != null && values.from != null && values.feeAccount === values.from;
-        const payloadAmount = values.feeIncludedInAmount && feeFrom ? Math.max(values.amount - feeNum, 0) : values.amount;
+        const payloadAmount =
+          values.feeIncludedInAmount && feeFrom ? Math.max(values.amount - feeNum, 0) : values.amount;
 
-        const formattedData = {
+        await createTransfer({
           from: values.from,
           to: values.to,
-          amount: payloadAmount.toString(),
-          rate: values.rate.toString(), // canonical TO per 1 FROM
-          fee: values.fee != null ? values.fee.toString() : undefined,
-          feeAccount: values.feeAccount,
-          executedAt: moment(values.executedAt).toISOString(),
+          amount: payloadAmount,
+          rate: values.rate,
+          fee: values.fee ?? undefined,
+          feeAccount: values.feeAccount ?? undefined,
+          executedAt: values.executedAt,
           note: values.note || '',
-        };
+        });
 
-        const response = await api.post('/api/transfers', formattedData);
-        logger.info(response, 'Transfer Create');
-
-        await refetchAccounts();
         submitForm(values);
-      } catch (error) {
-
-        console.error('Form submission failed:', error);
-        toast.error('Failed to submit transfer. Please try again.');
+      } catch (error: any) {
+        // mutation already toasts; keep this minimal
+        toast.error('Failed to submit transfer. Please try again.', {
+          description: error?.message || undefined,
+        });
+        throw error;
       }
     },
   });
@@ -261,15 +257,15 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
         {/* Accounts */}
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
           <FormField
-            name="from"
             control={control}
+            name="from"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm">From</FormLabel>
                 <AccountTypeahead
                   {...field}
-                  multiple={false}
                   aria-label="From account"
+                  multiple={false}
                   className={cn('w-full justify-between', { 'text-muted-foreground': !field.value })}
                 />
                 <FormMessage />
@@ -278,15 +274,15 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
           />
 
           <FormField
-            name="to"
             control={control}
+            name="to"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm">To</FormLabel>
                 <AccountTypeahead
                   {...field}
-                  multiple={false}
                   aria-label="To account"
+                  multiple={false}
                   className={cn('w-full justify-between', { 'text-muted-foreground': !field.value })}
                 />
                 <FormMessage />
@@ -295,11 +291,11 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
           />
         </div>
 
-        {/* Amount + Rate row (narrow modal friendly) */}
+        {/* Amount + Rate */}
         <div className="grid grid-cols-2 gap-3">
           <FormField
-            name="amount"
             control={control}
+            name="amount"
             render={({ field }) => (
               <FormItem>
                 <div className="flex items-baseline justify-between gap-2">
@@ -309,9 +305,9 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
                 <FormControl>
                   <Input
                     {...field}
-                    type="number"
-                    inputMode="decimal"
                     aria-label="Amount you send"
+                    inputMode="decimal"
+                    type="number"
                     onChange={(e) => {
                       const n = e.target.valueAsNumber;
                       field.onChange(Number.isFinite(n) ? n : 0);
@@ -326,28 +322,28 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
           <FormItem>
             <div className="flex items-baseline justify-between gap-2">
               <FormLabel className="text-sm">Rate</FormLabel>
-              <span className="text-2xs text-muted-foreground whitespace-nowrap" aria-hidden="true">
+              <span aria-hidden="true" className="text-2xs text-muted-foreground whitespace-nowrap">
                 {pairLabel}
               </span>
             </div>
 
             <div className="relative">
               <Input
-                type="text"
-                inputMode="decimal"
-                value={rateText}
-                onChange={(e) => setRateText(e.target.value)}
-                onBlur={normalizeRateOnBlur}
                 aria-label="Exchange rate"
+                inputMode="decimal"
+                type="text"
+                value={rateText}
                 className="pr-10"
+                onBlur={normalizeRateOnBlur}
+                onChange={(e) => setRateText(e.target.value)}
               />
               <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
                 aria-label="Toggle rate view"
                 aria-pressed={rateMode === 'fromPerTo'}
+                size="icon"
+                type="button"
+                variant="ghost"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
                 onClick={() => setRateMode((m) => (m === 'toPerFrom' ? 'fromPerTo' : 'toPerFrom'))}
               >
                 <ArrowLeftRight className="h-4 w-4" />
@@ -356,12 +352,12 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
           </FormItem>
         </div>
 
-        {/* Fee (aligned) */}
-        <div className="rounded-md border p-2 space-y-2" aria-label="Fee">
+        {/* Fee */}
+        <div aria-label="Fee" className="rounded-md border p-2 space-y-2">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
             <FormField
-              name="fee"
               control={control}
+              name="fee"
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-baseline justify-between gap-2">
@@ -371,9 +367,9 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
                   <FormControl>
                     <Input
                       {...field}
-                      type="number"
-                      inputMode="decimal"
                       aria-label="Fee amount"
+                      inputMode="decimal"
+                      type="number"
                       onChange={(e) => {
                         const n = e.target.valueAsNumber;
                         field.onChange(Number.isFinite(n) ? n : undefined);
@@ -386,15 +382,15 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
             />
 
             <FormField
-              name="feeAccount"
               control={control}
+              name="feeAccount"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm">Fee Account</FormLabel>
                   <AccountTypeahead
                     {...field}
-                    multiple={false}
                     aria-label="Account that pays the fee"
+                    multiple={false}
                     className={cn('w-full justify-between', { 'text-muted-foreground': !field.value })}
                   />
                   <FormMessage />
@@ -404,33 +400,31 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
           </div>
 
           <div className="flex items-center justify-between gap-3">
-            <Label className={cn('text-sm', { 'text-muted-foreground': !canIncludeFee })}>
-              Include fee in amount
-            </Label>
+            <Label className={cn('text-sm', { 'text-muted-foreground': !canIncludeFee })}>Include fee in amount</Label>
 
             <FormField
-              name="feeIncludedInAmount"
               control={control}
+              name="feeIncludedInAmount"
               render={({ field }) => (
                 <Switch
-                  checked={field.value}
-                  onCheckedChange={(v) => field.onChange(v)}
-                  disabled={!canIncludeFee}
-                  aria-label="Toggle fee included in amount"
                   aria-describedby={feeHint ? 'transfer-fee-hint' : undefined}
+                  aria-label="Toggle fee included in amount"
+                  checked={field.value}
+                  disabled={!canIncludeFee}
+                  onCheckedChange={(v) => field.onChange(v)}
                 />
               )}
             />
           </div>
 
           {feeHint ? (
-            <p id="transfer-fee-hint" className="text-2xs text-muted-foreground" aria-live="polite">
+            <p aria-live="polite" id="transfer-fee-hint" className="text-2xs text-muted-foreground">
               {feeHint}
             </p>
           ) : null}
         </div>
 
-        {/* They Receive full width (no truncation, no tab stop) */}
+        {/* They Receive */}
         <div className="rounded-md border p-2">
           <div className="flex items-baseline justify-between gap-2">
             <Label className="text-sm">They Receive</Label>
@@ -446,8 +440,8 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
 
         {/* Meta */}
         <FormField
-          name="executedAt"
           control={control}
+          name="executedAt"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-sm">Executed At</FormLabel>
@@ -460,21 +454,40 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
         />
 
         <FormField
-          name="note"
           control={control}
+          name="note"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-sm">Note</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Add a note..." aria-label="Note" />
+                <Input {...field} aria-label="Note" placeholder="Add a note..." />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {/* Optional submit button if you ever render this standalone */}
+        <div className="pt-2">
+          <Button
+            disabled={isCreating}
+            type="button"
+            className="w-full"
+            onClick={() => formRef.current?.submitForm?.()}>
+            {isCreating ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+                Submitting…
+              </span>
+            ) : (
+              'Submit'
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   );
 });
 
+TransferForm.displayName = 'TransferForm';
 export default TransferForm;

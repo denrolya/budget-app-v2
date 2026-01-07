@@ -8,7 +8,7 @@ import { axiosFetcher } from '@/services/api';
 import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
 import { ValueByPeriodData } from '@/types/valueByPeriodStatistics';
 import { generateQueryParamsString } from '@/lib/url/generateQueryParamsString';
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 
 const URL = '/api/v2/statistics/category/timeline';
 

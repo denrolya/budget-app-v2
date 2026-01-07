@@ -13,11 +13,11 @@ import {
 } from '@/components/ui/drawer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
-import { useCategories } from '@/contexts/FinanceData';
+import { useCategories } from '@/hooks/financeData';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useTransactions } from '@/hooks/useTransactions';
-import Category from '@/models/Category';
-import TransactionFilters from '@/models/TransactionFilters';
+import { useList as useTransactionsList } from '@/features/transactions';
+import Category from '@/features/categories/models/Category';
+import TransactionFilters from '@/features/transactions/models/TransactionFilters';
 
 interface TransactionsDrawerProps {
   isOpen: boolean;
@@ -50,7 +50,7 @@ export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
     refetch: refetchTransactions,
     pagination: { currentPage, perPage, totalPages, totalItems, setCurrentPage, setPerPage },
     setFilter,
-  } = useTransactions({
+  } = useTransactionsList({
     updateUrl: false,
     initialFilters: new TransactionFilters({
       withNestedCategories: fetchFromSubcategories,
@@ -77,22 +77,22 @@ export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
         <ScrollArea className="h-[60vh] px-4">
           <FormattedListing
             error={transactionsError}
+            groupedItems={groupedTransactions}
             isError={isTransactionsError}
             isLoading={isTransactionsLoading}
-            groupedItems={groupedTransactions}
             refetch={refetchTransactions}
             onAdd={() => openForm(FormType.Transaction)}
           />
         </ScrollArea>
         <DrawerFooter>
           <Pagination
-            isLoading={isTransactionsLoading}
             currentPage={currentPage}
+            isLoading={isTransactionsLoading}
+            perPage={perPage}
+            totalItems={totalItems}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
             onPerPageChange={setPerPage}
-            perPage={perPage}
-            totalItems={totalItems}
           />
         </DrawerFooter>
       </DrawerContent>

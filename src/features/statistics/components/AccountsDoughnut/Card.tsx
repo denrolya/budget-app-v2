@@ -15,7 +15,7 @@ import { CURRENCIES } from '@/constants/currency';
 import { useAccountDistribution } from '@/hooks/statistics/useAccountDistributionStatistics';
 import { UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { Timeframe } from '@/types/global';
-import { Type, Type as TransactionType } from '@/types/transaction';
+import { Type, Type as TransactionType } from '@/features/transactions';
 import { formatShortDate } from '@/lib/datetime/formatShortDate';
 import Skeleton from '@/features/statistics/components/CategoriesDoughnut/Skeleton';
 import ConfigurationMenu from '@/features/statistics/components/CategoriesDoughnut/ConfigurationMenu';

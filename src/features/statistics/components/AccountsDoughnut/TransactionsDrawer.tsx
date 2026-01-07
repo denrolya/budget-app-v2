@@ -14,8 +14,8 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useTransactions } from '@/hooks/useTransactions';
-import TransactionFilters from '@/models/TransactionFilters';
+import { useList as useTransactionsList } from '@/features/transactions';
+import TransactionFilters from '@/features/transactions/models/TransactionFilters';
 
 interface ProcessedCategory {
   id: number;
@@ -49,7 +49,7 @@ export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
     refetch: refetchTransactions,
     pagination: { currentPage, perPage, totalPages, totalItems, setCurrentPage, setPerPage },
     setFilter,
-  } = useTransactions({
+  } = useTransactionsList({
     updateUrl: false,
     initialFilters: new TransactionFilters({
       withNestedCategories: true,

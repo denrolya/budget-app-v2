@@ -14,8 +14,8 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { TableCell, TableRow } from '@/components/ui/table';
 import { MOMENT_DATETIME_FORM_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { cn } from '@/lib/utils';
-import Transaction from '@/models/Transaction';
-import { TransactionEditableField, useInlineTransactionEdit } from '@/hooks/useInlineTransactionEdit';
+import Transaction from '@/features/transactions/models/Transaction';
+import { TransactionEditableField, useInlineEdit } from '@/features/transactions/hooks/useInlineEdit';
 
 export type TransactionRowColumn =
   | { key: 'id'; className?: string }
@@ -34,7 +34,7 @@ type Props = {
   onOpenForm: (tx: Transaction) => void;
   onDelete: (tx: Transaction) => void;
   onToggleDraft?: (tx: Transaction) => void;
-  inlineEdit: ReturnType<typeof useInlineTransactionEdit>;
+  inlineEdit: ReturnType<typeof useInlineEdit>;
   sheetOpen?: boolean;
   onSheetOpenChange?: (open: boolean) => void;
   className?: string;

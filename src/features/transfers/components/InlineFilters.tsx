@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { cn } from '@/lib/utils';
-import TransferFilters from '@/models/TransferFilters';
+import TransferFilters from '@/features/transfers/models/TransferFilters';
 import { Timeframe } from '@/types/global';
 
 interface Props {

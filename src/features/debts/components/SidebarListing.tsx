@@ -2,8 +2,8 @@ import cn from 'classnames';
 import { Archive, Calendar, Search } from 'lucide-react';
 import React, { useState } from 'react';
 
-import Debt from '@/models/Debt';
-import { useDebts } from '@/contexts/FinanceData';
+import Debt from '@/features/debts/models/Debt';
+import { useDebts } from '@/hooks/financeData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import MoneyValue from '@/components/common/MoneyValue';

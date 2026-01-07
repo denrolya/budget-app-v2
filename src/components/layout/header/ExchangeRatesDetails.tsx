@@ -5,7 +5,7 @@ import MoneyValue from '@/components/common/MoneyValue';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { CURRENCY_CODE } from '@/constants/currency';
-import { useFixerExchangeRates } from '@/contexts/FinanceData';
+import { useFixerExchangeRates } from '@/hooks/financeData';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 
 export const ExchangeRatesDetails: React.FC = () => {

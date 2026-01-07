@@ -3,10 +3,10 @@ import { Moment } from 'moment';
 import { DependencyList, useEffect } from 'react';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
-import { useCategories } from '@/contexts/FinanceData';
-import Category from '@/models/Category';
+import { useCategories } from '@/hooks/financeData';
+import Category from '@/features/categories/models/Category';
 import { axiosFetcher } from '@/services/api';
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 import { generateQueryParamsString } from '@/lib/url/generateQueryParamsString';
 
 const URL = '/api/v2/statistics/category/tree';

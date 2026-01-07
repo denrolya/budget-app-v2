@@ -12,10 +12,10 @@ import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { TransactionFilters } from '@/models/TransactionFilters';
-import { TransferFilters } from '@/models/TransferFilters';
+import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
+import { TransferFilters } from '@/features/transfers/models/TransferFilters';
 import { Timeframe } from '@/types/global';
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 
 type CombinedFilters = TransactionFilters & TransferFilters;
 

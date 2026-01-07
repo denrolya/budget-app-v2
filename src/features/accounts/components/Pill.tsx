@@ -4,9 +4,9 @@ import React, { useMemo } from 'react';
 import AccountDetailsHoverCard from '@/features/accounts/components/DetailsHoverCard';
 import { Badge } from '@/components/ui/badge';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { useAccounts } from '@/contexts/FinanceData';
-import Account from '@/models/Account';
-import { Type as AccountType } from '@/types/account';
+import { useAccounts } from '@/hooks/financeData';
+import Account from '@/features/accounts/models/Account';
+import { Type as AccountType } from '@/features/accounts';
 
 type PillVariant = 'pill' | 'inline';
 type Tone = 'subtle' | 'filled';

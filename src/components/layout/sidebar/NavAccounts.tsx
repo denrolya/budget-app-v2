@@ -18,12 +18,11 @@ import {
 } from '@/components/ui/sidebar';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useBaseCurrency } from '@/contexts/auth';
-import { useActiveAccountsWithDefaultOrder, useTotalBalance } from '@/contexts/FinanceData';
+import { useBaseCurrency } from '@/features/auth';
+import { useActiveAccountsWithDefaultOrder, useTotalBalance } from '@/hooks/financeData';
 import { cn } from '@/lib/utils';
-import Account, { ACCOUNT_TYPES_ORDER } from '@/models/Account';
+import { Account, Type as AccountType, ACCOUNT_TYPES_ORDER } from '@/features/accounts';
 import storage from '@/services/storage';
-import { Type as AccountType } from '@/types/account';
 
 const STORAGE_KEY = 'sidebar.showPinnedOnly';
 
@@ -85,42 +84,42 @@ const NavAccounts = () => {
         <SidebarMenuSubButton asChild>
           {/* Link preserves styling and semantics; no role="button" needed */}
           <Link
+            aria-label={`Account ${a.displayName}`}
             to={`/accounts/${a.id}`}
             className={cn(
               'flex h-9 w-full items-center gap-2 pr-2',
               'min-w-0 overflow-hidden',
             )}
-            aria-label={`Account ${a.displayName}`}
           >
             {/* Name block */}
             <div className="min-w-0 flex-1 overflow-hidden">
-              <AccountPill showName tooltip={false} size="sm" variant="inline" account={a} />
+              <AccountPill showName account={a} size="sm" tooltip={false} variant="inline" />
             </div>
 
             {/* Amount block - must be able to shrink */}
             <div className="flex min-w-0 flex-col items-end gap-0.5 overflow-hidden">
               {/* Primary: native currency */}
-              <span className={cn(primaryAmountClass, 'max-w-full truncate')} title={`${nativeAmount} ${a.currency}`}>
+              <span title={`${nativeAmount} ${a.currency}`} className={cn(primaryAmountClass, 'max-w-full truncate')}>
                 <MoneyValue
                   amount={nativeAmount}
                   currency={a.currency}
-                  showValuesTooltip={false}
                   showSign={false}
+                  showValuesTooltip={false}
                 />
               </span>
 
               {/* Secondary: base currency */}
               {showBaseLine && (
                 <span
-                  className={cn(secondaryAmountClass, 'max-w-full truncate')}
                   title={`${baseAmount} ${baseCurrency}`}
+                  className={cn(secondaryAmountClass, 'max-w-full truncate')}
                 >
                   <MoneyValue
                     amount={baseAmount}
                     currency={baseCurrency}
-                    showValuesTooltip={false}
-                    showSign={false}
                     prefix="≈ "
+                    showSign={false}
+                    showValuesTooltip={false}
                   />
                 </span>
               )}
@@ -150,10 +149,10 @@ const NavAccounts = () => {
           <SidebarMenuItem id={`account-group-${type}`}>
             <CollapsibleTrigger asChild>
               <SidebarMenuButton
-                id={triggerId}
-                className="capitalize data-[state=open]:bg-accent"
                 aria-controls={contentId}
                 aria-label={`Toggle ${type} accounts`}
+                id={triggerId}
+                className="capitalize data-[state=open]:bg-accent"
               >
                 <span className="truncate text-xs font-medium text-muted-foreground">{type}</span>
 
@@ -162,17 +161,17 @@ const NavAccounts = () => {
                     <MoneyValue amount={totalInBase} showSign={false} />
                   </span>
                   <ChevronRightIcon
-                    className="h-4 w-4 shrink-0 transition-transform group-data-[state=open]/collapsible:rotate-90"
                     aria-hidden="true"
+                    className="h-4 w-4 shrink-0 transition-transform group-data-[state=open]/collapsible:rotate-90"
                   />
                 </span>
               </SidebarMenuButton>
             </CollapsibleTrigger>
 
-            <CollapsibleContent id={contentId} role="region" aria-labelledby={triggerId}>
+            <CollapsibleContent aria-labelledby={triggerId} id={contentId} role="region">
               <SidebarMenuSub className="m-0 !border-l-0 px-1 py-0 overflow-hidden">
                 {items.map((a) => (
-                  <AccountRow key={a.id} a={a} />
+                  <AccountRow a={a} key={a.id} />
                 ))}
               </SidebarMenuSub>
             </CollapsibleContent>
@@ -185,8 +184,8 @@ const NavAccounts = () => {
 
   return (
     <SidebarGroup
-      className={cn('group-data-[collapsible=icon]:hidden mt-auto', 'overflow-x-hidden')}
       aria-label="Accounts sidebar"
+      className={cn('group-data-[collapsible=icon]:hidden mt-auto', 'overflow-x-hidden')}
     >
       {/* pinned toggle bar */}
       <SidebarMenu className="mb-1 overflow-x-hidden">
@@ -195,16 +194,16 @@ const NavAccounts = () => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
+                  aria-describedby={pinnedHintId}
+                  aria-label="Toggle pinned accounts filter"
                   type="button"
                   className="flex items-center gap-1 text-muted-foreground hover:text-foreground focus:outline-none"
                   onClick={() => setShowPinnedOnly((v) => !v)}
-                  aria-label="Toggle pinned accounts filter"
-                  aria-describedby={pinnedHintId}
                 >
                   {showPinnedOnly ? (
-                    <EyeIcon className="h-4 w-4" aria-hidden="true" />
+                    <EyeIcon aria-hidden="true" className="h-4 w-4" />
                   ) : (
-                    <EyeOffIcon className="h-4 w-4" aria-hidden="true" />
+                    <EyeOffIcon aria-hidden="true" className="h-4 w-4" />
                   )}
                   <span className="text-sm">{showPinnedOnly ? 'Pinned only' : 'All accounts'}</span>
                 </button>
@@ -219,43 +218,43 @@ const NavAccounts = () => {
           <div className="flex items-center gap-1">
             {hiddenCount > 0 && (
               <span
-                className="rounded bg-muted px-1 text-2xs leading-4 text-muted-foreground"
                 aria-label={`${hiddenCount} hidden accounts`}
+                className="rounded bg-muted px-1 text-2xs leading-4 text-muted-foreground"
               >
                 {hiddenCount}
               </span>
             )}
 
             <Switch
+              aria-label="Pinned only"
+              checked={showPinnedOnly}
               id={switchId}
               className="scale-90"
-              checked={showPinnedOnly}
               onCheckedChange={setShowPinnedOnly}
-              aria-label="Pinned only"
             />
           </div>
         </SidebarMenuItem>
       </SidebarMenu>
 
-      <SidebarMenu className={cn('max-h-[300px] overflow-y-auto overflow-x-hidden')} aria-label="Accounts list">
+      <SidebarMenu aria-label="Accounts list" className={cn('max-h-[300px] overflow-y-auto overflow-x-hidden')}>
         {ACCOUNT_TYPES_ORDER.map((type) => {
           const items = byTypeVisible[type];
           if (!items?.length) return null;
 
           const totalInBase = sumBy(byTypeAll[type] ?? [], (acc) => acc.convertedValues?.[baseCurrency] ?? acc.balance);
 
-          return <Group key={type} type={type} items={items} totalInBase={totalInBase} />;
+          return <Group items={items} totalInBase={totalInBase} type={type} key={type} />;
         })}
       </SidebarMenu>
 
-      <SidebarMenu className="mt-1 overflow-x-hidden" aria-label="Accounts totals">
+      <SidebarMenu aria-label="Accounts totals" className="mt-1 overflow-x-hidden">
         <SidebarMenuItem className="-mx-2 px-2">
-          <div className="-mx-2 mb-1 h-px bg-border" role="separator" aria-orientation="horizontal" />
+          <div aria-orientation="horizontal" role="separator" className="-mx-2 mb-1 h-px bg-border" />
 
           <SidebarMenuButton
             asChild
-            className="h-8 cursor-default select-none hover:bg-transparent focus-visible:ring-0"
             aria-label="Total balance"
+            className="h-8 cursor-default select-none hover:bg-transparent focus-visible:ring-0"
           >
             <div className="flex w-full items-center justify-between min-w-0">
               <span className="uppercase tracking-wide text-muted-foreground text-xs">Total</span>

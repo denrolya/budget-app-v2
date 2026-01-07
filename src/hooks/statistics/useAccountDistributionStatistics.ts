@@ -1,14 +1,13 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import find from 'lodash/find';
 import type { Moment } from 'moment';
 import { DependencyList, useEffect } from 'react';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
-import { useAccounts } from '@/contexts/FinanceData';
-import type Account from '@/models/Account';
-import { axiosFetcher } from '@/services/api';
-import { Type as TransactionType } from '@/types/transaction';
+import { Account } from '@/features/accounts';
+import { Type as TransactionType } from '@/features/transactions';
+import { useAccounts } from '@/hooks/financeData';
 import { generateQueryParamsString } from '@/lib/url/generateQueryParamsString';
+import { axiosFetcher } from '@/services/api';
 
 const URL = '/api/v2/statistics/account-distribution';
 

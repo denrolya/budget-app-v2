@@ -2,7 +2,7 @@ import cn from 'classnames';
 import React from 'react';
 
 import { StatisticsType } from '@/types/statistics';
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 
 interface Props {
   percentageChange: number | { min: number; max: number };

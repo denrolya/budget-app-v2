@@ -1,12 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { Credentials } from '@/app/login/page';
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+
+import { Credentials } from '../types';
 
 const loginSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters'),
@@ -32,7 +34,7 @@ export const LoginForm: React.FC<Props> = ({ error, isLoading, onSubmit }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           control={form.control}
           name="username"
@@ -60,7 +62,7 @@ export const LoginForm: React.FC<Props> = ({ error, isLoading, onSubmit }) => {
           )}
         />
         {error && <p className="text-red-500 text-sm">{error}</p>}
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button disabled={isLoading} type="submit" className="w-full">
           {isLoading && (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

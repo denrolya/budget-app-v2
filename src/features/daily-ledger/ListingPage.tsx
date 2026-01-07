@@ -23,7 +23,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
+import { useTransactionsAndTransfersList } from '@/features/daily-ledger/hooks/useList';
 import { useTimeframe } from '@/features/daily-ledger/hooks/useTimeframe';
 import { useLedgerHotkeys } from '@/features/daily-ledger/hooks/useHotkeys';
 
@@ -79,7 +79,7 @@ export const DailyLedgerPage: React.FC = () => {
     setShowTransactions,
     showTransfers,
     setShowTransfers,
-  } = useTransactionsAndTransfers({
+  } = useTransactionsAndTransfersList({
     updateUrl: true,
     excludeTransfers: true,
   });

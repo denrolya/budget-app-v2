@@ -2,7 +2,7 @@ import { ResponsiveTree } from '@nivo/tree';
 import { hsl } from 'd3-color';
 import { useMemo } from 'react';
 
-import { useExpenseCategoriesTree } from '@/contexts/FinanceData';
+import { useExpenseCategoriesTree } from '@/hooks/financeData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 type Category = {

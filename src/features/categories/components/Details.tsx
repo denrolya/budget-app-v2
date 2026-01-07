@@ -7,9 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useTransactions } from '@/hooks/useTransactions';
-import Category from '@/models/Category';
-import { TransactionFilters } from '@/models/TransactionFilters';
+import { useList as useTransactionsList } from '@/features/transactions';
+import Category from '@/features/categories/models/Category';
+import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
 import CategoriesSunburst from '@/features/sandbox/components/Sunburst.example';
 
 interface Props {
@@ -17,7 +17,6 @@ interface Props {
 }
 
 export const CategoryDetails: React.FC<Props> = ({ category }) => {
-  console.log(category);
   const { openForm } = useFormContext();
   const [activeTab, setActiveTab] = useState('activity');
   const {
@@ -27,7 +26,7 @@ export const CategoryDetails: React.FC<Props> = ({ category }) => {
     error: transactionsError,
     refetch: refetchTransactions,
     setFilter,
-  } = useTransactions({
+  } = useTransactionsList({
     updateUrl: false,
     initialFilters: new TransactionFilters({
       withNestedCategories: true,

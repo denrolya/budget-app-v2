@@ -17,8 +17,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useTransactionsAndTransfers } from '@/hooks/useTransactionsAndTransfers';
-import Account from '@/models/Account';
+import { useTransactionsAndTransfersList } from '@/features/daily-ledger/hooks/useList';
+import Account from '@/features/accounts/models/Account';
 import { confirm } from '@/lib/confirmation';
 
 interface Props {
@@ -38,7 +38,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
     return { after, before };
   }, [currentDate]);
 
-  const { groupedItems, isLoading, isError, error, setFilter } = useTransactionsAndTransfers({
+  const { groupedItems, isLoading, isError, error, setFilter } = useTransactionsAndTransfersList({
     updateUrl: true,
     excludeTransfers: true,
   });

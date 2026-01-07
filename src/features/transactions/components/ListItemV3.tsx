@@ -12,7 +12,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
-import Transaction from '@/models/Transaction';
+import Transaction from '@/features/transactions/models/Transaction';
 
 interface TransactionItemProps {
   transaction: Transaction;

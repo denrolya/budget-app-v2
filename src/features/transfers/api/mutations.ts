@@ -1,0 +1,70 @@
+
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import moment from 'moment';
+import { toast } from 'sonner';
+
+import { api } from '@/services/api';
+import { queryKeys as accountQueryKeys } from '@/features/accounts';
+
+import type { CreateTransferInput } from '../types';
+
+import { queryKeys } from './keys';
+
+export const useMutations = (opts?: { invalidateKey?: readonly unknown[] }) => {
+  const qc = useQueryClient();
+  const invalidateKey = opts?.invalidateKey ?? queryKeys.all;
+
+  const invalidate = async () => {
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: invalidateKey }),
+      qc.invalidateQueries({ queryKey: accountQueryKeys.all }),
+    ]);
+  };
+
+  const createMutation = useMutation({
+    mutationFn: async (input: CreateTransferInput) => {
+      const payload = {
+        from: input.from,
+        to: input.to,
+        amount: String(input.amount),
+        rate: String(input.rate),
+        fee: input.fee != null ? String(input.fee) : undefined,
+        feeAccount: input.feeAccount,
+        executedAt: moment(input.executedAt).toISOString(),
+        note: input.note ?? '',
+      };
+
+      return api.post('/api/transfers', payload).then((r) => r.data);
+    },
+    onSuccess: async () => {
+      await invalidate();
+      toast.success('Transfer created successfully');
+    },
+    onError: (error: any) => {
+      toast.error('Failed to create transfer', {
+        description: error?.message || 'Unexpected error.',
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number | string) => api.delete(`/api/transfers/${id}`).then((r) => r.data),
+    onSuccess: async () => {
+      await invalidate();
+      toast.success('Transfer deleted successfully');
+    },
+    onError: (error: any) => {
+      toast.error('Failed to delete transfer', {
+        description: error?.message || 'Unexpected error.',
+      });
+    },
+  });
+
+  return {
+    create: createMutation.mutateAsync,
+    delete: deleteMutation.mutateAsync,
+
+    isCreating: createMutation.isPending,
+    isDeleting: deleteMutation.isPending,
+  };
+};

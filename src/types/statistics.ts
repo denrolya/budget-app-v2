@@ -1,4 +1,4 @@
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 
 export enum IntervalUnit {
   Day = 'day',

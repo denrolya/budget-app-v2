@@ -14,13 +14,12 @@
         "test:ui": "vitest --ui",
         "test:coverage": "vitest run --coverage",
         "prepare": "husky install",
-        "analyze:sonar:scan": "sonar-scanner",
-        "analyze:unused-packages": "npm-check",
-        "analyze:knip": "knip",
-        "analyze:knip:strict": "knip --reporter compact",
-        "analyze:knip:all": "npm run analyze:unused && npm run analyze:files && npm run analyze:deps",
-        "analyze:ts-prune": "ts-prune",
-        "analyze:unimported": "unimported"
+        "sonar:scan": "sonar-scanner",
+        "unused-packages": "npm-check",
+        "knip": "knip",
+        "knip:strict": "knip --reporter compact",
+        "ts-prune": "ts-prune",
+        "unimported": "unimported"
     },
     "dependencies": {
         "@dnd-kit/core": "^6.3.1",

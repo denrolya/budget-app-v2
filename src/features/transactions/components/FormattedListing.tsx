@@ -6,7 +6,7 @@ import List, { ListSkeleton } from '@/features/transactions/components/List';
 import TableListing from '@/features/transactions/components/TableListing';
 import TableListingSkeleton from '@/features/transactions/components/TableListingSkeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import Transaction from '@/models/Transaction';
+import Transaction from '@/features/transactions/models/Transaction';
 
 interface Props {
   isLoading: boolean;

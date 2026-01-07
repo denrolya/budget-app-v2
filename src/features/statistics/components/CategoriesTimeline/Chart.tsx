@@ -18,7 +18,7 @@ import {
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { BACKEND_DATE_FORMAT, MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import { CHART_STYLES } from '@/constants/recharts';
-import { useCategories } from '@/contexts/FinanceData';
+import { useCategories } from '@/hooks/financeData';
 import { useTheme } from '@/contexts/theme';
 import { ISO8601Period } from '@/types/global';
 import { cn } from '@/lib/utils';

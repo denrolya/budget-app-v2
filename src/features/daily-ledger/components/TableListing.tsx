@@ -12,12 +12,12 @@ import TransactionDetails from '@/features/transactions/components/Details';
 import TransactionRow from '@/features/transactions/components/ListingRow';
 import TransferDetails from '@/features/transfers/components/Details';
 import TransferRow from '@/features/transfers/components/ListingRow';
-import { useInlineTransactionEdit } from '@/hooks/useInlineTransactionEdit';
-import { useTransactionMutations } from '@/hooks/useTransactionMutations';
+import { useInlineEdit } from '@/features/transactions/hooks/useInlineEdit';
+import { useMutations } from '@/features/transactions/api/mutations';
 import { confirm } from '@/lib/confirmation';
 import { cn } from '@/lib/utils';
-import Transaction from '@/models/Transaction';
-import Transfer from '@/models/Transfer';
+import Transaction from '@/features/transactions/models/Transaction';
+import Transfer from '@/features/transfers/models/Transfer';
 
 interface Props {
   isLoading: boolean;
@@ -37,7 +37,7 @@ const TableListing: React.FC<Props> = ({
                                          isReversedOrder = false,
                                          compact = true,
                                        }) => {
-  const { updateTransaction, deleteTransaction, isUpdating } = useTransactionMutations();
+  const { update: updateTransaction, delete: deleteTransaction, isUpdating } = useMutations();
   const { openForm } = useFormContext();
 
   const [openSheetId, setOpenSheetId] = useState<number | null>(null);
@@ -52,7 +52,7 @@ const TableListing: React.FC<Props> = ({
     return isReversedOrder ? d.reverse() : d;
   }, [after, before, isReversedOrder]);
 
-  const inlineEdit = useInlineTransactionEdit({
+  const inlineEdit = useInlineEdit({
     isUpdating,
     onSave: async ({ original, updates }) => {
       await updateTransaction({

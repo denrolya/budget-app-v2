@@ -11,9 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FILTER_PRESETS, MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { cn } from '@/lib/utils';
-import { TransactionFilters } from '@/models/TransactionFilters';
+import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
 import { Timeframe } from '@/types/global';
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 
 interface Props {
   data: TransactionFilters;

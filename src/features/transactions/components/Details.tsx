@@ -1,22 +1,21 @@
 import { Bitcoin, DollarSign, Edit, Euro, InfoIcon, Loader2, Trash2 } from 'lucide-react';
 import React from 'react';
 
-import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
-import TransactionValue from '@/components/common/TransactionValue';
-import AccountPill from '@/features/accounts/components/Pill';
-import { ListItem as TransactionListItem } from '@/features/transactions/components/ListItem';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Separator } from '@/components/ui/separator';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
-import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/contexts/FinanceData';
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
+import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/hooks/financeData';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useTransactionMutations } from '@/hooks/useTransactionMutations';
-import Transaction from '@/models/Transaction';
+import AccountPill from '@/features/accounts/components/Pill';
+import { useMutations } from '@/features/transactions/api/mutations';
+import { ListItem as TransactionListItem } from '@/features/transactions/components/ListItem';
 import { confirm } from '@/lib/confirmation';
+import Transaction from '@/features/transactions/models/Transaction';
 
 interface TransactionDetailsProps {
   transaction: Transaction;
@@ -34,15 +33,15 @@ const RateDisplay: React.FC<{
   decimals: number;
 }> = ({ value, source, from, to, amount, decimals }) => (
   <div className="flex items-center space-x-2 text-xs font-mono">
-    <MoneyValue useColors={false} amount={amount} currency={from} />
+    <MoneyValue amount={amount} currency={from} useColors={false} />
     <span className="text-muted-foreground">=</span>
     <div className="flex-1 flex items-start">
       <MoneyValue
-        useColors={false}
-        className="font-mono"
         amount={amount * value}
         currency={to}
         maximumFractionDigits={decimals}
+        useColors={false}
+        className="font-mono"
       />
       <sup className="ml-1 mt-2 text-[8px] font-medium text-muted-foreground">{source}</sup>
     </div>
@@ -51,7 +50,7 @@ const RateDisplay: React.FC<{
 
 export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
   const { openForm } = useFormContext();
-  const { deleteTransaction, isDeleting, isUpdating: isEditing } = useTransactionMutations();
+  const { deleteTransaction, isDeleting, isUpdating: isEditing } = useMutations();
 
   const isDebt = transaction.debt && transaction.debt.debtor;
   const fixerRates = useFixerExchangeRates();
@@ -131,26 +130,26 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
           <div className="flex justify-between items-center">
             <span className="tracking-tight font-normal">Amount</span>
             <MoneyValue
-              showValuesTooltip={false}
-              className="text-xs font-mono"
               amount={transaction.amount * (transaction.isExpense() ? -1 : 1)}
               currency={transaction.account.currency}
+              showValuesTooltip={false}
+              className="text-xs font-mono"
             />
           </div>
           <div className="flex justify-between items-center">
             <span className="tracking-tight font-normal">Account</span>
             <span className="font-medium">
-              <AccountPill size="sm" account={transaction.account} />
+              <AccountPill account={transaction.account} size="sm" />
             </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="tracking-tight font-normal">Date</span>
             <RelativeDatetimeDisplay
-              showRelative={false}
+              date={transaction.executedAt}
               showDayBadge={false}
+              showRelative={false}
               variant="default"
               className="text-xs font-mono tracking-tighter text-muted-foreground"
-              date={transaction.executedAt}
             />
           </div>
           <div>
@@ -195,9 +194,8 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
 
                   return (
                     <ResponsiveTooltip
-                      openDelay={0}
                       desktopComponent="hovercard"
-                      key={`transaction-${transaction.id}-converted-values-${currency}`}
+                      openDelay={0}
                       content={
                         <div className="space-y-4">
                           <div>
@@ -206,45 +204,46 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
                               {transaction.executedAt.format(BACKEND_DATE_FORMAT)}
                             </p>
                             <RateDisplay
-                              value={value / transaction.amount}
-                              source="hist"
-                              from={transaction.account.currency}
-                              to={currency}
                               amount={transaction.amount}
                               decimals={isBTC ? 8 : 2}
+                              from={transaction.account.currency}
+                              source="hist"
+                              to={currency}
+                              value={value / transaction.amount}
                             />
                           </div>
                           <div>
                             <h4 className="font-semibold">Current Rates</h4>
                             <div className="space-y-1">
                               <RateDisplay
-                                value={fixerRates[currency] / fixerRates[transaction.account.currency]}
+                                amount={transaction.amount}
+                                decimals={isBTC ? 8 : 2}
+                                from={transaction.account.currency}
                                 source="fx"
-                                from={transaction.account.currency}
                                 to={currency}
-                                amount={transaction.amount}
-                                decimals={isBTC ? 8 : 2}
+                                value={fixerRates[currency] / fixerRates[transaction.account.currency]}
                               />
                               <RateDisplay
-                                value={monobankRates[currency] / monobankRates[transaction.account.currency]}
+                                amount={transaction.amount}
+                                decimals={isBTC ? 8 : 2}
+                                from={transaction.account.currency}
                                 source="mn"
-                                from={transaction.account.currency}
                                 to={currency}
-                                amount={transaction.amount}
-                                decimals={isBTC ? 8 : 2}
+                                value={monobankRates[currency] / monobankRates[transaction.account.currency]}
                               />
                               <RateDisplay
-                                value={wiseRates[currency] / wiseRates[transaction.account.currency]}
-                                source="ws"
-                                from={transaction.account.currency}
-                                to={currency}
                                 amount={transaction.amount}
                                 decimals={isBTC ? 8 : 2}
+                                from={transaction.account.currency}
+                                source="ws"
+                                to={currency}
+                                value={wiseRates[currency] / wiseRates[transaction.account.currency]}
                               />
                             </div>
                           </div>
                         </div>
                       }
+                      key={`transaction-${transaction.id}-converted-values-${currency}`}
                     >
                       <div className="flex justify-between items-center cursor-help">
                         <span className="flex items-center space-x-2 tracking-tight font-normal">
@@ -252,11 +251,11 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
                           <span>{currency}</span>
                         </span>
                         <MoneyValue
-                          useColors={false}
-                          className="text-xs font-mono text-muted-foreground"
                           amount={value}
                           currency={currency}
                           maximumFractionDigits={isBTC ? 8 : 2}
+                          useColors={false}
+                          className="text-xs font-mono text-muted-foreground"
                         />
                       </div>
                     </ResponsiveTooltip>
@@ -273,7 +272,7 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
             <div className="grid gap-2">
               <h3 className="font-semibold">Compensation Transactions</h3>
               {transaction.compensations.map((comp) => (
-                <TransactionListItem isCompensationView key={comp.id} transaction={comp} />
+                <TransactionListItem isCompensationView transaction={comp} key={comp.id} />
               ))}
             </div>
           </>
@@ -283,9 +282,9 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
       <div className="flex items-center justify-end mt-6">
         <div className="flex space-x-2">
           <Button
-            variant="outline"
-            size="sm"
             disabled={isEditing || isDeleting}
+            size="sm"
+            variant="outline"
             onClick={() => openForm(FormType.Transaction, transaction)}
           >
             {isEditing && (
@@ -302,10 +301,10 @@ export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
             )}
           </Button>
           <Button
-            variant="outline"
-            size="sm"
-            className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
             disabled={isEditing || isDeleting}
+            size="sm"
+            variant="outline"
+            className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
             onClick={() => handleDelete(transaction)}
           >
             {isDeleting && (

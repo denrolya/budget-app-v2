@@ -4,7 +4,7 @@ import React from 'react';
 import MoneyValue from '@/components/common/MoneyValue';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { ComparisonType, StatisticsType } from '@/types/statistics';
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 import { PercentageChange, StatisticsData } from '@/types/valueByPeriodStatistics';
 import TooltipContent from '@/features/statistics/components/StatisticsCard/TooltipContent';
 import PercentageBadge from '@/features/statistics/components/StatisticsCard/PercentageBadge';

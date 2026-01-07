@@ -57,24 +57,24 @@ const PageWithSidebar: PageWithSidebarComponent = ({
 
   return (
     <div
+      aria-label={ariaLabel}
       className={cn(
         'flex h-screen min-h-0 overflow-hidden',
         // Ensure flex children can shrink properly (prevents weird overflow issues in nested layouts)
         'min-w-0',
         className,
       )}
-      aria-label={ariaLabel}
       {...props}
     >
       {/* Desktop sidebar */}
       {!isMobile && (
         <div
+          aria-label="Sidebar container"
           className={cn(
             'shrink-0 border-r bg-background',
             'min-h-0 h-full overflow-x-hidden',
             sidebarWidth,
           )}
-          aria-label="Sidebar container"
         >
           {sidebarScrollable ? (
             renderScrollable(sidebar)
@@ -119,8 +119,8 @@ const Header: React.FC<
 
   return (
     <header
-      className={cn('bg-background border-b p-4', className)}
       aria-labelledby={typeof title === 'string' ? titleId : undefined}
+      className={cn('bg-background border-b p-4', className)}
       {...props}
     >
       {overrideContent ? (
@@ -129,8 +129,8 @@ const Header: React.FC<
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="flex items-center gap-2 min-w-0">
             {onBack && (
-              <Button type="button" variant="ghost" size="icon" onClick={onBack} aria-label={backAriaLabel}>
-                <ChevronLeft className="h-6 w-6" aria-hidden="true" />
+              <Button aria-label={backAriaLabel} size="icon" type="button" variant="ghost" onClick={onBack}>
+                <ChevronLeft aria-hidden="true" className="h-6 w-6" />
               </Button>
             )}
 
@@ -157,8 +157,8 @@ const Sidebar: React.FC<React.ComponentPropsWithoutRef<'aside'> & { ariaLabel?: 
                                                                                                ...props
                                                                                              }) => (
   <aside
-    className={cn('flex min-h-0 h-full min-w-0 flex-col overflow-x-hidden', className)}
     aria-label={ariaLabel}
+    className={cn('flex min-h-0 h-full min-w-0 flex-col overflow-x-hidden', className)}
     {...props}
   >
     {children}
@@ -171,7 +171,7 @@ const Content: React.FC<React.ComponentPropsWithoutRef<'main'> & { ariaLabel?: s
                                                                                               ariaLabel = 'Content',
                                                                                               ...props
                                                                                             }) => (
-  <main className={cn('min-h-0 h-full min-w-0 overflow-x-hidden', className)} aria-label={ariaLabel} {...props}>
+  <main aria-label={ariaLabel} className={cn('min-h-0 h-full min-w-0 overflow-x-hidden', className)} {...props}>
     {children}
   </main>
 );

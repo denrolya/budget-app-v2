@@ -14,13 +14,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BACKEND_DATE_FORMAT, MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
-import { useBaseCurrency } from '@/contexts/auth';
+import { useBaseCurrency } from '@/features/auth';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import List from '@/features/transactions/components/List';
 import TableListing from '@/features/transactions/components/TableListing';
 import { useIsMobile } from '@/hooks/use-mobile';
-import Debt from '@/models/Debt';
-import Transaction from '@/models/Transaction';
+import Debt from '@/features/debts/models/Debt';
+import Transaction from '@/features/transactions/models/Transaction';
 
 interface Props {
   debt: Debt;

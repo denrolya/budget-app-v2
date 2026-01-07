@@ -12,9 +12,9 @@ import TransferListItem, {
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROUTES } from '@/constants/routes';
-import { useBaseCurrency } from '@/contexts/auth';
-import Transaction from '@/models/Transaction';
-import Transfer from '@/models/Transfer';
+import { useBaseCurrency } from '@/features/auth';
+import Transaction from '@/features/transactions/models/Transaction';
+import Transfer from '@/features/transfers/models/Transfer';
 
 interface Props {
   date: Moment;

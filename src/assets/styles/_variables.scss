@@ -2,7 +2,7 @@ $transition-duration: 0.3s;
 $transition-timing: ease;
 
 :export {
-  transitionDuration: $transition-duration;
+  transition-duration: $transition-duration;
   transitionTiming: $transition-timing;
 }
 :root {

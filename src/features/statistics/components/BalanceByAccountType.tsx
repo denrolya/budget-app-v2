@@ -3,12 +3,12 @@ import { CreditCard, Globe, HelpCircle, Wallet } from 'lucide-react';
 import React from 'react';
 
 import { StatisticsType } from '@/types/statistics';
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { Card, CardContent } from '@/components/ui/card';
-import { useBaseCurrency } from '@/contexts/auth';
-import { useActiveAccounts, useTotalBalance } from '@/contexts/FinanceData';
-import { Type as AccountType } from '@/types/account';
+import { useBaseCurrency } from '@/features/auth';
+import { useActiveAccounts, useTotalBalance } from '@/hooks/financeData';
+import { Type as AccountType } from '@/features/accounts';
 import PercentageIndicator from '@/features/statistics/components/StatisticsCard/PercentageIndicator';
 
 interface Props {

@@ -2,7 +2,7 @@ import { Moment } from 'moment';
 import qs from 'qs';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 
 export const generateQueryParamsString = ({
                                             after,

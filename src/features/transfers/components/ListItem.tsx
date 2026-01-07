@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
-import Transfer from '@/models/Transfer';
+import Transfer from '@/features/transfers/models/Transfer';
 
 interface TransferItemProps {
   transfer: Transfer;

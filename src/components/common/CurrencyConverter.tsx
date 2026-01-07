@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CURRENCY_CODE } from '@/constants/currency';
-import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/contexts/FinanceData';
+import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/hooks/financeData';
 
 type RATE_SOURCE = 'mnb' | 'fx' | 'wse';
 

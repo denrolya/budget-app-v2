@@ -2,7 +2,7 @@ import { ResponsiveSunburst } from '@nivo/sunburst';
 import { Moment } from 'moment';
 import React, { useMemo } from 'react';
 
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 import { useCategoryTreeStatistics } from '@/hooks/statistics/useCategoryTreeStatistics';
 
 interface CategoryNode {

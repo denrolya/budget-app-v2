@@ -4,7 +4,7 @@ import React, { useMemo, useState } from 'react';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PERIOD_OPTIONS, TIMEFRAME_OPTIONS } from '@/constants/datetime';
-import { useBaseCurrency } from '@/contexts/auth';
+import { useBaseCurrency } from '@/features/auth';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
 import { UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { cn } from '@/lib/utils';

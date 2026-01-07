@@ -2,8 +2,8 @@ import React from 'react';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useBaseCurrency } from '@/contexts/auth';
-import Account, { ACCOUNT_TYPES_ORDER } from '@/models/Account';
+import { useBaseCurrency } from '@/features/auth';
+import { Account, ACCOUNT_TYPES_ORDER } from '@/features/accounts';
 
 interface Props {
   accounts: Account[];

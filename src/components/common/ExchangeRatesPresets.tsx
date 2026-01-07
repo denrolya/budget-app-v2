@@ -2,15 +2,15 @@ import cn from 'classnames';
 import { Equal } from 'lucide-react';
 import React, { useMemo } from 'react';
 
+import { useCurrencyConverter } from '@/contexts/CurrencyConverter';
 import MoneyValue from '@/components/common/MoneyValue';
 import { Button } from '@/components/ui/button';
 import { CURRENCY_CODE } from '@/constants/currency';
 import {
-  useFinanceData,
   useFixerExchangeRates,
   useMonobankExchangeRates,
   useWiseExchangeRates,
-} from '@/contexts/FinanceData';
+} from '@/hooks/financeData';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 
 interface RateComparisonProps {
@@ -29,7 +29,7 @@ interface RateDisplayProps {
 }
 
 export const ExchangeRatesPresets: React.FC = () => {
-  const { toggleCurrencyConverter } = useFinanceData();
+  const { toggle: toggleCurrencyConverter } = useCurrencyConverter();
   const fixerRates = useFixerExchangeRates();
   const monoRates = useMonobankExchangeRates();
   const wiseRates = useWiseExchangeRates();
@@ -66,14 +66,14 @@ export const ExchangeRatesPresets: React.FC = () => {
 
     const RateDisplay: React.FC<RateDisplayProps> = ({ value, source, from, to, amount, maximumFractionDigits }) => (
       <div className="flex items-center space-x-2 text-sm">
-        <MoneyValue useColors={false} amount={amount} currency={from} />
+        <MoneyValue amount={amount} currency={from} useColors={false} />
         <Equal className="h-3 w-3 text-muted-foreground" />
         <div className="flex-1 flex items-start">
           <MoneyValue
-            useColors={false}
             amount={amount * value}
             currency={to}
             maximumFractionDigits={maximumFractionDigits}
+            useColors={false}
           />
           <sup className="ml-1 mt-2 text-[8px] font-medium text-muted-foreground">{source}</sup>
         </div>
@@ -98,35 +98,35 @@ export const ExchangeRatesPresets: React.FC = () => {
         </h3>
         {rate.fixer !== null && (
           <RateDisplay
-            value={rate.fixer}
-            source="fx"
-            from={from}
-            to={to}
             amount={amount}
+            from={from}
             maximumFractionDigits={maximumFractionDigits}
+            source="fx"
+            to={to}
+            value={rate.fixer}
           />
         )}
         {rate.mono !== null && (
           <div className="mt-1 text-muted-foreground">
             <RateDisplay
-              value={rate.mono}
-              source="mb"
-              from={from}
-              to={to}
               amount={amount}
+              from={from}
               maximumFractionDigits={maximumFractionDigits}
+              source="mb"
+              to={to}
+              value={rate.mono}
             />
           </div>
         )}
         {rate.wise !== null && (
           <div className="mt-1 text-muted-foreground">
             <RateDisplay
-              value={rate.wise}
-              source="ws"
-              from={from}
-              to={to}
               amount={amount}
+              from={from}
               maximumFractionDigits={maximumFractionDigits}
+              source="ws"
+              to={to}
+              value={rate.wise}
             />
           </div>
         )}
@@ -140,7 +140,7 @@ export const ExchangeRatesPresets: React.FC = () => {
         <RateComparison from={CURRENCY_CODE.EUR} to={CURRENCY_CODE.HUF} />
         <RateComparison from={CURRENCY_CODE.USD} to={CURRENCY_CODE.HUF} />
         <RateComparison from={CURRENCY_CODE.EUR} to={CURRENCY_CODE.USD} />
-        <RateComparison from={CURRENCY_CODE.HUF} to={CURRENCY_CODE.UAH} amount={1000} />
+        <RateComparison amount={1000} from={CURRENCY_CODE.HUF} to={CURRENCY_CODE.UAH} />
         <RateComparison from={CURRENCY_CODE.EUR} to={CURRENCY_CODE.UAH} />
         <RateComparison from={CURRENCY_CODE.USD} to={CURRENCY_CODE.UAH} />
         <RateComparison from={CURRENCY_CODE.BTC} to={CURRENCY_CODE.EUR} />

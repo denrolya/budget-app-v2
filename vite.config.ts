@@ -118,6 +118,33 @@ const pwaOptions: Partial<VitePWAOptions> = {
 };
 
 export default defineConfig({
+  build: {
+    sourcemap: false,
+    reportCompressedSize: true,
+    chunkSizeWarningLimit: 750,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+
+          if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) return 'vendor-react';
+          if (id.includes('@radix-ui')) return 'vendor-radix';
+          if (id.includes('@tanstack')) return 'vendor-tanstack';
+
+          // heavy charting + d3 ecosystem
+          if (id.includes('recharts') || id.includes('@nivo') || id.includes('d3-')) return 'vendor-charts';
+
+          // date libs
+          if (id.includes('moment') || id.includes('date-fns')) return 'vendor-dates';
+
+          // utilities
+          if (id.includes('lodash')) return 'vendor-utils';
+
+          return 'vendor';
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     visualizer({ open: true }) as unknown as PluginOption, // This will open a visualization of your chunks after build

@@ -1,10 +1,10 @@
 import moment, { Moment } from 'moment';
 import { useMemo } from 'react';
 
-import { useCategories } from '@/contexts/FinanceData';
+import { useCategories } from '@/hooks/financeData';
 import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
 import { ComparisonType, Interval, StatisticsType } from '@/types/statistics';
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 import {
   IsIncrease,
   PercentageChange,

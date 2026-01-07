@@ -3,10 +3,10 @@ import React, { useMemo } from 'react';
 import MoneyValue from '@/components/common/MoneyValue';
 import AccountPill from '@/features/accounts/components/Pill';
 import ResponsiveTooltip from '@/components/ui/responsive-tooltip';
-import { useBaseCurrency } from '@/contexts/auth';
-import { useAccounts } from '@/contexts/FinanceData';
+import { useBaseCurrency } from '@/features/auth';
+import { useAccounts } from '@/hooks/financeData';
 import { cn } from '@/lib/utils';
-import Account, { ACCOUNT_TYPES_ORDER } from '@/models/Account';
+import { Account, ACCOUNT_TYPES_ORDER } from '@/features/accounts';
 
 type Props = {
   className?: string;

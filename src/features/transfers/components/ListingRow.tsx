@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { TableCell, TableRow } from '@/components/ui/table';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { cn } from '@/lib/utils';
-import Transfer from '@/models/Transfer';
+import Transfer from '@/features/transfers/models/Transfer';
 
 type TransferRowProps = {
   transfer: Transfer;

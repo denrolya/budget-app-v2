@@ -10,10 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { TransactionFilters } from '@/models/TransactionFilters';
-import { TransferFilters } from '@/models/TransferFilters';
+import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
+import { TransferFilters } from '@/features/transfers/models/TransferFilters';
 import { Timeframe } from '@/types/global';
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 
 type CombinedFilters = TransactionFilters & TransferFilters;
 

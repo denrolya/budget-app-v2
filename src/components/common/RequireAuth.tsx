@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
-import { useAuth } from '@/contexts/auth';
+import { useAuth } from '@/features/auth';
 
 const RequireAuth: React.FC = () => {
   const { isAuthenticated, isInitialized, isLoading } = useAuth();
@@ -10,7 +10,7 @@ const RequireAuth: React.FC = () => {
   if (!isInitialized || isLoading) return null;
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
+    return <Navigate replace state={{ from: location }} to="/login" />;
   }
 
   return <Outlet />;

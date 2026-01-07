@@ -10,7 +10,6 @@ import * as z from 'zod';
 
 import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
 import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
-import { CSVUploader } from '@/features/transactions/components/CSVUploader';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -19,8 +18,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
 import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
-import { useTransactionMutations } from '@/hooks/useTransactionMutations';
-import { Type as TransactionType } from '@/types/transaction';
+
+import { useMutations } from '../api/mutations';
+import { Type as TransactionType } from '../types';
+
+import { CSVUploader } from './CSVUploader';
 
 const transactionSchema = z.object({
   type: z.nativeEnum(TransactionType),
@@ -63,7 +65,7 @@ const missingRequired = (t: TransactionRow) => !t.account || !t.category;
 export const BulkCreateTableForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
-  const { createTransaction } = useTransactionMutations();
+  const { create: createTransaction } = useMutations();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -114,8 +116,9 @@ export const BulkCreateTableForm: React.FC = () => {
         try {
           await createTransaction(data.transactions[i]);
           ok.push(i);
-        } catch {
+        } catch(e) {
           failed += 1;
+          console.error(e);
           toast.error(`Failed to submit row #${i}.`);
         }
       }

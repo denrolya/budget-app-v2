@@ -21,7 +21,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCategoryTreeStatistics } from '@/hooks/statistics/useCategoryTreeStatistics';
 import { UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { Timeframe } from '@/types/global';
-import { Type, Type as TransactionType } from '@/types/transaction';
+import { Type, Type as TransactionType } from '@/features/transactions';
 import { formatShortDate } from '@/lib/datetime/formatShortDate';
 import TransactionsDrawer from '@/features/statistics/components/CategoriesDoughnut/TransactionsDrawer';
 import Skeleton from '@/features/statistics/components/CategoriesDoughnut/Skeleton';

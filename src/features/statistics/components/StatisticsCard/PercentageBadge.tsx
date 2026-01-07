@@ -2,7 +2,7 @@ import cn from 'classnames';
 import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 import React from 'react';
 
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 
 interface Props {
   percentage: number;

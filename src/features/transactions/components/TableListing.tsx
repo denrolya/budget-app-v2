@@ -10,10 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useTransactionMutations } from '@/hooks/useTransactionMutations';
-import Transaction from '@/models/Transaction';
+import { useMutations } from '@/features/transactions/api/mutations';
+import Transaction from '@/features/transactions/models/Transaction';
 import { confirm } from '@/lib/confirmation';
-import { useInlineTransactionEdit } from '@/hooks/useInlineTransactionEdit';
+import { useInlineEdit } from '@/features/transactions/hooks/useInlineEdit';
 import ListingRow from '@/features/transactions/components/ListingRow';
 
 
@@ -23,13 +23,13 @@ interface Props extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ...props }) => {
-  const { updateTransaction, deleteTransaction, isUpdating } = useTransactionMutations();
+  const { update: updateTransaction, delete: deleteTransaction, isUpdating } = useMutations();
   const { openForm } = useFormContext();
 
   // Optional: if you want only one details sheet open at a time
   const [openSheetId, setOpenSheetId] = useState<number | null>(null);
 
-  const inlineEdit = useInlineTransactionEdit({
+  const inlineEdit = useInlineEdit({
     isUpdating,
     onSave: async ({ original, updates }) => {
       await updateTransaction({
@@ -121,26 +121,26 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
                 })}
               >
                 <div className="flex justify-between items-center">
-                  <RelativeDatetimeDisplay showDayBadge badgeSize="sm" variant="default" showTime={false} date={date} />
-                  <SummaryBadge icon={ROUTES.TRANSACTION_LIST.icon} count={count} value={totalValue} />
+                  <RelativeDatetimeDisplay showDayBadge badgeSize="sm" date={date} showTime={false} variant="default" />
+                  <SummaryBadge count={count} icon={ROUTES.TRANSACTION_LIST.icon} value={totalValue} />
                 </div>
               </TableCell>
             </TableRow>
 
             {transactions.map((transaction) => (
               <ListingRow
-                key={transaction.id}
-                transaction={transaction}
-                compact={compact}
                 columns={columns as any}
-                renderDetails={(tx: Transaction) => <Details transaction={tx} />}
-                onOpenForm={(tx: Transaction) => openForm(FormType.Transaction, tx)}
-                onDelete={handleDelete}
-                onToggleDraft={toggleDraft}
+                compact={compact}
                 inlineEdit={inlineEdit}
+                renderDetails={(tx: Transaction) => <Details transaction={tx} />}
                 sheetOpen={openSheetId === transaction.id}
-                onSheetOpenChange={(open: boolean) => setOpenSheetId(open ? transaction.id : null)}
+                transaction={transaction}
                 className="text-xs"
+                key={transaction.id}
+                onDelete={handleDelete}
+                onOpenForm={(tx: Transaction) => openForm(FormType.Transaction, tx)}
+                onSheetOpenChange={(open: boolean) => setOpenSheetId(open ? transaction.id : null)}
+                onToggleDraft={toggleDraft}
               />
             ))}
           </React.Fragment>

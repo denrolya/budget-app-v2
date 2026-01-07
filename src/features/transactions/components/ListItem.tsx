@@ -17,8 +17,8 @@ import {
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import Transaction from '@/models/Transaction';
-import { Type } from '@/types/transaction';
+import Transaction from '@/features/transactions/models/Transaction';
+import { Type } from '@/features/transactions';
 import TransactionValue from '@/components/common/TransactionValue';
 
 interface TransactionListItemProps {

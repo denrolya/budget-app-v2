@@ -6,7 +6,7 @@ import List, { ListSkeleton } from '@/features/transfers/components/List';
 import TableListing from '@/features/transfers/components/TableListing';
 import TableListingSkeleton from '@/features/transfers/components/TableListingSkeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import Transfer from '@/models/Transfer';
+import Transfer from '@/features/transfers/models/Transfer';
 
 interface Props {
   isLoading: boolean;

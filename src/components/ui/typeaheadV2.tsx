@@ -1,7 +1,3 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import React, {
@@ -15,19 +11,18 @@ import React, {
   useState,
 } from 'react';
 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+
 const HIDE_DROPDOWN_TIMEOUT = 150;
 
 const typeaheadVariants = cva('relative w-full', {
   variants: {
-    size: {
-      default: '',
-      sm: '',
-      lg: '',
-    },
+    size: { default: '', sm: '', lg: '' },
   },
-  defaultVariants: {
-    size: 'default',
-  },
+  defaultVariants: { size: 'default' },
 });
 
 const typeaheadControlVariants = cva(
@@ -44,9 +39,7 @@ const typeaheadControlVariants = cva(
         lg: 'min-h-10 px-4 py-2 text-base',
       },
     },
-    defaultVariants: {
-      size: 'default',
-    },
+    defaultVariants: { size: 'default' },
   },
 );
 
@@ -58,48 +51,22 @@ const typeaheadInputVariants = cva('flex-1 bg-transparent outline-none placehold
       lg: 'min-w-[60px] text-base',
     },
   },
-  defaultVariants: {
-    size: 'default',
-  },
+  defaultVariants: { size: 'default' },
 });
 
 const typeaheadChipVariants = cva('whitespace-nowrap shadow-md bg-background', {
-  variants: {
-    size: {
-      default: 'text-xs py-0 px-1',
-      sm: 'text-xs py-0 px-1',
-      lg: 'text-sm py-0 px-1.5',
-    },
-  },
-  defaultVariants: {
-    size: 'default',
-  },
+  variants: { size: { default: 'text-xs py-0 px-1', sm: 'text-xs py-0 px-1', lg: 'text-sm py-0 px-1.5' } },
+  defaultVariants: { size: 'default' },
 });
 
 const chevronButtonVariants = cva('ml-auto p-0 hover:bg-transparent', {
-  variants: {
-    size: {
-      default: 'h-4 w-4',
-      sm: 'h-4 w-4',
-      lg: 'h-5 w-5',
-    },
-  },
-  defaultVariants: {
-    size: 'default',
-  },
+  variants: { size: { default: 'h-4 w-4', sm: 'h-4 w-4', lg: 'h-5 w-5' } },
+  defaultVariants: { size: 'default' },
 });
 
 const chevronIconVariants = cva('', {
-  variants: {
-    size: {
-      default: 'h-4 w-4',
-      sm: 'h-4 w-4',
-      lg: 'h-5 w-5',
-    },
-  },
-  defaultVariants: {
-    size: 'default',
-  },
+  variants: { size: { default: 'h-4 w-4', sm: 'h-4 w-4', lg: 'h-5 w-5' } },
+  defaultVariants: { size: 'default' },
 });
 
 type Group<T> = { label: string; options: T[] };
@@ -113,9 +80,9 @@ const normalizeSelected = <V extends string | number>(
   return Array.isArray(value) ? (value[0] != null ? [value[0]] : []) : [value];
 };
 
-const getKey = <T, >(obj: T, field: keyof T & string): string => String((obj as any)[field]);
-const getLabel = <T, >(obj: T, field: keyof T & string): string => String((obj as any)[field]);
-const getRawValue = <T, V extends string | number>(obj: T, field: keyof T & string): V => (obj as any)[field] as V;
+const readField = <T, K extends keyof T>(obj: T, key: K): T[K] => obj[key];
+
+const asString = (v: unknown): string => String(v);
 
 export interface TypeaheadV2Props<T, V extends string | number>
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'size'>,
@@ -176,25 +143,45 @@ function TypeaheadV2Inner<T, V extends string | number>(
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
-
   const listboxId = useId();
 
   useImperativeHandle(ref, () => inputRef.current as HTMLInputElement, []);
 
   const selectedValues = useMemo(() => normalizeSelected(value, multiple), [value, multiple]);
 
+  const getKey = useCallback(
+    (obj: T): string => asString(readField(obj, valueField as keyof T)),
+    [valueField],
+  );
+
+  const getLabel = useCallback(
+    (obj: T): string => asString(readField(obj, labelField as keyof T)),
+    [labelField],
+  );
+
+  const getRawValue = useCallback(
+    (obj: T): V => {
+      const raw = readField(obj, valueField as keyof T);
+      // We enforce V extends string|number by contract.
+      // Runtime: user must pass correct valueField type.
+      return raw as unknown as V;
+    },
+    [valueField],
+  );
+
   const selectedOptions = useMemo(() => {
     if (selectedValues.length === 0) return [];
     const selectedSet = new Set(selectedValues.map(String));
-    return options.filter((o) => selectedSet.has(getKey(o, valueField)));
-  }, [options, selectedValues, valueField]);
+    return options.filter((o) => selectedSet.has(getKey(o)));
+  }, [options, selectedValues, getKey]);
 
   const groupedOptions: Group<T>[] = useMemo(() => {
     if (!groupBy) return [{ label: '', options }];
 
     const map = new Map<string, T[]>();
     for (const option of options) {
-      const label = String((option as any)[groupBy] ?? '');
+      const groupVal = readField(option, groupBy as keyof T);
+      const label = asString(groupVal ?? '');
       const arr = map.get(label);
       if (arr) arr.push(option);
       else map.set(label, [option]);
@@ -206,12 +193,12 @@ function TypeaheadV2Inner<T, V extends string | number>(
     const query = inputValue.trim().toLowerCase();
     const selectedSet = new Set(selectedValues.map(String));
 
-    const matchesDefault = (option: T) => getLabel(option, labelField).toLowerCase().includes(query);
+    const matchesDefault = (option: T) => getLabel(option).toLowerCase().includes(query);
 
     return groupedOptions
       .map((group) => {
         const groupOptions = group.options.filter((option) => {
-          const optionValue = getKey(option, valueField);
+          const optionValue = getKey(option);
           if (selectedSet.has(optionValue)) return false;
           if (!query) return true;
           return filterFn ? filterFn(option, inputValue) : matchesDefault(option);
@@ -220,7 +207,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
         return { ...group, options: groupOptions };
       })
       .filter((g) => g.options.length > 0);
-  }, [groupedOptions, inputValue, selectedValues, valueField, labelField, filterFn]);
+  }, [groupedOptions, inputValue, selectedValues, filterFn, getKey, getLabel]);
 
   const flatFilteredOptions = useMemo(() => filteredGroups.flatMap((g) => g.options), [filteredGroups]);
 
@@ -230,7 +217,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
 
   const handleSelect = useCallback(
     (option: T) => {
-      const rawValue = getRawValue<T, V>(option, valueField);
+      const rawValue = getRawValue(option);
 
       if (multiple) {
         const exists = selectedValues.some((v) => String(v) === String(rawValue));
@@ -246,7 +233,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
       setInputValue('');
       setHighlightedIndex(-1);
     },
-    [multiple, onChange, selectedValues, valueField],
+    [getRawValue, multiple, onChange, selectedValues],
   );
 
   const handleRemove = useCallback(
@@ -301,7 +288,6 @@ function TypeaheadV2Inner<T, V extends string | number>(
 
       const inputRoot = inputRef.current?.closest('[data-typeahead-root="true"]') as HTMLElement | null;
       if (inputRoot && inputRoot.contains(target)) return;
-
       if (dropdownRef.current && dropdownRef.current.contains(target)) return;
 
       setOpen(false);
@@ -339,9 +325,9 @@ function TypeaheadV2Inner<T, V extends string | number>(
         <ScrollArea className="flex-1 min-w-0">
           <div className="flex items-center gap-1 min-w-0">
             {selectedOptions.map((option) => {
-              const key = getKey(option, valueField);
-              const label = getLabel(option, labelField);
-              const rawValue = getRawValue<T, V>(option, valueField);
+              const key = getKey(option);
+              const label = getLabel(option);
+              const rawValue = getRawValue(option);
 
               return (
                 <Badge key={key} variant="outline" className={cn(typeaheadChipVariants({ size }))}>
@@ -436,7 +422,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
 
                     {group.options.map((option, index) => {
                       const flatIndex = groupOffset + index;
-                      const optionKey = getKey(option, valueField);
+                      const optionKey = getKey(option);
                       const isHighlighted = highlightedIndex === flatIndex;
 
                       return (
@@ -483,9 +469,9 @@ function TypeaheadV2Inner<T, V extends string | number>(
 
 TypeaheadV2Inner.displayName = 'TypeaheadV2';
 
-const TypeaheadV2 = forwardRef(TypeaheadV2Inner) as unknown as <T, V extends string | number>(
-  props: TypeaheadV2Props<T, V> & { ref?: React.Ref<HTMLInputElement> },
-) => React.ReactElement;
+type TypeaheadV2Component = <T, V extends string | number>(props: TypeaheadV2Props<T, V> & React.RefAttributes<HTMLInputElement>) => React.ReactElement;
+
+const TypeaheadV2 = forwardRef(TypeaheadV2Inner) as unknown as TypeaheadV2Component;
 
 export default TypeaheadV2;
 export { TypeaheadV2 };

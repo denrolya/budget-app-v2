@@ -5,7 +5,7 @@ import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Separator } from '@/components/ui/separator';
-import Transfer from '@/models/Transfer';
+import Transfer from '@/features/transfers/models/Transfer';
 import { Skeleton } from '@/components/ui/skeleton';
 import ListItem, { ListItemSkeleton } from '@/features/transfers/components/ListItem';
 

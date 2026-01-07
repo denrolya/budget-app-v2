@@ -12,21 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import SidebarListing from '@/features/budget/components/SidebarListing';
 
-export type Budget = {
-  id: string;
-  name: string;
-  startDate: Date;
-  endDate?: Date;
-  categories: Category[];
-};
-
-export type Category = {
-  id: string;
-  name: string;
-  budgeted: number;
-  actual: number;
-  children?: Category[];
-};
+import type { Budget, Category } from './types';
 
 export const BudgetManagementPage = () => {
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);

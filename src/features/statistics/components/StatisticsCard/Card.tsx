@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Interval, StatisticsConfig, StatisticsType } from '@/types/statistics';
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 import { PercentageChange, StatisticsData, ValueByPeriodData } from '@/types/valueByPeriodStatistics';
 import { generateSlug } from '@/lib/url/generateSlug';
 import StatTypeBadge from '@/features/statistics/components/StatisticsCard/StatTypeBadge';

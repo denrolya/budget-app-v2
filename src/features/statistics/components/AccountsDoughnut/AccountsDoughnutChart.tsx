@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-import PieChart from '@/components/features/statistics/AccountsDoughnut/Chart';
+import PieChart from './Chart';
 
 const AccountsDoughnutChart: React.FC<{
   items: { id: string | number; name: string; value: number }[];
@@ -15,7 +15,7 @@ const AccountsDoughnutChart: React.FC<{
     () => ({ scheme: isExpense ? 'reds' : 'greens' } as const),
     [isExpense],
   );
-  return <PieChart data={data} total={total} colorScheme={scheme} />;
+  return <PieChart colorScheme={scheme} data={data} total={total} />;
 };
 
 export default AccountsDoughnutChart;

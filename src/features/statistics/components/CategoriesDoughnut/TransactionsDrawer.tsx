@@ -1,4 +1,4 @@
-import { Moment } from 'moment/moment';
+import { Moment } from 'moment';
 import React, { useEffect } from 'react';
 
 import Pagination from '@/components/common/Pagination';
@@ -14,8 +14,8 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useTransactions } from '@/hooks/useTransactions';
-import TransactionFilters from '@/models/TransactionFilters';
+import { useList as useTransactionsList } from '@/features/transactions';
+import TransactionFilters from '@/features/transactions/models/TransactionFilters';
 
 interface ProcessedCategory {
   id: number;
@@ -49,7 +49,7 @@ export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
     refetch: refetchTransactions,
     pagination: { currentPage, perPage, totalPages, totalItems, setCurrentPage, setPerPage },
     setFilter,
-  } = useTransactions({
+  } = useTransactionsList({
     updateUrl: false,
     initialFilters: new TransactionFilters({
       withNestedCategories: true,
@@ -76,22 +76,22 @@ export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
         <ScrollArea className="h-[60vh] px-4">
           <FormattedListing
             error={transactionsError}
+            groupedItems={groupedTransactions}
             isError={isTransactionsError}
             isLoading={isTransactionsLoading}
-            groupedItems={groupedTransactions}
             refetch={refetchTransactions}
             onAdd={() => openForm(FormType.Transaction)}
           />
         </ScrollArea>
         <DrawerFooter>
           <Pagination
-            isLoading={isTransactionsLoading}
             currentPage={currentPage}
+            isLoading={isTransactionsLoading}
+            perPage={perPage}
+            totalItems={totalItems}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
             onPerPageChange={setPerPage}
-            perPage={perPage}
-            totalItems={totalItems}
           />
         </DrawerFooter>
       </DrawerContent>

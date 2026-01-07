@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
-import Transaction from '@/models/Transaction';
+import Transaction from '@/features/transactions/models/Transaction';
 
 interface ListSkeletonProps extends React.ComponentPropsWithoutRef<'div'> {
   groupCount?: number;

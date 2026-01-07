@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight, Download, Edit } from 'lucide-react';
 import React from 'react';
 
-import Category from '@/models/Category';
+import Category from '@/features/categories/models/Category';
 import { Button } from '@/components/ui/button';
 
 const generateBreadcrumbs = (category: Category): Category[] => {

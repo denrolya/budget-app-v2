@@ -10,9 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/contexts/FinanceData';
-import Category from '@/models/Category';
-import { Type as TransactionType } from '@/types/transaction';
+import { useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/hooks/financeData';
+import Category from '@/features/categories/models/Category';
+import { Type as TransactionType } from '@/features/transactions';
 
 interface Props {
   selected: Category | null;

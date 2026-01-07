@@ -1,9 +1,10 @@
 import { CalendarIcon, PlusCircleIcon } from 'lucide-react';
 import React, { useState } from 'react';
 
-import { Budget } from '@/app/budget/page';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
+import { Budget } from '../types';
 
 const INITIAL_BUDGETS: Budget[] = [
   {
@@ -58,12 +59,12 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
         <div className="space-y-1 p-2">
           {budgets.map((budget) => (
             <Button
-              key={budget.id}
               variant={selected?.id === budget.id ? 'secondary' : 'ghost'}
               className="w-full justify-start"
+              key={budget.id}
               onClick={() => onSelect(budget)}
             >
-              <CalendarIcon className="mr-2 h-4 w-4" aria-hidden="true" />
+              <CalendarIcon aria-hidden="true" className="mr-2 h-4 w-4" />
               <span>{budget.name}</span>
             </Button>
           ))}
@@ -71,7 +72,7 @@ const SidebarListing: React.FC<Props> = ({ selected, onSelect }) => {
       </ScrollArea>
       <div className="p-2 border-t border-border">
         <Button className="w-full">
-          <PlusCircleIcon className="mr-2 h-4 w-4" aria-hidden="true" />
+          <PlusCircleIcon aria-hidden="true" className="mr-2 h-4 w-4" />
           <span>New Budget</span>
         </Button>
       </div>

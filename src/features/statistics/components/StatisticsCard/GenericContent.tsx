@@ -2,7 +2,7 @@ import { Moment } from 'moment';
 import React from 'react';
 
 import { ComparisonType, StatisticsType } from '@/types/statistics';
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 import { PercentageChange, StatisticsData } from '@/types/valueByPeriodStatistics';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import MoneyValue from '@/components/common/MoneyValue';

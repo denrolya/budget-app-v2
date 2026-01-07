@@ -8,10 +8,9 @@ import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay
 import AccountPill from '@/features/accounts/components/Pill';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useBaseCurrency } from '@/contexts/auth';
-import { useAccountsWithDefaultOrder } from '@/contexts/FinanceData';
-import Account from '@/models/Account';
-import { Type as AccountType } from '@/types/account';
+import { useBaseCurrency } from '@/features/auth';
+import { useAccountsWithDefaultOrder } from '@/hooks/financeData';
+import { Type as AccountType, Account } from '@/features/accounts';
 
 interface SidebarListingProps {
   selectedId: string | null;
@@ -73,8 +72,8 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
 
   return (
     <div
-      className="flex h-full flex-col overflow-x-hidden"
       aria-label="Accounts list"
+      className="flex h-full flex-col overflow-x-hidden"
       onKeyDown={(e) => {
         if (e.key === 'Escape' && onClear) onClear();
       }}
@@ -87,15 +86,15 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
           <label htmlFor={searchId} className="sr-only">
             Search accounts
           </label>
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <Search aria-hidden="true" className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            id={searchId}
-            placeholder="Search accounts"
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            inputMode="search"
             aria-label="Search accounts"
+            id={searchId}
+            inputMode="search"
+            placeholder="Search accounts"
+            value={searchTerm}
+            className="pl-8"
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
@@ -110,7 +109,7 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
             const groupRegionId = `accounts-group-${type}`;
 
             return (
-              <section key={type} aria-labelledby={groupRegionId} className="overflow-x-hidden">
+              <section aria-labelledby={groupRegionId} className="overflow-x-hidden" key={type}>
                 {/* Group header */}
                 <div
                   id={groupRegionId}
@@ -128,7 +127,7 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
                   </span>
                 </div>
 
-                <div role="group" aria-label={`${type} accounts`} className="overflow-x-hidden">
+                <div aria-label={`${type} accounts`} role="group" className="overflow-x-hidden">
                   {items.map((account) => {
                     const accountIdStr = String(account.id);
                     const isSelected = selectedId === accountIdStr;
@@ -140,10 +139,8 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
 
                     return (
                       <div
-                        key={account.id}
-                        role="listitem"
-                        ref={isSelected ? selectedAccountRef : null}
                         aria-selected={isSelected}
+                        role="listitem"
                         tabIndex={0}
                         className={cn(
                           'px-4 py-3 border-b cursor-pointer',
@@ -155,6 +152,7 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
                             'opacity-70': isArchived && !isSelected,
                           },
                         )}
+                        key={account.id}
                         onClick={() => handleAccountSelect(account)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
@@ -162,6 +160,7 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
                             handleAccountSelect(account);
                           }
                         }}
+                        ref={isSelected ? selectedAccountRef : null}
                       >
                         {/* Top row */}
                         <div className="flex items-start justify-between gap-3 min-w-0 overflow-x-hidden">
@@ -169,11 +168,11 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
                           <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                             <div className="min-w-0 flex-1 overflow-hidden">
                               <div className="flex items-center gap-2 min-w-0">
-                                <AccountPill size="sm" variant="inline" textClassName="text-sm" account={account} />
+                                <AccountPill account={account} size="sm" variant="inline" textClassName="text-sm" />
 
                                 {isArchived && (
                                   <span className="inline-flex items-center gap-1 text-2xs text-muted-foreground shrink-0">
-                                    <Archive className="h-3 w-3" aria-hidden="true" />
+                                    <Archive aria-hidden="true" className="h-3 w-3" />
                                     Archived
                                   </span>
                                 )}
@@ -184,13 +183,13 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
                           {/* Right */}
                           <div className="flex flex-col items-end gap-0.5 text-right min-w-0 overflow-x-hidden">
                             <span
+                              title={`${nativeAmount} ${account.currency}`}
                               className={cn(
                                 'text-xs font-semibold tabular-nums leading-tight text-right',
                                 nativeAmount < 0 && 'text-destructive',
                                 account.isEmpty() && 'text-muted-foreground',
                                 'whitespace-normal break-words',
                               )}
-                              title={`${nativeAmount} ${account.currency}`}
                             >
                               <MoneyValue
                                 amount={nativeAmount}
@@ -202,15 +201,15 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
 
                             {showBaseLine && (
                               <span
-                                className="text-2xs tabular-nums leading-tight text-muted-foreground text-right whitespace-normal break-words"
                                 title={`${baseAmount} ${baseCurrency}`}
+                                className="text-2xs tabular-nums leading-tight text-muted-foreground text-right whitespace-normal break-words"
                               >
                                 <MoneyValue
                                   amount={baseAmount}
                                   currency={baseCurrency}
+                                  prefix="≈ "
                                   showSign={false}
                                   showValuesTooltip={false}
-                                  prefix="≈ "
                                 />
                               </span>
                             )}
@@ -233,11 +232,11 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
 
         <div className="p-4">
           <button
+            aria-label={showArchived ? 'Hide archived accounts' : 'Show archived accounts'}
+            aria-pressed={showArchived}
             type="button"
             className="text-sm text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
             onClick={() => setShowArchived((v) => !v)}
-            aria-pressed={showArchived}
-            aria-label={showArchived ? 'Hide archived accounts' : 'Show archived accounts'}
           >
             {showArchived ? 'Hide Archived' : 'Show Archived'}
           </button>

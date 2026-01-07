@@ -1,5 +1,5 @@
 import { CURRENCY_CODE } from '@/constants/currency';
-import { ConvertedValues } from '@/types/transaction';
+import { ConvertedValues } from '@/features/transactions';
 
 export const getExchangeRate = (from: string, to: string, rates: ConvertedValues | null): number | null => {
   if (!rates) return null;

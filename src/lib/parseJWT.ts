@@ -1,4 +1,4 @@
-import { User } from '@/models/User';
+import type { User } from '@/features/auth';
 
 export const parseJwt = (token: string): User => {
   const base64Url = token.split('.')[1];

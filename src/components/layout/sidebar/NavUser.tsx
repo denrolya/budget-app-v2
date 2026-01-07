@@ -1,6 +1,6 @@
 import { Bike, Check, ChevronsUpDown, Command, Laptop, LogOut, Moon, Palmtree, Sun } from 'lucide-react';
 
-import { useAuth } from '@/contexts/auth';
+import { useAuth } from '@/features/auth';
 import { Theme, useTheme } from '@/contexts/theme';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -34,7 +34,7 @@ const NavUser: React.FC = () => {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.username} alt={user.username} />
+                <AvatarImage alt={user.username} src={user.username} />
                 <AvatarFallback className="rounded-lg">{user.username[0]}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -45,15 +45,15 @@ const NavUser: React.FC = () => {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side={isMobile ? 'bottom' : 'right'}
             align="end"
+            side={isMobile ? 'bottom' : 'right'}
             sideOffset={4}
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.username} alt={user.username} />
+                  <AvatarImage alt={user.username} src={user.username} />
                   <AvatarFallback className="rounded-lg">{user.username[0]}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">

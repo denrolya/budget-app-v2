@@ -3,9 +3,9 @@ import React from 'react';
 import ConvertedValuesTooltip from '@/components/common/ConvertedValuesTooltip';
 import { Badge } from '@/components/ui/badge';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
-import { useBaseCurrency } from '@/contexts/auth';
+import { useBaseCurrency } from '@/features/auth';
 import { cn } from '@/lib/utils';
-import Transaction from '@/models/Transaction';
+import Transaction from '@/features/transactions/models/Transaction';
 import { formatMoney as formatMoneyValue } from '@/lib/formatMoney';
 
 interface Props extends React.ComponentPropsWithoutRef<'span'> {
