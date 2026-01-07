@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { HotkeysContext } from '@/contexts/Hotkeys/context';
+import { HotkeysContext } from './context';
 
 export const useHotkeys = () => {
   const context = useContext(HotkeysContext);

@@ -67,9 +67,9 @@ const ITEMS: {
     icon: SquareTerminal,
     items: [
       {
-        title: ROUTES.TESTING_PAGE.label,
-        url: ROUTES.TESTING_PAGE.path,
-        icon: ROUTES.TESTING_PAGE.icon,
+        title: ROUTES.SANDBOX_PAGE.label,
+        url: ROUTES.SANDBOX_PAGE.path,
+        icon: ROUTES.SANDBOX_PAGE.icon,
       },
       {
         title: ROUTES.BUDGET_PAGE.label,

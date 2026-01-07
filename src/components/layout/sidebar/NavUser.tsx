@@ -1,7 +1,5 @@
 import { Bike, Check, ChevronsUpDown, Command, Laptop, LogOut, Moon, Palmtree, Sun } from 'lucide-react';
 
-import { useAuth } from '@/features/auth';
-import { Theme, useTheme } from '@/contexts/theme';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -17,6 +15,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { useHotkeys } from '@/contexts/Hotkeys';
+import { Theme, useTheme } from '@/contexts/theme';
+import { useAuth } from '@/features/auth';
 
 const NavUser: React.FC = () => {
   const { isMobile } = useSidebar();

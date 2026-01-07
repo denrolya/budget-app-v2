@@ -51,14 +51,9 @@ export const ROUTES = {
     icon: PieChart,
     label: 'Budget Planning',
   },
-  // REPORTS_PAGE: {
-  //   path: '/reports',
-  //   icon: BarChart3,
-  //   label: 'Reports',
-  // },
-  TESTING_PAGE: {
-    path: '/testing',
+  SANDBOX_PAGE: {
+    path: '/sandbox',
     icon: TestTube2,
-    label: 'Testing Page',
+    label: 'Sandbox Page',
   },
 };

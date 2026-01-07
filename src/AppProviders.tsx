@@ -5,22 +5,19 @@ import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { CurrencyConverterProvider } from '@/contexts/CurrencyConverter';
 import { FormProvider } from '@/contexts/Form';
-import HotkeysProvider from '@/contexts/Hotkeys';
+import { HotkeysProvider } from '@/contexts/Hotkeys';
 
 const AppProviders = ({ children }: React.PropsWithChildren) => (
   <TooltipProvider>
-    {/* keep Toaster high so it doesn't get unmounted by provider churn */}
-    <Toaster />
-
-    {/* put HotkeysProvider higher to eliminate "missing provider" transient renders */}
     <FormProvider>
-      <CurrencyConverterProvider>
-        <SidebarProvider defaultOpen={false} className="overflow-hidden">
+      <SidebarProvider>
+        <CurrencyConverterProvider>
           <HotkeysProvider>
             {children}
+            <Toaster />
           </HotkeysProvider>
-        </SidebarProvider>
-      </CurrencyConverterProvider>
+        </CurrencyConverterProvider>
+      </SidebarProvider>
     </FormProvider>
   </TooltipProvider>
 );

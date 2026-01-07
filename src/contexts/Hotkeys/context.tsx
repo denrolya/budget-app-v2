@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useMemo, useReducer, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useReducer, useState } from 'react';
 import { useHotkeys as useReactHotkeysHook } from 'react-hotkeys-hook';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -6,9 +6,15 @@ import { HotkeysDialog } from '@/components/common/HotkeysDialog';
 import { ROUTES } from '@/constants/routes';
 import { useCurrencyConverter } from '@/contexts/CurrencyConverter';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { Hotkey, HotkeyCategory, HotkeysContextType } from '@/types/hotkeys';
+import type { Hotkey, HotkeyCategory, HotkeysContextType } from '@/types/hotkeys';
 
 export const HotkeysContext = createContext<HotkeysContextType | null>(null);
+
+export const useHotkeys = (): HotkeysContextType => {
+  const ctx = useContext(HotkeysContext);
+  if (!ctx) throw new Error('useHotkeys must be used within a HotkeysProvider');
+  return ctx;
+};
 
 export const navigationHotkeys: Hotkey[] = [
   { windows: 'S', mac: 'S', description: 'Open/Close Sidebar' },
@@ -28,26 +34,28 @@ type HotkeysAction =
   | { type: 'ADD_PAGE_HOTKEYS'; payload: { pageName: string; hotkeys: Hotkey[] } }
   | { type: 'REMOVE_PAGE_HOTKEYS'; payload: { pageName: string } };
 
-const hotkeysReducer = (
-  state: { [key: string]: HotkeyCategory },
-  action: HotkeysAction,
-): { [key: string]: HotkeyCategory } => {
+type HotkeysState = Record<string, HotkeyCategory>;
+
+const hotkeysReducer = (state: HotkeysState, action: HotkeysAction): HotkeysState => {
   switch (action.type) {
     case 'ADD_PAGE_HOTKEYS': {
       const { pageName, hotkeys } = action.payload;
-      if (JSON.stringify(state[pageName]?.hotkeys) === JSON.stringify(hotkeys)) {
-        return state; // No change, return the same state
-      }
+
+      const existing = state[pageName]?.hotkeys ?? null;
+      if (existing && JSON.stringify(existing) === JSON.stringify(hotkeys)) return state;
+
       return {
         ...state,
         [pageName]: { name: pageName, hotkeys },
       };
     }
+
     case 'REMOVE_PAGE_HOTKEYS': {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [action.payload.pageName]: _, ...rest } = state;
       return rest;
     }
+
     default:
       return state;
   }
@@ -58,8 +66,10 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
     Global: { name: 'Global', hotkeys: globalHotkeys },
     Navigation: { name: 'Navigation', hotkeys: navigationHotkeys },
   });
+
   const [currentPage, setCurrentPage] = useState<string>('Global');
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const { openForm } = useFormContext();
@@ -74,16 +84,18 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
   }, []);
 
   const removePageHotkeys = useCallback((pageName: string) => {
-    if (pageName === 'Global') return; // Prevent removing global hotkeys
+    if (pageName === 'Global') return;
     dispatch({ type: 'REMOVE_PAGE_HOTKEYS', payload: { pageName } });
   }, []);
 
+  // Forms
   useReactHotkeysHook(
     'shift+t',
     (event) => {
       event.preventDefault();
       openForm(FormType.Transaction);
     },
+    { preventDefault: true },
     [openForm],
   );
 
@@ -93,6 +105,7 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
       event.preventDefault();
       openForm(FormType.Transfer);
     },
+    { preventDefault: true },
     [openForm],
   );
 
@@ -102,35 +115,40 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
       event.preventDefault();
       openForm(FormType.Account);
     },
+    { preventDefault: true },
     [openForm],
   );
 
+  // Currency Converter
   useReactHotkeysHook(
     'shift+c',
     (event) => {
       event.preventDefault();
       toggleCurrencyConverter();
     },
+    { preventDefault: true },
     [toggleCurrencyConverter],
   );
 
+  // Hotkeys dialog
   useReactHotkeysHook(
     'h',
     (event) => {
       event.preventDefault();
       toggleHotkeysDialog();
     },
+    { preventDefault: true },
     [toggleHotkeysDialog],
   );
 
+  // Navigation
   useReactHotkeysHook(
     'l',
     (event) => {
       event.preventDefault();
-      if (location.pathname !== ROUTES.DAILY_LEDGER.path) {
-        navigate(ROUTES.DAILY_LEDGER.path);
-      }
+      if (location.pathname !== ROUTES.DAILY_LEDGER.path) navigate(ROUTES.DAILY_LEDGER.path);
     },
+    { preventDefault: true },
     [location.pathname, navigate],
   );
 
@@ -138,14 +156,13 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
     't',
     (event) => {
       event.preventDefault();
-      if (location.pathname !== ROUTES.TRANSACTION_LIST.path) {
-        navigate(ROUTES.TRANSACTION_LIST.path);
-      }
+      if (location.pathname !== ROUTES.TRANSACTION_LIST.path) navigate(ROUTES.TRANSACTION_LIST.path);
     },
+    { preventDefault: true },
     [location.pathname, navigate],
   );
 
-  const contextValue = useMemo(
+  const contextValue = useMemo<HotkeysContextType>(
     () => ({
       addPageHotkeys,
       removePageHotkeys,

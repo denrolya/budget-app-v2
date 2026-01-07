@@ -1,5 +1,5 @@
-import { HotkeysProvider, globalHotkeys } from '@/contexts/Hotkeys/context';
-import { useHotkeys } from '@/contexts/Hotkeys/hooks';
+import { HotkeysProvider, globalHotkeys } from './context';
+import { useHotkeys } from './hooks';
 
 export type {
   Hotkey,

@@ -1,51 +1,91 @@
 import { Download, Edit } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
+import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { Button } from '@/components/ui/button';
-import { ROUTES } from '@/constants/routes';
 import SidebarListing from '@/features/debts/components/SidebarListing';
+import { useDebts } from '@/hooks/financeData';
+import { useIsMobile } from '@/hooks/use-mobile';
 
+import { useList as useDebtsQuery } from '../api';
 import DebtDetails from '../components/Details';
 import Debt from '../models/Debt';
 
 export const DebtsManagementPage: React.FC = () => {
-  const [selectedDebt, setSelectedDebt] = useState<Debt | null>(null);
-  const { icon: Icon } = ROUTES.DEBT_LIST;
+  const { debtId } = useParams<{ debtId: string }>();
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+
+  const debts = useDebts();
+
+  const debt = useMemo(() => {
+    if (!debtId) return null;
+    return debts?.find((d) => String(d.id) === debtId) ?? null;
+  }, [debts, debtId]);
+
+  const showSidebar = !isMobile || !debtId;
 
   return (
     <PageWithSidebar contentScrollable>
-      <PageWithSidebar.Sidebar>
-        <SidebarListing selected={selectedDebt} onSelect={setSelectedDebt} />
-      </PageWithSidebar.Sidebar>
-      {selectedDebt && (
-        <PageWithSidebar.Header title="Debt Details" onBack={() => setSelectedDebt(null)}>
-          <Button size="icon" variant="outline">
-            <Download className="h-4 w-4" />
-            <span className="sr-only">Export</span>
-          </Button>
-          <Button size="icon" variant="outline">
-            <Edit className="h-4 w-4" />
-            <span className="sr-only">Edit</span>
-          </Button>
-        </PageWithSidebar.Header>
+      {showSidebar && (
+        <PageWithSidebar.Sidebar ariaLabel="Debts sidebar">
+          <SidebarListing
+            selected={debt}
+            onClear={() => navigate('/debts')}
+            onSelect={(d: Debt) => navigate(`/debts/${d.id}`)}
+          />
+        </PageWithSidebar.Sidebar>
       )}
 
-      <PageWithSidebar.Content>
-        {selectedDebt && <DebtDetails debt={selectedDebt} />}
-
-        {!selectedDebt && (
-          <div className="flex items-center justify-center h-full bg-muted">
-            <div className="text-center space-y-4 h-full">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <Icon className="h-8 w-8 text-primary/60" />
+      <PageWithSidebar.Content className="min-h-0 h-full min-w-0 overflow-x-hidden">
+        <Routes>
+          <Route
+            index
+            element={
+              <div className="flex h-full w-full items-center justify-center bg-muted p-4">
+                <div className="text-muted-foreground">Select a debt from the sidebar</div>
               </div>
-              <p className="text-muted-foreground max-w-[250px]">Select a category from the sidebar to view details</p>
-            </div>
-          </div>
-        )}
+            }
+          />
+          <Route element={<DebtDetailsRoute />} path=":debtId" />
+          <Route element={<Navigate replace to="/debts" />} path="*" />
+        </Routes>
       </PageWithSidebar.Content>
     </PageWithSidebar>
+  );
+};
+
+const DebtDetailsRoute: React.FC = () => {
+  const { debtId } = useParams<{ debtId: string }>();
+  const navigate = useNavigate();
+
+  const { data } = useDebtsQuery();
+
+  const debt = React.useMemo(() => {
+    if (!debtId) return null;
+    return data?.find((d) => String(d.id) === debtId) ?? null;
+  }, [data, debtId]);
+
+  if (!debtId) return <Navigate replace to="/debts" />;
+  if (!data) return null;
+  if (!debt) return <Navigate replace to="/debts" />;
+
+  return (
+    <>
+      <PageWithSidebar.Header title="Debt Details" onBack={() => navigate('/debts')}>
+        <Button aria-label="Export" size="icon" variant="outline">
+          <Download aria-hidden="true" className="h-4 w-4" />
+        </Button>
+        <Button aria-label="Edit" size="icon" variant="outline">
+          <Edit aria-hidden="true" className="h-4 w-4" />
+        </Button>
+      </PageWithSidebar.Header>
+
+      <div className="p-4 min-w-0 overflow-x-hidden">
+        <DebtDetails debt={debt} />
+      </div>
+    </>
   );
 };
 

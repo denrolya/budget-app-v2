@@ -6,6 +6,7 @@ import RequiredDataGate from '@/components/common/RequiredDataGate';
 import LayoutV9 from '@/components/layout/LayoutV9';
 import { AccountsManagementPage } from '@/features/accounts';
 import { LoginPage } from '@/features/auth';
+import LogoutRoute from '@/features/auth/components/LogoutRoute';
 import BudgetingPage from '@/features/budget/ManagementPage';
 import { CategoriesManagementPage } from '@/features/categories';
 import DailyLedgerPage from '@/features/daily-ledger/ListingPage';
@@ -19,6 +20,7 @@ const Routing: React.FC = () => (
   <Routes>
     {/* Public */}
     <Route element={<LoginPage />} path="/login" />
+    <Route element={<LogoutRoute />} path="/logout" />
 
     {/* Protected */}
     <Route element={<RequireAuth />}>
@@ -36,8 +38,8 @@ const Routing: React.FC = () => (
         <Route element={<TransfersListPage />} path="transfers" />
         <Route element={<DailyLedgerPage />} path="ledger" />
         <Route element={<AccountsManagementPage />} path="accounts/*" />
-        <Route element={<DebtsManagementPage />} path="debts" />
-        <Route element={<SandboxPage />} path="testing" />
+        <Route element={<DebtsManagementPage />} path="debts/*" />
+        <Route element={<SandboxPage />} path="sandbox" />
         <Route element={<BudgetingPage />} path="budget" />
         <Route element={<CategoriesManagementPage />} path="categories" />
 

@@ -1,8 +1,8 @@
-import cn from 'classnames';
 import sumBy from 'lodash/sumBy';
 import { Archive, Search } from 'lucide-react';
 import React, { useCallback, useId, useMemo, useRef, useState } from 'react';
 
+import { cn } from '@/lib/utils';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountPill from '@/features/accounts/components/Pill';

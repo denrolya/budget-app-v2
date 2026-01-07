@@ -1,20 +1,19 @@
-import cn from 'classnames';
-import type { Moment } from 'moment';
-import React, { useMemo, useState } from 'react';
-import { toast } from 'sonner';
-
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import SummaryBadge from '@/components/common/SummaryBadge';
-import Details from '@/features/transactions/components/Details';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useMutations } from '@/features/transactions/api/mutations';
+import Details from '@/features/transactions/components/Details';
+import ListingRow from '@/features/transactions/components/ListingRow';
+import { useInlineEdit } from '@/features/transactions/hooks/useInlineEdit';
 import Transaction from '@/features/transactions/models/Transaction';
 import { confirm } from '@/lib/confirmation';
-import { useInlineEdit } from '@/features/transactions/hooks/useInlineEdit';
-import ListingRow from '@/features/transactions/components/ListingRow';
+import cn from 'classnames';
+import type { Moment } from 'moment';
+import React, { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 
 interface Props extends React.ComponentPropsWithoutRef<'div'> {
@@ -25,8 +24,6 @@ interface Props extends React.ComponentPropsWithoutRef<'div'> {
 export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ...props }) => {
   const { update: updateTransaction, delete: deleteTransaction, isUpdating } = useMutations();
   const { openForm } = useFormContext();
-
-  // Optional: if you want only one details sheet open at a time
   const [openSheetId, setOpenSheetId] = useState<number | null>(null);
 
   const inlineEdit = useInlineEdit({
