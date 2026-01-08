@@ -119,8 +119,8 @@ const pwaOptions: Partial<VitePWAOptions> = {
 
 export default defineConfig({
   build: {
-    sourcemap: true,
-    minify: false,
+    sourcemap: false,
+    minify: true,
     reportCompressedSize: true,
     chunkSizeWarningLimit: 750,
     rollupOptions: {
