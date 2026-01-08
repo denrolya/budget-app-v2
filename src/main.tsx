@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
 
 import Routing from '@/components/common/Routing';
+import { Toaster } from '@/components/ui/sonner';
 import { Theme, ThemeProvider } from '@/contexts/theme';
 import { AuthProvider } from '@/features/auth';
 import PWAWrapper from '@/PWAWrapper';
@@ -39,6 +40,7 @@ const App = () => (
 
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
+    <Toaster />
   </StrictMode>
 );
 

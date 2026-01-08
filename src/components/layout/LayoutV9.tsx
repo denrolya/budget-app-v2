@@ -2,7 +2,6 @@ import React from 'react';
 
 import { FormRenderer } from '@/components/common/FormRenderer';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { CurrencyConverterProvider } from '@/contexts/CurrencyConverter';
 import { FormProvider } from '@/contexts/Form';
@@ -30,7 +29,6 @@ const LayoutV9: React.FC<React.PropsWithChildren> = ({ children }) => (
 
                 <MobileNavigation />
                 <FormRenderer />
-                <Toaster />
               </div>
             </SidebarInset>
           </HotkeysProvider>

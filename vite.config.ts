@@ -119,7 +119,8 @@ const pwaOptions: Partial<VitePWAOptions> = {
 
 export default defineConfig({
   build: {
-    sourcemap: false,
+    sourcemap: true,
+    minify: false,
     reportCompressedSize: true,
     chunkSizeWarningLimit: 750,
     rollupOptions: {
@@ -127,21 +128,16 @@ export default defineConfig({
         manualChunks(id) {
           if (!id.includes('node_modules')) return;
 
-          if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) return 'vendor-react';
-          if (id.includes('@radix-ui')) return 'vendor-radix';
-          if (id.includes('@tanstack')) return 'vendor-tanstack';
+          // leaf-heavy chunks
+          if (id.includes('/recharts/') || id.includes('/@nivo/') || id.includes('/d3-')) {
+            return 'vendor-charts';
+          }
 
-          // heavy charting + d3 ecosystem
-          if (id.includes('recharts') || id.includes('@nivo') || id.includes('d3-')) return 'vendor-charts';
+          if (id.includes('/@tanstack/')) return 'vendor-tanstack';
 
-          // date libs
-          if (id.includes('moment') || id.includes('date-fns')) return 'vendor-dates';
-
-          // utilities
-          if (id.includes('lodash')) return 'vendor-utils';
-
+          // everything else (React, Radix, Sonner, UI libs, utilities, dates, etc.)
           return 'vendor';
-        },
+        }
       },
     },
   },
@@ -154,6 +150,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    dedupe: ['react', 'react-dom'],
   },
   test: {
     globals: true,
