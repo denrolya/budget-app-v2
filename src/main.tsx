@@ -4,7 +4,6 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
 
-import AppProviders from '@/AppProviders';
 import Routing from '@/components/common/Routing';
 import { Theme, ThemeProvider } from '@/contexts/theme';
 import { AuthProvider } from '@/features/auth';
@@ -32,9 +31,7 @@ const App = () => (
         <AuthProvider>
           <Router>
             <PWAWrapper>
-              <AppProviders>
-                <Routing />
-              </AppProviders>
+              <Routing />
             </PWAWrapper>
           </Router>
         </AuthProvider>

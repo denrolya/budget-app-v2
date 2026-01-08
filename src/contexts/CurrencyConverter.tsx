@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import CurrencyConverter from '@/components/common/CurrencyConverter';
 
@@ -19,6 +20,16 @@ export const CurrencyConverterProvider: React.FC<React.PropsWithChildren> = ({ c
   const close = useCallback(() => setIsOpen(false), []);
   const toggle = useCallback(() => setIsOpen((v) => !v), []);
 
+  useHotkeys(
+    'shift+c',
+    (event) => {
+      event.preventDefault();
+      toggle();
+    },
+    { preventDefault: true },
+    [toggle],
+  );
+
   const value = useMemo<CurrencyConverterContextValue>(
     () => ({
       isOpen,
@@ -33,8 +44,6 @@ export const CurrencyConverterProvider: React.FC<React.PropsWithChildren> = ({ c
   return (
     <CurrencyConverterContext.Provider value={value}>
       {children}
-
-      {/* Single global mount point */}
       <CurrencyConverter open={isOpen} onOpenChange={setIsOpen} />
     </CurrencyConverterContext.Provider>
   );

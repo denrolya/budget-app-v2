@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { HotkeysDialog } from '@/components/common/HotkeysDialog';
 import { ROUTES } from '@/constants/routes';
-import { useCurrencyConverter } from '@/contexts/CurrencyConverter';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import type { Hotkey, HotkeyCategory, HotkeysContextType } from '@/types/hotkeys';
 
@@ -66,7 +65,6 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
   const navigate = useNavigate();
   const location = useLocation();
   const { openForm } = useFormContext();
-  const { toggle: toggleCurrencyConverter } = useCurrencyConverter();
 
   const toggleHotkeysDialog = useCallback(() => setIsDialogOpen((prev) => !prev), []);
   const openHotkeysDialog = useCallback(() => setIsDialogOpen(true), []);
@@ -110,17 +108,6 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
     },
     { preventDefault: true },
     [openForm],
-  );
-
-  // Currency Converter
-  useReactHotkeysHook(
-    'shift+c',
-    (event) => {
-      event.preventDefault();
-      toggleCurrencyConverter();
-    },
-    { preventDefault: true },
-    [toggleCurrencyConverter],
   );
 
   // Hotkeys dialog

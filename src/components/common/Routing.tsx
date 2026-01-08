@@ -1,12 +1,12 @@
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import LogoutRoute from '@/features/auth/components/LogoutRoute';
 import RequireAuth from '@/components/common/RequireAuth';
 import RequiredDataGate from '@/components/common/RequiredDataGate';
 import LayoutV9 from '@/components/layout/LayoutV9';
 import { AccountsManagementPage } from '@/features/accounts';
 import { LoginPage } from '@/features/auth';
+import LogoutRoute from '@/features/auth/components/LogoutRoute';
 import BudgetingPage from '@/features/budget/ManagementPage';
 import { CategoriesManagementPage } from '@/features/categories';
 import DailyLedgerPage from '@/features/daily-ledger/ListingPage';

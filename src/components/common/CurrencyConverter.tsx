@@ -35,12 +35,12 @@ interface Props {
 }
 
 export const CurrencyConverter: React.FC<Props> = ({
-  defaultFromCurrency = CURRENCY_CODE.HUF,
-  defaultToCurrency = CURRENCY_CODE.EUR,
-  defaultAmount = 1000,
-  open,
-  onOpenChange,
-}) => {
+                                                     defaultFromCurrency = CURRENCY_CODE.HUF,
+                                                     defaultToCurrency = CURRENCY_CODE.EUR,
+                                                     defaultAmount = 1000,
+                                                     open,
+                                                     onOpenChange,
+                                                   }) => {
   const [fromCurrency, setFromCurrency] = useState<CURRENCY_CODE>(defaultFromCurrency);
   const [toCurrency, setToCurrency] = useState<CURRENCY_CODE>(defaultToCurrency);
   const [amount, setAmount] = useState<number>(defaultAmount);
@@ -103,9 +103,9 @@ export const CurrencyConverter: React.FC<Props> = ({
         <div className="flex space-x-1 mb-4">
           {rateSources.map((source) => (
             <Button
-              key={source}
               size="sm"
               variant={rateSource === source ? 'default' : 'outline'}
+              key={source}
               onClick={() => setRateSource(source)}
             >
               {source}
@@ -118,8 +118,8 @@ export const CurrencyConverter: React.FC<Props> = ({
               autoFocus
               type="text"
               value={amount}
-              onChange={handleAmountChange}
               className="pr-20 text-2xl font-semibold h-16 rounded-xl"
+              onChange={handleAmountChange}
             />
             <Select value={fromCurrency} onValueChange={(value) => setFromCurrency(value as CURRENCY_CODE)}>
               <SelectTrigger className="absolute inset-y-0 right-0 w-30 h-full rounded-r-xl">
@@ -127,7 +127,7 @@ export const CurrencyConverter: React.FC<Props> = ({
               </SelectTrigger>
               <SelectContent>
                 {availableCurrencies.map((currency) => (
-                  <SelectItem key={currency} value={currency}>
+                  <SelectItem value={currency} key={currency}>
                     <CurrencyFlag code={currency} />
                     {currency}
                   </SelectItem>
@@ -137,20 +137,20 @@ export const CurrencyConverter: React.FC<Props> = ({
           </div>
           <div className="flex justify-center">
             <Button
+              aria-label="Swap currencies"
               size="icon"
               variant="ghost"
-              onClick={swapCurrencies}
               className="rounded-full bg-muted"
-              aria-label="Swap currencies"
+              onClick={swapCurrencies}
             >
               <ArrowUpDown className="h-6 w-6" />
             </Button>
           </div>
           <div className="relative">
             <Input
+              readOnly
               type="text"
               value={convertedAmount}
-              readOnly
               className="pr-20 text-2xl font-semibold h-16 rounded-xl"
             />
             <Select value={toCurrency} onValueChange={(value) => setToCurrency(value as CURRENCY_CODE)}>
@@ -159,7 +159,7 @@ export const CurrencyConverter: React.FC<Props> = ({
               </SelectTrigger>
               <SelectContent>
                 {availableCurrencies.map((currency) => (
-                  <SelectItem key={currency} value={currency}>
+                  <SelectItem value={currency} key={currency}>
                     <CurrencyFlag code={currency} />
                     {currency}
                   </SelectItem>
@@ -176,7 +176,7 @@ export const CurrencyConverter: React.FC<Props> = ({
         </div>
         <div className="flex flex-wrap gap-2 justify-center">
           {presetAmounts.map((preset) => (
-            <Button key={preset} variant="outline" size="sm" onClick={() => setAmount(preset)} className="flex-grow">
+            <Button size="sm" variant="outline" className="flex-grow" key={preset} onClick={() => setAmount(preset)}>
               {preset}
             </Button>
           ))}
