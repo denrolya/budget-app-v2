@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useReducer, useState } from 'react';
+import React, { createContext, useCallback, useMemo, useReducer, useState } from 'react';
 import { useHotkeys as useReactHotkeysHook } from 'react-hotkeys-hook';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -10,14 +10,7 @@ import type { Hotkey, HotkeyCategory, HotkeysContextType } from '@/types/hotkeys
 
 export const HotkeysContext = createContext<HotkeysContextType | null>(null);
 
-export const useHotkeys = (): HotkeysContextType => {
-  const ctx = useContext(HotkeysContext);
-  if (!ctx) throw new Error('useHotkeys must be used within a HotkeysProvider');
-  return ctx;
-};
-
 export const navigationHotkeys: Hotkey[] = [
-  { windows: 'S', mac: 'S', description: 'Open/Close Sidebar' },
   { windows: 'H', mac: 'H', description: 'Open/Close this window' },
   { windows: 'L', mac: 'L', description: 'Open Daily Ledger page' },
   { windows: 'T', mac: 'T', description: 'Open Transactions page' },
@@ -182,5 +175,3 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
     </HotkeysContext.Provider>
   );
 };
-
-export default HotkeysProvider;

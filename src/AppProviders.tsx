@@ -10,7 +10,7 @@ import { HotkeysProvider } from '@/contexts/Hotkeys';
 const AppProviders = ({ children }: React.PropsWithChildren) => (
   <TooltipProvider>
     <FormProvider>
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={false} className="overflow-hidden">
         <CurrencyConverterProvider>
           <HotkeysProvider>
             {children}

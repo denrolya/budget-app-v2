@@ -1,21 +1,22 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
 
 import { FormRenderer } from '@/components/common/FormRenderer';
-import Header from '@/components/layout/header/Header';
-import MobileNavigation from '@/components/layout/MobileNavigation';
-import Sidebar from '@/components/layout/sidebar/Sidebar';
 import { SidebarInset } from '@/components/ui/sidebar';
 
-export const LayoutV9: React.FC = () => (
+import Header from './header/Header';
+import MobileNavigation from './MobileNavigation';
+import AppSidebar from './sidebar/AppSidebar';
+
+const LayoutV9: React.FC = ({ children }) => (
   <>
-    <Sidebar />
+    <AppSidebar />
+
     <SidebarInset>
       <div className="flex flex-col h-screen">
         <Header className="hidden md:flex" />
 
         <main className="flex flex-col h-full md:overflow-hidden bg-background">
-          <Outlet />
+          {children}
         </main>
 
         <MobileNavigation />
