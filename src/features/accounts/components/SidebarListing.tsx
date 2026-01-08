@@ -1,5 +1,5 @@
 import sumBy from 'lodash/sumBy';
-import { Archive, Search } from 'lucide-react';
+import { Archive, Search, Pin } from 'lucide-react';
 import React, { useCallback, useId, useMemo, useRef, useState } from 'react';
 
 import { cn } from '@/lib/utils';
@@ -182,22 +182,34 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
 
                           {/* Right */}
                           <div className="flex flex-col items-end gap-0.5 text-right min-w-0 overflow-x-hidden">
-                            <span
-                              title={`${nativeAmount} ${account.currency}`}
-                              className={cn(
-                                'text-xs font-semibold tabular-nums leading-tight text-right',
-                                nativeAmount < 0 && 'text-destructive',
-                                account.isEmpty() && 'text-muted-foreground',
-                                'whitespace-normal break-words',
+                            <div className="flex items-center gap-1">
+                              {account.isDisplayedOnSidebar && (
+                                <span
+                                  aria-label="Pinned in main sidebar"
+                                  title="Pinned in main sidebar"
+                                  className="inline-flex items-center text-muted-foreground"
+                                >
+                                  <Pin aria-hidden="true" className="h-3 w-3" />
+                                </span>
                               )}
-                            >
-                              <MoneyValue
-                                amount={nativeAmount}
-                                currency={account.currency}
-                                showSign={false}
-                                showValuesTooltip={false}
-                              />
-                            </span>
+
+                              <span
+                                title={`${nativeAmount} ${account.currency}`}
+                                className={cn(
+                                  'text-xs font-semibold tabular-nums leading-tight text-right',
+                                  nativeAmount < 0 && 'text-destructive',
+                                  account.isEmpty() && 'text-muted-foreground',
+                                  'whitespace-normal break-words',
+                                )}
+                              >
+                                <MoneyValue
+                                  amount={nativeAmount}
+                                  currency={account.currency}
+                                  showSign={false}
+                                  showValuesTooltip={false}
+                                />
+                              </span>
+                            </div>
 
                             {showBaseLine && (
                               <span

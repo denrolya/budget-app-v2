@@ -137,7 +137,7 @@ export default defineConfig({
 
           // everything else (React, Radix, Sonner, UI libs, utilities, dates, etc.)
           return 'vendor';
-        }
+        },
       },
     },
   },

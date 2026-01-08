@@ -1,37 +1,38 @@
 import { Download, Edit } from 'lucide-react';
 import React, { useMemo } from 'react';
-import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useMatch, useNavigate, useParams } from 'react-router-dom';
 
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { Button } from '@/components/ui/button';
-import SidebarListing from '@/features/debts/components/SidebarListing';
-import { useDebts } from '@/hooks/financeData';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 import { useList as useDebtsQuery } from '../api';
 import DebtDetails from '../components/Details';
+import SidebarListing from '../components/SidebarListing';
 import Debt from '../models/Debt';
 
 export const DebtsManagementPage: React.FC = () => {
-  const { debtId } = useParams<{ debtId: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  const debts = useDebts();
+  const debtMatch = useMatch('/debts/:debtId');
+  const selectedDebtId = debtMatch?.params?.debtId ?? null;
 
-  const debt = useMemo(() => {
-    if (!debtId) return null;
-    return debts?.find((d) => String(d.id) === debtId) ?? null;
-  }, [debts, debtId]);
+  const { data } = useDebtsQuery();
 
-  const showSidebar = !isMobile || !debtId;
+  const selectedDebt = useMemo(() => {
+    if (!selectedDebtId) return null;
+    return data?.find((d) => String(d.id) === selectedDebtId) ?? null;
+  }, [data, selectedDebtId]);
+
+  const showSidebar = !isMobile || !selectedDebtId;
 
   return (
     <PageWithSidebar contentScrollable>
       {showSidebar && (
         <PageWithSidebar.Sidebar ariaLabel="Debts sidebar">
           <SidebarListing
-            selected={debt}
+            selected={selectedDebt}
             onClear={() => navigate('/debts')}
             onSelect={(d: Debt) => navigate(`/debts/${d.id}`)}
           />
@@ -40,14 +41,7 @@ export const DebtsManagementPage: React.FC = () => {
 
       <PageWithSidebar.Content className="min-h-0 h-full min-w-0 overflow-x-hidden">
         <Routes>
-          <Route
-            index
-            element={
-              <div className="flex h-full w-full items-center justify-center bg-muted p-4">
-                <div className="text-muted-foreground">Select a debt from the sidebar</div>
-              </div>
-            }
-          />
+          <Route index element={<DebtsIndex />} />
           <Route element={<DebtDetailsRoute />} path=":debtId" />
           <Route element={<Navigate replace to="/debts" />} path="*" />
         </Routes>
@@ -56,13 +50,19 @@ export const DebtsManagementPage: React.FC = () => {
   );
 };
 
+const DebtsIndex: React.FC = () => (
+  <div className="flex h-full w-full items-center justify-center bg-muted p-4">
+    <div className="text-muted-foreground">Select a debt from the sidebar</div>
+  </div>
+);
+
 const DebtDetailsRoute: React.FC = () => {
   const { debtId } = useParams<{ debtId: string }>();
   const navigate = useNavigate();
 
   const { data } = useDebtsQuery();
 
-  const debt = React.useMemo(() => {
+  const debt = useMemo(() => {
     if (!debtId) return null;
     return data?.find((d) => String(d.id) === debtId) ?? null;
   }, [data, debtId]);
