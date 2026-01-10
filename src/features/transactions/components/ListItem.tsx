@@ -2,12 +2,17 @@ import cn from 'classnames';
 import { Eye, InfoIcon, MoreHorizontal, User } from 'lucide-react';
 import React from 'react';
 
-import AccountPill from '@/features/accounts/components/Pill';
-import { Details } from '@/features/transactions/components/Details';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,9 +22,13 @@ import {
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import Transaction from '@/features/transactions/models/Transaction';
-import { Type } from '@/features/transactions';
-import TransactionValue from '@/components/common/TransactionValue';
+import AccountPill from '@/features/accounts/components/Pill';
+
+import Transaction from '../models/Transaction';
+import { Type } from '../types';
+
+import TransactionValue from './TransactionValue';
+import Details from './Details';
 
 interface TransactionListItemProps {
   transaction: Transaction;
@@ -28,10 +37,10 @@ interface TransactionListItemProps {
 }
 
 export const ListItem: React.FC<TransactionListItemProps> = ({
-  transaction,
-  isCompensationView = false,
-  colorBorder = false,
-}) => {
+                                                               transaction,
+                                                               isCompensationView = false,
+                                                               colorBorder = false,
+                                                             }) => {
   const { openForm } = useFormContext();
   const isCompensated =
     transaction.type === Type.Expense && transaction.compensations && transaction.compensations?.length > 0;
@@ -54,7 +63,6 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
               <div className="flex items-center space-x-2 text-sm">
                 <ResponsiveTooltip
                   openDelay={0}
-                  contentClassName="w-80"
                   content={
                     <div className="flex justify-between space-x-4">
                       <div className="space-y-1">
@@ -67,10 +75,11 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
                       </div>
                     </div>
                   }
+                  contentClassName="w-80"
                 >
                   <Badge
-                    className="text-xs font-mono"
                     variant={transaction.type === Type.Income ? 'success' : 'destructive'}
+                    className="text-xs font-mono"
                   >
                     <TransactionValue transaction={transaction} />
                   </Badge>
@@ -102,20 +111,23 @@ export const ListItem: React.FC<TransactionListItemProps> = ({
                   <>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
                           <Eye className="h-4 w-4" />
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
                         <DialogHeader>
                           <DialogTitle>Transaction Details</DialogTitle>
+                          <DialogDescription className="sr-only">
+                            Transaction details for {transaction.id}
+                          </DialogDescription>
                         </DialogHeader>
                         <Details transaction={transaction} onEdit={onEdit} />
                       </DialogContent>
                     </Dialog>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>

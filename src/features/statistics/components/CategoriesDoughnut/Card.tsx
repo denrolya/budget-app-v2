@@ -23,9 +23,10 @@ import { UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeCo
 import { Timeframe } from '@/types/global';
 import { Type, Type as TransactionType } from '@/features/transactions';
 import { formatShortDate } from '@/lib/datetime/formatShortDate';
-import TransactionsDrawer from '@/features/statistics/components/CategoriesDoughnut/TransactionsDrawer';
-import Skeleton from '@/features/statistics/components/CategoriesDoughnut/Skeleton';
-import ConfigurationMenu from '@/features/statistics/components/CategoriesDoughnut/ConfigurationMenu';
+
+import TransactionsDrawer from './TransactionsDrawer';
+import Skeleton from './Skeleton';
+import ConfigurationMenu from './ConfigurationMenu';
 
 interface ProcessedCategory {
   id: number;

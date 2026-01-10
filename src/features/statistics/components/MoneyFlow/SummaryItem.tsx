@@ -1,9 +1,8 @@
+import MoneyValue from '@/components/common/MoneyValue';
+import ResponsiveTooltip from '@/components/ui/responsive-tooltip';
+import { cn } from '@/lib/utils';
 import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 import React from 'react';
-
-import MoneyValue from '@/components/common/MoneyValue';
-import { cn } from '@/lib/utils';
-import ResponsiveTooltip from '@/components/ui/responsive-tooltip';
 
 interface Props extends React.ComponentPropsWithoutRef<'div'> {
   label: string;
@@ -15,14 +14,14 @@ interface Props extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 const SummaryItem: React.FC<Props> = ({
-  label,
-  colors = false,
-  showSign = false,
-  value,
-  comparisonValue,
-  comparisonPercentage,
-  ...props
-}) => (
+                                        label,
+                                        colors = false,
+                                        showSign = false,
+                                        value,
+                                        comparisonValue,
+                                        comparisonPercentage,
+                                        ...props
+                                      }) => (
   <div {...props}>
     <p className="text-muted-foreground flex items-center justify-start md:justify-center text-xs">{label}</p>
     <div className="flex items-center justify-start md:justify-center">

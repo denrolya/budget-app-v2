@@ -5,8 +5,6 @@ export enum Theme {
   Light = 'light',
   System = 'system',
   TronDark = 'theme-tron-dark',
-  RetrowaveLight = 'theme-retrowave-light',
-  RetrowaveDark = 'theme-retrowave-dark',
 }
 
 interface ThemeProviderProps {
@@ -46,8 +44,6 @@ export const ThemeProvider = ({
       Theme.Light,
       Theme.Dark,
       Theme.TronDark,
-      Theme.RetrowaveLight,
-      Theme.RetrowaveDark,
     );
 
     if (theme === Theme.System) {

@@ -3,11 +3,11 @@ import moment from 'moment';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import Account from '@/features/accounts/models/Account';
 import Category from '@/features/categories/models/Category';
+import { RawTransactionDTO, Type as TransactionType } from '@/features/transactions';
 import Transaction from '@/features/transactions/models/Transaction';
 import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
 import { api, axiosFetcher } from '@/services/api';
 import { type Sorting } from '@/types/pagination';
-import { RawTransactionDTO, Type as TransactionType } from '@/features/transactions';
 
 interface FetchTransactionsParams {
   page: number;
@@ -122,19 +122,19 @@ const downloadBlob = (blob: Blob, filename: string) => {
 };
 
 const csvFilenameFromFilters = (filters: TransactionFilters) => {
-  const after = filters.after?.format('YYYY-MM-DD') ?? 'from';
-  const before = filters.before?.format('YYYY-MM-DD') ?? 'to';
+  const after = filters.after?.format(BACKEND_DATE_FORMAT) ?? 'from';
+  const before = filters.before?.format(BACKEND_DATE_FORMAT) ?? 'to';
   return `transactions_${after}_${before}.csv`;
 };
 
 export const transactionService = {
   async fetchList({
-                            page = 1,
-                            perPage = 30,
-                            filters,
-                            sort,
-                            excludeTransfers,
-                          }: FetchTransactionsParams): Promise<FetchResponse> {
+                    page = 1,
+                    perPage = 30,
+                    filters,
+                    sort,
+                    excludeTransfers,
+                  }: FetchTransactionsParams): Promise<FetchResponse> {
     const query = buildQueryParams({ page, perPage, filters, sort, includePagingAndSort: true });
     const url = buildUrl(BASE_URL, query);
 

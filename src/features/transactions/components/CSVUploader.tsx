@@ -5,7 +5,14 @@ import { useMemo, useState } from 'react';
 import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect } from '@/components/ui/multi-select';
@@ -115,12 +122,13 @@ export const CSVUploader = ({ onComplete }: { onComplete?: (transactions: Transa
 
   return (
     <>
-      <Input type="file" accept=".csv" onChange={handleFileChange} />
+      <Input accept=".csv" type="file" onChange={handleFileChange} />
       {showMapper && (
         <Dialog open onOpenChange={setShowMapper}>
           <DialogContent className="max-w-3xl w-full overflow-auto">
             <DialogHeader>
               <DialogTitle>Map CSV Fields</DialogTitle>
+              <DialogDescription>whater</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-1">
@@ -131,7 +139,7 @@ export const CSVUploader = ({ onComplete }: { onComplete?: (transactions: Transa
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">-- None --</SelectItem>
-                    {headers.map((h) => <SelectItem key={h} value={h}>{h}</SelectItem>)}
+                    {headers.map((h) => <SelectItem value={h} key={h}>{h}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -139,11 +147,11 @@ export const CSVUploader = ({ onComplete }: { onComplete?: (transactions: Transa
               <div className="space-y-1">
                 <Label>Note</Label>
                 <MultiSelect
-                  options={headers.map((h) => ({ label: h, value: h }))}
-                  onValueChange={setNoteFields}
                   defaultValue={noteFields}
-                  placeholder="Select columns for note"
                   maxCount={4}
+                  options={headers.map((h) => ({ label: h, value: h }))}
+                  placeholder="Select columns for note"
+                  onValueChange={setNoteFields}
                 />
               </div>
 
@@ -162,7 +170,7 @@ export const CSVUploader = ({ onComplete }: { onComplete?: (transactions: Transa
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">-- None --</SelectItem>
-                    {headers.map((h) => <SelectItem key={h} value={h}>{h}</SelectItem>)}
+                    {headers.map((h) => <SelectItem value={h} key={h}>{h}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -185,8 +193,8 @@ export const CSVUploader = ({ onComplete }: { onComplete?: (transactions: Transa
 
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="inferType"
                   checked={inferTypeFromAmount}
+                  id="inferType"
                   onCheckedChange={(val) => setInferTypeFromAmount(!!val)} />
                 <Label htmlFor="inferType">Infer type from amount</Label>
               </div>

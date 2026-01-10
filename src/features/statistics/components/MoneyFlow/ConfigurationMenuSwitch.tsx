@@ -1,8 +1,7 @@
-import { type LucideIcon } from 'lucide-react';
-import React, { ReactNode, useId } from 'react';
-
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { type LucideIcon } from 'lucide-react';
+import React, { ReactNode, useId } from 'react';
 
 interface Props {
   label: string;

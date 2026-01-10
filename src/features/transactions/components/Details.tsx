@@ -9,13 +9,15 @@ import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Separator } from '@/components/ui/separator';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
-import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/hooks/financeData';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import AccountPill from '@/features/accounts/components/Pill';
-import { useMutations } from '@/features/transactions/api/mutations';
-import { ListItem as TransactionListItem } from '@/features/transactions/components/ListItem';
+import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/hooks/financeData';
 import { confirm } from '@/lib/confirmation';
-import Transaction from '@/features/transactions/models/Transaction';
+
+import { useMutations } from '../api/mutations';
+import Transaction from '../models/Transaction';
+
+import TransactionListItem from './ListItemV3';
 
 interface TransactionDetailsProps {
   transaction: Transaction;
@@ -43,14 +45,14 @@ const RateDisplay: React.FC<{
         useColors={false}
         className="font-mono"
       />
-      <sup className="ml-1 mt-2 text-[8px] font-medium text-muted-foreground">{source}</sup>
+      <sup className="ml-1 mt-2 text-2xs font-medium text-muted-foreground">{source}</sup>
     </div>
   </div>
 );
 
-export const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
+const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
   const { openForm } = useFormContext();
-  const { deleteTransaction, isDeleting, isUpdating: isEditing } = useMutations();
+  const { delete: deleteTransaction, isDeleting, isUpdating: isEditing } = useMutations();
 
   const isDebt = transaction.debt && transaction.debt.debtor;
   const fixerRates = useFixerExchangeRates();

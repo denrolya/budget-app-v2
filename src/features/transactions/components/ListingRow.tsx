@@ -4,9 +4,7 @@ import React, { useId, useMemo } from 'react';
 
 import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
 import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
-import TransactionValue from '@/components/common/TransactionValue';
 import AccountPill from '@/features/accounts/components/Pill';
-import EditableCell from '@/features/transactions/components/EditableCell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,8 +12,12 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { TableCell, TableRow } from '@/components/ui/table';
 import { MOMENT_DATETIME_FORM_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { cn } from '@/lib/utils';
-import Transaction from '@/features/transactions/models/Transaction';
-import { TransactionEditableField, useInlineEdit } from '@/features/transactions/hooks/useInlineEdit';
+
+import Transaction from '../models/Transaction';
+import { TransactionEditableField, useInlineEdit } from '../hooks/useInlineEdit';
+
+import EditableCell from './EditableCell';
+import TransactionValue from './TransactionValue';
 
 export type TransactionRowColumn =
   | { key: 'id'; className?: string }
@@ -66,12 +68,12 @@ export const ListingRow = ({
     <EditableCell
       compact={compact}
       disabled={disabled}
-      isEditing={isEditing(transaction.id, field)}
       display={display}
       editor={editor}
-      onStartEdit={() => startEdit(transaction, field)}
+      isEditing={isEditing(transaction.id, field)}
       onCancel={cancelEdit}
       onSave={() => void save(transaction)}
+      onStartEdit={() => startEdit(transaction, field)}
     />
   );
 
@@ -80,11 +82,11 @@ export const ListingRow = ({
       <Sheet open={sheetOpen} onOpenChange={onSheetOpenChange}>
         <SheetTrigger asChild>
           <button
+            aria-expanded={!!sheetOpen}
+            aria-haspopup="dialog"
+            aria-label={`Open transaction #${transaction.id} details`}
             type="button"
             className="text-left"
-            aria-label={`Open transaction #${transaction.id} details`}
-            aria-haspopup="dialog"
-            aria-expanded={sheetOpen ? true : false}
           >
             <code className="cursor-context-menu tracking-tighter antialiased select-all text-muted-foreground">
               #{transaction.id}
@@ -93,10 +95,10 @@ export const ListingRow = ({
         </SheetTrigger>
 
         <SheetContent
+          aria-describedby={descId}
+          aria-labelledby={titleId}
           side="right"
           className="p-0 overflow-y-auto w-full sm:max-w-xl"
-          aria-labelledby={titleId}
-          aria-describedby={descId}
         >
           <div className="h-full flex flex-col">
             <SheetHeader className="p-6 pb-0">
@@ -128,7 +130,7 @@ export const ListingRow = ({
 
   const accountCell = renderEditable(
     'account',
-    <AccountPill size="sm" variant="inline" account={transaction.account} />,
+    <AccountPill account={transaction.account} size="sm" variant="inline" />,
     <AccountTypeahead
       autoFocus
       multiple={false}
@@ -141,7 +143,7 @@ export const ListingRow = ({
   // Keep amount visually as the primary numeric accent
   const amountCell = renderEditable(
     'amount',
-    <TransactionValue revert className="font-semibold tracking-tight" transaction={transaction} />,
+    <TransactionValue revert transaction={transaction} className="font-semibold tracking-tight" />,
     <Input
       autoFocus
       type="number"
@@ -158,10 +160,10 @@ export const ListingRow = ({
     </Badge>,
     <CategoryTypeahead
       autoFocus
-      valueField="id"
       multiple={false}
       type={transaction.type}
       value={((editValue as any)?.id ?? editValue) as any}
+      valueField="id"
       onChange={(v) => setEditValue(v as any)}
       onKeyDown={(e) => keyHandler.onKeyDown(e, transaction)}
     />,
@@ -193,9 +195,9 @@ export const ListingRow = ({
   const actionsCell = (
     <div className="flex justify-end gap-2">
       <Button
-        variant="ghost"
-        size="icon"
         aria-label={`View transaction #${transaction.id} details`}
+        size="icon"
+        variant="ghost"
         className="h-8 w-8 p-0"
         onClick={() => onSheetOpenChange?.(true)}
       >
@@ -203,9 +205,9 @@ export const ListingRow = ({
       </Button>
 
       <Button
-        variant="ghost"
-        size="icon"
         aria-label={`Edit transaction #${transaction.id}`}
+        size="icon"
+        variant="ghost"
         className="h-8 w-8 p-0"
         onClick={() => onOpenForm(transaction)}
       >
@@ -213,9 +215,9 @@ export const ListingRow = ({
       </Button>
 
       <Button
-        variant="ghost"
-        size="icon"
         aria-label={`Remove transaction #${transaction.id}`}
+        size="icon"
+        variant="ghost"
         className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
         onClick={() => onDelete(transaction)}
       >
@@ -248,7 +250,7 @@ export const ListingRow = ({
       <TableCell className={cellClass('w-4')} />
 
       {normalizedColumns.map((c, idx) => (
-        <TableCell key={`${c.key}-${idx}`} className={cellClass(c.className)}>
+        <TableCell className={cellClass(c.className)} key={`${c.key}-${idx}`}>
           {cellsByKey[c.key]}
         </TableCell>
       ))}

@@ -3,16 +3,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cardConfigs } from '@/constants/dashboard-config';
 import { Type as AccountType } from '@/features/accounts';
-import { StatisticsConfig } from '@/types/statistics';
-import { generateSlug } from '@/lib/url/generateSlug';
 import StatisticsCardsSidebar from '@/features/dashboard/components/StatisticsCardsSidebar';
 import BalanceByAccountType from '@/features/statistics/components/BalanceByAccountType';
-import CategoriesDoughnut from '@/features/statistics/components/CategoriesDoughnut/Card';
-import AccountsDoughnut from '@/features/statistics/components/AccountsDoughnut/Card';
 import CategoriesTimeline from '@/features/statistics/components/CategoriesTimeline/Card';
+import DistributionDoughnut from '@/features/statistics/components/DistributionDonut';
 import MoneyFlow from '@/features/statistics/components/MoneyFlow/Card';
 import StatisticsCard from '@/features/statistics/components/StatisticsCard/Card';
 import TotalBalanceCard from '@/features/statistics/components/TotalBalanceCard';
+import { generateSlug } from '@/lib/url/generateSlug';
+import { StatisticsConfig } from '@/types/statistics';
 
 const DashboardPage: React.FC = () => {
   const [configs] = useState(cardConfigs);
@@ -85,18 +84,10 @@ const DashboardPage: React.FC = () => {
           ))}
         </Tabs>
 
-        <div className="grid gap-6 grid-cols-1 xl:grid-cols-12">
-          {/* Left Doughnut (Accounts) */}
-          <AccountsDoughnut className="order-3 xl:order-1 xl:col-span-3 3xl:col-span-2 aspect-square" />
-
-          {/* Center Chart (Money Flow) */}
-          <MoneyFlow className="order-2 xl:order-2 xl:col-span-6 3xl:col-span-8 xl:col-start-4 3xl:col-start-3 min-h-[360px] md:min-h-[420px] 2xl:min-h-[480px]" />
-
-          {/* Right Doughnut (Categories) */}
-          <CategoriesDoughnut className="order-1 xl:order-3 xl:col-span-3 3xl:col-span-2 aspect-square" />
-
-          {/* Timeline below center */}
-          <CategoriesTimeline className="order-4 xl:order-4 xl:col-span-6 3xl:col-span-8 xl:col-start-4 3xl:col-start-3 min-h-[320px]" />
+        <div className="grid gap-6 grid-cols-1 xl:grid-cols-12 xl:items-stretch">
+          <MoneyFlow className="xl:col-span-8 3xl:col-span-10 xl:col-start-5 xl:row-start-1 h-full min-h-[360px] md:min-h-[420px] 2xl:min-h-[480px]" />
+          <CategoriesTimeline className="xl:col-span-8 3xl:col-span-10 xl:col-start-5 xl:row-start-2 h-full min-h-[320px]" />
+          <DistributionDoughnut className="xl:col-span-4 3xl:col-span-2 xl:row-span-2 h-full min-h-[720px]" />
         </div>
       </section>
 

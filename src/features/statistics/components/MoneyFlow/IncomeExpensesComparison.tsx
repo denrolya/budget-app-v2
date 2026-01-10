@@ -1,7 +1,6 @@
+import MoneyValue from '@/components/common/MoneyValue';
 import { ArrowDownIcon, ArrowRightIcon, ArrowUpIcon } from 'lucide-react';
 import React, { memo, useMemo } from 'react';
-
-import MoneyValue from '@/components/common/MoneyValue';
 
 interface Props {
   currentIncome: number;
@@ -31,11 +30,11 @@ const ChangeIndicator: React.FC<{ change: number; isExpense?: boolean }> = ({ ch
 };
 
 const IncomeExpensesComparison: React.FC<Props> = ({
-  currentIncome,
-  currentExpenses,
-  previousIncome,
-  previousExpenses,
-}) => {
+                                                     currentIncome,
+                                                     currentExpenses,
+                                                     previousIncome,
+                                                     previousExpenses,
+                                                   }) => {
   const changes = useMemo(() => {
     const currentRevenue = currentIncome - currentExpenses;
     const previousRevenue = previousIncome - previousExpenses;

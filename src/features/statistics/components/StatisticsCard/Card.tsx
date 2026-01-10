@@ -1,22 +1,21 @@
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import ConfigContainer from '@/features/statistics/components/StatisticsCard/ConfigContainer';
+import GenericContent from '@/features/statistics/components/StatisticsCard/GenericContent';
+import MinMaxContent from '@/features/statistics/components/StatisticsCard/MinMaxContent';
+import PercentageIndicator from '@/features/statistics/components/StatisticsCard/PercentageIndicator';
+import StatTypeBadge from '@/features/statistics/components/StatisticsCard/StatTypeBadge';
+import { Type as TransactionType } from '@/features/transactions';
+import { useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { generateSlug } from '@/lib/url/generateSlug';
+import { Interval, StatisticsConfig, StatisticsType } from '@/types/statistics';
+import { PercentageChange, StatisticsData, ValueByPeriodData } from '@/types/valueByPeriodStatistics';
 import { ResponsiveLine } from '@nivo/line';
 import isEqual from 'lodash/isEqual';
 import { SettingsIcon } from 'lucide-react';
 import React, { memo, useMemo, useState } from 'react';
-
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Interval, StatisticsConfig, StatisticsType } from '@/types/statistics';
-import { Type as TransactionType } from '@/features/transactions';
-import { PercentageChange, StatisticsData, ValueByPeriodData } from '@/types/valueByPeriodStatistics';
-import { generateSlug } from '@/lib/url/generateSlug';
-import StatTypeBadge from '@/features/statistics/components/StatisticsCard/StatTypeBadge';
-import PercentageIndicator from '@/features/statistics/components/StatisticsCard/PercentageIndicator';
-import MinMaxContent from '@/features/statistics/components/StatisticsCard/MinMaxContent';
-import GenericContent from '@/features/statistics/components/StatisticsCard/GenericContent';
-import ConfigContainer from '@/features/statistics/components/StatisticsCard/ConfigContainer';
 
 interface Props {
   onChange: (newConfig: Partial<StatisticsConfig>) => void;

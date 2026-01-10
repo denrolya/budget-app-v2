@@ -1,4 +1,4 @@
-import { Bike, LogOut, Monitor, Moon, MoreHorizontal, Palmtree, Plus, Sun } from 'lucide-react';
+import { Bike, LogOut, Monitor, Moon, MoreHorizontal, Plus, Sun } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSwipeable } from 'react-swipeable';
@@ -248,20 +248,6 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                                 <div className="flex items-center">
                                   <Bike aria-hidden="true" className="mr-2 h-4 w-4" />
                                   Tron Dark
-                                </div>
-                              </SelectItem>
-
-                              <SelectItem value={Theme.RetrowaveLight}>
-                                <div className="flex items-center">
-                                  <Palmtree aria-hidden="true" className="mr-2 h-4 w-4" />
-                                  Retrowave Light
-                                </div>
-                              </SelectItem>
-
-                              <SelectItem value={Theme.RetrowaveDark}>
-                                <div className="flex items-center">
-                                  <Palmtree aria-hidden="true" className="mr-2 h-4 w-4" />
-                                  Retrowave Dark
                                 </div>
                               </SelectItem>
                             </SelectContent>

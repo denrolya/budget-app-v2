@@ -1,13 +1,12 @@
-import { Moment } from 'moment';
-import React from 'react';
-
 import MoneyValue from '@/components/common/MoneyValue';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { ComparisonType, StatisticsType } from '@/types/statistics';
-import { Type as TransactionType } from '@/features/transactions';
-import { PercentageChange, StatisticsData } from '@/types/valueByPeriodStatistics';
-import TooltipContent from '@/features/statistics/components/StatisticsCard/TooltipContent';
 import PercentageBadge from '@/features/statistics/components/StatisticsCard/PercentageBadge';
+import TooltipContent from '@/features/statistics/components/StatisticsCard/TooltipContent';
+import { Type as TransactionType } from '@/features/transactions';
+import { ComparisonType, StatisticsType } from '@/types/statistics';
+import { PercentageChange, StatisticsData } from '@/types/valueByPeriodStatistics';
+import { Moment } from 'moment';
+import React from 'react';
 
 const MinMaxContent: React.FC<{
   currentValue: StatisticsData<StatisticsType.MinMax>;
@@ -20,16 +19,16 @@ const MinMaxContent: React.FC<{
   comparison: ComparisonType;
   type: TransactionType;
 }> = ({
-  currentValue,
-  comparisonValue,
-  percentageChange,
-  selectedTimeframe,
-  comparisonTimeframe,
-  comparison,
-  type,
-  minDate,
-  maxDate,
-}) => (
+        currentValue,
+        comparisonValue,
+        percentageChange,
+        selectedTimeframe,
+        comparisonTimeframe,
+        comparison,
+        type,
+        minDate,
+        maxDate,
+      }) => (
   <div className="flex flex-col space-y-1">
     <div className="flex justify-between items-baseline">
       <ResponsiveTooltip

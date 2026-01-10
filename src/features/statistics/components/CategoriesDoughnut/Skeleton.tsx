@@ -8,7 +8,7 @@ export const CategoriesDoughnutCardSkeleton: React.FC<React.ComponentPropsWithou
     <div className="w-full mt-4 md:mt-0 md:ml-4">
       <div className="space-y-2">
         {[...Array(5)].map((_, index) => (
-          <div key={index} className="flex items-center justify-between">
+          <div className="flex items-center justify-between" key={index}>
             <Skeleton className="h-4 w-1/3" />
             <div className="flex items-center space-x-2">
               <Skeleton className="h-4 w-16" />

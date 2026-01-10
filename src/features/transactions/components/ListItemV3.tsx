@@ -2,9 +2,7 @@ import cn from 'classnames';
 import { Eye, User } from 'lucide-react';
 import React from 'react';
 
-import TransactionValue from '@/components/common/TransactionValue';
 import AccountPill from '@/features/accounts/components/Pill';
-import Details from '@/features/transactions/components/Details';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,7 +10,11 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
-import Transaction from '@/features/transactions/models/Transaction';
+
+import Transaction from '../models/Transaction';
+
+import Details from './Details';
+import TransactionValue from './TransactionValue';
 
 interface TransactionItemProps {
   transaction: Transaction;
@@ -35,8 +37,8 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
       <CardContent className="p-2 flex flex-col space-y-1">
         <div className="flex flex-row items-center justify-between">
           <div className="flex-grow flex items-center space-x-2 overflow-x-auto">
-            <TransactionValue className="text-xs" transaction={transaction} />
-            <AccountPill size="sm" account={transaction.account} />
+            <TransactionValue transaction={transaction} className="text-xs" />
+            <AccountPill account={transaction.account} size="sm" />
             {transaction?.debt?.debtor && (
               <Badge variant="outline" className="text-[10px] flex items-center px-1">
                 <User className="h-3 w-3 mr-1" />
@@ -61,8 +63,8 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
             </span>
             <div className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
               <Sheet>
-                <SheetTrigger className="m-0" asChild>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                <SheetTrigger asChild className="m-0">
+                  <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
                     <Eye className="h-4 w-4" />
                   </Button>
                 </SheetTrigger>

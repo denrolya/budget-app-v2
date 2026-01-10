@@ -1,8 +1,7 @@
+import { Badge } from '@/components/ui/badge';
 import cn from 'classnames';
 import { BarChartIcon, CalendarIcon, DollarSignIcon, TrendingUpIcon } from 'lucide-react';
 import React from 'react';
-
-import { Badge } from '@/components/ui/badge';
 
 export type StatType = 'sum' | 'daily' | 'avg' | 'min-max';
 

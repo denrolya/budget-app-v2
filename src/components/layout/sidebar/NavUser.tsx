@@ -83,16 +83,6 @@ const NavUser: React.FC = () => {
               <DropdownMenuSubContent>
                 <DropdownMenuGroup>
                   <DropdownMenuLabel>Custom</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => setTheme(Theme.RetrowaveLight)}>
-                    <Palmtree className="mr-2 h-4 w-4" />
-                    <span>Retrowave Light</span>
-                    {theme === Theme.RetrowaveLight && <Check className="ml-auto h-4 w-4 text-primary" />}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme(Theme.RetrowaveDark)}>
-                    <Palmtree className="mr-2 h-4 w-4" />
-                    <span>Retrowave Dark</span>
-                    {theme === Theme.RetrowaveDark && <Check className="ml-auto h-4 w-4 text-primary" />}
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setTheme(Theme.TronDark)}>
                     <Bike className="mr-2 h-4 w-4" />
                     <span>Tron Dark</span>

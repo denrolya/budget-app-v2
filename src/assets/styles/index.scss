@@ -5,8 +5,6 @@
 @use 'themes/light' as light;
 @use 'themes/dark' as dark;
 @use 'themes/tron_dark' as tron-dark;
-@use 'themes/retrowave_dark' as retrowave-dark;
-@use 'themes/retrowave_light' as retrowave-light;
 
 @tailwind base;
 @tailwind components;
@@ -29,13 +27,5 @@
 
   .theme-tron-dark {
     @include tron-dark.theme;
-  }
-
-  .theme-retrowave-dark {
-    @include retrowave-dark.theme;
-  }
-
-  .theme-retrowave-light {
-    @include retrowave-light.theme;
   }
 }

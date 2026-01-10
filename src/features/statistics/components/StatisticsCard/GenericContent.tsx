@@ -18,14 +18,14 @@ const GenericContent: React.FC<{
   comparison: ComparisonType;
   type: TransactionType;
 }> = ({
-  currentValue,
-  comparisonValue,
-  percentageChange,
-  selectedTimeframe,
-  comparisonTimeframe,
-  comparison,
-  type,
-}) => (
+        currentValue,
+        comparisonValue,
+        percentageChange,
+        selectedTimeframe,
+        comparisonTimeframe,
+        comparison,
+        type,
+      }) => (
   <>
     <div className="flex justify-between items-baseline">
       <ResponsiveTooltip
@@ -67,7 +67,7 @@ const GenericContent: React.FC<{
         }
         contentClassName="p-2 rounded-xl text-xs"
       >
-          <MoneyValue amount={comparisonValue as number} useColors={false} className="font-semibold text-xs" />
+        <MoneyValue amount={comparisonValue as number} useColors={false} className="font-semibold text-xs" />
       </ResponsiveTooltip>
     </div>
   </>

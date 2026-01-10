@@ -1,3 +1,7 @@
+import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
+import { CHART_STYLES } from '@/constants/recharts';
+import CustomTooltip from '@/features/statistics/components/MoneyFlow/ChartTooltip';
+import { ISO8601Period } from '@/types/global';
 import moment, { Moment } from 'moment';
 import React from 'react';
 import {
@@ -11,11 +15,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-
-import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
-import { CHART_STYLES } from '@/constants/recharts';
-import { ISO8601Period } from '@/types/global';
-import CustomTooltip from '@/features/statistics/components/MoneyFlow/ChartTooltip';
 
 interface Props {
   data: {

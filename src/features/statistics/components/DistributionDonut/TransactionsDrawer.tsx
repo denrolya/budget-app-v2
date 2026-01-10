@@ -1,4 +1,4 @@
-import { Moment } from 'moment/moment';
+import { Moment } from 'moment';
 import React, { useEffect } from 'react';
 
 import Pagination from '@/components/common/Pagination';
@@ -76,22 +76,22 @@ export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
         <ScrollArea className="h-[60vh] px-4">
           <FormattedListing
             error={transactionsError}
+            groupedItems={groupedTransactions}
             isError={isTransactionsError}
             isLoading={isTransactionsLoading}
-            groupedItems={groupedTransactions}
             refetch={refetchTransactions}
             onAdd={() => openForm(FormType.Transaction)}
           />
         </ScrollArea>
         <DrawerFooter>
           <Pagination
-            isLoading={isTransactionsLoading}
             currentPage={currentPage}
+            isLoading={isTransactionsLoading}
+            perPage={perPage}
+            totalItems={totalItems}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
             onPerPageChange={setPerPage}
-            perPage={perPage}
-            totalItems={totalItems}
           />
         </DrawerFooter>
       </DrawerContent>

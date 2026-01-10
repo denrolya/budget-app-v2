@@ -1,20 +1,20 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-import cn from 'classnames';
-import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
-import React, { useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, Controller } from 'react-hook-form';
-import * as z from 'zod';
-
-import { StatisticsConfig } from '@/types/statistics';
-import { Switch } from '@/components/ui/switch';
-import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
 import { Type as TransactionType } from '@/features/transactions';
+
+import { StatisticsConfig } from '@/types/statistics';
+import { zodResolver } from '@hookform/resolvers/zod';
+// @ts-nocheck
+import cn from 'classnames';
+import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import * as z from 'zod';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),

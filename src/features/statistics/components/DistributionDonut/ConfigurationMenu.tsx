@@ -1,7 +1,7 @@
-import cn from 'classnames';
 import { ArrowDownCircle, ArrowUpCircle, Sigma, SettingsIcon } from 'lucide-react';
 import React from 'react';
 
+import { cn } from '@/lib/utils';
 import { Timeframe } from '@/types/global';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -73,9 +73,9 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
               <span>Show Monthly Average Values</span>
             </Label>
             <Switch
+              checked={showMonthlyAverage}
               id="show-monlty-average"
               className="scale-75"
-              checked={showMonthlyAverage}
               onCheckedChange={() => setShowMonthlyAverage(!showMonthlyAverage)}
             />
           </div>
@@ -88,7 +88,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-7 w-7 p-0">
+          <Button size="icon" variant="ghost" className="h-7 w-7 p-0">
             <SettingsIcon className="h-4 w-4" />
             <span className="sr-only">Open settings</span>
           </Button>
@@ -102,7 +102,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
     return (
       <Drawer>
         <DrawerTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-7 w-7 p-0">
+          <Button size="icon" variant="ghost" className="h-7 w-7 p-0">
             <SettingsIcon className="h-4 w-4" />
           </Button>
         </DrawerTrigger>

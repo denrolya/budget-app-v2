@@ -1,6 +1,3 @@
-import { BarChart, CalendarX, LineChart, PieChart, SettingsIcon, TrendingDown, TrendingUp } from 'lucide-react';
-import React from 'react';
-
 import { Button } from '@/components/ui/button';
 import {
   Drawer,
@@ -12,9 +9,11 @@ import {
 } from '@/components/ui/drawer';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import Switch from '@/features/statistics/components/MoneyFlow/ConfigurationMenuSwitch';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { PeriodValue } from '@/types/global';
-import Switch from '@/features/statistics/components/MoneyFlow/ConfigurationMenuSwitch';
+import { BarChart, CalendarX, LineChart, PieChart, SettingsIcon, TrendingDown, TrendingUp } from 'lucide-react';
+import React from 'react';
 
 interface UnifiedChartMenuProps {
   period: string;

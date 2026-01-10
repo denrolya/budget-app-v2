@@ -1,4 +1,5 @@
 import { Bitcoin, DollarSign, Euro } from 'lucide-react';
+import React from 'react';
 import { FaEthereum } from 'react-icons/fa';
 
 export enum CURRENCY_CODE {
