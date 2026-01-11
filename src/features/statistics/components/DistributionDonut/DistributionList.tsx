@@ -6,16 +6,15 @@ import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 import type { Item } from './types';
-import { renderNativeLine } from './utils';
 
 type RenderLabelArgs = {
   item: Item;
-  pct: number;
+  percentage: number;
 };
 
 type RenderTooltipArgs = {
   item: Item;
-  pct: number;
+  percentage: number;
 };
 
 type Props = {
@@ -24,31 +23,17 @@ type Props = {
   total: number;
 
   getDotColor?: (item: Item) => string | null;
-
   onRowClick?: (id: string) => void;
 
-  /**
-   * Render left label block (account pill for accounts, plain text for others).
-   * If not provided -> default label renderer.
-   */
   renderLabel?: (args: RenderLabelArgs) => React.ReactNode;
-
-  /**
-   * Tooltip content for the left side. If not provided -> default tooltip.
-   */
   renderTooltip?: (args: RenderTooltipArgs) => React.ReactNode;
 
-  /**
-   * Extra controls on the right (e.g. "view transactions" icon button for categories).
-   */
   rightSlot?: (item: Item) => React.ReactNode;
 };
 
-const ROW_BASE =
-  'w-full flex items-center justify-between gap-3 px-2 py-1 rounded hover:bg-muted/50 transition-colors';
-const LEFT_WRAP = 'min-w-0 flex items-center gap-2';
-const LABEL_TEXT = 'truncate text-sm leading-5';
-const DOT_CLASS = 'h-2.5 w-2.5 rounded-full shrink-0';
+const ROW_BASE = 'w-full flex items-center justify-between gap-3 rounded px-2 py-1 text-left transition-colors';
+const ROW_INTERACTIVE =
+  'hover:bg-muted/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
 const DistributionTable: React.FC<Props> = ({
                                               ariaLabel,
@@ -64,11 +49,11 @@ const DistributionTable: React.FC<Props> = ({
 
   const DefaultLabel = useMemo(
     () =>
-      ({ item, pct }: RenderLabelArgs) => (
-        <span className={LABEL_TEXT}>
+      ({ item, percentage }: RenderLabelArgs) => (
+        <span className="truncate text-sm leading-5">
           {item.name}
           {item.value > 0 ? (
-            <small className="ml-1 text-xs text-muted-foreground">({pct.toFixed(0)}%)</small>
+            <small className="ml-1 text-xs text-muted-foreground">({percentage.toFixed(0)}%)</small>
           ) : null}
         </span>
       ),
@@ -77,12 +62,7 @@ const DistributionTable: React.FC<Props> = ({
 
   const DefaultTooltip = useMemo(
     () =>
-      ({ item }: RenderTooltipArgs) => (
-        <>
-          <span className="truncate">{item.name}</span>
-          <span className="sr-only">.</span>
-        </>
-      ),
+      ({ item }: RenderTooltipArgs) => <span className="truncate">{item.name}</span>,
     [],
   );
 
@@ -96,28 +76,40 @@ const DistributionTable: React.FC<Props> = ({
       <ScrollArea aria-label={ariaLabel} className="h-full min-h-0">
         <div className="space-y-0.5 min-w-0">
           {rows.map((item) => {
-            const dot = getDotColor?.(item) ?? null;
-            const pct = total > 0 ? (item.value / total) * 100 : 0;
+            const dotColor = getDotColor?.(item) ?? null;
+            const percentage = total > 0 ? (item.value / total) * 100 : 0;
 
             const left = (
-              <div className={LEFT_WRAP}>
-                {dot ? <span aria-hidden="true" style={{ backgroundColor: dot }} className={DOT_CLASS} /> : null}
+              <div className="min-w-0 flex items-center gap-2">
+                {dotColor ? (
+                  <span
+                    aria-hidden="true"
+                    style={{ backgroundColor: dotColor }}
+                    className="h-2.5 w-2.5 rounded-full shrink-0"
+                  />
+                ) : null}
 
                 <ResponsiveTooltip
                   openDelay={120}
-                  content={TooltipRenderer({ item, pct })}
+                  content={TooltipRenderer({ item, percentage })}
                   triggerClassName="min-w-0 flex-1"
                 >
-                  <div className="min-w-0 flex-1">{LabelRenderer({ item, pct })}</div>
+                  <div className="min-w-0 flex-1">{LabelRenderer({ item, percentage })}</div>
                 </ResponsiveTooltip>
               </div>
             );
 
             const right = (
               <div className="flex items-center gap-2 shrink-0">
-                <div className="flex flex-col items-end gap-0.5">
-                  <MoneyValue amount={item.value} useColors={false} />
-                  {renderNativeLine(item.amount, item.currency)}
+                <div className="flex flex-col items-end gap-0.5 text-sm leading-5">
+                  <MoneyValue amount={item.value} useColors={false} className="text-sm leading-5" />
+                  {item.amount && (
+                    <MoneyValue
+                      amount={item.amount}
+                      currency={item.currency}
+                      useColors={false}
+                      className="text-2xs leading-4 text-muted-foreground" />
+                  )}
                 </div>
                 {rightSlot ? rightSlot(item) : null}
               </div>
@@ -129,7 +121,7 @@ const DistributionTable: React.FC<Props> = ({
                   aria-label={`Select ${item.name}`}
                   type="button"
                   variant="ghost"
-                  className={`${ROW_BASE} h-auto text-left font-normal focus-visible:ring-2 focus-visible:ring-ring`}
+                  className={`${ROW_BASE} ${ROW_INTERACTIVE} h-auto justify-between font-normal bg-transparent`}
                   key={item.id}
                   onClick={() => onRowClick?.(String(item.id))}
                 >
@@ -140,7 +132,7 @@ const DistributionTable: React.FC<Props> = ({
             }
 
             return (
-              <div className={ROW_BASE} key={item.id}>
+              <div className={`${ROW_BASE} ${ROW_INTERACTIVE}`} key={item.id}>
                 <div className="min-w-0 flex-1">{left}</div>
                 {right}
               </div>

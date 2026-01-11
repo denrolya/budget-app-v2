@@ -1,4 +1,3 @@
-
 import type { PieSvgProps } from '@nivo/pie';
 import sortBy from 'lodash/sortBy';
 import moment from 'moment';
@@ -6,6 +5,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import AccountPill from '@/features/accounts/components/Pill';
 import { CURRENCIES } from '@/constants/currency';
+import MoneyValue from '@/components/common/MoneyValue';
 
 import CardSkeleton from './CardSkeleton';
 import Chart from './Chart';
@@ -13,7 +13,6 @@ import { CURRENCY_COLORS, DEFAULT_COLOR } from './constants';
 import DistributionList from './DistributionList';
 import DonutTooltip from './DonutTooltip';
 import type { Datum, Item, TabKey } from './types';
-import { renderNativeLine } from './utils';
 
 
 type AccountModel = {
@@ -158,10 +157,14 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
 
       return (
         <DonutTooltip
-          extra={item ? renderNativeLine(item.amount, item.currency) : null}
           label={String(datum.data.label)}
           percent={percent}
           value={value}
+          extra={item ? <MoneyValue
+            amount={item.amount}
+            currency={item.currency}
+            useColors={false}
+            className="text-2xs leading-4 text-muted-foreground" /> : null}
         />
       );
     },
@@ -177,10 +180,14 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
       const item = currenciesById.get(id);
       return (
         <DonutTooltip
-          extra={item ? renderNativeLine(item.amount, item.currency ?? id) : null}
           label={String(datum.data.label)}
           percent={percent}
           value={value}
+          extra={item ? <MoneyValue
+            amount={item.amount}
+            currency={item.currency}
+            useColors={false}
+            className="text-2xs leading-4 text-muted-foreground" /> : null}
         />
       );
     },
@@ -195,10 +202,14 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
 
       return (
         <DonutTooltip
-          extra={item ? renderNativeLine(item.amount, item.currency) : null}
           label={String(datum.data.label)}
           percent={percent}
           value={value}
+          extra={item ? <MoneyValue
+            amount={item.amount}
+            currency={item.currency}
+            useColors={false}
+            className="text-2xs leading-4 text-muted-foreground" /> : null}
         />
       );
     },
@@ -215,7 +226,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
           ariaLabel="Accounts distribution list"
           items={accountItemsAll}
           total={totalAccounts}
-          renderLabel={({ item, pct }) => (
+          renderLabel={({ item, percentage }) => (
             <div className="min-w-0 flex items-center gap-2 text-sm leading-5 [&_*]:text-sm [&_*]:leading-5">
               {'account' in item && item.account ? (
                 <AccountPill account={item.account} tooltip={false} variant="inline" className="min-w-0" />
@@ -223,7 +234,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
                 <span className="truncate">{item.name}</span>
               )}
               {item.value > 0 ? (
-                <small className="text-xs text-muted-foreground shrink-0">({pct.toFixed(0)}%)</small>
+                <small className="text-xs text-muted-foreground shrink-0">({percentage.toFixed(0)}%)</small>
               ) : null}
             </div>
           )}
@@ -265,15 +276,15 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
         ariaLabel={`Accounts in ${selectedCurrency ?? ''} distribution list`}
         items={currencyAccounts}
         total={currencyTotal}
-        renderLabel={({ item, pct }) => (
-          <div className="min-w-0 flex items-center gap-2">
+        renderLabel={({ item, percentage }) => (
+          <div className="min-w-0 flex items-center gap-2 text-sm leading-5 [&_*]:text-sm [&_*]:leading-5">
             {'account' in item && item.account ? (
               <AccountPill account={item.account} tooltip={false} variant="inline" className="min-w-0" />
             ) : (
-              <span className="truncate text-sm leading-5">{item.name}</span>
+              <span className="truncate">{item.name}</span>
             )}
             {item.value > 0 ? (
-              <small className="text-xs text-muted-foreground shrink-0">({pct.toFixed(0)}%)</small>
+              <small className="text-xs text-muted-foreground shrink-0">({percentage.toFixed(0)}%)</small>
             ) : null}
           </div>
         )}
