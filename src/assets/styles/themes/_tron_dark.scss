@@ -64,6 +64,36 @@
   --chart-crosshair-color: 195 100% 50%;
   --chart-tooltip-background: 220 70% 5%;
   --chart-tooltip-text-color: 180 100% 80%;
+
+  /* Minimal, targeted fix: sidebar fallback (do NOT touch global bg classes) */
+  .sidebar,
+  [data-sidebar],
+  .app-sidebar {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  /* If sidebar has inner panel(s) that are white, keep them in-card */
+  .sidebar .card,
+  [data-sidebar] .card,
+  .app-sidebar .card {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+  }
+
+  /* Kill accidental bg-white only inside sidebar (surgical) */
+  .sidebar .bg-white,
+  [data-sidebar] .bg-white,
+  .app-sidebar .bg-white {
+    background-color: hsl(var(--background)) !important;
+  }
+
+  /* Borders inside sidebar: keep neon edge vibe, but only there */
+  .sidebar .border,
+  [data-sidebar] .border,
+  .app-sidebar .border {
+    border-color: hsl(var(--border) / 0.6) !important;
+  }
 }
 
 // Additional theme-specific styles that can't be handled by CSS variables
@@ -107,4 +137,3 @@
     }
   }
 }
-

@@ -1,18 +1,34 @@
-import { PieSvgProps } from '@nivo/pie';
+
+import type { PieSvgProps } from '@nivo/pie';
 import sortBy from 'lodash/sortBy';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
+import AccountPill from '@/features/accounts/components/Pill';
 import { CURRENCIES } from '@/constants/currency';
 
 import CardSkeleton from './CardSkeleton';
 import Chart from './Chart';
 import { CURRENCY_COLORS, DEFAULT_COLOR } from './constants';
-import DistributionTable from './DistributionTable';
+import DistributionList from './DistributionList';
 import DonutTooltip from './DonutTooltip';
 import type { Datum, Item, TabKey } from './types';
 import { renderNativeLine } from './utils';
 
+
+type AccountModel = {
+  id: number | string;
+  name: string;
+  displayName?: string | null;
+  currency?: string | null;
+  color?: string | null;
+};
+
+type AccountDistributionStat = {
+  account: AccountModel;
+  value?: number | null;
+  amount?: number | null;
+};
 
 interface Props {
   tab: TabKey;
@@ -22,7 +38,7 @@ interface Props {
   selectedCurrency: string | null;
   onCurrencySelect: (id: string) => void;
 
-  accountStats: any[];
+  accountStats: AccountDistributionStat[];
   totalAccountsRaw: number;
 
   isLoading: boolean;
@@ -42,9 +58,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
     (value: number) => {
       const now = moment();
       const { after, before } = timeframe;
-      const months = moment(before).isAfter(now)
-        ? now.diff(moment(after), 'months')
-        : moment(before).diff(moment(after), 'months');
+      const months = moment(before).isAfter(now) ? now.diff(moment(after), 'months') : moment(before).diff(moment(after), 'months');
       return months > 0 ? value / months : value;
     },
     [timeframe],
@@ -62,7 +76,8 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
       value: applyMonthly(s.value ?? 0),
       amount: applyMonthly(s.amount ?? 0),
       currency: s.account.currency,
-      color: (s.account as any).color ?? null,
+      color: s.account.color ?? null,
+      account: s.account,
     }));
     return sortBy(items, 'value');
   }, [accountStats, applyMonthly]);
@@ -98,32 +113,25 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
 
   const totalAccounts = useMemo(() => applyMonthly(totalAccountsRaw ?? 0), [applyMonthly, totalAccountsRaw]);
 
-  const currencyTotal = useMemo(() => {
-    if (!selectedCurrency) return 0;
-    return accountItemsAll
-      .filter((i) => (i.currency ?? '—') === selectedCurrency)
-      .reduce((sum, i) => sum + i.value, 0);
-  }, [accountItemsAll, selectedCurrency]);
-
   const currencyAccounts = useMemo(() => {
     if (!selectedCurrency) return [];
     return accountItemsAll.filter((i) => (i.currency ?? '—') === selectedCurrency);
   }, [accountItemsAll, selectedCurrency]);
 
-  const currenciesGrandTotal = useMemo(
-    () => currencyItemsAll.reduce((sum, i) => sum + i.value, 0),
-    [currencyItemsAll],
-  );
+  const currencyTotal = useMemo(() => currencyAccounts.reduce((sum, i) => sum + i.value, 0), [currencyAccounts]);
+
+  const currenciesGrandTotal = useMemo(() => currencyItemsAll.reduce((sum, i) => sum + i.value, 0), [currencyItemsAll]);
 
   const accountsById = useMemo(() => new Map(accountItemsAll.map((i) => [i.id, i])), [accountItemsAll]);
+  const currenciesById = useMemo(() => new Map(currencyItemsAll.map((i) => [String(i.id), i])), [currencyItemsAll]);
 
   const accountsColors = useMemo<PieSvgProps<Datum>['colors']>(
-    () => (d) => accountsById.get(String((d as any).id))?.color ?? DEFAULT_COLOR,
+    () => (d) => accountsById.get(String((d as { id: string | number }).id))?.color ?? DEFAULT_COLOR,
     [accountsById],
   );
 
   const currenciesColors = useMemo<PieSvgProps<Datum>['colors']>(
-    () => (d) => CURRENCY_COLORS[String((d as any).id)] ?? DEFAULT_COLOR,
+    () => (d) => CURRENCY_COLORS[String((d as { id: string | number }).id)] ?? DEFAULT_COLOR,
     [],
   );
 
@@ -144,8 +152,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
 
   const accountsTooltip = useCallback(
     ({ datum }: { datum: { data: Datum; value: number } }) => {
-      const id = String(datum.data.id);
-      const item = accountsById.get(id);
+      const item = accountsById.get(String(datum.data.id));
       const value = datum.value;
       const percent = totalAccounts > 0 ? (value / totalAccounts) * 100 : 0;
 
@@ -167,25 +174,22 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
       const value = datum.value;
       const percent = currenciesGrandTotal > 0 ? (value / currenciesGrandTotal) * 100 : 0;
 
-      const amount = currencyItemsAll.find((x) => String(x.id) === id)?.amount;
-      const currency = currencyItemsAll.find((x) => String(x.id) === id)?.currency;
-
+      const item = currenciesById.get(id);
       return (
         <DonutTooltip
-          extra={typeof amount === 'number' ? renderNativeLine(amount, currency ?? id) : null}
+          extra={item ? renderNativeLine(item.amount, item.currency ?? id) : null}
           label={String(datum.data.label)}
           percent={percent}
           value={value}
         />
       );
     },
-    [currenciesGrandTotal, currencyItemsAll],
+    [currenciesGrandTotal, currenciesById],
   );
 
   const accountsInCurrencyTooltip = useCallback(
     ({ datum }: { datum: { data: Datum; value: number } }) => {
-      const id = String(datum.data.id);
-      const item = accountsById.get(id);
+      const item = accountsById.get(String(datum.data.id));
       const value = datum.value;
       const percent = currencyTotal > 0 ? (value / currencyTotal) * 100 : 0;
 
@@ -207,11 +211,22 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
     return (
       <div className="flex flex-col flex-1 min-h-0 min-w-0">
         <Chart animate colors={accountsColors} data={accountsPieData} tooltip={accountsTooltip} />
-        <DistributionTable
+        <DistributionList
           ariaLabel="Accounts distribution list"
-          getDotColor={(i) => i.color ?? DEFAULT_COLOR}
           items={accountItemsAll}
           total={totalAccounts}
+          renderLabel={({ item, pct }) => (
+            <div className="min-w-0 flex items-center gap-2 text-sm leading-5 [&_*]:text-sm [&_*]:leading-5">
+              {'account' in item && item.account ? (
+                <AccountPill account={item.account} tooltip={false} variant="inline" className="min-w-0" />
+              ) : (
+                <span className="truncate">{item.name}</span>
+              )}
+              {item.value > 0 ? (
+                <small className="text-xs text-muted-foreground shrink-0">({pct.toFixed(0)}%)</small>
+              ) : null}
+            </div>
+          )}
         />
       </div>
     );
@@ -227,11 +242,16 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
           tooltip={currenciesTooltip}
           onClick={(node) => onCurrencySelect(String(node.data.id))}
         />
-        <DistributionTable
+        <DistributionList
           ariaLabel="Currencies distribution list"
           getDotColor={(i) => CURRENCY_COLORS[String(i.id)] ?? DEFAULT_COLOR}
           items={currencyItemsAll}
           total={currenciesGrandTotal}
+          renderTooltip={({ item }) => (
+            <>
+              <code className="font-mono text-xs">{String(item.id)}</code>: <span>{item.name}</span>
+            </>
+          )}
           onRowClick={onCurrencySelect}
         />
       </div>
@@ -241,11 +261,22 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
   return (
     <div className="flex flex-col flex-1 min-h-0 min-w-0">
       <Chart animate colors={accountsColors} data={accountsInCurrencyPieData} tooltip={accountsInCurrencyTooltip} />
-      <DistributionTable
-        ariaLabel={`Accounts in ${selectedCurrency} distribution list`}
-        getDotColor={(i) => i.color ?? DEFAULT_COLOR}
+      <DistributionList
+        ariaLabel={`Accounts in ${selectedCurrency ?? ''} distribution list`}
         items={currencyAccounts}
         total={currencyTotal}
+        renderLabel={({ item, pct }) => (
+          <div className="min-w-0 flex items-center gap-2">
+            {'account' in item && item.account ? (
+              <AccountPill account={item.account} tooltip={false} variant="inline" className="min-w-0" />
+            ) : (
+              <span className="truncate text-sm leading-5">{item.name}</span>
+            )}
+            {item.value > 0 ? (
+              <small className="text-xs text-muted-foreground shrink-0">({pct.toFixed(0)}%)</small>
+            ) : null}
+          </div>
+        )}
       />
     </div>
   );

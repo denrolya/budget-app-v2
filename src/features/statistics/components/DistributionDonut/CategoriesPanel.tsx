@@ -1,10 +1,12 @@
+
 import { ResponsivePie } from '@nivo/pie';
 import sortBy from 'lodash/sortBy';
 import { CreditCard } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
-import MoneyValue from '@/components/common/MoneyValue';
+import { Type as TransactionType } from '@/features/transactions';
+import { Button } from '@/components/ui/button';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,15 +15,25 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Button } from '@/components/ui/button';
-import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Type as TransactionType } from '@/features/transactions';
 
-import { processCategoryTree } from './utils';
 import CardSkeleton from './CardSkeleton';
+import DistributionList from './DistributionList';
 import DonutTooltip from './DonutTooltip';
 import type { ProcessedCategory } from './types';
+import { processCategoryTree } from './utils';
+
+type CategoryApiNode = {
+  id: number;
+  name: string;
+  total: number;
+  children?: CategoryApiNode[];
+};
+
+type CategoryRow = {
+  id: string;
+  name: string;
+  value: number;
+};
 
 const CategoriesPanel: React.FC<{
   type: TransactionType;
@@ -37,7 +49,7 @@ const CategoriesPanel: React.FC<{
   setIsDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
 
   isLoading: boolean;
-  categoryRaw: any[];
+  categoryRaw: CategoryApiNode[];
 }> = ({
         type,
         timeframe,
@@ -55,18 +67,17 @@ const CategoriesPanel: React.FC<{
     (value: number) => {
       const now = moment();
       const { after, before } = timeframe;
-      const months = moment(before).isAfter(now)
-        ? now.diff(moment(after), 'months')
-        : moment(before).diff(moment(after), 'months');
+      const months = moment(before).isAfter(now) ? now.diff(moment(after), 'months') : moment(before).diff(moment(after), 'months');
       return months > 0 ? value / months : value;
     },
     [timeframe],
   );
 
-  const root = useMemo(() => processCategoryTree(categoryRaw ?? []), [categoryRaw]);
+  const root = useMemo<ProcessedCategory[]>(() => processCategoryTree(categoryRaw), [categoryRaw]);
+
   const totalRoot = useMemo(() => root.reduce((sum, c) => sum + c.value, 0), [root]);
 
-  const currentCategories = useMemo(
+  const currentCategories = useMemo<ProcessedCategory[]>(
     () => (currentCategory ? currentCategory.children || [] : root),
     [currentCategory, root],
   );
@@ -85,10 +96,17 @@ const CategoriesPanel: React.FC<{
     return sortBy(list, 'value').reverse();
   }, [currentCategories, showMonthlyAverage, calcMonthlyAverage]);
 
-  const breadcrumbs = useMemo(() => [{
-    id: 0,
-    name: 'All Categories',
-  }, ...categoryStack.slice(1), currentCategory].filter(Boolean) as any[], [categoryStack, currentCategory]);
+  const categoriesById = useMemo(() => new Map(currentCategories.map((c) => [String(c.id), c])), [currentCategories]);
+
+  const breadcrumbs = useMemo(
+    () =>
+      [
+        { id: 0, name: 'All Categories' },
+        ...categoryStack.slice(1),
+        currentCategory,
+      ].filter(Boolean) as Array<{ id: number; name: string }>,
+    [categoryStack, currentCategory],
+  );
 
   const handleBreadcrumbClick = useCallback(
     (index: number) => {
@@ -127,28 +145,47 @@ const CategoriesPanel: React.FC<{
     [setSelectedCategory, setIsDrawerOpen],
   );
 
+  const categoryRows = useMemo<CategoryRow[]>(
+    () => chartData.map((r) => ({ id: String(r.id), name: r.label, value: r.value })).reverse(),
+    [chartData],
+  );
+
   if (isLoading) return <CardSkeleton />;
 
   return (
     <div className="flex flex-col flex-1 min-h-0 min-w-0">
-      <Breadcrumb>
-        <BreadcrumbList className="flex-wrap">
-          {breadcrumbs.map(({ id, name }, index) => (
-            <React.Fragment key={id}>
-              {index > 0 && <BreadcrumbSeparator />}
-              {index === breadcrumbs.length - 1 ? (
-                <BreadcrumbPage>{name}</BreadcrumbPage>
-              ) : (
-                <BreadcrumbItem>
-                  <BreadcrumbLink className="cursor-pointer" onClick={() => handleBreadcrumbClick(index)}>
-                    {name}
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-              )}
-            </React.Fragment>
-          ))}
-        </BreadcrumbList>
-      </Breadcrumb>
+      <div className="mb-2">
+        <Breadcrumb>
+          <BreadcrumbList className="flex-wrap">
+            {breadcrumbs.map(({ id, name }, index) => (
+              <React.Fragment key={id}>
+                {index > 0 && <BreadcrumbSeparator />}
+                {index === breadcrumbs.length - 1 ? (
+                  <BreadcrumbPage>{name}</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbItem>
+                    <BreadcrumbLink
+                      aria-label={`Go to ${name}`}
+                      role="button"
+                      tabIndex={0}
+                      className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                      onClick={() => handleBreadcrumbClick(index)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleBreadcrumbClick(index);
+                        }
+                      }}
+                    >
+                      {name}
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                )}
+              </React.Fragment>
+            ))}
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
 
       <div className="w-full h-56 sm:h-64 md:h-72 shrink-0">
         <ResponsivePie
@@ -157,88 +194,57 @@ const CategoriesPanel: React.FC<{
           borderWidth={0}
           colors={{ scheme: type === TransactionType.Expense ? 'red_grey' : 'greens' }}
           cornerRadius={3}
-          data={chartData as any}
+          data={chartData}
           enableArcLabels={false}
           enableArcLinkLabels={false}
           innerRadius={0.6}
           margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
           padAngle={0.7}
-          tooltip={({ datum: { data, value } }: any) => {
-            const percent = scopeTotal > 0 ? (value / scopeTotal) * 100 : 0;
-            return <DonutTooltip label={data.label} percent={percent} value={value} />;
+          tooltip={({ datum }) => {
+            const percent = scopeTotal > 0 ? (datum.value / scopeTotal) * 100 : 0;
+            return <DonutTooltip label={String(datum.data.label)} percent={percent} value={datum.value} />;
           }}
-          onClick={(node) => handleCategoryStep(node.data as any)}
+          onClick={(node) => {
+            const category = categoriesById.get(String(node.data.id));
+            if (category) handleCategoryStep(category);
+          }}
         />
       </div>
 
-      <div className="flex-1 min-h-0">
-        <ScrollArea aria-label="Categories distribution list" className="h-full min-h-0">
-          <div className="space-y-0.5 min-w-0">
-            {chartData.map((row: any) => {
-              const full = currentCategories.find((c) => c.id === row.id);
-              const pct = scopeTotal > 0 ? (row.value / scopeTotal) * 100 : 0;
+      <DistributionList
+        ariaLabel="Categories distribution list"
+        items={categoryRows}
+        total={scopeTotal}
+        renderTooltip={({ item }) => (
+          <>
+            <code className="font-mono text-xs">#{item.id}</code>: <span>{item.name}</span>
+          </>
+        )}
+        rightSlot={(item) => {
+          const category = categoriesById.get(String(item.id));
+          if (!category) return null;
 
-              return (
-                <div
-                  aria-label={`Open category ${row.label}`}
-                  role="button"
-                  tabIndex={0}
-                  className="w-full flex items-center justify-between gap-3 px-2 py-1 rounded hover:bg-muted/50 transition-colors cursor-pointer"
-                  key={row.id}
-                  onClick={() => full && handleCategoryStep(full)}
-                  onKeyDown={(e) => {
-                    if ((e.key === 'Enter' || e.key === ' ') && full) {
-                      e.preventDefault();
-                      handleCategoryStep(full);
-                    }
-                  }}
-                >
-                  <ResponsiveTooltip
-                    openDelay={120}
-                    content={
-                      <>
-                        <code className="font-mono text-xs">#{row.id}</code>: <span>{row.label}</span>
-                      </>
-                    }
-                    triggerClassName="truncate flex-1"
-                  >
-                    <span className="truncate text-sm leading-5 flex-1">
-                      {row.label}
-                      {row.value > 0 &&
-                        <small className="ml-1 text-xs text-muted-foreground">({pct.toFixed(0)}%)</small>}
-                    </span>
-                  </ResponsiveTooltip>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <MoneyValue amount={row.value} useColors={false} />
-
-                    <ResponsiveTooltip
-                      openDelay={120}
-                      content="View transactions for this category within selected timeframe"
-                      triggerClassName="m-0 p-0"
-                    >
-                      <Button
-                        aria-label="View transactions"
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (!full) return;
-                          openCategoryTransactions(full);
-                        }}
-                      >
-                        <CreditCard className="h-4 w-4" />
-                        <span className="sr-only">View transactions</span>
-                      </Button>
-                    </ResponsiveTooltip>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </ScrollArea>
-      </div>
+          return (
+            <Button
+              aria-label="View transactions"
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7"
+              onClick={(e) => {
+                e.stopPropagation();
+                openCategoryTransactions(category);
+              }}
+            >
+              <CreditCard className="h-4 w-4" />
+              <span className="sr-only">View transactions</span>
+            </Button>
+          );
+        }}
+        onRowClick={(id) => {
+          const category = categoriesById.get(id);
+          if (category) handleCategoryStep(category);
+        }}
+      />
     </div>
   );
 };
