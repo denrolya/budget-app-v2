@@ -159,26 +159,12 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
       return;
     }
 
-    // Smart interpretation
     if (rateMode === 'toPerFrom') {
-      if (n < 1) {
-        setRateMode('fromPerTo');
-        setValue('rate', 1 / n, { shouldDirty: true, shouldValidate: true });
-        setRateText(String(n));
-        return;
-      }
       setValue('rate', n, { shouldDirty: true, shouldValidate: true });
       return;
     }
 
-    // fromPerTo
-    if (n > 1) {
-      setRateMode('toPerFrom');
-      setValue('rate', n, { shouldDirty: true, shouldValidate: true });
-      setRateText(String(n));
-      return;
-    }
-
+    // fromPerTo отображает 1/rate
     setValue('rate', 1 / n, { shouldDirty: true, shouldValidate: true });
   };
 
