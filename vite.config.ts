@@ -143,7 +143,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    visualizer({ open: true }) as unknown as PluginOption, // This will open a visualization of your chunks after build
+    visualizer({ open: false }) as unknown as PluginOption, // This will open a visualization of your chunks after build
     VitePWA(pwaOptions),
   ],
   resolve: {
