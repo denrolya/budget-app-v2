@@ -17,7 +17,7 @@ export const useMutations = (opts?: { invalidateKey?: string | readonly unknown[
       qc.invalidateQueries({
         queryKey: Array.isArray(invalidateKey) ? invalidateKey : [invalidateKey],
       }),
-      qc.invalidateQueries({ queryKey: accountsKey.all }),
+      qc.invalidateQueries({ queryKey: queryKeys.all }),
     ]);
   };
 
