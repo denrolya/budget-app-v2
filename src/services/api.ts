@@ -14,8 +14,9 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-export const axiosFetcher = (url: string) => api.get(url).then(res => res.data);
+const axiosFetcher = (url: string) => api.get(url).then(res => res.data);
 
 export {
   api,
+  axiosFetcher,
 };

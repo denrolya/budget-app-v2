@@ -60,6 +60,15 @@ const ITEMS: {
     title: ROUTES.CATEGORIES_PAGE.label,
     url: ROUTES.CATEGORIES_PAGE.path,
     icon: ROUTES.CATEGORIES_PAGE.icon,
+    items: [{
+      title: ROUTES.CATEGORIES_PAGE.label,
+      url: ROUTES.CATEGORIES_PAGE.path,
+      icon: ROUTES.CATEGORIES_PAGE.icon,
+    }, {
+      title: ROUTES.CATEGORIES_TREE_PAGE.label,
+      url: ROUTES.CATEGORIES_TREE_PAGE.path,
+      icon: ROUTES.CATEGORIES_TREE_PAGE.icon,
+    }],
   },
   {
     title: 'Experimental',
@@ -89,7 +98,7 @@ const NavMain: React.FC<Props> = () => {
           const hasSubItems = Array.isArray(item.items) && item.items.length > 0;
 
           return hasSubItems ? (
-            <Collapsible key={item.title} asChild defaultOpen={pathname === item.url} className="group/collapsible">
+            <Collapsible asChild defaultOpen={pathname === item.url} className="group/collapsible" key={item.title}>
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton tooltip={item.title}>
@@ -117,7 +126,7 @@ const NavMain: React.FC<Props> = () => {
             </Collapsible>
           ) : (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title} asChild isActive={pathname === item.url}>
+              <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
                 <Link to={item.url}>
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>

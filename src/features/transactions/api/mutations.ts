@@ -1,8 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { queryKeys as accountsKey } from '@/features/accounts';
-
 import Transaction from '../models/Transaction';
 import { TransactionFilters } from '../models/TransactionFilters';
 

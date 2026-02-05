@@ -1,19 +1,23 @@
-import React from 'react';
 import moment from 'moment';
+import React from 'react';
 
 import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
-import BalanceProgressBar from '@/features/accounts/components/BalanceProgressbar.example';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useActiveAccountsWithDefaultOrder, useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/hooks/financeData';
-import TreeDND from '@/features/categories/components/TreeDND.example';
-import { Type as TransactionType } from '@/features/transactions';
+import BalanceProgressBar from '@/features/accounts/components/BalanceProgressbar.example';
 import BalaneProgressbarStyled from '@/features/accounts/components/BalanceProgressbarStyled.example';
 import BarChartWithDrawer from '@/features/sandbox/components/BarChartWithDrawer.example';
+import CategoryValueWithinTimeframeSunburstChart
+  from '@/features/sandbox/components/CategoryValueWithinTimeframeSunburstChart.example';
+import ExpensesBySeasons from '@/features/sandbox/components/ExpensesBySeasons.example';
 import FunnelWithDrawer from '@/features/sandbox/components/FunnelWithDrawer.example';
 import MonthExpensesRadialBarChart from '@/features/sandbox/components/MonthExpensesRadialBarChart.example';
 import ExpenseSunburstChart from '@/features/sandbox/components/Sunburst.example';
-import ExpensesBySeasons from '@/features/sandbox/components/ExpensesBySeasons.example';
-import CategoryValueWithinTimeframeSunburstChart from '@/features/sandbox/components/CategoryValueWithinTimeframeSunburstChart.example';
+import { Type as TransactionType } from '@/features/transactions';
+import {
+  useActiveAccountsWithDefaultOrder,
+  useExpenseCategoriesTree,
+  useIncomeCategoriesTree,
+} from '@/hooks/financeData';
 
 
 const TestingPage: React.FC = () => {
@@ -35,7 +39,10 @@ const TestingPage: React.FC = () => {
 
           <div>
             <BalanceProgressBar accounts={accounts} />
-            <CategoryValueWithinTimeframeSunburstChart after={moment().startOf('month')} before={moment().endOf('month')} type={TransactionType.Expense} />
+            <CategoryValueWithinTimeframeSunburstChart
+              after={moment().startOf('month')}
+              before={moment().endOf('month')}
+              type={TransactionType.Expense} />
           </div>
 
           <div className="mb-6 grid grid-cols-1 md:grid-cols-2 space-x-2">
@@ -56,7 +63,6 @@ const TestingPage: React.FC = () => {
         </TabsContent>
         <TabsContent value="other">
           <h1>Other random stuff</h1>
-          <TreeDND />
         </TabsContent>
       </Tabs>
     </FullHeightPageContent>
