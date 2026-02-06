@@ -25,7 +25,7 @@ export const useMutations = (opts?: { invalidateKey?: string | readonly unknown[
     mutationFn: (newTx: Partial<Transaction>) => transactionService.create(newTx),
     onSuccess: async () => {
       await invalidate();
-      toast.success('Transaction created successfully');
+      toast.success('Transaction created successfully!');
     },
     onError: (error: Error) => {
       toast.error('Failed to create transaction', { description: error.message || 'Unexpected error.' });
