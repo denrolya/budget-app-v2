@@ -93,6 +93,10 @@ const buildQueryParams = (args: {
     appendArray(query, 'accounts[]', filters.accounts as Array<string | number>);
   }
 
+  if (Array.isArray(filters.currencies) && filters.currencies.length > 0) {
+    appendArray(query, 'currencies[]', filters.currencies);
+  }
+
   if (filters.withNestedCategories !== undefined) {
     query.set('withNestedCategories', filters.withNestedCategories ? '1' : '0');
   }

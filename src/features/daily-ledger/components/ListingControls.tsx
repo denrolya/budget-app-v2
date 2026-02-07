@@ -2,18 +2,22 @@ import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, FileText, Layers, Rot
 import { Moment } from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
-import { useIsMobile } from '@/hooks/use-mobile';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
 import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
 import DisplayMenu from '@/features/daily-ledger/components/DisplayMenu';
 import { Type as TransactionType } from '@/features/transactions';
 import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
 import { TransferFilters } from '@/features/transfers/models/TransferFilters';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { Timeframe } from '@/types/global';
 
@@ -33,13 +37,13 @@ interface ListingControlsProps {
   setIsReversedOrder: (value: boolean) => void;
   handleResetFilters: () => void;
   onFiltersDialogToggle: () => void;
-  isCompactTable: boolean,
+  isCompactTable: boolean;
   setActiveView: (value: 'table' | 'list') => void;
-  setIsCompactTable: (value: boolean) => void,
-  setShowEmptyDays: (value: boolean) => void,
-  showEmptyDays: boolean,
-  showTransactions: boolean,
-  showTransfers: boolean,
+  setIsCompactTable: (value: boolean) => void;
+  setShowEmptyDays: (value: boolean) => void;
+  showEmptyDays: boolean;
+  showTransactions: boolean;
+  showTransfers: boolean;
 }
 
 const H = 'h-9';
@@ -47,10 +51,20 @@ const ICON_BTN = cn(H, 'w-9');
 const TYPEAHEAD_W = 'w-[18rem]';
 const AMOUNT_W = 'w-24';
 const DATE_TEXT = 'max-w-44 truncate';
+const CURRENCY_W = 'w-[14rem]';
 
 const Divider: React.FC = () => (
   <span aria-hidden="true" className="hidden md:block h-6 w-px bg-border mx-1.5" />
 );
+
+const isCurrencyCode = (v: unknown): v is CURRENCY_CODE => typeof v === 'string' && v in CURRENCIES;
+
+const toCurrencyCodes = (value: unknown): CURRENCY_CODE[] => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.filter(isCurrencyCode);
+  if (isCurrencyCode(value)) return [value];
+  return [];
+};
 
 export const ListingControls: React.FC<ListingControlsProps> = ({
                                                                   isLoading,
@@ -75,6 +89,7 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
                                                                   showEmptyDays,
                                                                 }) => {
   const isMobile = useIsMobile();
+
   const accountsValue = useMemo(() => {
     const t = Array.isArray(transactionFilters.accounts) ? transactionFilters.accounts : [];
     const tr = Array.isArray(transferFilters.accounts) ? transferFilters.accounts : [];
@@ -117,6 +132,32 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
     setFilter('withNestedCategories', !transactionFilters.withNestedCategories);
   }, [setFilter, transactionFilters.withNestedCategories]);
 
+  const currencyCodes = useMemo(() => toCurrencyCodes((transactionFilters as any).currencies), [transactionFilters]);
+
+  const toggleCurrency = useCallback(
+    (code: CURRENCY_CODE) => {
+      const next = currencyCodes.includes(code)
+        ? currencyCodes.filter((c) => c !== code)
+        : [...currencyCodes, code];
+
+      setFilter('currencies' as keyof CombinedFilters, next.length ? next : undefined);
+    },
+    [currencyCodes, setFilter],
+  );
+
+  const clearCurrencies = useCallback(() => {
+    setFilter('currencies' as keyof CombinedFilters, undefined);
+  }, [setFilter]);
+
+  const currencyLabel = useMemo(() => {
+    if (!currencyCodes.length) return 'Currencies';
+    if (currencyCodes.length === 1) {
+      const c = CURRENCIES[currencyCodes[0]];
+      return `${c.symbol} ${c.code}`;
+    }
+    return `Currencies (${currencyCodes.length})`;
+  }, [currencyCodes]);
+
   const canReset = Boolean(transactionFilters.activeCount) && !isLoading;
 
   return (
@@ -126,7 +167,6 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
         role="toolbar"
         className="flex flex-wrap items-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2"
       >
-        {/* DATE + ORDER */}
         <div className="flex items-center gap-1.5">
           <div aria-label="Date range" role="group" className="flex items-center">
             <DaterangePickerWithPresets
@@ -138,8 +178,7 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
                 size="sm"
                 type="button"
                 variant="outline"
-                className={cn(H, 'bg-background px-2')}
-              >
+                className={cn(H, 'bg-background px-2')}>
                 <CalendarIcon aria-hidden="true" className="mr-1.5 h-4 w-4" />
                 <span className={DATE_TEXT}>{dateLabel}</span>
               </Button>
@@ -168,7 +207,6 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
 
         <Divider />
 
-        {/* MAIN SELECTORS */}
         <div className="flex items-center gap-1.5">
           <div aria-label="Accounts filter" role="group" className={cn('flex items-center', TYPEAHEAD_W)}>
             <AccountTypeahead
@@ -216,11 +254,73 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
             </TooltipTrigger>
             <TooltipContent>Nested categories</TooltipContent>
           </Tooltip>
+
+          <Divider />
+
+          <div aria-label="Currencies filter" role="group" className={cn('flex items-center', CURRENCY_W)}>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  aria-label="Filter by currencies"
+                  type="button"
+                  variant="outline"
+                  className={cn(H, 'bg-background w-full justify-between px-2 font-normal')}
+                >
+                  <span className="truncate">{currencyLabel}</span>
+                  {currencyCodes.length ? (
+                    <span className="ml-2 text-xs text-muted-foreground shrink-0">{currencyCodes.join(', ')}</span>
+                  ) : null}
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent align="start" className="w-[18rem] p-2">
+                <div className="flex items-center justify-between gap-2 px-1 pb-2">
+                  <div className="text-sm font-medium">Currencies</div>
+                  <Button
+                    aria-label="Clear currencies filter"
+                    disabled={!currencyCodes.length}
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                    className="h-7 px-2"
+                    onClick={clearCurrencies}
+                  >
+                    Clear
+                  </Button>
+                </div>
+
+                <Separator />
+
+                <ScrollArea className="h-[220px]">
+                  <div className="py-2 space-y-1">
+                    {(Object.keys(CURRENCIES) as CURRENCY_CODE[]).map((code) => {
+                      const c = CURRENCIES[code];
+                      const selected = currencyCodes.includes(code);
+                      return (
+                        <Button
+                          aria-label={`Toggle currency ${code}`}
+                          aria-pressed={selected}
+                          type="button"
+                          variant={selected ? 'secondary' : 'ghost'}
+                          className="w-full justify-start h-9 px-2 font-normal"
+                          key={code}
+                          onClick={() => toggleCurrency(code)}
+                        >
+                          <span className="mr-2 text-sm">{c.symbol}</span>
+                          <span className="mr-2 font-mono text-xs">{c.code}</span>
+                          <span className="truncate text-sm text-muted-foreground">{c.name}</span>
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
 
         <Divider />
 
-        {/* AMOUNT + TYPE + DRAFT */}
         <div className="flex items-center gap-1.5">
           <div aria-label="Amount range" role="group" className="flex items-center gap-1.5">
             <Input
@@ -301,7 +401,6 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
           </Tooltip>
         </div>
 
-        {/* RIGHT ACTIONS */}
         <div className="ml-0 md:ml-auto flex items-center gap-1.5">
           {!isMobile && (
             <DisplayMenu

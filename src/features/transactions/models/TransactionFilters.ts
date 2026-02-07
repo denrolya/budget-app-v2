@@ -14,6 +14,7 @@ interface TransactionFiltersProps {
   withNestedCategories?: boolean;
   isDraft?: boolean;
   type?: TransactionType;
+  currencies?: string[];
 }
 
 type Scalar = string | number | boolean | null | undefined;
@@ -71,6 +72,7 @@ export class TransactionFilters extends BaseFilters {
   withNestedCategories!: boolean;
   isDraft?: boolean;
   type?: TransactionType;
+  currencies!: string[];
 
   constructor(initial: TransactionFiltersProps = {}) {
     super();
@@ -86,6 +88,7 @@ export class TransactionFilters extends BaseFilters {
       withNestedCategories: initial.withNestedCategories ?? false,
       isDraft: initial.isDraft,
       type: initial.type,
+      currencies: initial.currencies ?? [],
     };
 
     this._defaults = {
@@ -97,6 +100,7 @@ export class TransactionFilters extends BaseFilters {
       categories: [...(filled.categories ?? [])],
       excludedCategories: [...(filled.excludedCategories ?? [])],
       accounts: [...(filled.accounts ?? [])],
+      currencies: [...(filled.currencies ?? [])],
     };
 
     Object.assign(this, filled);
@@ -106,6 +110,7 @@ export class TransactionFilters extends BaseFilters {
     this.amountRange = toNumberArray(this.amountRange);
     this.categories = toMixedIdArray(this.categories);
     this.excludedCategories = toMixedIdArray(this.excludedCategories);
+    this.currencies = toStringArray(this.currencies);
   }
 
   /**
@@ -149,13 +154,15 @@ export class TransactionFilters extends BaseFilters {
       }
 
       case 'isDraft': {
-        // preserve undefined if not set
         if (value === undefined || value === null || value === '') return undefined;
         if (typeof value === 'boolean') return value;
         if (value === 'true' || value === '1') return true;
         if (value === 'false' || value === '0') return false;
         return Boolean(value);
       }
+
+      case 'currencies':
+        return toStringArray(value as ScalarOrArray);
 
       default:
         return value;
@@ -171,6 +178,7 @@ export class TransactionFilters extends BaseFilters {
       categories: [...(this._defaults.categories ?? [])],
       excludedCategories: [...(this._defaults.excludedCategories ?? [])],
       accounts: [...(this._defaults.accounts ?? [])],
+      currencies: [...(this._defaults.currencies ?? [])],
     });
   }
 

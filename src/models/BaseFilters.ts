@@ -29,7 +29,7 @@ abstract class BaseFilters implements FilterModel {
    * Must return `undefined` if param is not present.
    */
 
-  protected deserialize(key: string, ctx: DeserializeCtx): unknown | undefined {
+  protected deserialize(_key: string, ctx: DeserializeCtx): unknown | undefined {
     // Default behavior: read as string (no guessing)
     const raw = ctx.params.get(ctx.paramKey);
     return raw === null ? undefined : raw;

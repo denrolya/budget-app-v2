@@ -156,37 +156,24 @@ export const useTransactionsAndTransfersList = ({
   }, [transactionsState.resetFilters, transfersState.resetFilters]);
 
   return {
-    // merged view
     items,
     groupedItems,
-
-    // status
     isLoading,
     isError,
     error,
-
-    // controls
     setFilter,
     refetch,
     resetFilters,
-
-    // visibility toggles
     showTransactions,
     setShowTransactions,
     showTransfers,
     setShowTransfers,
-
-    // derived flags (useful for UI messaging)
     effectiveShowTransfers,
     shouldForceHideTransfers,
-
-    // raw underlying slices
     transactions: transactionsState.items,
     transfers: transfersState.items,
     transactionFilters: transactionsState.filters,
     transferFilters: transfersState.filters,
-
-    // optionally expose underlying state if UI needs it
     transactionsState,
     transfersState,
   };

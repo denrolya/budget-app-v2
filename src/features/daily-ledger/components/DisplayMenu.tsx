@@ -17,7 +17,7 @@ import { Type as TransactionType } from '@/features/transactions';
 
 interface Props {
   activeView: string;
-  setActiveView: (view: string) => void;
+  setActiveView: (view: 'table' | 'list') => void;
   showEmpty: boolean;
   setShowEmpty: (show: boolean) => void;
   isCompactTable: boolean;
@@ -83,8 +83,8 @@ const DisplayMenu: React.FC<Props> = ({
             <DropdownMenuSeparator />
 
             <DropdownMenuCheckboxItem
-              disabled={activeView !== 'table'}
               checked={showEmpty}
+              disabled={activeView !== 'table'}
               onCheckedChange={(v) => setShowEmpty(v)}
             >
               Show empty days
@@ -93,8 +93,8 @@ const DisplayMenu: React.FC<Props> = ({
             <DropdownMenuSeparator />
 
             <DropdownMenuCheckboxItem
-              disabled={activeView !== 'table'}
               checked={isCompactTable}
+              disabled={activeView !== 'table'}
               onCheckedChange={(v) => setIsCompactTable(v)}
             >
               Compact mode
@@ -133,8 +133,8 @@ const DisplayMenu: React.FC<Props> = ({
 
         <DropdownMenuLabel>Transaction Type</DropdownMenuLabel>
         <DropdownMenuCheckboxItem
-          disabled={!showTransactions}
           checked={showTransactions && (transactionFilters.type === TransactionType.Income || !transactionFilters.type)}
+          disabled={!showTransactions}
           onCheckedChange={() =>
             onTransactionTypeChange(
               transactionFilters.type === TransactionType.Income ? undefined : TransactionType.Income,

@@ -8,9 +8,9 @@ interface TransferFiltersProps {
   searchTerm?: string;
   before?: Moment;
   after?: Moment;
-  status?: string;
   amountRange?: number[];
   accounts?: string[];
+  currencies?: string[];
 }
 
 export class TransferFilters extends BaseFilters {
@@ -19,7 +19,6 @@ export class TransferFilters extends BaseFilters {
   searchTerm!: string;
   before!: Moment;
   after!: Moment;
-  status?: string;
   amountRange!: number[];
   accounts!: string[];
 
@@ -32,13 +31,14 @@ export class TransferFilters extends BaseFilters {
       after: initial.after ?? moment().startOf('year'),
       amountRange: initial.amountRange ?? [],
       accounts: initial.accounts ?? [],
-      status: initial.status,
+      currencies: initial.currencies ?? [],
     };
 
     this._defaults = {
       ...filled,
       before: filled.before.clone(),
       after: filled.after.clone(),
+      currencies: [...(filled.currencies ?? [])],
     };
 
     Object.assign(this, filled);
@@ -68,8 +68,8 @@ export class TransferFilters extends BaseFilters {
         return parts.length ? parts : [];
       }
 
-      case 'status':
-        return readParamString(params, paramKey);
+      case 'currencies':
+        return readParamArray(params, paramKey);
 
       default:
         return undefined;
@@ -81,6 +81,7 @@ export class TransferFilters extends BaseFilters {
       ...this._defaults,
       before: this._defaults.before.clone(),
       after: this._defaults.after.clone(),
+      currencies: [...(this._defaults.currencies ?? [])],
     });
   }
 

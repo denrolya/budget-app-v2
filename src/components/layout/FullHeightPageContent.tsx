@@ -10,13 +10,7 @@ export const FullHeightPageContent = React.forwardRef<HTMLElement, Props>(
   ({ className, children, ...props }, ref) => (
     <section
       role="main"
-      className={cn(
-        'w-full min-h-0 flex flex-col',
-        'h-[calc(100dvh-3rem)] md:h-full',
-        'p-2 md:p-4',
-        'overflow-hidden',
-        className,
-      )}
+      className={cn('w-full min-h-0 flex flex-col h-[calc(100dvh-3rem)] md:h-full p-2 md:p-4 overflow-hidden', className)}
       ref={ref}
       {...props}
     >

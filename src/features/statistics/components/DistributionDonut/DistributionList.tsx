@@ -22,16 +22,11 @@ type Props = {
   ariaLabel: string;
   items: Item[];
   total: number;
-
   getDotColor?: (item: Item) => string | null;
   onRowClick?: (id: string) => void;
-
   onViewTransactions: (id: string) => void;
-
   renderLabel?: (args: RenderLabelArgs) => React.ReactNode;
   renderTooltip?: (args: RenderTooltipArgs) => React.ReactNode;
-
-  rightSlot?: (item: Item) => React.ReactNode;
 };
 
 const ROW_BASE = 'w-full flex items-center justify-between gap-3 rounded px-2 py-1 text-left transition-colors';
@@ -47,7 +42,6 @@ const DistributionTable: React.FC<Props> = ({
                                               onViewTransactions,
                                               renderLabel,
                                               renderTooltip,
-                                              rightSlot,
                                             }) => {
   const rows = useMemo(() => [...items].reverse(), [items]);
 
@@ -85,13 +79,13 @@ const DistributionTable: React.FC<Props> = ({
 
             const left = (
               <div className="min-w-0 flex items-center gap-2">
-                {dotColor ? (
+                {dotColor && (
                   <span
                     aria-hidden="true"
                     style={{ backgroundColor: dotColor }}
                     className="h-2.5 w-2.5 rounded-full shrink-0"
                   />
-                ) : null}
+                )}
 
                 <ResponsiveTooltip
                   openDelay={120}
@@ -107,16 +101,15 @@ const DistributionTable: React.FC<Props> = ({
               <div className="flex items-center gap-2 shrink-0">
                 <div className="flex flex-col items-end gap-0.5 text-sm leading-5">
                   <MoneyValue amount={item.value} useColors={false} className="text-sm leading-5" />
-                  {item.amount ? (
+                  {item.amount && (
                     <MoneyValue
                       amount={item.amount}
                       currency={item.currency}
                       useColors={false}
                       className="text-2xs leading-4 text-muted-foreground"
                     />
-                  ) : null}
+                  )}
                 </div>
-                {rightSlot ? rightSlot(item) : null}
               </div>
             );
 

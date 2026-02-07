@@ -93,6 +93,7 @@ export const useList = (options: UseTransactionsListOptions = {}): UseTransactio
       accounts: 'accounts',
       withNestedCategories: 'withNestedCategories',
       isDraft: 'isDraft',
+      currencies: 'currencies'
     },
     formatMoment: BACKEND_DATE_FORMAT,
     queryFn: async (page, perPage, filters, sort) => {

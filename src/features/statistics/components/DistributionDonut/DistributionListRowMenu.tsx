@@ -1,3 +1,4 @@
+import { Copy, ExternalLink, ListTree } from 'lucide-react';
 import React, { useCallback } from 'react';
 
 import {
@@ -19,45 +20,54 @@ type Props = {
 };
 
 export const DistributionListRowMenu: React.FC<Props> = ({
-                                                       item,
-                                                       children,
-                                                       onSelect,
-                                                       onViewTransactions,
-                                                     }) => {
-  const copy = useCallback(async (text: string) => {
+                                                           item,
+                                                           children,
+                                                           onSelect,
+                                                           onViewTransactions,
+                                                         }) => {
+  const copy = useCallback(async (value: string) => {
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(value);
     } catch {
-      // ignore (clipboard may be blocked)
     }
   }, []);
 
+  const id = String(item.id);
+
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>
-        {children}
-      </ContextMenuTrigger>
+      <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 
       <ContextMenuContent className="w-56">
-        <ContextMenuLabel className="truncate">{item.name}</ContextMenuLabel>
+        <ContextMenuLabel className="truncate text-sm font-medium">
+          {item.name}
+        </ContextMenuLabel>
+
         <ContextMenuSeparator />
 
-        <ContextMenuItem onSelect={() => onSelect?.(String(item.id))}>
-          Open
-        </ContextMenuItem>
+        {onSelect && (
+          <ContextMenuItem onSelect={() => onSelect(id)}>
+            <ExternalLink className="mr-2 h-4 w-4" />
+            Open
+          </ContextMenuItem>
+        )}
 
-        {onViewTransactions ? (
-          <ContextMenuItem onSelect={() => onViewTransactions(String(item.id))}>
+        {onViewTransactions && (
+          <ContextMenuItem onSelect={() => onViewTransactions(id)}>
+            <ListTree className="mr-2 h-4 w-4" />
             View transactions
           </ContextMenuItem>
-        ) : null}
+        )}
 
         <ContextMenuSeparator />
 
-        <ContextMenuItem onSelect={() => copy(String(item.id))}>
+        <ContextMenuItem onSelect={() => copy(id)}>
+          <Copy className="mr-2 h-4 w-4" />
           Copy id
         </ContextMenuItem>
+
         <ContextMenuItem onSelect={() => copy(item.name)}>
+          <Copy className="mr-2 h-4 w-4" />
           Copy name
         </ContextMenuItem>
       </ContextMenuContent>

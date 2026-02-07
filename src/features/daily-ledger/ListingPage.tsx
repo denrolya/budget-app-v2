@@ -29,10 +29,7 @@ export const DailyLedgerPage: React.FC = () => {
     openForm(FormType.Transaction);
   }, [openForm]);
 
-  // Page hotkeys: only what page owns
   useHotkeys('b', toggleBulkCreate, { preventDefault: true }, [toggleBulkCreate]);
-
-  // Hotkeys help registry (page-owned items)
   useEffect(() => {
     const hotkeys = [{ windows: 'B', mac: 'B', description: 'Toggle Bulk Create' }];
     addPageHotkeys('Daily Ledger', hotkeys);

@@ -35,7 +35,7 @@ export const EditableCell = ({
       <div
         className={cn(
           'cursor-pointer rounded transition-colors',
-          compact ? 'p-1' : 'p-2',
+          compact ? 'p-0' : 'p-2',
           'hover:bg-muted/50',
           disabled && 'pointer-events-none opacity-60',
           className,

@@ -8,16 +8,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import { useMutations } from '@/features/transactions/api/mutations';
 import TransactionDetails from '@/features/transactions/components/Details';
 import TransactionRow from '@/features/transactions/components/ListingRow';
+import { useInlineEdit } from '@/features/transactions/hooks/useInlineEdit';
+import Transaction from '@/features/transactions/models/Transaction';
 import TransferDetails from '@/features/transfers/components/Details';
 import TransferRow from '@/features/transfers/components/ListingRow';
-import { useInlineEdit } from '@/features/transactions/hooks/useInlineEdit';
-import { useMutations } from '@/features/transactions/api/mutations';
+import Transfer from '@/features/transfers/models/Transfer';
 import { confirm } from '@/lib/confirmation';
 import { cn } from '@/lib/utils';
-import Transaction from '@/features/transactions/models/Transaction';
-import Transfer from '@/features/transfers/models/Transfer';
 
 interface Props {
   isLoading: boolean;
@@ -28,6 +28,17 @@ interface Props {
   isReversedOrder?: boolean;
   compact?: boolean;
 }
+
+export const COLS = {
+  gutter: 'w-3 shrink-0',
+  id: 'w-[74px] shrink-0',
+  account: 'w-[260px]',
+  amount: 'w-[200px] shrink-0',
+  category: 'w-[150px]',
+  note: 'w-auto',
+  executedAt: 'w-[72px] shrink-0',
+  actions: 'w-[96px] shrink-0',
+} as const;
 
 const TableListing: React.FC<Props> = ({
                                          groupedItems,
@@ -77,7 +88,6 @@ const TableListing: React.FC<Props> = ({
     if (!confirmed) return;
 
     if ('fromExpense' in item) {
-      // TODO: wire your transfer delete mutation here
       console.log('Delete transfer:', item.id);
       return;
     }
@@ -110,7 +120,7 @@ const TableListing: React.FC<Props> = ({
 
   const transactionColumns = useMemo(
     () => [
-      { key: 'id', className: cn('pl-4', 'w-[1%]') },
+      { key: 'id', className: cn('pl-4') },
       { key: 'account' },
       { key: 'amount' },
       { key: 'category' },
@@ -122,25 +132,45 @@ const TableListing: React.FC<Props> = ({
   );
 
   return (
-    <div className="overflow-x-auto">
-      <Table className="w-full">
+    <div className="w-full min-w-0 overflow-x-auto">
+      <Table className="w-full min-w-[768px] table-fixed">
+        <colgroup>
+          <col className={COLS.gutter} />
+          <col className={COLS.id} />
+          <col className={COLS.account} />
+          <col className={COLS.amount} />
+          <col className={COLS.category} />
+          <col className={COLS.note} />
+          <col className={COLS.executedAt} />
+          <col className={COLS.actions} />
+        </colgroup>
+
         <TableHeader className="sr-only">
           <TableRow>
-            <TableHead className="w-4"></TableHead>
-            <TableHead className="w-1/12">ID</TableHead>
-            <TableHead className="w-2/12">Type</TableHead>
-            <TableHead className="w-2/12">Amount</TableHead>
-            <TableHead className="w-2/12">Category/Rate</TableHead>
-            <TableHead className="w-2/12">Note</TableHead>
-            <TableHead className="w-1/12">Time</TableHead>
-            <TableHead className="w-1/12 text-right">Actions</TableHead>
+            <TableHead>Gutter</TableHead>
+            <TableHead>ID</TableHead>
+            <TableHead>Account</TableHead>
+            <TableHead>Amount</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Note</TableHead>
+            <TableHead>Time</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody>
           {dates.map((date) => {
-            const [, items, transactionsValue, transfersValue, transactionsCount, transfersCount] =
-            groupedItems?.find((group) => group[0].isSame(date, 'day')) || [null, [], 0, 0, 0, 0];
+            const found =
+              groupedItems?.find((group) => group[0].isSame(date, 'day')) ?? ([null, [], 0, 0, 0, 0] as any);
+
+            const [, items, transactionsValue, transfersValue, transactionsCount, transfersCount] = found as [
+                Moment | null,
+              (Transaction | Transfer)[],
+              number,
+              number,
+              number,
+              number,
+            ];
 
             if (!showEmptyDays && items.length === 0) return null;
 
@@ -152,12 +182,7 @@ const TableListing: React.FC<Props> = ({
                     'bg-destructive/10': transactionsValue < 0,
                   })}
                 >
-                  <TableCell
-                    colSpan={8}
-                    className={cn('font-semibold', 'px-4', {
-                      'py-0': compact,
-                    })}
-                  >
+                  <TableCell colSpan={8} className={cn('font-semibold px-4', compact && 'py-0')}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <RelativeDatetimeDisplay
@@ -199,9 +224,6 @@ const TableListing: React.FC<Props> = ({
                         key={`transfer-${transfer.id}`}
                         onDelete={(t) => handleDelete(t)}
                         onSheetOpenChange={(open) => setOpenSheetId(open ? transfer.id : null)}
-                        onViewDetailsClick={() =>
-                          setOpenSheetId((prev) => (prev === transfer.id ? null : transfer.id))
-                        }
                       />
                     );
                   }

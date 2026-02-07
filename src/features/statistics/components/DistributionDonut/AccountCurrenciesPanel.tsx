@@ -1,11 +1,11 @@
+import MoneyValue from '@/components/common/MoneyValue';
+import { CURRENCIES } from '@/constants/currency';
+
+import AccountPill from '@/features/accounts/components/Pill';
 import type { PieSvgProps } from '@nivo/pie';
 import sortBy from 'lodash/sortBy';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
-
-import AccountPill from '@/features/accounts/components/Pill';
-import { CURRENCIES } from '@/constants/currency';
-import MoneyValue from '@/components/common/MoneyValue';
 
 import CardSkeleton from './CardSkeleton';
 import Chart from './Chart';
@@ -60,42 +60,29 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
     (value: number) => {
       const now = moment();
       const { after, before } = timeframe;
-      const months = moment(before).isAfter(now)
-        ? now.diff(moment(after), 'months')
-        : moment(before).diff(moment(after), 'months');
+      const months = moment(before).isAfter(now) ? now.diff(moment(after), 'months') : moment(before).diff(moment(after), 'months');
       return months > 0 ? value / months : value;
     },
     [timeframe],
   );
 
-  const applyMonthly = useCallback((v: number) => (showMonthlyAverage ? calcMonthlyAverage(v) : v), [
-    showMonthlyAverage,
-    calcMonthlyAverage,
-  ]);
+  const applyMonthly = useCallback(
+    (value: number) => (showMonthlyAverage ? calcMonthlyAverage(value) : value),
+    [showMonthlyAverage, calcMonthlyAverage],
+  );
 
   const accountItemsAll: Item[] = useMemo(() => {
-    const items: Item[] = accountStats.map((s) => ({
-      id: String(s.account.id),
-      name: s.account.displayName ?? s.account.name,
-      value: applyMonthly(s.value ?? 0),
-      amount: applyMonthly(s.amount ?? 0),
-      currency: s.account.currency,
-      color: s.account.color ?? null,
-      account: s.account,
+    const items: Item[] = accountStats.map((stat) => ({
+      id: String(stat.account.id),
+      name: stat.account.displayName ?? stat.account.name,
+      value: applyMonthly(stat.value ?? 0),
+      amount: applyMonthly(stat.amount ?? 0),
+      currency: stat.account.currency,
+      color: stat.account.color ?? null,
+      account: stat.account,
     }));
     return sortBy(items, 'value');
   }, [accountStats, applyMonthly]);
-
-  const currencyToAccountIds = useMemo(() => {
-    const map = new Map<string, string[]>();
-    for (const stat of accountStats) {
-      const code = stat.account.currency ?? '—';
-      const list = map.get(code) ?? [];
-      list.push(String(stat.account.id));
-      map.set(code, list);
-    }
-    return map;
-  }, [accountStats]);
 
   const currencyItemsAll: Item[] = useMemo(() => {
     type Agg = { value: number; amount: number };
@@ -130,14 +117,14 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
 
   const currencyAccounts = useMemo(() => {
     if (!selectedCurrency) return [];
-    return accountItemsAll.filter((i) => (i.currency ?? '—') === selectedCurrency);
+    return accountItemsAll.filter((item) => (item.currency ?? '—') === selectedCurrency);
   }, [accountItemsAll, selectedCurrency]);
 
-  const currencyTotal = useMemo(() => currencyAccounts.reduce((sum, i) => sum + i.value, 0), [currencyAccounts]);
-  const currenciesGrandTotal = useMemo(() => currencyItemsAll.reduce((sum, i) => sum + i.value, 0), [currencyItemsAll]);
+  const currencyTotal = useMemo(() => currencyAccounts.reduce((sum, item) => sum + item.value, 0), [currencyAccounts]);
+  const currenciesGrandTotal = useMemo(() => currencyItemsAll.reduce((sum, item) => sum + item.value, 0), [currencyItemsAll]);
 
-  const accountsById = useMemo(() => new Map(accountItemsAll.map((i) => [String(i.id), i])), [accountItemsAll]);
-  const currenciesById = useMemo(() => new Map(currencyItemsAll.map((i) => [String(i.id), i])), [currencyItemsAll]);
+  const accountsById = useMemo(() => new Map(accountItemsAll.map((item) => [String(item.id), item])), [accountItemsAll]);
+  const currenciesById = useMemo(() => new Map(currencyItemsAll.map((item) => [String(item.id), item])), [currencyItemsAll]);
 
   const accountsColors = useMemo<PieSvgProps<Datum>['colors']>(
     () => (d) => accountsById.get(String((d as { id: string | number }).id))?.color ?? DEFAULT_COLOR,
@@ -150,17 +137,17 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
   );
 
   const accountsPieData: Datum[] = useMemo(
-    () => accountItemsAll.map((i) => ({ id: String(i.id), label: i.name, value: i.value })),
+    () => accountItemsAll.map((item) => ({ id: String(item.id), label: item.name, value: item.value })),
     [accountItemsAll],
   );
 
   const currenciesPieData: Datum[] = useMemo(
-    () => currencyItemsAll.map((i) => ({ id: String(i.id), label: i.name, value: i.value })),
+    () => currencyItemsAll.map((item) => ({ id: String(item.id), label: item.name, value: item.value })),
     [currencyItemsAll],
   );
 
   const accountsInCurrencyPieData: Datum[] = useMemo(
-    () => currencyAccounts.map((i) => ({ id: String(i.id), label: i.name, value: i.value })),
+    () => currencyAccounts.map((item) => ({ id: String(item.id), label: item.name, value: item.value })),
     [currencyAccounts],
   );
 
@@ -175,14 +162,16 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
           label={String(datum.data.label)}
           percent={percent}
           value={value}
-          extra={item && (
-            <MoneyValue
-              amount={item.amount}
-              currency={item.currency}
-              useColors={false}
-              className="text-2xs leading-4 text-muted-foreground"
-            />
-          )}
+          extra={
+            item ? (
+              <MoneyValue
+                amount={item.amount}
+                currency={item.currency}
+                useColors={false}
+                className="text-2xs leading-4 text-muted-foreground"
+              />
+            ) : null
+          }
         />
       );
     },
@@ -201,14 +190,16 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
           label={String(datum.data.label)}
           percent={percent}
           value={value}
-          extra={item && (
-            <MoneyValue
-              amount={item.amount}
-              currency={item.currency}
-              useColors={false}
-              className="text-2xs leading-4 text-muted-foreground"
-            />
-          )}
+          extra={
+            item ? (
+              <MoneyValue
+                amount={item.amount}
+                currency={item.currency}
+                useColors={false}
+                className="text-2xs leading-4 text-muted-foreground"
+              />
+            ) : null
+          }
         />
       );
     },
@@ -226,14 +217,16 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
           label={String(datum.data.label)}
           percent={percent}
           value={value}
-          extra={item && (
-            <MoneyValue
-              amount={item.amount}
-              currency={item.currency}
-              useColors={false}
-              className="text-2xs leading-4 text-muted-foreground"
-            />
-          )}
+          extra={
+            item ? (
+              <MoneyValue
+                amount={item.amount}
+                currency={item.currency}
+                useColors={false}
+                className="text-2xs leading-4 text-muted-foreground"
+              />
+            ) : null
+          }
         />
       );
     },
@@ -241,25 +234,21 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
   );
 
   const openAccountTransactions = useCallback(
-    (id: string) => {
-      const item = accountsById.get(String(id));
+    (accountId: string) => {
+      const item = accountsById.get(String(accountId));
       const title = item ? `Transactions in ${item.name}` : 'Transactions';
-      onOpenTransactions({ title, initialFilters: { accounts: [String(id)] } });
+      onOpenTransactions({ title, initialFilters: { accounts: [String(accountId)] } });
     },
     [accountsById, onOpenTransactions],
   );
 
   const openCurrencyTransactions = useCallback(
     (currencyCode: string) => {
-      const ids = currencyToAccountIds.get(String(currencyCode)) ?? [];
-      if (!ids.length) return;
-
       const item = currenciesById.get(String(currencyCode));
       const title = item ? `Transactions in ${item.name}` : `Transactions in ${currencyCode}`;
-
-      onOpenTransactions({ title, initialFilters: { accounts: ids } });
+      onOpenTransactions({ title, initialFilters: { currencies: [String(currencyCode)] } });
     },
-    [currencyToAccountIds, currenciesById, onOpenTransactions],
+    [currenciesById, onOpenTransactions],
   );
 
   if (isLoading) return <CardSkeleton />;
@@ -279,9 +268,8 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
               ) : (
                 <span className="truncate">{item.name}</span>
               )}
-              {item.value > 0 ? (
-                <small className="text-xs text-muted-foreground shrink-0">({percentage.toFixed(0)}%)</small>
-              ) : null}
+              {item.value > 0 ?
+                <small className="text-xs text-muted-foreground shrink-0">({percentage.toFixed(0)}%)</small> : null}
             </div>
           )}
           onViewTransactions={openAccountTransactions}
@@ -302,7 +290,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
         />
         <DistributionList
           ariaLabel="Currencies distribution list"
-          getDotColor={(i) => CURRENCY_COLORS[String(i.id)] ?? DEFAULT_COLOR}
+          getDotColor={(item) => CURRENCY_COLORS[String(item.id)] ?? DEFAULT_COLOR}
           items={currencyItemsAll}
           total={currenciesGrandTotal}
           renderTooltip={({ item }) => (
@@ -331,9 +319,8 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
             ) : (
               <span className="truncate">{item.name}</span>
             )}
-            {item.value > 0 ? (
-              <small className="text-xs text-muted-foreground shrink-0">({percentage.toFixed(0)}%)</small>
-            ) : null}
+            {item.value > 0 ?
+              <small className="text-xs text-muted-foreground shrink-0">({percentage.toFixed(0)}%)</small> : null}
           </div>
         )}
         onViewTransactions={openAccountTransactions}
