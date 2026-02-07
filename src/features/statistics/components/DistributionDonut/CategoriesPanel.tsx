@@ -1,11 +1,9 @@
 import { ResponsivePie } from '@nivo/pie';
 import sortBy from 'lodash/sortBy';
-import { CreditCard } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
 import { Type as TransactionType } from '@/features/transactions';
-import { Button } from '@/components/ui/button';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,6 +16,7 @@ import {
 import CardSkeleton from './CardSkeleton';
 import DistributionList from './DistributionList';
 import DonutTooltip from './DonutTooltip';
+import type { DrawerListingTarget } from './TransactionsDrawer';
 import type { ProcessedCategory } from './types';
 import { processCategoryTree } from './utils';
 
@@ -34,7 +33,7 @@ type CategoryRow = {
   value: number;
 };
 
-const CategoriesPanel: React.FC<{
+type Props = {
   type: TransactionType;
   timeframe: { after: Moment; before: Moment };
   showMonthlyAverage: boolean;
@@ -44,36 +43,37 @@ const CategoriesPanel: React.FC<{
   setCurrentCategory: React.Dispatch<React.SetStateAction<ProcessedCategory | null>>;
   setCategoryStack: React.Dispatch<React.SetStateAction<ProcessedCategory[]>>;
 
-  setSelectedCategory: React.Dispatch<React.SetStateAction<ProcessedCategory | null>>;
-  setIsDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
-
   isLoading: boolean;
   categoryRaw: CategoryApiNode[];
-}> = ({
-        type,
-        timeframe,
-        showMonthlyAverage,
-        currentCategory,
-        categoryStack,
-        setCurrentCategory,
-        setCategoryStack,
-        setSelectedCategory,
-        setIsDrawerOpen,
-        isLoading,
-        categoryRaw,
-      }) => {
+
+  onOpenTransactions: (target: DrawerListingTarget) => void;
+};
+
+const CategoriesPanel: React.FC<Props> = ({
+                                            type,
+                                            timeframe,
+                                            showMonthlyAverage,
+                                            currentCategory,
+                                            categoryStack,
+                                            setCurrentCategory,
+                                            setCategoryStack,
+                                            isLoading,
+                                            categoryRaw,
+                                            onOpenTransactions,
+                                          }) => {
   const calcMonthlyAverage = useCallback(
     (value: number) => {
       const now = moment();
       const { after, before } = timeframe;
-      const months = moment(before).isAfter(now) ? now.diff(moment(after), 'months') : moment(before).diff(moment(after), 'months');
+      const months = moment(before).isAfter(now)
+        ? now.diff(moment(after), 'months')
+        : moment(before).diff(moment(after), 'months');
       return months > 0 ? value / months : value;
     },
     [timeframe],
   );
 
   const root = useMemo<ProcessedCategory[]>(() => processCategoryTree(categoryRaw), [categoryRaw]);
-
   const totalRoot = useMemo(() => root.reduce((sum, c) => sum + c.value, 0), [root]);
 
   const currentCategories = useMemo<ProcessedCategory[]>(
@@ -99,11 +99,10 @@ const CategoriesPanel: React.FC<{
 
   const breadcrumbs = useMemo(
     () =>
-      [
-        { id: 0, name: 'All Categories' },
-        ...categoryStack.slice(1),
-        currentCategory,
-      ].filter(Boolean) as Array<{ id: number; name: string }>,
+      [{ id: 0, name: 'All Categories' }, ...categoryStack.slice(1), currentCategory].filter(Boolean) as Array<{
+        id: number;
+        name: string;
+      }>,
     [categoryStack, currentCategory],
   );
 
@@ -126,27 +125,30 @@ const CategoriesPanel: React.FC<{
   const handleCategoryStep = useCallback(
     (category: ProcessedCategory) => {
       if (category.children && category.children.length > 0) {
-        setCategoryStack((prev) => [
-          ...prev,
-          currentCategory || { id: 0, name: 'Root', value: totalRoot, children: root },
-        ]);
+        setCategoryStack((prev) => [...prev, currentCategory || {
+          id: 0,
+          name: 'Root',
+          value: totalRoot,
+          children: root,
+        }]);
         setCurrentCategory(category);
       }
     },
     [currentCategory, totalRoot, root, setCategoryStack, setCurrentCategory],
   );
 
-  const openCategoryTransactions = useCallback(
-    (category: ProcessedCategory) => {
-      setSelectedCategory(category);
-      setIsDrawerOpen(true);
-    },
-    [setSelectedCategory, setIsDrawerOpen],
-  );
-
   const categoryRows = useMemo<CategoryRow[]>(
     () => chartData.map((r) => ({ id: String(r.id), name: r.label, value: r.value })).reverse(),
     [chartData],
+  );
+
+  const openCategoryTransactions = useCallback(
+    (id: string) => {
+      const category = categoriesById.get(String(id));
+      const title = category ? `Transactions in ${category.name}` : 'Transactions';
+      onOpenTransactions({ title, initialFilters: { categories: [Number(id)], withNestedCategories: true } });
+    },
+    [categoriesById, onOpenTransactions],
   );
 
   if (isLoading) return <CardSkeleton />;
@@ -219,30 +221,11 @@ const CategoriesPanel: React.FC<{
             <code className="font-mono text-xs">#{item.id}</code>: <span>{item.name}</span>
           </>
         )}
-        rightSlot={(item) => {
-          const category = categoriesById.get(String(item.id));
-          if (!category) return null;
-
-          return (
-            <Button
-              aria-label="View transactions"
-              size="icon"
-              variant="ghost"
-              className="h-7 w-7"
-              onClick={(e) => {
-                e.stopPropagation();
-                openCategoryTransactions(category);
-              }}
-            >
-              <CreditCard className="h-4 w-4" />
-              <span className="sr-only">View transactions</span>
-            </Button>
-          );
-        }}
         onRowClick={(id) => {
           const category = categoriesById.get(id);
           if (category) handleCategoryStep(category);
         }}
+        onViewTransactions={openCategoryTransactions}
       />
     </div>
   );

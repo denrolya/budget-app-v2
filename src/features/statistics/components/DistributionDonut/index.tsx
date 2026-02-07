@@ -2,12 +2,12 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { processCategoryTree } from '@/features/statistics/components/DistributionDonut/utils';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import MoneyValue from '@/components/common/MoneyValue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { processCategoryTree } from '@/features/statistics/components/DistributionDonut/utils';
 import { Type as TransactionType } from '@/features/transactions';
 import { useAccountDistribution } from '@/hooks/statistics/useAccountDistributionStatistics';
 import { useCategoryTreeStatistics } from '@/hooks/statistics/useCategoryTreeStatistics';
@@ -18,7 +18,7 @@ import { Timeframe } from '@/types/global';
 import AccountsCurrenciesPanel from './AccountCurrenciesPanel';
 import CategoriesPanel from './CategoriesPanel';
 import ConfigurationMenu from './ConfigurationMenu';
-import TransactionsDrawer from './TransactionsDrawer';
+import TransactionsDrawer, { type DrawerListingTarget } from './TransactionsDrawer';
 import type { ProcessedCategory, TabKey } from './types';
 
 interface Props extends React.ComponentPropsWithoutRef<'div'> {
@@ -32,8 +32,14 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
   const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null);
   const [currentCategory, setCurrentCategory] = useState<ProcessedCategory | null>(null);
   const [categoryStack, setCategoryStack] = useState<ProcessedCategory[]>([]);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<ProcessedCategory | null>(null);
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerTarget, setDrawerTarget] = useState<DrawerListingTarget | null>(null);
+
+  const openTransactions = useCallback((target: DrawerListingTarget) => {
+    setDrawerTarget(target);
+    setDrawerOpen(true);
+  }, []);
 
   const fallback = useTimeframeControl({
     defaultTimeframe: { after: moment().startOf('month'), before: moment().endOf('month') },
@@ -96,11 +102,7 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
 
     if (tab === 'currencies') {
       if (!selectedCurrency) {
-        // currency total = sum over accountStats grouped; cheapest way: sum raw values from stats
-        const sum = (accountStats ?? []).reduce((acc: number, s: any) => {
-          const v = s?.value ?? 0;
-          return acc + v;
-        }, 0);
+        const sum = (accountStats ?? []).reduce((acc: number, s: any) => acc + (s?.value ?? 0), 0);
         return applyMonthly(sum);
       }
 
@@ -113,7 +115,6 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
       return applyMonthly(sum);
     }
 
-    // categories total: root/currentCategory value уже содержит raw totals => берём из дерева
     const root = processCategoryTree(categoryRaw ?? []);
     const totalRoot = root.reduce((sum, c) => sum + c.value, 0);
     const raw = currentCategory ? currentCategory.value : totalRoot;
@@ -154,7 +155,7 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
         </CardHeader>
 
         <CardContent className="p-4 pt-0 flex-1 min-h-0">
-          {!isControlled && (
+          {!isControlled ? (
             <DaterangePickerWithPresets
               after={timeframe.after}
               before={timeframe.before}
@@ -166,7 +167,7 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
                 </span>
               </span>
             </DaterangePickerWithPresets>
-          )}
+          ) : null}
 
           <div className="flex items-center justify-between gap-3 mb-2">
             <Tabs value={tab} onValueChange={onTabChange}>
@@ -183,7 +184,7 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
               </TabsList>
             </Tabs>
 
-            {tab === 'currencies' && (
+            {tab === 'currencies' ? (
               <Button
                 aria-label="Back to all currencies"
                 disabled={!selectedCurrency}
@@ -194,10 +195,10 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
               >
                 {selectedCurrency ? 'Back' : ' '}
               </Button>
-            )}
+            ) : null}
           </div>
 
-          {tab !== 'categories' && (
+          {tab !== 'categories' ? (
             <AccountsCurrenciesPanel
               accountStats={accountStats ?? []}
               isLoading={isLoading}
@@ -206,12 +207,10 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
               tab={tab}
               timeframe={timeframe}
               totalAccountsRaw={totalAccountsRaw ?? 0}
-              type={type}
               onCurrencySelect={onCurrencySelect}
+              onOpenTransactions={openTransactions}
             />
-          )}
-
-          {tab === 'categories' && (
+          ) : (
             <CategoriesPanel
               categoryRaw={categoryRaw ?? []}
               categoryStack={categoryStack}
@@ -219,11 +218,10 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
               isLoading={isLoading}
               setCategoryStack={setCategoryStack}
               setCurrentCategory={setCurrentCategory}
-              setIsDrawerOpen={setIsDrawerOpen}
-              setSelectedCategory={setSelectedCategory}
               showMonthlyAverage={showMonthlyAverage}
               timeframe={timeframe}
               type={type}
+              onOpenTransactions={openTransactions}
             />
           )}
         </CardContent>
@@ -236,14 +234,11 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
         </CardFooter>
       </Card>
 
-      {selectedCategory && (
-        <TransactionsDrawer
-          isOpen={isDrawerOpen}
-          selectedCategory={selectedCategory}
-          timeframe={timeframe}
-          onOpenChange={setIsDrawerOpen}
-        />
-      )}
+      <TransactionsDrawer
+        open={drawerOpen}
+        target={drawerTarget}
+        timeframe={timeframe}
+        onOpenChange={setDrawerOpen} />
     </>
   );
 };

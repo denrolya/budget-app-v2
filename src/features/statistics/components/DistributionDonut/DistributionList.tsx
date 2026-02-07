@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+import DistributionListRowMenu from './DistributionListRowMenu';
 import type { Item } from './types';
 
 type RenderLabelArgs = {
@@ -25,6 +26,8 @@ type Props = {
   getDotColor?: (item: Item) => string | null;
   onRowClick?: (id: string) => void;
 
+  onViewTransactions: (id: string) => void;
+
   renderLabel?: (args: RenderLabelArgs) => React.ReactNode;
   renderTooltip?: (args: RenderTooltipArgs) => React.ReactNode;
 
@@ -41,6 +44,7 @@ const DistributionTable: React.FC<Props> = ({
                                               total,
                                               getDotColor,
                                               onRowClick,
+                                              onViewTransactions,
                                               renderLabel,
                                               renderTooltip,
                                               rightSlot,
@@ -103,39 +107,55 @@ const DistributionTable: React.FC<Props> = ({
               <div className="flex items-center gap-2 shrink-0">
                 <div className="flex flex-col items-end gap-0.5 text-sm leading-5">
                   <MoneyValue amount={item.value} useColors={false} className="text-sm leading-5" />
-                  {item.amount && (
+                  {item.amount ? (
                     <MoneyValue
                       amount={item.amount}
                       currency={item.currency}
                       useColors={false}
-                      className="text-2xs leading-4 text-muted-foreground" />
-                  )}
+                      className="text-2xs leading-4 text-muted-foreground"
+                    />
+                  ) : null}
                 </div>
                 {rightSlot ? rightSlot(item) : null}
               </div>
             );
 
+            const rowKey = String(item.id);
+
             if (isClickable) {
               return (
-                <Button
-                  aria-label={`Select ${item.name}`}
-                  type="button"
-                  variant="ghost"
-                  className={`${ROW_BASE} ${ROW_INTERACTIVE} h-auto justify-between font-normal bg-transparent`}
-                  key={item.id}
-                  onClick={() => onRowClick?.(String(item.id))}
+                <DistributionListRowMenu
+                  item={item}
+                  key={rowKey}
+                  onSelect={() => onRowClick?.(rowKey)}
+                  onViewTransactions={() => onViewTransactions(rowKey)}
                 >
-                  <div className="min-w-0 flex-1">{left}</div>
-                  {right}
-                </Button>
+                  <Button
+                    aria-label={`Select ${item.name}`}
+                    type="button"
+                    variant="ghost"
+                    className={`${ROW_BASE} ${ROW_INTERACTIVE} h-auto justify-between font-normal bg-transparent`}
+                    onClick={() => onRowClick?.(rowKey)}
+                    onContextMenu={(e) => e.stopPropagation()}
+                  >
+                    <div className="min-w-0 flex-1">{left}</div>
+                    {right}
+                  </Button>
+                </DistributionListRowMenu>
               );
             }
 
             return (
-              <div className={`${ROW_BASE} ${ROW_INTERACTIVE}`} key={item.id}>
-                <div className="min-w-0 flex-1">{left}</div>
-                {right}
-              </div>
+              <DistributionListRowMenu
+                item={item}
+                key={rowKey}
+                onViewTransactions={() => onViewTransactions(rowKey)}
+              >
+                <div className={`${ROW_BASE} ${ROW_INTERACTIVE}`} onContextMenu={(e) => e.stopPropagation()}>
+                  <div className="min-w-0 flex-1">{left}</div>
+                  {right}
+                </div>
+              </DistributionListRowMenu>
             );
           })}
         </div>

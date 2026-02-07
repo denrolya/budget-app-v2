@@ -2,18 +2,20 @@ import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, FileText, Layers, Rot
 import { Moment } from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
-import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
-import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
+import { useIsMobile } from '@/hooks/use-mobile';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
+import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
+import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
+import DisplayMenu from '@/features/daily-ledger/components/DisplayMenu';
+import { Type as TransactionType } from '@/features/transactions';
 import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
 import { TransferFilters } from '@/features/transfers/models/TransferFilters';
+import { cn } from '@/lib/utils';
 import { Timeframe } from '@/types/global';
-import { Type as TransactionType } from '@/features/transactions';
 
 type CombinedFilters = TransactionFilters & TransferFilters;
 
@@ -31,6 +33,13 @@ interface ListingControlsProps {
   setIsReversedOrder: (value: boolean) => void;
   handleResetFilters: () => void;
   onFiltersDialogToggle: () => void;
+  isCompactTable: boolean,
+  setActiveView: (value: 'table' | 'list') => void;
+  setIsCompactTable: (value: boolean) => void,
+  setShowEmptyDays: (value: boolean) => void,
+  showEmptyDays: boolean,
+  showTransactions: boolean,
+  showTransfers: boolean,
 }
 
 const H = 'h-9';
@@ -57,7 +66,15 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
                                                                   setIsReversedOrder,
                                                                   handleResetFilters,
                                                                   onFiltersDialogToggle,
+                                                                  isCompactTable,
+                                                                  showTransfers,
+                                                                  setActiveView,
+                                                                  setIsCompactTable,
+                                                                  showTransactions,
+                                                                  setShowEmptyDays,
+                                                                  showEmptyDays,
                                                                 }) => {
+  const isMobile = useIsMobile();
   const accountsValue = useMemo(() => {
     const t = Array.isArray(transactionFilters.accounts) ? transactionFilters.accounts : [];
     const tr = Array.isArray(transferFilters.accounts) ? transferFilters.accounts : [];
@@ -105,25 +122,25 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
   return (
     <div className="border-b bg-muted/30 supports-[backdrop-filter]:bg-muted/30">
       <div
-        role="toolbar"
         aria-label="Ledger filters"
+        role="toolbar"
         className="flex flex-wrap items-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2"
       >
         {/* DATE + ORDER */}
         <div className="flex items-center gap-1.5">
-          <div role="group" aria-label="Date range" className="flex items-center">
+          <div aria-label="Date range" role="group" className="flex items-center">
             <DaterangePickerWithPresets
               after={timeframe.after}
               before={timeframe.before}
               onChange={handleTimeframeChange}>
               <Button
+                aria-label="Select date range"
+                size="sm"
                 type="button"
                 variant="outline"
-                size="sm"
                 className={cn(H, 'bg-background px-2')}
-                aria-label="Select date range"
               >
-                <CalendarIcon className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                <CalendarIcon aria-hidden="true" className="mr-1.5 h-4 w-4" />
                 <span className={DATE_TEXT}>{dateLabel}</span>
               </Button>
             </DaterangePickerWithPresets>
@@ -133,15 +150,15 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className={ICON_BTN}
-                  onClick={() => setIsReversedOrder(!isReversedOrder)}
                   aria-label="Toggle ordering"
                   aria-pressed={isReversedOrder}
+                  size="icon"
+                  type="button"
+                  variant="outline"
+                  className={ICON_BTN}
+                  onClick={() => setIsReversedOrder(!isReversedOrder)}
                 >
-                  <OrderIcon className="h-4 w-4" aria-hidden="true" />
+                  <OrderIcon aria-hidden="true" className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Toggle ordering</TooltipContent>
@@ -153,23 +170,26 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
 
         {/* MAIN SELECTORS */}
         <div className="flex items-center gap-1.5">
-          <div className={cn('flex items-center', TYPEAHEAD_W)} role="group" aria-label="Accounts filter">
+          <div aria-label="Accounts filter" role="group" className={cn('flex items-center', TYPEAHEAD_W)}>
             <AccountTypeahead
               multiple
-              value={accountsValue}
-              onChange={(accounts) => setFilter('accounts', accounts)}
-              placeholder="Accounts"
-              className="w-full"
               aria-label="Filter by accounts"
+              placeholder="Accounts"
+              value={accountsValue}
+              className="w-full"
+              onChange={(accounts) => setFilter('accounts', accounts)}
             />
           </div>
 
           <Divider />
 
-          <div className={cn('flex items-center', TYPEAHEAD_W)} role="group" aria-label="Categories filter">
+          <div aria-label="Categories filter" role="group" className={cn('flex items-center', TYPEAHEAD_W)}>
             <CategoryTypeahead
               multiple
+              aria-label="Filter by categories"
+              placeholder="Categories"
               value={transactionFilters.categories}
+              className="w-full"
               onChange={(categories) => {
                 setFilter('categories', categories);
                 if (categories?.length) {
@@ -177,24 +197,21 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
                   setShowTransfers(false);
                 }
               }}
-              placeholder="Categories"
-              className="w-full"
-              aria-label="Filter by categories"
             />
           </div>
 
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                type="button"
-                variant={transactionFilters.withNestedCategories ? 'secondary' : 'outline'}
-                size="icon"
-                className={ICON_BTN}
-                onClick={toggleNestedCategories}
                 aria-label="Nested categories"
                 aria-pressed={transactionFilters.withNestedCategories}
+                size="icon"
+                type="button"
+                variant={transactionFilters.withNestedCategories ? 'secondary' : 'outline'}
+                className={ICON_BTN}
+                onClick={toggleNestedCategories}
               >
-                <Layers className="h-4 w-4" aria-hidden="true" />
+                <Layers aria-hidden="true" className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Nested categories</TooltipContent>
@@ -205,59 +222,59 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
 
         {/* AMOUNT + TYPE + DRAFT */}
         <div className="flex items-center gap-1.5">
-          <div role="group" aria-label="Amount range" className="flex items-center gap-1.5">
+          <div aria-label="Amount range" role="group" className="flex items-center gap-1.5">
             <Input
+              aria-label="Minimum amount"
+              placeholder="Min"
               type="number"
               value={transactionFilters.amountRange[0] ?? ''}
+              className={cn(H, AMOUNT_W, 'bg-background')}
               onChange={(e) =>
                 setFilter('amountRange', [
                   e.target.value === '' ? undefined : Number(e.target.value),
                   transactionFilters.amountRange[1],
                 ])
               }
-              className={cn(H, AMOUNT_W, 'bg-background')}
-              placeholder="Min"
-              aria-label="Minimum amount"
             />
             <Input
+              aria-label="Maximum amount"
+              placeholder="Max"
               type="number"
               value={transactionFilters.amountRange[1] ?? ''}
+              className={cn(H, AMOUNT_W, 'bg-background')}
               onChange={(e) =>
                 setFilter('amountRange', [
                   transactionFilters.amountRange[0],
                   e.target.value === '' ? undefined : Number(e.target.value),
                 ])
               }
-              className={cn(H, AMOUNT_W, 'bg-background')}
-              placeholder="Max"
-              aria-label="Maximum amount"
             />
           </div>
 
           <Divider />
 
-          <div role="group" aria-label="Transaction type" className={cn('flex items-center', H)}>
+          <div aria-label="Transaction type" role="group" className={cn('flex items-center', H)}>
             <div className={cn('flex items-stretch overflow-hidden rounded-md border bg-background', H)}>
               <Button
+                aria-pressed={isIncome}
+                size="sm"
                 type="button"
                 variant={isIncome ? 'success' : 'ghost'}
-                size="sm"
                 className="h-full rounded-none px-2"
                 onClick={() => setType(TransactionType.Income)}
-                aria-pressed={isIncome}
               >
                 Income
               </Button>
 
-              <div className="self-center h-5 w-px bg-border" aria-hidden="true" />
+              <div aria-hidden="true" className="self-center h-5 w-px bg-border" />
 
               <Button
+                aria-pressed={isExpense}
+                size="sm"
                 type="button"
                 variant={isExpense ? 'destructive' : 'ghost'}
-                size="sm"
                 className="h-full rounded-none px-2"
                 onClick={() => setType(TransactionType.Expense)}
-                aria-pressed={isExpense}
               >
                 Expense
               </Button>
@@ -269,15 +286,15 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                type="button"
-                variant={transactionFilters.isDraft ? 'secondary' : 'outline'}
-                size="icon"
-                className={ICON_BTN}
-                onClick={toggleDraft}
                 aria-label="Only drafts"
                 aria-pressed={transactionFilters.isDraft}
+                size="icon"
+                type="button"
+                variant={transactionFilters.isDraft ? 'secondary' : 'outline'}
+                className={ICON_BTN}
+                onClick={toggleDraft}
               >
-                <FileText className="h-4 w-4" aria-hidden="true" />
+                <FileText aria-hidden="true" className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Only drafts</TooltipContent>
@@ -286,18 +303,37 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
 
         {/* RIGHT ACTIONS */}
         <div className="ml-0 md:ml-auto flex items-center gap-1.5">
+          {!isMobile && (
+            <DisplayMenu
+              activeView={activeView}
+              isCompactTable={isCompactTable}
+              isReversedOrder={isReversedOrder}
+              setActiveView={setActiveView}
+              setFilter={setFilter}
+              setIsCompactTable={setIsCompactTable}
+              setIsReversedOrder={setIsReversedOrder}
+              setShowEmpty={setShowEmptyDays}
+              setShowTransactions={setShowTransactions}
+              setShowTransfers={setShowTransfers}
+              showEmpty={showEmptyDays}
+              showTransactions={showTransactions}
+              showTransfers={showTransfers}
+              transactionFilters={transactionFilters}
+            />
+          )}
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
+                aria-label="Reset filters"
+                disabled={!canReset}
+                size="icon"
                 type="button"
                 variant="outline"
-                size="icon"
                 className={ICON_BTN}
-                disabled={!canReset}
                 onClick={handleResetFilters}
-                aria-label="Reset filters"
               >
-                <RotateCcw className={cn('h-4 w-4', isLoading && 'animate-spin')} aria-hidden="true" />
+                <RotateCcw aria-hidden="true" className={cn('h-4 w-4', isLoading && 'animate-spin')} />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Reset filters</TooltipContent>

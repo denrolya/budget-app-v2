@@ -1,99 +1,49 @@
-import { Moment } from 'moment';
-import React, { useEffect } from 'react';
+import type { Moment } from 'moment';
+import React, { useMemo } from 'react';
 
-import Pagination from '@/components/common/Pagination';
-import FormattedListing from '@/features/transactions/components/FormattedListing';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
-import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useList as useTransactionsList } from '@/features/transactions';
-import TransactionFilters from '@/features/transactions/models/TransactionFilters';
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import ListingContainer from '@/features/daily-ledger/components/ListingContainer';
 
-interface ProcessedCategory {
-  id: number;
-  name: string;
-  value: number;
-  children?: ProcessedCategory[];
-}
+export type DrawerListingTarget = {
+  title: string;
+  initialFilters: Record<string, unknown>;
+};
 
-interface TransactionsDrawerProps {
-  isOpen: boolean;
+type Props = {
+  open: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedCategory: ProcessedCategory;
-  timeframe: {
-    after: Moment;
-    before: Moment;
-  };
-}
+  target: DrawerListingTarget | null;
+  timeframe: { after: Moment; before: Moment };
+};
 
-export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
-  isOpen,
-  onOpenChange,
-  selectedCategory,
-  timeframe,
-}) => {
-  const { openForm } = useFormContext();
-  const {
-    groupedItems: groupedTransactions,
-    isLoading: isTransactionsLoading,
-    isError: isTransactionsError,
-    error: transactionsError,
-    refetch: refetchTransactions,
-    pagination: { currentPage, perPage, totalPages, totalItems, setCurrentPage, setPerPage },
-    setFilter,
-  } = useTransactionsList({
-    updateUrl: false,
-    initialFilters: new TransactionFilters({
-      withNestedCategories: true,
-    }),
-  });
-
-  useEffect(() => {
-    if (isOpen && selectedCategory.id) {
-      setFilter('categories', [selectedCategory.id]);
-      setFilter('after', timeframe.after);
-      setFilter('before', timeframe.before);
-    }
-  }, [isOpen, selectedCategory, timeframe, setFilter, refetchTransactions]);
+export const TransactionsDrawer: React.FC<Props> = ({ open, onOpenChange, target, timeframe }) => {
+  const listingKey = useMemo(() => {
+    if (!target) return 'none';
+    return `${target.title}:${timeframe.after.valueOf()}-${timeframe.before.valueOf()}`;
+  }, [target, timeframe.after, timeframe.before]);
 
   return (
-    <Drawer open={isOpen} onOpenChange={onOpenChange}>
+    <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Transactions in {selectedCategory.name}</DrawerTitle>
+          <DrawerTitle>{target?.title ?? 'Transactions'}</DrawerTitle>
           <DrawerDescription>
-            {timeframe.after.format(MOMENT_DATEPICKER_FORMAT)} - {timeframe.before.format(MOMENT_DATEPICKER_FORMAT)}
+            {timeframe.after.format('DD MMM YYYY')} - {timeframe.before.format('DD MMM YYYY')}
           </DrawerDescription>
         </DrawerHeader>
-        <ScrollArea className="h-[60vh] px-4">
-          <FormattedListing
-            error={transactionsError}
-            groupedItems={groupedTransactions}
-            isError={isTransactionsError}
-            isLoading={isTransactionsLoading}
-            refetch={refetchTransactions}
-            onAdd={() => openForm(FormType.Transaction)}
-          />
-        </ScrollArea>
-        <DrawerFooter>
-          <Pagination
-            currentPage={currentPage}
-            isLoading={isTransactionsLoading}
-            perPage={perPage}
-            totalItems={totalItems}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            onPerPageChange={setPerPage}
-          />
-        </DrawerFooter>
+
+        <div className="h-[80vh] min-h-0 flex flex-col">
+          {target ? (
+            <ListingContainer
+              enableHotkeys={false}
+              excludeTransfers={false}
+              initialFilters={target.initialFilters}
+              initialTimeframe={timeframe}
+              updateUrl={false}
+              key={listingKey}
+            />
+          ) : null}
+        </div>
       </DrawerContent>
     </Drawer>
   );

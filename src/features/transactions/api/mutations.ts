@@ -1,11 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+import { queryKeys as accountKeys } from '@/features/accounts';
+
 import Transaction from '../models/Transaction';
 import { TransactionFilters } from '../models/TransactionFilters';
 
 import { queryKeys } from './keys';
 import { transactionService } from './service';
+
 
 export const useMutations = (opts?: { invalidateKey?: string | readonly unknown[] }) => {
   const qc = useQueryClient();
@@ -17,7 +20,7 @@ export const useMutations = (opts?: { invalidateKey?: string | readonly unknown[
       qc.invalidateQueries({
         queryKey: Array.isArray(invalidateKey) ? invalidateKey : [invalidateKey],
       }),
-      qc.invalidateQueries({ queryKey: queryKeys.all }),
+      qc.invalidateQueries({ queryKey: accountKeys.all }),
     ]);
   };
 
