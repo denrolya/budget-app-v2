@@ -89,11 +89,11 @@ export const WalletBar: React.FC<Props> = ({ className }) => {
           <div className="text-sm text-muted-foreground">Your wallet</div>
           <MoneyValue
             amount={totalBaseValue}
-            className="text-2xl font-semibold tracking-tight"
             currency={baseCurrency as any}
             showValuesTooltip={false}
             useColors={false}
             values={{ [baseCurrency]: totalBaseValue }}
+            className="text-2xl font-semibold tracking-tight"
           />
         </div>
 
@@ -102,8 +102,8 @@ export const WalletBar: React.FC<Props> = ({ className }) => {
 
       <div
         aria-label="Wallet distribution by accounts"
-        className={cn('w-full', 'overflow-hidden', 'rounded-lg border bg-background/40')}
         role="group"
+        className={cn('w-full', 'overflow-hidden', 'rounded-lg border bg-background/40')}
       >
         <div className="flex h-12 w-full items-stretch">
           {segments.map((segment) => {
@@ -132,30 +132,30 @@ export const WalletBar: React.FC<Props> = ({ className }) => {
 
             return (
               <div
-                key={segment.key}
                 aria-label={`${segment.account.displayName}, ${segment.percent.toFixed(2)} percent`}
+                role="img"
+                style={{ flex: `0 0 ${segment.percent}%` }}
                 className={cn(
                   'relative h-full min-w-0',
                   // type boundary divider (does not consume width)
                   segment.isTypeBoundary && 'border-l border-border/70',
                 )}
-                role="img"
-                style={{ flex: `0 0 ${segment.percent}%` }}
+                key={segment.key}
               >
                 <ResponsiveTooltip
-                  content={tooltipContent}
-                  contentClassName="max-w-[22rem]"
                   desktopComponent="hovercard"
                   openDelay={150}
+                  content={tooltipContent}
+                  contentClassName="max-w-[22rem]"
                   triggerClassName="block h-full w-full"
                 >
                   <span
+                    style={{ backgroundColor: segment.account.color }}
                     className={cn(
                       'block h-full w-full',
                       'transition-[filter,outline-color] duration-150',
                       'outline outline-1 outline-transparent hover:outline-foreground/15',
                     )}
-                    style={{ backgroundColor: segment.account.color }}
                   />
                 </ResponsiveTooltip>
 

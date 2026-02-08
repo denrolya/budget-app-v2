@@ -68,17 +68,17 @@ const Marker = ({ account, size }: { account: Account; size: 'sm' | 'md' | 'lg' 
 
   return (
     <span
-      className={cn(
-        'inline-block shrink-0 flex-none align-middle',
-        sizeMap[size].marker,
-        shape !== 'diamond' && (shape === 'circle' ? 'rounded-full' : 'rounded-[0.2rem]'),
-      )}
       aria-hidden="true"
       style={{
         clipPath: shape === 'diamond' ? 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' : undefined,
         backgroundColor: isHollow ? 'transparent' : color,
         boxShadow: `inset 0 0 0 1px ${color}`,
       }}
+      className={cn(
+        'inline-block shrink-0 flex-none align-middle',
+        sizeMap[size].marker,
+        shape !== 'diamond' && (shape === 'circle' ? 'rounded-full' : 'rounded-[0.2rem]'),
+      )}
     />
   );
 };
@@ -149,14 +149,14 @@ export const AccountPill: React.FC<AccountPillProps> = ({
 
   const inlineNode = (
     <span
+      aria-label={ariaLabel}
+      role="note"
+      title={ariaLabel}
       className={cn(
         'inline-flex items-center gap-2 min-w-0 max-w-full align-middle',
         isArchived && 'opacity-70',
         className,
       )}
-      role="note"
-      aria-label={ariaLabel}
-      title={ariaLabel}
     >
       {content}
     </span>
@@ -164,14 +164,10 @@ export const AccountPill: React.FC<AccountPillProps> = ({
 
   const pillNode = (
     <Badge
+      aria-label={ariaLabel}
+      role="note"
+      title={ariaLabel}
       variant="outline"
-      className={cn(
-        'inline-flex items-center gap-2 min-w-0 max-w-full',
-        'border-border',
-        sizeMap[size].badge,
-        isArchived && 'opacity-70',
-        className,
-      )}
       style={
         isFilled
           ? {
@@ -181,9 +177,13 @@ export const AccountPill: React.FC<AccountPillProps> = ({
           }
           : undefined
       }
-      role="note"
-      aria-label={ariaLabel}
-      title={ariaLabel}
+      className={cn(
+        'inline-flex items-center gap-2 min-w-0 max-w-full',
+        'border-border',
+        sizeMap[size].badge,
+        isArchived && 'opacity-70',
+        className,
+      )}
     >
       {content}
     </Badge>
@@ -196,10 +196,10 @@ export const AccountPill: React.FC<AccountPillProps> = ({
   return (
     <ResponsiveTooltip
       desktopComponent="hovercard"
-      triggerClassName="cursor-help flex items-center"
-      contentClassName="p-2 rounded-lg"
       openDelay={0}
       content={<AccountDetailsHoverCard account={resolvedAccount} />}
+      contentClassName="p-2 rounded-lg"
+      triggerClassName="cursor-help flex items-center"
     >
       <span className="inline-flex max-w-full">{node}</span>
     </ResponsiveTooltip>

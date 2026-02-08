@@ -86,13 +86,13 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
       <div className="space-y-2">
         <Label htmlFor="date-range">Date Range</Label>
         <DaterangePickerWithPresets
-          id="date-range"
           after={data.after || moment().startOf('month')}
           before={data.before || moment().endOf('month')}
-          onChange={handleTimeframeChange}
+          id="date-range"
           presets={datePresets}
+          onChange={handleTimeframeChange}
         >
-          <Button id="date-range" variant="outline" size="sm" className="h-9 text-sm w-full justify-start">
+          <Button id="date-range" size="sm" variant="outline" className="h-9 text-sm w-full justify-start">
             <CalendarIcon className="mr-2 h-4 w-4" />
             <span>
               {data.after &&
@@ -109,11 +109,11 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
       <div className="space-y-2">
         <Label htmlFor="accounts">Accounts</Label>
         <AccountTypeahead
-          id="accounts"
           multiple
+          id="accounts"
           value={data.accounts}
-          onChange={(accounts) => onChange('accounts', accounts)}
           className="h-9 w-full"
+          onChange={(accounts) => onChange('accounts', accounts)}
         />
       </div>
 
@@ -124,26 +124,26 @@ const Content: React.FC<ListFiltersProps> = ({ data, onChange, onReset }) => {
         </Label>
         <div className="flex items-center space-x-2">
           <Input
-            type="number"
             id="min-amount"
-            value={localAmountRange[0] === undefined ? '' : localAmountRange[0]}
-            onChange={handleMinAmountChange}
-            className="w-full"
             placeholder="Min"
+            type="number"
+            value={localAmountRange[0] === undefined ? '' : localAmountRange[0]}
+            className="w-full"
+            onChange={handleMinAmountChange}
           />
           <span className="text-sm">to</span>
           <Input
-            type="number"
             id="max-amount"
-            value={localAmountRange[1] === undefined ? '' : localAmountRange[1]}
-            onChange={handleMaxAmountChange}
-            className="w-full"
             placeholder="Max"
+            type="number"
+            value={localAmountRange[1] === undefined ? '' : localAmountRange[1]}
+            className="w-full"
+            onChange={handleMaxAmountChange}
           />
         </div>
       </div>
 
-      <Button onClick={onReset} variant="outline" className="w-full">
+      <Button variant="outline" className="w-full" onClick={onReset}>
         Reset Filters
       </Button>
     </div>

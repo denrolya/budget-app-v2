@@ -188,7 +188,7 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
                 isCompactTable={isCompactTable}
                 isLoading={isLoading}
                 isReversedOrder={isReversedOrder}
-                setActiveView={setActiveView} // must be (v: 'table' | 'list') => void in ListingControls types
+                setActiveView={setActiveView}
                 setFilter={setFilter}
                 setIsCompactTable={setIsCompactTable}
                 setIsReversedOrder={setIsReversedOrder}

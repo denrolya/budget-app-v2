@@ -84,7 +84,7 @@ export const TransactionValue: React.FC<Props> = ({
 
   // Wrap with badge if required.
   let displayedContent = badge ? (
-    <Badge className="text-xs tracking-tight" variant={transaction.isIncome() ? 'success' : 'destructive'}>
+    <Badge variant={transaction.isIncome() ? 'success' : 'destructive'} className="text-xs tracking-tight">
       {content}
     </Badge>
   ) : (

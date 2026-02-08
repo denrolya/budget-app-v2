@@ -66,10 +66,10 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({
     const incomePercentage = totalIncome && totalIncome.value !== 0 ? (entry.value / totalIncome.value) * 100 : 0;
 
     return (
-      <div key={entry.name} className="flex justify-between items-center text-xs" style={{ color: entry.color }}>
+      <div style={{ color: entry.color }} className="flex justify-between items-center text-xs" key={entry.name}>
         <span className="font-medium truncate mr-2">{entry.name}</span>
         <div className="text-right flex items-center">
-          <MoneyValue className="font-mono font-medium" useColors={false} amount={entry.value} />
+          <MoneyValue amount={entry.value} useColors={false} className="font-mono font-medium" />
           {showComparison && (
             <div className="flex flex-col ml-1">
               {totalExpense && totalExpense.value !== 0 && (
@@ -77,8 +77,8 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({
                   <span className="min-w-[30px] text-right">{expensePercentage.toFixed(0)}%</span>
                   <div className="ml-1 w-8 bg-gray-200 rounded-full h-1 overflow-hidden">
                     <div
-                      className="bg-destructive rounded-full h-1"
                       style={{ width: `${Math.min(expensePercentage, 100)}%` }}
+                      className="bg-destructive rounded-full h-1"
                     ></div>
                   </div>
                 </div>
@@ -88,8 +88,8 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({
                   <span className="min-w-[30px] text-right">{incomePercentage.toFixed(0)}%</span>
                   <div className="ml-1 w-8 bg-gray-200 rounded-full h-1 overflow-hidden">
                     <div
-                      className="bg-success rounded-full h-1"
                       style={{ width: `${Math.min(incomePercentage, 100)}%` }}
+                      className="bg-success rounded-full h-1"
                     ></div>
                   </div>
                 </div>
@@ -121,15 +121,15 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({
             <Separator className="my-1" />
             <div className="text-xs">
               {totalExpense && (
-                <div className="flex justify-between items-center" style={{ color: totalExpense.color }}>
+                <div style={{ color: totalExpense.color }} className="flex justify-between items-center">
                   <span className="font-medium">Expenses:</span>
-                  <MoneyValue className="font-mono font-medium" useColors={false} amount={totalExpense.value} />
+                  <MoneyValue amount={totalExpense.value} useColors={false} className="font-mono font-medium" />
                 </div>
               )}
               {totalIncome && (
-                <div className="flex justify-between items-center" style={{ color: totalIncome.color }}>
+                <div style={{ color: totalIncome.color }} className="flex justify-between items-center">
                   <span className="font-medium">Income:</span>
-                  <MoneyValue className="font-mono font-medium" useColors={false} amount={totalIncome.value} />
+                  <MoneyValue amount={totalIncome.value} useColors={false} className="font-mono font-medium" />
                 </div>
               )}
               {showComparison && totalComparison !== null && (
@@ -139,8 +139,8 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({
                     <span className="mr-1">{(totalComparison * 100).toFixed(0)}%</span>
                     <div className="w-12 bg-gray-200 rounded-full h-1.5 overflow-hidden">
                       <div
-                        className={cn('rounded-full h-1.5', getComparisonColor(totalComparison))}
                         style={{ width: `${Math.min(totalComparison * 100, 100)}%` }}
+                        className={cn('rounded-full h-1.5', getComparisonColor(totalComparison))}
                       ></div>
                     </div>
                   </div>

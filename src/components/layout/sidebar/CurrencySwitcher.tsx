@@ -77,14 +77,14 @@ const CurrencySwitcher = () => {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             align="start"
             side={isMobile ? 'bottom' : 'right'}
             sideOffset={4}
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
           >
             <DropdownMenuLabel className="text-xs text-muted-foreground">Currency</DropdownMenuLabel>
             {fiatCurrencies.map((currency) => (
-              <DropdownMenuItem key={currency.code} onClick={() => handleChange(currency)} className="gap-2 p-2">
+              <DropdownMenuItem className="gap-2 p-2" key={currency.code} onClick={() => handleChange(currency)}>
                 <div className="flex size-6 items-center justify-center rounded-sm border">
                   {renderCurrencyIcon(currency)}
                 </div>

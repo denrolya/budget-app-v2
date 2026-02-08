@@ -1,4 +1,11 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import cn from 'classnames';
+import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import * as z from 'zod';
+
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -6,15 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
 import { Type as TransactionType } from '@/features/transactions';
-
 import { StatisticsConfig } from '@/types/statistics';
-import { zodResolver } from '@hookform/resolvers/zod';
 // @ts-nocheck
-import cn from 'classnames';
-import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
-import React, { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import * as z from 'zod';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -73,8 +73,8 @@ export const ConfigForm: React.FC<Props> = ({ initialConfig, onSubmit }) => {
         />
 
         <FormField
-          name="type"
           control={form.control}
+          name="type"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Type</FormLabel>
@@ -118,8 +118,8 @@ export const ConfigForm: React.FC<Props> = ({ initialConfig, onSubmit }) => {
               <CategoryTypeahead
                 {...field}
                 multiple
-                valueField="name"
                 type={form.watch('type')}
+                valueField="name"
                 className={cn('w-full justify-between', {
                   'text-muted-foreground': !field.value,
                 })}
@@ -152,31 +152,31 @@ export const ConfigForm: React.FC<Props> = ({ initialConfig, onSubmit }) => {
           <FormLabel>Interval</FormLabel>
           <div className="flex">
             <Controller
-              name="interval.value"
               control={form.control}
+              name="interval.value"
               render={({ field }) => (
                 <FormControl>
                   <Input
                     type="number"
                     {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value))}
                     className="rounded-r-none"
+                    onChange={(e) => field.onChange(parseInt(e.target.value))}
                   />
                 </FormControl>
               )}
             />
             <Controller
-              name="interval.unit"
               control={form.control}
+              name="interval.unit"
               render={({ field }) => (
                 <FormControl>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select defaultValue={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="rounded-l-none border-l-0 min-w-[120px]">
                       <SelectValue placeholder="Unit" />
                     </SelectTrigger>
                     <SelectContent>
                       {(['day', 'week', 'month', 'quarter', 'year'] as const).map((unit) => (
-                        <SelectItem key={unit} value={unit}>
+                        <SelectItem value={unit} key={unit}>
                           {unit}(s)
                         </SelectItem>
                       ))}
@@ -204,31 +204,31 @@ export const ConfigForm: React.FC<Props> = ({ initialConfig, onSubmit }) => {
             <FormLabel>Period</FormLabel>
             <div className="flex">
               <Controller
-                name="period.value"
                 control={form.control}
+                name="period.value"
                 render={({ field }) => (
                   <FormControl>
                     <Input
                       type="number"
                       {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value))}
                       className="rounded-r-none"
+                      onChange={(e) => field.onChange(parseInt(e.target.value))}
                     />
                   </FormControl>
                 )}
               />
               <Controller
-                name="period.unit"
                 control={form.control}
+                name="period.unit"
                 render={({ field }) => (
                   <FormControl>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select defaultValue={field.value} onValueChange={field.onChange}>
                       <SelectTrigger className="rounded-l-none border-l-0 min-w-[120px]">
                         <SelectValue placeholder="Unit" />
                       </SelectTrigger>
                       <SelectContent>
                         {(['day', 'week', 'month', 'quarter', 'year'] as const).map((unit) => (
-                          <SelectItem key={unit} value={unit}>
+                          <SelectItem value={unit} key={unit}>
                             {unit}(s)
                           </SelectItem>
                         ))}
@@ -249,7 +249,7 @@ export const ConfigForm: React.FC<Props> = ({ initialConfig, onSubmit }) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Comparison Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select defaultValue={field.value} onValueChange={field.onChange}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select comparison type" />
@@ -271,7 +271,7 @@ export const ConfigForm: React.FC<Props> = ({ initialConfig, onSubmit }) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Statistic Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select defaultValue={field.value} onValueChange={field.onChange}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select statistic type" />

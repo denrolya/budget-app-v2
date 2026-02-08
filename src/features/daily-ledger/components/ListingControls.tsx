@@ -1,6 +1,7 @@
+import debounce from 'lodash/debounce';
 import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, FileText, Layers, RotateCcw } from 'lucide-react';
 import { Moment } from 'moment';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
@@ -21,17 +22,22 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { Timeframe } from '@/types/global';
 
-type CombinedFilters = TransactionFilters & TransferFilters;
+type CombinedFilters =
+  TransactionFilters &
+  TransferFilters & {
+  after: Moment;
+  before: Moment;
+};
 
-interface ListingControlsProps {
+interface Props {
   isLoading?: boolean;
   transactionFilters: TransactionFilters;
   transferFilters: TransferFilters;
-  setFilter: (type: keyof CombinedFilters, value: any) => void;
+  setFilter: <K extends keyof CombinedFilters>(key: K, value: CombinedFilters[K]) => void;
   setShowTransactions: (value: boolean) => void;
   setShowTransfers: (value: boolean) => void;
   timeframe: { after: Moment; before: Moment };
-  setTimeframe: (range: { after: Moment; before: Moment } | null) => void;
+  setTimeframe: (range: { after: Moment; before: Moment }) => void;
   activeView: 'table' | 'list';
   isReversedOrder: boolean;
   setIsReversedOrder: (value: boolean) => void;
@@ -66,28 +72,28 @@ const toCurrencyCodes = (value: unknown): CURRENCY_CODE[] => {
   return [];
 };
 
-export const ListingControls: React.FC<ListingControlsProps> = ({
-                                                                  isLoading,
-                                                                  transactionFilters,
-                                                                  transferFilters,
-                                                                  setFilter,
-                                                                  setShowTransactions,
-                                                                  setShowTransfers,
-                                                                  timeframe,
-                                                                  setTimeframe,
-                                                                  activeView,
-                                                                  isReversedOrder,
-                                                                  setIsReversedOrder,
-                                                                  handleResetFilters,
-                                                                  onFiltersDialogToggle,
-                                                                  isCompactTable,
-                                                                  showTransfers,
-                                                                  setActiveView,
-                                                                  setIsCompactTable,
-                                                                  showTransactions,
-                                                                  setShowEmptyDays,
-                                                                  showEmptyDays,
-                                                                }) => {
+export const ListingControls: React.FC<Props> = ({
+                                                   isLoading,
+                                                   transactionFilters,
+                                                   transferFilters,
+                                                   setFilter,
+                                                   setShowTransactions,
+                                                   setShowTransfers,
+                                                   timeframe,
+                                                   setTimeframe,
+                                                   activeView,
+                                                   isReversedOrder,
+                                                   setIsReversedOrder,
+                                                   handleResetFilters,
+                                                   onFiltersDialogToggle,
+                                                   isCompactTable,
+                                                   showTransfers,
+                                                   setActiveView,
+                                                   setIsCompactTable,
+                                                   showTransactions,
+                                                   setShowEmptyDays,
+                                                   showEmptyDays,
+                                                 }) => {
   const isMobile = useIsMobile();
 
   const accountsValue = useMemo(() => {
@@ -160,6 +166,58 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
 
   const canReset = Boolean(transactionFilters.activeCount) && !isLoading;
 
+  // -----------------------------
+  // Amount range: local + debounced commit (keeps query params updating)
+  // -----------------------------
+  const [minLocal, setMinLocal] = useState('');
+  const [maxLocal, setMaxLocal] = useState('');
+
+  // sync external -> local (reset / initial load / back-forward navigation)
+  useEffect(() => {
+    const [extMin, extMax] = transactionFilters.amountRange ?? [];
+    const nextMin = extMin != null ? String(extMin) : '';
+    const nextMax = extMax != null ? String(extMax) : '';
+
+    // avoid caret jumps / redundant updates
+    setMinLocal((p) => (p === nextMin ? p : nextMin));
+    setMaxLocal((p) => (p === nextMax ? p : nextMax));
+  }, [transactionFilters.amountRange]);
+
+  const debouncedCommitAmountRange = useMemo(
+    () =>
+      debounce((minStr: string, maxStr: string) => {
+        const minRaw = minStr.trim();
+        const maxRaw = maxStr.trim();
+
+        const minParsed = minRaw === '' ? undefined : Number(minRaw);
+        const maxParsed = maxRaw === '' ? undefined : Number(maxRaw);
+
+        const min = Number.isFinite(minParsed as number) ? (minParsed as number) : undefined;
+        const max = Number.isFinite(maxParsed as number) ? (maxParsed as number) : undefined;
+
+        setFilter('amountRange', [min, max] as any);
+      }, 350),
+    [setFilter],
+  );
+
+  useEffect(() => () => debouncedCommitAmountRange.cancel(), [debouncedCommitAmountRange]);
+
+  const onMinChange = useCallback(
+    (v: string) => {
+      setMinLocal(v);
+      debouncedCommitAmountRange(v, maxLocal);
+    },
+    [debouncedCommitAmountRange, maxLocal],
+  );
+
+  const onMaxChange = useCallback(
+    (v: string) => {
+      setMaxLocal(v);
+      debouncedCommitAmountRange(minLocal, v);
+    },
+    [debouncedCommitAmountRange, minLocal],
+  );
+
   return (
     <div className="border-b bg-muted/30 supports-[backdrop-filter]:bg-muted/30">
       <div
@@ -178,7 +236,8 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
                 size="sm"
                 type="button"
                 variant="outline"
-                className={cn(H, 'bg-background px-2')}>
+                className={cn(H, 'bg-background px-2')}
+              >
                 <CalendarIcon aria-hidden="true" className="mr-1.5 h-4 w-4" />
                 <span className={DATE_TEXT}>{dateLabel}</span>
               </Button>
@@ -325,29 +384,21 @@ export const ListingControls: React.FC<ListingControlsProps> = ({
           <div aria-label="Amount range" role="group" className="flex items-center gap-1.5">
             <Input
               aria-label="Minimum amount"
+              inputMode="decimal"
               placeholder="Min"
               type="number"
-              value={transactionFilters.amountRange[0] ?? ''}
+              value={minLocal}
               className={cn(H, AMOUNT_W, 'bg-background')}
-              onChange={(e) =>
-                setFilter('amountRange', [
-                  e.target.value === '' ? undefined : Number(e.target.value),
-                  transactionFilters.amountRange[1],
-                ])
-              }
+              onChange={(e) => onMinChange(e.target.value)}
             />
             <Input
               aria-label="Maximum amount"
+              inputMode="decimal"
               placeholder="Max"
               type="number"
-              value={transactionFilters.amountRange[1] ?? ''}
+              value={maxLocal}
               className={cn(H, AMOUNT_W, 'bg-background')}
-              onChange={(e) =>
-                setFilter('amountRange', [
-                  transactionFilters.amountRange[0],
-                  e.target.value === '' ? undefined : Number(e.target.value),
-                ])
-              }
+              onChange={(e) => onMaxChange(e.target.value)}
             />
           </div>
 

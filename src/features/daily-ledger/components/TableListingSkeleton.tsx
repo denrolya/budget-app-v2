@@ -44,7 +44,7 @@ export const TableListingSkeleton: React.FC<Props> = ({
   }, [dates, showEmptyDays]);
 
   return (
-    <div className="overflow-x-auto" role="status" aria-label="Loading transactions and transfers table">
+    <div aria-label="Loading transactions and transfers table" role="status" className="overflow-x-auto">
       <Table className="w-full">
         <TableHeader className="sr-only">
           <TableRow>
@@ -69,9 +69,9 @@ export const TableListingSkeleton: React.FC<Props> = ({
                     <RelativeDatetimeDisplay
                       showDayBadge
                       badgeSize="sm"
-                      variant="default"
+                      date={date}
                       showTime={false}
-                      date={date} />
+                      variant="default" />
                     <div className="flex items-center gap-3 font-normal">
                       <Skeleton className="h-6 w-28 sm:w-32" />
                       <Skeleton className="h-6 w-28 sm:w-32" />
@@ -87,13 +87,13 @@ export const TableListingSkeleton: React.FC<Props> = ({
 
                 return isTransfer ? (
                   <TransferListingRowSkeleton
-                    key={`${date.format(BACKEND_DATE_FORMAT)}-tr-${index}`}
                     compact={compact}
+                    key={`${date.format(BACKEND_DATE_FORMAT)}-tr-${index}`}
                   />
                 ) : (
                   <TransactionListingRowSkeleton
-                    key={`${date.format(BACKEND_DATE_FORMAT)}-tx-${index}`}
                     compact={compact}
+                    key={`${date.format(BACKEND_DATE_FORMAT)}-tx-${index}`}
                   />
                 );
               })}

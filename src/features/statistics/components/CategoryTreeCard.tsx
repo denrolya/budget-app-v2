@@ -104,18 +104,18 @@ export const CategoryTreeCardSkeleton = () => (
         <div className="h-8 w-48 bg-muted rounded"></div>
       </CardTitle>
       <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-        <Button variant="outline" className="w-full sm:w-[280px] justify-start text-left font-normal" disabled>
+        <Button disabled variant="outline" className="w-full sm:w-[280px] justify-start text-left font-normal">
           <CalendarIcon className="mr-2 h-4 w-4" />
           <div className="h-4 w-32 bg-muted rounded"></div>
         </Button>
         <div className="flex space-x-2">
-          <Button variant="outline" size="icon" disabled>
+          <Button disabled size="icon" variant="outline">
             <RadarIcon className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" disabled>
+          <Button disabled size="icon" variant="outline">
             <BarChartIcon className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" disabled>
+          <Button disabled size="icon" variant="outline">
             <PieChartIcon className="h-4 w-4" />
           </Button>
         </div>
@@ -126,7 +126,7 @@ export const CategoryTreeCardSkeleton = () => (
         <nav aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center space-x-2">
             {[1, 2].map((_, index) => (
-              <li key={index} className="flex items-center">
+              <li className="flex items-center" key={index}>
                 {index > 0 && <div className="h-4 w-4 mx-2 bg-muted rounded"></div>}
                 <div className="h-4 w-20 bg-muted rounded"></div>
               </li>
@@ -143,7 +143,7 @@ export const CategoryTreeCardSkeleton = () => (
           <div className="h-[calc(100%-2rem)] pr-4 overflow-hidden">
             <div className="space-y-2">
               {[1, 2, 3, 4, 5].map((_, index) => (
-                <div key={index} className="flex items-center justify-between py-2 px-3 bg-muted/50 rounded-md">
+                <div className="flex items-center justify-between py-2 px-3 bg-muted/50 rounded-md" key={index}>
                   <div className="flex items-center space-x-3 flex-grow">
                     <div className="w-4 h-4 rounded-full bg-muted/70"></div>
                     <div className="flex-grow min-w-0">
@@ -220,18 +220,18 @@ export const CategoryTreeCard = () => {
     switch (chartType) {
       case 'radar':
         return (
-          <ResponsiveContainer width="100%" height={300}>
-            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
+          <ResponsiveContainer height={300} width="100%">
+            <RadarChart cx="50%" cy="50%" data={chartData} outerRadius="70%">
               <PolarGrid />
               <PolarAngleAxis dataKey="name" />
               <PolarRadiusAxis />
-              <Radar name="Current Period" dataKey="currentPeriod" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+              <Radar dataKey="currentPeriod" fill="#8884d8" fillOpacity={0.6} name="Current Period" stroke="#8884d8" />
               <Radar
-                name="Previous Period"
                 dataKey="previousPeriod"
-                stroke="#82ca9d"
                 fill="#82ca9d"
                 fillOpacity={0.6}
+                name="Previous Period"
+                stroke="#82ca9d"
               />
               <Tooltip content={<CustomTooltip />} />
             </RadarChart>
@@ -239,47 +239,47 @@ export const CategoryTreeCard = () => {
         );
       case 'bar':
         return (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer height={300} width="100%">
             <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="currentPeriod" name="Current Period" fill="#8884d8" />
-              <Bar dataKey="previousPeriod" name="Previous Period" fill="#82ca9d" />
+              <Bar dataKey="currentPeriod" fill="#8884d8" name="Current Period" />
+              <Bar dataKey="previousPeriod" fill="#82ca9d" name="Previous Period" />
             </BarChart>
           </ResponsiveContainer>
         );
       case 'doughnut':
         return (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer height={300} width="100%">
             <PieChart>
               <Pie
-                data={chartData}
                 cx="50%"
                 cy="50%"
+                data={chartData}
+                dataKey="currentPeriod"
+                fill="#8884d8"
                 innerRadius={60}
                 outerRadius={80}
-                fill="#8884d8"
                 paddingAngle={5}
-                dataKey="currentPeriod"
               >
                 {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell fill={COLORS[index % COLORS.length]} key={`cell-${index}`} />
                 ))}
               </Pie>
               <Pie
-                data={chartData}
                 cx="50%"
                 cy="50%"
+                data={chartData}
+                dataKey="previousPeriod"
+                fill="#82ca9d"
                 innerRadius={40}
                 outerRadius={55}
-                fill="#82ca9d"
                 paddingAngle={5}
-                dataKey="previousPeriod"
               >
                 {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell fill={COLORS[index % COLORS.length]} key={`cell-${index}`} />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
@@ -314,31 +314,31 @@ export const CategoryTreeCard = () => {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
-              <Calendar mode="range" selected={dateRange} onSelect={handleDateRangeChange} initialFocus />
+              <Calendar initialFocus mode="range" selected={dateRange} onSelect={handleDateRangeChange} />
             </PopoverContent>
           </Popover>
           <div className="flex space-x-2">
             <Button
-              variant={chartType === 'radar' ? 'default' : 'outline'}
-              size="icon"
-              onClick={() => setChartType('radar')}
               aria-label="Radar Chart"
+              size="icon"
+              variant={chartType === 'radar' ? 'default' : 'outline'}
+              onClick={() => setChartType('radar')}
             >
               <RadarIcon className="h-4 w-4" />
             </Button>
             <Button
-              variant={chartType === 'bar' ? 'default' : 'outline'}
-              size="icon"
-              onClick={() => setChartType('bar')}
               aria-label="Bar Chart"
+              size="icon"
+              variant={chartType === 'bar' ? 'default' : 'outline'}
+              onClick={() => setChartType('bar')}
             >
               <BarChartIcon className="h-4 w-4" />
             </Button>
             <Button
-              variant={chartType === 'doughnut' ? 'default' : 'outline'}
-              size="icon"
-              onClick={() => setChartType('doughnut')}
               aria-label="Doughnut Chart"
+              size="icon"
+              variant={chartType === 'doughnut' ? 'default' : 'outline'}
+              onClick={() => setChartType('doughnut')}
             >
               <PieChartIcon className="h-4 w-4" />
             </Button>
@@ -350,12 +350,12 @@ export const CategoryTreeCard = () => {
           <nav aria-label="Breadcrumb">
             <ol className="flex flex-wrap items-center space-x-2">
               {categoryPath.map((category, index) => (
-                <li key={index} className="flex items-center">
+                <li className="flex items-center" key={index}>
                   {index > 0 && <ChevronRightIcon className="h-4 w-4 mx-2 text-muted-foreground" />}
                   <Button
                     variant="link"
-                    onClick={() => handleBreadcrumbClick(index)}
                     className={`p-0 h-auto ${index === categoryPath.length - 1 ? 'font-semibold' : ''}`}
+                    onClick={() => handleBreadcrumbClick(index)}
                   >
                     {category.name}
                   </Button>
@@ -374,13 +374,13 @@ export const CategoryTreeCard = () => {
                   const percentChange = ((diff / category.previousPeriod) * 100).toFixed(1);
                   return (
                     <div
-                      key={category.name}
                       className="flex items-center justify-between py-2 px-3 bg-muted rounded-md hover:bg-muted/80 transition-colors"
+                      key={category.name}
                     >
                       <div className="flex items-center space-x-3 flex-grow">
                         <div
-                          className="w-4 h-4 rounded-full flex-shrink-0"
                           style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                          className="w-4 h-4 rounded-full flex-shrink-0"
                         ></div>
                         <div className="flex-grow min-w-0">
                           <h5 className="font-medium text-sm truncate">{category.name}</h5>
@@ -400,15 +400,15 @@ export const CategoryTreeCard = () => {
                         </div>
                       </div>
                       <Button
-                        variant="ghost"
                         size="sm"
+                        variant="ghost"
+                        className="ml-2 text-xs"
                         onClick={() => {
                           const fullCategory = currentCategory.children?.find((cat) => cat.name === category.name);
                           if (fullCategory) {
                             handleCategoryClick(fullCategory);
                           }
                         }}
-                        className="ml-2 text-xs"
                       >
                         Details
                       </Button>

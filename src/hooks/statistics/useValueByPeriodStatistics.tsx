@@ -69,7 +69,7 @@ const calculateStatisticsValues = <T extends StatisticsType>(
 
 export const useValueByPeriod = <T extends StatisticsType>(
   { config, after, before }: ValueByPeriodParams & { config: { statType: T } },
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   _dependencies: any[] = [],
   queryKey: string = 'value-by-period',
 ): UseValueByPeriodReturn<T> => {

@@ -15,6 +15,7 @@ export interface CategoryDTO {
   icon: string;
   isAffectingProfit: boolean;
   isTechnical: boolean;
+  isFixed: boolean;
   tags: CategoryTagDTO[];
 }
 

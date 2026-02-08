@@ -1,3 +1,8 @@
+import { ResponsiveLine } from '@nivo/line';
+import isEqual from 'lodash/isEqual';
+import { SettingsIcon } from 'lucide-react';
+import React, { memo, useMemo, useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,10 +17,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { generateSlug } from '@/lib/url/generateSlug';
 import { Interval, StatisticsConfig, StatisticsType } from '@/types/statistics';
 import { PercentageChange, StatisticsData, ValueByPeriodData } from '@/types/valueByPeriodStatistics';
-import { ResponsiveLine } from '@nivo/line';
-import isEqual from 'lodash/isEqual';
-import { SettingsIcon } from 'lucide-react';
-import React, { memo, useMemo, useState } from 'react';
 
 interface Props {
   onChange: (newConfig: Partial<StatisticsConfig>) => void;

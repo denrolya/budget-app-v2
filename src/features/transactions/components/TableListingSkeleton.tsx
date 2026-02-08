@@ -20,7 +20,7 @@ const DEFAULT_GROUPS = 2;
 const cellPad = (compact?: boolean) => (compact ? 'p-0' : undefined);
 
 export const ListingRowSkeleton: React.FC<ListingRowSkeletonProps> = ({ compact = true, className }) => (
-  <TableRow className={cn('text-xs hover:bg-transparent', className)} aria-hidden="true">
+  <TableRow aria-hidden="true" className={cn('text-xs hover:bg-transparent', className)}>
     {/* gutter */}
     <TableCell className={cn('w-4', cellPad(compact))} />
 
@@ -107,9 +107,9 @@ export const TransactionsTableListingSkeleton: React.FC<TableListingSkeletonProp
             <GroupHeaderSkeleton compact={compact} />
             {Array.from({ length: rowsPerGroup }).map((__, rowIndex) => (
               <ListingRowSkeleton
-                key={`${groupIndex}-${rowIndex}`}
                 compact={compact}
                 className={className}
+                key={`${groupIndex}-${rowIndex}`}
               />
             ))}
           </React.Fragment>

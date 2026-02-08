@@ -99,27 +99,27 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, onReset, isLo
   return (
     <div className="border-b bg-muted/30 supports-[backdrop-filter]:bg-muted/30">
       <div
-        role="toolbar"
         aria-label="Transfer filters"
+        role="toolbar"
         className="flex flex-wrap items-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2"
       >
         {/* DATE */}
         <div className="flex items-center gap-1.5">
-          <div role="group" aria-label="Date range" className="flex items-center">
+          <div aria-label="Date range" role="group" className="flex items-center">
             <DaterangePickerWithPresets
               after={data.after || moment().startOf('month')}
               before={data.before || moment().endOf('month')}
-              onChange={handleTimeframeChange}
               presets={DATE_PRESETS}
+              onChange={handleTimeframeChange}
             >
               <Button
+                aria-label="Select date range"
+                size="sm"
                 type="button"
                 variant="outline"
-                size="sm"
                 className={cn(H, 'bg-background px-2')}
-                aria-label="Select date range"
               >
-                <CalendarIcon className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                <CalendarIcon aria-hidden="true" className="mr-1.5 h-4 w-4" />
                 <span className={DATE_TEXT}>{dateLabel}</span>
               </Button>
             </DaterangePickerWithPresets>
@@ -130,14 +130,14 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, onReset, isLo
 
         {/* ACCOUNTS */}
         <div className="flex items-center gap-1.5">
-          <div className={cn('flex items-center', TYPEAHEAD_W)} role="group" aria-label="Accounts filter">
+          <div aria-label="Accounts filter" role="group" className={cn('flex items-center', TYPEAHEAD_W)}>
             <AccountTypeahead
               multiple
-              value={data.accounts}
-              onChange={(accounts) => onChange('accounts', accounts)}
-              placeholder="Accounts"
-              className="w-full"
               aria-label="Filter by accounts"
+              placeholder="Accounts"
+              value={data.accounts}
+              className="w-full"
+              onChange={(accounts) => onChange('accounts', accounts)}
             />
           </div>
         </div>
@@ -146,24 +146,24 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, onReset, isLo
 
         {/* AMOUNT */}
         <div className="flex items-center gap-1.5">
-          <div role="group" aria-label="Amount range" className="flex items-center gap-1.5">
+          <div aria-label="Amount range" role="group" className="flex items-center gap-1.5">
             <Input
+              aria-label="Minimum amount"
+              inputMode="numeric"
+              placeholder="Min"
               type="number"
               value={localAmountRange[0] ?? ''}
-              onChange={handleMinAmountChange}
               className={cn(H, AMOUNT_W, 'bg-background')}
-              placeholder="Min"
-              inputMode="numeric"
-              aria-label="Minimum amount"
+              onChange={handleMinAmountChange}
             />
             <Input
+              aria-label="Maximum amount"
+              inputMode="numeric"
+              placeholder="Max"
               type="number"
               value={localAmountRange[1] ?? ''}
-              onChange={handleMaxAmountChange}
               className={cn(H, AMOUNT_W, 'bg-background')}
-              placeholder="Max"
-              inputMode="numeric"
-              aria-label="Maximum amount"
+              onChange={handleMaxAmountChange}
             />
           </div>
         </div>
@@ -172,15 +172,15 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, onReset, isLo
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
+                aria-label="Reset filters"
+                disabled={!canReset}
+                size="icon"
                 type="button"
                 variant="outline"
-                size="icon"
                 className={ICON_BTN}
                 onClick={onReset}
-                disabled={!canReset}
-                aria-label="Reset filters"
               >
-                <RotateCcw className={cn('h-4 w-4', isLoading && 'animate-spin')} aria-hidden="true" />
+                <RotateCcw aria-hidden="true" className={cn('h-4 w-4', isLoading && 'animate-spin')} />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Reset filters</TooltipContent>

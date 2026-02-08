@@ -102,7 +102,7 @@ const SidebarListing: React.FC<Props> = ({ selected, selectedType, setSelectedTy
       <>
         {parts.map((part, i) =>
           part.toLowerCase() === searchTerm.toLowerCase() ? (
-            <span key={i} className="bg-info">
+            <span className="bg-info" key={i}>
               {part}
             </span>
           ) : (
@@ -149,9 +149,9 @@ const SidebarListing: React.FC<Props> = ({ selected, selectedType, setSelectedTy
             >
               <div className="flex items-stretch">
                 <div className="flex-grow flex items-center gap-2 py-2 px-4">
-                  <div className="flex items-center" style={{ width: `${depth * 20}px` }}>
+                  <div style={{ width: `${depth * 20}px` }} className="flex items-center">
                     {Array.from({ length: depth }).map((_, index) => (
-                      <div key={index} className="w-5 h-5" />
+                      <div className="w-5 h-5" key={index} />
                     ))}
                     {depth > 0 && (
                       <div className="w-5 h-5 border-l-2 border-b-2 border-muted-foreground rounded-bl-lg" />
@@ -175,8 +175,8 @@ const SidebarListing: React.FC<Props> = ({ selected, selectedType, setSelectedTy
                 </div>
                 {isMobile && (
                   <Button
-                    variant="ghost"
                     size="sm"
+                    variant="ghost"
                     className="px-2 h-auto flex items-center justify-center"
                     onClick={(e) => handleInfoClick(e, category)}
                   >
@@ -189,9 +189,9 @@ const SidebarListing: React.FC<Props> = ({ selected, selectedType, setSelectedTy
             {category.children && expandedCategories[category.id] && (
               <CategoryTree
                 categories={category.children}
+                depth={depth + 1}
                 expandedCategories={expandedCategories}
                 setExpandedCategories={setExpandedCategories}
-                depth={depth + 1}
               />
             )}
           </React.Fragment>
@@ -215,8 +215,8 @@ const SidebarListing: React.FC<Props> = ({ selected, selectedType, setSelectedTy
             <React.Fragment key={category.id}>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
               <Button
-                variant="ghost"
                 size="sm"
+                variant="ghost"
                 onClick={() => {
                   setCurrentPath((prev) => prev.slice(0, index + 1));
                   onSelect(category);
@@ -230,36 +230,36 @@ const SidebarListing: React.FC<Props> = ({ selected, selectedType, setSelectedTy
       </div>
       <Tabs
         value={selectedType}
+        className="flex flex-col flex-grow overflow-hidden"
         onValueChange={(value) => {
           setSelectedType(value as TransactionType);
           setCurrentPath([]);
           onSelect(null);
         }}
-        className="flex flex-col flex-grow overflow-hidden"
       >
         <TabsList className="grid w-full grid-cols-2 rounded-none">
           <TabsTrigger value="income">Income</TabsTrigger>
           <TabsTrigger value="expense">Expense</TabsTrigger>
         </TabsList>
-        <TabsContent className="flex-grow overflow-hidden m-0 p-0" value={TransactionType.Income}>
+        <TabsContent value={TransactionType.Income} className="flex-grow overflow-hidden m-0 p-0">
           <ScrollArea className="h-full">
             <CategoryTree
+              expandedCategories={expandedCategories}
+              setExpandedCategories={setExpandedCategories}
               categories={
                 currentPath.length > 0 ? currentPath[currentPath.length - 1].children || [] : filteredIncomeCategories
               }
-              expandedCategories={expandedCategories}
-              setExpandedCategories={setExpandedCategories}
             />
           </ScrollArea>
         </TabsContent>
-        <TabsContent className="flex-grow overflow-hidden m-0 p-0" value={TransactionType.Expense}>
+        <TabsContent value={TransactionType.Expense} className="flex-grow overflow-hidden m-0 p-0">
           <ScrollArea className="h-full">
             <CategoryTree
+              expandedCategories={expandedCategories}
+              setExpandedCategories={setExpandedCategories}
               categories={
                 currentPath.length > 0 ? currentPath[currentPath.length - 1].children || [] : filteredExpenseCategories
               }
-              expandedCategories={expandedCategories}
-              setExpandedCategories={setExpandedCategories}
             />
           </ScrollArea>
         </TabsContent>

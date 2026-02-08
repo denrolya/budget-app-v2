@@ -238,7 +238,7 @@ const TableListing: React.FC<Props> = ({
                       renderDetails={(t) => <TransactionDetails transaction={t} />}
                       sheetOpen={openSheetId === transaction.id}
                       transaction={transaction}
-                      className={cn('text-xs')}
+                      className="text-xs"
                       key={`tx-${transaction.id}`}
                       onDelete={(t) => handleDelete(t)}
                       onOpenForm={(t) => openForm(FormType.Transaction, t)}

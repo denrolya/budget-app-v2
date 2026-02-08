@@ -51,10 +51,10 @@ export const EditableCell = ({
     <div className={cn('flex items-center gap-2', className)}>
       <div className="flex-1 min-w-0">{editor}</div>
       <div className="shrink-0 flex items-center">
-        <Button variant="ghost" size="icon" onClick={onSave} className="h-8 w-8 p-0" disabled={disabled}>
+        <Button disabled={disabled} size="icon" variant="ghost" className="h-8 w-8 p-0" onClick={onSave}>
           <Check className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" onClick={onCancel} className="h-8 w-8 p-0" disabled={disabled}>
+        <Button disabled={disabled} size="icon" variant="ghost" className="h-8 w-8 p-0" onClick={onCancel}>
           <X className="h-4 w-4" />
         </Button>
       </div>

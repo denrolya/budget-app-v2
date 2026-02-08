@@ -29,13 +29,13 @@ const FormattedListing: React.FC<Props> = ({ isLoading, isError, error, groupedI
     <div className="md:hidden">
       {isLoading && <ListSkeleton />}
       {!isLoading && groupedItems.length > 0 && <List groupedItems={groupedItems} />}
-      {!isLoading && groupedItems.length === 0 && <EmptyTransferState onRefresh={refetch} onAddTransfer={onAdd} />}
+      {!isLoading && groupedItems.length === 0 && <EmptyTransferState onAddTransfer={onAdd} onRefresh={refetch} />}
     </div>
 
     <div className="hidden md:block">
       {isLoading && <TableListingSkeleton />}
       {!isLoading && groupedItems.length > 0 && <TableListing groupedItems={groupedItems} />}
-      {!isLoading && groupedItems.length === 0 && <EmptyTransferState onRefresh={refetch} onAddTransfer={onAdd} />}
+      {!isLoading && groupedItems.length === 0 && <EmptyTransferState onAddTransfer={onAdd} onRefresh={refetch} />}
     </div>
   </>
 );

@@ -1,6 +1,7 @@
-import MoneyValue from '@/components/common/MoneyValue';
 import { ArrowDownIcon, ArrowRightIcon, ArrowUpIcon } from 'lucide-react';
 import React, { memo, useMemo } from 'react';
+
+import MoneyValue from '@/components/common/MoneyValue';
 
 interface Props {
   currentIncome: number;
@@ -76,10 +77,10 @@ const IncomeExpensesComparison: React.FC<Props> = ({
         <React.Fragment key={label}>
           <div className="text-xs">{label}</div>
           <div className="text-xs font-mono text-right">
-            <MoneyValue useColors={false} showSign={current < 0} amount={current} className="text-xs" />
+            <MoneyValue amount={current} showSign={current < 0} useColors={false} className="text-xs" />
           </div>
           <div className="text-xs font-mono text-right text-muted-foreground">
-            <MoneyValue useColors={false} showSign={previous < 0} amount={previous} className="text-xs" />
+            <MoneyValue amount={previous} showSign={previous < 0} useColors={false} className="text-xs" />
           </div>
           <div className="text-xs font-mono text-right flex items-center justify-end">
             <ChangeIndicator change={change} isExpense={label === 'Expenses'} />

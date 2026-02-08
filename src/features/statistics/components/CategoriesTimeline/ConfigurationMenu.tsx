@@ -71,8 +71,8 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
         <div className="flex flex-wrap gap-2">
           {periodOptions.map((option) => (
             <Button
-              key={option.value}
               variant={selectedPeriod === option.value ? 'default' : 'outline'}
+              key={option.value}
               onClick={() => setSelectedPeriod(option.value)}
             >
               {option.label[0]}
@@ -89,10 +89,10 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
         <CategoryTypeahead
           multiple
           id="categories"
-          valueField="id"
           value={selectedCategories}
-          onChange={(categories) => setSelectedCategories(categories)}
+          valueField="id"
           className="h-9 w-full"
+          onChange={(categories) => setSelectedCategories(categories)}
         />
       </div>
 
@@ -100,16 +100,16 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
         <Label className="text-xs font-medium">Chart Type</Label>
         <div className="flex flex-wrap gap-2">
           <Button
-            className="flex items-center px-2 py-1 space-x-1"
             variant={chartType === 'line' ? 'default' : 'outline'}
+            className="flex items-center px-2 py-1 space-x-1"
             onClick={() => setChartType('line')}
           >
             <LineChart className="h-4 w-4" />
             Line
           </Button>
           <Button
-            className="flex items-center px-2 py-1 space-x-1"
             variant={chartType === 'bar' ? 'default' : 'outline'}
+            className="flex items-center px-2 py-1 space-x-1"
             onClick={() => setChartType('bar')}
           >
             <BarChart className="h-4 w-4" />
@@ -126,9 +126,9 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
             <span>Show Total Expense</span>
           </Label>
           <Switch
+            checked={showExpenseReference}
             id="show-total-expense"
             className="scale-75"
-            checked={showExpenseReference}
             onCheckedChange={() => setShowExpenseReference(!showExpenseReference)}
           />
         </div>
@@ -139,9 +139,9 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
             <span>Show Income Reference</span>
           </Label>
           <Switch
+            checked={showIncomeReference}
             id="show-total-income"
             className="scale-75"
-            checked={showIncomeReference}
             onCheckedChange={() => setShowIncomeReference(!showIncomeReference)}
           />
         </div>
@@ -152,9 +152,9 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
             <span>Show Comparison In Tooltip</span>
           </Label>
           <Switch
+            checked={showComparisonInTooltip}
             id="show-comparison-in-tooltip"
             className="scale-75"
-            checked={showComparisonInTooltip}
             onCheckedChange={() => setShowComparisonInTooltip(!showComparisonInTooltip)}
           />
         </div>
@@ -168,9 +168,9 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
             <span>Fetch Transactions From Subcategories</span>
           </Label>
           <Switch
+            checked={fetchTransactionsFromSubcategories}
             id="fetch-transactions-from-subcategories"
             className="scale-75"
-            checked={fetchTransactionsFromSubcategories}
             onCheckedChange={() => setFetchTransactionsFromSubcategories(!fetchTransactionsFromSubcategories)}
           />
         </div>
@@ -181,9 +181,9 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
             <span>Use separate Y Axis for Totals</span>
           </Label>
           <Switch
+            checked={useSeparateAxisForTotals}
             id="use-separate-axis-for-totals"
             className="scale-75"
-            checked={useSeparateAxisForTotals}
             onCheckedChange={() => setUseSeparateAxisForTotals(!useSeparateAxisForTotals)}
           />
         </div>
@@ -195,7 +195,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-7 w-7 p-0">
+          <Button size="icon" variant="ghost" className="h-7 w-7 p-0">
             <SettingsIcon className="h-4 w-4" />
             <span className="sr-only">Open settings</span>
           </Button>
@@ -210,7 +210,7 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-7 w-7 p-0">
+        <Button size="icon" variant="ghost" className="h-7 w-7 p-0">
           <SettingsIcon className="h-4 w-4" />
         </Button>
       </DrawerTrigger>

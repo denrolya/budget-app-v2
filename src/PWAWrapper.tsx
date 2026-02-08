@@ -38,7 +38,7 @@ const PWAWrapper = ({ children }: { children: React.ReactNode }) => {
       {newVersionAvailable && (
         <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground p-4 rounded-md shadow-lg">
           <p>New version available!</p>
-          <button onClick={reloadPage} className="mt-2 bg-secondary text-secondary-foreground px-4 py-2 rounded">
+          <button className="mt-2 bg-secondary text-secondary-foreground px-4 py-2 rounded" onClick={reloadPage}>
             Update and Reload
           </button>
         </div>

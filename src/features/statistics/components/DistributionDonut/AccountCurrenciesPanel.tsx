@@ -1,11 +1,12 @@
-import MoneyValue from '@/components/common/MoneyValue';
-import { CURRENCIES } from '@/constants/currency';
 
-import AccountPill from '@/features/accounts/components/Pill';
 import type { PieSvgProps } from '@nivo/pie';
 import sortBy from 'lodash/sortBy';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+
+import AccountPill from '@/features/accounts/components/Pill';
+import { CURRENCIES } from '@/constants/currency';
+import MoneyValue from '@/components/common/MoneyValue';
 
 import CardSkeleton from './CardSkeleton';
 import Chart from './Chart';

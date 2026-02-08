@@ -43,10 +43,10 @@ const ChartCard: React.FC<ChartCardProps<T>> = ({
 
       {ConfigurationMenuComponent && (
         <ConfigurationMenuComponent
-          timeframe={timeframe}
           period={period}
-          setTimeframe={setTimeframe}
           setPeriod={setPeriod}
+          setTimeframe={setTimeframe}
+          timeframe={timeframe}
         />
       )}
 
@@ -67,6 +67,6 @@ const ChartCard: React.FC<ChartCardProps<T>> = ({
       )}
     </Card>
   );
-}
+};
 
 export default ChartCard;

@@ -1,13 +1,14 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import IncomeExpensesComparison from '@/features/statistics/components/MoneyFlow/IncomeExpensesComparison';
-import { formatRange } from '@/lib/datetime/formatShortDate';
-import { ISO8601Period } from '@/types/global';
 import moment, { Moment } from 'moment';
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { TooltipProps } from 'recharts';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
+
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import IncomeExpensesComparison from '@/features/statistics/components/MoneyFlow/IncomeExpensesComparison';
+import { formatRange } from '@/lib/datetime/formatShortDate';
+import { ISO8601Period } from '@/types/global';
 
 interface TransformedData {
   timestamp: number;

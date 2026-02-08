@@ -55,16 +55,16 @@ export const Pagination: React.FC<PaginationProps> = ({
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 w-full text-sm">
       <Select
+        disabled={isLoading}
         value={perPage.toString()}
         onValueChange={(value) => onPerPageChange(parseInt(value, 10))}
-        disabled={isLoading}
       >
-        <SelectTrigger className="w-[100px]" aria-label="Items per page">
+        <SelectTrigger aria-label="Items per page" className="w-[100px]">
           <SelectValue placeholder="Per page" />
         </SelectTrigger>
         <SelectContent>
           {[10, 20, 30, 40, 50].map((value) => (
-            <SelectItem key={value} value={value.toString()}>
+            <SelectItem value={value.toString()} key={value}>
               {value} items
             </SelectItem>
           ))}
@@ -77,34 +77,34 @@ export const Pagination: React.FC<PaginationProps> = ({
 
       <div className="flex items-center gap-2">
         <Button
-          variant="outline"
-          size="icon"
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1 || isLoading}
           aria-label="Previous page"
+          disabled={currentPage === 1 || isLoading}
+          size="icon"
+          variant="outline"
+          onClick={() => onPageChange(currentPage - 1)}
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
         <Input
-          type="number"
-          min={1}
-          max={totalPages}
-          value={inputPage}
-          onChange={handlePageInput}
-          className="w-14 text-center"
           aria-label="Go to page"
           disabled={isLoading}
+          max={totalPages}
+          min={1}
+          type="number"
+          value={inputPage}
+          className="w-14 text-center"
+          onChange={handlePageInput}
         />
 
         <span className="text-muted-foreground whitespace-nowrap">of {totalPages}</span>
 
         <Button
-          variant="outline"
-          size="icon"
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages || isLoading}
           aria-label="Next page"
+          disabled={currentPage === totalPages || isLoading}
+          size="icon"
+          variant="outline"
+          onClick={() => onPageChange(currentPage + 1)}
         >
           <ChevronRight className="h-4 w-4" />
         </Button>

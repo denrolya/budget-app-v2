@@ -46,11 +46,12 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
           </Button>
         )}
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent align="start" className="w-auto p-0">
         <Calendar
           initialFocus
-          mode="range"
           defaultMonth={after.toDate()}
+          mode="range"
+          numberOfMonths={isMobile ? 1 : 2}
           selected={{
             from: after.toDate(),
             to: before.toDate(),
@@ -63,17 +64,16 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
               });
             }
           }}
-          numberOfMonths={isMobile ? 1 : 2}
         />
         <div className="p-3 space-y-3">
           <h4 className="font-medium text-sm text-primary">Presets</h4>
           <div className="grid grid-cols-4 gap-1">
             {presets.map(({ label, range }) => (
               <Button
-                key={label}
                 size="sm"
                 variant="outline"
                 className="w-full justify-start text-left text-xs"
+                key={label}
                 onClick={() => onChange(range)}
               >
                 {label}

@@ -20,13 +20,13 @@ export const FeeIndicator: React.FC<FeeIndicatorProps> = ({ feeAmount, feeCurren
 
   const tooltipContent = (
     <p>
-      Fee: <MoneyValue useColors={false} amount={feeAmount} currency={feeCurrency} />
+      Fee: <MoneyValue amount={feeAmount} currency={feeCurrency} useColors={false} />
       <br />({feePercentage}% of transfer amount)
     </p>
   );
 
   return (
-    <ResponsiveTooltip content={tooltipContent} openDelay={0}>
+    <ResponsiveTooltip openDelay={0} content={tooltipContent}>
       <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
     </ResponsiveTooltip>
   );

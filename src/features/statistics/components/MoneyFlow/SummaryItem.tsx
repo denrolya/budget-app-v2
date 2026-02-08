@@ -1,8 +1,9 @@
+import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
+import React from 'react';
+
 import MoneyValue from '@/components/common/MoneyValue';
 import ResponsiveTooltip from '@/components/ui/responsive-tooltip';
 import { cn } from '@/lib/utils';
-import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
-import React from 'react';
 
 interface Props extends React.ComponentPropsWithoutRef<'div'> {
   label: string;
@@ -25,17 +26,17 @@ const SummaryItem: React.FC<Props> = ({
   <div {...props}>
     <p className="text-muted-foreground flex items-center justify-start md:justify-center text-xs">{label}</p>
     <div className="flex items-center justify-start md:justify-center">
-      <MoneyValue className="font-medium font-mono text-xs" useColors={colors} showSign={showSign} amount={value} />
+      <MoneyValue amount={value} showSign={showSign} useColors={colors} className="font-medium font-mono text-xs" />
       {comparisonValue != null && comparisonPercentage != null && (
         <ResponsiveTooltip
           content={
             <span className="flex items-center text-xs">
               vs
               <MoneyValue
-                className="ml-1 font-medium font-mono"
-                useColors={colors}
-                showSign={showSign}
                 amount={comparisonValue}
+                showSign={showSign}
+                useColors={colors}
+                className="ml-1 font-medium font-mono"
               />
             </span>
           }

@@ -54,7 +54,7 @@ export const List: React.FC<Props> = ({ groupedItems, ...props }) => (
         <div className="space-y-2">
           <div className="flex flex-col space-y-1 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
             <h2 className="text-lg font-semibold">
-              <RelativeDatetimeDisplay showTime={false} date={date} />
+              <RelativeDatetimeDisplay date={date} showTime={false} />
             </h2>
             <div className="text-sm text-muted-foreground">
               <span>{count} transfers</span>

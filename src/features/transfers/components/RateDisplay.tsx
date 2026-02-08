@@ -46,8 +46,8 @@ const RateDisplay: React.FC<Props> = ({
 
   return (
     <span
-      className={cn('tabular-nums whitespace-nowrap text-xs text-muted-foreground', className)}
       aria-label={ariaLabel}
+      className={cn('tabular-nums whitespace-nowrap text-xs text-muted-foreground', className)}
       {...props}
     >
       {equationText}

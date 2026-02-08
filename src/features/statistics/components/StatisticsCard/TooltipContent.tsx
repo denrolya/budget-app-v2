@@ -27,7 +27,7 @@ const TooltipContent: React.FC<{
     <Separator className="my-2" />
     <h3 className="font-semibold text-sm">{label}</h3>
     <p className="text-base font-bold">
-      <MoneyValue className="font-medium font-mono" useColors={false} amount={amount} />
+      <MoneyValue amount={amount} useColors={false} className="font-medium font-mono" />
     </p>
     {date && <p className="text-muted-foreground">Date: {date.format(MOMENT_DATE_VIEW_FORMAT)}</p>}
     <Separator className="my-2" />

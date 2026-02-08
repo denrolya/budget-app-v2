@@ -27,7 +27,7 @@ export const PercentageIndicator: React.FC<Props> = ({ percentageChange, type, s
 
     return (
       <div className="absolute bottom-0 left-0 w-full h-1 bg-muted">
-        <div className={cn('absolute bottom-0 left-0 h-1', color)} style={{ width }} />
+        <div style={{ width }} className={cn('absolute bottom-0 left-0 h-1', color)} />
       </div>
     );
   }
@@ -41,8 +41,8 @@ export const PercentageIndicator: React.FC<Props> = ({ percentageChange, type, s
 
     return (
       <div className="absolute bottom-0 left-0 w-full h-1 bg-muted">
-        <div className={cn('absolute bottom-0 left-0 h-1', minColor)} style={{ width: minWidth }} />
-        <div className={cn('absolute bottom-0 right-0 h-1', maxColor)} style={{ width: maxWidth }} />
+        <div style={{ width: minWidth }} className={cn('absolute bottom-0 left-0 h-1', minColor)} />
+        <div style={{ width: maxWidth }} className={cn('absolute bottom-0 right-0 h-1', maxColor)} />
       </div>
     );
   }

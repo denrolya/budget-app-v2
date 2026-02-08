@@ -22,10 +22,10 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
       <div className="flex flex-row items-center justify-between">
         <div className="flex-grow flex items-center space-x-2 overflow-x-auto">
           <MoneyValue
-            useColors={false}
-            className="text-xs font-medium"
             amount={transfer.amount}
             currency={transfer.fromExpense.account.currency}
+            useColors={false}
+            className="text-xs font-medium"
           />
           <span className="text-muted-foreground hidden sm:flex items-center space-x-1">
             <AccountPill account={transfer.fromExpense.account} size="sm" className="flex-shrink-0" />
@@ -47,8 +47,8 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
           </span>
           <div className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             <Sheet>
-              <SheetTrigger className="m-0" asChild>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+              <SheetTrigger asChild className="m-0">
+                <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
                   <Eye className="h-4 w-4" />
                 </Button>
               </SheetTrigger>

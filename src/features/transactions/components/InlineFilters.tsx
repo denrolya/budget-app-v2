@@ -1,8 +1,8 @@
-import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import debounce from 'lodash/debounce';
 import { ArrowDownCircle, ArrowUpCircle, CalendarIcon, FileText, Layers, RotateCcw } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
 import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
@@ -106,27 +106,27 @@ const InlineFilters: React.FC<Props> = ({ data, onChange, onReset, isLoading, on
   return (
     <div className="border-b bg-muted/30 supports-[backdrop-filter]:bg-muted/30">
       <div
-        role="toolbar"
         aria-label="Transaction filters"
+        role="toolbar"
         className="flex flex-wrap items-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2"
       >
         {/* DATE */}
         <div className="flex items-center gap-1.5">
-          <div role="group" aria-label="Date range" className="flex items-center">
+          <div aria-label="Date range" role="group" className="flex items-center">
             <DaterangePickerWithPresets
               after={data.after}
               before={data.before}
-              onChange={handleTimeframeChange}
               presets={FILTER_PRESETS}
+              onChange={handleTimeframeChange}
             >
               <Button
+                aria-label="Select date range"
+                size="sm"
                 type="button"
                 variant="outline"
-                size="sm"
                 className={cn(H, 'bg-background px-2')}
-                aria-label="Select date range"
               >
-                <CalendarIcon className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                <CalendarIcon aria-hidden="true" className="mr-1.5 h-4 w-4" />
                 <span className={DATE_TEXT}>{dateLabel}</span>
               </Button>
             </DaterangePickerWithPresets>
@@ -137,42 +137,42 @@ const InlineFilters: React.FC<Props> = ({ data, onChange, onReset, isLoading, on
 
         {/* MAIN SELECTORS */}
         <div className="flex items-center gap-1.5">
-          <div className={cn('flex items-center', TYPEAHEAD_W)} role="group" aria-label="Accounts filter">
+          <div aria-label="Accounts filter" role="group" className={cn('flex items-center', TYPEAHEAD_W)}>
             <AccountTypeahead
               multiple
-              value={data.accounts}
-              onChange={(accounts) => onChange('accounts', accounts)}
-              placeholder="Accounts"
-              className="w-full"
               aria-label="Filter by accounts"
+              placeholder="Accounts"
+              value={data.accounts}
+              className="w-full"
+              onChange={(accounts) => onChange('accounts', accounts)}
             />
           </div>
 
           <Divider />
 
-          <div className={cn('flex items-center', TYPEAHEAD_W)} role="group" aria-label="Categories filter">
+          <div aria-label="Categories filter" role="group" className={cn('flex items-center', TYPEAHEAD_W)}>
             <CategoryTypeahead
               multiple
-              value={data.categories}
-              onChange={(categories) => onChange('categories', categories)}
-              placeholder="Categories"
-              className="w-full"
               aria-label="Filter by categories"
+              placeholder="Categories"
+              value={data.categories}
+              className="w-full"
+              onChange={(categories) => onChange('categories', categories)}
             />
           </div>
 
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                type="button"
-                variant={data.withNestedCategories ? 'secondary' : 'outline'}
-                size="icon"
-                className={ICON_BTN}
-                onClick={toggleNestedCategories}
                 aria-label="Nested categories"
                 aria-pressed={data.withNestedCategories}
+                size="icon"
+                type="button"
+                variant={data.withNestedCategories ? 'secondary' : 'outline'}
+                className={ICON_BTN}
+                onClick={toggleNestedCategories}
               >
-                <Layers className="h-4 w-4" aria-hidden="true" />
+                <Layers aria-hidden="true" className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Nested categories</TooltipContent>
@@ -183,54 +183,54 @@ const InlineFilters: React.FC<Props> = ({ data, onChange, onReset, isLoading, on
 
         {/* AMOUNT + TYPE + DRAFT */}
         <div className="flex items-center gap-1.5">
-          <div role="group" aria-label="Amount range" className="flex items-center gap-1.5">
+          <div aria-label="Amount range" role="group" className="flex items-center gap-1.5">
             <Input
+              aria-label="Minimum amount"
+              inputMode="numeric"
+              placeholder="Min"
               type="number"
               value={localAmountRange[0] ?? ''}
-              onChange={handleMinAmountChange}
               className={cn(H, AMOUNT_W, 'bg-background')}
-              placeholder="Min"
-              inputMode="numeric"
-              aria-label="Minimum amount"
+              onChange={handleMinAmountChange}
             />
             <Input
+              aria-label="Maximum amount"
+              inputMode="numeric"
+              placeholder="Max"
               type="number"
               value={localAmountRange[1] ?? ''}
-              onChange={handleMaxAmountChange}
               className={cn(H, AMOUNT_W, 'bg-background')}
-              placeholder="Max"
-              inputMode="numeric"
-              aria-label="Maximum amount"
+              onChange={handleMaxAmountChange}
             />
           </div>
 
           <Divider />
 
-          <div role="group" aria-label="Transaction type" className={cn('flex items-center', H)}>
+          <div aria-label="Transaction type" role="group" className={cn('flex items-center', H)}>
             <div className={cn('flex items-stretch overflow-hidden rounded-md border bg-background', H)}>
               <Button
+                aria-pressed={isIncome}
+                size="sm"
                 type="button"
                 variant={isIncome ? 'success' : 'ghost'}
-                size="sm"
                 className="h-full rounded-none px-2"
                 onClick={() => setType(TransactionType.Income)}
-                aria-pressed={isIncome}
               >
-                <ArrowDownCircle className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                <ArrowDownCircle aria-hidden="true" className="mr-1.5 h-4 w-4" />
                 Income
               </Button>
 
-              <div className="self-center h-5 w-px bg-border" aria-hidden="true" />
+              <div aria-hidden="true" className="self-center h-5 w-px bg-border" />
 
               <Button
+                aria-pressed={isExpense}
+                size="sm"
                 type="button"
                 variant={isExpense ? 'destructive' : 'ghost'}
-                size="sm"
                 className="h-full rounded-none px-2"
                 onClick={() => setType(TransactionType.Expense)}
-                aria-pressed={isExpense}
               >
-                <ArrowUpCircle className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                <ArrowUpCircle aria-hidden="true" className="mr-1.5 h-4 w-4" />
                 Expense
               </Button>
             </div>
@@ -241,15 +241,15 @@ const InlineFilters: React.FC<Props> = ({ data, onChange, onReset, isLoading, on
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                type="button"
-                variant={data.isDraft ? 'secondary' : 'outline'}
-                size="icon"
-                className={ICON_BTN}
-                onClick={toggleDraft}
                 aria-label="Only drafts"
                 aria-pressed={data.isDraft}
+                size="icon"
+                type="button"
+                variant={data.isDraft ? 'secondary' : 'outline'}
+                className={ICON_BTN}
+                onClick={toggleDraft}
               >
-                <FileText className="h-4 w-4" aria-hidden="true" />
+                <FileText aria-hidden="true" className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Only drafts</TooltipContent>
@@ -261,15 +261,15 @@ const InlineFilters: React.FC<Props> = ({ data, onChange, onReset, isLoading, on
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
+                aria-label="Reset filters"
+                disabled={!canReset}
+                size="icon"
                 type="button"
                 variant="outline"
-                size="icon"
                 className={ICON_BTN}
                 onClick={onReset}
-                disabled={!canReset}
-                aria-label="Reset filters"
               >
-                <RotateCcw className={cn('h-4 w-4', isLoading && 'animate-spin')} aria-hidden="true" />
+                <RotateCcw aria-hidden="true" className={cn('h-4 w-4', isLoading && 'animate-spin')} />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Reset filters</TooltipContent>

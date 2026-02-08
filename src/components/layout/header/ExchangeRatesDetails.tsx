@@ -31,11 +31,11 @@ export const ExchangeRatesDetails: React.FC = () => {
                 {from}/{to}
               </span>
               <MoneyValue
-                useColors={false}
-                showSymbol={false}
-                className="font-semibold"
                 amount={getExchangeRate(from, to, fixerExchangeRates) ?? 0}
                 currency={to}
+                showSymbol={false}
+                useColors={false}
+                className="font-semibold"
               />
             </div>
           ))}

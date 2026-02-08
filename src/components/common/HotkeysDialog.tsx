@@ -29,11 +29,11 @@ export const HotkeysDialog: React.FC<HotkeysDialogProps> = ({ isOpen, onClose })
     ));
 
   const renderHotkeyList = (category: HotkeyCategory) => (
-    <div key={category.name} className="mb-6 last:mb-0">
+    <div className="mb-6 last:mb-0" key={category.name}>
       <h3 className="text-lg font-semibold mb-2">{category.name}</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {category.hotkeys.map((hotkey) => (
-          <div key={hotkey.description} className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4" key={hotkey.description}>
             <div className="flex-shrink-0 min-w-[120px]">
               {renderHotkeyTrigger(isMac ? hotkey.mac : hotkey.windows)}
             </div>

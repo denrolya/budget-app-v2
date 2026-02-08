@@ -1,7 +1,8 @@
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { type LucideIcon } from 'lucide-react';
 import React, { ReactNode, useId } from 'react';
+
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 
 interface Props {
   label: string;
@@ -22,10 +23,10 @@ const ConfigurationMenuSwitch: React.FC<Props> = ({ label, icon: Icon, checked, 
         <span>{label}</span>
       </Label>
       <Switch
-        id={id}
         checked={checked}
-        onCheckedChange={onChange}
+        id={id}
         className="scale-75"
+        onCheckedChange={onChange}
       />
     </div>
   );
