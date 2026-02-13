@@ -1,3 +1,4 @@
+import { useBaseCurrency } from '@/features/auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Moment } from 'moment';
 import { DependencyList, useEffect } from 'react';
@@ -49,6 +50,7 @@ export const useCategoryTreeStatistics = (
   }: UseCategoryTreeStatisticsParams,
   dependencies: DependencyList = [],
 ): UseCategoryTreeStatisticsReturn => {
+  const baseCurrency = useBaseCurrency();
   const queryClient = useQueryClient();
   const categories = useCategories();
 
@@ -73,6 +75,7 @@ export const useCategoryTreeStatistics = (
       after.format(BACKEND_DATE_FORMAT),
       before.format(BACKEND_DATE_FORMAT),
       type,
+      baseCurrency,
       ...dependencies,
     ],
     queryFn: async (): Promise<CategoryNode[]> => await axiosFetcher(`${URL}?${generateQueryParamsString({

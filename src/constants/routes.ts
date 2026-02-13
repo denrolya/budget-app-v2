@@ -1,13 +1,12 @@
 import {
   CalendarDays,
   CreditCardIcon,
+  FolderTree,
   Handshake,
   LayoutDashboard,
   PieChart,
   PiggyBank,
   Repeat,
-  Tags,
-  FolderTree,
   TestTube2,
 } from 'lucide-react';
 
@@ -44,13 +43,8 @@ export const ROUTES = {
   },
   CATEGORIES_PAGE: {
     path: '/categories',
-    icon: Tags,
-    label: 'Categories',
-  },
-  CATEGORIES_TREE_PAGE: {
-    path: '/categories/tree',
     icon: FolderTree,
-    label: 'Tree',
+    label: 'Categories',
   },
   BUDGET_PAGE: {
     path: '/budget',

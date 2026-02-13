@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import moment from 'moment';
 import { useEffect } from 'react';
 
+import { useBaseCurrency } from '@/features/auth';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { axiosFetcher } from '@/services/api';
 import {
@@ -24,6 +25,7 @@ export const useValueByPeriodStatisticsRequest = ({
                                                     queryKey = 'value-by-period',
                                                     enabled = true,
                                                   }: UseStatisticsParams): UseStatisticsReturn => {
+  const baseCurrency = useBaseCurrency();
   const queryClient = useQueryClient();
   const {
     data,
@@ -32,13 +34,15 @@ export const useValueByPeriodStatisticsRequest = ({
     refetch,
   } = useQuery<ValueByPeriodDataDTO[], Error, ValueByPeriodData[]>({
     enabled,
-    queryKey: [queryKey,
+    queryKey: [
+      queryKey,
       after?.format(BACKEND_DATE_FORMAT),
       before?.format(BACKEND_DATE_FORMAT),
       period,
       type,
       accounts,
       categories,
+      baseCurrency,
     ],
     queryFn: async (): Promise<ValueByPeriodDataDTO[]> => {
       const response = await axiosFetcher(`${URL}?${generateQueryParamsString({

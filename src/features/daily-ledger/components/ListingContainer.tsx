@@ -56,7 +56,13 @@ const ErrorBanner: React.FC<{ error: unknown }> = ({ error }) => {
 };
 
 const ListingContainer = forwardRef<ListingHandle, Props>(
-  ({ updateUrl = true, omitTransferTransactions = true, enableHotkeys = true, showControls = true, initialFilters }, ref) => {
+  ({
+     updateUrl = true,
+     omitTransferTransactions = true,
+     enableHotkeys = true,
+     showControls = true,
+     initialFilters,
+   }, ref) => {
     const isMobile = useIsMobile();
     const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
 

@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
 import { TransformedData, UseMoneyFlowParams, UseMoneyFlowReturn } from '@/types/statistics/moneyFlow';
@@ -8,7 +8,6 @@ export const useMoneyFlow = ({
                                period,
                                timeframe,
                                previousTimeframe,
-                               baseCurrency,
                              }: UseMoneyFlowParams): UseMoneyFlowReturn => {
   const {
     data: currentDataBackend,
@@ -33,11 +32,6 @@ export const useMoneyFlow = ({
     before: previousTimeframe.before,
     queryKey: 'money-flow-comparison',
   });
-
-  useEffect(() => {
-    refetchCurrentPeriodData();
-    refetchPreviousPeriodData();
-  }, [baseCurrency]);
 
   const transformedData: TransformedData[] = useMemo(() => {
     if (!currentDataBackend?.length || !previousDataBackend?.length) return [];

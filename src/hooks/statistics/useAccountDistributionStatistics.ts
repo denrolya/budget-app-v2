@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Moment } from 'moment';
 import { DependencyList, useEffect } from 'react';
 
+import { useBaseCurrency } from '@/features/auth';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { Account } from '@/features/accounts';
 import { Type as TransactionType } from '@/features/transactions';
@@ -48,6 +49,7 @@ export const useAccountDistribution = (
   }: UseAccountDistributionParams,
   dependencies: DependencyList = [],
 ): UseAccountDistributionReturn => {
+  const baseCurrency = useBaseCurrency();
   const queryClient = useQueryClient();
   const accounts = useAccounts();
 
@@ -61,6 +63,7 @@ export const useAccountDistribution = (
       after.format(BACKEND_DATE_FORMAT),
       before.format(BACKEND_DATE_FORMAT),
       type,
+      baseCurrency,
       ...dependencies,
     ],
     queryFn: async (): Promise<ApiRow[]> => {

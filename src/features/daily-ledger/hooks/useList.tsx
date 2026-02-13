@@ -9,15 +9,8 @@ import { Transfer, TransferFilters, useList as useTransfersList } from '@/featur
 interface UseTransactionsAndTransfersListOptions {
   initialTransactionFilters?: TransactionFilters;
   initialTransferFilters?: TransferFilters;
-
   updateUrl?: boolean;
   omitTransferTransactions?: boolean;
-
-  /**
-   * Upper bound for “combined” fetch.
-   * If the selected date-range can exceed this, you need a range endpoint or
-   * pagination iteration (which breaks the “2 BE calls” constraint).
-   */
   perPage?: number;
 }
 

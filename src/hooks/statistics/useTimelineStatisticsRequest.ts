@@ -3,6 +3,7 @@ import moment from 'moment';
 import { DependencyList, useCallback, useEffect, useMemo } from 'react';
 import capitalize from 'lodash/capitalize';
 
+import { useBaseCurrency } from '@/features/auth';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { axiosFetcher } from '@/services/api';
 import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
@@ -57,6 +58,7 @@ export const useTimelineStatistics = (
   }: UseTimelineStatisticsParams,
   dependencies: DependencyList = [],
 ): UseTimelineStatisticsReturn => {
+  const baseCurrency = useBaseCurrency();
   const queryClient = useQueryClient();
 
   const {
@@ -71,6 +73,7 @@ export const useTimelineStatistics = (
       before.format(BACKEND_DATE_FORMAT),
       period,
       categories,
+      baseCurrency,
       ...dependencies,
     ],
     queryFn: async (): Promise<TimelineData> => await axiosFetcher(`${URL}?${generateQueryParamsString({

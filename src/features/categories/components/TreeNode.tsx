@@ -16,21 +16,33 @@ import { cn } from '@/lib/utils';
 import Category from '../models/Category';
 
 type DropPosition = 'before' | 'after' | 'inside' | null;
+type OpenStateById = Record<number, boolean>;
 
 interface Props {
   category: Category;
   depth: number;
+
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onToggle: () => void;
+
   onEdit: (c: Category) => void;
   onDelete: (c: Category) => void;
   onAddChild: (c: Category) => void;
+
   draggedId: number | null;
   dropTargetId: number | null;
   dropPosition: DropPosition;
+
   onDragStart: (e: React.DragEvent, c: Category) => void;
   onDragEnd: () => void;
   onDragOver: (e: React.DragEvent, c: Category) => void;
   onDragLeave: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent, c: Category) => void;
+
+  openById: OpenStateById;
+  setOpenById: (id: number, open: boolean) => void;
+  toggleOpenById: (id: number) => void;
 }
 
 const LEVEL_PX = 18;
@@ -50,6 +62,9 @@ const sortChildren = (children: Category[]) =>
 const TreeNode: React.FC<Props> = ({
                                      category,
                                      depth,
+                                     isOpen,
+                                     onOpenChange,
+                                     onToggle,
                                      onEdit,
                                      onDelete,
                                      onAddChild,
@@ -61,8 +76,10 @@ const TreeNode: React.FC<Props> = ({
                                      onDragOver,
                                      onDragLeave,
                                      onDrop,
+                                     openById,
+                                     setOpenById,
+                                     toggleOpenById,
                                    }) => {
-  const [open, setOpen] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
 
   const hasChildren = category.children.length > 0;
@@ -79,40 +96,18 @@ const TreeNode: React.FC<Props> = ({
   const showAfter = isDropTarget && dropPosition === 'after' && !hasChildren;
   const showInside = isDropTarget && dropPosition === 'inside';
 
-  const showOpenFolder = hasChildren && open;
-  const showClosedFolder = hasChildren && !open;
+  const showOpenFolder = hasChildren && isOpen;
+  const showClosedFolder = hasChildren && !isOpen;
   const showLeafDot = !hasChildren;
 
   const childrenSorted = useMemo(() => sortChildren(category.children), [category.children]);
 
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
 
-  const toggleOpen = () => {
+  const handleToggle = () => {
     if (!hasChildren) return;
-    setOpen((v) => !v);
+    onToggle();
   };
-
-  const rowClassName = cn(
-    'group relative w-full flex items-center rounded px-0 pr-1 transition-colors',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background',
-    {
-      'opacity-40': isDragging,
-      'cursor-pointer': hasChildren,
-      'cursor-default': !hasChildren,
-      'hover:bg-accent/50': !menuOpen,
-      'bg-accent/50': menuOpen,
-      'bg-primary/10 ring-1 ring-primary/40': showInside,
-    },
-  );
-
-  const dragHandleClassName = cn(
-    'absolute left-1 top-1/2 -translate-y-1/2 flex cursor-grab items-center text-muted-foreground/50 active:cursor-grabbing transition-opacity',
-    {
-      'opacity-100': menuOpen,
-      'opacity-0': !menuOpen,
-      'group-hover:opacity-100 group-focus-visible:opacity-100': !menuOpen,
-    },
-  );
 
   const overlayVisibleClassName = cn('', {
     'opacity-100': menuOpen,
@@ -143,14 +138,14 @@ const TreeNode: React.FC<Props> = ({
 
   return (
     <div className="select-none">
-      <Collapsible open={open} onOpenChange={setOpen}>
+      <Collapsible open={isOpen} onOpenChange={onOpenChange}>
         <ContextMenu onOpenChange={setMenuOpen}>
           <ContextMenuTrigger asChild>
             <div className="relative">
               {showBefore && (
                 <div
                   style={{ top: 0, marginLeft: indentWidth }}
-                  className="absolute left-0 right-2 h-0.5 bg-primary rounded-full z-30 pointer-events-none"
+                  className="absolute left-0 right-2 z-30 h-0.5 rounded-full bg-primary pointer-events-none"
                 >
                   <div className="absolute -left-1 -top-[3px] size-2 rounded-full bg-primary" />
                 </div>
@@ -159,7 +154,7 @@ const TreeNode: React.FC<Props> = ({
               {showAfter && (
                 <div
                   style={{ bottom: 0, marginLeft: indentWidth }}
-                  className="absolute left-0 right-2 h-0.5 bg-primary rounded-full z-30 pointer-events-none"
+                  className="absolute left-0 right-2 z-30 h-0.5 rounded-full bg-primary pointer-events-none"
                 >
                   <div className="absolute -left-1 -top-[3px] size-2 rounded-full bg-primary" />
                 </div>
@@ -167,17 +162,58 @@ const TreeNode: React.FC<Props> = ({
 
               <div
                 draggable
+                aria-expanded={hasChildren ? isOpen : undefined}
                 role="treeitem"
                 style={{ minHeight: ROW_H }}
                 tabIndex={0}
-                className={rowClassName}
-                onClick={toggleOpen}
+                className={cn(
+                  'group relative w-full flex items-center rounded px-0 pr-1 transition-colors',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background',
+                  {
+                    'opacity-40': isDragging,
+                    'cursor-pointer': hasChildren,
+                    'cursor-default': !hasChildren,
+                    'hover:bg-accent/50': !menuOpen,
+                    'bg-accent/50': menuOpen,
+                    'bg-primary/10 ring-1 ring-primary/40': showInside,
+                  },
+                )}
+                onClick={handleToggle}
                 onDragEnd={onDragEnd}
                 onDragLeave={onDragLeave}
                 onDragOver={(e) => onDragOver(e, category)}
                 onDragStart={(e) => onDragStart(e, category)}
                 onDrop={(e) => onDrop(e, category)}
+                onKeyDown={(e) => {
+                  if (!hasChildren) return;
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleToggle();
+                  }
+                  if (e.key === 'ArrowRight' && !isOpen) {
+                    e.preventDefault();
+                    onOpenChange(true);
+                  }
+                  if (e.key === 'ArrowLeft' && isOpen) {
+                    e.preventDefault();
+                    onOpenChange(false);
+                  }
+                }}
               >
+                <div
+                  aria-hidden="true"
+                  className={cn(
+                    'absolute left-1 top-1/2 -translate-y-1/2 flex cursor-grab items-center text-muted-foreground/50 active:cursor-grabbing transition-opacity',
+                    {
+                      'opacity-100': menuOpen,
+                      'opacity-0': !menuOpen,
+                      'group-hover:opacity-100 group-focus-visible:opacity-100': !menuOpen,
+                    },
+                  )}
+                  onClick={stop}>
+                  <GripVertical className="size-3.5" />
+                </div>
+
                 <div style={{ width: indentWidth }} className="relative shrink-0">
                   {railX !== null && (
                     <>
@@ -213,7 +249,10 @@ const TreeNode: React.FC<Props> = ({
                     size="sm"
                     variant="ghost"
                     className="size-6 p-0 text-muted-foreground hover:bg-secondary hover:text-foreground"
-                    onClick={() => onAddChild(category)}
+                    onClick={() => {
+                      onAddChild(category);
+                      setOpenById(category.id, true);
+                    }}
                   >
                     <FolderPlus className="size-3" />
                   </Button>
@@ -251,7 +290,12 @@ const TreeNode: React.FC<Props> = ({
 
             <ContextMenuSeparator />
 
-            <ContextMenuItem onClick={() => onAddChild(category)}>
+            <ContextMenuItem
+              onClick={() => {
+                onAddChild(category);
+                setOpenById(category.id, true);
+              }}
+            >
               <FolderPlus className="mr-2 size-4" />
               Add Subcategory
             </ContextMenuItem>
@@ -273,7 +317,7 @@ const TreeNode: React.FC<Props> = ({
           </ContextMenuContent>
         </ContextMenu>
 
-        {hasChildren && open && (
+        {hasChildren && isOpen && (
           <CollapsibleContent>
             <div className="relative">
               <div
@@ -288,6 +332,10 @@ const TreeNode: React.FC<Props> = ({
                   draggedId={draggedId}
                   dropPosition={dropPosition}
                   dropTargetId={dropTargetId}
+                  isOpen={Boolean(openById[child.id])}
+                  openById={openById}
+                  setOpenById={setOpenById}
+                  toggleOpenById={toggleOpenById}
                   key={child.id}
                   onAddChild={onAddChild}
                   onDelete={onDelete}
@@ -297,6 +345,8 @@ const TreeNode: React.FC<Props> = ({
                   onDragStart={onDragStart}
                   onDrop={onDrop}
                   onEdit={onEdit}
+                  onOpenChange={(open) => setOpenById(child.id, open)}
+                  onToggle={() => toggleOpenById(child.id)}
                 />
               ))}
             </div>

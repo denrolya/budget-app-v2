@@ -60,15 +60,6 @@ const ITEMS: {
     title: ROUTES.CATEGORIES_PAGE.label,
     url: ROUTES.CATEGORIES_PAGE.path,
     icon: ROUTES.CATEGORIES_PAGE.icon,
-    items: [{
-      title: ROUTES.CATEGORIES_PAGE.label,
-      url: ROUTES.CATEGORIES_PAGE.path,
-      icon: ROUTES.CATEGORIES_PAGE.icon,
-    }, {
-      title: ROUTES.CATEGORIES_TREE_PAGE.label,
-      url: ROUTES.CATEGORIES_TREE_PAGE.path,
-      icon: ROUTES.CATEGORIES_TREE_PAGE.icon,
-    }],
   },
   {
     title: 'Experimental',

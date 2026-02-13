@@ -9,7 +9,6 @@ import { LoginPage } from '@/features/auth';
 import LogoutRoute from '@/features/auth/components/LogoutRoute';
 import BudgetingPage from '@/features/budget/ManagementPage';
 import { CategoriesManagementPage } from '@/features/categories';
-import { CategoriesTreePage } from '@/features/categories';
 import DailyLedgerPage from '@/features/daily-ledger/ListingPage';
 import DashboardPage from '@/features/dashboard/Page';
 import { DebtsManagementPage } from '@/features/debts';
@@ -32,7 +31,6 @@ const AppShell: React.FC = () => (
         <Route element={<SandboxPage />} path="/testing" />
         <Route element={<BudgetingPage />} path="/budget" />
         <Route element={<CategoriesManagementPage />} path="/categories" />
-        <Route element={<CategoriesTreePage />} path="/categories/tree" />
 
         <Route element={<Navigate replace to="/ledger" />} path="*" />
       </Routes>
