@@ -23,7 +23,7 @@ interface UseTransactionsListOptions {
   initialFilters?: TransactionFilters;
   initialSort?: Sorting;
   updateUrl?: boolean;
-  excludeTransfers?: boolean;
+  omitTransferTransactions?: boolean;
 
   /**
    * If you need different invalidation scope (e.g. ledger combined view),
@@ -70,7 +70,7 @@ export const useList = (options: UseTransactionsListOptions = {}): UseTransactio
     initialFilters = new TransactionFilters(),
     initialSort = { field: 'executedAt', direction: 'desc' } as Sorting,
     updateUrl = true,
-    excludeTransfers = false,
+    omitTransferTransactions = false,
     queryKeyBase = queryKeys.all[0], // "transactions"
   } = options;
 
@@ -102,7 +102,7 @@ export const useList = (options: UseTransactionsListOptions = {}): UseTransactio
         perPage,
         filters,
         sort,
-        excludeTransfers,
+        omitTransferTransactions,
       });
 
       return {

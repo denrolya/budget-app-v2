@@ -14,7 +14,7 @@ interface FetchTransactionsParams {
   perPage: number;
   filters: TransactionFilters;
   sort: Sorting;
-  excludeTransfers: boolean;
+  omitTransferTransactions: boolean;
 }
 
 interface TransactionResponse {
@@ -137,7 +137,7 @@ export const transactionService = {
                     perPage = 30,
                     filters,
                     sort,
-                    excludeTransfers,
+                    omitTransferTransactions,
                   }: FetchTransactionsParams): Promise<FetchResponse> {
     const query = buildQueryParams({ page, perPage, filters, sort, includePagingAndSort: true });
     const url = buildUrl(BASE_URL, query);
@@ -145,7 +145,7 @@ export const transactionService = {
     const result: TransactionResponse = await axiosFetcher(url);
 
     // NOTE: count/totalValue returned by backend may include transfers; you currently filter list only.
-    const list = excludeTransfers ? result.list.filter((t: any) => !t.transfer?.id) : result.list;
+    const list = omitTransferTransactions ? result.list.filter((t: any) => !t.transfer?.id) : result.list;
 
     return {
       items: list,

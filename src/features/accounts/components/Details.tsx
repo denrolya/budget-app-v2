@@ -40,7 +40,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
 
   const { groupedItems, isLoading, isError, error, setFilter } = useTransactionsAndTransfersList({
     updateUrl: true,
-    excludeTransfers: true,
+    omitTransferTransactions: true,
   });
 
   useEffect(() => {

@@ -94,14 +94,14 @@ interface Props extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const DateDisplay: React.FC<Props> = ({
-  date,
-  variant = 'default',
-  showRelative = true,
-  showTime = true,
-  showDayBadge = false,
-  badgeSize = 'sm',
-  className,
-}) => {
+                                        date,
+                                        variant = 'default',
+                                        showRelative = true,
+                                        showTime = true,
+                                        showDayBadge = false,
+                                        badgeSize = 'sm',
+                                        className,
+                                      }) => {
   const isCurrentYear = date.year() === moment().year();
 
   const formattedDate = useMemo(() => {
@@ -122,15 +122,14 @@ const DateDisplay: React.FC<Props> = ({
 
   const relativeTime = useMemo(() => {
     const now = moment();
-    const diffHours = date.diff(now, 'hours');
-    const diffDays = date.diff(now, 'days');
 
-    if (Math.abs(diffHours) < 1) return 'just now';
-    if (diffHours === 1) return 'in 1 hour';
-    if (diffHours > 1 && diffHours <= 6) return `in ${diffHours} hours`;
-    if (diffHours > 6 && diffHours < 24) return 'later today';
-    if (diffDays === 1) return 'tomorrow';
-    if (diffDays === -1) return 'yesterday';
+    if (date.isSame(now, 'day')) return 'today';
+    if (date.isSame(now.clone().subtract(1, 'day'), 'day')) return 'yesterday';
+    if (date.isSame(now.clone().add(1, 'day'), 'day')) return 'tomorrow';
+
+    const diffDays = date.startOf('day').diff(now.startOf('day'), 'days');
+    if (Math.abs(diffDays) <= 6) return date.format('ddd'); // Mon/Tue/...
+
     return date.fromNow();
   }, [date]);
 

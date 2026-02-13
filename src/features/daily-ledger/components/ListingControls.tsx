@@ -105,8 +105,8 @@ export const ListingControls: React.FC<Props> = ({
   const handleTimeframeChange = useCallback(
     (range: Timeframe) => {
       setTimeframe({
-        after: range.after ? range.after.startOf('day') : timeframe.after,
-        before: range.before ? range.before.endOf('day') : timeframe.before,
+        after: range.after ? range.after.clone().startOf('day') : timeframe.after,
+        before: range.before ? range.before.clone().endOf('day') : timeframe.before,
       });
     },
     [setTimeframe, timeframe.after, timeframe.before],

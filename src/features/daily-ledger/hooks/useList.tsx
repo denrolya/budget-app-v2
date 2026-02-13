@@ -11,7 +11,7 @@ interface UseTransactionsAndTransfersListOptions {
   initialTransferFilters?: TransferFilters;
 
   updateUrl?: boolean;
-  excludeTransfers?: boolean;
+  omitTransferTransactions?: boolean;
 
   /**
    * Upper bound for “combined” fetch.
@@ -75,7 +75,7 @@ export const useTransactionsAndTransfersList = ({
                                                   initialTransactionFilters = new TransactionFilters(),
                                                   initialTransferFilters = new TransferFilters(),
                                                   updateUrl = false,
-                                                  excludeTransfers = true,
+                                                  omitTransferTransactions = true,
                                                   perPage = 500,
                                                 }: UseTransactionsAndTransfersListOptions = {}) => {
   const baseCurrency = useBaseCurrency();
@@ -88,7 +88,7 @@ export const useTransactionsAndTransfersList = ({
     initialPerPage: perPage,
     initialFilters: initialTransactionFilters,
     updateUrl,
-    excludeTransfers,
+    omitTransferTransactions,
   });
 
   const transfersState = useTransfersList({

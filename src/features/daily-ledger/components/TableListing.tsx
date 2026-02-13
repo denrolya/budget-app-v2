@@ -187,6 +187,7 @@ const TableListing: React.FC<Props> = ({
                       <div className="flex items-center space-x-4">
                         <RelativeDatetimeDisplay
                           showDayBadge
+                          showRelative
                           badgeSize="sm"
                           date={date}
                           showTime={false}

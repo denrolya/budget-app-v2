@@ -33,7 +33,7 @@ export type InitialFilters = Record<string, unknown>;
 
 type Props = {
   updateUrl?: boolean;
-  excludeTransfers?: boolean;
+  omitTransferTransactions?: boolean;
   enableHotkeys?: boolean;
   showControls?: boolean
   initialFilters?: InitialFilters;
@@ -56,7 +56,7 @@ const ErrorBanner: React.FC<{ error: unknown }> = ({ error }) => {
 };
 
 const ListingContainer = forwardRef<ListingHandle, Props>(
-  ({ updateUrl = true, excludeTransfers = false, enableHotkeys = true, showControls = true, initialFilters }, ref) => {
+  ({ updateUrl = true, omitTransferTransactions = true, enableHotkeys = true, showControls = true, initialFilters }, ref) => {
     const isMobile = useIsMobile();
     const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
 
@@ -91,7 +91,7 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
       setShowTransfers,
     } = useTransactionsAndTransfersList({
       updateUrl,
-      excludeTransfers,
+      omitTransferTransactions,
     });
 
     /**

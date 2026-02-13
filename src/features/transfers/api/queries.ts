@@ -23,7 +23,7 @@ interface UseTransfersListOptions {
   initialFilters?: TransferFilters;
   initialSort?: Sorting;
   updateUrl?: boolean;
-  excludeTransfers?: never; // guard: transfers list shouldn't have this option
+  omitTransferTransactions?: never; // guard: transfers list shouldn't have this option
   queryKeyBase?: readonly unknown[];
 }
 

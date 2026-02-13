@@ -1,11 +1,11 @@
 import { Search } from 'lucide-react';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type Category from '@/features/categories/models/Category';
 import {
   useExpenseCategories,
@@ -34,33 +34,15 @@ const countDescendants = (category: Category): number => {
   return count;
 };
 
-const countCategories = (categories: Category[]): number => {
-  let count = 0;
-
-  const walk = (nodes: Category[]) => {
-    nodes.forEach((node) => {
-      count += 1;
-      walk(node.children);
-    });
-  };
-
-  walk(categories);
-  return count;
-};
-
 const filterCategories = (categories: Category[], query: string): Category[] => {
   const q = query.trim().toLowerCase();
   if (!q) return categories;
 
   const filterNode = (cat: Category): Category | null => {
     const matchesSelf = cat.name.toLowerCase().includes(q);
-    const children = cat.children
-      .map(filterNode)
-      .filter((c): c is Category => c !== null);
+    const children = cat.children.map(filterNode).filter((c): c is Category => c !== null);
 
-    if (matchesSelf || children.length > 0) {
-      return { ...cat, children } as Category;
-    }
+    if (matchesSelf || children.length > 0) return { ...cat, children } as Category;
     return null;
   };
 
@@ -73,28 +55,25 @@ const CategoriesPage = () => {
   const incomeCategories = useIncomeCategories();
   const expenseCategories = useExpenseCategories();
 
-  const [activeType, setActiveType] = React.useState<CategoryType>('expense');
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const [activeType, setActiveType] = useState<CategoryType>('expense');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [editingCategory, setEditingCategory] = React.useState<Category | null>(null);
-  const [newCategoryParentId, setNewCategoryParentId] = React.useState<number | null>(null);
-  const [newCategoryType, setNewCategoryType] = React.useState<CategoryType>('expense');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [newCategoryParentId, setNewCategoryParentId] = useState<number | null>(null);
+  const [newCategoryType, setNewCategoryType] = useState<CategoryType>('expense');
 
   const { delete: deleteCategory, isDeleting } = useMutations();
 
-  const filteredIncome = React.useMemo(
+  const filteredIncome = useMemo(
     () => filterCategories(incomeCategoriesTree, searchQuery),
     [incomeCategoriesTree, searchQuery],
   );
 
-  const filteredExpense = React.useMemo(
+  const filteredExpense = useMemo(
     () => filterCategories(expenseCategoriesTree, searchQuery),
     [expenseCategoriesTree, searchQuery],
   );
-
-  const incomeCount = React.useMemo(() => countCategories(incomeCategoriesTree), [incomeCategoriesTree]);
-  const expenseCount = React.useMemo(() => countCategories(expenseCategoriesTree), [expenseCategoriesTree]);
 
   const dialogCategories = newCategoryType === 'income' ? incomeCategories : expenseCategories;
 
@@ -119,20 +98,21 @@ const CategoriesPage = () => {
         ? `Delete "${category.name}" and its ${childCount} subcategories?`
         : `Delete "${category.name}"?`;
 
+
     if (!confirm(message)) return;
 
     await deleteCategory(category.id);
   };
 
-  const tree = activeType === 'income' ? filteredIncome : filteredExpense;
-  const totalCount = activeType === 'income' ? incomeCount : expenseCount;
+  const treeForType = (type: CategoryType) => (type === 'income' ? filteredIncome : filteredExpense);
 
   return (
     <>
       <PageWithSidebar contentScrollable={false}>
         <PageWithSidebar.Sidebar>
           <div className={cn('flex h-full flex-col', isDeleting && 'pointer-events-none opacity-60')}>
-            <div className="space-y-2 border-b border-border p-2">
+            {/* Search */}
+            <div className="border-b border-border p-2">
               <div className="relative">
                 <Search
                   aria-hidden="true"
@@ -142,67 +122,64 @@ const CategoriesPage = () => {
                   aria-label="Search categories"
                   placeholder="Search..."
                   value={searchQuery}
-                  className="h-9 pl-8"
+                  className="h-10 pl-8"
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-1">
-                <Button
-                  size="sm"
-                  variant={activeType === 'expense' ? 'secondary' : 'ghost'}
-                  className="h-8 justify-start"
-                  onClick={() => setActiveType('expense')}
-                >
-                  <span aria-hidden="true" className="mr-2 size-2 rounded-full bg-destructive" />
-                  Expense
-                  <Badge variant="secondary" className="ml-auto px-2 py-0.5 text-2xs font-normal">
-                    {expenseCount}
-                  </Badge>
-                </Button>
-
-                <Button
-                  size="sm"
-                  variant={activeType === 'income' ? 'secondary' : 'ghost'}
-                  className="h-8 justify-start"
-                  onClick={() => setActiveType('income')}
-                >
-                  <span aria-hidden="true" className="mr-2 size-2 rounded-full bg-success" />
-                  Income
-                  <Badge variant="secondary" className="ml-auto px-2 py-0.5 text-2xs font-normal">
-                    {incomeCount}
-                  </Badge>
-                </Button>
-              </div>
-
-              <div className="flex items-center justify-between px-1 pt-1">
-                <div className="text-2xs font-medium text-muted-foreground">
-                  {activeType === 'income' ? 'Income' : 'Expense'}
-                  <span className="ml-2 text-muted-foreground/70">{totalCount}</span>
-                </div>
-
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-7 px-2 text-2xs hover:bg-accent"
-                  onClick={() => handleAddNew(null, activeType)}
-                >
-                  Add
-                </Button>
-              </div>
             </div>
 
-            <ScrollArea className="flex-1">
-              <div className="p-2">
-                <CategoryTree
-                  categories={tree}
-                  type={activeType}
-                  onAddNew={handleAddNew}
-                  onDelete={handleDelete}
-                  onEdit={handleEdit}
-                />
-              </div>
-            </ScrollArea>
+            {/* Type tabs */}
+            <Tabs
+              value={activeType}
+              className="flex flex-1 flex-col min-h-0"
+              onValueChange={(v) => setActiveType(v as CategoryType)}
+            >
+              <TabsList aria-label="Category type" className="grid w-full grid-cols-2 rounded-none">
+                <TabsTrigger value="expense">Expense</TabsTrigger>
+                <TabsTrigger value="income">Income</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="expense" className="m-0 flex-1 min-h-0 p-0">
+                <ScrollArea className="h-full">
+                  <div className="p-2">
+                    <CategoryTree
+                      categories={treeForType('expense')}
+                      type="expense"
+                      onAddNew={handleAddNew}
+                      onDelete={handleDelete}
+                      onEdit={handleEdit}
+                    />
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+
+              <TabsContent value="income" className="m-0 flex-1 min-h-0 p-0">
+                <ScrollArea className="h-full">
+                  <div className="p-2">
+                    <CategoryTree
+                      categories={treeForType('income')}
+                      type="income"
+                      onAddNew={handleAddNew}
+                      onDelete={handleDelete}
+                      onEdit={handleEdit}
+                    />
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
+
+            {/* Footer action */}
+            <div className="border-t border-border p-2">
+              <Button
+                size="sm"
+                type="button"
+                variant="secondary"
+                className="h-10 w-full justify-center"
+                onClick={() => handleAddNew(null, activeType)}
+              >
+                Add category
+              </Button>
+            </div>
           </div>
         </PageWithSidebar.Sidebar>
 
@@ -218,8 +195,8 @@ const CategoriesPage = () => {
                   non nibh.
                 </p>
                 <p className="text-sm leading-relaxed">
-                  Use the sidebar to search, drag & drop categories, and manage the tree structure. Category details
-                  will appear here later.
+                  Use the sidebar to search, drag &amp; drop categories, and manage the tree structure. Category
+                  details will appear here later.
                 </p>
               </div>
             </div>

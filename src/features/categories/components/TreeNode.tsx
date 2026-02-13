@@ -93,7 +93,7 @@ const TreeNode: React.FC<Props> = ({
   };
 
   const rowClassName = cn(
-    'group relative w-full flex items-center rounded px-1.5 pr-1 transition-colors',
+    'group relative w-full flex items-center rounded px-0 pr-1 transition-colors',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background',
     {
       'opacity-40': isDragging,
@@ -136,7 +136,7 @@ const TreeNode: React.FC<Props> = ({
     overlayVisibleClassName,
   );
 
-  const nameClassName = cn('min-w-0 flex-1 truncate text-[13px] leading-tight', {
+  const nameClassName = cn('min-w-0 flex-1 truncate text-sm leading-tight', {
     'font-medium text-foreground': hasChildren,
     'text-foreground/90': !hasChildren,
   });
@@ -178,10 +178,6 @@ const TreeNode: React.FC<Props> = ({
                 onDragStart={(e) => onDragStart(e, category)}
                 onDrop={(e) => onDrop(e, category)}
               >
-                <div aria-hidden="true" className={dragHandleClassName} onClick={stop}>
-                  <GripVertical className="size-3.5" />
-                </div>
-
                 <div style={{ width: indentWidth }} className="relative shrink-0">
                   {railX !== null && (
                     <>
