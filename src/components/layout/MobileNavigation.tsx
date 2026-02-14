@@ -85,7 +85,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
   });
 
   const navItems = useMemo(
-    () => [ROUTES.DASHBOARD, ROUTES.DAILY_LEDGER, ROUTES.TRANSACTION_LIST],
+    () => [ROUTES.DASHBOARD_V2, ROUTES.DAILY_LEDGER, ROUTES.TRANSACTION_LIST],
     [],
   );
 

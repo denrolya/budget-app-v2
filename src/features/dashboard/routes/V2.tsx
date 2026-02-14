@@ -4,7 +4,7 @@ import { cardConfigsV2 } from '@/constants/dashboard-config';
 import { Type as AccountType } from '@/features/accounts';
 import StatisticsCardsSidebar from '@/features/dashboard/components/StatisticsCardsSidebar';
 import BalanceByAccountType from '@/features/statistics/components/BalanceByAccountType';
-import DistributionDoughnut from '@/features/statistics/components/DistributionDonut';
+import DistributionDonut from '@/features/statistics/components/DistributionDonut/TripleTabCard';
 import MoneyFlow from '@/features/statistics/components/MoneyFlow/Card';
 import StatisticsCard from '@/features/statistics/components/StatisticsCard/Card';
 import TotalBalanceCard from '@/features/statistics/components/TotalBalanceCard';
@@ -48,7 +48,7 @@ const DashboardV2Page: React.FC = () => {
       <section className="h-full w-full overflow-auto pb-[187px] lg:p-4">
         <h2 className="tracking-tight text-2xl font-bold mb-4 hidden md:block">Dashboard</h2>
 
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-4 mb-4">
           {configs.general.map((card) => (
             <StatisticsCard
               config={card}
@@ -60,7 +60,7 @@ const DashboardV2Page: React.FC = () => {
 
         <div className="grid gap-6 grid-cols-1 xl:grid-cols-12 xl:items-stretch">
           <MoneyFlow className="xl:col-span-8 3xl:col-span-10 xl:col-start-5 xl:row-start-1 h-full min-h-[360px] md:min-h-[420px] 2xl:min-h-[480px]" />
-          <DistributionDoughnut className="xl:col-span-4 3xl:col-span-2 xl:row-span-2 h-full min-h-[720px]" />
+          <DistributionDonut className="xl:col-span-4 3xl:col-span-2 xl:row-span-2 h-full min-h-[720px]" />
         </div>
       </section>
 

@@ -3,14 +3,15 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import RequireAuth from '@/components/common/RequireAuth';
 import RequiredDataGate from '@/components/common/RequiredDataGate';
-import LayoutV9 from '@/components/layout/LayoutV9';
+import Layout from '@/components/layout/Layout';
 import { AccountsManagementPage } from '@/features/accounts';
 import { LoginPage } from '@/features/auth';
 import LogoutRoute from '@/features/auth/components/LogoutRoute';
 import BudgetingPage from '@/features/budget/ManagementPage';
 import { CategoriesManagementPage } from '@/features/categories';
 import DailyLedgerPage from '@/features/daily-ledger/ListingPage';
-import DashboardPage from '@/features/dashboard/routes/V2';
+import DashboardV1Page from '@/features/dashboard/routes/V1';
+import DashboardV2Page from '@/features/dashboard/routes/V2';
 import { DebtsManagementPage } from '@/features/debts';
 import SandboxPage from '@/features/sandbox/Page';
 import { TransactionsListPage } from '@/features/transactions';
@@ -18,11 +19,12 @@ import { TransfersListPage } from '@/features/transfers';
 
 const AppShell: React.FC = () => (
   <RequiredDataGate>
-    <LayoutV9>
+    <Layout>
       <Routes>
         <Route index element={<Navigate replace to="/ledger" />} />
 
-        <Route element={<DashboardPage />} path="/dashboard" />
+        <Route element={<DashboardV1Page />} path="/dashboard/v1" />
+        <Route element={<DashboardV2Page />} path="/dashboard/v2" />
         <Route element={<TransactionsListPage />} path="/transactions" />
         <Route element={<TransfersListPage />} path="/transfers" />
         <Route element={<DailyLedgerPage />} path="/ledger" />
@@ -34,7 +36,7 @@ const AppShell: React.FC = () => (
 
         <Route element={<Navigate replace to="/ledger" />} path="*" />
       </Routes>
-    </LayoutV9>
+    </Layout>
   </RequiredDataGate>
 );
 

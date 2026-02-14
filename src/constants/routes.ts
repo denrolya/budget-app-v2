@@ -11,10 +11,15 @@ import {
 } from 'lucide-react';
 
 export const ROUTES = {
-  DASHBOARD: {
-    path: '/dashboard',
+  DASHBOARD_V1: {
+    path: '/dashboard/v1',
     icon: LayoutDashboard,
     label: 'Dashboard',
+  },
+  DASHBOARD_V2: {
+    path: '/dashboard/v2',
+    icon: LayoutDashboard,
+    label: 'Dashboard V2',
   },
   DAILY_LEDGER: {
     path: '/ledger',

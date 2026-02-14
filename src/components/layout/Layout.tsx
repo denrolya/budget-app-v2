@@ -11,7 +11,7 @@ import Header from './header/Header';
 import MobileNavigation from './MobileNavigation';
 import AppSidebar from './sidebar/AppSidebar';
 
-const LayoutV9: React.FC<React.PropsWithChildren> = ({ children }) => (
+const Layout: React.FC<React.PropsWithChildren> = ({ children }) => (
   <TooltipProvider>
     <FormProvider>
       <SidebarProvider defaultOpen={false} className="overflow-hidden">
@@ -38,4 +38,4 @@ const LayoutV9: React.FC<React.PropsWithChildren> = ({ children }) => (
   </TooltipProvider>
 );
 
-export default LayoutV9;
+export default Layout;

@@ -6,7 +6,7 @@ import { Type as AccountType } from '@/features/accounts';
 import StatisticsCardsSidebar from '@/features/dashboard/components/StatisticsCardsSidebar';
 import BalanceByAccountType from '@/features/statistics/components/BalanceByAccountType';
 import CategoriesTimeline from '@/features/statistics/components/CategoriesTimeline/Card';
-import DistributionDoughnut from '@/features/statistics/components/DistributionDonut';
+import DistributionDonut from '@/features/statistics/components/DistributionDonut/TripleTabCard';
 import MoneyFlow from '@/features/statistics/components/MoneyFlow/Card';
 import StatisticsCard from '@/features/statistics/components/StatisticsCard/Card';
 import TotalBalanceCard from '@/features/statistics/components/TotalBalanceCard';
@@ -87,7 +87,7 @@ const DashboardPage: React.FC = () => {
         <div className="grid gap-6 grid-cols-1 xl:grid-cols-12 xl:items-stretch">
           <MoneyFlow className="xl:col-span-8 3xl:col-span-10 xl:col-start-5 xl:row-start-1 h-full min-h-[360px] md:min-h-[420px] 2xl:min-h-[480px]" />
           <CategoriesTimeline className="xl:col-span-8 3xl:col-span-10 xl:col-start-5 xl:row-start-2 h-full min-h-[320px]" />
-          <DistributionDoughnut className="xl:col-span-4 3xl:col-span-2 xl:row-span-2 h-full min-h-[720px]" />
+          <DistributionDonut className="xl:col-span-4 3xl:col-span-2 xl:row-span-2 h-full min-h-[720px]" />
         </div>
       </section>
 
