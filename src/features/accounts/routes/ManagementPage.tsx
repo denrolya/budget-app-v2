@@ -67,7 +67,7 @@ const AccountDetailsRoute: React.FC = () => {
   }, [data, accountId]);
 
   const onAccountUpdate = async (account: Account, diff: Partial<Account>) => {
-    await update({ account, diff });
+    await update({ id: account.id, diff });
   };
 
   const onToggleArchive = async () => {

@@ -1,40 +1,21 @@
 import { FoldVertical, Plus, Search, UnfoldVertical } from 'lucide-react';
 import React, { useMemo, useRef, useState } from 'react';
 
+import { confirm } from '@/lib/confirmation';
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FormType, useForm } from '@/contexts/Form';
 import type Category from '@/features/categories/models/Category';
 import CategoriesSunburst from '@/features/sandbox/components/Sunburst.example';
-import { Type as TransactionType } from '@/features/transactions';
-import {
-  useExpenseCategories,
-  useExpenseCategoriesTree,
-  useIncomeCategories,
-  useIncomeCategoriesTree,
-} from '@/hooks/financeData';
+import { useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/hooks/financeData';
 import { cn } from '@/lib/utils';
 
 import { useMutations } from '../api';
-import CategoryDialog from '../components/FormDialog';
 import CategoryTree, { type CategoryTreeRef } from '../components/TreeDND';
-import type { CategoryType } from '../types';
-
-const countDescendants = (category: Category): number => {
-  let count = 0;
-
-  const walk = (node: Category) => {
-    node.children.forEach((child) => {
-      count += 1;
-      walk(child);
-    });
-  };
-
-  walk(category);
-  return count;
-};
+import { CategoryType } from '../types';
 
 const filterCategories = (categories: Category[], query: string): Category[] => {
   const q = query.trim().toLowerCase();
@@ -51,19 +32,13 @@ const filterCategories = (categories: Category[], query: string): Category[] => 
   return categories.map(filterNode).filter((c): c is Category => c !== null);
 };
 
-const CategoriesPage = () => {
+const CategoriesPage: React.FC = () => {
+  const { openForm } = useForm();
   const incomeCategoriesTree = useIncomeCategoriesTree();
   const expenseCategoriesTree = useExpenseCategoriesTree();
-  const incomeCategories = useIncomeCategories();
-  const expenseCategories = useExpenseCategories();
 
-  const [activeType, setActiveType] = useState<CategoryType>('expense');
+  const [activeType, setActiveType] = useState<CategoryType>(CategoryType.Expense);
   const [searchQuery, setSearchQuery] = useState('');
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [newCategoryParentId, setNewCategoryParentId] = useState<number | null>(null);
-  const [newCategoryType, setNewCategoryType] = useState<CategoryType>('expense');
 
   const { delete: deleteCategory, isDeleting } = useMutations();
 
@@ -80,30 +55,19 @@ const CategoriesPage = () => {
     [expenseCategoriesTree, searchQuery],
   );
 
-  const dialogCategories = newCategoryType === 'income' ? incomeCategories : expenseCategories;
+  const handleEdit = (category: Category) => openForm(FormType.Category, category);
 
-  const handleEdit = (category: Category) => {
-    setEditingCategory(category);
-    setNewCategoryParentId(null);
-    setNewCategoryType(category.type);
-    setDialogOpen(true);
-  };
-
-  const handleAddNew = (parentId: number | null, type: CategoryType) => {
-    setEditingCategory(null);
-    setNewCategoryParentId(parentId);
-    setNewCategoryType(type);
-    setDialogOpen(true);
-  };
+  const handleAddNew = (parent: number | null, type: CategoryType) => openForm(FormType.Category, { type, parent });
 
   const handleDelete = async (category: Category) => {
-    const childCount = countDescendants(category);
-    const message =
-      childCount > 0
-        ? `Delete "${category.name}" and its ${childCount} subcategories?`
-        : `Delete "${category.name}"?`;
+    const isConfirmed = await confirm({
+      title: 'Confirm Deletion',
+      description: `Are you sure you want to delete the category "${category.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    });
 
-    if (!confirm(message)) return;
+    if (!isConfirmed) return;
 
     await deleteCategory(category.id);
   };
@@ -186,8 +150,8 @@ const CategoriesPage = () => {
                   <div className="p-2">
                     <CategoryTree
                       defaultCollapsed
-                      categories={treeForType('expense')}
-                      type="expense"
+                      categories={treeForType(CategoryType.Expense)}
+                      type={CategoryType.Expense}
                       onAddNew={handleAddNew}
                       onDelete={handleDelete}
                       onEdit={handleEdit}
@@ -202,8 +166,8 @@ const CategoriesPage = () => {
                   <div className="p-2">
                     <CategoryTree
                       defaultCollapsed
-                      categories={treeForType('income')}
-                      type="income"
+                      categories={treeForType(CategoryType.Income)}
+                      type={CategoryType.Income}
                       onAddNew={handleAddNew}
                       onDelete={handleDelete}
                       onEdit={handleEdit}
@@ -220,20 +184,11 @@ const CategoriesPage = () => {
 
         <PageWithSidebar.Content>
           <CategoriesSunburst
-            categories={activeType === TransactionType.Income ? incomeCategoriesTree : expenseCategoriesTree}
+            categories={activeType === CategoryType.Income ? incomeCategoriesTree : expenseCategoriesTree}
             height="100vh"
           />
         </PageWithSidebar.Content>
       </PageWithSidebar>
-
-      <CategoryDialog
-        allCategories={dialogCategories}
-        category={editingCategory}
-        open={dialogOpen}
-        parentId={newCategoryParentId}
-        type={newCategoryType}
-        onOpenChange={setDialogOpen}
-      />
     </>
   );
 };

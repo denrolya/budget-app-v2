@@ -7,36 +7,30 @@ import type { CategoryApiResponseDTO, CreateCategoryDTO, UpdateCategoryDTO } fro
 const API_BASE = '/api/categories';
 const ENDPOINT = '/api/v2/category';
 
-export type RawCategoriesResponse = unknown;
-
 type ApiErrorPayload = {
   message?: string;
 };
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   const axiosError = error as AxiosError<ApiErrorPayload> | undefined;
-  const messageFromApi = axiosError?.response?.data?.message;
-  const messageFromError = axiosError?.message;
-
-  return messageFromApi || messageFromError || fallback;
+  return axiosError?.response?.data?.message || axiosError?.message || fallback;
 };
 
 export const categoriesService = {
-  fetchList: async (): Promise<RawCategoriesResponse> => axiosFetcher(ENDPOINT),
+  fetchList: async (): Promise<CategoryApiResponseDTO[]> => axiosFetcher(ENDPOINT),
 
   create: async (payload: CreateCategoryDTO): Promise<CategoryApiResponseDTO> => {
     try {
-      const { data } = await api.post<CategoryApiResponseDTO>(`${API_BASE}/${payload.type}`, {
-        name: payload.name,
-        type: payload.type,
-        parent: payload.parentId ?? null,
-        isAffectingProfit: payload.isAffectingProfit ?? true,
-        isTechnical: payload.isTechnical ?? false,
-        isFixed: payload.isFixed ?? false,
-        icon: '',
-        color: null,
-        tags: [],
-      });
+      const { data } = await api.post<CategoryApiResponseDTO>(
+        `${API_BASE}/${payload.type}`,
+        {
+          name: payload.name,
+          parent: payload.parent ?? null,
+          isAffectingProfit: payload.isAffectingProfit ?? true,
+          isTechnical: payload.isTechnical ?? false,
+          isFixed: payload.isFixed ?? false,
+        },
+      );
 
       return data;
     } catch (error) {
@@ -46,17 +40,18 @@ export const categoriesService = {
 
   update: async (id: number, payload: UpdateCategoryDTO): Promise<CategoryApiResponseDTO> => {
     try {
-      const { data } = await api.put<CategoryApiResponseDTO>(`${API_BASE}/${id}`, {
-        id,
-        type: payload.type,
-        name: payload.name,
-        parent: payload.parentId,
-        isAffectingProfit: payload.isAffectingProfit,
-        isTechnical: payload.isTechnical,
-        isFixed: payload.isFixed,
-        icon: '',
-        tags: [],
-      });
+      const { data } = await api.put<CategoryApiResponseDTO>(
+        `${API_BASE}/${id}`,
+        {
+          id,
+          type: payload.type,
+          name: payload.name,
+          parent: payload.parent ?? null,
+          isAffectingProfit: payload.isAffectingProfit,
+          isTechnical: payload.isTechnical,
+          isFixed: payload.isFixed,
+        },
+      );
 
       return data;
     } catch (error) {

@@ -3,13 +3,16 @@ import React, { useMemo, useState } from 'react';
 
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import SummaryBadge from '@/components/common/SummaryBadge';
-import Details from '@/features/transfers/components/Details';
-import TransferRow from '@/features/transfers/components/ListingRow';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
-import { cn } from '@/lib/utils';
+import Details from '@/features/transfers/components/Details';
+import TransferRow from '@/features/transfers/components/ListingRow';
 import Transfer from '@/features/transfers/models/Transfer';
+import { confirm } from '@/lib/confirmation';
+import { cn } from '@/lib/utils';
+
+import { useMutations as useTransfersMutations } from '../api/mutations';
 
 const COLS = {
   gutter: 'w-3 shrink-0',
@@ -28,10 +31,20 @@ interface Props {
 }
 
 export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) => {
+  const { delete: deleteTransfer } = useTransfersMutations();
   const [openSheetId, setOpenSheetId] = useState<number | null>(null);
 
-  const handleDelete = (transfer: Transfer) => {
-    console.log('Delete transfer:', transfer.id);
+  const handleDelete = async (transfer: Transfer) => {
+    const isConfirmed = await confirm({
+      title: 'Are you absolutely sure?',
+      description: `You are about to delete transfer #${transfer.id}. This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    });
+
+    if (!isConfirmed) return;
+
+    await deleteTransfer(Number(transfer.id));
   };
 
   const totalColumnsCount = useMemo(() => 8, []);

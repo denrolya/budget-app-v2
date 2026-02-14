@@ -194,7 +194,6 @@ export const ListingRow: React.FC<Props> = ({
   const descId = useId();
 
   const onView = useMemo(() => () => onSheetOpenChange?.(true), [onSheetOpenChange]);
-  const onRemove = useMemo(() => () => onDelete(transfer), [onDelete, transfer]);
 
   return (
     <ContextMenu>
@@ -236,7 +235,7 @@ export const ListingRow: React.FC<Props> = ({
           </TableCell>
 
           <TableCell className={cellClassName(compact, 'text-right')}>
-            <ActionsCell transfer={transfer} onDelete={onRemove} onView={onView} />
+            <ActionsCell transfer={transfer} onDelete={() => onDelete(transfer)} onView={onView} />
           </TableCell>
         </TableRow>
       </ContextMenuTrigger>
@@ -256,7 +255,7 @@ export const ListingRow: React.FC<Props> = ({
 
         <ContextMenuSeparator />
 
-        <ContextMenuItem className="text-destructive focus:text-destructive" onSelect={onRemove}>
+        <ContextMenuItem className="text-destructive focus:text-destructive" onSelect={() => onDelete(transfer)}>
           <Trash2 className="mr-2 h-4 w-4" />
           Delete
         </ContextMenuItem>

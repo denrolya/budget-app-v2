@@ -10,7 +10,7 @@ import LogoutRoute from '@/features/auth/components/LogoutRoute';
 import BudgetingPage from '@/features/budget/ManagementPage';
 import { CategoriesManagementPage } from '@/features/categories';
 import DailyLedgerPage from '@/features/daily-ledger/ListingPage';
-import DashboardPage from '@/features/dashboard/Page';
+import DashboardPage from '@/features/dashboard/routes/V2';
 import { DebtsManagementPage } from '@/features/debts';
 import SandboxPage from '@/features/sandbox/Page';
 import { TransactionsListPage } from '@/features/transactions';

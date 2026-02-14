@@ -143,9 +143,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
                       <span className="sr-only">{account.isDisplayedOnSidebar ? 'Hide from sidebar' : 'Show in sidebar'}</span>
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="left">
-                    <p>{account.isDisplayedOnSidebar ? 'Pinned to sidebar' : 'Pin to sidebar'}</p>
-                  </TooltipContent>
+                  <TooltipContent>{account.isDisplayedOnSidebar ? 'Pinned to sidebar' : 'Pin to sidebar'}</TooltipContent>
                 </Tooltip>
               </CardTitle>
               <CardDescription>

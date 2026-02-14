@@ -18,6 +18,8 @@ export default class Category {
   root: Category | null = null;
   children: Category[] = [];
 
+  private _depth: number | null = null;
+
   constructor(data: CategoryDTO) {
     this.id = data.id;
     this.name = data.name;
@@ -33,7 +35,23 @@ export default class Category {
 
   addChild(child: Category): void {
     child.parent = this;
+    child._depth = null;
     this.children.push(child);
+  }
+
+  get depth(): number {
+    if (this._depth !== null) return this._depth;
+
+    let depth = 0;
+    let current = this.parent;
+
+    while (current) {
+      depth += 1;
+      current = current.parent;
+    }
+
+    this._depth = depth;
+    return depth;
   }
 
   getFullPath(): string[] {

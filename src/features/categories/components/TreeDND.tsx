@@ -11,8 +11,8 @@ import TreeNode from './TreeNode';
 const isDescendant = (node: Category, targetId: number): boolean =>
   node.children.some((child) => child.id === targetId || isDescendant(child, targetId));
 
-const wouldCreateCircle = (category: Category, newParentId: number | null): boolean =>
-  newParentId !== null && (newParentId === category.id || isDescendant(category, newParentId));
+const wouldCreateCircle = (category: Category, newParent: number | null): boolean =>
+  newParent !== null && (newParent === category.id || isDescendant(category, newParent));
 
 const sortRoot = (items: Category[]) =>
   [...items].sort((a, b) => {
@@ -53,7 +53,7 @@ interface Props {
   type: CategoryType;
   onEdit: (c: Category) => void;
   onDelete: (c: Category) => void;
-  onAddNew: (parentId: number | null, type: CategoryType) => void;
+  onAddNew: (parent: number | null, type: CategoryType) => void;
 
   openById?: OpenStateById;
   onOpenByIdChange?: (next: OpenStateById) => void;
@@ -191,10 +191,10 @@ const CategoryTree = forwardRef<CategoryTreeRef, Props>(
       }
 
       const parent = dropPosition === 'inside' ? target : target.parent ?? null;
-      const newParentId = parent ? parent.id : null;
+      const newParent = parent ? parent.id : null;
       const breadcrumb = parent ? parent.getFullPath() : [];
 
-      await moveWithBreadcrumb({ id: draggedId!, newParentId }, breadcrumb);
+      await moveWithBreadcrumb({ id: draggedId!, newParent }, breadcrumb);
       endDrag();
     };
 

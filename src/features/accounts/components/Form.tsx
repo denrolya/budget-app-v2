@@ -65,7 +65,6 @@ const normalizeType = (v: unknown): FormSchema['type'] => {
 };
 
 export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref) => {
-
   const { create, update } = useMutations();
   const {
     updateFormState,

@@ -6,6 +6,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import AccountForm from '@/features/accounts/components/Form';
 import TransactionForm from '@/features/transactions/components/Form';
 import TransferForm from '@/features/transfers/components/Form';
+import DebtForm from '@/features/debts/components/Form';
+import CategoryForm from '@/features/categories/components/Form';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -23,8 +25,8 @@ const formComponents = {
   [FormType.Account]: AccountForm,
   [FormType.Transaction]: TransactionForm,
   [FormType.Transfer]: TransferForm,
-  // [FormType.Debt]: DebtForm,
-  // [FormType.Category]: CategoryForm,
+  [FormType.Debt]: DebtForm,
+  [FormType.Category]: CategoryForm,
 };
 
 interface FormState {

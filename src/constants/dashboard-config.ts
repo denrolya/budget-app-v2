@@ -17,7 +17,7 @@ export const cardConfigs = {
       timeframe: { unit: IntervalUnit.Month, value: 1 },
       comparison: ComparisonType.Previous,
       statType: StatisticsType.Sum,
-    }
+    },
   ],
 
   // Annual Summary
@@ -125,6 +125,39 @@ export const cardConfigs = {
       period: { unit: IntervalUnit.Month, value: 1 },
       comparison: ComparisonType.Previous,
       statType: StatisticsType.MinMax,
+    },
+  ],
+};
+
+export const cardConfigsV2 = {
+  general: [
+    {
+      title: 'Monthly Expenses',
+      type: TransactionType.Expense,
+      timeframe: { unit: IntervalUnit.Month, value: 1 },
+      comparison: ComparisonType.Previous,
+      statType: StatisticsType.Sum,
+    },
+    {
+      title: 'Monthly Incomes',
+      type: TransactionType.Income,
+      timeframe: { unit: IntervalUnit.Month, value: 1 },
+      comparison: ComparisonType.Previous,
+      statType: StatisticsType.Sum,
+    },
+    {
+      title: 'Yearly Income',
+      type: TransactionType.Income,
+      timeframe: { unit: IntervalUnit.Year, value: 1 },
+      comparison: ComparisonType.Previous,
+      statType: StatisticsType.Sum,
+    },
+    {
+      title: 'Yearly Expenses',
+      type: TransactionType.Expense,
+      timeframe: { unit: IntervalUnit.Year, value: 1 },
+      comparison: ComparisonType.Previous,
+      statType: StatisticsType.Sum,
     },
   ],
 };

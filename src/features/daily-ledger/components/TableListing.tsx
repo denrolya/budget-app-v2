@@ -8,7 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useMutations } from '@/features/transactions/api/mutations';
+import { useMutations as useTransactionsMutations } from '@/features/transactions/api/mutations';
+import { useMutations as useTransfersMutations } from '@/features/transfers/api/mutations';
 import TransactionDetails from '@/features/transactions/components/Details';
 import TransactionRow from '@/features/transactions/components/ListingRow';
 import { useInlineEdit } from '@/features/transactions/hooks/useInlineEdit';
@@ -48,7 +49,8 @@ const TableListing: React.FC<Props> = ({
                                          isReversedOrder = false,
                                          compact = true,
                                        }) => {
-  const { update: updateTransaction, delete: deleteTransaction, isUpdating } = useMutations();
+  const { update: updateTransaction, delete: deleteTransaction, isUpdating } = useTransactionsMutations();
+  const { delete: deleteTransfer } = useTransfersMutations();
   const { openForm } = useFormContext();
 
   const [openSheetId, setOpenSheetId] = useState<number | null>(null);
@@ -78,17 +80,17 @@ const TableListing: React.FC<Props> = ({
   const handleDelete = async (item: Transaction | Transfer) => {
     const itemType = 'fromExpense' in item ? 'transfer' : 'transaction';
 
-    const confirmed = await confirm({
+    const isConfirmed = await confirm({
       title: 'Are you absolutely sure?',
       description: `You are about to delete ${itemType} #${item.id}. This action cannot be undone.`,
       confirmText: 'Delete',
       cancelText: 'Cancel',
     });
 
-    if (!confirmed) return;
+    if (!isConfirmed) return;
 
     if ('fromExpense' in item) {
-      console.log('Delete transfer:', item.id);
+      await deleteTransfer(Number(item.id));
       return;
     }
 

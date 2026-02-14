@@ -4,8 +4,8 @@ export enum FormType {
   Transaction = 'transaction',
   Transfer = 'transfer',
   Account = 'account',
-  // Debt = 'debt',
-  // Category = 'category'
+  Debt = 'debt',
+  Category = 'category'
 }
 
 interface FormState {
