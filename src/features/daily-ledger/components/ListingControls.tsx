@@ -245,7 +245,7 @@ export const ListingControls: React.FC<Props> = ({
           </div>
 
           {showOrderToggle && (
-            <Tooltip>
+            <Tooltip delayDuration={1500}>
               <TooltipTrigger asChild>
                 <Button
                   aria-label="Toggle ordering"
@@ -297,7 +297,7 @@ export const ListingControls: React.FC<Props> = ({
             />
           </div>
 
-          <Tooltip>
+          <Tooltip delayDuration={1500}>
             <TooltipTrigger asChild>
               <Button
                 aria-label="Nested categories"
@@ -434,7 +434,7 @@ export const ListingControls: React.FC<Props> = ({
 
           <Divider />
 
-          <Tooltip>
+          <Tooltip delayDuration={1500}>
             <TooltipTrigger asChild>
               <Button
                 aria-label="Only drafts"
@@ -472,7 +472,7 @@ export const ListingControls: React.FC<Props> = ({
             />
           )}
 
-          <Tooltip>
+          <Tooltip delayDuration={1500}>
             <TooltipTrigger asChild>
               <Button
                 aria-label="Reset filters"

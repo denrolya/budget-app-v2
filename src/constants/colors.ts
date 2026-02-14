@@ -1,30 +1,30 @@
 export const ACCOUNT_CURRENCY_COLORSCHEME = {
   bank: {
-    eur: '#33CCFF',
-    usd: '#66FF66',
-    uah: '#FFDD55',
-    huf: '#FF6347',
-    btc: '#FFB84D', // Lightest orange
+    EUR: '#33CCFF',
+    USD: '#66FF66',
+    UAH: '#FFDD55',
+    HUF: '#FF6347',
+    BTC: '#FFB84D', // Lightest orange
   },
   cash: {
-    eur: '#0099CC',
-    usd: '#32CD32',
-    uah: '#FFD100',
-    huf: '#B22222',
-    btc: '#FFA500', // Slightly darker orange
+    EUR: '#0099CC',
+    USD: '#32CD32',
+    UAH: '#FFD100',
+    HUF: '#B22222',
+    BTC: '#FFA500', // Slightly darker orange
   },
   internet: {
-    eur: '#006080',
-    usd: '#228B22',
-    uah: '#CCAC00',
-    huf: '#8B0000',
-    btc: '#FF8C00', // Darkest, most saturated orange
+    EUR: '#006080',
+    USD: '#228B22',
+    UAH: '#CCAC00',
+    HUF: '#8B0000',
+    BTC: '#FF8C00', // Darkest, most saturated orange
   },
-  other: {
-    eur: '#66CCCC',
-    usd: '#99FF99',
-    uah: '#FFEB99',
-    huf: '#D2691E',
-    btc: '#FFDAB9', // Lighter, more pastel-like orange
+  basic: {
+    EUR: '#66CCCC',
+    USD: '#99FF99',
+    UAH: '#FFEB99',
+    HUF: '#D2691E',
+    BTC: '#FFDAB9', // Lighter, more pastel-like orange
   },
 };

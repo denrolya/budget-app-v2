@@ -1,6 +1,8 @@
-import { axiosFetcher, api } from '@/services/api';
 import Account, { AccountRawData } from '@/features/accounts/models/Account';
 import type { ConvertedValues } from '@/features/transactions';
+import { api, axiosFetcher } from '@/services/api';
+
+import { CreateAccountDTO, UpdateAccountDTO, Type as AccountType } from '../types';
 
 type ExchangeRates = Record<string, number>;
 
@@ -26,10 +28,19 @@ export const accountService = {
     return rawAccounts.map((raw) => withConvertedValues(raw, rates));
   },
 
-  async update(id: number | string, diff: Partial<Account>): Promise<AccountRawData> {
-    return api.put<AccountRawData>(`${BASE_URL_V1}/${id}`, diff).then((res) => res.data);
+  async create(payload: CreateAccountDTO): Promise<AccountRawData> {
+    const url = payload.type === AccountType.Basic ? BASE_URL_V1 : `${BASE_URL_V1}/${payload.type}`;
+    const { data } = await api.post<AccountRawData>(url, payload);
+    return data;
   },
 
-  // optional helper if you need it elsewhere
+  async update(id: number | string, payload: UpdateAccountDTO): Promise<AccountRawData> {
+    const { data } = await api.put<AccountRawData>(
+      `${BASE_URL_V1}/${id}`,
+      payload,
+    );
+    return data;
+  },
+
   withConvertedValues,
 };

@@ -1,16 +1,18 @@
 import sumBy from 'lodash/sumBy';
-import { Archive, Search, Pin } from 'lucide-react';
+import { Archive, ArchiveRestore, Focus, Search, X } from 'lucide-react';
 import React, { useCallback, useId, useMemo, useRef, useState } from 'react';
 
-import { cn } from '@/lib/utils';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
-import AccountPill from '@/features/accounts/components/Pill';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Account, Type as AccountType } from '@/features/accounts';
+import AccountPill from '@/features/accounts/components/Pill';
 import { useBaseCurrency } from '@/features/auth';
-import { useAccountsWithDefaultOrder } from '@/hooks/financeData';
-import { Type as AccountType, Account } from '@/features/accounts';
+import { useAccountsWithDefaultOrder, useActiveAccountsWithDefaultOrder } from '@/hooks/financeData';
+import { cn } from '@/lib/utils';
 
 interface SidebarListingProps {
   selectedId: string | null;
@@ -20,19 +22,19 @@ interface SidebarListingProps {
 
 const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, onClear }) => {
   const baseCurrency = useBaseCurrency();
+  const activeAccounts = useActiveAccountsWithDefaultOrder();
   const accounts = useAccountsWithDefaultOrder();
 
-  const [showArchived, setShowArchived] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [showArchived, setShowArchived] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const selectedAccountRef = useRef<HTMLDivElement>(null);
   const searchId = useId();
+  const selectedAccountRef = useRef<HTMLDivElement>(null);
 
-  const handleAccountSelect = useCallback(
+  const handleSelect = useCallback(
     (account: Account) => {
       const isAlreadySelected = selectedId === String(account.id);
 
-      // Clicking the selected item toggles back to /accounts (index state) if consumer supports it.
       if (isAlreadySelected && onClear) {
         onClear();
         return;
@@ -52,23 +54,24 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
   );
 
   const filteredAccounts = useMemo(() => {
-    const q = searchTerm.trim().toLowerCase();
+    const query = searchTerm.trim().toLowerCase();
 
     return accounts.filter((account) => {
       if (!showArchived && account.isArchived()) return false;
-      if (!q) return true;
-      return account.displayName.toLowerCase().includes(q);
+      if (!query) return true;
+      return account.displayName.toLowerCase().includes(query);
     });
   }, [accounts, searchTerm, showArchived]);
 
-  const groupedAccounts = useMemo(
-    () =>
-      Object.values(AccountType).reduce((acc, type) => {
-        acc[type] = filteredAccounts.filter((account) => account.type === type);
-        return acc;
-      }, {} as Record<AccountType, Account[]>),
-    [filteredAccounts],
+  const totalBalance = useMemo(
+    () => sumBy(activeAccounts, ({ convertedValues }) => convertedValues?.[baseCurrency] || 0),
+    [activeAccounts, baseCurrency],
   );
+
+  const groupedAccounts = useMemo(() => Object.values(AccountType).reduce((acc, type) => {
+    acc[type] = filteredAccounts.filter((account) => account.type === type);
+    return acc;
+  }, {} as Record<AccountType, Account[]>), [filteredAccounts]);
 
   return (
     <div
@@ -78,27 +81,91 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
         if (e.key === 'Escape' && onClear) onClear();
       }}
     >
-      {/* Header */}
-      <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold mb-2">Accounts</h2>
+      {/* Search + compact toolbar (same layout as categories) */}
+      <div className="border-b p-2">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search
+              aria-hidden="true"
+              className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              aria-label="Search accounts"
+              id={searchId}
+              inputMode="search"
+              placeholder="Search…"
+              value={searchTerm}
+              className="h-9 pl-8"
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
 
-        <div className="relative">
-          <label htmlFor={searchId} className="sr-only">
-            Search accounts
-          </label>
-          <Search aria-hidden="true" className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            aria-label="Search accounts"
-            id={searchId}
-            inputMode="search"
-            placeholder="Search accounts"
-            value={searchTerm}
-            className="pl-8"
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div aria-label="Account actions" role="toolbar" className="flex items-center gap-1">
+            {onClear && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label="Clear selection"
+                    disabled={!selectedId}
+                    size="icon"
+                    type="button"
+                    variant="ghost"
+                    className="h-9 w-9"
+                    onClick={() => onClear()}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Clear selection</TooltipContent>
+              </Tooltip>
+            )}
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  aria-label={showArchived ? 'Hide archived accounts' : 'Show archived accounts'}
+                  aria-pressed={showArchived}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                  className="h-9 w-9"
+                  onClick={() => setShowArchived((v) => !v)}
+                >
+                  {showArchived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{showArchived ? 'Hide archived accounts' : 'Show archived accounts'}</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  aria-label="Focus selected account"
+                  disabled={!selectedId}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                  className="h-9 w-9"
+                  onClick={() => selectedAccountRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
+                >
+                  <Focus className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Focus selected account</TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+
+        {/* Compact total line (no extra headers) */}
+        <div className="mt-2 flex items-baseline justify-between gap-2 px-1">
+          <div className="text-2xs font-medium text-muted-foreground">Total</div>
+          <div className="text-xs font-semibold tabular-nums text-foreground text-right">
+            <MoneyValue amount={totalBalance} currency={baseCurrency} showSign={false} />
+          </div>
         </div>
       </div>
 
+      {/* List */}
       <ScrollArea className="flex-1 overflow-x-hidden">
         <div role="list" className="overflow-x-hidden">
           {Object.values(AccountType).map((type) => {
@@ -106,28 +173,26 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
             if (!items?.length) return null;
 
             const groupTotal = sumBy(items, ({ convertedValues }) => convertedValues?.[baseCurrency] || 0);
-            const groupRegionId = `accounts-group-${type}`;
+            const regionId = `accounts-group-${type}`;
 
             return (
-              <section aria-labelledby={groupRegionId} className="overflow-x-hidden" key={type}>
-                {/* Group header */}
+              <section aria-labelledby={regionId} key={type}>
+                {/* Group header (keep, but compact) */}
                 <div
-                  id={groupRegionId}
+                  id={regionId}
                   className={cn(
-                    'px-4 py-2 border-b',
+                    'px-3 py-1.5 border-b',
                     'flex items-center justify-between gap-2',
-                    'text-xs uppercase tracking-wide text-muted-foreground',
-                    'overflow-x-hidden',
+                    'text-2xs uppercase tracking-wide text-muted-foreground',
                   )}
                 >
                   <span className="min-w-0 flex-1 truncate">{type}</span>
-
-                  <span className="text-sm font-semibold tabular-nums text-foreground text-right whitespace-normal break-words">
+                  <span className="text-xs font-semibold tabular-nums text-foreground text-right">
                     <MoneyValue amount={groupTotal} currency={baseCurrency} showSign={false} />
                   </span>
                 </div>
 
-                <div aria-label={`${type} accounts`} role="group" className="overflow-x-hidden">
+                <div aria-label={`${type} accounts`} role="group">
                   {items.map((account) => {
                     const accountIdStr = String(account.id);
                     const isSelected = selectedId === accountIdStr;
@@ -143,79 +208,58 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
                         role="listitem"
                         tabIndex={0}
                         className={cn(
-                          'px-4 py-3 border-b cursor-pointer',
-                          'transition-colors hover:bg-accent',
+                          'px-3 py-2 border-b cursor-pointer',
+                          'transition-colors hover:bg-accent hover:text-accent-foreground',
                           'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                          'overflow-x-hidden',
                           {
-                            'bg-accent': isSelected,
+                            'bg-accent text-accent-foreground': isSelected,
                             'opacity-70': isArchived && !isSelected,
                           },
                         )}
                         key={account.id}
-                        onClick={() => handleAccountSelect(account)}
+                        onClick={() => handleSelect(account)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
-                            handleAccountSelect(account);
+                            handleSelect(account);
                           }
                         }}
                         ref={isSelected ? selectedAccountRef : null}
                       >
-                        {/* Top row */}
-                        <div className="flex items-start justify-between gap-3 min-w-0 overflow-x-hidden">
+                        <div className="flex items-start justify-between gap-3 min-w-0">
                           {/* Left */}
-                          <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                            <div className="min-w-0 flex-1 overflow-hidden">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <AccountPill account={account} size="sm" variant="inline" textClassName="text-sm" />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <AccountPill account={account} size="sm" tooltip={false} variant="inline" textClassName="text-sm" />
+                              {isArchived && (
+                                <span className="text-2xs text-muted-foreground shrink-0">Archived</span>
+                              )}
+                            </div>
 
-                                {isArchived && (
-                                  <span className="inline-flex items-center gap-1 text-2xs text-muted-foreground shrink-0">
-                                    <Archive aria-hidden="true" className="h-3 w-3" />
-                                    Archived
-                                  </span>
-                                )}
-                              </div>
+                            <div className="mt-1 text-2xs text-muted-foreground truncate">
+                              Updated: <RelativeDatetimeDisplay date={account.updatedAt} />
                             </div>
                           </div>
 
                           {/* Right */}
-                          <div className="flex flex-col items-end gap-0.5 text-right min-w-0 overflow-x-hidden">
-                            <div className="flex items-center gap-1">
-                              {account.isDisplayedOnSidebar && (
-                                <span
-                                  aria-label="Pinned in main sidebar"
-                                  title="Pinned in main sidebar"
-                                  className="inline-flex items-center text-muted-foreground"
-                                >
-                                  <Pin aria-hidden="true" className="h-3 w-3" />
-                                </span>
+                          <div className="flex flex-col items-end gap-0.5 text-right shrink-0">
+                            <span
+                              className={cn(
+                                'text-xs font-semibold tabular-nums leading-tight',
+                                nativeAmount < 0 && 'text-destructive',
+                                account.isEmpty() && 'text-muted-foreground',
                               )}
-
-                              <span
-                                title={`${nativeAmount} ${account.currency}`}
-                                className={cn(
-                                  'text-xs font-semibold tabular-nums leading-tight text-right',
-                                  nativeAmount < 0 && 'text-destructive',
-                                  account.isEmpty() && 'text-muted-foreground',
-                                  'whitespace-normal break-words',
-                                )}
-                              >
-                                <MoneyValue
-                                  amount={nativeAmount}
-                                  currency={account.currency}
-                                  showSign={false}
-                                  showValuesTooltip={false}
-                                />
-                              </span>
-                            </div>
+                            >
+                              <MoneyValue
+                                amount={nativeAmount}
+                                currency={account.currency}
+                                showSign={false}
+                                showValuesTooltip={false}
+                              />
+                            </span>
 
                             {showBaseLine && (
-                              <span
-                                title={`${baseAmount} ${baseCurrency}`}
-                                className="text-2xs tabular-nums leading-tight text-muted-foreground text-right whitespace-normal break-words"
-                              >
+                              <span className="text-2xs tabular-nums leading-tight text-muted-foreground">
                                 <MoneyValue
                                   amount={baseAmount}
                                   currency={baseCurrency}
@@ -227,12 +271,6 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
                             )}
                           </div>
                         </div>
-
-                        {/* Meta */}
-                        <div className="mt-2 text-2xs text-muted-foreground">
-                          <span>Last updated: </span>
-                          <RelativeDatetimeDisplay date={account.updatedAt} />
-                        </div>
                       </div>
                     );
                   })}
@@ -240,18 +278,14 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
               </section>
             );
           })}
-        </div>
 
-        <div className="p-4">
-          <button
-            aria-label={showArchived ? 'Hide archived accounts' : 'Show archived accounts'}
-            aria-pressed={showArchived}
-            type="button"
-            className="text-sm text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
-            onClick={() => setShowArchived((v) => !v)}
-          >
-            {showArchived ? 'Hide Archived' : 'Show Archived'}
-          </button>
+          {filteredAccounts.length === 0 && (
+            <div className="p-2">
+              <div className="flex h-16 items-center justify-center rounded-md border border-dashed border-border text-2xs text-muted-foreground">
+                No accounts found
+              </div>
+            </div>
+          )}
         </div>
       </ScrollArea>
     </div>

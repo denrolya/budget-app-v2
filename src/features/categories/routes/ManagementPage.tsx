@@ -116,7 +116,7 @@ const CategoriesPage = () => {
     <>
       <PageWithSidebar contentScrollable={false}>
         <PageWithSidebar.Sidebar>
-          <div className={cn('flex h-full flex-col', isDeleting && 'pointer-events-none opacity-60')}>
+          <div className={cn('flex h-full flex-col', { 'pointer-events-none opacity-60': isDeleting })}>
             {/* Search + compact toolbar */}
             <div className="border-b p-2">
               <div className="flex items-center gap-2">
