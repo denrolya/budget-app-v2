@@ -202,6 +202,10 @@ export const transactionService = {
     return api.post(`/api/transactions/${data.type}`, this.formatData(data));
   },
 
+  bulkCreate(payload: Partial<RawTransactionDTO | Transaction>[]) {
+    return api.post('/api/transactions/bulk', payload.map((data) => this.formatData(data)));
+  },
+
   update(id: string | number, updates: Partial<RawTransactionDTO | Transaction>, original: Transaction) {
     return api.put(`/api/transactions/${id}`, this.formatData(updates, original));
   },

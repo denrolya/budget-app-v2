@@ -65,7 +65,7 @@ const missingRequired = (t: TransactionRow) => !t.account || !t.category;
 export const BulkCreateTableForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
-  const { create: createTransaction } = useMutations();
+  const { bulkCreate } = useMutations();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -109,28 +109,25 @@ export const BulkCreateTableForm: React.FC = () => {
 
       setIsSubmitting(true);
 
-      const ok: number[] = [];
-      let failed = 0;
+      try {
+        await bulkCreate(
+          data.transactions.map((t) => ({
+            ...t,
+            type: t.type,
+          })),
+        );
 
-      for (let i = 0; i < data.transactions.length; i++) {
-        try {
-          await createTransaction(data.transactions[i]);
-          ok.push(i);
-        } catch(e) {
-          failed += 1;
-          console.error(e);
-          toast.error(`Failed to submit row #${i}.`);
-        }
+        toast.success(`${data.transactions.length} transaction(s) created successfully!`);
+
+        replace([createDefaultRow()]);
+      } catch (e) {
+        console.error(e);
+        toast.error('Failed to submit transactions. Please review data and try again.');
+      } finally {
+        setIsSubmitting(false);
       }
-
-      const remaining = data.transactions.filter((_, idx) => !ok.includes(idx));
-      replace(remaining.length ? remaining : [createDefaultRow()]);
-
-      if (failed > 0) toast.warning(`${failed} transaction(s) failed. Please review and try again.`);
-
-      setIsSubmitting(false);
     },
-    [createTransaction, replace, validateRequired],
+    [bulkCreate, replace, validateRequired],
   );
 
   // Hotkeys
@@ -194,7 +191,8 @@ export const BulkCreateTableForm: React.FC = () => {
         <form
           aria-label="Bulk create transactions"
           className="relative isolate z-40"
-          onSubmit={form.handleSubmit(onSubmit)}>
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
           {/* Table region must be above siblings too */}
           <div className={cn('relative z-40', footerReserve)}>
             <Table>
@@ -303,7 +301,9 @@ export const BulkCreateTableForm: React.FC = () => {
                                   type="number"
                                   value={field.value ?? ''}
                                   className={cn(compactControl, 'w-full')}
-                                  onChange={(e) => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)}
+                                  onChange={(e) =>
+                                    field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)
+                                  }
                                 />
                               </FormControl>
                               <FormMessage />

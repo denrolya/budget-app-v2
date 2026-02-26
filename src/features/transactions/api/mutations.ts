@@ -9,7 +9,6 @@ import { TransactionFilters } from '../models/TransactionFilters';
 import { queryKeys } from './keys';
 import { transactionService } from './service';
 
-
 export const useMutations = (opts?: { invalidateKey?: string | readonly unknown[] }) => {
   const qc = useQueryClient();
 
@@ -32,6 +31,19 @@ export const useMutations = (opts?: { invalidateKey?: string | readonly unknown[
     },
     onError: (error: Error) => {
       toast.error('Failed to create transaction', { description: error.message || 'Unexpected error.' });
+    },
+  });
+
+  const bulkCreateMutation = useMutation({
+    mutationFn: (newTxs: Partial<Transaction>[]) => transactionService.bulkCreate(newTxs),
+    onSuccess: async (_data, variables) => {
+      await invalidate();
+      toast.success(`Created ${variables.length} transactions successfully!`);
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to create transactions', {
+        description: error.message || 'Unexpected error.',
+      });
     },
   });
 
@@ -81,9 +93,12 @@ export const useMutations = (opts?: { invalidateKey?: string | readonly unknown[
     delete: deleteMutation.mutateAsync,
     exportTransactionsCsv,
 
+    bulkCreate: bulkCreateMutation.mutateAsync,
+
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
     isExportingCsv: exportCsvMutation.isPending,
+    isBulkCreating: bulkCreateMutation.isPending,
   };
 };
