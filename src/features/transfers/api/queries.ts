@@ -41,10 +41,14 @@ export type UseTransfersListReturn = Omit<UseListReturn<TransferFilters, Transfo
   totalValue: number;
 };
 
-const groupTransfersByDay = (items: Transfer[], baseCurrency: string): GroupedTransfers =>
+const groupTransfersByDay = (
+  items: Transfer[],
+  baseCurrency: string,
+  direction: 'asc' | 'desc' = 'desc',
+): GroupedTransfers =>
   toPairs(
     groupBy(
-      sortBy(items, (item) => -item.executedAt.valueOf()),
+      sortBy(items, (item) => direction === 'asc' ? item.executedAt.valueOf() : -item.executedAt.valueOf()),
       (item) => item.executedAt.format(BACKEND_DATE_FORMAT),
     ),
   ).map(([date, dayItems]) => {
@@ -73,7 +77,7 @@ export const useList = (options: UseTransfersListOptions = {}): UseTransfersList
     updateUrl,
     queryKeyBase: String(queryKeyBase?.[0] ?? 'transfers'),
     searchParamKeys: {
-      searchTerm: 'q',
+      searchTerm: 'note',
       before: 'before',
       after: 'after',
       amountRange: 'amount',
@@ -119,7 +123,10 @@ export const useList = (options: UseTransfersListOptions = {}): UseTransfersList
 
   const items = useMemo(() => data?.items ?? [], [data]);
   const totalValue = data?.totalValue ?? 0;
-  const groupedItems = useMemo(() => groupTransfersByDay(items, baseCurrency), [items, baseCurrency]);
+  const groupedItems = useMemo(
+    () => groupTransfersByDay(items, baseCurrency, listState.sort.direction),
+    [items, baseCurrency, listState.sort.direction],
+  );
 
   return { ...listState, items, groupedItems, totalValue };
 };

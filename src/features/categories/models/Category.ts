@@ -10,7 +10,6 @@ export default class Category {
   createdAt: Moment;
   icon: string;
   isAffectingProfit: boolean;
-  isTechnical: boolean;
   isFixed: boolean;
   tags: CategoryTagDTO[];
 
@@ -28,7 +27,6 @@ export default class Category {
     this.createdAt = moment(data.createdAt);
     this.icon = data.icon;
     this.isAffectingProfit = data.isAffectingProfit;
-    this.isTechnical = data.isTechnical;
     this.isFixed = data.isFixed;
     this.tags = data.tags;
   }

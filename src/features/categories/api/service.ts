@@ -27,7 +27,6 @@ export const categoriesService = {
           name: payload.name,
           parent: payload.parent ?? null,
           isAffectingProfit: payload.isAffectingProfit ?? true,
-          isTechnical: payload.isTechnical ?? false,
           isFixed: payload.isFixed ?? false,
         },
       );
@@ -48,7 +47,6 @@ export const categoriesService = {
           name: payload.name,
           parent: payload.parent ?? null,
           isAffectingProfit: payload.isAffectingProfit,
-          isTechnical: payload.isTechnical,
           isFixed: payload.isFixed,
         },
       );

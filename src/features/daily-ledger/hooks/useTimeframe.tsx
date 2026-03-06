@@ -1,98 +1,101 @@
 import moment from 'moment';
 import { useCallback, useState } from 'react';
 
-import { TIMEFRAME_STEP_PRESETS } from '@/features/daily-ledger/constants';
-import { Timeframe, TimeframeStep } from '@/types/global';
+import { Timeframe } from '@/types/global';
 
-const DEFAULT_STEP: TimeframeStep = TIMEFRAME_STEP_PRESETS.find(
-  (s) => s.unit === 'week',
-) ?? TIMEFRAME_STEP_PRESETS[1];
+export const getInitialTimeframe = (): Timeframe => ({
+  after: moment().startOf('isoWeek'),
+  before: moment().endOf('isoWeek'),
+});
 
-const getInitialTimeframe = (step: TimeframeStep): Timeframe => {
-  const now = moment();
+export type DetectedPeriod = 'day' | 'week' | 'month' | 'custom';
 
-  switch (step.unit) {
-    case 'week':
-      return {
-        after: now.clone().startOf('isoWeek'),
-        before: now.clone().endOf('isoWeek'),
-      };
+/** Detects whether a timeframe aligns with a standard period boundary. */
+export const detectPeriod = ({ after, before }: Timeframe): DetectedPeriod => {
+  if (after.isSame(before, 'day')) return 'day';
 
-    case 'month':
-      return {
-        after: now.clone().startOf('month'),
-        before: now.clone().endOf('month'),
-      };
+  if (
+    after.isoWeekday() === 1 &&
+    before.isoWeekday() === 7 &&
+    before.diff(after, 'days') === 6
+  )
+    return 'week';
 
+  if (
+    after.date() === 1 &&
+    after.isSame(before, 'month') &&
+    before.date() === before.daysInMonth()
+  )
+    return 'month';
+
+  return 'custom';
+};
+
+/** Snaps to the standard period containing the reference date. */
+export const snapToPeriod = (ref: moment.Moment, period: 'day' | 'week' | 'month'): Timeframe => {
+  switch (period) {
     case 'day':
-    default:
+      return { after: ref.clone().startOf('day'), before: ref.clone().endOf('day') };
+    case 'week':
+      return { after: ref.clone().startOf('isoWeek'), before: ref.clone().endOf('isoWeek') };
+    case 'month':
+      return { after: ref.clone().startOf('month'), before: ref.clone().endOf('month') };
+  }
+};
+
+/**
+ * Navigate to the next or previous period.
+ * Standard periods (day/week/month) snap to their natural boundaries.
+ * Custom ranges shift by their exact duration in days.
+ */
+const navigate = (timeframe: Timeframe, direction: 'next' | 'previous'): Timeframe => {
+  const sign = direction === 'next' ? 1 : -1;
+  const { after, before } = timeframe;
+
+  switch (detectPeriod(timeframe)) {
+    case 'day': {
+      const base = after.clone().add(sign, 'day');
+      return { after: base.clone().startOf('day'), before: base.clone().endOf('day') };
+    }
+    case 'week': {
+      const base = after.clone().add(sign * 7, 'days');
+      return { after: base.clone().startOf('isoWeek'), before: base.clone().endOf('isoWeek') };
+    }
+    case 'month': {
+      const base = after.clone().add(sign, 'month');
+      return { after: base.clone().startOf('month'), before: base.clone().endOf('month') };
+    }
+    case 'custom': {
+      const days = before.diff(after, 'days') + 1;
       return {
-        after: now.clone().startOf('day'),
-        before: now.clone().endOf('day'),
+        after: after.clone().add(sign * days, 'days'),
+        before: before.clone().add(sign * days, 'days'),
       };
+    }
   }
 };
 
 interface UseTimeframeProps {
-  onChange: (timeframe: Timeframe) => void;
+  initialTimeframe?: Timeframe;
 }
 
-export const useTimeframe = ({ onChange }: UseTimeframeProps) => {
-  const [step, setStep] = useState<TimeframeStep>(DEFAULT_STEP);
+export const useTimeframe = ({ initialTimeframe }: UseTimeframeProps = {}) => {
   const [timeframe, setTimeframe] = useState<Timeframe>(
-    getInitialTimeframe(DEFAULT_STEP),
+    initialTimeframe ?? getInitialTimeframe(),
   );
 
-  const buildTimeframeFromStart = useCallback((start: moment.Moment, step: TimeframeStep): Timeframe => {
-    switch (step.unit) {
-      case 'week':
-        return {
-          after: start.clone().startOf('isoWeek'),
-          before: start.clone().endOf('isoWeek'),
-        };
-
-      case 'month':
-        return {
-          after: start.clone().startOf('month'),
-          before: start.clone().endOf('month'),
-        };
-
-      case 'day':
-      default:
-        return {
-          after: start.clone().startOf('day'),
-          before: start.clone().endOf('day'),
-        };
-    }
+  const goToPeriod = useCallback((direction: 'next' | 'previous') => {
+    setTimeframe((current) => navigate(current, direction));
   }, []);
 
-  const goToPeriod = useCallback(
-    (direction: 'next' | 'previous') => {
-      const sign = direction === 'next' ? 1 : -1;
+  const goToNextPeriod = useCallback(() => goToPeriod('next'), [goToPeriod]);
+  const goToPreviousPeriod = useCallback(() => goToPeriod('previous'), [goToPeriod]);
 
-      const base = timeframe.after.clone().add(sign * step.amount, step.unit);
-      const next = buildTimeframeFromStart(base, step);
-
-      setTimeframe(next);
-      onChange(next);
-    },
-    [timeframe.after, step, buildTimeframeFromStart, onChange],
-  );
-
-  const goToNextPeriod = () => goToPeriod('next');
-  const goToPreviousPeriod = () => goToPeriod('previous');
-
-  const reset = useCallback(() => {
-    const initial = getInitialTimeframe(step);
-    setTimeframe(initial);
-    onChange(initial);
-  }, [step, onChange]);
+  const reset = useCallback(() => setTimeframe(getInitialTimeframe()), []);
 
   return {
     timeframe,
     setTimeframe,
-    step,
-    setStep,
     goToNextPeriod,
     goToPreviousPeriod,
     reset,

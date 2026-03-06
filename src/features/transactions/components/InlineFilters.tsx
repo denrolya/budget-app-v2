@@ -1,5 +1,5 @@
 import debounce from 'lodash/debounce';
-import { ArrowDownCircle, ArrowUpCircle, CalendarIcon, FileText, Layers, RotateCcw } from 'lucide-react';
+import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, ChevronDown, Layers, RotateCcw, Search, X } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
@@ -8,12 +8,18 @@ import CategoryTypeahead from '@/features/categories/components/CategoryTypeahea
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { FILTER_PRESETS, MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { cn } from '@/lib/utils';
 import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
 import { Timeframe } from '@/types/global';
-import { Type as TransactionType } from '@/features/transactions';
 
 interface Props {
   data: TransactionFilters;
@@ -21,59 +27,83 @@ interface Props {
   onReset: () => void;
   isLoading?: boolean;
   onFiltersDialogToggle: () => void;
+  sortDirection?: 'asc' | 'desc';
+  onSortToggle?: () => void;
 }
 
 const H = 'h-9';
 const ICON_BTN = cn(H, 'w-9');
-const TYPEAHEAD_W = 'w-[18rem]';
-const AMOUNT_W = 'w-24';
+const TYPEAHEAD_W = 'w-[15rem]';
+const AMOUNT_W = 'w-20';
 const DATE_TEXT = 'max-w-44 truncate';
 
+// Visually connects CategoryTypeahead to its nested-toggle button on the right.
+const TYPEAHEAD_JOINED = cn(TYPEAHEAD_W, '[&>div:first-child]:rounded-r-none [&>div:first-child]:border-r-0');
+
 const Divider: React.FC = () => (
-  <span aria-hidden="true" className="hidden md:block h-6 w-px bg-border mx-1.5" />
+  <span aria-hidden="true" className="hidden md:block h-6 w-px bg-border mx-1" />
 );
 
-const InlineFilters: React.FC<Props> = ({ data, onChange, onReset, isLoading, onFiltersDialogToggle }) => {
-  const [localAmountRange, setLocalAmountRange] = useState(data.amountRange);
+const CURRENCY_CODES = Object.keys(CURRENCIES) as CURRENCY_CODE[];
 
-  const debouncedOnChange = useRef(
-    debounce(<K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => {
-      onChange(key, value);
+const InlineFilters: React.FC<Props> = ({ data, onChange, onReset, isLoading, onFiltersDialogToggle, sortDirection, onSortToggle }) => {
+  // --- Local amount state (avoids caret jumps on debounce) ---
+  const [minLocal, setMinLocal] = useState('');
+  const [maxLocal, setMaxLocal] = useState('');
+  const [searchLocal, setSearchLocal] = useState(data.searchTerm ?? '');
+
+  const debouncedAmount = useRef(
+    debounce((minStr: string, maxStr: string) => {
+      const min = minStr === '' ? NaN : Number(minStr);
+      const max = maxStr === '' ? NaN : Number(maxStr);
+      if (!Number.isFinite(min) && !Number.isFinite(max)) {
+        onChange('amountRange', [] as any);
+        return;
+      }
+      onChange('amountRange', [min, max] as any);
+    }, 350),
+  ).current;
+
+  const debouncedSearch = useRef(
+    debounce((value: string) => {
+      onChange('searchTerm', value as any);
     }, 250),
   ).current;
 
-  useEffect(() => () => debouncedOnChange.cancel(), [debouncedOnChange]);
+  useEffect(() => () => { debouncedAmount.cancel(); debouncedSearch.cancel(); }, [debouncedAmount, debouncedSearch]);
 
+  // Sync external amount → local (reset / URL navigation)
   useEffect(() => {
-    setLocalAmountRange(data.amountRange);
+    const [extMin, extMax] = data.amountRange ?? [];
+    setMinLocal((p) => { const n = (extMin != null && Number.isFinite(extMin)) ? String(extMin) : ''; return p === n ? p : n; });
+    setMaxLocal((p) => { const n = (extMax != null && Number.isFinite(extMax)) ? String(extMax) : ''; return p === n ? p : n; });
   }, [data.amountRange]);
 
+  useEffect(() => {
+    setSearchLocal(data.searchTerm ?? '');
+  }, [data.searchTerm]);
+
+  const handleMinChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setMinLocal(e.target.value);
+    debouncedAmount(e.target.value, maxLocal);
+  }, [debouncedAmount, maxLocal]);
+
+  const handleMaxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setMaxLocal(e.target.value);
+    debouncedAmount(minLocal, e.target.value);
+  }, [debouncedAmount, minLocal]);
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchLocal(e.target.value);
+    debouncedSearch(e.target.value);
+  }, [debouncedSearch]);
+
   const dateLabel = useMemo(() => {
-    const { after, before } = data;
-    if (after && before)
-      return `${after.format(MOMENT_DATEPICKER_FORMAT)} - ${before.format(MOMENT_DATEPICKER_FORMAT)}`;
-    if (!after && before) return `Before ${before.format(MOMENT_DATEPICKER_FORMAT)}`;
-    if (after && !before) return `After ${after.format(MOMENT_DATEPICKER_FORMAT)}`;
+    if (data.after && data.before) return `${data.after.format(MOMENT_DATEPICKER_FORMAT)} – ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`;
+    if (!data.after && data.before) return `Before ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`;
+    if (data.after && !data.before) return `After ${data.after.format(MOMENT_DATEPICKER_FORMAT)}`;
     return 'Date';
   }, [data.after, data.before]);
-
-  const isIncome = data.type === TransactionType.Income;
-  const isExpense = data.type === TransactionType.Expense;
-
-  const setType = useCallback(
-    (type: TransactionType) => {
-      onChange('type', data.type === type ? undefined : type);
-    },
-    [data.type, onChange],
-  );
-
-  const toggleDraft = useCallback(() => {
-    debouncedOnChange('isDraft', !data.isDraft);
-  }, [data.isDraft, debouncedOnChange]);
-
-  const toggleNestedCategories = useCallback(() => {
-    debouncedOnChange('withNestedCategories', !data.withNestedCategories);
-  }, [data.withNestedCategories, debouncedOnChange]);
 
   const handleTimeframeChange = useCallback(
     (range: Timeframe) => {
@@ -83,23 +113,28 @@ const InlineFilters: React.FC<Props> = ({ data, onChange, onReset, isLoading, on
     [onChange],
   );
 
-  const handleMinAmountChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newMin = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
-      setLocalAmountRange((prev) => [newMin, prev[1]]);
-      debouncedOnChange('amountRange', [newMin, localAmountRange[1]]);
-    },
-    [debouncedOnChange, localAmountRange],
-  );
+  const toggleNestedCategories = useCallback(() => {
+    onChange('withNestedCategories', !data.withNestedCategories);
+  }, [data.withNestedCategories, onChange]);
 
-  const handleMaxAmountChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newMax = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
-      setLocalAmountRange((prev) => [prev[0], newMax]);
-      debouncedOnChange('amountRange', [localAmountRange[0], newMax]);
-    },
-    [debouncedOnChange, localAmountRange],
-  );
+  const selectedCurrencies: string[] = useMemo(() => (data as any).currencies ?? [], [data]);
+
+  const toggleCurrency = useCallback((code: CURRENCY_CODE) => {
+    const next = selectedCurrencies.includes(code)
+      ? selectedCurrencies.filter((c) => c !== code)
+      : [...selectedCurrencies, code];
+    onChange('currencies' as any, (next.length ? next : undefined) as any);
+  }, [selectedCurrencies, onChange]);
+
+  const clearCurrencies = useCallback(() => {
+    onChange('currencies' as any, undefined as any);
+  }, [onChange]);
+
+  const currencyLabel = useMemo(() => {
+    if (selectedCurrencies.length === 0) return 'Currency';
+    if (selectedCurrencies.length <= 2) return selectedCurrencies.map((c) => CURRENCIES[c as CURRENCY_CODE]?.symbol ?? c).join(' ');
+    return `${selectedCurrencies.length} currencies`;
+  }, [selectedCurrencies]);
 
   const canReset = data.activeCount > 0 && !isLoading;
 
@@ -110,153 +145,176 @@ const InlineFilters: React.FC<Props> = ({ data, onChange, onReset, isLoading, on
         role="toolbar"
         className="flex flex-wrap items-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2"
       >
-        {/* DATE */}
-        <div className="flex items-center gap-1.5">
-          <div aria-label="Date range" role="group" className="flex items-center">
-            <DaterangePickerWithPresets
-              after={data.after}
-              before={data.before}
-              presets={FILTER_PRESETS}
-              onChange={handleTimeframeChange}
-            >
-              <Button
-                aria-label="Select date range"
-                size="sm"
-                type="button"
-                variant="outline"
-                className={cn(H, 'bg-background px-2')}
-              >
-                <CalendarIcon aria-hidden="true" className="mr-1.5 h-4 w-4" />
-                <span className={DATE_TEXT}>{dateLabel}</span>
-              </Button>
-            </DaterangePickerWithPresets>
-          </div>
+        {/* DATE + SORT ORDER */}
+        <div className="flex items-stretch">
+          <DaterangePickerWithPresets
+            after={data.after}
+            before={data.before}
+            presets={FILTER_PRESETS}
+            onChange={handleTimeframeChange}
+          >
+            <Button size="sm" type="button" variant="outline" className={cn(H, 'bg-background px-2', onSortToggle && 'rounded-r-none border-r-0')}>
+              <CalendarIcon aria-hidden="true" className="mr-1.5 h-4 w-4 shrink-0" />
+              <span className={DATE_TEXT}>{dateLabel}</span>
+            </Button>
+          </DaterangePickerWithPresets>
+
+          {onSortToggle && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  aria-label="Toggle sort order"
+                  aria-pressed={sortDirection === 'asc'}
+                  size="icon"
+                  type="button"
+                  variant="outline"
+                  className="h-9 w-9 rounded-l-none border border-input shrink-0"
+                  onClick={onSortToggle}
+                >
+                  {sortDirection === 'asc'
+                    ? <CalendarArrowUp aria-hidden="true" className="h-4 w-4" />
+                    : <CalendarArrowDown aria-hidden="true" className="h-4 w-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Toggle sort order</TooltipContent>
+            </Tooltip>
+          )}
         </div>
 
         <Divider />
 
-        {/* MAIN SELECTORS */}
-        <div className="flex items-center gap-1.5">
-          <div aria-label="Accounts filter" role="group" className={cn('flex items-center', TYPEAHEAD_W)}>
-            <AccountTypeahead
-              multiple
-              aria-label="Filter by accounts"
-              placeholder="Accounts"
-              value={data.accounts}
-              className="w-full"
-              onChange={(accounts) => onChange('accounts', accounts)}
-            />
-          </div>
+        {/* ACCOUNTS */}
+        <div aria-label="Accounts filter" role="group" className={cn('flex items-center', TYPEAHEAD_W)}>
+          <AccountTypeahead
+            multiple
+            placeholder="Accounts"
+            value={data.accounts}
+            className="w-full"
+            onChange={(accounts) => onChange('accounts', accounts)}
+          />
+        </div>
 
-          <Divider />
+        <Divider />
 
-          <div aria-label="Categories filter" role="group" className={cn('flex items-center', TYPEAHEAD_W)}>
-            <CategoryTypeahead
-              multiple
-              aria-label="Filter by categories"
-              placeholder="Categories"
-              value={data.categories}
-              className="w-full"
-              onChange={(categories) => onChange('categories', categories)}
-            />
-          </div>
-
+        {/* CATEGORIES + NESTED BTN-GROUP */}
+        <div aria-label="Categories filter" role="group" className="flex items-stretch">
+          <CategoryTypeahead
+            multiple
+            placeholder="Categories"
+            value={data.categories}
+            className={TYPEAHEAD_JOINED}
+            onChange={(categories) => {
+              onChange('categories', categories);
+              if (categories?.length) onChange('withNestedCategories', true);
+            }}
+          />
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                aria-label="Nested categories"
+                aria-label="Include nested categories"
                 aria-pressed={data.withNestedCategories}
                 size="icon"
                 type="button"
                 variant={data.withNestedCategories ? 'secondary' : 'outline'}
-                className={ICON_BTN}
+                className="h-9 w-9 rounded-l-none border border-input shrink-0"
                 onClick={toggleNestedCategories}
               >
                 <Layers aria-hidden="true" className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Nested categories</TooltipContent>
+            <TooltipContent>Include nested categories</TooltipContent>
           </Tooltip>
         </div>
 
         <Divider />
 
-        {/* AMOUNT + TYPE + DRAFT */}
-        <div className="flex items-center gap-1.5">
-          <div aria-label="Amount range" role="group" className="flex items-center gap-1.5">
-            <Input
-              aria-label="Minimum amount"
-              inputMode="numeric"
-              placeholder="Min"
-              type="number"
-              value={localAmountRange[0] ?? ''}
-              className={cn(H, AMOUNT_W, 'bg-background')}
-              onChange={handleMinAmountChange}
-            />
-            <Input
-              aria-label="Maximum amount"
-              inputMode="numeric"
-              placeholder="Max"
-              type="number"
-              value={localAmountRange[1] ?? ''}
-              className={cn(H, AMOUNT_W, 'bg-background')}
-              onChange={handleMaxAmountChange}
-            />
-          </div>
-
-          <Divider />
-
-          <div aria-label="Transaction type" role="group" className={cn('flex items-center', H)}>
-            <div className={cn('flex items-stretch overflow-hidden rounded-md border bg-background', H)}>
-              <Button
-                aria-pressed={isIncome}
-                size="sm"
-                type="button"
-                variant={isIncome ? 'success' : 'ghost'}
-                className="h-full rounded-none px-2"
-                onClick={() => setType(TransactionType.Income)}
-              >
-                <ArrowDownCircle aria-hidden="true" className="mr-1.5 h-4 w-4" />
-                Income
-              </Button>
-
-              <div aria-hidden="true" className="self-center h-5 w-px bg-border" />
-
-              <Button
-                aria-pressed={isExpense}
-                size="sm"
-                type="button"
-                variant={isExpense ? 'destructive' : 'ghost'}
-                className="h-full rounded-none px-2"
-                onClick={() => setType(TransactionType.Expense)}
-              >
-                <ArrowUpCircle aria-hidden="true" className="mr-1.5 h-4 w-4" />
-                Expense
-              </Button>
-            </div>
-          </div>
-
-          <Divider />
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                aria-label="Only drafts"
-                aria-pressed={data.isDraft}
-                size="icon"
-                type="button"
-                variant={data.isDraft ? 'secondary' : 'outline'}
-                className={ICON_BTN}
-                onClick={toggleDraft}
-              >
-                <FileText aria-hidden="true" className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Only drafts</TooltipContent>
-          </Tooltip>
+        {/* AMOUNT RANGE */}
+        <div aria-label="Amount range" role="group" className="flex items-center gap-1">
+          <Input
+            aria-label="Minimum amount"
+            inputMode="decimal"
+            placeholder="Min"
+            type="number"
+            value={minLocal}
+            className={cn(H, AMOUNT_W, 'bg-background')}
+            onChange={handleMinChange}
+          />
+          <span aria-hidden="true" className="text-muted-foreground text-xs">–</span>
+          <Input
+            aria-label="Maximum amount"
+            inputMode="decimal"
+            placeholder="Max"
+            type="number"
+            value={maxLocal}
+            className={cn(H, AMOUNT_W, 'bg-background')}
+            onChange={handleMaxChange}
+          />
         </div>
 
-        {/* RESET */}
+        <Divider />
+
+        {/* NOTE SEARCH */}
+        <div className="relative flex items-center">
+          <Search aria-hidden="true" className="absolute left-2.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <Input
+            aria-label="Search by note"
+            placeholder="Search notes…"
+            type="search"
+            value={searchLocal}
+            className={cn(H, 'bg-background pl-8 w-36')}
+            onChange={handleSearchChange}
+          />
+        </div>
+
+        <Divider />
+
+        {/* CURRENCY DROPDOWN */}
+        <div aria-label="Currency filter" role="group" className="flex items-stretch">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="sm"
+                type="button"
+                variant={selectedCurrencies.length > 0 ? 'secondary' : 'outline'}
+                className={cn(H, 'bg-background px-2 gap-1', selectedCurrencies.length > 0 && 'rounded-r-none border-r-0')}
+              >
+                <span className="text-xs">{currencyLabel}</span>
+                <ChevronDown aria-hidden="true" className="h-3 w-3 shrink-0 opacity-60" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-44">
+              {CURRENCY_CODES.map((code) => {
+                const c = CURRENCIES[code];
+                return (
+                  <DropdownMenuCheckboxItem
+                    checked={selectedCurrencies.includes(code)}
+                    key={code}
+                    onCheckedChange={() => toggleCurrency(code)}
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    <span className="mr-2 w-5 text-center text-sm">{c.symbol}</span>
+                    <span className="font-mono text-xs mr-2">{c.code}</span>
+                    <span className="truncate text-xs text-muted-foreground">{c.name}</span>
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {selectedCurrencies.length > 0 && (
+            <Button
+              aria-label="Clear currency filter"
+              size="icon"
+              type="button"
+              variant="secondary"
+              className="h-9 w-7 rounded-l-none border border-l-0 border-input shrink-0"
+              onClick={clearCurrencies}
+            >
+              <X aria-hidden="true" className="h-3 w-3" />
+            </Button>
+          )}
+        </div>
+
+        {/* RESET + FILTER TOGGLE */}
         <div className="ml-0 md:ml-auto flex items-center gap-1.5">
           <Tooltip>
             <TooltipTrigger asChild>

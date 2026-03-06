@@ -1,6 +1,8 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import moment from 'moment';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useSearchParams } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -11,10 +13,18 @@ import ListFiltersSheet from '@/features/daily-ledger/components/ListFiltersShee
 import ListingControls from '@/features/daily-ledger/components/ListingControls';
 import TableListing from '@/features/daily-ledger/components/TableListing';
 import TableListingSkeleton from '@/features/daily-ledger/components/TableListingSkeleton';
-import { TIMEFRAME_STEP_PRESETS } from '@/features/daily-ledger/constants';
 import { useTransactionsAndTransfersList } from '@/features/daily-ledger/hooks/useList';
-import { useTimeframe } from '@/features/daily-ledger/hooks/useTimeframe';
+import {
+  detectPeriod,
+  getInitialTimeframe,
+  snapToPeriod,
+  useTimeframe,
+} from '@/features/daily-ledger/hooks/useTimeframe';
+import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
+import { TransferFilters } from '@/features/transfers/models/TransferFilters';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
+import { Timeframe } from '@/types/global';
 
 type ViewMode = 'table' | 'list';
 
@@ -35,8 +45,13 @@ type Props = {
   updateUrl?: boolean;
   omitTransferTransactions?: boolean;
   enableHotkeys?: boolean;
-  showControls?: boolean
+  showControls?: boolean;
   initialFilters?: InitialFilters;
+  /**
+   * Override the starting timeframe (used by embedded drawer views).
+   * When `updateUrl=true` and URL params are present, URL takes precedence.
+   */
+  initialTimeframe?: Timeframe;
 };
 
 const ErrorBanner: React.FC<{ error: unknown }> = ({ error }) => {
@@ -55,6 +70,25 @@ const ErrorBanner: React.FC<{ error: unknown }> = ({ error }) => {
   );
 };
 
+/** Read the initial timeframe from search params (stable - call inside useMemo with [] deps). */
+const readTimeframeFromParams = (searchParams: URLSearchParams): Timeframe | undefined => {
+  const afterRaw = searchParams.get('after');
+  const beforeRaw = searchParams.get('before');
+  if (!afterRaw || !beforeRaw) return undefined;
+
+  const after = moment(afterRaw, BACKEND_DATE_FORMAT, true);
+  const before = moment(beforeRaw, BACKEND_DATE_FORMAT, true);
+  if (!after.isValid() || !before.isValid()) return undefined;
+
+  return { after, before };
+};
+
+const PERIOD_PRESETS = [
+  { value: 'day', label: '1 day' },
+  { value: 'week', label: '1 week' },
+  { value: 'month', label: '1 month' },
+] as const;
+
 const ListingContainer = forwardRef<ListingHandle, Props>(
   ({
      updateUrl = true,
@@ -62,23 +96,64 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
      enableHotkeys = true,
      showControls = true,
      initialFilters,
+     initialTimeframe: initialTimeframeProp,
    }, ref) => {
     const isMobile = useIsMobile();
     const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
 
-    // timeframe is here now
-    const { timeframe, setTimeframe, step, setStep, goToNextPeriod, goToPreviousPeriod, reset: resetTimeframe } =
-      useTimeframe({
-        onChange: () => undefined,
-      });
+    // --- URL params (read once on mount, write on change) ---
+    const [, setSearchParams] = useSearchParams();
 
-    // listing-only UI state
+    /**
+     * Capture the initial search params once on mount via a ref, so we can
+     * read them in useMemo without triggering exhaustive-deps warnings.
+     */
+    const initialSearchParamsRef = useRef(useSearchParams()[0]);
+
+    /**
+     * Compute the effective initial timeframe ONCE on mount.
+     * Priority: URL params > prop > computed default (current ISO week).
+     */
+    const urlTimeframe = useMemo(() => readTimeframeFromParams(initialSearchParamsRef.current), []);
+
+    const effectiveInitialTimeframe: Timeframe =
+      urlTimeframe ?? initialTimeframeProp ?? getInitialTimeframe();
+
+    /**
+     * Pre-seed filters with the effective timeframe so the first fetch uses
+     * the correct range immediately (prevents a double-fetch on page load).
+     */
+    const effectiveInitialTimeframeRef = useRef(effectiveInitialTimeframe);
+
+    const initialTransactionFilters = useMemo(
+      () =>
+        new TransactionFilters({
+          after: effectiveInitialTimeframeRef.current.after,
+          before: effectiveInitialTimeframeRef.current.before,
+        }),
+      [],
+    );
+
+    const initialTransferFilters = useMemo(
+      () =>
+        new TransferFilters({
+          after: effectiveInitialTimeframeRef.current.after,
+          before: effectiveInitialTimeframeRef.current.before,
+        }),
+      [],
+    );
+
+    // --- Timeframe hook ---
+    const { timeframe, setTimeframe, goToNextPeriod, goToPreviousPeriod, reset: resetTimeframe } =
+      useTimeframe({ initialTimeframe: effectiveInitialTimeframe });
+
+    // --- Listing-only UI state ---
     const [showEmptyDays, setShowEmptyDays] = useState(true);
     const [activeView, setActiveView] = useState<ViewMode>('table');
     const [isReversedOrder, setIsReversedOrder] = useState(true);
     const [isCompactTable, setIsCompactTable] = useState(true);
 
-    // filters sheet is owned here
+    // --- Filters sheet ---
     const [isFiltersOpen, setIsFiltersOpen] = useState(false);
     const toggleFilters = useCallback(() => setIsFiltersOpen((p) => !p), []);
 
@@ -98,6 +173,8 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
     } = useTransactionsAndTransfersList({
       updateUrl,
       omitTransferTransactions,
+      initialTransactionFilters,
+      initialTransferFilters,
     });
 
     /**
@@ -125,7 +202,7 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
       didApplyInitialFiltersRef.current = true;
     }, [initialFilters, setFilter]);
 
-    // sync timeframe -> list filters (always)
+    // Sync timeframe → list filters (after any timeframe change)
     useEffect(() => {
       setFilter('after', timeframe.after);
       setFilter('before', timeframe.before);
@@ -171,16 +248,11 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
       return () => removePageHotkeys('Combined Listing');
     }, [enableHotkeys, addPageHotkeys, removePageHotkeys]);
 
-    const selectedTimeframeStepIndex = useMemo(
-      () => TIMEFRAME_STEP_PRESETS.findIndex((p) => p.amount === step?.amount && p.unit === step?.unit),
-      [step?.amount, step?.unit],
-    );
+    const activePeriod = useMemo(() => detectPeriod(timeframe), [timeframe]);
 
     const showDesktopTable = !isMobile && activeView === 'table';
     const showDesktopDaily = !isMobile && activeView === 'list';
     const showMobileDaily = isMobile;
-
-    const stepSelectValue = useMemo(() => String(selectedTimeframeStepIndex), [selectedTimeframeStepIndex]);
 
     return (
       <>
@@ -274,20 +346,19 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
             </Button>
 
             <Select
-              value={stepSelectValue}
+              value={activePeriod === 'custom' ? '' : activePeriod}
               onValueChange={(val) => {
-                const index = Number.parseInt(val, 10);
-                const next = TIMEFRAME_STEP_PRESETS[index];
-                if (next) setStep(next);
+                const preset = val as 'day' | 'week' | 'month';
+                setTimeframe(snapToPeriod(timeframe.after, preset));
               }}
             >
               <SelectTrigger aria-label="Select time period" className="w-44">
-                <SelectValue placeholder="Select time period" />
+                <SelectValue placeholder="Custom" />
               </SelectTrigger>
               <SelectContent>
-                {TIMEFRAME_STEP_PRESETS.map((preset, index) => (
-                  <SelectItem value={String(index)} key={`${preset.amount}-${preset.unit}`}>
-                    {preset.amount} {preset.unit}
+                {PERIOD_PRESETS.map(({ value, label }) => (
+                  <SelectItem value={value} key={value}>
+                    {label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -318,6 +389,7 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
           timeframe={timeframe}
           transactionFilters={transactionFilters}
           transferFilters={transferFilters}
+          onReset={handleResetFilters}
         />
       </>
     );

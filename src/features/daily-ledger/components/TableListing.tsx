@@ -2,9 +2,10 @@ import { Moment } from 'moment';
 import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import DateGroupHeaderRow from '@/components/common/DateGroupHeaderRow';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import SummaryBadge from '@/components/common/SummaryBadge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
@@ -30,25 +31,14 @@ interface Props {
   compact?: boolean;
 }
 
-export const COLS = {
-  gutter: 'w-3 shrink-0',
-  id: 'w-[74px] shrink-0',
-  account: 'w-[260px]',
-  amount: 'w-[200px] shrink-0',
-  category: 'w-[150px]',
-  note: 'w-auto',
-  executedAt: 'w-[72px] shrink-0',
-  actions: 'w-[96px] shrink-0',
-} as const;
-
 const TableListing: React.FC<Props> = ({
-                                         groupedItems,
-                                         after,
-                                         before,
-                                         showEmptyDays = true,
-                                         isReversedOrder = false,
-                                         compact = true,
-                                       }) => {
+  groupedItems,
+  after,
+  before,
+  showEmptyDays = true,
+  isReversedOrder = false,
+  compact = true,
+}) => {
   const { update: updateTransaction, delete: deleteTransaction, isUpdating } = useTransactionsMutations();
   const { delete: deleteTransfer } = useTransfersMutations();
   const { openForm } = useFormContext();
@@ -122,41 +112,30 @@ const TableListing: React.FC<Props> = ({
 
   const transactionColumns = useMemo(
     () => [
-      { key: 'id', className: cn('pl-4') },
+      { key: 'id', className: 'pl-4' },
       { key: 'account' },
       { key: 'amount' },
       { key: 'category' },
-      { key: 'note', className: cn('text-muted-foreground') },
+      { key: 'note', className: 'text-muted-foreground' },
       { key: 'executedAt' },
-      { key: 'actions', className: cn('text-right') },
+      { key: 'actions', className: 'text-right' },
     ],
     [],
   );
 
   return (
-    <div className="w-full min-w-0 overflow-x-auto">
-      <Table className="w-full min-w-[768px] table-fixed">
-        <colgroup>
-          <col className={COLS.gutter} />
-          <col className={COLS.id} />
-          <col className={COLS.account} />
-          <col className={COLS.amount} />
-          <col className={COLS.category} />
-          <col className={COLS.note} />
-          <col className={COLS.executedAt} />
-          <col className={COLS.actions} />
-        </colgroup>
-
+    <div className="overflow-x-auto">
+      <Table className="min-w-[760px]">
         <TableHeader className="sr-only">
           <TableRow>
-            <TableHead>Gutter</TableHead>
+            <TableHead />
             <TableHead>ID</TableHead>
             <TableHead>Account</TableHead>
             <TableHead>Amount</TableHead>
             <TableHead>Category</TableHead>
             <TableHead>Note</TableHead>
             <TableHead>Time</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -166,7 +145,7 @@ const TableListing: React.FC<Props> = ({
               groupedItems?.find((group) => group[0].isSame(date, 'day')) ?? ([null, [], 0, 0, 0, 0] as any);
 
             const [, items, transactionsValue, transfersValue, transactionsCount, transfersCount] = found as [
-                Moment | null,
+              Moment | null,
               (Transaction | Transfer)[],
               number,
               number,
@@ -178,43 +157,46 @@ const TableListing: React.FC<Props> = ({
 
             return (
               <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
-                <TableRow
-                  className={cn({
+                <DateGroupHeaderRow
+                  compact={compact}
+                  rowClassName={cn({
                     'bg-success/10': transactionsValue > 0,
                     'bg-destructive/10': transactionsValue < 0,
                   })}
-                >
-                  <TableCell colSpan={8} className={cn('font-semibold px-4', compact && 'py-0')}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <RelativeDatetimeDisplay
-                          showDayBadge
-                          showRelative
-                          badgeSize="sm"
-                          date={date}
-                          showTime={false}
-                          variant="default"
-                          className="font-normal"
-                        />
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <SummaryBadge
-                          count={transactionsCount}
-                          icon={ROUTES.TRANSACTION_LIST.icon}
-                          value={transactionsValue}
-                        />
-                        <SummaryBadge
-                          count={transfersCount}
-                          icon={ROUTES.TRANSFER_LIST.icon}
-                          useColors={false}
-                          value={transfersValue}
-                        />
-                      </div>
+                  left={
+                    <div className="flex items-center space-x-4">
+                      <RelativeDatetimeDisplay
+                        showDayBadge
+                        showRelative
+                        badgeSize="sm"
+                        date={date}
+                        showTime={false}
+                        variant="default"
+                        className="font-normal"
+                      />
                     </div>
-                  </TableCell>
-                </TableRow>
+                  }
+                  right={
+                    <>
+                      <SummaryBadge
+                        count={transactionsCount}
+                        icon={ROUTES.TRANSACTION_LIST.icon}
+                        value={transactionsValue}
+                      />
+                      <SummaryBadge
+                        count={transfersCount}
+                        icon={ROUTES.TRANSFER_LIST.icon}
+                        useColors={false}
+                        value={transfersValue}
+                      />
+                    </>
+                  }
+                />
 
-                {items.map((item) => {
+                {[...items].sort((a, b) => isReversedOrder
+                  ? (b.executedAt as Moment).valueOf() - (a.executedAt as Moment).valueOf()
+                  : (a.executedAt as Moment).valueOf() - (b.executedAt as Moment).valueOf()
+                ).map((item) => {
                   if (item instanceof Transfer || 'fromExpense' in (item as any)) {
                     const transfer = item as Transfer;
 

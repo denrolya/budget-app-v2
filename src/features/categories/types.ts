@@ -12,7 +12,6 @@ export interface CategoryDTO {
   createdAt: string;
   icon: string;
   isAffectingProfit: boolean;
-  isTechnical: boolean;
   isFixed: boolean;
   tags: CategoryTagDTO[];
 }
@@ -23,7 +22,6 @@ export interface CategoryApiResponseDTO {
   '@type': string;
   isFixed: boolean;
   name: string;
-  isTechnical: boolean;
   parent: CategoryApiResponseDTO | null;
   isAffectingProfit: boolean;
 }
@@ -57,7 +55,6 @@ export type CreateCategoryDTO = {
   name: string;
   parent?: CategoryId | null;
   isAffectingProfit?: boolean;
-  isTechnical?: boolean;
   isFixed?: boolean;
 };
 
@@ -66,14 +63,12 @@ export type UpdateCategoryDTO = {
   name?: string;
   parent?: CategoryId | null;
   isAffectingProfit?: boolean;
-  isTechnical?: boolean;
   isFixed?: boolean;
 };
 
 /** ===== API DTOs (actual request payloads) ===== */
 export type ApiCreateCategoryPayload = {
   name: string;
-  isTechnical?: boolean;
   isAffectingProfit?: boolean;
   isFixed?: boolean;
   parent?: Iri | null;
@@ -84,7 +79,6 @@ export type ApiCreateCategoryPayload = {
 
 export type ApiUpdateCategoryPayload = {
   name?: string;
-  isTechnical?: boolean;
   isAffectingProfit?: boolean;
   isFixed?: boolean;
   parent?: Iri | null;
@@ -97,7 +91,6 @@ export type CategoryApiDTO = {
   id: CategoryId;
   name: string;
   type?: string; // API отдаёт type readOnly string
-  isTechnical?: boolean;
   isAffectingProfit?: boolean;
   isFixed?: boolean;
 

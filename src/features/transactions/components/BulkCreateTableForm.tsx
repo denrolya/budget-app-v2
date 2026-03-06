@@ -22,7 +22,6 @@ import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
 import { useMutations } from '../api/mutations';
 import { Type as TransactionType } from '../types';
 
-import { CSVUploader } from './CSVUploader';
 
 const transactionSchema = z.object({
   type: z.nativeEnum(TransactionType),
@@ -389,10 +388,6 @@ export const BulkCreateTableForm: React.FC = () => {
               <Button disabled={isSubmitting} type="button" variant="outline" className="h-9" onClick={addRow}>
                 <Plus className="mr-2 h-4 w-4" /> Add Transaction
               </Button>
-
-              <div className="w-full sm:w-72">
-                <CSVUploader onComplete={replace} />
-              </div>
 
               <Button disabled={isSubmitting} type="submit" variant="default" className="h-9">
                 <Save className="mr-2 h-4 w-4" /> {isSubmitting ? 'Saving...' : 'Save All'}

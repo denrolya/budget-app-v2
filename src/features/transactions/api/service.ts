@@ -68,7 +68,7 @@ const buildQueryParams = (args: {
     if (sort?.direction) query.set('sortDirection', sort.direction);
   }
 
-  if (filters.searchTerm) query.set('searchTerm', filters.searchTerm);
+  if (filters.searchTerm) query.set('note', filters.searchTerm);
 
   if (filters.before) query.set('before', filters.before.format(BACKEND_DATE_FORMAT));
   if (filters.after) query.set('after', filters.after.format(BACKEND_DATE_FORMAT));
@@ -192,7 +192,7 @@ export const transactionService = {
         category: 137,
         executedAt: moment(comp.executedAt).toISOString(),
         isDraft: false,
-        note: `[Compensation]: ${values.note || existingData?.id}`,
+        note: values.note ? `[Compensation]: ${values.note}` : null,
         type: TransactionType.Income,
       };
     });

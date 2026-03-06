@@ -1,9 +1,10 @@
 import type { Moment } from 'moment';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
+import DateGroupHeaderRow from '@/components/common/DateGroupHeaderRow';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import SummaryBadge from '@/components/common/SummaryBadge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
 import Details from '@/features/transfers/components/Details';
@@ -13,17 +14,6 @@ import { confirm } from '@/lib/confirmation';
 import { cn } from '@/lib/utils';
 
 import { useMutations as useTransfersMutations } from '../api/mutations';
-
-const COLS = {
-  gutter: 'w-3 shrink-0',
-  id: 'w-[74px] shrink-0',
-  accounts: 'w-[260px]',
-  amount: 'w-[200px] shrink-0',
-  rate: 'w-[150px] shrink-0',
-  note: 'w-auto',
-  executedAt: 'w-[72px] shrink-0',
-  actions: 'w-[96px] shrink-0',
-} as const;
 
 interface Props {
   groupedItems: [Moment, Transfer[], number, number][];
@@ -47,32 +37,19 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
     await deleteTransfer(Number(transfer.id));
   };
 
-  const totalColumnsCount = useMemo(() => 8, []);
-
   return (
-    <div className="w-full min-w-0 overflow-x-auto">
-      <Table className="w-full min-w-0 table-fixed">
-        <colgroup>
-          <col className={COLS.gutter} />
-          <col className={COLS.id} />
-          <col className={COLS.accounts} />
-          <col className={COLS.amount} />
-          <col className={COLS.rate} />
-          <col className={COLS.note} />
-          <col className={COLS.executedAt} />
-          <col className={COLS.actions} />
-        </colgroup>
-
+    <div className="overflow-x-auto">
+      <Table className="min-w-[760px]">
         <TableHeader className="sr-only">
           <TableRow>
-            <TableHead>Gutter</TableHead>
+            <TableHead />
             <TableHead>ID</TableHead>
             <TableHead>Transfer</TableHead>
             <TableHead>Amount</TableHead>
             <TableHead>Rate</TableHead>
             <TableHead>Note</TableHead>
             <TableHead>Time</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -82,25 +59,27 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
 
             return (
               <React.Fragment key={dateKey}>
-                <TableRow>
-                  <TableCell colSpan={totalColumnsCount} className={cn('bg-muted/40 px-4', compact && 'py-0')}>
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <RelativeDatetimeDisplay
-                        showDayBadge
-                        badgeSize="sm"
-                        date={date}
-                        showTime={false}
-                        variant="default"
-                      />
-                      <SummaryBadge
-                        count={totalItems}
-                        icon={ROUTES.TRANSFER_LIST.icon}
-                        useColors={false}
-                        value={totalValue}
-                      />
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <DateGroupHeaderRow
+                  compact={compact}
+                  cellClassName="bg-muted/40"
+                  left={
+                    <RelativeDatetimeDisplay
+                      showDayBadge
+                      badgeSize="sm"
+                      date={date}
+                      showTime={false}
+                      variant="default"
+                    />
+                  }
+                  right={
+                    <SummaryBadge
+                      count={totalItems}
+                      icon={ROUTES.TRANSFER_LIST.icon}
+                      useColors={false}
+                      value={totalValue}
+                    />
+                  }
+                />
 
                 {transfers.map((transfer) => (
                   <TransferRow

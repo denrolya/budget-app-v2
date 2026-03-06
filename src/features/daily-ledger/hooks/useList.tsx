@@ -1,8 +1,11 @@
+import { useQueryClient } from '@tanstack/react-query';
 import moment, { Moment } from 'moment';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useBaseCurrency } from '@/features/auth';
+import { FormType, useFormSubmitListener } from '@/contexts/Form';
 import { Transaction, TransactionFilters, useList as useTransactionsList } from '@/features/transactions';
 import { Transfer, TransferFilters, useList as useTransfersList } from '@/features/transfers';
 
@@ -72,22 +75,34 @@ export const useTransactionsAndTransfersList = ({
                                                   perPage = 500,
                                                 }: UseTransactionsAndTransfersListOptions = {}) => {
   const baseCurrency = useBaseCurrency();
+  const queryClient = useQueryClient();
 
   // UI toggles
   const [showTransactions, setShowTransactions] = useState(true);
   const [showTransfers, setShowTransfers] = useState(true);
 
+  // Sub-hooks use isolated cache keys so they never collide with the standalone
+  // transactions/transfers list pages that use the default 'transactions'/'transfers' keys.
   const transactionsState = useTransactionsList({
     initialPerPage: perPage,
     initialFilters: initialTransactionFilters,
-    updateUrl,
+    updateUrl: false,
     omitTransferTransactions,
+    queryKeyBase: 'ledger_transactions',
   });
 
   const transfersState = useTransfersList({
     initialPerPage: perPage,
     initialFilters: initialTransferFilters,
-    updateUrl,
+    updateUrl: false,
+    queryKeyBase: ['ledger_transfers'],
+  });
+
+  // Cross-invalidate standalone caches on form submit so navigating to the
+  // transactions/transfers pages always shows fresh data.
+  useFormSubmitListener([FormType.Transaction, FormType.Transfer], () => {
+    queryClient.invalidateQueries({ queryKey: ['transactions'] });
+    queryClient.invalidateQueries({ queryKey: ['transfers'] });
   });
 
   const isLoading = transactionsState.isLoading || transfersState.isLoading;
@@ -147,6 +162,49 @@ export const useTransactionsAndTransfersList = ({
     transactionsState.resetFilters();
     transfersState.resetFilters();
   }, [transactionsState.resetFilters, transfersState.resetFilters]);
+
+  // URL ownership: write filter state when updateUrl=true.
+  // TransactionFilters is a superset of TransferFilters, so TX filters cover all URL keys.
+  const [, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (!updateUrl) return;
+
+    const f = transactionsState.filters;
+
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+
+        // Clear all filter-owned keys before rewriting
+        ['after', 'before', 'q', 'categories', 'accounts', 'currencies', 'amount', 'isDraft', 'withNestedCategories', 'type'].forEach((k) =>
+          next.delete(k),
+        );
+
+        // Write after/before only when they differ from the default (current ISO week).
+        // This keeps the URL clean on initial load.
+        const defaultAfter = moment().startOf('isoWeek');
+        const defaultBefore = moment().endOf('isoWeek');
+        if (!f.after.isSame(defaultAfter, 'day') || !f.before.isSame(defaultBefore, 'day')) {
+          next.set('after', f.after.format(BACKEND_DATE_FORMAT));
+          next.set('before', f.before.format(BACKEND_DATE_FORMAT));
+        }
+
+        // Optional filters — omit when empty/default
+        if (f.searchTerm) next.set('q', f.searchTerm);
+        if (f.categories?.length) next.set('categories', (f.categories as Array<string | number>).join(','));
+        if (f.accounts?.length) next.set('accounts', f.accounts.join(','));
+        if (f.currencies?.length) next.set('currencies', f.currencies.join(','));
+        if (f.amountRange?.length) next.set('amount', f.amountRange.join(','));
+        if (f.isDraft !== undefined) next.set('isDraft', String(f.isDraft));
+        if (f.withNestedCategories) next.set('withNestedCategories', 'true');
+        if (f.type) next.set('type', f.type);
+
+        return next;
+      },
+      { replace: true },
+    );
+  }, [updateUrl, transactionsState.filters, setSearchParams]);
 
   return {
     items,

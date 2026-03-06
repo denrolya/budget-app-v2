@@ -38,9 +38,14 @@ export const TransfersListPage: React.FC = () => {
     resetFilters,
     isFetching,
     totalValue,
+    sort,
   } = useList();
 
   const isUpdatingBannerVisible = isFetching && !isLoading;
+
+  const handleSortToggle = useCallback(() => {
+    sort.setSort({ field: sort.field || 'executedAt', direction: sort.direction === 'desc' ? 'asc' : 'desc' });
+  }, [sort]);
 
   const openNewTransferForm = useCallback(() => {
     openForm(FormType.Transfer);
@@ -154,6 +159,8 @@ export const TransfersListPage: React.FC = () => {
                 onChange={setFilter}
                 onFiltersDialogToggle={toggleFilters}
                 onReset={resetFilters}
+                sortDirection={sort.direction}
+                onSortToggle={handleSortToggle}
               />
             </div>
           )}

@@ -2,6 +2,13 @@ import moment, { Moment } from 'moment';
 
 import BaseFilters from '@/models/BaseFilters';
 import { Type as TransactionType } from '@/features/transactions';
+import {
+  readParamArray,
+  readParamBool,
+  readParamMoment,
+  readParamNumberArray,
+  readParamString,
+} from '@/lib/url/searchParams';
 
 interface TransactionFiltersProps {
   searchTerm?: string;
@@ -30,12 +37,22 @@ const toStringArray = (value: ScalarOrArray): string[] => {
     .filter((v) => v.length > 0);
 };
 
-const toNumberArray = (value: ScalarOrArray): number[] => {
+/**
+ * Positional variant for amountRange: preserves NaN as a sentinel for
+ * "no value at this position" so [NaN, 500] means "no min, max=500".
+ * Returns [] when all positions are empty (no effective filter).
+ */
+const toAmountRange = (value: ScalarOrArray): number[] => {
   if (value === null || value === undefined) return [];
   const arr = Array.isArray(value) ? value : [value];
-  return arr
-    .map((v) => (typeof v === 'number' ? v : Number(String(v).trim())))
-    .filter((n) => Number.isFinite(n));
+  if (arr.length === 0) return [];
+  const mapped = arr.map((v) => {
+    if (v === null || v === undefined) return NaN;
+    return typeof v === 'number' ? v : Number(String(v).trim());
+  });
+  // All positions empty → clear the filter entirely
+  if (mapped.every((n) => !Number.isFinite(n))) return [];
+  return mapped;
 };
 
 const toMixedIdArray = (value: ScalarOrArray): Array<string | number> => {
@@ -107,10 +124,49 @@ export class TransactionFilters extends BaseFilters {
 
     // Enforce normalization even for constructor input
     this.accounts = toStringArray(this.accounts);
-    this.amountRange = toNumberArray(this.amountRange);
+    this.amountRange = toAmountRange(this.amountRange);
     this.categories = toMixedIdArray(this.categories);
     this.excludedCategories = toMixedIdArray(this.excludedCategories);
     this.currencies = toStringArray(this.currencies);
+  }
+
+  protected override deserialize(
+    key: string,
+    ctx: { params: URLSearchParams; paramKey: string; format: string },
+  ): unknown | undefined {
+    const { params, paramKey, format } = ctx;
+
+    switch (key) {
+      case 'after':
+      case 'before':
+        return readParamMoment(params, paramKey, format);
+
+      case 'categories':
+      case 'excludedCategories':
+      case 'accounts':
+      case 'currencies':
+        return readParamArray(params, paramKey);
+
+      case 'amountRange': {
+        const raw = params.get(paramKey);
+        if (!raw) return [];
+        // Positional CSV: ",500" → [NaN, 500] | "100," → [100, NaN] | "100,500" → [100, 500]
+        const [minStr, maxStr] = raw.split(',').map((s) => s.trim());
+        const min = minStr ? Number(minStr) : NaN;
+        const max = maxStr !== undefined ? (maxStr ? Number(maxStr) : NaN) : NaN;
+        const result = [min, max];
+        return result.every((n) => !Number.isFinite(n)) ? [] : result;
+      }
+
+      case 'withNestedCategories':
+      case 'isDraft':
+        return readParamBool(params, paramKey);
+
+      case 'searchTerm':
+      case 'type':
+      default:
+        return readParamString(params, paramKey);
+    }
   }
 
   /**
@@ -129,8 +185,8 @@ export class TransactionFilters extends BaseFilters {
         return toStringArray(value as ScalarOrArray);
 
       case 'amountRange':
-        // Always number[]
-        return toNumberArray(value as ScalarOrArray);
+        // Positional: NaN = "no value at this position"
+        return toAmountRange(value as ScalarOrArray);
 
       case 'categories':
       case 'excludedCategories':

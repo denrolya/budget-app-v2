@@ -32,7 +32,7 @@ const buildQueryParams = ({ page, perPage, filters, sort }: FetchTransfersParams
   query.set('page', String(page));
   query.set('perPage', String(perPage));
 
-  if (filters.searchTerm) query.set('searchTerm', filters.searchTerm);
+  if (filters.searchTerm) query.set('note', filters.searchTerm);
 
   if (filters.before) {
     // preserve your original semantics: inclusive "before end of day"

@@ -46,10 +46,14 @@ export type UseTransactionsListReturn = Omit<UseListReturn<TransactionFilters, T
   totalValue: number;
 };
 
-const groupTransactionsByDay = (items: Transaction[], baseCurrency: string): GroupedTransactions =>
+const groupTransactionsByDay = (
+  items: Transaction[],
+  baseCurrency: string,
+  direction: 'asc' | 'desc' = 'desc',
+): GroupedTransactions =>
   toPairs(
     groupBy(
-      sortBy(items, (item) => -item.executedAt.valueOf()),
+      sortBy(items, (item) => direction === 'asc' ? item.executedAt.valueOf() : -item.executedAt.valueOf()),
       (item) => item.executedAt.format(BACKEND_DATE_FORMAT),
     ),
   ).map(([date, dayItems]) => {
@@ -84,7 +88,7 @@ export const useList = (options: UseTransactionsListOptions = {}): UseTransactio
     updateUrl,
     queryKeyBase,
     searchParamKeys: {
-      searchTerm: 'q',
+      searchTerm: 'note',
       before: 'before',
       after: 'after',
       status: 'status',
@@ -132,7 +136,10 @@ export const useList = (options: UseTransactionsListOptions = {}): UseTransactio
 
   const items = useMemo(() => data?.items ?? [], [data]);
   const totalValue = data?.totalValue ?? 0;
-  const groupedItems = useMemo(() => groupTransactionsByDay(items, baseCurrency), [items, baseCurrency]);
+  const groupedItems = useMemo(
+    () => groupTransactionsByDay(items, baseCurrency, listState.sort.direction),
+    [items, baseCurrency, listState.sort.direction],
+  );
 
   return {
     ...listState,

@@ -44,7 +44,6 @@ export const CategoryDialog = ({
   const [name, setName] = React.useState('');
   const [selectedParentId, setSelectedParentId] = React.useState<number | null>(null);
   const [isAffectingProfit, setIsAffectingProfit] = React.useState(true);
-  const [isTechnical, setIsTechnical] = React.useState(false);
 
   const { create, update, isCreating, isUpdating } = useMutations();
   const isLoading = isCreating || isUpdating;
@@ -81,12 +80,10 @@ export const CategoryDialog = ({
         setName(category.name);
         setSelectedParentId(category.parent?.id ?? null);
         setIsAffectingProfit(category.isAffectingProfit);
-        setIsTechnical(category.isTechnical);
       } else {
         setName('');
         setSelectedParentId(parentId);
         setIsAffectingProfit(true);
-        setIsTechnical(false);
       }
     }
   }, [open, category, parentId]);
@@ -101,7 +98,6 @@ export const CategoryDialog = ({
         name: name.trim(),
         parentId: selectedParentId,
         isAffectingProfit,
-        isTechnical,
       };
       await update({ id: category.id, updates });
     } else {
@@ -110,7 +106,6 @@ export const CategoryDialog = ({
         type,
         parentId: selectedParentId,
         isAffectingProfit,
-        isTechnical,
       };
       await create(payload);
     }
@@ -244,19 +239,6 @@ export const CategoryDialog = ({
                   onCheckedChange={setIsAffectingProfit}
                 />
                 <span className="text-3xs text-muted-foreground">Profit</span>
-              </label>
-              <label
-                htmlFor="technical"
-                className="flex items-center gap-1.5 cursor-pointer"
-              >
-                <Switch
-                  checked={isTechnical}
-                  disabled={isLoading}
-                  id="technical"
-                  className="scale-75"
-                  onCheckedChange={setIsTechnical}
-                />
-                <span className="text-3xs text-muted-foreground">Technical</span>
               </label>
             </fieldset>
           </div>

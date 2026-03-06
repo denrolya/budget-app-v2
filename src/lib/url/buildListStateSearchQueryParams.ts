@@ -34,10 +34,18 @@ export const buildListStateSearchParams = <FilterType extends BaseFilters>(
     const paramKey = keys[key as string] || key;
     const defaultValue = defaults.filters[key as keyof FilterType];
     if (!isNil(value) && value !== '' && !isSameValue(value, defaultValue)) {
-      const formattedValue = moment.isMoment(value)
-        ? value.format(formatMoment)
-        : value.toString();
-      params.set(paramKey, formattedValue);
+      let formattedValue: string;
+      if (moment.isMoment(value)) {
+        formattedValue = value.format(formatMoment);
+      } else if (Array.isArray(value)) {
+        // Preserve positional semantics: NaN → empty string so [NaN, 500] → ",500"
+        formattedValue = value
+          .map((v) => (typeof v === 'number' && !Number.isFinite(v) ? '' : String(v)))
+          .join(',');
+      } else {
+        formattedValue = value.toString();
+      }
+      if (formattedValue) params.set(paramKey, formattedValue);
     }
   });
 

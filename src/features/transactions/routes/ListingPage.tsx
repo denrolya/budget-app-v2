@@ -40,7 +40,12 @@ export const TransactionsListPage: React.FC = () => {
     resetFilters,
     isFetching,
     totalValue,
+    sort,
   } = useTransactionsList();
+
+  const handleSortToggle = useCallback(() => {
+    sort.setSort({ field: sort.field || 'executedAt', direction: sort.direction === 'desc' ? 'asc' : 'desc' });
+  }, [sort]);
 
   const { exportTransactionsCsv, isExportingCsv } = useMutations('transactions');
 
@@ -173,6 +178,8 @@ export const TransactionsListPage: React.FC = () => {
                 onChange={setFilter}
                 onFiltersDialogToggle={toggleFilters}
                 onReset={resetFilters}
+                sortDirection={sort.direction}
+                onSortToggle={handleSortToggle}
               />
             </div>
           )}

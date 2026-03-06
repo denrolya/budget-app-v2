@@ -23,7 +23,6 @@ const schema = z.object({
   type: z.enum(['expense', 'income']),
   parent: z.number().int().nullable(),
   isAffectingProfit: z.boolean(),
-  isTechnical: z.boolean(),
   isFixed: z.boolean(),
 });
 
@@ -80,7 +79,6 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>(
         type: data?.type ?? CategoryType.Expense,
         parent: normalizedParent,
         isAffectingProfit: data?.isAffectingProfit ?? true,
-        isTechnical: data?.isTechnical ?? false,
         isFixed: data?.isFixed ?? false,
       };
     }, [data]);
@@ -124,7 +122,6 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>(
               type: values.type,
               parent: values.parent,
               isAffectingProfit: values.isAffectingProfit,
-              isTechnical: values.isTechnical,
               isFixed: values.isFixed,
             };
             await update({ id: data.id, payload });
@@ -134,7 +131,6 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>(
               type: values.type,
               parent: values.parent,
               isAffectingProfit: values.isAffectingProfit,
-              isTechnical: values.isTechnical,
               isFixed: values.isFixed,
             };
             await create(payload);
@@ -275,29 +271,6 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>(
                       htmlFor="affecting-profit"
                       className="cursor-pointer select-none text-3xs text-muted-foreground">
                       Profit
-                    </FormLabel>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="isTechnical"
-                render={({ field }) => (
-                  <FormItem className="flex items-center gap-2 space-y-0">
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        disabled={isLoading}
-                        id="technical"
-                        className="scale-75"
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel
-                      htmlFor="technical"
-                      className="cursor-pointer select-none text-3xs text-muted-foreground">
-                      Technical
                     </FormLabel>
                   </FormItem>
                 )}

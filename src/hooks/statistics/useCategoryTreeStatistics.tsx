@@ -16,7 +16,6 @@ interface CategoryNode {
   id: number;
   createdAt: string;
   name: string;
-  isTechnical: boolean;
   children: CategoryNode[];
   isAffectingProfit: boolean;
   icon: string | null;
