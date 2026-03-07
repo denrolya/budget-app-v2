@@ -23,9 +23,11 @@ import Debt from '../models/Debt';
 
 interface Props {
   debt: Debt;
+  transactions: Transaction[];
+  isLoadingTransactions?: boolean;
 }
 
-const DebtDetails: React.FC<Props> = ({ debt }) => {
+const DebtDetails: React.FC<Props> = ({ debt, transactions, isLoadingTransactions = false }) => {
   const [activeTab, setActiveTab] = useState('transactions');
   const { openForm } = useFormContext();
   const baseCurrency = useBaseCurrency();
@@ -35,7 +37,7 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
     () =>
       toPairs(
         groupBy(
-          sortBy(debt.transactions, (item) => -item.executedAt.valueOf()),
+          sortBy(transactions, (item) => -item.executedAt.valueOf()),
           (item) => item.executedAt.format(BACKEND_DATE_FORMAT),
         ),
       ).map(([date, items]) => {
@@ -46,11 +48,11 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
         const totalItems = items.length;
         return [moment(date), items, totalValue, totalItems];
       }),
-    [debt.transactions, baseCurrency],
+    [transactions, baseCurrency],
   );
 
   const totalTransactionsValue = groupedTransactions.reduce((acc, [, , totalValue]) => acc + totalValue, 0);
-  const totalTransactionsCount = debt.transactions.length;
+  const totalTransactionsCount = transactions.length;
 
   return (
     // min-w-0 is critical: allows this column to shrink inside flex layouts (PageWithSidebar.Content).
@@ -120,9 +122,8 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
                     error={null}
                     groupedItems={groupedTransactions}
                     isError={false}
-                    isLoading={false}
-                    refetch={() => {
-                    }}
+                    isLoading={isLoadingTransactions}
+                    refetch={() => {}}
                     onAdd={() => openForm(FormType.Transaction, { debt })} />
                 </ScrollArea>
               </CardContent>

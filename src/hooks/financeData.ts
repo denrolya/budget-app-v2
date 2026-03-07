@@ -59,7 +59,6 @@ export const useExchangeRates = (): ExchangeRatesData => {
   return q.data;
 };
 
-export const useFixerExchangeRates = (): ConvertedValues => useExchangeRates().fixer;
 export const useMonobankExchangeRates = (): ConvertedValues => useExchangeRates().mono;
 export const useWiseExchangeRates = (): ConvertedValues => useExchangeRates().wise;
 

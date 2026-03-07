@@ -11,7 +11,7 @@ import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import AccountPill from '@/features/accounts/components/Pill';
-import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/hooks/financeData';
+import { useExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/hooks/financeData';
 import { confirm } from '@/lib/confirmation';
 
 import { useMutations } from '../api/mutations';
@@ -55,7 +55,7 @@ const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
   const { delete: deleteTransaction, isDeleting, isUpdating: isEditing } = useMutations();
 
   const isDebt = transaction.debt && transaction.debt.debtor;
-  const fixerRates = useFixerExchangeRates();
+  const fixerRates = useExchangeRates().fixer;
   const monobankRates = useMonobankExchangeRates();
   const wiseRates = useWiseExchangeRates();
 

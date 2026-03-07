@@ -11,7 +11,7 @@ import { FormType, useForm } from '@/contexts/Form';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { confirm } from '@/lib/confirmation';
 
-import { queryKeys, useList as useDebtsQuery, useMutations as useDebtMutations } from '../api';
+import { queryKeys, useTransactions as useDebtTransactions, useList as useDebtsQuery, useMutations as useDebtMutations } from '../api';
 import DebtDetails from '../components/Details';
 import SidebarListing from '../components/SidebarListing';
 import type Debt from '../models/Debt';
@@ -67,8 +67,14 @@ const DebtDetailsRoute: React.FC = () => {
   const { debtId } = useParams<{ debtId: string }>();
   const navigate = useNavigate();
 
+  const debtIdNum = debtId ? Number(debtId) : null;
+
+  // List query: used for action buttons (edit, close, delete) — no transactions needed
   const { data } = useDebtsQuery({ withClosed: true });
   const { update, remove } = useDebtMutations();
+
+  // Fetch transactions only when a debt is selected (lazy loading)
+  const { data: transactions = [], isLoading: isLoadingTransactions } = useDebtTransactions(debtIdNum);
 
   const debt = useMemo(() => {
     if (!debtId) return null;
@@ -79,6 +85,7 @@ const DebtDetailsRoute: React.FC = () => {
     await Promise.all([
       qc.invalidateQueries({ queryKey: queryKeys.list({ withClosed: true }) }),
       qc.invalidateQueries({ queryKey: queryKeys.list({ withClosed: false }) }),
+      debtIdNum ? qc.invalidateQueries({ queryKey: queryKeys.transactions(debtIdNum) }) : Promise.resolve(),
     ]);
   };
 
@@ -185,7 +192,7 @@ const DebtDetailsRoute: React.FC = () => {
       </PageWithSidebar.Header>
 
       <div className="p-4 min-w-0 overflow-x-hidden">
-        <DebtDetails debt={debt} />
+        <DebtDetails debt={debt} transactions={transactions} isLoadingTransactions={isLoadingTransactions} />
       </div>
     </>
   );

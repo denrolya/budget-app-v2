@@ -1,9 +1,8 @@
 import debounce from 'lodash/debounce';
-import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, ChevronDown, RotateCcw, Search, X } from 'lucide-react';
+import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, ChevronDown, Search, X } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { Button } from '@/components/ui/button';
@@ -24,15 +23,12 @@ import { Timeframe } from '@/types/global';
 interface Props {
   data: TransferFilters;
   onChange: <K extends keyof TransferFilters>(key: K, value: TransferFilters[K] | undefined | null) => void;
-  onReset: () => void;
   isLoading?: boolean;
-  onFiltersDialogToggle: () => void;
   sortDirection?: 'asc' | 'desc';
   onSortToggle?: () => void;
 }
 
 const H = 'h-9';
-const ICON_BTN = cn(H, 'w-9');
 const TYPEAHEAD_W = 'w-[15rem]';
 const AMOUNT_W = 'w-20';
 const DATE_TEXT = 'max-w-44 truncate';
@@ -53,7 +49,7 @@ const Divider: React.FC = () => (
 
 const CURRENCY_CODES = Object.keys(CURRENCIES) as CURRENCY_CODE[];
 
-const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, onReset, isLoading, onFiltersDialogToggle, sortDirection, onSortToggle }) => {
+const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, isLoading, sortDirection, onSortToggle }) => {
   const [minLocal, setMinLocal] = useState('');
   const [maxLocal, setMaxLocal] = useState('');
   const [searchLocal, setSearchLocal] = useState(data.searchTerm ?? '');
@@ -136,8 +132,6 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, onReset, isLo
     if (selectedCurrencies.length <= 2) return selectedCurrencies.map((c) => CURRENCIES[c as CURRENCY_CODE]?.symbol ?? c).join(' ');
     return `${selectedCurrencies.length} currencies`;
   }, [selectedCurrencies]);
-
-  const canReset = data.activeCount > 0 && !isLoading;
 
   return (
     <div className="border-b bg-muted/30 supports-[backdrop-filter]:bg-muted/30">
@@ -283,27 +277,6 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, onReset, isLo
           )}
         </div>
 
-        {/* RESET + FILTER TOGGLE */}
-        <div className="ml-0 md:ml-auto flex items-center gap-1.5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                aria-label="Reset filters"
-                disabled={!canReset}
-                size="icon"
-                type="button"
-                variant="outline"
-                className={ICON_BTN}
-                onClick={onReset}
-              >
-                <RotateCcw aria-hidden="true" className={cn('h-4 w-4', isLoading && 'animate-spin')} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Reset filters</TooltipContent>
-          </Tooltip>
-
-          <FiltersToggleButton activeCount={data.activeCount} onClick={onFiltersDialogToggle} />
-        </div>
       </div>
     </div>
   );

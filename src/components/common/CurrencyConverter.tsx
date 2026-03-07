@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CURRENCY_CODE } from '@/constants/currency';
-import { useFixerExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/hooks/financeData';
+import { useExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/hooks/financeData';
 
 type RATE_SOURCE = 'mnb' | 'fx' | 'wse';
 
@@ -46,7 +46,7 @@ export const CurrencyConverter: React.FC<Props> = ({
   const [amount, setAmount] = useState<number>(defaultAmount);
   const [rateSource, setRateSource] = useState<RATE_SOURCE>('mnb');
 
-  const fixerRates = useFixerExchangeRates();
+  const fixerRates = useExchangeRates().fixer;
   const monoRates = useMonobankExchangeRates();
   const wiseRates = useWiseExchangeRates();
 

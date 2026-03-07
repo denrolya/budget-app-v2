@@ -1,7 +1,9 @@
-import { CopyPlus, SquarePlus } from 'lucide-react';
+import { CopyPlus, RotateCcw, SquarePlus } from 'lucide-react';
+import moment from 'moment';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
+import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +14,7 @@ import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
 import BulkCreateTableForm from '@/features/transactions/components/BulkCreateTableForm';
 
 import ListingContainer, { type ListingHandle } from './components/ListingContainer';
+import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
 
 export const DailyLedgerPage: React.FC = () => {
   const { openForm } = useFormContext();
@@ -20,6 +23,26 @@ export const DailyLedgerPage: React.FC = () => {
   const listingRef = useRef<ListingHandle | null>(null);
 
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
+  const [activeFilterCount, setActiveFilterCount] = useState(0);
+  const [displayMenuTarget, setDisplayMenuTarget] = useState<HTMLDivElement | null>(null);
+
+  // Heatmap ↔ listing sync: track when the heatmap is driving a range change so we
+  // don't clear its selection in response to the resulting timeframe update.
+  const isHeatmapDrivingRef = useRef(false);
+  const [heatmapResetTrigger, setHeatmapResetTrigger] = useState(0);
+
+  const handleHeatmapRangeSelect = useCallback((after: moment.Moment, before: moment.Moment) => {
+    isHeatmapDrivingRef.current = true;
+    listingRef.current?.setDateRange(after, before);
+  }, []);
+
+  const handleListingTimeframeChange = useCallback(() => {
+    if (isHeatmapDrivingRef.current) {
+      isHeatmapDrivingRef.current = false;
+      return;
+    }
+    setHeatmapResetTrigger((n) => n + 1);
+  }, []);
 
   const toggleBulkCreate = useCallback(() => {
     setIsBulkCreateOpen((p) => !p);
@@ -77,11 +100,45 @@ export const DailyLedgerPage: React.FC = () => {
                 </TooltipTrigger>
                 <TooltipContent>New Transaction</TooltipContent>
               </Tooltip>
+
+              <div className="hidden md:contents" ref={setDisplayMenuTarget} />
+
+              {activeFilterCount > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Reset filters"
+                      size="icon"
+                      type="button"
+                      variant="outline"
+                      onClick={() => listingRef.current?.resetFilters()}
+                    >
+                      <RotateCcw aria-hidden="true" className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Reset filters</TooltipContent>
+                </Tooltip>
+              )}
+
+              <FiltersToggleButton
+                activeCount={activeFilterCount}
+                aria-label="Toggle filters"
+                onClick={() => listingRef.current?.toggleFilters()}
+              />
             </div>
           </div>
         </CardHeader>
 
         <CardContent className="w-full min-w-0 p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
+          <div className="shrink-0 border-b">
+            <TransactionHeatmapChart
+              accountIds={[]}
+              resetTrigger={heatmapResetTrigger}
+              onRangeSelect={handleHeatmapRangeSelect}
+              onRangeClear={() => listingRef.current?.resetFilters()}
+            />
+          </div>
+
           {isBulkCreateOpen && (
             <div className="shrink-0 border-b bg-muted/50 supports-[backdrop-filter]:bg-muted/50">
               <div className="px-4 py-3">
@@ -90,7 +147,13 @@ export const DailyLedgerPage: React.FC = () => {
             </div>
           )}
 
-          <ListingContainer updateUrl ref={listingRef} />
+          <ListingContainer
+            updateUrl
+            displayMenuPortalTarget={displayMenuTarget}
+            onActiveCountChange={setActiveFilterCount}
+            onTimeframeChange={handleListingTimeframeChange}
+            ref={listingRef}
+          />
         </CardContent>
       </Card>
     </FullHeightPageContent>

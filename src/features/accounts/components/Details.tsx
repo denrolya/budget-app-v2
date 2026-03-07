@@ -1,17 +1,17 @@
 import { cn } from '@/lib/utils';
-import { AlertCircle, ArrowUpDown, Plus, Star, StarOff } from 'lucide-react';
+import { AlertCircle, Plus, Star, StarOff } from 'lucide-react';
 import moment from 'moment';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import BalanceHistoryChart from '@/features/accounts/components/BalanceHistoryChart';
+import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
 import AccountPill from '@/features/accounts/components/Pill';
 import Account from '@/features/accounts/models/Account';
 import { UpdateAccountDTO } from '@/features/accounts/types';
@@ -32,12 +32,14 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
   const { openForm } = useFormContext();
   const currentDate = moment().startOf('day');
   const daysPerPage = 15;
-  const [activeTab, setActiveTab] = useState('activity');
-  const dateRange = useMemo(() => {
-    const after = currentDate.clone().subtract(daysPerPage - 1, 'days');
-    const before = currentDate.clone();
-    return { after, before };
-  }, [currentDate]);
+
+  const defaultRange = useMemo(() => ({
+    after: currentDate.clone().subtract(daysPerPage - 1, 'days'),
+    before: currentDate.clone().endOf('day'),
+  }), []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const [heatmapRange, setHeatmapRange] = useState<{ after: moment.Moment; before: moment.Moment } | null>(null);
+  const activeRange = heatmapRange ?? defaultRange;
 
   const { groupedItems, isLoading, isError, error, setFilter } = useTransactionsAndTransfersList({
     updateUrl: true,
@@ -45,13 +47,37 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
   });
 
   useEffect(() => {
-    setFilter('after', dateRange.after);
-    setFilter('before', dateRange.before.clone().endOf('day'));
-  }, [dateRange, setFilter]);
+    setFilter('after', activeRange.after);
+    setFilter('before', activeRange.before);
+  }, [activeRange, setFilter]);
 
   useEffect(() => {
     setFilter('accounts', [account.id]);
   }, [account, setFilter]);
+
+  const handleHeatmapRangeSelect = useCallback((after: moment.Moment, before: moment.Moment) => {
+    setHeatmapRange({ after, before });
+  }, []);
+
+  const handleHeatmapRangeClear = useCallback(() => {
+    setHeatmapRange(null);
+  }, []);
+
+  const toggleSidebarVisibility = async () => {
+    const confirmed = await confirm({
+      title: account.isDisplayedOnSidebar ? 'Hide from sidebar?' : 'Show in sidebar?',
+      description: account.isDisplayedOnSidebar
+        ? `${account.name} will no longer be shown in the sidebar.`
+        : `${account.name} will be added to your sidebar.`,
+      confirmText: account.isDisplayedOnSidebar ? 'Hide' : 'Show',
+      cancelText: 'Cancel',
+    });
+
+    if (!confirmed) return;
+
+    account.isDisplayedOnSidebar = !account.isDisplayedOnSidebar;
+    onAccountUpdate(account, { isDisplayedOnSidebar: account.isDisplayedOnSidebar });
+  };
 
   const renderActivityContent = () => {
     if (isError) {
@@ -75,21 +101,20 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
 
     return (
       <>
-        <div className="md:hidden">
+        <div className={cn('md:hidden')}>
           <DailyList
-            after={dateRange.after}
-            before={dateRange.before}
+            after={activeRange.after}
+            before={activeRange.before}
             groupedItems={groupedItems}
             isLoading={isLoading}
           />
         </div>
-
         <div className="hidden md:block">
-          {isLoading && <TableListingSkeleton after={dateRange.after} before={dateRange.before} />}
+          {isLoading && <TableListingSkeleton after={activeRange.after} before={activeRange.before} />}
           {!isLoading && (
             <TableListing
-              after={dateRange.after}
-              before={dateRange.before}
+              after={activeRange.after}
+              before={activeRange.before}
               groupedItems={groupedItems}
               isLoading={isLoading}
             />
@@ -99,125 +124,84 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
     );
   };
 
-  const toggleSidebarVisibility = async () => {
-    const confirmed = await confirm({
-      title: account.isDisplayedOnSidebar ? 'Hide from sidebar?' : 'Show in sidebar?',
-      description: account.isDisplayedOnSidebar
-        ? `${account.name} will no longer be shown in the sidebar.`
-        : `${account.name} will be added to your sidebar.`,
-      confirmText: account.isDisplayedOnSidebar ? 'Hide' : 'Show',
-      cancelText: 'Cancel',
-    });
-
-    if (!confirmed) return;
-
-    account.isDisplayedOnSidebar = !account.isDisplayedOnSidebar;
-    onAccountUpdate(account, { isDisplayedOnSidebar: account.isDisplayedOnSidebar });
-  };
-
   return (
     <>
-      <Card className="mb-4">
-        <CardHeader>
-          <div className="flex items-center space-x-4 mb-2">
-            <div>
-              <CardTitle className="flex space-x-2 items-center">
-                <AccountPill showName account={account} tooltip={false} variant="inline" />
-                <MoneyValue
-                  badge
-                  showSign
-                  amount={account.balance}
-                  currency={account.currency}
-                  values={account.convertedValues}
-                />
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      aria-label={account.isDisplayedOnSidebar ? 'Hide from sidebar' : 'Show in sidebar'}
-                      size="icon"
-                      type="button"
-                      variant="ghost"
-                      className="h-8 w-8"
-                      onClick={toggleSidebarVisibility}
-                    >
-                      {account.isDisplayedOnSidebar ? <Star className="h-4 w-4" /> : <StarOff className="h-4 w-4" />}
-                      <span className="sr-only">{account.isDisplayedOnSidebar ? 'Hide from sidebar' : 'Show in sidebar'}</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>{account.isDisplayedOnSidebar ? 'Pinned to sidebar' : 'Pin to sidebar'}</TooltipContent>
-                </Tooltip>
-              </CardTitle>
-              <CardDescription>
-                Created: <RelativeDatetimeDisplay date={account.createdAt} />
-              </CardDescription>
-            </div>
-          </div>
+      {/* Hero card: account info + embedded balance history chart */}
+      <Card className="mb-4 overflow-hidden">
+        <CardHeader className="pb-1">
+          <CardTitle className="flex items-center gap-2 flex-wrap">
+            <AccountPill showName account={account} tooltip={false} variant="inline" />
+            <MoneyValue
+              badge
+              showSign
+              amount={account.balance}
+              currency={account.currency}
+              values={account.convertedValues}
+            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  aria-label={account.isDisplayedOnSidebar ? 'Hide from sidebar' : 'Show in sidebar'}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                  className="h-7 w-7"
+                  onClick={toggleSidebarVisibility}
+                >
+                  {account.isDisplayedOnSidebar
+                    ? <Star className="h-3.5 w-3.5" />
+                    : <StarOff className="h-3.5 w-3.5" />}
+                  <span className="sr-only">
+                    {account.isDisplayedOnSidebar ? 'Hide from sidebar' : 'Show in sidebar'}
+                  </span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {account.isDisplayedOnSidebar ? 'Pinned to sidebar' : 'Pin to sidebar'}
+              </TooltipContent>
+            </Tooltip>
+          </CardTitle>
+          <CardDescription>
+            Created: <RelativeDatetimeDisplay date={account.createdAt} />
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">Notes here</p>
+
+        {/* Chart flush to card edges — no horizontal padding */}
+        <CardContent className="p-0">
+          <BalanceHistoryChart account={account} />
         </CardContent>
-        <CardFooter>
-          <Button size="sm" variant="outline">
-            <ArrowUpDown className="mr-2 h-4 w-4" />
-            Edit Balance
-          </Button>
-        </CardFooter>
       </Card>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList
-          className={cn({
-            'grid w-full grid-cols-2': isMobile,
-          })}
-        >
-          <TabsTrigger value="activity">Activity</TabsTrigger>
-          <TabsTrigger value="history">Account History</TabsTrigger>
-        </TabsList>
-        <TabsContent value="activity">
-          <Card>
-            <CardHeader className="sr-only">
-              <CardTitle>Activity</CardTitle>
-              <CardDescription className="sr-only">List of all transactions for past 7 days</CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ScrollArea className="h-[400px]">{renderActivityContent()}</ScrollArea>
-            </CardContent>
-            <CardFooter className="p-4">
-              <Button onClick={() => openForm(FormType.Transaction, { account })}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Transaction
-              </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-        <TabsContent value="history">
-          <Card>
-            <CardHeader>
-              <CardTitle>Account History</CardTitle>
-              <CardDescription>Timeline of actions and changes related to this account</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[300px]">
-                <ul className="space-y-4">
-                  {[
-                    { id: 1, date: '2023-06-15', action: 'Debt created', details: 'Initial loan of $1000' },
-                    { id: 2, date: '2023-07-01', action: 'Repayment received', details: 'Repayment of $250' },
-                    { id: 3, date: '2023-08-01', action: 'Repayment received', details: 'Repayment of $250' },
-                  ].map((event) => (
-                    <li className="flex justify-between items-center" key={event.id}>
-                      <div>
-                        <p className="font-medium">{event.action}</p>
-                        <p className="text-sm text-muted-foreground">{event.details}</p>
-                      </div>
-                      <Badge variant="secondary">{moment(event.date).format('LLL')}</Badge>
-                    </li>
-                  ))}
-                </ul>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {/* Transaction heatmap */}
+      <Card className="mb-4 overflow-hidden">
+        <CardHeader className="pb-0">
+          <CardTitle className="text-base">Activity</CardTitle>
+          <CardDescription>Transaction activity by day — drag to filter the list below</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <TransactionHeatmapChart
+            accountIds={[account.id]}
+            currency={account.currency}
+            onRangeSelect={handleHeatmapRangeSelect}
+            onRangeClear={handleHeatmapRangeClear}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Recent activity */}
+      <Card>
+        <CardHeader className="sr-only">
+          <CardTitle>Activity</CardTitle>
+          <CardDescription>
+            {heatmapRange
+              ? `${heatmapRange.after.format('D MMM')} – ${heatmapRange.before.format('D MMM YYYY')}`
+              : `Transactions for the past ${daysPerPage} days`}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <ScrollArea className="h-[400px]">{renderActivityContent()}</ScrollArea>
+        </CardContent>
+      </Card>
     </>
   );
 };

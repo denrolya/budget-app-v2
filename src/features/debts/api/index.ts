@@ -1,3 +1,3 @@
 export { queryKeys } from './keys';
-export { useList } from './queries';
+export { useTransactions, useList } from './queries';
 export { useMutations } from './mutations';

@@ -59,7 +59,7 @@ const PageWithSidebar: PageWithSidebarComponent = ({
     <div
       aria-label={ariaLabel}
       className={cn(
-        'flex h-screen min-h-0 overflow-hidden',
+        'flex h-full min-h-0 overflow-hidden',
         // Ensure flex children can shrink properly (prevents weird overflow issues in nested layouts)
         'min-w-0',
         className,

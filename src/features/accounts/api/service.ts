@@ -43,4 +43,45 @@ export const accountService = {
   },
 
   withConvertedValues,
+
+  async fetchDailyStats(accountId: number, after: string, before: string): Promise<DailyStatsResponse> {
+    const { data } = await api.get<DailyStatsResponse>(
+      `${BASE_URL_V2}/${accountId}/daily-stats`,
+      { params: { after, before } },
+    );
+    return data;
+  },
+
+  async fetchGlobalDailyStats(
+    accountIds: number[],
+    after: string,
+    before: string,
+    affectingProfit = false,
+  ): Promise<DailyStatsResponse> {
+    const params = new URLSearchParams({ after, before });
+    accountIds.forEach((id) => params.append('accounts[]', String(id)));
+    if (affectingProfit) params.set('affectingProfit', '1');
+    const { data } = await api.get<DailyStatsResponse>(`/api/v2/statistics/daily?${params}`);
+    return data;
+  },
+
+  async fetchBalanceHistory(
+    accountId: number,
+    after: string,
+    before: string,
+    interval: string,
+  ): Promise<BalanceHistoryResponse> {
+    const { data } = await api.get<BalanceHistoryResponse>(
+      `${BASE_URL_V2}/${accountId}/balance-history`,
+      { params: { after, before, interval } },
+    );
+    return data;
+  },
 };
+
+export type BalanceHistoryPoint = { timestamp: number; balance: number };
+export type BalanceHistoryResponse = { currency: string; data: BalanceHistoryPoint[] };
+
+export type DailyStatsCurrencyValues = { income: number; expense: number };
+export type DailyStatsDatum = { day: string; count: number; convertedValues: Record<string, DailyStatsCurrencyValues> };
+export type DailyStatsResponse = { data: DailyStatsDatum[] };

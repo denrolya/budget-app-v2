@@ -135,7 +135,9 @@ const DateDisplay: React.FC<Props> = ({
 
   const dayVisual = useMemo(() => {
     const dayOfWeek = date.day();
-    const { color, name, shortName } = DAY_STYLES[dayOfWeek as keyof typeof DAY_STYLES];
+    const dayStyle = DAY_STYLES[dayOfWeek as keyof typeof DAY_STYLES];
+    if (!dayStyle) return null;
+    const { color, name, shortName } = dayStyle;
     const sizeClass = BADGE_SIZES[badgeSize];
 
     return (

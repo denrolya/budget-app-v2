@@ -2,12 +2,33 @@ import { useQuery } from '@tanstack/react-query';
 
 import { useList as useAccountsQuery } from '@/features/accounts';
 import { useList as useCategoriesQuery } from '@/features/categories';
+import { TransactionFactory } from '@/features/transactions/models/Transaction';
+import { transactionService } from '@/features/transactions/api/service';
+import type Transaction from '@/features/transactions/models/Transaction';
 
 import type Debt from '..//models/Debt';
 import { mapDebtDTOToModel } from '../lib/mapDebtDTOToModel';
 
 import { queryKeys } from './keys';
 import { debtService } from './service';
+
+export const useTransactions = (id: number | null) => {
+  const accounts = useAccountsQuery();
+  const categories = useCategoriesQuery();
+  const { createTransaction } = TransactionFactory();
+
+  return useQuery<Transaction[], Error>({
+    queryKey: queryKeys.transactions(id ?? 0),
+    enabled: Boolean(id && accounts.data && categories.data),
+    queryFn: async () => {
+      if (!id) return [];
+      const dtos = await transactionService.fetchByDebt(id);
+      return dtos.map(createTransaction);
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: 3,
+  });
+};
 
 export const useList = (opts?: { withClosed?: boolean }) => {
   const accounts = useAccountsQuery();

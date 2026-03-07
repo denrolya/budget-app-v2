@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useSearchParams } from 'react-router-dom';
 
@@ -9,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
 import DailyList from '@/features/daily-ledger/components/DailyList';
+import DisplayMenu from '@/features/daily-ledger/components/DisplayMenu';
 import ListFiltersSheet from '@/features/daily-ledger/components/ListFiltersSheet';
 import ListingControls from '@/features/daily-ledger/components/ListingControls';
 import TableListing from '@/features/daily-ledger/components/TableListing';
@@ -32,6 +34,8 @@ export type ListingHandle = {
   goToNextPeriod: () => void;
   goToPreviousPeriod: () => void;
   toggleFilters: () => void;
+  resetFilters: () => void;
+  setDateRange: (after: moment.Moment, before: moment.Moment) => void;
 };
 
 /**
@@ -52,6 +56,9 @@ type Props = {
    * When `updateUrl=true` and URL params are present, URL takes precedence.
    */
   initialTimeframe?: Timeframe;
+  onActiveCountChange?: (count: number) => void;
+  onTimeframeChange?: (after: moment.Moment, before: moment.Moment) => void;
+  displayMenuPortalTarget?: HTMLDivElement | null;
 };
 
 const ErrorBanner: React.FC<{ error: unknown }> = ({ error }) => {
@@ -97,6 +104,9 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
      showControls = true,
      initialFilters,
      initialTimeframe: initialTimeframeProp,
+     onActiveCountChange,
+     onTimeframeChange,
+     displayMenuPortalTarget,
    }, ref) => {
     const isMobile = useIsMobile();
     const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
@@ -205,12 +215,24 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
       setFilter('before', timeframe.before);
     }, [setFilter, timeframe.after, timeframe.before]);
 
+    // Notify parent when timeframe changes (skips the initial mount)
+    const isMountedForTimeframeRef = useRef(false);
+    useEffect(() => {
+      if (!isMountedForTimeframeRef.current) { isMountedForTimeframeRef.current = true; return; }
+      onTimeframeChange?.(timeframe.after, timeframe.before);
+    }, [timeframe.after, timeframe.before]); // eslint-disable-line react-hooks/exhaustive-deps
+
     const handleResetFilters = useCallback(() => {
       resetTimeframe();
       resetFilters();
       setShowTransactions(true);
       setShowTransfers(true);
     }, [resetTimeframe, resetFilters, setShowTransactions, setShowTransfers]);
+
+    // Notify parent of active filter count changes
+    useEffect(() => {
+      onActiveCountChange?.(transactionFilters.activeCount);
+    }, [onActiveCountChange, transactionFilters.activeCount]);
 
     // expose imperative API
     useImperativeHandle(
@@ -219,8 +241,10 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
         goToNextPeriod,
         goToPreviousPeriod,
         toggleFilters,
+        resetFilters: handleResetFilters,
+        setDateRange: (after, before) => setTimeframe({ after, before }),
       }),
-      [goToNextPeriod, goToPreviousPeriod, toggleFilters],
+      [goToNextPeriod, goToPreviousPeriod, toggleFilters, handleResetFilters, setTimeframe],
     );
 
     // Hotkeys: owned by container; disabled in drawer when needed
@@ -259,25 +283,16 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
             <div className="shrink-0">
               <ListingControls
                 activeView={activeView}
-                handleResetFilters={handleResetFilters}
-                isCompactTable={isCompactTable}
                 isLoading={isLoading}
                 isReversedOrder={isReversedOrder}
-                setActiveView={setActiveView}
                 setFilter={setFilter}
-                setIsCompactTable={setIsCompactTable}
                 setIsReversedOrder={setIsReversedOrder}
-                setShowEmptyDays={setShowEmptyDays}
                 setShowTransactions={setShowTransactions}
                 setShowTransfers={setShowTransfers}
                 setTimeframe={setTimeframe}
-                showEmptyDays={showEmptyDays}
-                showTransactions={showTransactions}
-                showTransfers={showTransfers}
                 timeframe={timeframe}
                 transactionFilters={transactionFilters}
                 transferFilters={transferFilters}
-                onFiltersDialogToggle={toggleFilters}
               />
             </div>
           )}
@@ -388,6 +403,24 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
           transferFilters={transferFilters}
           onReset={handleResetFilters}
         />
+
+        {displayMenuPortalTarget && !isMobile && createPortal(
+          <DisplayMenu
+            activeView={activeView}
+            isCompactTable={isCompactTable}
+            setActiveView={setActiveView}
+            setFilter={setFilter}
+            setIsCompactTable={setIsCompactTable}
+            setShowEmpty={setShowEmptyDays}
+            setShowTransactions={setShowTransactions}
+            setShowTransfers={setShowTransfers}
+            showEmpty={showEmptyDays}
+            showTransactions={showTransactions}
+            showTransfers={showTransfers}
+            transactionFilters={transactionFilters}
+          />,
+          displayMenuPortalTarget,
+        )}
       </>
     );
   },

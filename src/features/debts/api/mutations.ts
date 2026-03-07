@@ -9,12 +9,13 @@ import { debtService } from './service';
 export const useMutations = () => {
   const qc = useQueryClient();
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: queryKeys.list() });
+  // Invalidates all debt queries (all list variants + any cached item)
+  const invalidateAll = () => qc.invalidateQueries({ queryKey: queryKeys.all });
 
   const create = useMutation({
     mutationFn: (payload: DebtWriteDTO) => debtService.create(payload),
     onSuccess: async () => {
-      await invalidate();
+      await invalidateAll();
       toast.success('Debt created');
     },
     onError: (e) => {
@@ -26,9 +27,12 @@ export const useMutations = () => {
 
   const update = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: Partial<DebtWriteDTO> }) => debtService.update(id, payload),
-    onSuccess: async () => {
+    onSuccess: async (_data, { id }) => {
       toast.success('Debt updated successfully');
-      await invalidate();
+      await Promise.all([
+        invalidateAll(),
+        qc.invalidateQueries({ queryKey: queryKeys.transactions(id) }),
+      ]);
     },
     onError: (e) => {
       console.error('Debt update failed:', e);
@@ -41,7 +45,7 @@ export const useMutations = () => {
     mutationFn: ({ id }: { id: number }) => debtService.remove(id),
     onSuccess: async () => {
       toast.success('Debt removed');
-      await invalidate();
+      await invalidateAll();
     },
     onError: (e) => {
       console.error('Debt delete failed:', e);

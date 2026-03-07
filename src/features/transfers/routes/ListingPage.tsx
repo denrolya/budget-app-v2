@@ -1,4 +1,5 @@
-import { Edit, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { Edit, RefreshCw, RotateCcw, SquarePlus, Trash2 } from 'lucide-react';
+import moment from 'moment';
 import React, { useCallback, useState } from 'react';
 
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
@@ -18,6 +19,7 @@ import FormattedListing from '@/features/transfers/components/FormattedListing';
 import { useListHotkeys as useHotkeys } from '@/features/transfers/hooks/useHotkeys';
 
 import { useList } from '../api';
+import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
 
 export const TransfersListPage: React.FC = () => {
   const isMobile = useIsMobile();
@@ -76,12 +78,7 @@ export const TransfersListPage: React.FC = () => {
             <CardTitle className="text-2xl font-bold">Transfers</CardTitle>
 
             <div aria-label="Transfers actions" role="toolbar" className="flex flex-wrap items-center gap-2">
-              <SummaryBadge
-                count={totalItems}
-                icon={ROUTES.TRANSFER_LIST.icon}
-                useColors={false}
-                value={totalValue}
-              />
+              <SummaryBadge count={totalItems} icon={ROUTES.TRANSFER_LIST.icon} useColors={false} value={totalValue} />
 
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -89,10 +86,10 @@ export const TransfersListPage: React.FC = () => {
                     aria-label="Create a new transfer"
                     size="icon"
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     onClick={openNewTransferForm}
                   >
-                    <Plus aria-hidden="true" className="h-4 w-4" />
+                    <SquarePlus aria-hidden="true" className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>New Transfer</TooltipContent>
@@ -105,7 +102,7 @@ export const TransfersListPage: React.FC = () => {
                     disabled={isLoading}
                     size="icon"
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     onClick={refreshList}
                   >
                     <RefreshCw aria-hidden="true" className="h-4 w-4" />
@@ -114,10 +111,26 @@ export const TransfersListPage: React.FC = () => {
                 <TooltipContent>Refresh</TooltipContent>
               </Tooltip>
 
+              {filters.activeCount > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Reset filters"
+                      size="icon"
+                      type="button"
+                      variant="outline"
+                      onClick={resetFilters}
+                    >
+                      <RotateCcw aria-hidden="true" className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Reset filters</TooltipContent>
+                </Tooltip>
+              )}
+
               <FiltersToggleButton
                 activeCount={filters.activeCount}
                 aria-label={filtersToggleAriaLabel}
-                className="flex md:hidden"
                 onClick={toggleFilters}
               />
             </div>
@@ -151,14 +164,20 @@ export const TransfersListPage: React.FC = () => {
         </CardHeader>
 
         <CardContent className="p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
+          <div className="shrink-0 border-b">
+            <TransactionHeatmapChart
+              accountIds={[]}
+              onRangeSelect={(after, before) => { setFilter('after', after); setFilter('before', before); }}
+              onRangeClear={() => { setFilter('after', moment().subtract(30, 'days').startOf('day')); setFilter('before', moment().endOf('day')); }}
+            />
+          </div>
+
           {!isMobile && (
             <div className="shrink-0">
               <InlineFilters
                 data={filters}
                 isLoading={isLoading}
                 onChange={setFilter}
-                onFiltersDialogToggle={toggleFilters}
-                onReset={resetFilters}
                 sortDirection={sort.direction}
                 onSortToggle={handleSortToggle}
               />

@@ -1,4 +1,5 @@
-import { CopyPlus, Download, RefreshCw, SquarePlus } from 'lucide-react';
+import { CopyPlus, Download, RefreshCw, RotateCcw, SquarePlus } from 'lucide-react';
+import moment from 'moment';
 import React, { useCallback, useState } from 'react';
 
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
@@ -20,6 +21,7 @@ import InlineFilters from '@/features/transactions/components/InlineFilters';
 import FormattedListing from '@/features/transactions/components/FormattedListing';
 import BulkCreateTableForm from '@/features/transactions/components/BulkCreateTableForm';
 import { useListHotkeys as useHotkeys } from '@/features/transactions/hooks/useHotkeys';
+import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
 
 export const TransactionsListPage: React.FC = () => {
   const isMobile = useIsMobile();
@@ -89,18 +91,7 @@ export const TransactionsListPage: React.FC = () => {
             <CardTitle className="text-2xl font-bold">Transactions</CardTitle>
 
             <div aria-label="Transactions actions" role="toolbar" className="flex flex-wrap items-center gap-2">
-              <SummaryBadge
-                count={totalItems}
-                icon={ROUTES.TRANSACTION_LIST.icon}
-                value={totalValue}
-              />
-
-              <FiltersToggleButton
-                activeCount={filters.activeCount}
-                aria-label={filtersToggleAriaLabel}
-                className="flex md:hidden"
-                onClick={toggleFilters}
-              />
+              <SummaryBadge count={totalItems} icon={ROUTES.TRANSACTION_LIST.icon} value={totalValue} />
 
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -141,7 +132,7 @@ export const TransactionsListPage: React.FC = () => {
                     disabled={isExportingCsv}
                     size="icon"
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     onClick={exportCsv}
                   >
                     <Download aria-hidden="true" className="h-4 w-4" />
@@ -157,7 +148,7 @@ export const TransactionsListPage: React.FC = () => {
                     disabled={isLoading}
                     size="icon"
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     onClick={refreshList}
                   >
                     <RefreshCw aria-hidden="true" className="h-4 w-4" />
@@ -165,20 +156,49 @@ export const TransactionsListPage: React.FC = () => {
                 </TooltipTrigger>
                 <TooltipContent>Refresh</TooltipContent>
               </Tooltip>
+
+              {filters.activeCount > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Reset filters"
+                      size="icon"
+                      type="button"
+                      variant="outline"
+                      onClick={resetFilters}
+                    >
+                      <RotateCcw aria-hidden="true" className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Reset filters</TooltipContent>
+                </Tooltip>
+              )}
+
+              <FiltersToggleButton
+                activeCount={filters.activeCount}
+                aria-label={filtersToggleAriaLabel}
+                onClick={toggleFilters}
+              />
             </div>
           </div>
         </CardHeader>
 
         <CardContent className="p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
+          <div className="shrink-0 border-b">
+            <TransactionHeatmapChart
+              accountIds={(filters.accounts as string[]).map(Number)}
+              onRangeSelect={(after, before) => { setFilter('after', after); setFilter('before', before); }}
+              onRangeClear={() => { setFilter('after', moment().subtract(30, 'days').startOf('day')); setFilter('before', moment().endOf('day')); }}
+            />
+          </div>
+
           {!isMobile && (
             <div className="shrink-0">
               <InlineFilters
                 data={filters}
                 isLoading={isLoading}
-                onChange={setFilter}
-                onFiltersDialogToggle={toggleFilters}
-                onReset={resetFilters}
                 sortDirection={sort.direction}
+                onChange={setFilter}
                 onSortToggle={handleSortToggle}
               />
             </div>

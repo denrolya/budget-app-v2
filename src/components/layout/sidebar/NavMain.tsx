@@ -67,6 +67,11 @@ const ITEMS: {
     icon: ROUTES.CATEGORIES_PAGE.icon,
   },
   {
+    title: ROUTES.BUDGET_PAGE.label,
+    url: ROUTES.BUDGET_PAGE.path,
+    icon: ROUTES.BUDGET_PAGE.icon,
+  },
+  {
     title: 'Experimental',
     url: '#',
     icon: SquareTerminal,
@@ -75,11 +80,6 @@ const ITEMS: {
         title: ROUTES.SANDBOX_PAGE.label,
         url: ROUTES.SANDBOX_PAGE.path,
         icon: ROUTES.SANDBOX_PAGE.icon,
-      },
-      {
-        title: ROUTES.BUDGET_PAGE.label,
-        url: ROUTES.BUDGET_PAGE.path,
-        icon: ROUTES.BUDGET_PAGE.icon,
       },
     ],
   },

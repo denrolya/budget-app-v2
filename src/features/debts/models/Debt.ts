@@ -11,7 +11,7 @@ export interface DebtRawData {
   balance: number;
   transactions: Transaction[];
   convertedValues: ConvertedValues;
-  createdAt: string;
+  createdAt: string | null;
   updatedAt?: string | undefined;
   closedAt: string | null;
 }
@@ -36,7 +36,7 @@ export default class Debt {
     this.balance = data.balance;
     this.transactions = data.transactions;
     this.convertedValues = data.convertedValues;
-    this.createdAt = moment(data.createdAt);
+    this.createdAt = data.createdAt ? moment(data.createdAt) : moment();
     this.updatedAt = data.updatedAt ? moment(data.updatedAt) : undefined;
     this.closedAt = data.closedAt ? moment(data.closedAt) : null;
   }

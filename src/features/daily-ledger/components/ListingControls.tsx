@@ -1,10 +1,9 @@
 import debounce from 'lodash/debounce';
-import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, ChevronDown, Layers, RotateCcw, Search, X } from 'lucide-react';
+import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, ChevronDown, Layers, Search, X } from 'lucide-react';
 import { Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
-import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
 import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
@@ -17,10 +16,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
-import DisplayMenu from '@/features/daily-ledger/components/DisplayMenu';
 import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
 import { TransferFilters } from '@/features/transfers/models/TransferFilters';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { Timeframe } from '@/types/global';
 
@@ -37,19 +34,9 @@ interface Props {
   activeView: 'table' | 'list';
   isReversedOrder: boolean;
   setIsReversedOrder: (value: boolean) => void;
-  handleResetFilters: () => void;
-  onFiltersDialogToggle: () => void;
-  isCompactTable: boolean;
-  setActiveView: (value: 'table' | 'list') => void;
-  setIsCompactTable: (value: boolean) => void;
-  setShowEmptyDays: (value: boolean) => void;
-  showEmptyDays: boolean;
-  showTransactions: boolean;
-  showTransfers: boolean;
 }
 
 const H = 'h-9';
-const ICON_BTN = cn(H, 'w-9');
 const TYPEAHEAD_W = 'w-[14rem]';
 const AMOUNT_W = 'w-20';
 const DATE_TEXT = 'max-w-40 truncate';
@@ -75,17 +62,7 @@ export const ListingControls: React.FC<Props> = ({
   activeView,
   isReversedOrder,
   setIsReversedOrder,
-  handleResetFilters,
-  onFiltersDialogToggle,
-  isCompactTable,
-  showTransfers,
-  setActiveView,
-  setIsCompactTable,
-  showTransactions,
-  setShowEmptyDays,
-  showEmptyDays,
 }) => {
-  const isMobile = useIsMobile();
 
   // --- Amount range: local strings + debounced commit ---
   const [minLocal, setMinLocal] = useState('');
@@ -185,7 +162,6 @@ export const ListingControls: React.FC<Props> = ({
 
   const showOrderToggle = activeView === 'table';
   const OrderIcon = isReversedOrder ? CalendarArrowUp : CalendarArrowDown;
-  const canReset = Boolean(transactionFilters.activeCount) && !isLoading;
 
   return (
     <div className="border-b bg-muted/30 supports-[backdrop-filter]:bg-muted/30">
@@ -369,44 +345,6 @@ export const ListingControls: React.FC<Props> = ({
           )}
         </div>
 
-        {/* RIGHT: DISPLAY MENU + RESET + FILTERS TOGGLE */}
-        <div className="ml-0 md:ml-auto flex items-center gap-1.5">
-          {!isMobile && (
-            <DisplayMenu
-              activeView={activeView}
-              isCompactTable={isCompactTable}
-              setActiveView={setActiveView}
-              setFilter={setFilter}
-              setIsCompactTable={setIsCompactTable}
-              setShowEmpty={setShowEmptyDays}
-              setShowTransactions={setShowTransactions}
-              setShowTransfers={setShowTransfers}
-              showEmpty={showEmptyDays}
-              showTransactions={showTransactions}
-              showTransfers={showTransfers}
-              transactionFilters={transactionFilters}
-            />
-          )}
-
-          <Tooltip delayDuration={1200}>
-            <TooltipTrigger asChild>
-              <Button
-                aria-label="Reset filters"
-                disabled={!canReset}
-                size="icon"
-                type="button"
-                variant="outline"
-                className={ICON_BTN}
-                onClick={handleResetFilters}
-              >
-                <RotateCcw aria-hidden="true" className={cn('h-4 w-4', isLoading && 'animate-spin')} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Reset filters</TooltipContent>
-          </Tooltip>
-
-          <FiltersToggleButton activeCount={transactionFilters.activeCount} onClick={onFiltersDialogToggle} />
-        </div>
       </div>
     </div>
   );

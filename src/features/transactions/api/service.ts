@@ -154,6 +154,13 @@ export const transactionService = {
     };
   },
 
+  async fetchByDebt(debtId: number): Promise<RawTransactionDTO[]> {
+    const query = new URLSearchParams({ after: '2000-01-01', before: '2099-12-31', perPage: '1000' });
+    query.append('debts[]', String(debtId));
+    const result: TransactionResponse = await axiosFetcher(`${BASE_URL}?${query.toString()}`);
+    return result.list;
+  },
+
   async exportCsv(filters: TransactionFilters): Promise<void> {
     const query = buildQueryParams({ filters, includePagingAndSort: false });
     const url = buildUrl(`${BASE_URL}/export.csv`, query);
