@@ -18,6 +18,12 @@
         "unused-packages": "npm-check",
         "knip": "knip",
         "knip:strict": "knip --reporter compact",
+        "deploy": "node deploy.mjs deploy",
+        "deploy:restart": "node deploy.mjs restart",
+        "deploy:status": "node deploy.mjs status",
+        "deploy:logs": "node deploy.mjs logs",
+        "deploy:shell": "node deploy.mjs shell",
+        "deploy:clean": "node deploy.mjs clean",
         "ts-prune": "ts-prune",
         "unimported": "unimported"
     },
@@ -74,7 +80,6 @@
         "@tanstack/react-table": "^8.21.3",
         "axios": "^1.7.4",
         "class-variance-authority": "^0.7.1",
-        "classnames": "^2.5.1",
         "clsx": "^2.1.1",
         "cmdk": "^1.1.1",
         "command": "^1.1.1",
@@ -156,7 +161,7 @@
         "eslint": "^9.9.0"
     },
     "engines": {
-        "node": ">=18.0.0"
+        "node": ">=20.0.0"
     },
     "engine-strict": true,
     "lint-staged": {

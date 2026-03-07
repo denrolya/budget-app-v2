@@ -157,7 +157,11 @@ export const useTimelineStatistics = (
   }, [categoriesData, expenseData, incomeData, fetchExpenseReference, fetchIncomeReference]);
 
   const isLoading = isLoadingCategories || (fetchExpenseReference && isLoadingExpense) || (fetchIncomeReference && isLoadingIncome);
-  const error = errorCategories || (fetchExpenseReference && errorExpense) || (fetchIncomeReference && errorIncome);
+  const error: Error | null =
+    errorCategories ||
+    (fetchExpenseReference ? errorExpense : null) ||
+    (fetchIncomeReference ? errorIncome : null) ||
+    null;
 
   const refetch = useCallback(() => {
     refetchCategories();

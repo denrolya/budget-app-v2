@@ -1,4 +1,4 @@
-import cn from 'classnames';
+import { cn } from '@/lib/utils';
 import { forwardRef, ReactNode, useCallback, useMemo } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';

@@ -1,4 +1,4 @@
-import cn from 'classnames';
+import { cn } from '@/lib/utils';
 import { Eye, User } from 'lucide-react';
 import React from 'react';
 
@@ -19,6 +19,7 @@ import TransactionValue from './TransactionValue';
 interface TransactionItemProps {
   transaction: Transaction;
   colorBorder?: boolean;
+  isCompensationView?: boolean;
 }
 
 export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBorder = false }) => {

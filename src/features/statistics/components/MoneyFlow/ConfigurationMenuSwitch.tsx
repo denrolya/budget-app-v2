@@ -6,15 +6,16 @@ import { Switch } from '@/components/ui/switch';
 
 interface Props {
   label: string;
-  icon: ReactNode | LucideIcon;
+  icon: LucideIcon | ReactNode;
   checked: boolean;
   onChange: (checked: boolean) => void;
   iconClassName?: string;
 }
 
 
-const ConfigurationMenuSwitch: React.FC<Props> = ({ label, icon: Icon, checked, onChange, iconClassName }) => {
+const ConfigurationMenuSwitch: React.FC<Props> = ({ label, icon, checked, onChange, iconClassName }) => {
   const id = useId();
+  const Icon = icon as LucideIcon;
 
   return (
     <div className="flex items-center justify-between">

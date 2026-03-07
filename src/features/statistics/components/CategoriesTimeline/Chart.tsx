@@ -48,12 +48,14 @@ interface CategoryData {
   value: number;
 }
 
+type TimelineDataProcessed = {
+  [category: string]: CategoryData[];
+};
+
 interface Props {
   chartType: 'line' | 'bar';
   showComparisonInTooltip?: boolean;
-  data: Array<{
-    [category: string]: CategoryData[];
-  }>;
+  data: TimelineDataProcessed;
   selectedPeriod: ISO8601Period;
   onClick?: (data: any, index: number) => void;
   useSeparateAxisForTotals?: boolean;
@@ -136,8 +138,8 @@ export const CategoryTimelineChart: React.FC<Props> = ({
     return label;
   };
 
-  const ChartComponent = chartType === 'line' ? LineChart : BarChart;
-  const DataComponent = chartType === 'line' ? Line : Bar;
+  const ChartComponent = (chartType === 'line' ? LineChart : BarChart) as React.ElementType;
+  const DataComponent = (chartType === 'line' ? Line : Bar) as React.ElementType;
 
   const handleLegendClick = (e: any) => {
     const { dataKey } = e;
@@ -172,7 +174,13 @@ export const CategoryTimelineChart: React.FC<Props> = ({
           {useSeparateAxisForTotals && <YAxis orientation="right" yAxisId="total" {...CHART_STYLES.yAxis} />}
           <Tooltip
             content={(props) => (
-              <ChartTooltip selectedPeriod={selectedPeriod} showComparison={showComparisonInTooltip} {...props} />
+              <ChartTooltip
+                selectedPeriod={selectedPeriod}
+                showComparison={showComparisonInTooltip}
+                active={props.active}
+                payload={props.payload as Array<{ name: string; value: number; color: string }> | undefined}
+                label={props.label}
+              />
             )}
           />
           <Legend

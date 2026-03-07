@@ -1,3 +1,4 @@
+import type { FunnelPartEventHandler } from '@nivo/funnel';
 import { ResponsiveFunnel } from '@nivo/funnel';
 import { useCallback, useRef, useState } from 'react';
 
@@ -22,18 +23,18 @@ const monthlyData = [
 
 export default function Component() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedMonth, setSelectedMonth] = useState('');
+  const [_selectedMonth, setSelectedMonth] = useState('');
   const [tooltipContent, setTooltipContent] = useState<{ id: string; value: number; expenses: number } | null>(null);
   const lastTap = useRef(0);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const handleInteraction = useCallback((data: { id: string; value: number; expenses: number }) => {
+  const handleInteraction: FunnelPartEventHandler<{ id: string; value: number; expenses: number }> = useCallback((part) => {
     const now = Date.now();
     const DOUBLE_TAP_DELAY = 300; // ms
 
     if (now - lastTap.current < DOUBLE_TAP_DELAY) {
       // Double tap detected
-      setSelectedMonth(data.id);
+      setSelectedMonth(String(part.data.id));
       setIsDrawerOpen(true);
       if (tooltipTimeout.current) {
         clearTimeout(tooltipTimeout.current);
@@ -45,7 +46,7 @@ export default function Component() {
         clearTimeout(tooltipTimeout.current);
       }
       tooltipTimeout.current = setTimeout(() => {
-        setTooltipContent(data);
+        setTooltipContent(part.data);
       }, 100);
     }
 
@@ -83,10 +84,6 @@ export default function Component() {
                   currentBorderWidth={40}
                   motionConfig="wobbly"
                   onClick={handleInteraction}
-                  onDoubleClick={(data) => {
-                    setSelectedMonth(data.id);
-                    setIsDrawerOpen(true);
-                  }}
                 />
               </div>
             </TooltipTrigger>

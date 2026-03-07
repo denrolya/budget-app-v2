@@ -34,6 +34,8 @@
     "include": ["src","node_modules/vitest/globals.d.ts"],
     "exclude": [
         "test.ts",
-        "**/*.spec.ts"
+        "**/*.spec.ts",
+        "**/*.example.tsx",
+        "**/*.example.ts"
     ]
 }

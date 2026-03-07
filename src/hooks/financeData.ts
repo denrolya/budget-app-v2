@@ -108,22 +108,22 @@ export const useCategories = (): CategoriesData => {
 
 export const useIncomeCategories = (): Category[] => {
   const { list } = useCategories();
-  return useMemo(() => list.filter(({ type }) => type === TransactionType.Income), [list]);
+  return useMemo(() => list.filter(({ type }) => (type as string) === (TransactionType.Income as string)), [list]);
 };
 
 export const useIncomeCategoriesTree = (): Category[] => {
   const { tree } = useCategories();
-  return useMemo(() => tree.filter(({ type }) => type === TransactionType.Income), [tree]);
+  return useMemo(() => tree.filter(({ type }) => (type as string) === (TransactionType.Income as string)), [tree]);
 };
 
 export const useExpenseCategories = (): Category[] => {
   const { list } = useCategories();
-  return useMemo(() => list.filter(({ type }) => type === TransactionType.Expense), [list]);
+  return useMemo(() => list.filter(({ type }) => (type as string) === (TransactionType.Expense as string)), [list]);
 };
 
 export const useExpenseCategoriesTree = (): Category[] => {
   const { tree } = useCategories();
-  return useMemo(() => tree.filter(({ type }) => type === TransactionType.Expense), [tree]);
+  return useMemo(() => tree.filter(({ type }) => (type as string) === (TransactionType.Expense as string)), [tree]);
 };
 
 export const useDebts = (): Debt[] => {

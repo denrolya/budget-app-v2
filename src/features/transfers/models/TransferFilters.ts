@@ -2,7 +2,7 @@ import moment, { Moment } from 'moment';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import BaseFilters from '@/models/BaseFilters';
-import { readParamArray, readParamMoment, readParamNumberArray, readParamString } from '@/lib/url/searchParams';
+import { readParamArray, readParamMoment, readParamString } from '@/lib/url/searchParams';
 
 type Scalar = string | number | boolean | null | undefined;
 type ScalarOrArray<T extends Scalar = Scalar> = T | T[];
@@ -52,8 +52,8 @@ export class TransferFilters extends BaseFilters {
 
     this._defaults = {
       ...filled,
-      before: filled.before.clone(),
-      after: filled.after.clone(),
+      before: filled.before!.clone(),
+      after: filled.after!.clone(),
       currencies: [...(filled.currencies ?? [])],
     };
 
@@ -107,8 +107,8 @@ export class TransferFilters extends BaseFilters {
   reset() {
     Object.assign(this, {
       ...this._defaults,
-      before: this._defaults.before.clone(),
-      after: this._defaults.after.clone(),
+      before: this._defaults.before?.clone(),
+      after: this._defaults.after?.clone(),
       currencies: [...(this._defaults.currencies ?? [])],
     });
   }

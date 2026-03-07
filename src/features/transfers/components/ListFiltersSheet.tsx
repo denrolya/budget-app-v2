@@ -108,7 +108,7 @@ const Content: React.FC<Omit<Props, 'isOpen' | 'setIsOpen'>> = ({ data, onChange
           placeholder="All accounts"
           value={data.accounts}
           className="w-full"
-          onChange={(accounts) => onChange('accounts', accounts)}
+          onChange={(accounts) => onChange('accounts', accounts as string[] | null)}
         />
       </div>
 

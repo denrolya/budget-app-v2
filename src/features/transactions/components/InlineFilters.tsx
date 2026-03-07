@@ -190,7 +190,7 @@ const InlineFilters: React.FC<Props> = ({ data, onChange, onReset, isLoading, on
             placeholder="Accounts"
             value={data.accounts}
             className="w-full"
-            onChange={(accounts) => onChange('accounts', accounts)}
+            onChange={(accounts) => onChange('accounts', accounts as string[] | null)}
           />
         </div>
 
@@ -201,10 +201,10 @@ const InlineFilters: React.FC<Props> = ({ data, onChange, onReset, isLoading, on
           <CategoryTypeahead
             multiple
             placeholder="Categories"
-            value={data.categories}
+            value={data.categories as string[]}
             className={TYPEAHEAD_JOINED}
             onChange={(categories) => {
-              onChange('categories', categories);
+              onChange('categories', categories as string[] | null);
               if (categories?.length) onChange('withNestedCategories', true);
             }}
           />

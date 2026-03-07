@@ -17,6 +17,7 @@ import { useFormLogic } from '@/hooks/useFormLogic';
 
 import { useMutations } from '../api';
 import { CategoryType, type CreateCategoryDTO, type UpdateCategoryDTO } from '../types';
+import { Type as TransactionType } from '@/features/transactions';
 
 const schema = z.object({
   name: z.string().min(1, { message: 'Name is required.' }).min(2, { message: 'Name must be at least 2 characters.' }),
@@ -33,10 +34,10 @@ export interface CategoryFormRef {
 }
 
 interface CategoryFormProps {
-  key: string;
-  category: Category | null;
-  parent: number | null;
-  type: CategoryType;
+  key?: string;
+  category?: Category | null;
+  parent?: number | null;
+  type?: CategoryType;
 }
 
 export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>(
@@ -119,7 +120,7 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>(
           if (data?.id) {
             const payload: UpdateCategoryDTO = {
               name,
-              type: values.type,
+              type: values.type as CategoryType,
               parent: values.parent,
               isAffectingProfit: values.isAffectingProfit,
               isFixed: values.isFixed,
@@ -128,7 +129,7 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>(
           } else {
             const payload: CreateCategoryDTO = {
               name,
-              type: values.type,
+              type: values.type as CategoryType,
               parent: values.parent,
               isAffectingProfit: values.isAffectingProfit,
               isFixed: values.isFixed,
@@ -196,10 +197,15 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>(
                 <FormItem className="w-full">
                   <FormLabel>Category</FormLabel>
                   <CategoryTypeahead
-                    {...field}
                     multiple={false}
                     size="sm"
-                    type={form.watch('type')}
+                    type={form.watch('type') as TransactionType}
+                    value={field.value != null ? String(field.value) : null}
+                    onChange={(v) => field.onChange(v ? Number(v) : null)}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                    disabled={field.disabled}
                   />
                   <FormMessage />
                 </FormItem>

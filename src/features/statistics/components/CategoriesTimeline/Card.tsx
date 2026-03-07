@@ -25,7 +25,7 @@ interface ChartEvent {
 }
 
 interface Props extends React.ComponentPropsWithoutRef<'div'> {
-  controlledTimeframe: UseTimeframeControl;
+  controlledTimeframe?: UseTimeframeControl;
 }
 
 export const CategoriesTimelineCard: React.FC<Props> = ({
@@ -57,9 +57,12 @@ export const CategoriesTimelineCard: React.FC<Props> = ({
   const {
     timeframe = fallback.timeframe,
     setTimeframe = fallback.setTimeframe,
-    period = fallback.period,
-    setPeriod = fallback.setPeriod,
+    period: rawPeriod = fallback.period,
+    setPeriod: rawSetPeriod = fallback.setPeriod,
   } = controlledTimeframe ?? {};
+
+  const period = rawPeriod ?? fallback.period!;
+  const setPeriod = rawSetPeriod ?? fallback.setPeriod!;
 
   const { data, isLoading, error } = useTimelineStatistics(
     {
@@ -94,7 +97,7 @@ export const CategoriesTimelineCard: React.FC<Props> = ({
     let startDate: Moment;
     let endDate: Moment;
 
-    switch (selectedPeriod) {
+    switch (period) {
       case 'P1D':
         startDate = clickedDate.clone().startOf('day');
         endDate = clickedDate.clone().endOf('day');
@@ -117,7 +120,7 @@ export const CategoriesTimelineCard: React.FC<Props> = ({
         break;
 
       default:
-        console.error('Unsupported period:', selectedPeriod);
+        console.error('Unsupported period:', period);
         return;
     }
 

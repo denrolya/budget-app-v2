@@ -223,8 +223,7 @@ const CategoryCell = ({
         autoFocus
         multiple={false}
         type={tx.type}
-        value={((editValue as any)?.id ?? editValue) as any}
-        valueField="id"
+        value={((editValue as any)?.id ?? editValue) != null ? String((editValue as any)?.id ?? editValue) : null}
         onChange={(v) => setEditValue(v as any)}
         onKeyDown={(e) => keyHandler.onKeyDown(e, tx)}
       />
@@ -262,7 +261,7 @@ const ExecutedAtCell = ({
   disabled,
   inlineEdit,
 }: Pick<CellRendererArgs, 'tx' | 'compact' | 'disabled' | 'inlineEdit'>) => {
-  const { editValue, setEditValue, save, cancelEdit, startEdit, keyHandler } = inlineEdit;
+  const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
   const [open, setOpen] = React.useState(false);
 
   const handleOpen = () => {

@@ -47,7 +47,7 @@ export const TransactionsListPage: React.FC = () => {
     sort.setSort({ field: sort.field || 'executedAt', direction: sort.direction === 'desc' ? 'asc' : 'desc' });
   }, [sort]);
 
-  const { exportTransactionsCsv, isExportingCsv } = useMutations('transactions');
+  const { exportTransactionsCsv, isExportingCsv } = useMutations({ invalidateKey: 'transactions' });
 
   const isUpdatingBannerVisible = isFetching && !isLoading;
 

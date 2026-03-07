@@ -23,9 +23,12 @@ dist-ssr
 *.sln
 *.sw?
 .sonar
+.claude/
 
 # Other
 stats.html
 *.tsbuildinfo
 vite.config.ts.*.mjs
 .eslintcache
+.env.deploy
+.env.production

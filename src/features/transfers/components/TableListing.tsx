@@ -11,7 +11,6 @@ import Details from '@/features/transfers/components/Details';
 import TransferRow from '@/features/transfers/components/ListingRow';
 import Transfer from '@/features/transfers/models/Transfer';
 import { confirm } from '@/lib/confirmation';
-import { cn } from '@/lib/utils';
 
 import { useMutations as useTransfersMutations } from '../api/mutations';
 

@@ -24,17 +24,12 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { Timeframe } from '@/types/global';
 
-type CombinedFilters = TransactionFilters &
-  TransferFilters & {
-    after: Moment;
-    before: Moment;
-  };
-
 interface Props {
   isLoading?: boolean;
   transactionFilters: TransactionFilters;
   transferFilters: TransferFilters;
-  setFilter: <K extends keyof CombinedFilters>(key: K, value: CombinedFilters[K]) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setFilter: (key: string, value: any) => void;
   setShowTransactions: (value: boolean) => void;
   setShowTransfers: (value: boolean) => void;
   timeframe: { after: Moment; before: Moment };
@@ -102,16 +97,16 @@ export const ListingControls: React.FC<Props> = ({
       const min = minStr === '' ? NaN : Number(minStr);
       const max = maxStr === '' ? NaN : Number(maxStr);
       if (!Number.isFinite(min) && !Number.isFinite(max)) {
-        setFilter('amountRange' as keyof CombinedFilters, [] as any);
+        setFilter('amountRange', [] as any);
         return;
       }
-      setFilter('amountRange' as keyof CombinedFilters, [min, max] as any);
+      setFilter('amountRange', [min, max] as any);
     }, 350),
   ).current;
 
   const debouncedSearch = useRef(
     debounce((value: string) => {
-      setFilter('searchTerm' as keyof CombinedFilters, value as any);
+      setFilter('searchTerm', value as any);
     }, 250),
   ).current;
 
@@ -159,7 +154,7 @@ export const ListingControls: React.FC<Props> = ({
   );
 
   const toggleNestedCategories = useCallback(() => {
-    setFilter('withNestedCategories' as keyof CombinedFilters, !transactionFilters.withNestedCategories as any);
+    setFilter('withNestedCategories', !transactionFilters.withNestedCategories as any);
   }, [setFilter, transactionFilters.withNestedCategories]);
 
   const selectedCurrencies: string[] = useMemo(() => (transactionFilters as any).currencies ?? [], [transactionFilters]);
@@ -168,11 +163,11 @@ export const ListingControls: React.FC<Props> = ({
     const next = selectedCurrencies.includes(code)
       ? selectedCurrencies.filter((c: string) => c !== code)
       : [...selectedCurrencies, code];
-    setFilter('currencies' as keyof CombinedFilters, (next.length ? next : undefined) as any);
+    setFilter('currencies', (next.length ? next : undefined) as any);
   }, [selectedCurrencies, setFilter]);
 
   const clearCurrencies = useCallback(() => {
-    setFilter('currencies' as keyof CombinedFilters, undefined as any);
+    setFilter('currencies', undefined as any);
   }, [setFilter]);
 
   const currencyLabel = useMemo(() => {
@@ -246,7 +241,7 @@ export const ListingControls: React.FC<Props> = ({
             placeholder="Accounts"
             value={accountsValue}
             className="w-full"
-            onChange={(accounts) => setFilter('accounts' as keyof CombinedFilters, accounts as any)}
+            onChange={(accounts) => setFilter('accounts', accounts as any)}
           />
         </div>
 
@@ -257,12 +252,12 @@ export const ListingControls: React.FC<Props> = ({
           <CategoryTypeahead
             multiple
             placeholder="Categories"
-            value={transactionFilters.categories}
+            value={transactionFilters.categories as string[]}
             className={TYPEAHEAD_JOINED}
             onChange={(categories) => {
-              setFilter('categories' as keyof CombinedFilters, categories as any);
+              setFilter('categories', categories as any);
               if (categories?.length) {
-                setFilter('withNestedCategories' as keyof CombinedFilters, true as any);
+                setFilter('withNestedCategories', true as any);
                 setShowTransactions(true);
                 setShowTransfers(false);
               }
@@ -380,11 +375,9 @@ export const ListingControls: React.FC<Props> = ({
             <DisplayMenu
               activeView={activeView}
               isCompactTable={isCompactTable}
-              isReversedOrder={isReversedOrder}
               setActiveView={setActiveView}
               setFilter={setFilter}
               setIsCompactTable={setIsCompactTable}
-              setIsReversedOrder={setIsReversedOrder}
               setShowEmpty={setShowEmptyDays}
               setShowTransactions={setShowTransactions}
               setShowTransfers={setShowTransfers}

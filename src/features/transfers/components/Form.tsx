@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import cn from 'classnames';
+import { cn } from '@/lib/utils';
 import { ArrowLeftRight, Loader2 } from 'lucide-react';
 import moment from 'moment';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
@@ -249,10 +249,15 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
               <FormItem>
                 <FormLabel className="text-sm">From</FormLabel>
                 <AccountTypeahead
-                  {...field}
                   aria-label="From account"
                   multiple={false}
                   className={cn('w-full justify-between', { 'text-muted-foreground': !field.value })}
+                  value={field.value != null ? String(field.value) : null}
+                  onChange={(v) => field.onChange(v ? Number(v) : undefined)}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
+                  disabled={field.disabled}
                 />
                 <FormMessage />
               </FormItem>
@@ -266,10 +271,15 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
               <FormItem>
                 <FormLabel className="text-sm">To</FormLabel>
                 <AccountTypeahead
-                  {...field}
                   aria-label="To account"
                   multiple={false}
                   className={cn('w-full justify-between', { 'text-muted-foreground': !field.value })}
+                  value={field.value != null ? String(field.value) : null}
+                  onChange={(v) => field.onChange(v ? Number(v) : undefined)}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
+                  disabled={field.disabled}
                 />
                 <FormMessage />
               </FormItem>
@@ -374,10 +384,15 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
                 <FormItem>
                   <FormLabel className="text-sm">Fee Account</FormLabel>
                   <AccountTypeahead
-                    {...field}
                     aria-label="Account that pays the fee"
                     multiple={false}
                     className={cn('w-full justify-between', { 'text-muted-foreground': !field.value })}
+                    value={field.value != null ? String(field.value) : null}
+                    onChange={(v) => field.onChange(v ? Number(v) : undefined)}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                    disabled={field.disabled}
                   />
                   <FormMessage />
                 </FormItem>

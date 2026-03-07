@@ -104,7 +104,7 @@ const DistributionTable: React.FC<Props> = ({
                   {item.amount && (
                     <MoneyValue
                       amount={item.amount}
-                      currency={item.currency}
+                      currency={item.currency != null ? item.currency as import('@/constants/currency').CURRENCY_CODE : undefined}
                       useColors={false}
                       className="text-2xs leading-4 text-muted-foreground"
                     />

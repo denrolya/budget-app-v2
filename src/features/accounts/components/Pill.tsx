@@ -1,4 +1,4 @@
-import cn from 'classnames';
+import { cn } from '@/lib/utils';
 import React, { useMemo } from 'react';
 
 import AccountDetailsHoverCard from '@/features/accounts/components/DetailsHoverCard';
@@ -77,7 +77,10 @@ const Marker = ({ account, size }: { account: Account; size: 'sm' | 'md' | 'lg' 
       className={cn(
         'inline-block shrink-0 flex-none align-middle',
         sizeMap[size].marker,
-        shape !== 'diamond' && (shape === 'circle' ? 'rounded-full' : 'rounded-[0.2rem]'),
+        {
+          'rounded-full': shape === 'circle',
+          'rounded-[0.2rem]': shape !== 'diamond' && shape !== 'circle',
+        },
       )}
     />
   );
@@ -128,11 +131,13 @@ export const AccountPill: React.FC<AccountPillProps> = ({
   // Filled pill: marker in same color is redundant; BUT archived should still show it (muted marker is useful).
   const effectiveShowMarker = showMarker && (!isFilled || isArchived);
 
+  const nameSizeClass = isInline ? 'leading-none' : sizeMap[size].text;
+
   const nameNode = showName ? (
     <span
       className={cn(
         'min-w-0 truncate',
-        isInline ? 'leading-none' : sizeMap[size].text,
+        nameSizeClass,
         textClassName,
       )}
     >
@@ -154,7 +159,7 @@ export const AccountPill: React.FC<AccountPillProps> = ({
       title={ariaLabel}
       className={cn(
         'inline-flex items-center gap-2 min-w-0 max-w-full align-middle',
-        isArchived && 'opacity-70',
+        { 'opacity-70': isArchived },
         className,
       )}
     >
@@ -181,7 +186,7 @@ export const AccountPill: React.FC<AccountPillProps> = ({
         'inline-flex items-center gap-2 min-w-0 max-w-full',
         'border-border',
         sizeMap[size].badge,
-        isArchived && 'opacity-70',
+        { 'opacity-70': isArchived },
         className,
       )}
     >

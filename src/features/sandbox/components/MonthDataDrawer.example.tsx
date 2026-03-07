@@ -4,6 +4,7 @@ import { ResponsiveTreeMap } from '@nivo/treemap';
 import { eachDayOfInterval, endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 
 import ExpenseSunburstChart from '@/features/sandbox/components/Sunburst.example';
+import { Type as TransactionType } from '@/features/transactions';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 
@@ -131,8 +132,8 @@ const FinancialStatisticsDrawer = ({ isOpen, setIsOpen }: FinancialStatisticsDra
               />
             </section>
             <section className="flex flex-row justify-between">
-              <ExpenseSunburstChart type="expense" />
-              <ExpenseSunburstChart type="income" />
+              <ExpenseSunburstChart categories={[]} type={TransactionType.Expense} />
+              <ExpenseSunburstChart categories={[]} type={TransactionType.Income} />
             </section>
             <section className="flex flex-col space-y-4">
               <h2 className="text-xl font-semibold">Detailed Breakdown</h2>

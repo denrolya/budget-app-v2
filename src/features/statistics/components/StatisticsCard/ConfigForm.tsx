@@ -1,6 +1,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import cn from 'classnames';
+import { cn } from '@/lib/utils';
 import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -56,7 +56,7 @@ export const ConfigForm: React.FC<Props> = ({ initialConfig, onSubmit }) => {
 
   return (
     <Form {...form}>
-      <form className="space-y-6" onSubmit={form.handleSubmit((data) => onSubmit(data as StatisticsConfig))}>
+      <form className="space-y-6" onSubmit={form.handleSubmit((data) => onSubmit(data as unknown as StatisticsConfig))}>
         <FormField
           control={form.control}
           name="title"
@@ -119,7 +119,6 @@ export const ConfigForm: React.FC<Props> = ({ initialConfig, onSubmit }) => {
                 {...field}
                 multiple
                 type={form.watch('type')}
-                valueField="name"
                 className={cn('w-full justify-between', {
                   'text-muted-foreground': !field.value,
                 })}
@@ -138,7 +137,6 @@ export const ConfigForm: React.FC<Props> = ({ initialConfig, onSubmit }) => {
               <CategoryTypeahead
                 {...field}
                 multiple
-                valueField="name"
                 className={cn('w-full justify-between', {
                   'text-muted-foreground': !field.value,
                 })}

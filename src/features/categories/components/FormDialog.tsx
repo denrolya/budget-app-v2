@@ -11,7 +11,7 @@ import type Category from '@/features/categories/models/Category';
 import { cn } from '@/lib/utils';
 
 import { useMutations } from '../api';
-import type { CategoryType, CreateCategoryPayload, UpdateCategoryPayload } from '../types';
+import type { CategoryType, CreateCategoryDTO, UpdateCategoryDTO } from '../types';
 
 // Get depth level for indentation
 const getIndentLevel = (category: Category): number => {
@@ -94,17 +94,18 @@ export const CategoryDialog = ({
     if (!name.trim()) return;
 
     if (isEditing && category) {
-      const updates: UpdateCategoryPayload = {
+      const payload: UpdateCategoryDTO = {
         name: name.trim(),
-        parentId: selectedParentId,
+        parent: selectedParentId,
         isAffectingProfit,
+        type,
       };
-      await update({ id: category.id, updates });
+      await update({ id: category.id, payload });
     } else {
-      const payload: CreateCategoryPayload = {
+      const payload: CreateCategoryDTO = {
         name: name.trim(),
         type,
-        parentId: selectedParentId,
+        parent: selectedParentId,
         isAffectingProfit,
       };
       await create(payload);

@@ -16,6 +16,7 @@ import type { Budget, Category } from './types';
 
 export const BudgetManagementPage = () => {
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
   const { icon: Icon } = ROUTES.BUDGET_PAGE;
 
   const calculateProgress = (budgeted: number, actual: number) => Math.min((actual / budgeted) * 100, 100);

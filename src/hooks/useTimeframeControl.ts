@@ -14,12 +14,12 @@ export interface UseTimeframeControlOptions {
 }
 
 export interface UseTimeframeControl {
-  period: ISO8601Period;
-  setPeriod: (period: ISO8601Period) => void;
-  availablePeriods: PeriodOption[];
+  period?: ISO8601Period;
+  setPeriod?: (period: ISO8601Period) => void;
+  availablePeriods?: PeriodOption[];
   timeframe: Timeframe;
   setTimeframe: (tf: Timeframe) => void;
-  preset: string;
+  preset: string | undefined;
   setPreset: (preset: string) => void;
   previousTimeframe?: Timeframe;
 }

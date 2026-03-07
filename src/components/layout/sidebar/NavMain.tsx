@@ -85,7 +85,7 @@ const ITEMS: {
   },
 ];
 
-const NavMain: React.FC<Props> = () => {
+const NavMain: React.FC = () => {
   const { pathname } = useLocation();
   return (
     <SidebarGroup>

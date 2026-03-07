@@ -27,7 +27,7 @@ const ConvertedCurrenciesTooltip: React.FC<ConvertedCurrenciesTooltipProps> = ({
       content={
         <ul>
           {Object.entries(convertedValues).map(([code, val]) => {
-            const currencyData = CURRENCIES[code];
+            const currencyData = CURRENCIES[code as CURRENCY_CODE];
             const currencySymbol = currencyData?.symbol || '';
             const formatted = formatMoney(val, code as CURRENCY_CODE, currencySymbol);
             const isOriginal = code === originalCurrency;

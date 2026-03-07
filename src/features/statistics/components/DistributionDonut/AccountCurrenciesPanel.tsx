@@ -164,10 +164,10 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
           percent={percent}
           value={value}
           extra={
-            item ? (
+            item && item.amount != null ? (
               <MoneyValue
                 amount={item.amount}
-                currency={item.currency}
+                currency={item.currency != null ? item.currency as import('@/constants/currency').CURRENCY_CODE : undefined}
                 useColors={false}
                 className="text-2xs leading-4 text-muted-foreground"
               />
@@ -192,10 +192,10 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
           percent={percent}
           value={value}
           extra={
-            item ? (
+            item && item.amount != null ? (
               <MoneyValue
                 amount={item.amount}
-                currency={item.currency}
+                currency={item.currency != null ? item.currency as import('@/constants/currency').CURRENCY_CODE : undefined}
                 useColors={false}
                 className="text-2xs leading-4 text-muted-foreground"
               />
@@ -219,10 +219,10 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
           percent={percent}
           value={value}
           extra={
-            item ? (
+            item && item.amount != null ? (
               <MoneyValue
                 amount={item.amount}
-                currency={item.currency}
+                currency={item.currency != null ? item.currency as import('@/constants/currency').CURRENCY_CODE : undefined}
                 useColors={false}
                 className="text-2xs leading-4 text-muted-foreground"
               />
@@ -265,7 +265,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
           renderLabel={({ item, percentage }) => (
             <div className="min-w-0 flex items-center gap-2 text-sm leading-5 [&_*]:text-sm [&_*]:leading-5">
               {'account' in item && item.account ? (
-                <AccountPill account={item.account} tooltip={false} variant="inline" className="min-w-0" />
+                <AccountPill account={item.account as unknown as import('@/features/accounts/models/Account').default} tooltip={false} variant="inline" className="min-w-0" />
               ) : (
                 <span className="truncate">{item.name}</span>
               )}
@@ -316,7 +316,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
         renderLabel={({ item, percentage }) => (
           <div className="min-w-0 flex items-center gap-2 text-sm leading-5 [&_*]:text-sm [&_*]:leading-5">
             {'account' in item && item.account ? (
-              <AccountPill account={item.account} tooltip={false} variant="inline" className="min-w-0" />
+              <AccountPill account={item.account as unknown as import('@/features/accounts/models/Account').default} tooltip={false} variant="inline" className="min-w-0" />
             ) : (
               <span className="truncate">{item.name}</span>
             )}

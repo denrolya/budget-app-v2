@@ -71,7 +71,7 @@ const DisplayMenu: React.FC<Props> = ({
         {!isMobile && (
           <>
             <DropdownMenuLabel>View Mode</DropdownMenuLabel>
-            <DropdownMenuRadioGroup value={activeView} onValueChange={(v) => setActiveView(v)}>
+            <DropdownMenuRadioGroup value={activeView} onValueChange={(v) => setActiveView(v as 'list' | 'table')}>
               <DropdownMenuRadioItem value="list">
                 <LayoutList className="mr-2 h-4 w-4" /> List
               </DropdownMenuRadioItem>

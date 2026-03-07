@@ -115,7 +115,7 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
       return applyMonthly(sum);
     }
 
-    const root = processCategoryTree(categoryRaw ?? []);
+    const root = processCategoryTree((categoryRaw ?? []) as unknown as Parameters<typeof processCategoryTree>[0]);
     const totalRoot = root.reduce((sum, c) => sum + c.value, 0);
     const raw = currentCategory ? currentCategory.value : totalRoot;
     return applyMonthly(raw);
@@ -212,7 +212,7 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
             />
           ) : (
             <CategoriesPanel
-              categoryRaw={categoryRaw ?? []}
+              categoryRaw={(categoryRaw ?? []) as unknown as Parameters<typeof CategoriesPanel>[0]['categoryRaw']}
               categoryStack={categoryStack}
               currentCategory={currentCategory}
               isLoading={isLoading}

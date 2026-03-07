@@ -20,15 +20,15 @@ interface ChartCardProps<T> {
   useDataHook: (timeframe: TimeframeValue, period: ISO8601Period) => { data: T; isLoading: boolean; error?: any };
 }
 
-const ChartCard: React.FC<ChartCardProps<T>> = ({
-                               title,
-                               description,
-                               chartType = 'bar',
-                               ChartComponent,
-                               ConfigurationMenuComponent,
-                               SummaryComponent,
-                               useDataHook,
-                             }) => {
+function ChartCard<T>({
+  title,
+  description,
+  chartType: _chartType = 'bar',
+  ChartComponent,
+  ConfigurationMenuComponent,
+  SummaryComponent,
+  useDataHook,
+}: ChartCardProps<T>) {
   const [timeframe, setTimeframe] = useState<TimeframeValue>(TIMEFRAME_OPTIONS[6].value);
   const [period, setPeriod] = useState<ISO8601Period>(PERIOD_OPTIONS[2].value);
 
@@ -67,6 +67,6 @@ const ChartCard: React.FC<ChartCardProps<T>> = ({
       )}
     </Card>
   );
-};
+}
 
 export default ChartCard;

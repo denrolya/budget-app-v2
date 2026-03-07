@@ -116,7 +116,7 @@ const DateDisplay: React.FC<Props> = ({
       return date.format((timeObj as NumericDateFormat['WITH_TIME']).ALL_YEARS);
     }
 
-    const format = isCurrentYear ? timeObj.CURRENT_YEAR : timeObj.OTHER_YEAR;
+    const format = isCurrentYear ? (timeObj as DateFormat['WITH_TIME']).CURRENT_YEAR : (timeObj as DateFormat['WITH_TIME']).OTHER_YEAR;
     return date.format(format);
   }, [date, isCurrentYear, variant, showTime]);
 

@@ -1,3 +1,4 @@
+import type { ComputedDatum } from '@nivo/bar';
 import { ResponsiveBar } from '@nivo/bar';
 import { useCallback, useRef, useState } from 'react';
 
@@ -20,19 +21,9 @@ const monthlyData = [
   { month: 'Dec', income: 8500, expenses: 6500 },
 ];
 
-// Sample detailed data (you would replace this with real data in a production app)
-const getDetailedData = (month: string) => [
-  { category: 'Salary', amount: 5000, type: 'Income' },
-  { category: 'Freelance', amount: 1500, type: 'Income' },
-  { category: 'Rent', amount: 1500, type: 'Expense' },
-  { category: 'Groceries', amount: 500, type: 'Expense' },
-  { category: 'Utilities', amount: 300, type: 'Expense' },
-  { category: 'Entertainment', amount: 200, type: 'Expense' },
-];
-
 export default function Component() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedMonth, setSelectedMonth] = useState('');
+  const [_selectedMonth, setSelectedMonth] = useState('');
   const [tooltipContent, setTooltipContent] = useState<{
     month: string;
     income: number;
@@ -42,13 +33,13 @@ export default function Component() {
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleInteraction = useCallback(
-    (data: { indexValue: string; data: { month: string; income: number; expenses: number } }) => {
+    (data: ComputedDatum<{ month: string; income: number; expenses: number }> & { color: string }) => {
       const now = Date.now();
       const DOUBLE_TAP_DELAY = 300; // ms
 
       if (now - lastTap.current < DOUBLE_TAP_DELAY) {
         // Double tap detected
-        setSelectedMonth(data.indexValue);
+        setSelectedMonth(String(data.indexValue));
         setIsDrawerOpen(true);
         if (tooltipTimeout.current) {
           clearTimeout(tooltipTimeout.current);
@@ -141,10 +132,6 @@ export default function Component() {
                   ariaLabel="Yearly income and expenses chart"
                   barAriaLabel={(e) => `${e.id}: ${e.formattedValue} in month: ${e.indexValue}`}
                   onClick={handleInteraction}
-                  onDoubleClick={(data) => {
-                    setSelectedMonth(data.indexValue);
-                    setIsDrawerOpen(true);
-                  }}
                 />
               </div>
             </TooltipTrigger>

@@ -194,7 +194,7 @@ const CategoryTree = forwardRef<CategoryTreeRef, Props>(
       const newParent = parent ? parent.id : null;
       const breadcrumb = parent ? parent.getFullPath() : [];
 
-      await moveWithBreadcrumb({ id: draggedId!, newParent }, breadcrumb);
+      await moveWithBreadcrumb({ id: draggedId!, type, newParent }, breadcrumb);
       endDrag();
     };
 

@@ -124,7 +124,7 @@ const Content: React.FC<Props> = ({ data, onChange, onReset }) => {
           placeholder="All accounts"
           value={data.accounts}
           className="w-full"
-          onChange={(accounts) => onChange('accounts', accounts)}
+          onChange={(accounts) => onChange('accounts', accounts as string[] | null)}
         />
       </div>
 
@@ -135,10 +135,10 @@ const Content: React.FC<Props> = ({ data, onChange, onReset }) => {
           <CategoryTypeahead
             multiple
             placeholder="All categories"
-            value={data.categories}
+            value={data.categories as string[]}
             className="flex-1 [&>div:first-child]:rounded-r-none [&>div:first-child]:border-r-0"
             onChange={(categories) => {
-              onChange('categories', categories);
+              onChange('categories', categories as string[] | null);
               if (categories?.length) onChange('withNestedCategories', true);
             }}
           />

@@ -58,7 +58,7 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({
   const totalExpense = payload.find((entry) => entry.name === 'Total Expense');
   const totalIncome = payload.find((entry) => entry.name === 'Total Income');
 
-  const renderEntry = (entry: CustomTooltipProps['payload'][0]) => {
+  const renderEntry = (entry: NonNullable<CustomTooltipProps['payload']>[number]) => {
     const isTotal = entry.name === 'Total Expense' || entry.name === 'Total Income';
     if (isTotal) return null;
 

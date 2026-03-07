@@ -1,4 +1,4 @@
-import cn from 'classnames';
+import { cn } from '@/lib/utils';
 import { forwardRef, ReactNode, useCallback, useMemo } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
@@ -58,8 +58,10 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(
               currency={account.currency}
               className={cn(
                 'tabular-nums font-medium whitespace-nowrap text-xs',
-                account.balance < 0 && 'text-destructive',
-                account.balance === 0 && 'text-muted-foreground',
+                {
+                  'text-destructive': account.balance < 0,
+                  'text-muted-foreground': account.balance === 0,
+                },
               )}
             />
           </div>

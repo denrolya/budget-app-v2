@@ -158,7 +158,7 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
         ];
       case 'category':
         return (allCategories as Category[])
-          .filter((category) => category.type === selectedType)
+          .filter((category) => (category.type as string) === (selectedType as string))
           .map((category) => ({ value: category.id.toString(), label: category.name }));
       case 'account':
         return accounts.map((account) => ({ value: account.id.toString(), label: account.displayName }));
@@ -204,10 +204,10 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
         await createTransaction({
           type: values.type,
           amount: Number.parseFloat(values.amount),
-          category: Number.parseInt(values.category, 10),
-          account: Number.parseInt(values.account, 10),
+          category: Number.parseInt(values.category, 10) as unknown as import('@/features/categories/models/Category').default,
+          account: Number.parseInt(values.account, 10) as unknown as import('@/features/accounts/models/Account').default,
           isDraft: values.isDraft,
-          executedAt: values.executedAt,
+          executedAt: values.executedAt as unknown as import('moment').Moment,
         });
 
         submitForm(values);

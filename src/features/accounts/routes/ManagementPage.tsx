@@ -14,6 +14,7 @@ import AccountDetails from '../components/Details';
 import SidebarListing from '../components/SidebarListing';
 import WalletBar from '../components/WalletBar';
 import Account from '../models/Account';
+import { UpdateAccountDTO } from '../types';
 
 const ManagementPage: React.FC = () => {
   const navigate = useNavigate();
@@ -66,7 +67,7 @@ const AccountDetailsRoute: React.FC = () => {
     return data?.find((a) => String(a.id) === accountId) ?? null;
   }, [data, accountId]);
 
-  const onAccountUpdate = async (account: Account, diff: Partial<Account>) => {
+  const onAccountUpdate = async (account: Account, diff: UpdateAccountDTO) => {
     await update({ id: account.id, diff });
   };
 

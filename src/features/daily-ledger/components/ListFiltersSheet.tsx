@@ -25,12 +25,11 @@ import { TransferFilters } from '@/features/transfers/models/TransferFilters';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Timeframe } from '@/types/global';
 
-type CombinedFilters = TransactionFilters & TransferFilters;
-
 interface ListFiltersContentProps {
   transactionFilters: TransactionFilters;
   transferFilters: TransferFilters;
-  setFilter: (key: keyof CombinedFilters, value: any) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setFilter: (key: string, value: any) => void;
   showTransactions: boolean;
   setShowTransactions: (value: boolean) => void;
   showTransfers: boolean;
@@ -226,7 +225,7 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
           <CategoryTypeahead
             multiple
             placeholder="All categories"
-            value={transactionFilters.categories}
+            value={transactionFilters.categories as string[]}
             className="flex-1 [&>div:first-child]:rounded-r-none [&>div:first-child]:border-r-0"
             onChange={(categories) => {
               setFilter('categories' as any, categories as any);

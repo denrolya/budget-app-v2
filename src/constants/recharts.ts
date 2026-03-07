@@ -1,5 +1,3 @@
-import { CSSProperties } from 'react';
-
 export const CHART_STYLES = {
   container: {
     width: '100%',
@@ -10,13 +8,13 @@ export const CHART_STYLES = {
     margin: { top: 0, right: 30, bottom: 0, left: -30 },
   },
   xAxis: {
-    orientation: 'bottom',
-    domain: ['dataMin', 'dataMax'],
+    orientation: 'bottom' as const,
+    domain: ['dataMin', 'dataMax'] as [string, string],
     tick: {
       fontSize: 10,
       fill: 'hsl(var(--muted-foreground) / 0.4)',
       opacity: 0.5,
-    } as CSSProperties,
+    } as Record<string, unknown>,
     tickLine: false,
     axisLine: false,
   },
@@ -25,7 +23,7 @@ export const CHART_STYLES = {
       fontSize: 11,
       fill: 'hsl(var(--primary))',
       opacity: 0.5,
-    } as CSSProperties,
+    } as Record<string, unknown>,
     tickLine: false,
     axisLine: false,
     tickFormatter: (value: number) => new Intl.NumberFormat('en-US', {

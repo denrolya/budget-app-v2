@@ -29,9 +29,11 @@ interface Props extends TooltipProps<ValueType, NameType> {
   comparisonMode?: 'previousPeriod' | 'previousTimeframe';
 }
 
+type PeriodRange = { after: moment.Moment; before: moment.Moment };
+
 const periodMapping: Record<ISO8601Period, moment.unitOfTime.DurationConstructor> = {
   P1D: 'day',
-  P1W: 'isoWeek',
+  P1W: 'isoWeek' as moment.unitOfTime.DurationConstructor,
   P1M: 'month',
   P3M: 'month',
   P1Y: 'year',
@@ -63,6 +65,8 @@ export const ChartTooltip: React.FC<Props> = ({
                                                 data,
                                                 period,
                                                 coordinate,
+                                                currentTimeframe,
+                                                previousTimeframe,
                                                 comparisonMode = 'previousTimeframe',
                                               }) => {
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -105,7 +109,7 @@ export const ChartTooltip: React.FC<Props> = ({
 
   if (!active || !dataPoint) return null;
 
-  const formattedCurrentDate = formatDateRange(dataPoint.currentPeriod, period);
+  const formattedCurrentDate = formatDateRange(currentTimeframe, period);
   const formattedComparisonDate =
     comparisonMode === 'previousPeriod'
       ? formatDateRange(
@@ -115,7 +119,7 @@ export const ChartTooltip: React.FC<Props> = ({
         },
         period,
       )
-      : formatDateRange(dataPoint.comparisonPeriod, period);
+      : formatDateRange(previousTimeframe, period);
 
   return createPortal(
     <Card

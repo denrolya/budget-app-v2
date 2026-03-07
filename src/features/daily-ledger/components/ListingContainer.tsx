@@ -101,9 +101,6 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
     const isMobile = useIsMobile();
     const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
 
-    // --- URL params (read once on mount, write on change) ---
-    const [, setSearchParams] = useSearchParams();
-
     /**
      * Capture the initial search params once on mount via a ref, so we can
      * read them in useMemo without triggering exhaustive-deps warnings.

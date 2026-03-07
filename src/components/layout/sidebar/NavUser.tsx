@@ -1,4 +1,4 @@
-import { Bike, Check, ChevronsUpDown, Command, Laptop, LogOut, Moon, Palmtree, Sun } from 'lucide-react';
+import { Bike, Check, ChevronsUpDown, Command, Laptop, LogOut, Moon, Sun } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -16,11 +16,12 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { useHotkeys } from '@/contexts/Hotkeys';
 import { Theme, useTheme } from '@/contexts/theme';
-import { useAuth } from '@/features/auth';
+import { useAuth, useUser } from '@/features/auth';
 
 const NavUser: React.FC = () => {
   const { isMobile } = useSidebar();
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
+  const user = useUser();
   const { theme, setTheme } = useTheme();
   const { openHotkeysDialog } = useHotkeys();
 

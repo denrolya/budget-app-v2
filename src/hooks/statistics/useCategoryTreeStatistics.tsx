@@ -54,13 +54,14 @@ export const useCategoryTreeStatistics = (
   const categories = useCategories();
 
   const transformCategoryNode = (node: CategoryNode): Category => {
-    const category = categories[type]?.find((c: Category) => c.id === node.id) || new Category(node);
+    const categoryList = (categories as unknown as Record<string, Category[]>)[type as string];
+    const category = categoryList?.find((c: Category) => c.id === node.id) || new Category(node as unknown as import('@/features/categories/types').CategoryDTO);
     return {
       ...category,
       total: node.total,
       value: node.value,
       children: node.children.map(transformCategoryNode),
-    };
+    } as unknown as Category;
   };
 
   const {

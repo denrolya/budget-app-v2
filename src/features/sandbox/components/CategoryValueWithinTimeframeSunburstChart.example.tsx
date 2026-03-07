@@ -59,7 +59,7 @@ export const CategoryValueWithinTimeframeSunburstChart: React.FC<CategoryValueWi
 
   const processedData = useMemo(() => {
     if (!data) return { name: 'Categories', children: [] };
-    return processData(data);
+    return processData(data as unknown as CategoryNode[]);
   }, [data]);
 
   const totalValue = useMemo(() => {

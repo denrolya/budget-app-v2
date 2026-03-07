@@ -1,4 +1,4 @@
-import cn from 'classnames';
+import { cn } from '@/lib/utils';
 import type { Moment } from 'moment';
 import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';

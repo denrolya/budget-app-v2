@@ -107,7 +107,7 @@ export const CategoriesDoughnutCard: React.FC<Props> = ({
   );
 
   const { rootCategories, totalCurrent } = useMemo(() => {
-    const rootCategories = processData(currentData);
+    const rootCategories = processData(currentData ?? []);
     const totalCurrent = rootCategories.reduce((sum, cat) => sum + cat.value, 0);
     return { rootCategories, totalCurrent };
   }, [currentData, processData]);
@@ -173,7 +173,11 @@ export const CategoriesDoughnutCard: React.FC<Props> = ({
     }
   };
 
-  const breadcrumbs = [{ id: 0, name: 'All Categories' }, ...categoryStack.slice(1), currentCategory].filter(Boolean);
+  const breadcrumbs = [
+    { id: 0, name: 'All Categories' } as { id: number; name: string },
+    ...categoryStack.slice(1),
+    currentCategory,
+  ].filter((b): b is { id: number; name: string } => b !== null);
 
   const amountToDisplay = useMemo(() => {
     if (showMonthlyAverage) {

@@ -191,7 +191,7 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, onReset, isLo
             placeholder="Accounts"
             value={data.accounts}
             className="w-full"
-            onChange={(accounts) => onChange('accounts', accounts)}
+            onChange={(accounts) => onChange('accounts', accounts as string[] | null)}
           />
         </div>
 

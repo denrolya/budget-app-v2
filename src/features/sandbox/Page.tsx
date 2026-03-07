@@ -35,7 +35,7 @@ const TestingPage: React.FC = () => {
         <TabsContent value="nivo-charts">
           <h1>New Nivo Charts</h1>
 
-          <BalaneProgressbarStyled />
+          <BalaneProgressbarStyled percentageChange={0} accounts={[]} />
 
           <div>
             <BalanceProgressBar accounts={accounts} />

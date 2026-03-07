@@ -1,4 +1,4 @@
-import cn from 'classnames';
+import { cn } from '@/lib/utils';
 import { AlertCircle, ArrowUpDown, Plus, Star, StarOff } from 'lucide-react';
 import moment from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import AccountPill from '@/features/accounts/components/Pill';
 import Account from '@/features/accounts/models/Account';
+import { UpdateAccountDTO } from '@/features/accounts/types';
 import DailyList from '@/features/daily-ledger/components/DailyList';
 import TableListing from '@/features/daily-ledger/components/TableListing';
 import TableListingSkeleton from '@/features/daily-ledger/components/TableListingSkeleton';
@@ -23,7 +24,7 @@ import { confirm } from '@/lib/confirmation';
 
 interface Props {
   account: Account;
-  onAccountUpdate: (account: Account, diff: Partial<Account>) => void;
+  onAccountUpdate: (account: Account, diff: UpdateAccountDTO) => void;
 }
 
 const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {

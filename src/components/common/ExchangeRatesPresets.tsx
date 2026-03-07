@@ -1,4 +1,4 @@
-import cn from 'classnames';
+import { cn } from '@/lib/utils';
 import { Equal } from 'lucide-react';
 import React, { useMemo } from 'react';
 

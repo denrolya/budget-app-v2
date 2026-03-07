@@ -1,14 +1,7 @@
-import Category, { CategoryTreeBuilder } from '../models/Category';
+import { buildCategoriesData as buildTree, CategoriesData } from './buildTree';
+import type { CategoryDTO } from '../types';
 
-export type CategoriesData = {
-  tree: Category[];
-  list: Category[];
-};
+export type { CategoriesData };
 
-export const buildCategoriesData = (rawCategories: unknown): CategoriesData => {
-  const treeBuilder = new CategoryTreeBuilder();
-  const tree = treeBuilder.normalizeData(rawCategories);
-  const list = treeBuilder.getPlainList();
-
-  return { tree, list };
-};
+export const buildCategoriesData = (rawCategories: unknown): CategoriesData =>
+  buildTree(rawCategories as CategoryDTO[]);

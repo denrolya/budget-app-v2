@@ -96,9 +96,10 @@ abstract class BaseFilters implements FilterModel {
   }
 
   clone(): this {
-    const clone = new (this.constructor as { new(): this })();
+    const Constructor = this.constructor as new () => BaseFilters;
+    const clone = new Constructor();
     Object.assign(clone, this);
-    return clone;
+    return clone as this;
   }
 }
 

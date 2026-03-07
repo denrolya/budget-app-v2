@@ -19,6 +19,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBaseCurrency } from '@/features/auth';
+import { CURRENCY_CODE } from '@/constants/currency';
 import { useActiveAccountsWithDefaultOrder, useTotalBalance } from '@/hooks/financeData';
 import { cn } from '@/lib/utils';
 import { Account, Type as AccountType, ACCOUNT_TYPES_ORDER } from '@/features/accounts';
@@ -27,7 +28,7 @@ import storage from '@/services/storage';
 const STORAGE_KEY = 'sidebar.showPinnedOnly';
 
 const NavAccounts = () => {
-  const baseCurrency = useBaseCurrency() as string;
+  const baseCurrency = useBaseCurrency() as CURRENCY_CODE;
   const accounts = useActiveAccountsWithDefaultOrder() as Account[];
   const total = useTotalBalance() as number;
 

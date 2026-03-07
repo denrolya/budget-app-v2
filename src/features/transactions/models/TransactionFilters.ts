@@ -6,7 +6,6 @@ import {
   readParamArray,
   readParamBool,
   readParamMoment,
-  readParamNumberArray,
   readParamString,
 } from '@/lib/url/searchParams';
 
@@ -110,12 +109,12 @@ export class TransactionFilters extends BaseFilters {
 
     this._defaults = {
       ...filled,
-      before: filled.before.clone(),
-      after: filled.after.clone(),
+      before: filled.before!.clone(),
+      after: filled.after!.clone(),
       // ensure arrays are cloned by value
       amountRange: [...(filled.amountRange ?? [])],
-      categories: [...(filled.categories ?? [])],
-      excludedCategories: [...(filled.excludedCategories ?? [])],
+      categories: [...(filled.categories ?? [])] as string[] | number[],
+      excludedCategories: [...(filled.excludedCategories ?? [])] as string[] | number[],
       accounts: [...(filled.accounts ?? [])],
       currencies: [...(filled.currencies ?? [])],
     };
@@ -125,8 +124,8 @@ export class TransactionFilters extends BaseFilters {
     // Enforce normalization even for constructor input
     this.accounts = toStringArray(this.accounts);
     this.amountRange = toAmountRange(this.amountRange);
-    this.categories = toMixedIdArray(this.categories);
-    this.excludedCategories = toMixedIdArray(this.excludedCategories);
+    this.categories = toMixedIdArray(this.categories) as string[] | number[];
+    this.excludedCategories = toMixedIdArray(this.excludedCategories) as string[] | number[];
     this.currencies = toStringArray(this.currencies);
   }
 

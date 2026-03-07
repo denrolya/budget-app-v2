@@ -28,8 +28,6 @@ export type GroupedItem = [
   number, // transfersCount
 ];
 
-type CombinedFilters = TransactionFilters & TransferFilters;
-
 const isTransaction = (item: CombinedItem): item is Transaction => item instanceof Transaction;
 const isTransfer = (item: CombinedItem): item is Transfer => item instanceof Transfer;
 
@@ -125,8 +123,9 @@ export const useTransactionsAndTransfersList = ({
    * Applies the key to whichever filter models support it.
    * Keep pure (no UI side-effects).
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const setFilter = useCallback(
-    <K extends keyof CombinedFilters>(key: K, value: CombinedFilters[K]) => {
+    (key: string, value: unknown) => {
       if (TransactionFilters.isApplicable(key)) {
         transactionsState.setFilter(key as keyof TransactionFilters, value as any);
       }

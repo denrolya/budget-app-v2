@@ -14,7 +14,7 @@ import { generateSlug } from '@/lib/url/generateSlug';
 import { StatisticsConfig } from '@/types/statistics';
 
 const DashboardPage: React.FC = () => {
-  const [configs] = useState(cardConfigs);
+  const [configs] = useState(cardConfigs as Record<string, typeof cardConfigs[keyof typeof cardConfigs]>);
   const groups = Object.keys(configs);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -126,9 +126,9 @@ const DashboardPage: React.FC = () => {
                     transition: 'filter 0.3s ease-out, opacity 0.3s ease-out',
                   }}
                 >
-                  {item.type === 'balance' && <BalanceByAccountType type={item.accountType} />}
+                  {item.type === 'balance' && 'accountType' in item && item.accountType != null && <BalanceByAccountType type={item.accountType} />}
                   {item.type === 'total' && <TotalBalanceCard />}
-                  {item.type === 'statistics' && <StatisticsCard config={item.card} onChange={handleConfigChange} />}
+                  {item.type === 'statistics' && 'card' in item && <StatisticsCard config={item.card} onChange={handleConfigChange} />}
                 </div>
               </div>
             );

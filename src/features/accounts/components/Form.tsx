@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import cn from 'classnames';
+import { cn } from '@/lib/utils';
 import { Banknote, CreditCard, MoreHorizontal, Wallet } from 'lucide-react';
 import { forwardRef, useImperativeHandle, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
@@ -15,7 +15,7 @@ import { useForm as useFormContext } from '@/contexts/Form';
 import { useMutations } from '@/features/accounts/api/mutations';
 import { useFormLogic } from '@/hooks/useFormLogic';
 
-import { Type as AccountType, UpdateAccountDTO } from '../types';
+import { Type as AccountType, CreateAccountDTO, UpdateAccountDTO } from '../types';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -96,16 +96,14 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
     form,
     setFormState: updateFormState,
     onSubmit: async (values: FormSchema) => {
-      const payload = { ...values, balance: String(values.balance) };
-
       try {
         if (data?.id) {
           await update({
             id: data.id as number,
-            diff: payload as UpdateAccountDTO,
+            diff: values as UpdateAccountDTO,
           });
         } else {
-          await create(payload as CreateAccountDTO);
+          await create(values as unknown as CreateAccountDTO);
         }
       } catch (error) {
         console.error('Account form submission failed:', error);

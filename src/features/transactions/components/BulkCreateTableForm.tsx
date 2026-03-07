@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import cn from 'classnames';
+import { cn } from '@/lib/utils';
 import { ArrowDownCircle, ArrowUpCircle, Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -113,7 +113,7 @@ export const BulkCreateTableForm: React.FC = () => {
           data.transactions.map((t) => ({
             ...t,
             type: t.type,
-          })),
+          })) as unknown as import('@/features/transactions/models/Transaction').default[],
         );
 
         toast.success(`${data.transactions.length} transaction(s) created successfully!`);
@@ -271,14 +271,18 @@ export const BulkCreateTableForm: React.FC = () => {
                               <FormItem className="space-y-0 w-full">
                                 <FormLabel className="sr-only">Category</FormLabel>
                                 <CategoryTypeahead
-                                  {...field}
                                   autoFocus={autoFocusCategory}
                                   multiple={false}
                                   type={type}
-                                  valueField="id"
                                   className={cn(compactControl, 'w-full justify-between', {
                                     'text-muted-foreground': !field.value,
                                   })}
+                                  value={field.value != null ? String(field.value) : null}
+                                  onChange={(v) => field.onChange(v ? Number(v) : undefined)}
+                                  onBlur={field.onBlur}
+                                  name={field.name}
+                                  ref={field.ref}
+                                  disabled={field.disabled}
                                 />
                                 <FormMessage />
                               </FormItem>
@@ -319,11 +323,16 @@ export const BulkCreateTableForm: React.FC = () => {
                             <FormItem className="space-y-0">
                               <FormLabel className="sr-only">Account</FormLabel>
                               <AccountTypeahead
-                                {...field}
                                 multiple={false}
                                 className={cn(compactControl, 'w-full justify-between', {
                                   'text-muted-foreground': !field.value,
                                 })}
+                                value={field.value != null ? String(field.value) : null}
+                                onChange={(v) => field.onChange(v ? Number(v) : undefined)}
+                                onBlur={field.onBlur}
+                                name={field.name}
+                                ref={field.ref}
+                                disabled={field.disabled}
                               />
                               <FormMessage />
                             </FormItem>

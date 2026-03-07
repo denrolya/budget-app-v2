@@ -39,11 +39,9 @@ interface Props {
   showYearBoundary: boolean;
   showMonthBoundary: boolean;
   showSeasonBoundary: boolean;
-  isStacked?: boolean;
 }
 
 const MoneyFlowChart: React.FC<Props> = ({
-                                           isStacked = true,
                                            currentTimeframe,
                                            previousTimeframe,
                                            period,

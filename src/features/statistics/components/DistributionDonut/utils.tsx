@@ -1,9 +1,15 @@
 import { CURRENCIES } from '@/constants/currency';
-import { Category } from '@/features/categories';
 
 import type { ProcessedCategory } from './types';
 
-export const processCategoryTree = (data: Category[]): ProcessedCategory[] =>
+type CategoryApiNode = {
+  id: number;
+  name: string;
+  total: number;
+  children?: CategoryApiNode[];
+};
+
+export const processCategoryTree = (data: CategoryApiNode[]): ProcessedCategory[] =>
   data?.map((category) => {
     const children = category.children ? processCategoryTree(category.children) : [];
     const totalChildrenValue = children.reduce((sum: number, child: ProcessedCategory) => sum + child.value, 0);

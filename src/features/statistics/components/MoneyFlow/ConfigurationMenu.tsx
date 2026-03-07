@@ -14,11 +14,11 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Switch from '@/features/statistics/components/MoneyFlow/ConfigurationMenuSwitch';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { PeriodValue } from '@/types/global';
+import { ISO8601Period } from '@/types/global';
 
 interface UnifiedChartMenuProps {
   period: string;
-  setPeriod: (value: PeriodValue) => void;
+  setPeriod: (value: ISO8601Period) => void;
   chartType: 'bar' | 'line';
   setChartType: (value: 'bar' | 'line') => void;
   showIncome: boolean;

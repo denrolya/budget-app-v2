@@ -31,7 +31,7 @@ export const mapDebtDTOToModel = (dto: DebtDTO, deps: { accounts: Account[]; cat
   const accountMap = byId(deps.accounts);
   const categoryMap = byId(deps.categories);
 
-  const transactions = dto.transactions.map((rawTx: RawTransactionDTO) => {
+  const transactions = (dto.transactions ?? []).map((rawTx: RawTransactionDTO) => {
     const account = accountMap.get(rawTx.account.id);
     const category = categoryMap.get(rawTx.category.id);
 

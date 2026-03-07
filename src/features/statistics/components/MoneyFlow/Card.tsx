@@ -1,9 +1,9 @@
 import { Calendar as CalendarIcon, Calendar } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { PERIOD_OPTIONS, TIMEFRAME_OPTIONS } from '@/constants/datetime';
+import { TIMEFRAME_OPTIONS } from '@/constants/datetime';
 import { useBaseCurrency } from '@/features/auth';
 import Chart from '@/features/statistics/components/MoneyFlow/Chart';
 import ConfigurationMenu from '@/features/statistics/components/MoneyFlow/ConfigurationMenu';
@@ -13,10 +13,9 @@ import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
 import { UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { formatRange } from '@/lib/datetime/formatShortDate';
 import { cn } from '@/lib/utils';
-import { PeriodValue } from '@/types/global';
 
 interface Props extends React.ComponentPropsWithoutRef<'div'> {
-  controlledTimeframe: UseTimeframeControl;
+  controlledTimeframe?: UseTimeframeControl;
 }
 
 export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className }) => {
@@ -41,10 +40,16 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
     timeframe = fallback.timeframe,
     previousTimeframe = fallback.previousTimeframe,
     setTimeframe = fallback.setTimeframe,
-    period = fallback.period,
-    setPeriod = fallback.setPeriod,
-    availablePeriods = fallback.availablePeriods,
+    period: rawPeriod = fallback.period,
+    setPeriod: rawSetPeriod = fallback.setPeriod,
+    availablePeriods: rawAvailablePeriods = fallback.availablePeriods,
   } = controlledTimeframe ?? {};
+
+  const period = rawPeriod ?? fallback.period!;
+  const setPeriod = rawSetPeriod ?? fallback.setPeriod!;
+  const availablePeriods = rawAvailablePeriods ?? fallback.availablePeriods!;
+
+  const resolvedPreviousTimeframe = previousTimeframe ?? fallback.previousTimeframe!;
 
   const {
     transformedData,
@@ -62,14 +67,9 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
   } = useMoneyFlow({
     period,
     timeframe,
-    previousTimeframe,
+    previousTimeframe: resolvedPreviousTimeframe,
     baseCurrency,
   });
-
-  const getPeriodLabel = useMemo(() => {
-    const periodOption = PERIOD_OPTIONS.find((option) => option.value === period);
-    return periodOption ? periodOption.label.toLowerCase() : 'period';
-  }, [period]);
 
   return (
     <Card
@@ -86,7 +86,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
             chartType={chartType}
             period={period}
             setChartType={setChartType}
-            setPeriod={(value: PeriodValue) => setPeriod(value)}
+            setPeriod={setPeriod}
             setShowExpenses={setShowExpenses}
             setShowIncome={setShowIncome}
             setShowMonthBoundary={setShowMonthBoundary}
@@ -119,7 +119,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
                 <span className="ml-1 text-muted-foreground flex items-center">
                   {' vs '}
                   <Calendar className="inline h-3 w-3 mx-1" />
-                  {formatRange(previousTimeframe)}
+                  {formatRange(resolvedPreviousTimeframe)}
                 </span>
               </span>
             </span>
@@ -142,7 +142,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
                     currentTimeframe={timeframe}
                     data={transformedData}
                     period={period}
-                    previousTimeframe={previousTimeframe}
+                    previousTimeframe={resolvedPreviousTimeframe}
                     showExpenses={showExpenses}
                     showIncome={showIncome}
                     showMonthBoundary={showMonthBoundary}

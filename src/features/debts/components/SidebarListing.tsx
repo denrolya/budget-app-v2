@@ -3,7 +3,6 @@ import { Archive, ArchiveRestore, Focus, Search, X } from 'lucide-react';
 import React, { useCallback, useId, useMemo, useRef, useState } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
-import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';

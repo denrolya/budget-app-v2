@@ -96,7 +96,7 @@ export const TIMEFRAME_OPTIONS: TimeframeOption[] = [
   },
 ] as const;
 
-export const DASHBOARD_TIMEFRAME_OPTIONS: Array<{ label: string, range: Timeframe }> = [
+export const DASHBOARD_TIMEFRAME_OPTIONS: Array<{ label: string; value?: string; range: Timeframe }> = [
   {
     label: 'Summer',
     range: { after: moment().month(5).startOf('month'), before: moment().month(8).endOf('month') },

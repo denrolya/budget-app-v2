@@ -89,10 +89,9 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
         <CategoryTypeahead
           multiple
           id="categories"
-          value={selectedCategories}
-          valueField="id"
+          value={selectedCategories.map(String)}
           className="h-9 w-full"
-          onChange={(categories) => setSelectedCategories(categories)}
+          onChange={(categories) => setSelectedCategories((categories as string[] | null)?.map(Number) ?? [])}
         />
       </div>
 

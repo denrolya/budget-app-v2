@@ -11,7 +11,7 @@ export const useList = () =>
     queryKey: queryKeys.all,
     queryFn: async () => {
       const raw = await categoriesService.fetchList();
-      return buildCategoriesData(raw as CategoryDTO[]);
+      return buildCategoriesData(raw as unknown as CategoryDTO[]);
     },
     staleTime: 1000 * 60 * 30,
     retry: 3,

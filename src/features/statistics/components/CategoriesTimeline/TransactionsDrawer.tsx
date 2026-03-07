@@ -41,7 +41,7 @@ export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
   const { list: allCategories } = useCategories();
   const categories = selectedCategories
     .map((id) => allCategories.find((category: Category) => category.id === id))
-    .filter(Boolean);
+    .filter((c): c is Category => c !== undefined);
   const {
     groupedItems: groupedTransactions,
     isLoading: isTransactionsLoading,

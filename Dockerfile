@@ -8,13 +8,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci --prefer-offline
 
 # Copy the rest of the application code
 COPY . .
 
-# Build the application
-RUN npm run build:dev
+# Build the application (includes tsc type-check + vite build)
+RUN npm run build
 
 # Stage 2: Serve the application with Nginx
 FROM nginx:stable-alpine
