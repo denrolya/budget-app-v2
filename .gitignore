@@ -30,5 +30,6 @@ stats.html
 *.tsbuildinfo
 vite.config.ts.*.mjs
 .eslintcache
+.env
 .env.deploy
 .env.production
