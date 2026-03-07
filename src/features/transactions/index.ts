@@ -2,13 +2,13 @@
 export { default as TransactionsListPage } from './routes/ListingPage';
 
 // Public hooks (feature API)
-export { useList, useMutations, queryKeys } from './api';
+export { useList } from './api';
 
-// Models / types (export only if used outside this feature)
+// Models / types
 export { default as Transaction } from './models/Transaction';
 export { TransactionFilters } from './models/TransactionFilters';
-export * from './types';
+export { Type } from './types';
+export type { ConvertedValues, RawTransactionDTO, TransactionModelProps } from './types';
 
-// Public components (ONLY if reused outside transactions feature)
-// If only used inside transactions pages/components — don't export.
+// Public components
 export { default as FormattedListing } from './components/FormattedListing';

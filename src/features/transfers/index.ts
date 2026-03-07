@@ -1,7 +1,9 @@
+// Pages
 export { default as TransfersListPage } from './routes/ListingPage';
 
-export { useList, useMutations, queryKeys } from './api';
+// Public hooks (feature API)
+export { useList } from './api';
 
-// only if used outside the feature
+// Models
 export { default as Transfer } from './models/Transfer';
 export { TransferFilters } from './models/TransferFilters';
