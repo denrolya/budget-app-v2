@@ -9,11 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { CURRENCY_CODE } from '@/constants/currency';
 import { ConvertedValues } from '@/features/transactions';
-import {
-  useExchangeRates,
-  useMonobankExchangeRates,
-  useWiseExchangeRates,
-} from '@/hooks/financeData';
+import { useExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/hooks/financeData';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import {
   ExchangeRateSnapshot,
@@ -58,7 +54,7 @@ const RateDisplay: React.FC<RateDisplayProps> = ({
     {diffPct !== undefined && (
       <span
         className={cn('text-[10px] font-medium flex-none rounded px-0.5', {
-          'text-success bg-success/10':         diffPct >= 0,
+          'text-success bg-success/10': diffPct >= 0,
           'text-destructive bg-destructive/10': diffPct < 0,
         })}
       >
@@ -76,8 +72,8 @@ interface RateComparisonProps {
   to: CURRENCY_CODE;
   amount?: number;
   fixerRates: ConvertedValues;
-  monoRates:  ConvertedValues;
-  wiseRates:  ConvertedValues;
+  monoRates: ConvertedValues;
+  wiseRates: ConvertedValues;
   snapshots: ExchangeRateSnapshot[];
   isLoadingSnapshots: boolean;
 }
@@ -95,8 +91,8 @@ const RateComparison: React.FC<RateComparisonProps> = ({
   const rate = useMemo(
     () => ({
       fixer: getExchangeRate(from, to, fixerRates),
-      mono:  getExchangeRate(from, to, monoRates),
-      wise:  getExchangeRate(from, to, wiseRates),
+      mono: getExchangeRate(from, to, monoRates),
+      wise: getExchangeRate(from, to, wiseRates),
     }),
     [from, to, fixerRates, monoRates, wiseRates],
   );
@@ -137,8 +133,7 @@ const RateComparison: React.FC<RateComparisonProps> = ({
       .map(([x, y]) => ({ x, y }));
   }, [snapshots, from, to, amount]);
 
-  const maximumFractionDigits =
-    from === CURRENCY_CODE.BTC || to === CURRENCY_CODE.HUF ? 0 : 2;
+  const maximumFractionDigits = from === CURRENCY_CODE.BTC || to === CURRENCY_CODE.HUF ? 0 : 2;
 
   return (
     <div className="bg-muted/20 rounded-md border border-muted overflow-hidden">
@@ -151,24 +146,24 @@ const RateComparison: React.FC<RateComparisonProps> = ({
         {rate.fixer !== null && (
           <RateDisplay
             amount={amount}
+            diffPct={diff?.['fixer']}
             from={from}
+            maximumFractionDigits={maximumFractionDigits}
+            source="fx"
             to={to}
             value={rate.fixer}
-            source="fx"
-            maximumFractionDigits={maximumFractionDigits}
-            diffPct={diff?.['fixer']}
           />
         )}
         {rate.mono !== null && (
           <div className="mt-1 text-muted-foreground">
             <RateDisplay
               amount={amount}
+              diffPct={diff?.['mono']}
               from={from}
+              maximumFractionDigits={maximumFractionDigits}
+              source="mb"
               to={to}
               value={rate.mono}
-              source="mb"
-              maximumFractionDigits={maximumFractionDigits}
-              diffPct={diff?.['mono']}
             />
           </div>
         )}
@@ -176,12 +171,12 @@ const RateComparison: React.FC<RateComparisonProps> = ({
           <div className="mt-1 text-muted-foreground">
             <RateDisplay
               amount={amount}
+              diffPct={diff?.['wise']}
               from={from}
+              maximumFractionDigits={maximumFractionDigits}
+              source="ws"
               to={to}
               value={rate.wise}
-              source="ws"
-              maximumFractionDigits={maximumFractionDigits}
-              diffPct={diff?.['wise']}
             />
           </div>
         )}
@@ -189,11 +184,7 @@ const RateComparison: React.FC<RateComparisonProps> = ({
 
       {/* Sparkline — pulled up slightly so the gradient bleeds into the rate rows */}
       <div className="-mt-4">
-        <RateSparkline
-          data={sparkData}
-          isLoading={isLoadingSnapshots}
-          maximumFractionDigits={maximumFractionDigits}
-        />
+        <RateSparkline data={sparkData} isLoading={isLoadingSnapshots} maximumFractionDigits={maximumFractionDigits} />
       </div>
     </div>
   );
@@ -204,7 +195,7 @@ const RateComparison: React.FC<RateComparisonProps> = ({
 type DayRange = 7 | 30 | 90;
 
 const PRESETS: Array<{ label: string; value: DayRange }> = [
-  { label: '7D',  value: 7  },
+  { label: '7D', value: 7 },
   { label: '30D', value: 30 },
   { label: '90D', value: 90 },
 ];
@@ -213,21 +204,20 @@ export const ExchangeRatesPresets: React.FC = () => {
   const { toggle: toggleCurrencyConverter } = useCurrencyConverter();
 
   const fixerRates = useExchangeRates().fixer;
-  const monoRates  = useMonobankExchangeRates();
-  const wiseRates  = useWiseExchangeRates();
+  const monoRates = useMonobankExchangeRates();
+  const wiseRates = useWiseExchangeRates();
 
   const [days, setDays] = useState<DayRange>(30);
 
   const { fromDate, toDate } = useMemo(
     () => ({
       fromDate: moment().subtract(days, 'days').format('YYYY-MM-DD'),
-      toDate:   moment().format('YYYY-MM-DD'),
+      toDate: moment().format('YYYY-MM-DD'),
     }),
     [days],
   );
 
-  const { data: snapshotsData, isLoading: isLoadingSnapshots } =
-    useFixerExchangeRates(fromDate, toDate);
+  const { data: snapshotsData, isLoading: isLoadingSnapshots } = useFixerExchangeRates(fromDate, toDate);
 
   const snapshots = snapshotsData?.snapshots ?? [];
 
@@ -235,17 +225,16 @@ export const ExchangeRatesPresets: React.FC = () => {
 
   return (
     <div className="space-y-3 p-0 md:p-4">
-
       {/* Time range selector */}
       <div className="flex items-center justify-end">
         <ToggleGroup
-          type="single"
           size="sm"
+          type="single"
           value={String(days)}
           onValueChange={(v) => v && setDays(Number(v) as DayRange)}
         >
           {PRESETS.map((p) => (
-            <ToggleGroupItem key={p.value} value={String(p.value)} className="text-xs px-2.5">
+            <ToggleGroupItem value={String(p.value)} className="text-xs px-2.5" key={p.value}>
               {p.label}
             </ToggleGroupItem>
           ))}

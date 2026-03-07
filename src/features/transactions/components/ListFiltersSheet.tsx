@@ -1,6 +1,7 @@
 import debounce from 'lodash/debounce';
 import { ArrowDownCircle, ArrowUpCircle, ChevronDown, FileText, Search, X } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Layers } from 'lucide-react';
 
 import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
 import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
@@ -17,7 +18,6 @@ import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
-import { Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
 import { Type as TransactionType } from '@/features/transactions';
@@ -57,39 +57,65 @@ const Content: React.FC<Props> = ({ data, onChange, onReset }) => {
     }, 250),
   ).current;
 
-  useEffect(() => () => { debouncedAmount.cancel(); debouncedSearch.cancel(); }, [debouncedAmount, debouncedSearch]);
+  useEffect(
+    () => () => {
+      debouncedAmount.cancel();
+      debouncedSearch.cancel();
+    },
+    [debouncedAmount, debouncedSearch],
+  );
 
   useEffect(() => {
     const [extMin, extMax] = data.amountRange ?? [];
-    setMinLocal((p) => { const n = (extMin != null && Number.isFinite(extMin)) ? String(extMin) : ''; return p === n ? p : n; });
-    setMaxLocal((p) => { const n = (extMax != null && Number.isFinite(extMax)) ? String(extMax) : ''; return p === n ? p : n; });
+    setMinLocal((p) => {
+      const n = extMin != null && Number.isFinite(extMin) ? String(extMin) : '';
+      return p === n ? p : n;
+    });
+    setMaxLocal((p) => {
+      const n = extMax != null && Number.isFinite(extMax) ? String(extMax) : '';
+      return p === n ? p : n;
+    });
   }, [data.amountRange]);
 
-  useEffect(() => { setSearchLocal(data.searchTerm ?? ''); }, [data.searchTerm]);
+  useEffect(() => {
+    setSearchLocal(data.searchTerm ?? '');
+  }, [data.searchTerm]);
 
-  const handleMinChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setMinLocal(e.target.value);
-    debouncedAmount(e.target.value, maxLocal);
-  }, [debouncedAmount, maxLocal]);
+  const handleMinChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setMinLocal(e.target.value);
+      debouncedAmount(e.target.value, maxLocal);
+    },
+    [debouncedAmount, maxLocal],
+  );
 
-  const handleMaxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setMaxLocal(e.target.value);
-    debouncedAmount(minLocal, e.target.value);
-  }, [debouncedAmount, minLocal]);
+  const handleMaxChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setMaxLocal(e.target.value);
+      debouncedAmount(minLocal, e.target.value);
+    },
+    [debouncedAmount, minLocal],
+  );
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchLocal(e.target.value);
-    debouncedSearch(e.target.value);
-  }, [debouncedSearch]);
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchLocal(e.target.value);
+      debouncedSearch(e.target.value);
+    },
+    [debouncedSearch],
+  );
 
   const selectedCurrencies: string[] = useMemo(() => (data as any).currencies ?? [], [data]);
 
-  const toggleCurrency = useCallback((code: CURRENCY_CODE) => {
-    const next = selectedCurrencies.includes(code)
-      ? selectedCurrencies.filter((c) => c !== code)
-      : [...selectedCurrencies, code];
-    onChange('currencies' as any, (next.length ? next : undefined) as any);
-  }, [selectedCurrencies, onChange]);
+  const toggleCurrency = useCallback(
+    (code: CURRENCY_CODE) => {
+      const next = selectedCurrencies.includes(code)
+        ? selectedCurrencies.filter((c) => c !== code)
+        : [...selectedCurrencies, code];
+      onChange('currencies' as any, (next.length ? next : undefined) as any);
+    },
+    [selectedCurrencies, onChange],
+  );
 
   const clearCurrencies = useCallback(() => {
     onChange('currencies' as any, undefined as any);
@@ -97,13 +123,17 @@ const Content: React.FC<Props> = ({ data, onChange, onReset }) => {
 
   const currencyLabel = useMemo(() => {
     if (selectedCurrencies.length === 0) return 'Currency';
-    if (selectedCurrencies.length <= 2) return selectedCurrencies.map((c) => CURRENCIES[c as CURRENCY_CODE]?.symbol ?? c).join(' ');
+    if (selectedCurrencies.length <= 2)
+      return selectedCurrencies.map((c) => CURRENCIES[c as CURRENCY_CODE]?.symbol ?? c).join(' ');
     return `${selectedCurrencies.length} currencies`;
   }, [selectedCurrencies]);
 
-  const setType = useCallback((type: TransactionType) => {
-    onChange('type', data.type === type ? undefined : type);
-  }, [data.type, onChange]);
+  const setType = useCallback(
+    (type: TransactionType) => {
+      onChange('type', data.type === type ? undefined : type);
+    },
+    [data.type, onChange],
+  );
 
   const toggleDraft = useCallback(() => {
     onChange('isDraft', data.isDraft === undefined ? true : !data.isDraft || undefined);
@@ -115,7 +145,6 @@ const Content: React.FC<Props> = ({ data, onChange, onReset }) => {
 
   return (
     <div className="space-y-5 px-1">
-
       {/* ACCOUNTS */}
       <div className="space-y-2">
         <Label className={LABEL_CLS}>Accounts</Label>
@@ -174,7 +203,9 @@ const Content: React.FC<Props> = ({ data, onChange, onReset }) => {
             className="bg-background flex-1 h-9"
             onChange={handleMinChange}
           />
-          <span aria-hidden="true" className="text-muted-foreground text-xs shrink-0">–</span>
+          <span aria-hidden="true" className="text-muted-foreground text-xs shrink-0">
+            –
+          </span>
           <Input
             aria-label="Maximum amount"
             inputMode="decimal"
@@ -191,7 +222,10 @@ const Content: React.FC<Props> = ({ data, onChange, onReset }) => {
       <div className="space-y-2">
         <Label className={LABEL_CLS}>Search</Label>
         <div className="relative flex items-center">
-          <Search aria-hidden="true" className="absolute left-2.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <Search
+            aria-hidden="true"
+            className="absolute left-2.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none"
+          />
           <Input
             aria-label="Search by note"
             placeholder="Search notes…"
@@ -213,8 +247,10 @@ const Content: React.FC<Props> = ({ data, onChange, onReset }) => {
                 size="sm"
                 type="button"
                 variant={selectedCurrencies.length > 0 ? 'secondary' : 'outline'}
-                className={cn('flex-1 justify-between bg-background px-3 gap-1 h-9',
-                  selectedCurrencies.length > 0 && 'rounded-r-none border-r-0')}
+                className={cn(
+                  'flex-1 justify-between bg-background px-3 gap-1 h-9',
+                  selectedCurrencies.length > 0 && 'rounded-r-none border-r-0',
+                )}
               >
                 <span className="text-xs">{currencyLabel}</span>
                 <ChevronDown aria-hidden="true" className="h-3 w-3 shrink-0 opacity-60" />
@@ -325,8 +361,7 @@ export const ListFiltersSheet: React.FC<Props> = ({ isOpen = false, setIsOpen, d
           <FilterDescription className="sr-only">Additional transaction filter options.</FilterDescription>
         </FilterHeader>
         <div className="overflow-y-auto px-4 pb-6 pt-2">
-          <Content data={data} onChange={onChange} onReset={onReset} setIsOpen={setIsOpen} isOpen={isOpen} />
-
+          <Content data={data} isOpen={isOpen} setIsOpen={setIsOpen} onChange={onChange} onReset={onReset} />
         </div>
       </FilterContent>
     </FilterWrapper>

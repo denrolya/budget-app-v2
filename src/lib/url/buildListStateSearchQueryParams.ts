@@ -39,9 +39,7 @@ export const buildListStateSearchParams = <FilterType extends BaseFilters>(
         formattedValue = value.format(formatMoment);
       } else if (Array.isArray(value)) {
         // Preserve positional semantics: NaN → empty string so [NaN, 500] → ",500"
-        formattedValue = value
-          .map((v) => (typeof v === 'number' && !Number.isFinite(v) ? '' : String(v)))
-          .join(',');
+        formattedValue = value.map((v) => (typeof v === 'number' && !Number.isFinite(v) ? '' : String(v))).join(',');
       } else {
         formattedValue = value.toString();
       }

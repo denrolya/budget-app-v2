@@ -133,12 +133,12 @@ const csvFilenameFromFilters = (filters: TransactionFilters) => {
 
 export const transactionService = {
   async fetchList({
-                    page = 1,
-                    perPage = 30,
-                    filters,
-                    sort,
-                    omitTransferTransactions,
-                  }: FetchTransactionsParams): Promise<FetchResponse> {
+    page = 1,
+    perPage = 30,
+    filters,
+    sort,
+    omitTransferTransactions,
+  }: FetchTransactionsParams): Promise<FetchResponse> {
     const query = buildQueryParams({ page, perPage, filters, sort, includePagingAndSort: true });
     const url = buildUrl(BASE_URL, query);
 
@@ -210,7 +210,10 @@ export const transactionService = {
   },
 
   bulkCreate(payload: Partial<RawTransactionDTO | Transaction>[]) {
-    return api.post('/api/transactions/bulk', payload.map((data) => this.formatData(data)));
+    return api.post(
+      '/api/transactions/bulk',
+      payload.map((data) => this.formatData(data)),
+    );
   },
 
   update(id: string | number, updates: Partial<RawTransactionDTO | Transaction>, original: Transaction) {
@@ -225,7 +228,7 @@ export const transactionService = {
     page: number;
     perPage: number;
     filters: TransactionFilters;
-    sort: { field: string; direction: SortDirection }
+    sort: { field: string; direction: SortDirection };
   }) {
     const query = buildQueryParams({ ...args, includePagingAndSort: true });
     return buildUrl(BASE_URL, query);

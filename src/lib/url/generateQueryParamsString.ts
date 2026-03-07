@@ -5,15 +5,15 @@ import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { Type as TransactionType } from '@/features/transactions';
 
 export const generateQueryParamsString = ({
-                                            after,
-                                            afterFormat = BACKEND_DATE_FORMAT,
-                                            before,
-                                            beforeFormat = BACKEND_DATE_FORMAT,
-                                            period,
-                                            type = null,
-                                            categories = [],
-                                            accounts = [],
-                                          }: {
+  after,
+  afterFormat = BACKEND_DATE_FORMAT,
+  before,
+  beforeFormat = BACKEND_DATE_FORMAT,
+  period,
+  type = null,
+  categories = [],
+  accounts = [],
+}: {
   after?: Moment;
   afterFormat?: string;
   before?: Moment;
@@ -22,15 +22,15 @@ export const generateQueryParamsString = ({
   type?: TransactionType | null;
   categories?: (string | number)[];
   accounts?: (string | number)[];
-}):
-  string => qs.stringify(
-  {
-    after: after?.format(afterFormat),
-    before: before?.format(beforeFormat),
-    interval: period,
-    type: type || undefined,
-    categories,
-    accounts,
-  },
-  { arrayFormat: 'brackets' },
-);
+}): string =>
+  qs.stringify(
+    {
+      after: after?.format(afterFormat),
+      before: before?.format(beforeFormat),
+      interval: period,
+      type: type || undefined,
+      categories,
+      accounts,
+    },
+    { arrayFormat: 'brackets' },
+  );

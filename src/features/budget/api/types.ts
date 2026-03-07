@@ -12,7 +12,7 @@ export interface BudgetDTO {
   name: string | null;
   periodType: BudgetPeriodType;
   startDate: string; // 'YYYY-MM-DD'
-  endDate: string;   // 'YYYY-MM-DD'
+  endDate: string; // 'YYYY-MM-DD'
   lines?: BudgetLineDTO[];
 }
 

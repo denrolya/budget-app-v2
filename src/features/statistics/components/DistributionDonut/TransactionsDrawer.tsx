@@ -36,9 +36,9 @@ export const TransactionsDrawer: React.FC<Props> = ({ open, onOpenChange, target
           {target ? (
             <ListingContainer
               enableHotkeys={false}
-              omitTransferTransactions={false}
               initialFilters={target.initialFilters}
               initialTimeframe={timeframe}
+              omitTransferTransactions={false}
               updateUrl={false}
               key={listingKey}
             />

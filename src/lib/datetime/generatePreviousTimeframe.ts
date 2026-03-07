@@ -7,7 +7,6 @@ export const generatePreviousTimeframe = (
   endDate: Moment,
   unit: IntervalUnit = IntervalUnit.Day,
 ): { previousStart: Moment; previousEnd: Moment } => {
-
   if (!moment.isMoment(startDate) || !startDate.isValid()) {
     throw new Error('Invalid startDate provided.');
   }
@@ -28,10 +27,7 @@ export const generatePreviousTimeframe = (
   let previousStart: Moment;
   let previousEnd: Moment;
 
-  if (
-    startDate.isSame(startDate.clone().startOf('year')) &&
-    endDate.isSame(endDate.clone().endOf('year'))
-  ) {
+  if (startDate.isSame(startDate.clone().startOf('year')) && endDate.isSame(endDate.clone().endOf('year'))) {
     // Whole years
     const yearsSpan = endDate.year() - startDate.year() + 1;
     previousStart = startDate.clone().subtract(yearsSpan, 'years').startOf('year');
@@ -54,7 +50,7 @@ export const generatePreviousTimeframe = (
     } else {
       // Calculate weeks across years
       const weeksInStartYear = moment(`${startYear}-12-31`).isoWeek();
-      weeksSpan = (weeksInStartYear - startWeek + 1) + ((endYear - startYear - 1) * 52) + endWeek;
+      weeksSpan = weeksInStartYear - startWeek + 1 + (endYear - startYear - 1) * 52 + endWeek;
     }
 
     previousStart = startDate.clone().subtract(weeksSpan, 'weeks').startOf('isoWeek');

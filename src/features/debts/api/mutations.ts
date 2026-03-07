@@ -29,10 +29,7 @@ export const useMutations = () => {
     mutationFn: ({ id, payload }: { id: number; payload: Partial<DebtWriteDTO> }) => debtService.update(id, payload),
     onSuccess: async (_data, { id }) => {
       toast.success('Debt updated successfully');
-      await Promise.all([
-        invalidateAll(),
-        qc.invalidateQueries({ queryKey: queryKeys.transactions(id) }),
-      ]);
+      await Promise.all([invalidateAll(), qc.invalidateQueries({ queryKey: queryKeys.transactions(id) })]);
     },
     onError: (e) => {
       console.error('Debt update failed:', e);

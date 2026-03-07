@@ -14,39 +14,38 @@
   --accent: 240 4.8% 95.9%;
   --accent-foreground: 240 5.9% 10%;
 
-  --destructive: 0 50% 40%;              /* muted rust red */
-  --destructive-foreground: 43 20% 90%;  /* parchment/beige text */
+  --destructive: 0 50% 40%; /* muted rust red */
+  --destructive-foreground: 43 20% 90%; /* parchment/beige text */
 
-  --success: 142 30% 40%;                /* oxidized green */
-  --success-foreground: 43 20% 90%;      /* reused parchment text for visual consistency */
+  --success: 142 30% 40%; /* oxidized green */
+  --success-foreground: 43 20% 90%; /* reused parchment text for visual consistency */
 
-  --warning: 43 60% 50%;                 /* tarnished brass / aged gold */
-  --warning-foreground: 0 0% 10%;        /* very dark brownish-black */
+  --warning: 43 60% 50%; /* tarnished brass / aged gold */
+  --warning-foreground: 0 0% 10%; /* very dark brownish-black */
 
-  --info: 210 30% 50%;                   /* dusty teal / faded terminal blue */
-  --info-foreground: 43 20% 90%;         /* parchment (same as above) */
+  --info: 210 30% 50%; /* dusty teal / faded terminal blue */
+  --info-foreground: 43 20% 90%; /* parchment (same as above) */
   --border: 240 5.9% 90%;
   --input: 240 5.9% 90%;
   --ring: 240 10% 3.9%;
   --radius: 0.5rem;
 
-  --chart-1: 12 40% 45%;      /* muted clay orange */
-  --chart-2: 173 30% 35%;     /* faded turquoise */
-  --chart-3: 197 20% 28%;     /* deep steel blue */
-  --chart-4: 43 50% 55%;      /* worn brass */
-  --chart-5: 27 55% 50%;      /* aged amber */
-  --chart-6: 230 30% 50%;     /* dusty violet-blue */
-  --chart-7: 291 30% 50%;     /* vintage purple */
-  --chart-8: 150 30% 35%;     /* oxidized copper green */
-  --chart-9: 52 50% 55%;      /* antique gold */
-  --chart-10: 324 35% 38%;    /* dried berry red */
+  --chart-1: 12 40% 45%; /* muted clay orange */
+  --chart-2: 173 30% 35%; /* faded turquoise */
+  --chart-3: 197 20% 28%; /* deep steel blue */
+  --chart-4: 43 50% 55%; /* worn brass */
+  --chart-5: 27 55% 50%; /* aged amber */
+  --chart-6: 230 30% 50%; /* dusty violet-blue */
+  --chart-7: 291 30% 50%; /* vintage purple */
+  --chart-8: 150 30% 35%; /* oxidized copper green */
+  --chart-9: 52 50% 55%; /* antique gold */
+  --chart-10: 324 35% 38%; /* dried berry red */
 
-  --chart-text-color: 220 10% 40%;         /* old steel / dusty slate */
-  --chart-crosshair-color: 262 35% 45%;    /* aged violet glass */
-  --chart-tooltip-background: 43 20% 90%;  /* parchment beige */
-  --chart-tooltip-text-color: 0 0% 10%;    /* old ink / terminal black */
+  --chart-text-color: 220 10% 40%; /* old steel / dusty slate */
+  --chart-crosshair-color: 262 35% 45%; /* aged violet glass */
+  --chart-tooltip-background: 43 20% 90%; /* parchment beige */
+  --chart-tooltip-text-color: 0 0% 10%; /* old ink / terminal black */
 
   --sidebar-background: 0 0% 98%;
   --sidebar-foreground: 240 5.3% 26.1%;
 }
-

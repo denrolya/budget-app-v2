@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils';
 import { Eye, User } from 'lucide-react';
 import React from 'react';
 
+import { cn } from '@/lib/utils';
 import AccountPill from '@/features/accounts/components/Pill';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

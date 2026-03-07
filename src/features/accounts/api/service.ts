@@ -35,20 +35,16 @@ export const accountService = {
   },
 
   async update(id: number | string, payload: UpdateAccountDTO): Promise<AccountRawData> {
-    const { data } = await api.put<AccountRawData>(
-      `${BASE_URL_V1}/${id}`,
-      payload,
-    );
+    const { data } = await api.put<AccountRawData>(`${BASE_URL_V1}/${id}`, payload);
     return data;
   },
 
   withConvertedValues,
 
   async fetchDailyStats(accountId: number, after: string, before: string): Promise<DailyStatsResponse> {
-    const { data } = await api.get<DailyStatsResponse>(
-      `${BASE_URL_V2}/${accountId}/daily-stats`,
-      { params: { after, before } },
-    );
+    const { data } = await api.get<DailyStatsResponse>(`${BASE_URL_V2}/${accountId}/daily-stats`, {
+      params: { after, before },
+    });
     return data;
   },
 
@@ -71,10 +67,9 @@ export const accountService = {
     before: string,
     interval: string,
   ): Promise<BalanceHistoryResponse> {
-    const { data } = await api.get<BalanceHistoryResponse>(
-      `${BASE_URL_V2}/${accountId}/balance-history`,
-      { params: { after, before, interval } },
-    );
+    const { data } = await api.get<BalanceHistoryResponse>(`${BASE_URL_V2}/${accountId}/balance-history`, {
+      params: { after, before, interval },
+    });
     return data;
   },
 };

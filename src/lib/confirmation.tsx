@@ -20,47 +20,55 @@ interface ConfirmationOptions {
 
 let root: ReturnType<typeof createRoot> | null = null;
 
-export const confirm = (options: ConfirmationOptions): Promise<boolean> => new Promise((resolve) => {
-  const containerElement = document.createElement('div');
-  document.body.appendChild(containerElement);
+export const confirm = (options: ConfirmationOptions): Promise<boolean> =>
+  new Promise((resolve) => {
+    const containerElement = document.createElement('div');
+    document.body.appendChild(containerElement);
 
-  const cleanup = () => {
-    if (root) {
-      root.unmount();
-      document.body.removeChild(containerElement);
-      root = null;
-    }
-  };
-
-  root = createRoot(containerElement);
-
-  root.render(
-    <AlertDialog open={true} onOpenChange={(open) => {
-      if (!open) {
-        cleanup();
-        resolve(false);
+    const cleanup = () => {
+      if (root) {
+        root.unmount();
+        document.body.removeChild(containerElement);
+        root = null;
       }
-    }}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{options.title}</AlertDialogTitle>
-          <AlertDialogDescription>{options.description}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => {
+    };
+
+    root = createRoot(containerElement);
+
+    root.render(
+      <AlertDialog
+        open={true}
+        onOpenChange={(open) => {
+          if (!open) {
             cleanup();
             resolve(false);
-          }}>
-            {options.cancelText || 'Cancel'}
-          </AlertDialogCancel>
-          <AlertDialogAction onClick={() => {
-            cleanup();
-            resolve(true);
-          }}>
-            {options.confirmText || 'Confirm'}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>,
-  );
-});
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{options.title}</AlertDialogTitle>
+            <AlertDialogDescription>{options.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                cleanup();
+                resolve(false);
+              }}
+            >
+              {options.cancelText || 'Cancel'}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                cleanup();
+                resolve(true);
+              }}
+            >
+              {options.confirmText || 'Confirm'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>,
+    );
+  });

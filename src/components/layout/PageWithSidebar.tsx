@@ -17,25 +17,25 @@ type PageWithSidebarProps = React.ComponentPropsWithoutRef<'div'> & {
 type PageWithSidebarComponent = React.FC<PageWithSidebarProps> & {
   Header: React.FC<
     React.ComponentPropsWithoutRef<'header'> & {
-    title?: ReactNode;
-    onBack?: () => void;
-    overrideContent?: boolean;
-    backAriaLabel?: string;
-  }
+      title?: ReactNode;
+      onBack?: () => void;
+      overrideContent?: boolean;
+      backAriaLabel?: string;
+    }
   >;
   Sidebar: React.FC<React.ComponentPropsWithoutRef<'aside'> & { ariaLabel?: string }>;
   Content: React.FC<React.ComponentPropsWithoutRef<'main'> & { ariaLabel?: string }>;
 };
 
 const PageWithSidebar: PageWithSidebarComponent = ({
-                                                     children,
-                                                     className = '',
-                                                     sidebarWidth = 'w-80',
-                                                     sidebarScrollable = false,
-                                                     contentScrollable = true,
-                                                     ariaLabel = 'Page layout',
-                                                     ...props
-                                                   }) => {
+  children,
+  className = '',
+  sidebarWidth = 'w-80',
+  sidebarScrollable = false,
+  contentScrollable = true,
+  ariaLabel = 'Page layout',
+  ...props
+}) => {
   const isMobile = useIsMobile();
   const childrenArray = React.Children.toArray(children);
 
@@ -46,7 +46,7 @@ const PageWithSidebar: PageWithSidebarComponent = ({
   // Mobile rule:
   // - header exists => details view => show content
   // - otherwise => list-first => show sidebar (fallback to content)
-  const mobileBody = header ? content : sidebar ?? content;
+  const mobileBody = header ? content : (sidebar ?? content);
 
   const renderScrollable = (node: ReactNode) => (
     <ScrollArea className="h-full">
@@ -70,11 +70,7 @@ const PageWithSidebar: PageWithSidebarComponent = ({
       {!isMobile && (
         <div
           aria-label="Sidebar container"
-          className={cn(
-            'shrink-0 border-r bg-background',
-            'min-h-0 h-full overflow-x-hidden',
-            sidebarWidth,
-          )}
+          className={cn('shrink-0 border-r bg-background', 'min-h-0 h-full overflow-x-hidden', sidebarWidth)}
         >
           {sidebarScrollable ? (
             renderScrollable(sidebar)
@@ -109,11 +105,11 @@ const PageWithSidebar: PageWithSidebarComponent = ({
 
 const Header: React.FC<
   React.ComponentPropsWithoutRef<'header'> & {
-  title?: ReactNode;
-  onBack?: () => void;
-  overrideContent?: boolean;
-  backAriaLabel?: string;
-}
+    title?: ReactNode;
+    onBack?: () => void;
+    overrideContent?: boolean;
+    backAriaLabel?: string;
+  }
 > = ({ children, className = '', title, onBack, overrideContent = false, backAriaLabel = 'Back', ...props }) => {
   const titleId = useId();
 
@@ -151,11 +147,11 @@ const Header: React.FC<
 };
 
 const Sidebar: React.FC<React.ComponentPropsWithoutRef<'aside'> & { ariaLabel?: string }> = ({
-                                                                                               children,
-                                                                                               className = '',
-                                                                                               ariaLabel = 'Sidebar',
-                                                                                               ...props
-                                                                                             }) => (
+  children,
+  className = '',
+  ariaLabel = 'Sidebar',
+  ...props
+}) => (
   <aside
     aria-label={ariaLabel}
     className={cn('flex min-h-0 h-full min-w-0 flex-col overflow-x-hidden', className)}
@@ -166,11 +162,11 @@ const Sidebar: React.FC<React.ComponentPropsWithoutRef<'aside'> & { ariaLabel?: 
 );
 
 const Content: React.FC<React.ComponentPropsWithoutRef<'main'> & { ariaLabel?: string }> = ({
-                                                                                              children,
-                                                                                              className = '',
-                                                                                              ariaLabel = 'Content',
-                                                                                              ...props
-                                                                                            }) => (
+  children,
+  className = '',
+  ariaLabel = 'Content',
+  ...props
+}) => (
   <main aria-label={ariaLabel} className={cn('min-h-0 h-full min-w-0 overflow-x-hidden', className)} {...props}>
     {children}
   </main>

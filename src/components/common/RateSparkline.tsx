@@ -30,11 +30,7 @@ interface Props {
   maximumFractionDigits?: number;
 }
 
-const RateSparkline: React.FC<Props> = ({
-  data,
-  isLoading = false,
-  maximumFractionDigits = 2,
-}) => {
+const RateSparkline: React.FC<Props> = ({ data, isLoading = false, maximumFractionDigits = 2 }) => {
   if (isLoading) {
     return <div style={{ height: CHART_HEIGHT }} className="animate-pulse bg-muted/40" />;
   }
@@ -50,9 +46,9 @@ const RateSparkline: React.FC<Props> = ({
     );
   }
 
-  const first     = data[0].y;
-  const last      = data[data.length - 1].y;
-  const isUp      = last >= first;
+  const first = data[0].y;
+  const last = data[data.length - 1].y;
+  const isUp = last >= first;
   // Resolve to a real rgb() color — both line and gradient use the same value
   const lineColor = resolveCssVar(isUp ? '--success' : '--destructive');
 

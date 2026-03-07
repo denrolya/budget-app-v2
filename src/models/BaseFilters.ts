@@ -4,7 +4,7 @@ import moment from 'moment';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 
 export interface FilterConstructor<T extends BaseFilters = BaseFilters> {
-  new(): T;
+  new (): T;
 
   fromSearchParams(params: URLSearchParams, map: Record<string, string>, format: string): T;
 }

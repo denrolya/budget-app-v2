@@ -53,15 +53,9 @@ const NavAccounts = () => {
 
   const hiddenCount = useMemo(() => accounts.filter((a) => !a.isDisplayedOnSidebar).length, [accounts]);
 
-  const byTypeAll = useMemo(
-    () => groupBy(accounts, 'type') as Partial<Record<AccountType, Account[]>>,
-    [accounts],
-  );
+  const byTypeAll = useMemo(() => groupBy(accounts, 'type') as Partial<Record<AccountType, Account[]>>, [accounts]);
 
-  const byTypeVisible = useMemo(
-    () => groupBy(filtered, 'type') as Partial<Record<AccountType, Account[]>>,
-    [filtered],
-  );
+  const byTypeVisible = useMemo(() => groupBy(filtered, 'type') as Partial<Record<AccountType, Account[]>>, [filtered]);
 
   const AccountRow = memo(({ a }: { a: Account }) => {
     const nativeAmount = a.balance;
@@ -87,10 +81,7 @@ const NavAccounts = () => {
           <Link
             aria-label={`Account ${a.displayName}`}
             to={`/accounts/${a.id}`}
-            className={cn(
-              'flex h-9 w-full items-center gap-2 pr-2',
-              'min-w-0 overflow-hidden',
-            )}
+            className={cn('flex h-9 w-full items-center gap-2 pr-2', 'min-w-0 overflow-hidden')}
           >
             {/* Name block */}
             <div className="min-w-0 flex-1 overflow-hidden">
@@ -101,12 +92,7 @@ const NavAccounts = () => {
             <div className="flex min-w-0 flex-col items-end gap-0.5 overflow-hidden">
               {/* Primary: native currency */}
               <span title={`${nativeAmount} ${a.currency}`} className={cn(primaryAmountClass, 'max-w-full truncate')}>
-                <MoneyValue
-                  amount={nativeAmount}
-                  currency={a.currency}
-                  showSign={false}
-                  showValuesTooltip={false}
-                />
+                <MoneyValue amount={nativeAmount} currency={a.currency} showSign={false} showValuesTooltip={false} />
               </span>
 
               {/* Secondary: base currency */}
@@ -132,55 +118,45 @@ const NavAccounts = () => {
   });
   AccountRow.displayName = 'AccountRow';
 
-  const Group = memo(
-    ({
-       type,
-       items,
-       totalInBase,
-     }: {
-      type: AccountType;
-      items: Account[];
-      totalInBase: number;
-    }) => {
-      const contentId = `accounts-group-content-${type}`;
-      const triggerId = `accounts-group-trigger-${type}`;
+  const Group = memo(({ type, items, totalInBase }: { type: AccountType; items: Account[]; totalInBase: number }) => {
+    const contentId = `accounts-group-content-${type}`;
+    const triggerId = `accounts-group-trigger-${type}`;
 
-      return (
-        <Collapsible asChild defaultOpen className="group/collapsible">
-          <SidebarMenuItem id={`account-group-${type}`}>
-            <CollapsibleTrigger asChild>
-              <SidebarMenuButton
-                aria-controls={contentId}
-                aria-label={`Toggle ${type} accounts`}
-                id={triggerId}
-                className="capitalize data-[state=open]:bg-accent"
-              >
-                <span className="truncate text-xs font-medium text-muted-foreground">{type}</span>
+    return (
+      <Collapsible asChild defaultOpen className="group/collapsible">
+        <SidebarMenuItem id={`account-group-${type}`}>
+          <CollapsibleTrigger asChild>
+            <SidebarMenuButton
+              aria-controls={contentId}
+              aria-label={`Toggle ${type} accounts`}
+              id={triggerId}
+              className="capitalize data-[state=open]:bg-accent"
+            >
+              <span className="truncate text-xs font-medium text-muted-foreground">{type}</span>
 
-                <span className="ml-auto flex min-w-0 items-center gap-2">
-                  <span className="min-w-0 max-w-[8rem] truncate text-xs font-semibold tabular-nums">
-                    <MoneyValue amount={totalInBase} showSign={false} />
-                  </span>
-                  <ChevronRightIcon
-                    aria-hidden="true"
-                    className="h-4 w-4 shrink-0 transition-transform group-data-[state=open]/collapsible:rotate-90"
-                  />
+              <span className="ml-auto flex min-w-0 items-center gap-2">
+                <span className="min-w-0 max-w-[8rem] truncate text-xs font-semibold tabular-nums">
+                  <MoneyValue amount={totalInBase} showSign={false} />
                 </span>
-              </SidebarMenuButton>
-            </CollapsibleTrigger>
+                <ChevronRightIcon
+                  aria-hidden="true"
+                  className="h-4 w-4 shrink-0 transition-transform group-data-[state=open]/collapsible:rotate-90"
+                />
+              </span>
+            </SidebarMenuButton>
+          </CollapsibleTrigger>
 
-            <CollapsibleContent aria-labelledby={triggerId} id={contentId} role="region">
-              <SidebarMenuSub className="m-0 !border-l-0 px-1 py-0 overflow-hidden">
-                {items.map((a) => (
-                  <AccountRow a={a} key={a.id} />
-                ))}
-              </SidebarMenuSub>
-            </CollapsibleContent>
-          </SidebarMenuItem>
-        </Collapsible>
-      );
-    },
-  );
+          <CollapsibleContent aria-labelledby={triggerId} id={contentId} role="region">
+            <SidebarMenuSub className="m-0 !border-l-0 px-1 py-0 overflow-hidden">
+              {items.map((a) => (
+                <AccountRow a={a} key={a.id} />
+              ))}
+            </SidebarMenuSub>
+          </CollapsibleContent>
+        </SidebarMenuItem>
+      </Collapsible>
+    );
+  });
   Group.displayName = 'Group';
 
   return (

@@ -69,12 +69,7 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
     [selected.months],
   );
 
-  const { data, isLoading, isError } = useBalanceHistory(
-    account.id,
-    after,
-    before,
-    selected.interval,
-  );
+  const { data, isLoading, isError } = useBalanceHistory(account.id, after, before, selected.interval);
 
   const rawPoints = data?.data ?? [];
   const lastBalance = rawPoints[rawPoints.length - 1]?.balance ?? 0;
@@ -107,9 +102,6 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
     return selected.interval === 'P1M' ? d.format('MMM') : d.format('D MMM');
   };
 
-  const formatYTick = (value: number) =>
-    Math.abs(value) >= 1000 ? `${(value / 1000).toFixed(1)}k` : String(value);
-
   const SliceTooltip = ({ slice }: SliceTooltipProps) => {
     const point = slice.points[0];
     if (!point) return null;
@@ -126,9 +118,7 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
         <p className="text-muted-foreground mb-1">
           {moment(point.data.x as string, 'YYYY-MM-DD').format('D MMM YYYY')}
         </p>
-        <p className={`font-semibold ${balance >= 0 ? 'text-success' : 'text-destructive'}`}>
-          {formatted}
-        </p>
+        <p className={`font-semibold ${balance >= 0 ? 'text-success' : 'text-destructive'}`}>{formatted}</p>
       </div>
     );
   };
@@ -152,14 +142,9 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
     <div className="relative">
       {/* Preset toggle — floats over the top-right of the chart */}
       <div className="absolute top-2 right-3 z-10">
-        <ToggleGroup
-          type="single"
-          value={preset}
-          onValueChange={(v) => v && setPreset(v as PresetLabel)}
-          size="sm"
-        >
+        <ToggleGroup size="sm" type="single" value={preset} onValueChange={(v) => v && setPreset(v as PresetLabel)}>
           {PRESETS.map((p) => (
-            <ToggleGroupItem key={p.label} value={p.label} className="text-xs px-2">
+            <ToggleGroupItem value={p.label} className="text-xs px-2" key={p.label}>
               {p.label}
             </ToggleGroupItem>
           ))}
@@ -187,36 +172,36 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
       {hasData && (
         <div style={{ height: CHART_HEIGHT }}>
           <ResponsiveLine
-            data={chartData}
-            // top leaves room for preset buttons; sides/bottom flush to card edges
-            margin={{ top: 40, right: 0, bottom: 22, left: 0 }}
-            xScale={{ type: 'point' }}
-            yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false }}
-            curve="natural"
-            colors={[lineColor]}
-            lineWidth={1.5}
-            enableArea={true}
+            animate={false}
             areaOpacity={1}
-            enablePoints={false}
+            axisLeft={null}
+            axisRight={null}
+            axisTop={null}
+            colors={[lineColor]}
+            crosshairType="x"
+            curve="natural"
+            data={chartData}
+            defs={[gradientDef]}
+            enableArea={true}
             enableGridX={false}
             enableGridY={false}
+            enablePoints={false}
             enableSlices="x"
+            fill={[{ match: '*', id: GRADIENT_ID }]}
+            isInteractive={true}
+            lineWidth={1.5}
+            // top leaves room for preset buttons; sides/bottom flush to card edges
+            margin={{ top: 40, right: 0, bottom: 22, left: 0 }}
             sliceTooltip={SliceTooltip}
-            crosshairType="x"
+            theme={nivoTheme}
+            xScale={{ type: 'point' }}
+            yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false }}
             axisBottom={{
               tickValues,
               format: formatXTick,
               tickSize: 0,
               tickPadding: 5,
             }}
-            axisLeft={null}
-            axisTop={null}
-            axisRight={null}
-            theme={nivoTheme}
-            isInteractive={true}
-            animate={false}
-            defs={[gradientDef]}
-            fill={[{ match: '*', id: GRADIENT_ID }]}
           />
         </div>
       )}

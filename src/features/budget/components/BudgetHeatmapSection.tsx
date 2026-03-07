@@ -11,6 +11,7 @@ import Category from '@/features/categories/models/Category';
 import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
 
 import type { BudgetDTO, BudgetAnalyticsItem } from '../api/types';
+
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
 interface Props {
@@ -99,9 +100,7 @@ const BudgetHeatmapSection: React.FC<Props> = ({ budget, analytics, displayCurre
             : 'text-success'
           : undefined,
     },
-    ...(paceLabel
-      ? [{ label: 'Pace', value: paceLabel.text, valueClass: paceLabel.color }]
-      : []),
+    ...(paceLabel ? [{ label: 'Pace', value: paceLabel.text, valueClass: paceLabel.color }] : []),
   ];
 
   return (
@@ -111,12 +110,12 @@ const BudgetHeatmapSection: React.FC<Props> = ({ budget, analytics, displayCurre
         <TransactionHeatmapChart
           accountIds={[]}
           currency={displayCurrency}
-          selectable={false}
-          showControls={false}
           defaultViewMode="expense"
-          year={heatmapYear}
           rangeAfter={heatmapAfter}
           rangeBefore={heatmapBefore}
+          selectable={false}
+          showControls={false}
+          year={heatmapYear}
         />
       </div>
 

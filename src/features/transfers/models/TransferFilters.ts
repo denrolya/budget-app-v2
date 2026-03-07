@@ -60,11 +60,14 @@ export class TransferFilters extends BaseFilters {
     Object.assign(this, filled);
   }
 
-  protected deserialize(key: string, ctx: {
-    params: URLSearchParams;
-    paramKey: string;
-    format: string
-  }): unknown | undefined {
+  protected deserialize(
+    key: string,
+    ctx: {
+      params: URLSearchParams;
+      paramKey: string;
+      format: string;
+    },
+  ): unknown | undefined {
     const { params, paramKey } = ctx;
     const format = ctx.format || BACKEND_DATE_FORMAT;
 

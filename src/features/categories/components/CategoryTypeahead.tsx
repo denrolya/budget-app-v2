@@ -5,7 +5,8 @@ import Category from '@/features/categories/models/Category';
 import { Type as TransactionType } from '@/features/transactions';
 import { useExpenseCategories, useIncomeCategories } from '@/hooks/financeData';
 
-type CategoryTypeaheadProps = Omit<TypeaheadV2Props<Category, string>,
+type CategoryTypeaheadProps = Omit<
+  TypeaheadV2Props<Category, string>,
   'options' | 'labelField' | 'groupBy' | 'renderElement' | 'valueField'
 > & {
   className?: string;
@@ -24,10 +25,7 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
     }, [expenseCategories, incomeCategories, type]);
 
     const sortedOptions = useMemo(
-      () =>
-        options
-          .slice()
-          .sort((a, b) => a.getFullPath().join(' > ').localeCompare(b.getFullPath().join(' > '))),
+      () => options.slice().sort((a, b) => a.getFullPath().join(' > ').localeCompare(b.getFullPath().join(' > '))),
       [options],
     );
 
@@ -57,12 +55,7 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
       const rootName = (option.root?.name ?? '').toLowerCase();
       const path = option.getFullPath().join(' > ').toLowerCase();
 
-      return (
-        name.includes(q) ||
-        parentName.includes(q) ||
-        rootName.includes(q) ||
-        path.includes(q)
-      );
+      return name.includes(q) || parentName.includes(q) || rootName.includes(q) || path.includes(q);
     };
 
     return (

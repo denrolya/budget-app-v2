@@ -4,9 +4,10 @@ import moment, { Moment } from 'moment';
 import * as ReactRouterDom from 'react-router-dom';
 import { vi } from 'vitest';
 
-import { buildListStateSearchParams } from '@/lib/buildListStateSearchQueryParams';
 import BaseFilters from '@/models/BaseFilters';
 import { useListState } from '@/hooks/useListState';
+
+import { buildListStateSearchParams } from '@/lib/buildListStateSearchQueryParams';
 
 const setSearchParamsMock = vi.fn();
 const getSearchParamsMock = vi.fn(() => new URLSearchParams());
@@ -16,10 +17,7 @@ vi.mock('react-router-dom', async () => {
 
   return {
     ...actual,
-    useSearchParams: vi.fn(() => [
-      getSearchParamsMock(),
-      setSearchParamsMock,
-    ]),
+    useSearchParams: vi.fn(() => [getSearchParamsMock(), setSearchParamsMock]),
   };
 });
 
@@ -231,7 +229,8 @@ describe('useListState', () => {
   });
 
   it('updates filters and resets page to 1', async () => {
-    const { result } = renderHook(() =>
+    const { result } = renderHook(
+      () =>
         useListState<DummyFilterModel, { totalItems: number }, any>({
           initialFilters: new DummyFilterModel('init', moment('2024-01-01')),
           queryFn: mockQueryFn,
@@ -253,7 +252,8 @@ describe('useListState', () => {
   });
 
   it('resets filters to initial and resets page', async () => {
-    const { result } = renderHook(() =>
+    const { result } = renderHook(
+      () =>
         useListState<DummyFilterModel, { totalItems: number }, any>({
           initialFilters: new DummyFilterModel('reset', moment('2024-01-01')),
           queryFn: mockQueryFn,
@@ -274,7 +274,8 @@ describe('useListState', () => {
   });
 
   it('updates sort state and reflects in search params', async () => {
-    const { result } = renderHook(() =>
+    const { result } = renderHook(
+      () =>
         useListState<DummyFilterModel, { totalItems: number }, any>({
           initialFilters: new DummyFilterModel('foo', moment()),
           queryFn: mockQueryFn,
@@ -294,7 +295,8 @@ describe('useListState', () => {
   });
 
   it('updates perPage and resets page to 1', async () => {
-    const { result } = renderHook(() =>
+    const { result } = renderHook(
+      () =>
         useListState<DummyFilterModel, { totalItems: number }, any>({
           initialFilters: new DummyFilterModel('init', moment()),
           queryFn: mockQueryFn,
@@ -317,7 +319,8 @@ describe('useListState', () => {
   it('updates queryKey when filters or sort changes', async () => {
     const queryFn = vi.fn().mockResolvedValue({ totalItems: 0 });
 
-    const { result } = renderHook(() =>
+    const { result } = renderHook(
+      () =>
         useListState<DummyFilterModel, { totalItems: number }, any>({
           initialFilters: new DummyFilterModel('init', moment()),
           queryFn,
@@ -332,12 +335,7 @@ describe('useListState', () => {
     });
 
     await waitFor(() => {
-      expect(queryFn).toHaveBeenCalledWith(
-        2,
-        20,
-        expect.any(DummyFilterModel),
-        { field: 'foo', direction: 'desc' },
-      );
+      expect(queryFn).toHaveBeenCalledWith(2, 20, expect.any(DummyFilterModel), { field: 'foo', direction: 'desc' });
     });
   });
 
@@ -374,7 +372,8 @@ describe('useListState', () => {
       }),
     );
 
-    const { result } = renderHook(() =>
+    const { result } = renderHook(
+      () =>
         useListState<DummyFilterModel, { totalItems: number }, any>({
           initialFilters: new DummyFilterModel('init', moment('2024-01-01')),
           queryFn: mockQueryFn,

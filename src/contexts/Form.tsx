@@ -5,7 +5,7 @@ export enum FormType {
   Transfer = 'transfer',
   Account = 'account',
   Debt = 'debt',
-  Category = 'category'
+  Category = 'category',
 }
 
 interface FormState {
@@ -57,14 +57,17 @@ export const useFormManager = (): FormContextType => {
     setFormState(initialFormState);
   }, []);
 
-  const submitForm = useCallback(<T, >(response: T) => {
-    if (formState.type) {
-      listeners.forEach(listener => listener(formState.type!, response));
-    }
-  }, [formState.type, listeners, closeForm]);
+  const submitForm = useCallback(
+    <T,>(response: T) => {
+      if (formState.type) {
+        listeners.forEach((listener) => listener(formState.type!, response));
+      }
+    },
+    [formState.type, listeners, closeForm],
+  );
 
   const resetForm = useCallback(() => {
-    setFormState(prev => ({
+    setFormState((prev) => ({
       ...prev,
       isValid: false,
       isDirty: false,
@@ -73,15 +76,15 @@ export const useFormManager = (): FormContextType => {
   }, []);
 
   const updateFormState = useCallback((updates: Partial<FormState>) => {
-    setFormState(prev => ({ ...prev, ...updates }));
+    setFormState((prev) => ({ ...prev, ...updates }));
   }, []);
 
-  const addFormSubmitListener = useCallback(<T, >(listener: FormEventListener<T>) => {
-    setListeners(prev => [...prev, listener as FormEventListener]);
+  const addFormSubmitListener = useCallback(<T,>(listener: FormEventListener<T>) => {
+    setListeners((prev) => [...prev, listener as FormEventListener]);
   }, []);
 
-  const removeFormSubmitListener = useCallback(<T, >(listener: FormEventListener<T>) => {
-    setListeners(prev => prev.filter(l => l !== listener));
+  const removeFormSubmitListener = useCallback(<T,>(listener: FormEventListener<T>) => {
+    setListeners((prev) => prev.filter((l) => l !== listener));
   }, []);
 
   return {
@@ -110,11 +113,16 @@ export const useForm = () => {
   return context;
 };
 
-export const useFormSubmitListener = <T, >(formTypes: FormType[], callback: (response: T) => void) => {
+export const useFormSubmitListener = <T,>(formTypes: FormType[], callback: (response: T) => void) => {
   const { addFormSubmitListener, removeFormSubmitListener } = useForm();
 
   // Memoize formTypes and callback
-  const memoizedFormTypes = useMemo(() => formTypes, [/* actual dependencies */]);
+  const memoizedFormTypes = useMemo(
+    () => formTypes,
+    [
+      /* actual dependencies */
+    ],
+  );
   // const memoizedCallback = useCallback(callback, [/* actual dependencies */]);
 
   useEffect(() => {

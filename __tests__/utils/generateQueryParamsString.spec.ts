@@ -2,6 +2,7 @@ import moment from 'moment';
 import qs from 'qs';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
+
 import { Type as TransactionType } from '@/types/transaction';
 import { generateQueryParamsString } from '@/lib/generateQueryParamsString'; // adjust import based on your file structure
 
@@ -14,14 +15,19 @@ describe('generateQueryParamsString', () => {
       before,
     });
 
-    expect(result).toBe(qs.stringify({
-      after: after.format(BACKEND_DATE_FORMAT),
-      before: before.format(BACKEND_DATE_FORMAT),
-      interval: undefined,
-      type: undefined,
-      categories: [],
-      accounts: [],
-    }, { arrayFormat: 'brackets' }));
+    expect(result).toBe(
+      qs.stringify(
+        {
+          after: after.format(BACKEND_DATE_FORMAT),
+          before: before.format(BACKEND_DATE_FORMAT),
+          interval: undefined,
+          type: undefined,
+          categories: [],
+          accounts: [],
+        },
+        { arrayFormat: 'brackets' },
+      ),
+    );
   });
 
   it('should generate query string with custom date formats', () => {
@@ -36,14 +42,19 @@ describe('generateQueryParamsString', () => {
       beforeFormat: customFormat,
     });
 
-    expect(result).toBe(qs.stringify({
-      after: after.format(customFormat),
-      before: before.format(customFormat),
-      interval: undefined,
-      type: undefined,
-      categories: [],
-      accounts: [],
-    }, { arrayFormat: 'brackets' }));
+    expect(result).toBe(
+      qs.stringify(
+        {
+          after: after.format(customFormat),
+          before: before.format(customFormat),
+          interval: undefined,
+          type: undefined,
+          categories: [],
+          accounts: [],
+        },
+        { arrayFormat: 'brackets' },
+      ),
+    );
   });
 
   it('should handle period, type, categories, and accounts', () => {
@@ -63,14 +74,19 @@ describe('generateQueryParamsString', () => {
       accounts,
     });
 
-    expect(result).toBe(qs.stringify({
-      after: after.format(BACKEND_DATE_FORMAT),
-      before: before.format(BACKEND_DATE_FORMAT),
-      interval: period,
-      type,
-      categories,
-      accounts,
-    }, { arrayFormat: 'brackets' }));
+    expect(result).toBe(
+      qs.stringify(
+        {
+          after: after.format(BACKEND_DATE_FORMAT),
+          before: before.format(BACKEND_DATE_FORMAT),
+          interval: period,
+          type,
+          categories,
+          accounts,
+        },
+        { arrayFormat: 'brackets' },
+      ),
+    );
   });
 
   it('should handle empty arrays for categories and accounts', () => {
@@ -83,14 +99,19 @@ describe('generateQueryParamsString', () => {
       accounts: [],
     });
 
-    expect(result).toBe(qs.stringify({
-      after: after.format(BACKEND_DATE_FORMAT),
-      before: before.format(BACKEND_DATE_FORMAT),
-      interval: undefined,
-      type: undefined,
-      categories: [],
-      accounts: [],
-    }, { arrayFormat: 'brackets' }));
+    expect(result).toBe(
+      qs.stringify(
+        {
+          after: after.format(BACKEND_DATE_FORMAT),
+          before: before.format(BACKEND_DATE_FORMAT),
+          interval: undefined,
+          type: undefined,
+          categories: [],
+          accounts: [],
+        },
+        { arrayFormat: 'brackets' },
+      ),
+    );
   });
 
   it('should return empty string when no params are provided', () => {
@@ -104,14 +125,19 @@ describe('generateQueryParamsString', () => {
       before: undefined,
     });
 
-    expect(result).toBe(qs.stringify({
-      after: undefined,
-      before: undefined,
-      interval: undefined,
-      type: undefined,
-      categories: [],
-      accounts: [],
-    }, { arrayFormat: 'brackets' }));
+    expect(result).toBe(
+      qs.stringify(
+        {
+          after: undefined,
+          before: undefined,
+          interval: undefined,
+          type: undefined,
+          categories: [],
+          accounts: [],
+        },
+        { arrayFormat: 'brackets' },
+      ),
+    );
   });
 
   it('should handle null type correctly', () => {
@@ -123,14 +149,19 @@ describe('generateQueryParamsString', () => {
       type: undefined,
     });
 
-    expect(result).toBe(qs.stringify({
-      after: after.format(BACKEND_DATE_FORMAT),
-      before: before.format(BACKEND_DATE_FORMAT),
-      interval: undefined,
-      type: undefined,
-      categories: [],
-      accounts: [],
-    }, { arrayFormat: 'brackets' }));
+    expect(result).toBe(
+      qs.stringify(
+        {
+          after: after.format(BACKEND_DATE_FORMAT),
+          before: before.format(BACKEND_DATE_FORMAT),
+          interval: undefined,
+          type: undefined,
+          categories: [],
+          accounts: [],
+        },
+        { arrayFormat: 'brackets' },
+      ),
+    );
   });
 
   it('should handle numeric categories and accounts', () => {
@@ -146,14 +177,19 @@ describe('generateQueryParamsString', () => {
       accounts,
     });
 
-    expect(result).toBe(qs.stringify({
-      after: after.format(BACKEND_DATE_FORMAT),
-      before: before.format(BACKEND_DATE_FORMAT),
-      interval: undefined,
-      type: undefined,
-      categories,
-      accounts,
-    }, { arrayFormat: 'brackets' }));
+    expect(result).toBe(
+      qs.stringify(
+        {
+          after: after.format(BACKEND_DATE_FORMAT),
+          before: before.format(BACKEND_DATE_FORMAT),
+          interval: undefined,
+          type: undefined,
+          categories,
+          accounts,
+        },
+        { arrayFormat: 'brackets' },
+      ),
+    );
   });
 
   it('should handle mixed string and numeric categories and accounts', () => {
@@ -169,13 +205,18 @@ describe('generateQueryParamsString', () => {
       accounts,
     });
 
-    expect(result).toBe(qs.stringify({
-      after: after.format(BACKEND_DATE_FORMAT),
-      before: before.format(BACKEND_DATE_FORMAT),
-      interval: undefined,
-      type: undefined,
-      categories,
-      accounts,
-    }, { arrayFormat: 'brackets' }));
+    expect(result).toBe(
+      qs.stringify(
+        {
+          after: after.format(BACKEND_DATE_FORMAT),
+          before: before.format(BACKEND_DATE_FORMAT),
+          interval: undefined,
+          type: undefined,
+          categories,
+          accounts,
+        },
+        { arrayFormat: 'brackets' },
+      ),
+    );
   });
 });

@@ -1,6 +1,6 @@
-import { cn } from '@/lib/utils';
 import React, { useMemo } from 'react';
 
+import { cn } from '@/lib/utils';
 import AccountDetailsHoverCard from '@/features/accounts/components/DetailsHoverCard';
 import { Badge } from '@/components/ui/badge';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
@@ -74,14 +74,10 @@ const Marker = ({ account, size }: { account: Account; size: 'sm' | 'md' | 'lg' 
         backgroundColor: isHollow ? 'transparent' : color,
         boxShadow: `inset 0 0 0 1px ${color}`,
       }}
-      className={cn(
-        'inline-block shrink-0 flex-none align-middle',
-        sizeMap[size].marker,
-        {
-          'rounded-full': shape === 'circle',
-          'rounded-[0.2rem]': shape !== 'diamond' && shape !== 'circle',
-        },
-      )}
+      className={cn('inline-block shrink-0 flex-none align-middle', sizeMap[size].marker, {
+        'rounded-full': shape === 'circle',
+        'rounded-[0.2rem]': shape !== 'diamond' && shape !== 'circle',
+      })}
     />
   );
 };
@@ -95,16 +91,16 @@ const getContrastColor = (hex: string): 'black' | 'white' => {
 };
 
 export const AccountPill: React.FC<AccountPillProps> = ({
-                                                          account,
-                                                          size = 'md',
-                                                          variant = 'pill',
-                                                          tone = 'subtle',
-                                                          showMarker = true,
-                                                          showName = true,
-                                                          textClassName,
-                                                          tooltip = true,
-                                                          className,
-                                                        }) => {
+  account,
+  size = 'md',
+  variant = 'pill',
+  tone = 'subtle',
+  showMarker = true,
+  showName = true,
+  textClassName,
+  tooltip = true,
+  className,
+}) => {
   const accounts = useAccounts();
 
   const resolvedAccount = useMemo(() => {
@@ -116,11 +112,7 @@ export const AccountPill: React.FC<AccountPillProps> = ({
   const accentColor = isArchived ? 'var(--muted-foreground)' : resolvedAccount.color;
 
   const ariaLabel = useMemo(() => {
-    const parts = [
-      resolvedAccount.displayName,
-      `type ${resolvedAccount.type}`,
-      `currency ${resolvedAccount.currency}`,
-    ];
+    const parts = [resolvedAccount.displayName, `type ${resolvedAccount.type}`, `currency ${resolvedAccount.currency}`];
     if (isArchived) parts.push('archived');
     return parts.join(', ');
   }, [resolvedAccount.displayName, resolvedAccount.type, resolvedAccount.currency, isArchived]);
@@ -134,15 +126,7 @@ export const AccountPill: React.FC<AccountPillProps> = ({
   const nameSizeClass = isInline ? 'leading-none' : sizeMap[size].text;
 
   const nameNode = showName ? (
-    <span
-      className={cn(
-        'min-w-0 truncate',
-        nameSizeClass,
-        textClassName,
-      )}
-    >
-      {resolvedAccount.displayName}
-    </span>
+    <span className={cn('min-w-0 truncate', nameSizeClass, textClassName)}>{resolvedAccount.displayName}</span>
   ) : null;
 
   const content = (
@@ -176,10 +160,10 @@ export const AccountPill: React.FC<AccountPillProps> = ({
       style={
         isFilled
           ? {
-            backgroundColor: accentColor,
-            borderColor: 'transparent',
-            color: getContrastColor(accentColor) === 'white' ? 'white' : 'black',
-          }
+              backgroundColor: accentColor,
+              borderColor: 'transparent',
+              color: getContrastColor(accentColor) === 'white' ? 'white' : 'black',
+            }
           : undefined
       }
       className={cn(

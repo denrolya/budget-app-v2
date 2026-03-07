@@ -49,19 +49,22 @@ function loadEnv(filePath) {
     const idx = trimmed.indexOf('=');
     if (idx < 0) continue;
     const key = trimmed.slice(0, idx).trim();
-    const val = trimmed.slice(idx + 1).trim().replace(/^["']|["']$/g, '');
+    const val = trimmed
+      .slice(idx + 1)
+      .trim()
+      .replace(/^["']|["']$/g, '');
     if (!(key in process.env)) process.env[key] = val;
   }
 }
 
 loadEnv(join(__dir, '.env.production'));
 
-const HOST     = (process.env.DEPLOY_HOST ?? 'your.host.name').replace(/^https?:\/\//, '').replace(/\/$/, '');
-const USER     = process.env.DEPLOY_USER  ?? 'username';
-const BASE_DIR = process.env.DEPLOY_BASE  ?? '/var/www/app-v2';
-const KEEP     = parseInt(process.env.DEPLOY_KEEP ?? '5', 10);
-const LOG_DIR  = process.env.NGINX_LOG_DIR ?? '/var/log/nginx';
-const TARGET   = `${USER}@${HOST}`;
+const HOST = (process.env.DEPLOY_HOST ?? 'your.host.name').replace(/^https?:\/\//, '').replace(/\/$/, '');
+const USER = process.env.DEPLOY_USER ?? 'username';
+const BASE_DIR = process.env.DEPLOY_BASE ?? '/var/www/app-v2';
+const KEEP = parseInt(process.env.DEPLOY_KEEP ?? '5', 10);
+const LOG_DIR = process.env.NGINX_LOG_DIR ?? '/var/log/nginx';
+const TARGET = `${USER}@${HOST}`;
 const LOCAL_DIST = join(__dir, 'dist') + '/';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -72,36 +75,30 @@ function local(cmd, opts = {}) {
 }
 
 function ssh(cmd) {
-  const result = spawnSync(
-    'ssh',
-    ['-o', 'StrictHostKeyChecking=accept-new', '-o', 'BatchMode=yes', TARGET, cmd],
-    { stdio: 'inherit' },
-  );
+  const result = spawnSync('ssh', ['-o', 'StrictHostKeyChecking=accept-new', '-o', 'BatchMode=yes', TARGET, cmd], {
+    stdio: 'inherit',
+  });
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
 function sshCapture(cmd) {
-  const result = spawnSync(
-    'ssh',
-    ['-o', 'StrictHostKeyChecking=accept-new', '-o', 'BatchMode=yes', TARGET, cmd],
-    { encoding: 'utf8' },
-  );
+  const result = spawnSync('ssh', ['-o', 'StrictHostKeyChecking=accept-new', '-o', 'BatchMode=yes', TARGET, cmd], {
+    encoding: 'utf8',
+  });
   if (result.status !== 0) process.exit(result.status ?? 1);
   return result.stdout.trim();
 }
 
 function sshTty(cmd) {
-  const result = spawnSync(
-    'ssh',
-    ['-t', '-o', 'StrictHostKeyChecking=accept-new', TARGET, ...(cmd ? [cmd] : [])],
-    { stdio: 'inherit' },
-  );
+  const result = spawnSync('ssh', ['-t', '-o', 'StrictHostKeyChecking=accept-new', TARGET, ...(cmd ? [cmd] : [])], {
+    stdio: 'inherit',
+  });
   if (result.status !== 0 && result.status !== 130) process.exit(result.status ?? 1);
 }
 
 function makeTimestamp() {
   const now = new Date();
-  const p = n => String(n).padStart(2, '0');
+  const p = (n) => String(n).padStart(2, '0');
   return `${now.getFullYear()}${p(now.getMonth() + 1)}${p(now.getDate())}_${p(now.getHours())}${p(now.getMinutes())}${p(now.getSeconds())}`;
 }
 
@@ -166,16 +163,16 @@ const commands = {
   releases() {
     console.log(`\n==> Releases on ${TARGET}:${BASE_DIR}/releases/\n`);
     const current = sshCapture(`readlink ${BASE_DIR}/current 2>/dev/null || echo ''`);
-    const list    = sshCapture(`ls -1dt ${BASE_DIR}/releases/*/ 2>/dev/null || echo ''`);
+    const list = sshCapture(`ls -1dt ${BASE_DIR}/releases/*/ 2>/dev/null || echo ''`);
     if (!list) {
       console.log('  (no releases found)\n');
       return;
     }
     const releases = list.split('\n').filter(Boolean);
     releases.forEach((r, i) => {
-      const name      = r.replace(/\/$/, '').split('/').pop();
+      const name = r.replace(/\/$/, '').split('/').pop();
       const isCurrent = r.replace(/\/$/, '') === current.replace(/\/$/, '');
-      const marker    = isCurrent ? ' ← current' : '';
+      const marker = isCurrent ? ' ← current' : '';
       console.log(`  [${i}] ${name}${marker}`);
     });
     console.log(`\n  rollback: node deploy.mjs rollback [n]  (n = index above)\n`);
@@ -222,15 +219,15 @@ const commands = {
 
   help() {
     const cmds = [
-      ['deploy',        'Build locally + upload new release + go live'],
-      ['upload',        'Upload only — skip build, use existing dist/'],
-      ['releases',      'List releases on server with current marker'],
-      ['rollback [n]',  'Roll back n releases (default: 1 = previous)'],
-      ['nginx:reload',  'Reload nginx config on server'],
-      ['nginx:test',    'Test nginx config validity on server'],
-      ['logs [n]',      'Tail nginx access + error logs (Ctrl+C to stop)'],
-      ['shell',         'SSH into server'],
-      ['help',          'Show this help'],
+      ['deploy', 'Build locally + upload new release + go live'],
+      ['upload', 'Upload only — skip build, use existing dist/'],
+      ['releases', 'List releases on server with current marker'],
+      ['rollback [n]', 'Roll back n releases (default: 1 = previous)'],
+      ['nginx:reload', 'Reload nginx config on server'],
+      ['nginx:test', 'Test nginx config validity on server'],
+      ['logs [n]', 'Tail nginx access + error logs (Ctrl+C to stop)'],
+      ['shell', 'SSH into server'],
+      ['help', 'Show this help'],
     ];
     console.log(`\n  budget-app-v2 deploy  →  ${TARGET}:${BASE_DIR}\n`);
     for (const [cmd, desc] of cmds) {
@@ -242,7 +239,7 @@ const commands = {
 
 // ── Entry point ───────────────────────────────────────────────────────────────
 
-const [,, command = 'help', ...args] = process.argv;
+const [, , command = 'help', ...args] = process.argv;
 
 const handler = commands[command];
 if (!handler) {

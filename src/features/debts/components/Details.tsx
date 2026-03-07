@@ -124,7 +124,8 @@ const DebtDetails: React.FC<Props> = ({ debt, transactions, isLoadingTransaction
                     isError={false}
                     isLoading={isLoadingTransactions}
                     refetch={() => {}}
-                    onAdd={() => openForm(FormType.Transaction, { debt })} />
+                    onAdd={() => openForm(FormType.Transaction, { debt })}
+                  />
                 </ScrollArea>
               </CardContent>
 

@@ -26,10 +26,11 @@ export const CHART_STYLES = {
     } as Record<string, unknown>,
     tickLine: false,
     axisLine: false,
-    tickFormatter: (value: number) => new Intl.NumberFormat('en-US', {
-      notation: 'compact',
-      compactDisplay: 'short',
-    }).format(value),
+    tickFormatter: (value: number) =>
+      new Intl.NumberFormat('en-US', {
+        notation: 'compact',
+        compactDisplay: 'short',
+      }).format(value),
   },
   cartesianGrid: {
     strokeDasharray: '3 3',

@@ -37,19 +37,11 @@ export const TransactionValue: React.FC<Props> = ({
   const baseValue = convertedValues?.[baseCurrency.code];
 
   // Helper to format money values using the transaction's sign logic.
-  const formatMoney = (
-    value: number,
-    currencyCode: CURRENCY_CODE,
-    currencySymbol: string,
-  ) => {
+  const formatMoney = (value: number, currencyCode: CURRENCY_CODE, currencySymbol: string) => {
     const shouldShowPlus = transaction.isIncome() && value >= 0;
     const shouldShowMinus = transaction.isExpense() && value < 0;
     const sign = showSign ? (shouldShowPlus ? '+' : shouldShowMinus ? '-' : '') : '';
-    return `${sign ? sign + ' ' : ''}${currencySymbol} ${formatMoneyValue(
-      value,
-      currencyCode,
-      maximumFractionDigits,
-    )}`;
+    return `${sign ? sign + ' ' : ''}${currencySymbol} ${formatMoneyValue(value, currencyCode, maximumFractionDigits)}`;
   };
 
   // Format the original and converted (base) values.

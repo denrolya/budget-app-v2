@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { cn } from '@/lib/utils';
 import { ArrowDownCircle, ArrowUpCircle, Loader2, Plus, Save, Trash2 } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -8,6 +7,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
+import { cn } from '@/lib/utils';
 import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
 import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,6 @@ import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
 
 import { useMutations } from '../api/mutations';
 import { Type as TransactionType } from '../types';
-
 
 const transactionSchema = z.object({
   type: z.nativeEnum(TransactionType),
@@ -272,17 +271,17 @@ export const BulkCreateTableForm: React.FC = () => {
                                 <FormLabel className="sr-only">Category</FormLabel>
                                 <CategoryTypeahead
                                   autoFocus={autoFocusCategory}
+                                  disabled={field.disabled}
                                   multiple={false}
+                                  name={field.name}
                                   type={type}
+                                  value={field.value != null ? String(field.value) : null}
                                   className={cn(compactControl, 'w-full justify-between', {
                                     'text-muted-foreground': !field.value,
                                   })}
-                                  value={field.value != null ? String(field.value) : null}
-                                  onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                                   onBlur={field.onBlur}
-                                  name={field.name}
+                                  onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                                   ref={field.ref}
-                                  disabled={field.disabled}
                                 />
                                 <FormMessage />
                               </FormItem>
@@ -323,16 +322,16 @@ export const BulkCreateTableForm: React.FC = () => {
                             <FormItem className="space-y-0">
                               <FormLabel className="sr-only">Account</FormLabel>
                               <AccountTypeahead
+                                disabled={field.disabled}
                                 multiple={false}
+                                name={field.name}
+                                value={field.value != null ? String(field.value) : null}
                                 className={cn(compactControl, 'w-full justify-between', {
                                   'text-muted-foreground': !field.value,
                                 })}
-                                value={field.value != null ? String(field.value) : null}
-                                onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                                 onBlur={field.onBlur}
-                                name={field.name}
+                                onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                                 ref={field.ref}
-                                disabled={field.disabled}
                               />
                               <FormMessage />
                             </FormItem>

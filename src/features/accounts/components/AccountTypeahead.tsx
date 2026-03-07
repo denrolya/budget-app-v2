@@ -1,6 +1,6 @@
-import { cn } from '@/lib/utils';
 import { forwardRef, ReactNode, useCallback, useMemo } from 'react';
 
+import { cn } from '@/lib/utils';
 import MoneyValue from '@/components/common/MoneyValue';
 import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
 import { useAccountsWithDefaultOrder } from '@/hooks/financeData';
@@ -8,9 +8,10 @@ import { useAccountsWithDefaultOrder } from '@/hooks/financeData';
 import AccountPill from '../components/Pill';
 import Account from '../models/Account';
 
-type AccountTypeaheadProps =
-  Omit<TypeaheadV2Props<Account, string>, 'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'>
-  & {
+type AccountTypeaheadProps = Omit<
+  TypeaheadV2Props<Account, string>,
+  'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'
+> & {
   className?: string;
 };
 
@@ -56,13 +57,10 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(
               showSign
               amount={account.balance}
               currency={account.currency}
-              className={cn(
-                'tabular-nums font-medium whitespace-nowrap text-xs',
-                {
-                  'text-destructive': account.balance < 0,
-                  'text-muted-foreground': account.balance === 0,
-                },
-              )}
+              className={cn('tabular-nums font-medium whitespace-nowrap text-xs', {
+                'text-destructive': account.balance < 0,
+                'text-muted-foreground': account.balance === 0,
+              })}
             />
           </div>
         </div>

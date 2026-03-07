@@ -21,15 +21,12 @@ export const categoriesService = {
 
   create: async (payload: CreateCategoryDTO): Promise<CategoryApiResponseDTO> => {
     try {
-      const { data } = await api.post<CategoryApiResponseDTO>(
-        `${API_BASE}/${payload.type}`,
-        {
-          name: payload.name,
-          parent: payload.parent ?? null,
-          isAffectingProfit: payload.isAffectingProfit ?? true,
-          isFixed: payload.isFixed ?? false,
-        },
-      );
+      const { data } = await api.post<CategoryApiResponseDTO>(`${API_BASE}/${payload.type}`, {
+        name: payload.name,
+        parent: payload.parent ?? null,
+        isAffectingProfit: payload.isAffectingProfit ?? true,
+        isFixed: payload.isFixed ?? false,
+      });
 
       return data;
     } catch (error) {
@@ -39,17 +36,14 @@ export const categoriesService = {
 
   update: async (id: number, payload: UpdateCategoryDTO): Promise<CategoryApiResponseDTO> => {
     try {
-      const { data } = await api.put<CategoryApiResponseDTO>(
-        `${API_BASE}/${id}`,
-        {
-          id,
-          type: payload.type,
-          name: payload.name,
-          parent: payload.parent ?? null,
-          isAffectingProfit: payload.isAffectingProfit,
-          isFixed: payload.isFixed,
-        },
-      );
+      const { data } = await api.put<CategoryApiResponseDTO>(`${API_BASE}/${id}`, {
+        id,
+        type: payload.type,
+        name: payload.name,
+        parent: payload.parent ?? null,
+        isAffectingProfit: payload.isAffectingProfit,
+        isFixed: payload.isFixed,
+      });
 
       return data;
     } catch (error) {

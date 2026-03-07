@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils';
 import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 import React from 'react';
 
+import { cn } from '@/lib/utils';
 import { Type as TransactionType } from '@/features/transactions';
 
 interface Props {

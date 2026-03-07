@@ -61,19 +61,7 @@ interface Props {
 }
 
 const CategoryTree = forwardRef<CategoryTreeRef, Props>(
-  (
-    {
-      categories,
-      type,
-      onEdit,
-      onDelete,
-      onAddNew,
-      openById,
-      onOpenByIdChange,
-      defaultCollapsed = true,
-    },
-    ref,
-  ) => {
+  ({ categories, type, onEdit, onDelete, onAddNew, openById, onOpenByIdChange, defaultCollapsed = true }, ref) => {
     const [draggedId, setDraggedId] = useState<number | null>(null);
     const [draggedCategory, setDraggedCategory] = useState<Category | null>(null);
     const [dropTargetId, setDropTargetId] = useState<number | null>(null);
@@ -190,7 +178,7 @@ const CategoryTree = forwardRef<CategoryTreeRef, Props>(
         return endDrag();
       }
 
-      const parent = dropPosition === 'inside' ? target : target.parent ?? null;
+      const parent = dropPosition === 'inside' ? target : (target.parent ?? null);
       const newParent = parent ? parent.id : null;
       const breadcrumb = parent ? parent.getFullPath() : [];
 

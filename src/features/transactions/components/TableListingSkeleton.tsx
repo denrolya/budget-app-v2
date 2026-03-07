@@ -81,42 +81,38 @@ const GroupHeaderSkeleton: React.FC<{ compact?: boolean }> = ({ compact = true }
 GroupHeaderSkeleton.displayName = 'TransactionListingGroupHeaderSkeleton';
 
 export const TransactionsTableListingSkeleton: React.FC<TableListingSkeletonProps> = ({
-                                                                                        compact = true,
-                                                                                        className,
-                                                                                        rowsPerGroup = DEFAULT_ROWS_PER_GROUP,
-                                                                                        groups = DEFAULT_GROUPS,
-                                                                                        ...tableProps
-                                                                                      }) => (
-    <Table {...tableProps}>
-      <TableHeader className="sr-only">
-        <TableRow>
-          <TableHead className="w-4" />
-          <TableHead>ID</TableHead>
-          <TableHead>Account</TableHead>
-          <TableHead>Amount</TableHead>
-          <TableHead>Category</TableHead>
-          <TableHead>Note</TableHead>
-          <TableHead>Time</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
+  compact = true,
+  className,
+  rowsPerGroup = DEFAULT_ROWS_PER_GROUP,
+  groups = DEFAULT_GROUPS,
+  ...tableProps
+}) => (
+  <Table {...tableProps}>
+    <TableHeader className="sr-only">
+      <TableRow>
+        <TableHead className="w-4" />
+        <TableHead>ID</TableHead>
+        <TableHead>Account</TableHead>
+        <TableHead>Amount</TableHead>
+        <TableHead>Category</TableHead>
+        <TableHead>Note</TableHead>
+        <TableHead>Time</TableHead>
+        <TableHead className="text-right">Actions</TableHead>
+      </TableRow>
+    </TableHeader>
 
-      <TableBody aria-busy="true">
-        {Array.from({ length: groups }).map((_, groupIndex) => (
-          <React.Fragment key={groupIndex}>
-            <GroupHeaderSkeleton compact={compact} />
-            {Array.from({ length: rowsPerGroup }).map((__, rowIndex) => (
-              <ListingRowSkeleton
-                compact={compact}
-                className={className}
-                key={`${groupIndex}-${rowIndex}`}
-              />
-            ))}
-          </React.Fragment>
-        ))}
-      </TableBody>
-    </Table>
-  );
+    <TableBody aria-busy="true">
+      {Array.from({ length: groups }).map((_, groupIndex) => (
+        <React.Fragment key={groupIndex}>
+          <GroupHeaderSkeleton compact={compact} />
+          {Array.from({ length: rowsPerGroup }).map((__, rowIndex) => (
+            <ListingRowSkeleton compact={compact} className={className} key={`${groupIndex}-${rowIndex}`} />
+          ))}
+        </React.Fragment>
+      ))}
+    </TableBody>
+  </Table>
+);
 
 TransactionsTableListingSkeleton.displayName = 'TransactionsTableListingSkeleton';
 

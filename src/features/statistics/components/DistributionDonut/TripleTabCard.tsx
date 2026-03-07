@@ -77,10 +77,11 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
     setSelectedCurrency((prev) => (prev === id ? null : id));
   }, []);
 
-  const { stats: accountStats, total: totalAccountsRaw, isLoading: isLoadingAccounts } = useAccountDistribution(
-    { type, after: timeframe.after, before: timeframe.before },
-    [],
-  );
+  const {
+    stats: accountStats,
+    total: totalAccountsRaw,
+    isLoading: isLoadingAccounts,
+  } = useAccountDistribution({ type, after: timeframe.after, before: timeframe.before }, []);
 
   const { data: categoryRaw, isLoading: isLoadingCategories } = useCategoryTreeStatistics({
     type,
@@ -159,7 +160,8 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
             <DaterangePickerWithPresets
               after={timeframe.after}
               before={timeframe.before}
-              onChange={handleTimeframeChange}>
+              onChange={handleTimeframeChange}
+            >
               <span className="cursor-pointer hover:underline inline-flex flex-row mb-2">
                 <span className="text-xs flex items-center">
                   <CalendarIcon className="inline h-3 w-3 mr-1" />
@@ -234,11 +236,7 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
         </CardFooter>
       </Card>
 
-      <TransactionsDrawer
-        open={drawerOpen}
-        target={drawerTarget}
-        timeframe={timeframe}
-        onOpenChange={setDrawerOpen} />
+      <TransactionsDrawer open={drawerOpen} target={drawerTarget} timeframe={timeframe} onOpenChange={setDrawerOpen} />
     </>
   );
 };

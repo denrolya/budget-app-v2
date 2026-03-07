@@ -34,13 +34,13 @@ interface CategoryDialogProps {
 }
 
 export const CategoryDialog = ({
-                                 open,
-                                 onOpenChange,
-                                 category,
-                                 parentId,
-                                 type,
-                                 allCategories,
-                               }: CategoryDialogProps) => {
+  open,
+  onOpenChange,
+  category,
+  parentId,
+  type,
+  allCategories,
+}: CategoryDialogProps) => {
   const [name, setName] = React.useState('');
   const [selectedParentId, setSelectedParentId] = React.useState<number | null>(null);
   const [isAffectingProfit, setIsAffectingProfit] = React.useState(true);
@@ -130,9 +130,7 @@ export const CategoryDialog = ({
               <span
                 className={cn(
                   'text-3xs font-normal px-1.5 py-0.5 rounded',
-                  type === 'expense'
-                    ? 'bg-destructive/10 text-destructive'
-                    : 'bg-success/10 text-success',
+                  type === 'expense' ? 'bg-destructive/10 text-destructive' : 'bg-success/10 text-success',
                 )}
               >
                 {type === 'expense' ? 'Expense' : 'Income'}
@@ -165,9 +163,7 @@ export const CategoryDialog = ({
               <Select
                 disabled={isLoading}
                 value={selectedParentId ? String(selectedParentId) : 'root'}
-                onValueChange={(value) =>
-                  setSelectedParentId(value === 'root' ? null : Number(value))
-                }
+                onValueChange={(value) => setSelectedParentId(value === 'root' ? null : Number(value))}
               >
                 <SelectTrigger id="parent" className="h-8 text-sm">
                   <SelectValue placeholder="Select parent" />
@@ -194,33 +190,21 @@ export const CategoryDialog = ({
               role="navigation"
               className="flex items-center gap-1 text-2xs text-muted-foreground bg-muted rounded px-2 py-1.5 min-h-7"
             >
-              <span className="text-3xs uppercase tracking-wide font-medium text-muted-foreground/70 mr-1">
-                Path:
-              </span>
+              <span className="text-3xs uppercase tracking-wide font-medium text-muted-foreground/70 mr-1">Path:</span>
               {breadcrumbPath.length === 0 ? (
                 <span className="italic">Root</span>
               ) : (
                 breadcrumbPath.map((segment, i) => (
                   <React.Fragment key={i}>
-                    {i > 0 && (
-                      <ChevronRight
-                        aria-hidden="true"
-                        className="size-3 text-muted-foreground/50 shrink-0"
-                      />
-                    )}
+                    {i > 0 && <ChevronRight aria-hidden="true" className="size-3 text-muted-foreground/50 shrink-0" />}
                     <span className="truncate">{segment}</span>
                   </React.Fragment>
                 ))
               )}
               {name.trim() && (
                 <>
-                  <ChevronRight
-                    aria-hidden="true"
-                    className="size-3 text-muted-foreground/50 shrink-0"
-                  />
-                  <span className="text-foreground font-medium truncate">
-                    {name.trim()}
-                  </span>
+                  <ChevronRight aria-hidden="true" className="size-3 text-muted-foreground/50 shrink-0" />
+                  <span className="text-foreground font-medium truncate">{name.trim()}</span>
                 </>
               )}
             </div>
@@ -228,10 +212,7 @@ export const CategoryDialog = ({
             {/* Compact toggles */}
             <fieldset className="flex items-center gap-3 pt-1">
               <legend className="sr-only">Category flags</legend>
-              <label
-                htmlFor="affecting-profit"
-                className="flex items-center gap-1.5 cursor-pointer"
-              >
+              <label htmlFor="affecting-profit" className="flex items-center gap-1.5 cursor-pointer">
                 <Switch
                   checked={isAffectingProfit}
                   disabled={isLoading}
@@ -255,12 +236,7 @@ export const CategoryDialog = ({
             >
               Cancel
             </Button>
-            <Button
-              disabled={!name.trim() || isLoading}
-              size="sm"
-              type="submit"
-              className="h-7 text-2xs"
-            >
+            <Button disabled={!name.trim() || isLoading} size="sm" type="submit" className="h-7 text-2xs">
               {isLoading ? 'Saving...' : isEditing ? 'Save' : 'Create'}
             </Button>
           </DialogFooter>

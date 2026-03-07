@@ -53,39 +53,65 @@ const Content: React.FC<Omit<Props, 'isOpen' | 'setIsOpen'>> = ({ data, onChange
     }, 250),
   ).current;
 
-  useEffect(() => () => { debouncedAmount.cancel(); debouncedSearch.cancel(); }, [debouncedAmount, debouncedSearch]);
+  useEffect(
+    () => () => {
+      debouncedAmount.cancel();
+      debouncedSearch.cancel();
+    },
+    [debouncedAmount, debouncedSearch],
+  );
 
   useEffect(() => {
     const [extMin, extMax] = data.amountRange ?? [];
-    setMinLocal((p) => { const n = (extMin != null && Number.isFinite(extMin)) ? String(extMin) : ''; return p === n ? p : n; });
-    setMaxLocal((p) => { const n = (extMax != null && Number.isFinite(extMax)) ? String(extMax) : ''; return p === n ? p : n; });
+    setMinLocal((p) => {
+      const n = extMin != null && Number.isFinite(extMin) ? String(extMin) : '';
+      return p === n ? p : n;
+    });
+    setMaxLocal((p) => {
+      const n = extMax != null && Number.isFinite(extMax) ? String(extMax) : '';
+      return p === n ? p : n;
+    });
   }, [data.amountRange]);
 
-  useEffect(() => { setSearchLocal((data as any).searchTerm ?? ''); }, [(data as any).searchTerm]);
+  useEffect(() => {
+    setSearchLocal((data as any).searchTerm ?? '');
+  }, [(data as any).searchTerm]);
 
-  const handleMinChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setMinLocal(e.target.value);
-    debouncedAmount(e.target.value, maxLocal);
-  }, [debouncedAmount, maxLocal]);
+  const handleMinChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setMinLocal(e.target.value);
+      debouncedAmount(e.target.value, maxLocal);
+    },
+    [debouncedAmount, maxLocal],
+  );
 
-  const handleMaxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setMaxLocal(e.target.value);
-    debouncedAmount(minLocal, e.target.value);
-  }, [debouncedAmount, minLocal]);
+  const handleMaxChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setMaxLocal(e.target.value);
+      debouncedAmount(minLocal, e.target.value);
+    },
+    [debouncedAmount, minLocal],
+  );
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchLocal(e.target.value);
-    debouncedSearch(e.target.value);
-  }, [debouncedSearch]);
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchLocal(e.target.value);
+      debouncedSearch(e.target.value);
+    },
+    [debouncedSearch],
+  );
 
   const selectedCurrencies: string[] = useMemo(() => (data as any).currencies ?? [], [data]);
 
-  const toggleCurrency = useCallback((code: CURRENCY_CODE) => {
-    const next = selectedCurrencies.includes(code)
-      ? selectedCurrencies.filter((c) => c !== code)
-      : [...selectedCurrencies, code];
-    onChange('currencies' as keyof TransferFilters, (next.length ? next : undefined) as any);
-  }, [selectedCurrencies, onChange]);
+  const toggleCurrency = useCallback(
+    (code: CURRENCY_CODE) => {
+      const next = selectedCurrencies.includes(code)
+        ? selectedCurrencies.filter((c) => c !== code)
+        : [...selectedCurrencies, code];
+      onChange('currencies' as keyof TransferFilters, (next.length ? next : undefined) as any);
+    },
+    [selectedCurrencies, onChange],
+  );
 
   const clearCurrencies = useCallback(() => {
     onChange('currencies' as keyof TransferFilters, undefined as any);
@@ -93,13 +119,13 @@ const Content: React.FC<Omit<Props, 'isOpen' | 'setIsOpen'>> = ({ data, onChange
 
   const currencyLabel = useMemo(() => {
     if (selectedCurrencies.length === 0) return 'Currency';
-    if (selectedCurrencies.length <= 2) return selectedCurrencies.map((c) => CURRENCIES[c as CURRENCY_CODE]?.symbol ?? c).join(' ');
+    if (selectedCurrencies.length <= 2)
+      return selectedCurrencies.map((c) => CURRENCIES[c as CURRENCY_CODE]?.symbol ?? c).join(' ');
     return `${selectedCurrencies.length} currencies`;
   }, [selectedCurrencies]);
 
   return (
     <div className="space-y-5 px-1">
-
       {/* ACCOUNTS */}
       <div className="space-y-2">
         <Label className={LABEL_CLS}>Accounts</Label>
@@ -125,7 +151,9 @@ const Content: React.FC<Omit<Props, 'isOpen' | 'setIsOpen'>> = ({ data, onChange
             className="bg-background flex-1 h-9"
             onChange={handleMinChange}
           />
-          <span aria-hidden="true" className="text-muted-foreground text-xs shrink-0">–</span>
+          <span aria-hidden="true" className="text-muted-foreground text-xs shrink-0">
+            –
+          </span>
           <Input
             aria-label="Maximum amount"
             inputMode="decimal"
@@ -142,7 +170,10 @@ const Content: React.FC<Omit<Props, 'isOpen' | 'setIsOpen'>> = ({ data, onChange
       <div className="space-y-2">
         <Label className={LABEL_CLS}>Search</Label>
         <div className="relative flex items-center">
-          <Search aria-hidden="true" className="absolute left-2.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <Search
+            aria-hidden="true"
+            className="absolute left-2.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none"
+          />
           <Input
             aria-label="Search by note"
             placeholder="Search notes…"
@@ -164,8 +195,10 @@ const Content: React.FC<Omit<Props, 'isOpen' | 'setIsOpen'>> = ({ data, onChange
                 size="sm"
                 type="button"
                 variant={selectedCurrencies.length > 0 ? 'secondary' : 'outline'}
-                className={cn('flex-1 justify-between bg-background px-3 gap-1 h-9',
-                  selectedCurrencies.length > 0 && 'rounded-r-none border-r-0')}
+                className={cn(
+                  'flex-1 justify-between bg-background px-3 gap-1 h-9',
+                  selectedCurrencies.length > 0 && 'rounded-r-none border-r-0',
+                )}
               >
                 <span className="text-xs">{currencyLabel}</span>
                 <ChevronDown aria-hidden="true" className="h-3 w-3 shrink-0 opacity-60" />

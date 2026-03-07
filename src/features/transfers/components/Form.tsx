@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { cn } from '@/lib/utils';
 import { ArrowLeftRight, Loader2 } from 'lucide-react';
 import moment from 'moment';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
@@ -7,6 +6,7 @@ import { useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -250,14 +250,14 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
                 <FormLabel className="text-sm">From</FormLabel>
                 <AccountTypeahead
                   aria-label="From account"
-                  multiple={false}
-                  className={cn('w-full justify-between', { 'text-muted-foreground': !field.value })}
-                  value={field.value != null ? String(field.value) : null}
-                  onChange={(v) => field.onChange(v ? Number(v) : undefined)}
-                  onBlur={field.onBlur}
-                  name={field.name}
-                  ref={field.ref}
                   disabled={field.disabled}
+                  multiple={false}
+                  name={field.name}
+                  value={field.value != null ? String(field.value) : null}
+                  className={cn('w-full justify-between', { 'text-muted-foreground': !field.value })}
+                  onBlur={field.onBlur}
+                  onChange={(v) => field.onChange(v ? Number(v) : undefined)}
+                  ref={field.ref}
                 />
                 <FormMessage />
               </FormItem>
@@ -272,14 +272,14 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
                 <FormLabel className="text-sm">To</FormLabel>
                 <AccountTypeahead
                   aria-label="To account"
-                  multiple={false}
-                  className={cn('w-full justify-between', { 'text-muted-foreground': !field.value })}
-                  value={field.value != null ? String(field.value) : null}
-                  onChange={(v) => field.onChange(v ? Number(v) : undefined)}
-                  onBlur={field.onBlur}
-                  name={field.name}
-                  ref={field.ref}
                   disabled={field.disabled}
+                  multiple={false}
+                  name={field.name}
+                  value={field.value != null ? String(field.value) : null}
+                  className={cn('w-full justify-between', { 'text-muted-foreground': !field.value })}
+                  onBlur={field.onBlur}
+                  onChange={(v) => field.onChange(v ? Number(v) : undefined)}
+                  ref={field.ref}
                 />
                 <FormMessage />
               </FormItem>
@@ -385,14 +385,14 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
                   <FormLabel className="text-sm">Fee Account</FormLabel>
                   <AccountTypeahead
                     aria-label="Account that pays the fee"
-                    multiple={false}
-                    className={cn('w-full justify-between', { 'text-muted-foreground': !field.value })}
-                    value={field.value != null ? String(field.value) : null}
-                    onChange={(v) => field.onChange(v ? Number(v) : undefined)}
-                    onBlur={field.onBlur}
-                    name={field.name}
-                    ref={field.ref}
                     disabled={field.disabled}
+                    multiple={false}
+                    name={field.name}
+                    value={field.value != null ? String(field.value) : null}
+                    className={cn('w-full justify-between', { 'text-muted-foreground': !field.value })}
+                    onBlur={field.onBlur}
+                    onChange={(v) => field.onChange(v ? Number(v) : undefined)}
+                    ref={field.ref}
                   />
                   <FormMessage />
                 </FormItem>
@@ -474,7 +474,8 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
             disabled={isCreating}
             type="button"
             className="w-full"
-            onClick={() => formRef.current?.submitForm?.()}>
+            onClick={() => formRef.current?.submitForm?.()}
+          >
             {isCreating ? (
               <span className="flex items-center justify-center gap-2">
                 <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />

@@ -10,13 +10,7 @@ interface Props {
   animate?: boolean;
 }
 
-const PieBlock: React.FC<Props> = ({
-                                     data,
-                                     colors,
-                                     tooltip,
-                                     onClick,
-                                     animate = true,
-                                   }) => {
+const PieBlock: React.FC<Props> = ({ data, colors, tooltip, onClick, animate = true }) => {
   if (!data.length) return null;
 
   return (

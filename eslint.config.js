@@ -13,8 +13,8 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
   { ignores: ['dist', 'src/components/ui', 'src/**/*.example.*'] },
   {
-    files:           ['**/*.{ts,tsx}'],
-    extends:         [
+    files: ['**/*.{ts,tsx}'],
+    extends: [
       js.configs.recommended,
       ...tseslint.configs.recommended,
       // 'plugin:import/recommended',
@@ -22,24 +22,24 @@ export default tseslint.config(
       prettier,
     ],
     languageOptions: {
-      ecmaVersion:   2020,
-      globals:       {
+      ecmaVersion: 2020,
+      globals: {
         ...globals.browser,
         React: 'readonly',
       },
-      parser:        tseslint.parser,
+      parser: tseslint.parser,
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
         },
       },
     },
-    plugins:         {
+    plugins: {
       '@typescript-eslint': tseslint.plugin,
 
       // React
-      react:           reactPlugin,
-      'react-hooks':   reactHooks,
+      react: reactPlugin,
+      'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
 
       // Imports
@@ -48,8 +48,8 @@ export default tseslint.config(
       // Sorting/ordering
       perfectionist,
     },
-    settings:        {
-      react:             {
+    settings: {
+      react: {
         version: 'detect',
       },
       'import/resolver': {
@@ -58,7 +58,7 @@ export default tseslint.config(
         },
       },
     },
-    rules:           {
+    rules: {
       /**
        * -------------------------
        * React / Hooks
@@ -66,18 +66,18 @@ export default tseslint.config(
        */
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      'react/react-in-jsx-scope':             'off',
-      'react/prop-types':                     'off',
+      'react/react-in-jsx-scope': 'off',
+      'react/prop-types': 'off',
 
       /**
        * -------------------------
        * TypeScript
        * -------------------------
        */
-      '@typescript-eslint/explicit-function-return-type':  'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-explicit-any':                'off',
-      '@typescript-eslint/no-unused-vars':                 [
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': [
         'error',
         {
           argsIgnorePattern: '^_',
@@ -89,15 +89,15 @@ export default tseslint.config(
        * Imports
        * -------------------------
        */
-      'import/order':         [
+      'import/order': [
         'error',
         {
-          groups:                        ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-          'newlines-between':            'always',
-          pathGroups:                    [
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+          'newlines-between': 'always',
+          pathGroups: [
             {
-              pattern:  'src/**',
-              group:    'internal',
+              pattern: 'src/**',
+              group: 'internal',
               position: 'after',
             },
           ],
@@ -105,10 +105,10 @@ export default tseslint.config(
         },
       ],
       'import/no-unresolved': 'error',
-      'import/named':         'error',
-      'import/namespace':     'error',
-      'import/default':       'error',
-      'import/export':        'error',
+      'import/named': 'error',
+      'import/namespace': 'error',
+      'import/default': 'error',
+      'import/export': 'error',
 
       /**
        * -------------------------
@@ -125,9 +125,9 @@ export default tseslint.config(
       'perfectionist/sort-jsx-props': [
         'error',
         {
-          type:              'alphabetical',
-          order:             'asc',
-          ignoreCase:        true,
+          type: 'alphabetical',
+          order: 'asc',
+          ignoreCase: true,
           specialCharacters: 'keep',
 
           // Keep existing manual grouping if you separate props with blank lines
@@ -143,7 +143,7 @@ export default tseslint.config(
             {
               groupName: 'last-prop',
               elementNamePattern:
-                         '^(key|ref|children|content|className|contentClassName|triggerClassName|.*ClassName|on[A-Z].*)$',
+                '^(key|ref|children|content|className|contentClassName|triggerClassName|.*ClassName|on[A-Z].*)$',
             },
           ],
         },
@@ -154,12 +154,12 @@ export default tseslint.config(
        * Style
        * -------------------------
        */
-      'arrow-body-style':      ['error', 'as-needed'],
-      'object-curly-spacing':  ['error', 'always'],
-      quotes:                  ['error', 'single'],
-      semi:                    ['error', 'always'],
+      'arrow-body-style': ['error', 'as-needed'],
+      'object-curly-spacing': ['error', 'always'],
+      quotes: ['error', 'single'],
+      semi: ['error', 'always'],
       'prefer-arrow-callback': ['error'],
-      'func-style':            ['error', 'expression'],
+      'func-style': ['error', 'expression'],
     },
   },
 );

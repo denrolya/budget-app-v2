@@ -33,8 +33,8 @@ export const useFormLogic = <T,>({ form, onSubmit, setFormState }: UseFormLogicP
         toast.error('Please fix the errors in the form', {
           action: {
             label: 'Close',
-            onClick: () => toast.dismiss()
-          }
+            onClick: () => toast.dismiss(),
+          },
         });
         throw new Error('Form validation failed');
       }

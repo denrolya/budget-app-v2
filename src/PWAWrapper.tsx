@@ -6,23 +6,26 @@ const PWAWrapper = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if ('serviceWorker' in navigator && import.meta.env.MODE === 'production') {
-      navigator.serviceWorker.register('/sw.js').then((registration) => {
-        console.log('Service Worker registered with scope:', registration.scope);
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((registration) => {
+          console.log('Service Worker registered with scope:', registration.scope);
 
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                setWaitingWorker(newWorker);
-                setNewVersionAvailable(true);
-              }
-            });
-          }
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  setWaitingWorker(newWorker);
+                  setNewVersionAvailable(true);
+                }
+              });
+            }
+          });
+        })
+        .catch((error: Error) => {
+          console.error('Service Worker registration failed:', error);
         });
-      }).catch((error: Error) => {
-        console.error('Service Worker registration failed:', error);
-      });
     }
   }, []);
 

@@ -50,17 +50,17 @@ type Props = {
 };
 
 const CategoriesPanel: React.FC<Props> = ({
-                                            type,
-                                            timeframe,
-                                            showMonthlyAverage,
-                                            currentCategory,
-                                            categoryStack,
-                                            setCurrentCategory,
-                                            setCategoryStack,
-                                            isLoading,
-                                            categoryRaw,
-                                            onOpenTransactions,
-                                          }) => {
+  type,
+  timeframe,
+  showMonthlyAverage,
+  currentCategory,
+  categoryStack,
+  setCurrentCategory,
+  setCategoryStack,
+  isLoading,
+  categoryRaw,
+  onOpenTransactions,
+}) => {
   const calcMonthlyAverage = useCallback(
     (value: number) => {
       const now = moment();
@@ -125,12 +125,15 @@ const CategoriesPanel: React.FC<Props> = ({
   const handleCategoryStep = useCallback(
     (category: ProcessedCategory) => {
       if (category.children && category.children.length > 0) {
-        setCategoryStack((prev) => [...prev, currentCategory || {
-          id: 0,
-          name: 'Root',
-          value: totalRoot,
-          children: root,
-        }]);
+        setCategoryStack((prev) => [
+          ...prev,
+          currentCategory || {
+            id: 0,
+            name: 'Root',
+            value: totalRoot,
+            children: root,
+          },
+        ]);
         setCurrentCategory(category);
       }
     },

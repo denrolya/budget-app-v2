@@ -66,13 +66,13 @@ export const DateCard: React.FC<Props> = ({ date, items }) => {
               count={transfers.length}
               icon={ROUTES.TRANSFER_LIST.icon}
               useColors={false}
-              value={transferAmount} />
+              value={transferAmount}
+            />
           </div>
         </div>
 
         {items.length > 0 && (
           <div className="flex-1 min-h-0 overflow-y-auto px-3 py-2">
-
             <ul className="flex flex-col gap-3">
               {items.map((item) => (
                 <li className="max-w-full" key={item.id}>

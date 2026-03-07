@@ -22,8 +22,18 @@ interface Props {
 const currentYear = new Date().getFullYear();
 const YEARS = Array.from({ length: 6 }, (_, i) => currentYear - 2 + i);
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 const BudgetCreateDialog: React.FC<Props> = ({ open, onOpenChange, budgets, onCreated }) => {
@@ -94,12 +104,12 @@ const BudgetCreateDialog: React.FC<Props> = ({ open, onOpenChange, budgets, onCr
             <Label>Period type</Label>
             <RadioGroup
               value={periodType}
-              onValueChange={(v) => setPeriodType(v as BudgetPeriodType)}
               className="flex gap-4"
+              onValueChange={(v) => setPeriodType(v as BudgetPeriodType)}
             >
               {(['monthly', 'yearly', 'custom'] as BudgetPeriodType[]).map((pt) => (
-                <div key={pt} className="flex items-center gap-2">
-                  <RadioGroupItem value={pt} id={pt} />
+                <div className="flex items-center gap-2" key={pt}>
+                  <RadioGroupItem id={pt} value={pt} />
                   <Label htmlFor={pt} className="font-normal capitalize cursor-pointer">
                     {pt}
                   </Label>
@@ -114,10 +124,14 @@ const BudgetCreateDialog: React.FC<Props> = ({ open, onOpenChange, budgets, onCr
               <div className="flex-1 space-y-1">
                 <Label>Month</Label>
                 <Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {MONTHS.map((m, i) => (
-                      <SelectItem key={i} value={String(i)}>{m}</SelectItem>
+                      <SelectItem value={String(i)} key={i}>
+                        {m}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -125,10 +139,14 @@ const BudgetCreateDialog: React.FC<Props> = ({ open, onOpenChange, budgets, onCr
               <div className="w-28 space-y-1">
                 <Label>Year</Label>
                 <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {YEARS.map((y) => (
-                      <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                      <SelectItem value={String(y)} key={y}>
+                        {y}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -141,10 +159,14 @@ const BudgetCreateDialog: React.FC<Props> = ({ open, onOpenChange, budgets, onCr
             <div className="w-32 space-y-1">
               <Label>Year</Label>
               <Select value={String(yearOnly)} onValueChange={(v) => setYearOnly(Number(v))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {YEARS.map((y) => (
-                    <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                    <SelectItem value={String(y)} key={y}>
+                      {y}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -156,11 +178,11 @@ const BudgetCreateDialog: React.FC<Props> = ({ open, onOpenChange, budgets, onCr
             <div className="flex gap-2">
               <div className="flex-1 space-y-1">
                 <Label>Start date</Label>
-                <DatePicker date={startDate} setDate={setStartDate} label="Start date" />
+                <DatePicker date={startDate} label="Start date" setDate={setStartDate} />
               </div>
               <div className="flex-1 space-y-1">
                 <Label>End date</Label>
-                <DatePicker date={endDate} setDate={setEndDate} label="End date" />
+                <DatePicker date={endDate} label="End date" setDate={setEndDate} />
               </div>
             </div>
           )}
@@ -186,7 +208,7 @@ const BudgetCreateDialog: React.FC<Props> = ({ open, onOpenChange, budgets, onCr
                 </SelectTrigger>
                 <SelectContent>
                   {budgets.map((b) => (
-                    <SelectItem key={b.id} value={String(b.id)}>
+                    <SelectItem value={String(b.id)} key={b.id}>
                       {b.name ?? `${b.startDate} – ${b.endDate}`}
                     </SelectItem>
                   ))}

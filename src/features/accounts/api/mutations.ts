@@ -99,7 +99,9 @@ export const useMutations = () => {
 
   const pinMutation = useMutation({
     mutationFn: async (args: { id: number; isDisplayedOnSidebar: boolean }) => {
-      const raw = await accountService.update(args.id, { isDisplayedOnSidebar: args.isDisplayedOnSidebar } as UpdateAccountDTO);
+      const raw = await accountService.update(args.id, {
+        isDisplayedOnSidebar: args.isDisplayedOnSidebar,
+      } as UpdateAccountDTO);
       return rebuildAccountModel(raw);
     },
     onSuccess: (next) => {

@@ -7,12 +7,12 @@ import { axiosFetcher } from '@/services/api';
 
 export type ExchangeRateSnapshot = {
   id: number;
-  effectiveAt: string;       // ISO datetime, e.g. "2025-02-05T12:00:00+00:00"
-  usdPerEur: number | null;  // 1 EUR = N USD
-  hufPerEur: number | null;  // 1 EUR = N HUF
-  uahPerEur: number | null;  // 1 EUR = N UAH
-  eurPerBtc: number | null;  // 1 BTC = N EUR
-  eurPerEth: number | null;  // 1 ETH = N EUR
+  effectiveAt: string; // ISO datetime, e.g. "2025-02-05T12:00:00+00:00"
+  usdPerEur: number | null; // 1 EUR = N USD
+  hufPerEur: number | null; // 1 EUR = N HUF
+  uahPerEur: number | null; // 1 EUR = N UAH
+  eurPerBtc: number | null; // 1 BTC = N EUR
+  eurPerEth: number | null; // 1 ETH = N EUR
 };
 
 export type ExchangeRateSnapshotsData = {
@@ -41,8 +41,8 @@ export function getRateFromSnapshot(
     [CURRENCY_CODE.USD]: snapshot.usdPerEur ? 1 / snapshot.usdPerEur : null,
     [CURRENCY_CODE.HUF]: snapshot.hufPerEur ? 1 / snapshot.hufPerEur : null,
     [CURRENCY_CODE.UAH]: snapshot.uahPerEur ? 1 / snapshot.uahPerEur : null,
-    [CURRENCY_CODE.BTC]: snapshot.eurPerBtc,   // 1 BTC = eurPerBtc EUR
-    [CURRENCY_CODE.ETH]: snapshot.eurPerEth,   // 1 ETH = eurPerEth EUR
+    [CURRENCY_CODE.BTC]: snapshot.eurPerBtc, // 1 BTC = eurPerBtc EUR
+    [CURRENCY_CODE.ETH]: snapshot.eurPerEth, // 1 ETH = eurPerEth EUR
   };
 
   // Value of 1 EUR expressed in `to`
@@ -56,7 +56,7 @@ export function getRateFromSnapshot(
   };
 
   const xToEur = fromToEur[from] ?? null;
-  const eurToY  = eurToTarget[to]  ?? null;
+  const eurToY = eurToTarget[to] ?? null;
 
   if (xToEur === null || eurToY === null) return null;
   return xToEur * eurToY;
@@ -73,10 +73,9 @@ export function getRateFromSnapshot(
 export const useFixerExchangeRates = (before: string, after: string) =>
   useQuery<ExchangeRateSnapshotsData, Error>({
     queryKey: ['fixer', 'snapshots', before, after],
-    queryFn: () =>
-      axiosFetcher(`/api/v2/exchange-rates/snapshots?from=${before}&to=${after}`),
+    queryFn: () => axiosFetcher(`/api/v2/exchange-rates/snapshots?from=${before}&to=${after}`),
     staleTime: 1000 * 60 * 60 * 6, // 6 h — snapshots rarely change
-    gcTime:    1000 * 60 * 60 * 24, // 24 h
+    gcTime: 1000 * 60 * 60 * 24, // 24 h
     retry: 2,
     enabled: !!before && !!after,
   });

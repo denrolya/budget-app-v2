@@ -7,18 +7,11 @@ interface ChartUIStateOptions<Toggles extends string = never> {
   defaultToggles?: Partial<Record<Toggles, boolean>>;
 }
 
-export const useChart = <Toggles extends string = never>(
-  options: ChartUIStateOptions<Toggles> = {},
-) => {
-  const {
-    defaultChartType = 'bar',
-    defaultToggles = {},
-  } = options;
+export const useChart = <Toggles extends string = never>(options: ChartUIStateOptions<Toggles> = {}) => {
+  const { defaultChartType = 'bar', defaultToggles = {} } = options;
 
   const [chartType, setChartType] = useState<ChartType>(defaultChartType);
-  const [toggles, setToggles] = useState<Partial<Record<Toggles, boolean>>>(
-    defaultToggles,
-  );
+  const [toggles, setToggles] = useState<Partial<Record<Toggles, boolean>>>(defaultToggles);
 
   const setToggle = (key: Toggles, value: boolean) => {
     setToggles((prev) => ({ ...prev, [key]: value }));

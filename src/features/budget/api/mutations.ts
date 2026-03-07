@@ -15,8 +15,7 @@ export const useCreateBudget = () => {
 export const useUpdateBudget = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: UpdateBudgetDTO }) =>
-      budgetService.update(id, payload),
+    mutationFn: ({ id, payload }: { id: number; payload: UpdateBudgetDTO }) => budgetService.update(id, payload),
     onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: queryKeys.all() });
       qc.invalidateQueries({ queryKey: queryKeys.detail(id) });
@@ -35,16 +34,8 @@ export const useDeleteBudget = () => {
 export const useUpsertBudgetLine = (budgetId: number) => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      lineId,
-      payload,
-    }: {
-      lineId: number | null;
-      payload: UpsertBudgetLineDTO;
-    }) =>
-      lineId
-        ? budgetService.updateLine(budgetId, lineId, payload)
-        : budgetService.createLine(budgetId, payload),
+    mutationFn: ({ lineId, payload }: { lineId: number | null; payload: UpsertBudgetLineDTO }) =>
+      lineId ? budgetService.updateLine(budgetId, lineId, payload) : budgetService.createLine(budgetId, payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.detail(budgetId) }),
   });
 };

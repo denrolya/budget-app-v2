@@ -1,8 +1,8 @@
-import { useBaseCurrency } from '@/features/auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Moment } from 'moment';
 import { DependencyList, useEffect } from 'react';
 
+import { useBaseCurrency } from '@/features/auth';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useCategories } from '@/hooks/financeData';
 import Category from '@/features/categories/models/Category';
@@ -41,12 +41,7 @@ interface UseCategoryTreeStatisticsReturn {
 }
 
 export const useCategoryTreeStatistics = (
-  {
-    after,
-    before,
-    type,
-    queryKey = 'category-tree-statistics',
-  }: UseCategoryTreeStatisticsParams,
+  { after, before, type, queryKey = 'category-tree-statistics' }: UseCategoryTreeStatisticsParams,
   dependencies: DependencyList = [],
 ): UseCategoryTreeStatisticsReturn => {
   const baseCurrency = useBaseCurrency();
@@ -55,7 +50,9 @@ export const useCategoryTreeStatistics = (
 
   const transformCategoryNode = (node: CategoryNode): Category => {
     const categoryList = (categories as unknown as Record<string, Category[]>)[type as string];
-    const category = categoryList?.find((c: Category) => c.id === node.id) || new Category(node as unknown as import('@/features/categories/types').CategoryDTO);
+    const category =
+      categoryList?.find((c: Category) => c.id === node.id) ||
+      new Category(node as unknown as import('@/features/categories/types').CategoryDTO);
     return {
       ...category,
       total: node.total,
@@ -64,12 +61,7 @@ export const useCategoryTreeStatistics = (
     } as unknown as Category;
   };
 
-  const {
-    data,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery<CategoryNode[], Error, Category[]>({
+  const { data, isLoading, error, refetch } = useQuery<CategoryNode[], Error, Category[]>({
     queryKey: [
       queryKey,
       after.format(BACKEND_DATE_FORMAT),
@@ -78,19 +70,25 @@ export const useCategoryTreeStatistics = (
       baseCurrency,
       ...dependencies,
     ],
-    queryFn: async (): Promise<CategoryNode[]> => await axiosFetcher(`${URL}?${generateQueryParamsString({
-      after,
-      before,
-      type,
-    })}`) as CategoryNode[],
+    queryFn: async (): Promise<CategoryNode[]> =>
+      (await axiosFetcher(
+        `${URL}?${generateQueryParamsString({
+          after,
+          before,
+          type,
+        })}`,
+      )) as CategoryNode[],
     select: (data) => data.map(transformCategoryNode),
     refetchOnWindowFocus: false,
     staleTime: 60 * 60 * 1000, // 1h
   });
 
-  useEffect(() => () => {
-    queryClient.cancelQueries({ queryKey: [queryKey] });
-  }, [queryClient, queryKey]);
+  useEffect(
+    () => () => {
+      queryClient.cancelQueries({ queryKey: [queryKey] });
+    },
+    [queryClient, queryKey],
+  );
 
   useEffect(() => {
     refetch();
@@ -103,4 +101,3 @@ export const useCategoryTreeStatistics = (
     refetch,
   };
 };
-

@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils';
 import { ArrowDownCircle, ArrowUpCircle, Sigma, SettingsIcon } from 'lucide-react';
 import React from 'react';
 
+import { cn } from '@/lib/utils';
 import { Timeframe } from '@/types/global';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';

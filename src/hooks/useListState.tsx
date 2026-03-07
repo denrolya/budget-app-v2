@@ -1,4 +1,3 @@
-
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
@@ -36,22 +35,22 @@ interface UseListStateOptions<FilterType extends BaseFilters, DataType> {
 
 export type UseListReturn<FilterType, DataType> = Omit<UseListState<FilterType>, 'pagination' | 'sort'> &
   UseQueryResult<DataType, Error> & {
-  pagination: {
-    totalItems: number;
-    totalPages: number;
-    perPage: number;
-    currentPage: number;
-    setCurrentPage: (page: number) => void;
-    setPerPage: (perPage: number) => void;
+    pagination: {
+      totalItems: number;
+      totalPages: number;
+      perPage: number;
+      currentPage: number;
+      setCurrentPage: (page: number) => void;
+      setPerPage: (perPage: number) => void;
+    };
+    sort: {
+      field: string;
+      direction: 'asc' | 'desc';
+      setSort: (sort: Sorting) => void;
+    };
+    setFilter: SetFilterFunction<FilterType>;
+    resetFilters: () => void;
   };
-  sort: {
-    field: string;
-    direction: 'asc' | 'desc';
-    setSort: (sort: Sorting) => void;
-  };
-  setFilter: SetFilterFunction<FilterType>;
-  resetFilters: () => void;
-};
 
 export interface UseListState<FilterType> {
   pagination: PaginationState;
@@ -91,10 +90,10 @@ export const useListState = <FilterType extends BaseFilters, DataType extends { 
     filters:
       hasSearchParams && typeof FilterClass.fromSearchParams === 'function'
         ? (FilterClass.fromSearchParams(
-          searchParams,
-          searchParamKeys as Record<string, string>,
-          formatMoment,
-        ) as FilterType)
+            searchParams,
+            searchParamKeys as Record<string, string>,
+            formatMoment,
+          ) as FilterType)
         : initialFilters,
     sort: {
       field: searchParams.get('sortField') || initialSort?.field || '',
@@ -157,12 +156,16 @@ export const useListState = <FilterType extends BaseFilters, DataType extends { 
     [setSearchParams, updateUrl],
   );
 
-  const stateAsParams = useMemo(() => buildListStateSearchParams(
-      state,
-      { filters: initialFilters, initialPerPage, initialSort },
-      searchParamKeys as Record<string, string>,
-      formatMoment,
-    ), [state, initialFilters, initialPerPage, initialSort, searchParamKeys, formatMoment]);
+  const stateAsParams = useMemo(
+    () =>
+      buildListStateSearchParams(
+        state,
+        { filters: initialFilters, initialPerPage, initialSort },
+        searchParamKeys as Record<string, string>,
+        formatMoment,
+      ),
+    [state, initialFilters, initialPerPage, initialSort, searchParamKeys, formatMoment],
+  );
 
   useEffect(() => {
     if (!updateUrl) return;

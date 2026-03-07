@@ -10,6 +10,7 @@ import { CategoryType } from '@/features/categories/types';
 import Category from '@/features/categories/models/Category';
 
 import type { BudgetDTO, BudgetAnalyticsItem } from '../api/types';
+
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
 interface Props {
@@ -99,14 +100,21 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
   }, [budget, analytics, displayCurrency, rates, catData]);
 
   const remainingColor = stats.remaining < 0 ? 'text-destructive' : 'text-green-600 dark:text-green-400';
-  const pctColor = stats.percentUsed > 100 ? 'text-destructive' : stats.percentUsed > 80 ? 'text-yellow-600 dark:text-yellow-400' : undefined;
+  const pctColor =
+    stats.percentUsed > 100
+      ? 'text-destructive'
+      : stats.percentUsed > 80
+        ? 'text-yellow-600 dark:text-yellow-400'
+        : undefined;
   const savingsColor = stats.netSavings >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive';
 
   return (
     <div className="rounded-lg border bg-card px-4 py-3 space-y-2 text-sm">
       {/* Expense row */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground w-16 shrink-0">Expenses</span>
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground w-16 shrink-0">
+          Expenses
+        </span>
         <Stat label="planned" value={fmtAmt(stats.totalPlannedExpense, displayCurrency)} />
         <Divider />
         <Stat label="actual" value={fmtAmt(stats.totalActualExpense, displayCurrency)} />
@@ -117,19 +125,10 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
           className={remainingColor}
         />
         <Divider />
-        <Stat
-          label="used"
-          value={`${stats.percentUsed.toFixed(1)}%`}
-          className={pctColor}
-        />
+        <Stat label="used" value={`${stats.percentUsed.toFixed(1)}%`} className={pctColor} />
         <Divider />
-        <Stat
-          label="days"
-          value={`${stats.daysElapsed}/${stats.daysTotal}`}
-        />
-        {stats.daysLeft > 0 && (
-          <span className="text-xs text-muted-foreground">({stats.daysLeft} left)</span>
-        )}
+        <Stat label="days" value={`${stats.daysElapsed}/${stats.daysTotal}`} />
+        {stats.daysLeft > 0 && <span className="text-xs text-muted-foreground">({stats.daysLeft} left)</span>}
       </div>
 
       {/* Income row */}
@@ -137,7 +136,11 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
         <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground w-16 shrink-0">Income</span>
         <Stat label="planned" value={fmtAmt(stats.totalPlannedIncome, displayCurrency)} />
         <Divider />
-        <Stat label="actual" value={fmtAmt(stats.totalActualIncome, displayCurrency)} className="text-green-600 dark:text-green-400" />
+        <Stat
+          label="actual"
+          value={fmtAmt(stats.totalActualIncome, displayCurrency)}
+          className="text-green-600 dark:text-green-400"
+        />
         <Divider />
         <Stat
           label="net savings"

@@ -59,16 +59,16 @@ const formatDateRange = (range: PeriodRange, period: ISO8601Period): string => {
 };
 
 export const ChartTooltip: React.FC<Props> = ({
-                                                active,
-                                                payload,
-                                                label,
-                                                data,
-                                                period,
-                                                coordinate,
-                                                currentTimeframe,
-                                                previousTimeframe,
-                                                comparisonMode = 'previousTimeframe',
-                                              }) => {
+  active,
+  payload,
+  label,
+  data,
+  period,
+  coordinate,
+  currentTimeframe,
+  previousTimeframe,
+  comparisonMode = 'previousTimeframe',
+}) => {
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const { x = 0, y = 0 } = coordinate || {};
 
@@ -79,9 +79,7 @@ export const ChartTooltip: React.FC<Props> = ({
 
     if (comparisonMode === 'previousPeriod') {
       const index = data.findIndex((item) => item.timestamp === label);
-      return index > 0
-        ? data[index - 1]
-        : data.find((item) => item.date.year() === dataPoint.date.year() - 1) || null;
+      return index > 0 ? data[index - 1] : data.find((item) => item.date.year() === dataPoint.date.year() - 1) || null;
     }
 
     return {
@@ -113,12 +111,12 @@ export const ChartTooltip: React.FC<Props> = ({
   const formattedComparisonDate =
     comparisonMode === 'previousPeriod'
       ? formatDateRange(
-        {
-          after: moment(dataPoint.date).subtract(1, periodMapping[period]),
-          before: moment(dataPoint.date).subtract(1, periodMapping[period]).endOf(periodMapping[period]),
-        },
-        period,
-      )
+          {
+            after: moment(dataPoint.date).subtract(1, periodMapping[period]),
+            before: moment(dataPoint.date).subtract(1, periodMapping[period]).endOf(periodMapping[period]),
+          },
+          period,
+        )
       : formatDateRange(previousTimeframe, period);
 
   return createPortal(

@@ -14,19 +14,9 @@ export type DetectedPeriod = 'day' | 'week' | 'month' | 'custom';
 export const detectPeriod = ({ after, before }: Timeframe): DetectedPeriod => {
   if (after.isSame(before, 'day')) return 'day';
 
-  if (
-    after.isoWeekday() === 1 &&
-    before.isoWeekday() === 7 &&
-    before.diff(after, 'days') === 6
-  )
-    return 'week';
+  if (after.isoWeekday() === 1 && before.isoWeekday() === 7 && before.diff(after, 'days') === 6) return 'week';
 
-  if (
-    after.date() === 1 &&
-    after.isSame(before, 'month') &&
-    before.date() === before.daysInMonth()
-  )
-    return 'month';
+  if (after.date() === 1 && after.isSame(before, 'month') && before.date() === before.daysInMonth()) return 'month';
 
   return 'custom';
 };
@@ -80,9 +70,7 @@ interface UseTimeframeProps {
 }
 
 export const useTimeframe = ({ initialTimeframe }: UseTimeframeProps = {}) => {
-  const [timeframe, setTimeframe] = useState<Timeframe>(
-    initialTimeframe ?? getInitialTimeframe(),
-  );
+  const [timeframe, setTimeframe] = useState<Timeframe>(initialTimeframe ?? getInitialTimeframe());
 
   const goToPeriod = useCallback((direction: 'next' | 'previous') => {
     setTimeframe((current) => navigate(current, direction));

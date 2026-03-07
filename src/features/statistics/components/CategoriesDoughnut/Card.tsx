@@ -39,10 +39,7 @@ interface Props extends React.ComponentPropsWithoutRef<'div'> {
   controlledTimeframe: UseTimeframeControl;
 }
 
-export const CategoriesDoughnutCard: React.FC<Props> = ({
-                                                          controlledTimeframe,
-                                                          className,
-                                                        }) => {
+export const CategoriesDoughnutCard: React.FC<Props> = ({ controlledTimeframe, className }) => {
   const [currentCategory, setCurrentCategory] = useState<ProcessedCategory | null>(null);
   const [categoryStack, setCategoryStack] = useState<ProcessedCategory[]>([]);
   const [type, setType] = useState<TransactionType>(TransactionType.Expense);
@@ -59,10 +56,7 @@ export const CategoriesDoughnutCard: React.FC<Props> = ({
     enablePeriod: false,
   });
 
-  const {
-    timeframe = fallback.timeframe,
-    setTimeframe = fallback.setTimeframe,
-  } = controlledTimeframe ?? {};
+  const { timeframe = fallback.timeframe, setTimeframe = fallback.setTimeframe } = controlledTimeframe ?? {};
 
   const handleTimeframeChange = useCallback(
     (range: Timeframe) => {
@@ -287,8 +281,7 @@ export const CategoriesDoughnutCard: React.FC<Props> = ({
                             openDelay={1}
                             content={
                               <>
-                                <code className="font-mono text-xs">#{category.id}</code>:{' '}
-                                <span>{category.name}</span>
+                                <code className="font-mono text-xs">#{category.id}</code>: <span>{category.name}</span>
                               </>
                             }
                             triggerClassName="truncate flex-1"

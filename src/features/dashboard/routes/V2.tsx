@@ -99,9 +99,16 @@ const DashboardV2Page: React.FC = () => {
                     transition: 'filter 0.3s ease-out, opacity 0.3s ease-out',
                   }}
                 >
-                  {item.type === 'balance' && 'accountType' in item && item.accountType != null && <BalanceByAccountType type={item.accountType} />}
+                  {item.type === 'balance' && 'accountType' in item && item.accountType != null && (
+                    <BalanceByAccountType type={item.accountType} />
+                  )}
                   {item.type === 'total' && <TotalBalanceCard />}
-                  {item.type === 'statistics' && 'card' in item && <StatisticsCard config={item.card as import('@/types/statistics').StatisticsConfig} onChange={handleConfigChange} />}
+                  {item.type === 'statistics' && 'card' in item && (
+                    <StatisticsCard
+                      config={item.card as import('@/types/statistics').StatisticsConfig}
+                      onChange={handleConfigChange}
+                    />
+                  )}
                 </div>
               </div>
             );

@@ -26,7 +26,6 @@ export interface CategoryApiResponseDTO {
   isAffectingProfit: boolean;
 }
 
-
 // features/categories/types.ts
 
 export enum CategoryType {
@@ -36,7 +35,6 @@ export enum CategoryType {
 
 /** Domain */
 export type CategoryId = number;
-
 
 /** API Platform relations are IRIs, not numeric IDs */
 export type Iri = string;
@@ -104,6 +102,4 @@ export type CategoryApiDTO = {
   children?: Array<Iri> | CategoryApiDTO[]; // зависит от endpoint-а
 };
 
-export type CategoriesApiResponse =
-  | HydraCollection<CategoryApiDTO>
-  | CategoryApiDTO[];
+export type CategoriesApiResponse = HydraCollection<CategoryApiDTO> | CategoryApiDTO[];

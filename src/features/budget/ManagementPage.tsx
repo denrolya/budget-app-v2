@@ -99,10 +99,7 @@ const BudgetDetailRoute: React.FC = () => {
   return (
     <div className="h-full flex flex-col min-h-0">
       {/* Header */}
-      <PageWithSidebar.Header
-        title={<span className="truncate text-base font-semibold">{title}</span>}
-        onBack={() => navigate('/budget')}
-      >
+      <PageWithSidebar.Header title={title} onBack={() => navigate('/budget')}>
         <BudgetDisplayCurrency value={displayCurrency} onChange={setDisplayCurrency} />
         <Tooltip>
           <TooltipTrigger asChild>

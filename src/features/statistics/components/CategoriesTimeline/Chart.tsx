@@ -175,11 +175,11 @@ export const CategoryTimelineChart: React.FC<Props> = ({
           <Tooltip
             content={(props) => (
               <ChartTooltip
+                active={props.active}
+                label={props.label}
+                payload={props.payload as Array<{ name: string; value: number; color: string }> | undefined}
                 selectedPeriod={selectedPeriod}
                 showComparison={showComparisonInTooltip}
-                active={props.active}
-                payload={props.payload as Array<{ name: string; value: number; color: string }> | undefined}
-                label={props.label}
               />
             )}
           />

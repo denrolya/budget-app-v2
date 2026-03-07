@@ -122,7 +122,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
         logout,
         updateCurrency,
         refreshToken,
-      }}>
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

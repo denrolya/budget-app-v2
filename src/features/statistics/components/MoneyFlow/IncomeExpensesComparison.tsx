@@ -31,11 +31,11 @@ const ChangeIndicator: React.FC<{ change: number; isExpense?: boolean }> = ({ ch
 };
 
 const IncomeExpensesComparison: React.FC<Props> = ({
-                                                     currentIncome,
-                                                     currentExpenses,
-                                                     previousIncome,
-                                                     previousExpenses,
-                                                   }) => {
+  currentIncome,
+  currentExpenses,
+  previousIncome,
+  previousExpenses,
+}) => {
   const changes = useMemo(() => {
     const currentRevenue = currentIncome - currentExpenses;
     const previousRevenue = previousIncome - previousExpenses;

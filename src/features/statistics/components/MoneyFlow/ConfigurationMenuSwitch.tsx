@@ -12,7 +12,6 @@ interface Props {
   iconClassName?: string;
 }
 
-
 const ConfigurationMenuSwitch: React.FC<Props> = ({ label, icon, checked, onChange, iconClassName }) => {
   const id = useId();
   const Icon = icon as LucideIcon;
@@ -23,12 +22,7 @@ const ConfigurationMenuSwitch: React.FC<Props> = ({ label, icon, checked, onChan
         <Icon className={`h-3 w-3 ${iconClassName}`} />
         <span>{label}</span>
       </Label>
-      <Switch
-        checked={checked}
-        id={id}
-        className="scale-75"
-        onCheckedChange={onChange}
-      />
+      <Switch checked={checked} id={id} className="scale-75" onCheckedChange={onChange} />
     </div>
   );
 };

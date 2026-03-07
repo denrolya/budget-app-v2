@@ -9,6 +9,7 @@ import Category from '@/features/categories/models/Category';
 import { CategoryType } from '@/features/categories/types';
 
 import type { BudgetDTO, BudgetAnalyticsItem, BudgetLineDTO } from '../api/types';
+
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
 interface Props {
@@ -54,9 +55,7 @@ const BudgetCategoryBarChart: React.FC<Props> = ({ budget, analytics, displayCur
     const linesMap = new Map<number, BudgetLineDTO>();
     (budget.lines ?? []).forEach((line) => linesMap.set(line.categoryId, line));
 
-    const expenseRoots = catData.tree.filter(
-      (c) => c.isAffectingProfit && c.type === CategoryType.Expense,
-    );
+    const expenseRoots = catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense);
 
     return expenseRoots
       .map((cat) => {
@@ -93,36 +92,25 @@ const BudgetCategoryBarChart: React.FC<Props> = ({ budget, analytics, displayCur
 
   if (chartData.length === 0) {
     return (
-      <div className="flex items-center justify-center h-48 text-sm text-muted-foreground">
-        No data to display
-      </div>
+      <div className="flex items-center justify-center h-48 text-sm text-muted-foreground">No data to display</div>
     );
   }
 
   return (
     <div style={{ height: Math.max(140, chartData.length * 36) }}>
       <ResponsiveBar
+        borderRadius={2}
+        colors={['hsl(var(--muted-foreground) / 0.5)', 'hsl(var(--destructive))']}
         data={chartData}
-        keys={['Planned', 'Actual']}
+        groupMode="grouped"
         indexBy="category"
+        keys={['Planned', 'Actual']}
+        labelSkipWidth={40}
+        labelTextColor="hsl(var(--background))"
         layout="horizontal"
         margin={{ top: 8, right: 80, bottom: 24, left: 110 }}
         padding={0.3}
-        groupMode="grouped"
-        colors={['hsl(var(--muted-foreground) / 0.5)', 'hsl(var(--destructive))']}
         theme={nivoTheme}
-        borderRadius={2}
-        label={(d) => {
-          const sym = CURRENCIES[displayCurrency as CURRENCY_CODE]?.symbol ?? displayCurrency;
-          const abs = Math.abs(d.value as number);
-          return abs >= 1000 ? `${sym}${(abs / 1000).toFixed(abs >= 10000 ? 0 : 1)}k` : `${sym}${abs}`;
-        }}
-        labelTextColor="hsl(var(--background))"
-        labelSkipWidth={40}
-        axisLeft={{
-          tickSize: 0,
-          tickPadding: 8,
-        }}
         axisBottom={{
           tickSize: 0,
           tickPadding: 4,
@@ -131,6 +119,15 @@ const BudgetCategoryBarChart: React.FC<Props> = ({ budget, analytics, displayCur
             const abs = Math.abs(v as number);
             return abs >= 1000 ? `${sym}${(abs / 1000).toFixed(0)}k` : `${sym}${abs.toLocaleString('en-US')}`;
           },
+        }}
+        axisLeft={{
+          tickSize: 0,
+          tickPadding: 8,
+        }}
+        label={(d) => {
+          const sym = CURRENCIES[displayCurrency as CURRENCY_CODE]?.symbol ?? displayCurrency;
+          const abs = Math.abs(d.value as number);
+          return abs >= 1000 ? `${sym}${(abs / 1000).toFixed(abs >= 10000 ? 0 : 1)}k` : `${sym}${abs}`;
         }}
         legends={[
           {

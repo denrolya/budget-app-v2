@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { cn } from '@/lib/utils';
 import { Banknote, CreditCard, MoreHorizontal, Wallet } from 'lucide-react';
 import { forwardRef, useImperativeHandle, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -54,12 +54,16 @@ const CURRENCY_CARDS: Record<CURRENCY_CODE, CurrencyCard> = {
 };
 
 const normalizeCurrency = (v: unknown): CURRENCY_CODE => {
-  const raw = String(v ?? '').trim().toUpperCase();
+  const raw = String(v ?? '')
+    .trim()
+    .toUpperCase();
   return (Object.values(CURRENCY_CODE) as string[]).includes(raw) ? (raw as CURRENCY_CODE) : CURRENCY_CODE.EUR;
 };
 
 const normalizeType = (v: unknown): FormSchema['type'] => {
-  const raw = String(v ?? '').trim().toLowerCase();
+  const raw = String(v ?? '')
+    .trim()
+    .toLowerCase();
   if (raw === AccountType.Bank || raw === AccountType.Cash || raw === AccountType.Internet) return raw;
   return AccountType.Basic;
 };
@@ -126,7 +130,7 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
     const bgColor =
       field === 'type'
         ? ACCOUNT_CURRENCY_COLORSCHEME[value as keyof typeof ACCOUNT_CURRENCY_COLORSCHEME][
-          currency as keyof (typeof ACCOUNT_CURRENCY_COLORSCHEME)[AccountType.Internet]
+            currency as keyof (typeof ACCOUNT_CURRENCY_COLORSCHEME)[AccountType.Internet]
           ]
         : CURRENCY_CARDS[value as CURRENCY_CODE].colorVar;
 
@@ -203,9 +207,11 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
                       style={{
                         backgroundColor:
                           field.value === option.value
-                            ? ACCOUNT_CURRENCY_COLORSCHEME
-                              [option.value as keyof typeof ACCOUNT_CURRENCY_COLORSCHEME]
-                              [form.watch('currency') as keyof (typeof ACCOUNT_CURRENCY_COLORSCHEME)[AccountType.Internet]]
+                            ? ACCOUNT_CURRENCY_COLORSCHEME[option.value as keyof typeof ACCOUNT_CURRENCY_COLORSCHEME][
+                                form.watch(
+                                  'currency',
+                                ) as keyof (typeof ACCOUNT_CURRENCY_COLORSCHEME)[AccountType.Internet]
+                              ]
                             : undefined,
                       }}
                       className={getButtonStyle(option.value, 'type')}

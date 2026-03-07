@@ -13,7 +13,7 @@ export type SunburstNode = {
   value?: number;
   color?: string;
   currency?: string;
-  accountId?: number;       // set on account leaves for tooltip lookup
+  accountId?: number; // set on account leaves for tooltip lookup
   rawBalance?: number;
   convertedValue?: number;
   children?: SunburstNode[];
@@ -68,9 +68,9 @@ const AccountsSunburstChart: React.FC<Props> = ({ onHoverChange }) => {
           return {
             name: acc.name,
             value: Math.max(Math.abs(converted ?? acc.balance), 0.001),
-            color: ringColor,       // explicit fallback so arcs are never black
+            color: ringColor, // explicit fallback so arcs are never black
             currency: acc.currency,
-            accountId: acc.id,      // for tooltip lookup
+            accountId: acc.id, // for tooltip lookup
             rawBalance: acc.balance,
             convertedValue: converted,
           };
@@ -87,23 +87,21 @@ const AccountsSunburstChart: React.FC<Props> = ({ onHoverChange }) => {
     const node = data;
     const isAccount = node.rawBalance !== undefined;
     const account =
-      isAccount && node.accountId !== undefined
-        ? (accounts.find((a) => a.id === node.accountId) ?? null)
-        : null;
+      isAccount && node.accountId !== undefined ? (accounts.find((a) => a.id === node.accountId) ?? null) : null;
 
     if (account) {
       return (
         <div className="bg-background border rounded-lg shadow-lg overflow-hidden text-sm min-w-[190px]">
           <div className="px-3 pt-3 pb-2">
-            <AccountPill account={account} showName variant="pill" tone="subtle" size="sm" tooltip={false} />
+            <AccountPill showName account={account} size="sm" tone="subtle" tooltip={false} variant="pill" />
           </div>
           <div className="border-t px-3 py-2 space-y-1.5">
             <div className="flex justify-between items-center gap-6">
               <span className="text-xs text-muted-foreground">Balance</span>
               <MoneyValue
+                useColors
                 amount={account.balance}
                 currency={account.currency}
-                useColors
                 values={{}}
                 className="text-xs font-semibold"
               />
@@ -133,7 +131,7 @@ const AccountsSunburstChart: React.FC<Props> = ({ onHoverChange }) => {
     return (
       <div className="bg-background border rounded-lg shadow-lg px-3 py-2.5 text-sm min-w-[160px]">
         <div className="flex items-center gap-2 mb-2">
-          <span className="h-2.5 w-2.5 rounded-sm flex-none" style={{ backgroundColor: color }} />
+          <span style={{ backgroundColor: color }} className="h-2.5 w-2.5 rounded-sm flex-none" />
           <span className="font-semibold">{node.name}</span>
         </div>
         <div className="space-y-1">
@@ -158,28 +156,28 @@ const AccountsSunburstChart: React.FC<Props> = ({ onHoverChange }) => {
 
   return (
     <ResponsiveSunburst<SunburstNode>
-      data={sunburstData}
-      id="name"
-      value="value"
-      margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
-      cornerRadius={3}
-      borderWidth={6}
+      isInteractive
+      animate={true}
       borderColor={{ theme: 'background' }}
+      borderWidth={6}
+      childColor={{ from: 'color', modifiers: [['brighter', 0.35]] }}
+      cornerRadius={3}
+      data={sunburstData}
+      enableArcLabels={false}
+      id="name"
+      margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
+      motionConfig="gentle"
+      tooltip={SunburstTooltip as any}
+      transitionMode="pushIn"
+      value="value"
       // Use a function so both ring nodes and account nodes get their currency colour
       colors={(node) => {
         const d = node.data as SunburstNode;
         if (d.currency) return getCurrencyBaseColor(d.currency);
         return '#888';
       }}
-      childColor={{ from: 'color', modifiers: [['brighter', 0.35]] }}
-      enableArcLabels={false}
-      isInteractive
-      animate={true}
-      motionConfig="gentle"
-      transitionMode="pushIn"
       onMouseEnter={(datum) => onHoverChange?.(datum as HoveredSunburstNode)}
       onMouseLeave={() => onHoverChange?.(null)}
-      tooltip={SunburstTooltip as any}
     />
   );
 };

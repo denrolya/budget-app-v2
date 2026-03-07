@@ -66,11 +66,15 @@ export interface MinMaxStatistics {
 }
 
 export type StatisticsData<T extends StatisticsType> = T extends StatisticsType.MinMax ? MinMaxStatistics : number;
-export type PercentageChange<T extends StatisticsType> = T extends StatisticsType.MinMax ? {
-  min: number;
-  max: number
-} : number;
-export type IsIncrease<T extends StatisticsType> = T extends StatisticsType.MinMax ? {
-  min: boolean;
-  max: boolean
-} : boolean;
+export type PercentageChange<T extends StatisticsType> = T extends StatisticsType.MinMax
+  ? {
+      min: number;
+      max: number;
+    }
+  : number;
+export type IsIncrease<T extends StatisticsType> = T extends StatisticsType.MinMax
+  ? {
+      min: boolean;
+      max: boolean;
+    }
+  : boolean;

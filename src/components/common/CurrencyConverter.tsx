@@ -35,12 +35,12 @@ interface Props {
 }
 
 export const CurrencyConverter: React.FC<Props> = ({
-                                                     defaultFromCurrency = CURRENCY_CODE.HUF,
-                                                     defaultToCurrency = CURRENCY_CODE.EUR,
-                                                     defaultAmount = 1000,
-                                                     open,
-                                                     onOpenChange,
-                                                   }) => {
+  defaultFromCurrency = CURRENCY_CODE.HUF,
+  defaultToCurrency = CURRENCY_CODE.EUR,
+  defaultAmount = 1000,
+  open,
+  onOpenChange,
+}) => {
   const [fromCurrency, setFromCurrency] = useState<CURRENCY_CODE>(defaultFromCurrency);
   const [toCurrency, setToCurrency] = useState<CURRENCY_CODE>(defaultToCurrency);
   const [amount, setAmount] = useState<number>(defaultAmount);

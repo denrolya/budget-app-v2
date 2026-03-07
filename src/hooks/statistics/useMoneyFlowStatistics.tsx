@@ -4,11 +4,7 @@ import { useMemo } from 'react';
 import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
 import { TransformedData, UseMoneyFlowParams, UseMoneyFlowReturn } from '@/types/statistics/moneyFlow';
 
-export const useMoneyFlow = ({
-                               period,
-                               timeframe,
-                               previousTimeframe,
-                             }: UseMoneyFlowParams): UseMoneyFlowReturn => {
+export const useMoneyFlow = ({ period, timeframe, previousTimeframe }: UseMoneyFlowParams): UseMoneyFlowReturn => {
   const {
     data: currentDataBackend,
     isLoading: isCurrentLoading,
@@ -39,10 +35,7 @@ export const useMoneyFlow = ({
     const maxLength = Math.max(currentDataBackend.length, previousDataBackend.length);
     const baseDate = currentDataBackend[0]?.after.clone() ?? moment(); // fallback just in case
 
-    const periodUnit =
-      period === 'P1D' ? 'days' :
-        period === 'P1W' ? 'weeks' :
-          'months';
+    const periodUnit = period === 'P1D' ? 'days' : period === 'P1W' ? 'weeks' : 'months';
 
     return Array.from({ length: maxLength }, (_, index) => {
       const date = baseDate.clone().add(index, periodUnit);
@@ -142,9 +135,8 @@ export const useMoneyFlow = ({
     };
   }, [transformedData, period, timeframe, previousTimeframe]);
 
-  const revenueChangePercent = previousTotalRevenue !== 0
-    ? ((totalRevenue - previousTotalRevenue) / Math.abs(previousTotalRevenue)) * 100
-    : 0;
+  const revenueChangePercent =
+    previousTotalRevenue !== 0 ? ((totalRevenue - previousTotalRevenue) / Math.abs(previousTotalRevenue)) * 100 : 0;
 
   return {
     transformedData,

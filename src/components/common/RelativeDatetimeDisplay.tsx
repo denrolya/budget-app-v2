@@ -94,14 +94,14 @@ interface Props extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const DateDisplay: React.FC<Props> = ({
-                                        date,
-                                        variant = 'default',
-                                        showRelative = true,
-                                        showTime = true,
-                                        showDayBadge = false,
-                                        badgeSize = 'sm',
-                                        className,
-                                      }) => {
+  date,
+  variant = 'default',
+  showRelative = true,
+  showTime = true,
+  showDayBadge = false,
+  badgeSize = 'sm',
+  className,
+}) => {
   const isCurrentYear = date.year() === moment().year();
 
   const formattedDate = useMemo(() => {
@@ -116,7 +116,9 @@ const DateDisplay: React.FC<Props> = ({
       return date.format((timeObj as NumericDateFormat['WITH_TIME']).ALL_YEARS);
     }
 
-    const format = isCurrentYear ? (timeObj as DateFormat['WITH_TIME']).CURRENT_YEAR : (timeObj as DateFormat['WITH_TIME']).OTHER_YEAR;
+    const format = isCurrentYear
+      ? (timeObj as DateFormat['WITH_TIME']).CURRENT_YEAR
+      : (timeObj as DateFormat['WITH_TIME']).OTHER_YEAR;
     return date.format(format);
   }, [date, isCurrentYear, variant, showTime]);
 

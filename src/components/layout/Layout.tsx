@@ -23,9 +23,7 @@ const Layout: React.FC<React.PropsWithChildren> = ({ children }) => (
               <div className="flex flex-col h-screen">
                 <Header className="hidden md:flex" />
 
-                <main className="flex flex-col flex-1 min-h-0 md:overflow-hidden bg-background">
-                  {children}
-                </main>
+                <main className="flex flex-col flex-1 min-h-0 md:overflow-hidden bg-background">{children}</main>
 
                 <MobileNavigation />
                 <FormRenderer />

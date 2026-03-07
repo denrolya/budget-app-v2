@@ -204,8 +204,14 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
         await createTransaction({
           type: values.type,
           amount: Number.parseFloat(values.amount),
-          category: Number.parseInt(values.category, 10) as unknown as import('@/features/categories/models/Category').default,
-          account: Number.parseInt(values.account, 10) as unknown as import('@/features/accounts/models/Account').default,
+          category: Number.parseInt(
+            values.category,
+            10,
+          ) as unknown as import('@/features/categories/models/Category').default,
+          account: Number.parseInt(
+            values.account,
+            10,
+          ) as unknown as import('@/features/accounts/models/Account').default,
           isDraft: values.isDraft,
           executedAt: values.executedAt as unknown as import('moment').Moment,
         });
@@ -332,12 +338,7 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
           </div>
 
           <DrawerFooter>
-            <Button
-              disabled={isSubmitting || !isValid}
-              type="button"
-              variant="outline"
-              onClick={() => resetForm()}
-            >
+            <Button disabled={isSubmitting || !isValid} type="button" variant="outline" onClick={() => resetForm()}>
               Cancel
             </Button>
 

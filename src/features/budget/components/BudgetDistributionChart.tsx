@@ -9,6 +9,7 @@ import Category from '@/features/categories/models/Category';
 import { CategoryType } from '@/features/categories/types';
 
 import type { BudgetAnalyticsItem } from '../api/types';
+
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
 interface Props {
@@ -16,7 +17,6 @@ interface Props {
   displayCurrency: DisplayCurrency;
   rates: ConvertedValues | null;
 }
-
 
 const nivoTheme = {
   background: 'transparent',
@@ -43,9 +43,7 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, displayCurrency, 
     const analyticsMap = new Map<number, BudgetAnalyticsItem>();
     analytics.forEach((item) => analyticsMap.set(item.categoryId, item));
 
-    const expenseRoots = catData.tree.filter(
-      (c) => c.isAffectingProfit && c.type === CategoryType.Expense,
-    );
+    const expenseRoots = catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense);
 
     return expenseRoots
       .map((cat) => {
@@ -70,33 +68,29 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, displayCurrency, 
   }, [catData, analytics, displayCurrency, rates]);
 
   if (chartData.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-48 text-sm text-muted-foreground">
-        No spending data
-      </div>
-    );
+    return <div className="flex items-center justify-center h-48 text-sm text-muted-foreground">No spending data</div>;
   }
 
   const total = chartData.reduce((s, d) => s + d.value, 0);
 
   return (
-    <div className="relative" style={{ height: 240 }}>
+    <div style={{ height: 240 }} className="relative">
       <ResponsivePie
-        data={chartData}
-        margin={{ top: 16, right: 100, bottom: 16, left: 100 }}
-        innerRadius={0.6}
-        padAngle={1.5}
-        cornerRadius={3}
         activeOuterRadiusOffset={6}
-        colors={{ scheme: 'red_grey' }}
-        theme={nivoTheme}
-        enableArcLabels={false}
-        enableArcLinkLabels={true}
+        arcLinkLabelsColor={{ from: 'color' }}
         arcLinkLabelsSkipAngle={10}
         arcLinkLabelsStraightLength={8}
-        arcLinkLabelsColor={{ from: 'color' }}
         arcLinkLabelsTextColor="hsl(var(--foreground))"
         arcLinkLabelsThickness={1}
+        colors={{ scheme: 'red_grey' }}
+        cornerRadius={3}
+        data={chartData}
+        enableArcLabels={false}
+        enableArcLinkLabels={true}
+        innerRadius={0.6}
+        margin={{ top: 16, right: 100, bottom: 16, left: 100 }}
+        padAngle={1.5}
+        theme={nivoTheme}
         tooltip={({ datum }) => (
           <div className="rounded-md border bg-background px-3 py-2 shadow-md text-sm">
             <p className="text-muted-foreground text-xs mb-1">{datum.label}</p>

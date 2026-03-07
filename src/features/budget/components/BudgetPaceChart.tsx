@@ -12,6 +12,7 @@ import Category from '@/features/categories/models/Category';
 import { useGlobalDailyStats } from '@/features/accounts/api';
 
 import type { BudgetDTO, BudgetAnalyticsItem } from '../api/types';
+
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
 interface Props {
@@ -103,9 +104,7 @@ const BudgetPaceChart: React.FC<Props> = ({ budget, analytics: _analytics, displ
 
   if (totalPlanned === 0 && actualData.every((d) => d.y === 0)) {
     return (
-      <div className="h-48 flex items-center justify-center text-sm text-muted-foreground">
-        No data to display
-      </div>
+      <div className="h-48 flex items-center justify-center text-sm text-muted-foreground">No data to display</div>
     );
   }
 
@@ -117,35 +116,30 @@ const BudgetPaceChart: React.FC<Props> = ({ budget, analytics: _analytics, displ
 
   const periodDays = moment(budget.endDate).diff(moment(budget.startDate), 'days');
   const xTickValues =
-    periodDays <= 60 ? 'every 1 week'
-    : periodDays <= 120 ? 'every 2 weeks'
-    : periodDays <= 366 ? 'every 1 month'
-    : 'every 3 months';
+    periodDays <= 60
+      ? 'every 1 week'
+      : periodDays <= 120
+        ? 'every 2 weeks'
+        : periodDays <= 366
+          ? 'every 1 month'
+          : 'every 3 months';
 
-  const xTickFormat =
-    periodDays <= 120 ? '%b %d'
-    : '%b %Y';
+  const xTickFormat = periodDays <= 120 ? '%b %d' : '%b %Y';
 
   return (
     <div style={{ height: 220 }}>
       <ResponsiveLine
-        data={[
-          {
-            id: 'Budget limit',
-            data: paceData,
-            color: 'hsl(var(--muted-foreground))',
-          },
-          {
-            id: 'Cumulative spend',
-            data: actualData,
-            color: 'hsl(var(--destructive))',
-          },
-        ]}
-        margin={{ top: 12, right: 104, bottom: 40, left: 64 }}
-        xScale={{ type: 'time', format: '%Y-%m-%d', useUTC: false, precision: 'day' }}
-        xFormat="time:%b %d"
-        yScale={{ type: 'linear', min: 0, max: 'auto' }}
+        colors={(d) => (d as any).color}
+        enableArea={false}
         enableCrosshair={false}
+        enableSlices="x"
+        lineWidth={2}
+        margin={{ top: 12, right: 104, bottom: 40, left: 64 }}
+        pointSize={0}
+        theme={nivoTheme}
+        xFormat="time:%b %d"
+        xScale={{ type: 'time', format: '%Y-%m-%d', useUTC: false, precision: 'day' }}
+        yScale={{ type: 'linear', min: 0, max: 'auto' }}
         axisBottom={{
           format: xTickFormat,
           tickValues: xTickValues,
@@ -158,28 +152,18 @@ const BudgetPaceChart: React.FC<Props> = ({ budget, analytics: _analytics, displ
           format: fmtY,
           tickValues: 5,
         }}
-        colors={(d) => (d as any).color}
-        lineWidth={2}
-        pointSize={0}
-        enableArea={false}
-        theme={nivoTheme}
-        enableSlices="x"
-        sliceTooltip={({ slice }) => (
-          <div className="rounded-md border bg-background px-3 py-2 shadow-md text-sm">
-            <p className="text-muted-foreground text-xs mb-1">
-              {slice.points[0]?.data.xFormatted}
-            </p>
-            {slice.points.map((p) => (
-              <div key={p.id} className="flex items-center gap-2">
-                <span className="inline-block h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
-                <span className="text-muted-foreground">{p.serieId}:</span>
-                <span className="font-semibold tabular-nums">
-                  {sym}{Number(p.data.y).toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+        data={[
+          {
+            id: 'Budget limit',
+            data: paceData,
+            color: 'hsl(var(--muted-foreground))',
+          },
+          {
+            id: 'Cumulative spend',
+            data: actualData,
+            color: 'hsl(var(--destructive))',
+          },
+        ]}
         legends={[
           {
             anchor: 'bottom-right',
@@ -195,6 +179,21 @@ const BudgetPaceChart: React.FC<Props> = ({ budget, analytics: _analytics, displ
             symbolShape: 'circle',
           },
         ]}
+        sliceTooltip={({ slice }) => (
+          <div className="rounded-md border bg-background px-3 py-2 shadow-md text-sm">
+            <p className="text-muted-foreground text-xs mb-1">{slice.points[0]?.data.xFormatted}</p>
+            {slice.points.map((p) => (
+              <div className="flex items-center gap-2" key={p.id}>
+                <span style={{ backgroundColor: p.color }} className="inline-block h-2 w-2 rounded-full shrink-0" />
+                <span className="text-muted-foreground">{p.serieId}:</span>
+                <span className="font-semibold tabular-nums">
+                  {sym}
+                  {Number(p.data.y).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       />
     </div>
   );

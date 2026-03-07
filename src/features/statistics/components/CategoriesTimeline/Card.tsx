@@ -28,10 +28,7 @@ interface Props extends React.ComponentPropsWithoutRef<'div'> {
   controlledTimeframe?: UseTimeframeControl;
 }
 
-export const CategoriesTimelineCard: React.FC<Props> = ({
-                                                          controlledTimeframe,
-                                                          className,
-                                                        }) => {
+export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, className }) => {
   const [chartType, setChartType] = useState<'line' | 'bar'>('line');
   const [selectedCategories, setSelectedCategories] = useState<number[]>([1, 6, 73, 147]);
   const [debouncedCategories, setDebouncedCategories] = useState<number[]>(selectedCategories);
@@ -42,7 +39,6 @@ export const CategoriesTimelineCard: React.FC<Props> = ({
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [selectedTimeframeForTransactions, setSelectedTimeframeForTransactions] = useState<TransactionsTimeframe>(null);
   const [fetchTransactionsFromSubcategories, setFetchTransactionsFromSubcategories] = useState<boolean>(false);
-
 
   const fallback = useTimeframeControl({
     defaultPeriod: 'P1M',

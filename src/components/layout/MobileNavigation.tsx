@@ -40,9 +40,7 @@ const NavItem: React.FC<{
       )}
     >
       <Icon className={cn('h-5 w-5', isActive && 'text-primary')} />
-      <span className={cn('text-[10px] mt-0.5', isActive && 'text-primary')}>
-        {label}
-      </span>
+      <span className={cn('text-[10px] mt-0.5', isActive && 'text-primary')}>{label}</span>
     </Link>
   </li>
 );
@@ -55,10 +53,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('quickAccess');
 
-  const tabOptions: TabKey[] = useMemo(
-    () => ['quickAccess', 'exchangeRates', 'settings'],
-    [],
-  );
+  const tabOptions: TabKey[] = useMemo(() => ['quickAccess', 'exchangeRates', 'settings'], []);
 
   useEffect(() => {
     setDrawerOpen(false);
@@ -84,10 +79,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
     trackMouse: false,
   });
 
-  const navItems = useMemo(
-    () => [ROUTES.DASHBOARD_V2, ROUTES.DAILY_LEDGER, ROUTES.TRANSACTION_LIST],
-    [],
-  );
+  const navItems = useMemo(() => [ROUTES.DASHBOARD_V2, ROUTES.DAILY_LEDGER, ROUTES.TRANSACTION_LIST], []);
 
   const pathname = location.pathname;
 
@@ -165,11 +157,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                 </DrawerHeader>
 
                 <div className="p-4" {...swipeHandlers}>
-                  <Tabs
-                    value={activeTab}
-                    className="w-full"
-                    onValueChange={(v) => setActiveTab(v as TabKey)}
-                  >
+                  <Tabs value={activeTab} className="w-full" onValueChange={(v) => setActiveTab(v as TabKey)}>
                     <TabsList aria-label="More tabs" className="grid w-full grid-cols-3">
                       <TabsTrigger value="quickAccess">Quick</TabsTrigger>
                       <TabsTrigger value="exchangeRates">Rates</TabsTrigger>
@@ -187,10 +175,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                             <Button
                               asChild
                               variant="ghost"
-                              className={cn(
-                                'w-full justify-start',
-                                isActive && 'bg-accent',
-                              )}
+                              className={cn('w-full justify-start', isActive && 'bg-accent')}
                               key={key}
                             >
                               <Link aria-current={isActive ? 'page' : undefined} to={route.path}>
@@ -254,12 +239,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
                           </Select>
                         </section>
 
-                        <Button
-                          aria-label="Logout"
-                          variant="destructive"
-                          className="w-full"
-                          onClick={logout}
-                        >
+                        <Button aria-label="Logout" variant="destructive" className="w-full" onClick={logout}>
                           <LogOut aria-hidden="true" className="mr-2 h-4 w-4" />
                           Logout
                         </Button>

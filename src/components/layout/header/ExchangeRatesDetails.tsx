@@ -7,10 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { CURRENCY_CODE } from '@/constants/currency';
 import { cn } from '@/lib/utils';
-import {
-  getRateFromSnapshot,
-  useFixerExchangeRates,
-} from '@/services/api/exchangeRateSnapshots.queries';
+import { getRateFromSnapshot, useFixerExchangeRates } from '@/services/api/exchangeRateSnapshots.queries';
 
 // ─── Static config ────────────────────────────────────────────────────────────
 
@@ -30,7 +27,7 @@ export const ExchangeRatesDetails: React.FC = () => {
   const { fromDate, toDate } = useMemo(
     () => ({
       fromDate: moment().subtract(30, 'days').format('YYYY-MM-DD'),
-      toDate:   moment().format('YYYY-MM-DD'),
+      toDate: moment().format('YYYY-MM-DD'),
     }),
     [], // stable for the session — no Fixer request needed
   );
@@ -44,15 +41,13 @@ export const ExchangeRatesDetails: React.FC = () => {
 
     if (snapshots.length === 0) return map;
 
-    const sorted = [...snapshots].sort(
-      (a, b) => new Date(a.effectiveAt).getTime() - new Date(b.effectiveAt).getTime(),
-    );
+    const sorted = [...snapshots].sort((a, b) => new Date(a.effectiveAt).getTime() - new Date(b.effectiveAt).getTime());
     const first = sorted[0];
-    const last  = sorted[sorted.length - 1];
+    const last = sorted[sorted.length - 1];
 
     for (const { from, to } of HEADER_PAIRS) {
-      const r0   = getRateFromSnapshot(first, from, to);
-      const r1   = getRateFromSnapshot(last,  from, to);
+      const r0 = getRateFromSnapshot(first, from, to);
+      const r1 = getRateFromSnapshot(last, from, to);
       const isUp = r0 !== null && r1 !== null ? r1 >= r0 : null;
       map.set(`${from}/${to}`, { rate: r1, isUp });
     }
@@ -65,21 +60,23 @@ export const ExchangeRatesDetails: React.FC = () => {
       <SheetTrigger asChild>
         <div className="hidden md:flex items-center text-xs space-x-2">
           {HEADER_PAIRS.map(({ from, to }) => {
-            const key  = `${from}/${to}`;
+            const key = `${from}/${to}`;
             const data = pairData.get(key);
             const rate = data?.rate ?? null;
             const isUp = data?.isUp ?? null;
 
             return (
               <div
-                key={key}
                 className="flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                key={key}
               >
-                <span className="antialiased">{from}/{to}</span>
+                <span className="antialiased">
+                  {from}/{to}
+                </span>
                 {/* Wrapper drives the colour — MoneyValue inner spans inherit it */}
                 <span
                   className={cn({
-                    'text-success opacity-75':     isUp === true,
+                    'text-success opacity-75': isUp === true,
                     'text-destructive opacity-75': isUp === false,
                   })}
                 >

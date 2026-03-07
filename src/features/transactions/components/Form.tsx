@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { cn } from '@/lib/utils';
 import { ArrowDownCircle, ArrowUpCircle, X } from 'lucide-react';
 import moment from 'moment';
 import { forwardRef, useImperativeHandle, useState, useEffect, useRef } from 'react';
@@ -7,6 +6,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import z from 'zod';
 
+import { cn } from '@/lib/utils';
 import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
 import { useMutations } from '@/features/transactions/api/mutations';
 import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
@@ -91,7 +91,11 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     onSubmit: async (values: z.infer<typeof formSchema>) => {
       try {
         if (data?.id) {
-          await updateTransaction({ id: data.id, updates: values as unknown as Partial<Transaction>, originalTransaction: data });
+          await updateTransaction({
+            id: data.id,
+            updates: values as unknown as Partial<Transaction>,
+            originalTransaction: data,
+          });
         } else {
           await createTransaction(values as unknown as Partial<Transaction>);
         }
@@ -176,16 +180,16 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
             <FormItem>
               <FormLabel>Debt</FormLabel>
               <DebtTypeahead
+                disabled={field.disabled}
                 multiple={false}
+                name={field.name}
+                value={field.value != null ? String(field.value) : null}
                 className={cn('w-full justify-between', {
                   'text-muted-foreground': !field.value,
                 })}
-                value={field.value != null ? String(field.value) : null}
-                onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                 onBlur={field.onBlur}
-                name={field.name}
+                onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                 ref={field.ref}
-                disabled={field.disabled}
               />
               <FormMessage />
             </FormItem>
@@ -200,17 +204,17 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               <FormLabel>Category</FormLabel>
               <CategoryTypeahead
                 autoFocus
+                disabled={field.disabled}
                 multiple={false}
+                name={field.name}
                 type={form.watch('type')}
+                value={field.value != null ? String(field.value) : null}
                 className={cn('w-full justify-between', {
                   'text-muted-foreground': !field.value,
                 })}
-                value={field.value != null ? String(field.value) : null}
-                onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                 onBlur={field.onBlur}
-                name={field.name}
+                onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                 ref={field.ref}
-                disabled={field.disabled}
               />
               <FormMessage />
             </FormItem>
@@ -247,16 +251,16 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               <FormItem className="flex-1">
                 <FormLabel>Account</FormLabel>
                 <AccountTypeahead
+                  disabled={field.disabled}
                   multiple={false}
+                  name={field.name}
+                  value={field.value != null ? String(field.value) : null}
                   className={cn('w-full justify-between', {
                     'text-muted-foreground': !field.value,
                   })}
-                  value={field.value != null ? String(field.value) : null}
-                  onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                   onBlur={field.onBlur}
-                  name={field.name}
+                  onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                   ref={field.ref}
-                  disabled={field.disabled}
                 />
                 <FormMessage />
               </FormItem>
@@ -333,16 +337,16 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                     render={({ field }) => (
                       <FormItem>
                         <AccountTypeahead
+                          disabled={field.disabled}
                           multiple={false}
+                          name={field.name}
+                          value={field.value != null ? String(field.value) : null}
                           className={cn('w-full justify-between', {
                             'text-muted-foreground': !field.value,
                           })}
-                          value={field.value != null ? String(field.value) : null}
-                          onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                           onBlur={field.onBlur}
-                          name={field.name}
+                          onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                           ref={field.ref}
-                          disabled={field.disabled}
                         />
                         <FormMessage />
                       </FormItem>

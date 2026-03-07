@@ -2,12 +2,7 @@ import moment, { Moment } from 'moment';
 
 import BaseFilters from '@/models/BaseFilters';
 import { Type as TransactionType } from '@/features/transactions';
-import {
-  readParamArray,
-  readParamBool,
-  readParamMoment,
-  readParamString,
-} from '@/lib/url/searchParams';
+import { readParamArray, readParamBool, readParamMoment, readParamString } from '@/lib/url/searchParams';
 
 interface TransactionFiltersProps {
   searchTerm?: string;
@@ -31,9 +26,7 @@ const isMomentLike = (v: unknown): v is Moment => moment.isMoment(v);
 const toStringArray = (value: ScalarOrArray): string[] => {
   if (value === null || value === undefined) return [];
   const arr = Array.isArray(value) ? value : [value];
-  return arr
-    .map((v) => String(v).trim())
-    .filter((v) => v.length > 0);
+  return arr.map((v) => String(v).trim()).filter((v) => v.length > 0);
 };
 
 /**

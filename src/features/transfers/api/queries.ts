@@ -48,7 +48,7 @@ const groupTransfersByDay = (
 ): GroupedTransfers =>
   toPairs(
     groupBy(
-      sortBy(items, (item) => direction === 'asc' ? item.executedAt.valueOf() : -item.executedAt.valueOf()),
+      sortBy(items, (item) => (direction === 'asc' ? item.executedAt.valueOf() : -item.executedAt.valueOf())),
       (item) => item.executedAt.format(BACKEND_DATE_FORMAT),
     ),
   ).map(([date, dayItems]) => {

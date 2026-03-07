@@ -20,16 +20,16 @@ type Props = {
 };
 
 export const EditableCell = ({
-                               isEditing,
-                               compact = true,
-                               disabled,
-                               display,
-                               editor,
-                               onStartEdit,
-                               onSave,
-                               onCancel,
-                               className,
-                             }: Props) => {
+  isEditing,
+  compact = true,
+  disabled,
+  display,
+  editor,
+  onStartEdit,
+  onSave,
+  onCancel,
+  className,
+}: Props) => {
   if (!isEditing) {
     return (
       <div

@@ -12,14 +12,14 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useIsMobile } from '@/hooks/use-mobile';
-import ListFiltersSheet from '@/features/transfers/components/ListFiltersSheet';
-import InlineFilters from '@/features/transfers/components/InlineFilters';
+import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
 import FormattedListing from '@/features/transfers/components/FormattedListing';
+import InlineFilters from '@/features/transfers/components/InlineFilters';
+import ListFiltersSheet from '@/features/transfers/components/ListFiltersSheet';
 import { useListHotkeys as useHotkeys } from '@/features/transfers/hooks/useHotkeys';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 import { useList } from '../api';
-import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
 
 export const TransfersListPage: React.FC = () => {
   const isMobile = useIsMobile();
@@ -167,8 +167,14 @@ export const TransfersListPage: React.FC = () => {
           <div className="shrink-0 border-b">
             <TransactionHeatmapChart
               accountIds={[]}
-              onRangeSelect={(after, before) => { setFilter('after', after); setFilter('before', before); }}
-              onRangeClear={() => { setFilter('after', moment().subtract(30, 'days').startOf('day')); setFilter('before', moment().endOf('day')); }}
+              onRangeClear={() => {
+                setFilter('after', moment().subtract(30, 'days').startOf('day'));
+                setFilter('before', moment().endOf('day'));
+              }}
+              onRangeSelect={(after, before) => {
+                setFilter('after', after);
+                setFilter('before', before);
+              }}
             />
           </div>
 
@@ -176,9 +182,8 @@ export const TransfersListPage: React.FC = () => {
             <div className="shrink-0">
               <InlineFilters
                 data={filters}
-                isLoading={isLoading}
-                onChange={setFilter}
                 sortDirection={sort.direction}
+                onChange={setFilter}
                 onSortToggle={handleSortToggle}
               />
             </div>

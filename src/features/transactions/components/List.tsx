@@ -15,11 +15,7 @@ interface ListSkeletonProps extends React.ComponentPropsWithoutRef<'div'> {
   transactionsPerGroup?: number;
 }
 
-export const ListSkeleton: React.FC<ListSkeletonProps> = ({
-                                                            groupCount = 3,
-                                                            transactionsPerGroup = 5,
-                                                            ...props
-                                                          }) => (
+export const ListSkeleton: React.FC<ListSkeletonProps> = ({ groupCount = 3, transactionsPerGroup = 5, ...props }) => (
   <div {...props} className="flex flex-col gap-3">
     {Array.from({ length: groupCount }).map((_, groupIndex) => (
       <Card className="w-full overflow-hidden" key={groupIndex}>

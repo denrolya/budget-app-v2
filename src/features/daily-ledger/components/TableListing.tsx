@@ -159,10 +159,6 @@ const TableListing: React.FC<Props> = ({
               <React.Fragment key={date.format(BACKEND_DATE_FORMAT)}>
                 <DateGroupHeaderRow
                   compact={compact}
-                  rowClassName={cn({
-                    'bg-success/10': transactionsValue > 0,
-                    'bg-destructive/10': transactionsValue < 0,
-                  })}
                   left={
                     <div className="flex items-center space-x-4">
                       <RelativeDatetimeDisplay
@@ -191,47 +187,54 @@ const TableListing: React.FC<Props> = ({
                       />
                     </>
                   }
+                  rowClassName={cn({
+                    'bg-success/10': transactionsValue > 0,
+                    'bg-destructive/10': transactionsValue < 0,
+                  })}
                 />
 
-                {[...items].sort((a, b) => isReversedOrder
-                  ? (b.executedAt as Moment).valueOf() - (a.executedAt as Moment).valueOf()
-                  : (a.executedAt as Moment).valueOf() - (b.executedAt as Moment).valueOf()
-                ).map((item) => {
-                  if (item instanceof Transfer || 'fromExpense' in (item as any)) {
-                    const transfer = item as Transfer;
+                {[...items]
+                  .sort((a, b) =>
+                    isReversedOrder
+                      ? (b.executedAt as Moment).valueOf() - (a.executedAt as Moment).valueOf()
+                      : (a.executedAt as Moment).valueOf() - (b.executedAt as Moment).valueOf(),
+                  )
+                  .map((item) => {
+                    if (item instanceof Transfer || 'fromExpense' in (item as any)) {
+                      const transfer = item as Transfer;
+
+                      return (
+                        <TransferRow
+                          compact={compact}
+                          renderDetails={(t) => <TransferDetails transfer={t} />}
+                          sheetOpen={openSheetId === transfer.id}
+                          transfer={transfer}
+                          key={`transfer-${transfer.id}`}
+                          onDelete={(t) => handleDelete(t)}
+                          onSheetOpenChange={(open) => setOpenSheetId(open ? transfer.id : null)}
+                        />
+                      );
+                    }
+
+                    const transaction = item as Transaction;
 
                     return (
-                      <TransferRow
+                      <TransactionRow
+                        columns={transactionColumns as any}
                         compact={compact}
-                        renderDetails={(t) => <TransferDetails transfer={t} />}
-                        sheetOpen={openSheetId === transfer.id}
-                        transfer={transfer}
-                        key={`transfer-${transfer.id}`}
+                        inlineEdit={inlineEdit}
+                        renderDetails={(t) => <TransactionDetails transaction={t} />}
+                        sheetOpen={openSheetId === transaction.id}
+                        transaction={transaction}
+                        className="text-xs"
+                        key={`tx-${transaction.id}`}
                         onDelete={(t) => handleDelete(t)}
-                        onSheetOpenChange={(open) => setOpenSheetId(open ? transfer.id : null)}
+                        onOpenForm={(t) => openForm(FormType.Transaction, t)}
+                        onSheetOpenChange={(open) => setOpenSheetId(open ? transaction.id : null)}
+                        onToggleDraft={toggleDraft}
                       />
                     );
-                  }
-
-                  const transaction = item as Transaction;
-
-                  return (
-                    <TransactionRow
-                      columns={transactionColumns as any}
-                      compact={compact}
-                      inlineEdit={inlineEdit}
-                      renderDetails={(t) => <TransactionDetails transaction={t} />}
-                      sheetOpen={openSheetId === transaction.id}
-                      transaction={transaction}
-                      className="text-xs"
-                      key={`tx-${transaction.id}`}
-                      onDelete={(t) => handleDelete(t)}
-                      onOpenForm={(t) => openForm(FormType.Transaction, t)}
-                      onSheetOpenChange={(open) => setOpenSheetId(open ? transaction.id : null)}
-                      onToggleDraft={toggleDraft}
-                    />
-                  );
-                })}
+                  })}
               </React.Fragment>
             );
           })}

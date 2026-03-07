@@ -118,21 +118,26 @@
 
   // Add a subtle grid effect to the background
   &::before {
-    content: "";
+    content: '';
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: linear-gradient(to right, hsl(var(--primary) / 0.1) 1px, transparent 1px),
-    linear-gradient(to bottom, hsl(var(--primary) / 0.1) 1px, transparent 1px);
+    background-image:
+      linear-gradient(to right, hsl(var(--primary) / 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--primary) / 0.1) 1px, transparent 1px);
     background-size: 20px 20px;
     pointer-events: none;
   }
 
   // Add a glow effect to buttons and interactive elements
-  button, a, input, select {
-    &:hover, &:focus {
+  button,
+  a,
+  input,
+  select {
+    &:hover,
+    &:focus {
       box-shadow: 0 0 10px hsl(var(--primary) / 0.5);
     }
   }

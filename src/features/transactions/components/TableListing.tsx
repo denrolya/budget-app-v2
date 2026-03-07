@@ -1,8 +1,8 @@
-import { cn } from '@/lib/utils';
 import type { Moment } from 'moment';
 import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { cn } from '@/lib/utils';
 import DateGroupHeaderRow from '@/components/common/DateGroupHeaderRow';
 import SummaryBadge from '@/components/common/SummaryBadge';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
@@ -111,12 +111,7 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
               <React.Fragment key={dateKey}>
                 <DateGroupHeaderRow
                   compact={compact}
-                  cellClassName="bg-muted/40"
-                  rowClassName={cn({
-                    'bg-success/10': totalValue > 0,
-                    'bg-destructive/10': totalValue < 0,
-                    'bg-muted/20': count === 0,
-                  })}
+                  right={<SummaryBadge count={count} icon={ROUTES.TRANSACTION_LIST.icon} value={totalValue} />}
                   left={
                     <RelativeDatetimeDisplay
                       showDayBadge
@@ -126,9 +121,12 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
                       variant="default"
                     />
                   }
-                  right={
-                    <SummaryBadge count={count} icon={ROUTES.TRANSACTION_LIST.icon} value={totalValue} />
-                  }
+                  cellClassName="bg-muted/40"
+                  rowClassName={cn({
+                    'bg-success/10': totalValue > 0,
+                    'bg-destructive/10': totalValue < 0,
+                    'bg-muted/20': count === 0,
+                  })}
                 />
 
                 {transactions.map((transaction) => (

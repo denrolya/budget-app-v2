@@ -19,7 +19,7 @@ const BudgetDisplayCurrency: React.FC<Props> = ({ value, onChange }) => (
     }}
   >
     {DISPLAY_CURRENCIES.map((c) => (
-      <ToggleGroupItem key={c} value={c} className="text-xs px-3 h-8">
+      <ToggleGroupItem value={c} className="text-xs px-3 h-8" key={c}>
         {c}
       </ToggleGroupItem>
     ))}

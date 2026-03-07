@@ -76,16 +76,19 @@ export const useTimelineStatistics = (
       baseCurrency,
       ...dependencies,
     ],
-    queryFn: async (): Promise<TimelineData> => await axiosFetcher(`${URL}?${generateQueryParamsString({
-      after,
-      before,
-      period,
-      categories,
-    })}`) as TimelineData,
+    queryFn: async (): Promise<TimelineData> =>
+      (await axiosFetcher(
+        `${URL}?${generateQueryParamsString({
+          after,
+          before,
+          period,
+          categories,
+        })}`,
+      )) as TimelineData,
     select: (data: TimelineData): TimelineDataProcessed => {
       const processedData: TimelineDataProcessed = {};
       Object.entries(data).forEach(([category, timelineData]) => {
-        processedData[category] = timelineData.map(item => ({
+        processedData[category] = timelineData.map((item) => ({
           date: moment.unix(item.date),
           value: item.value,
         }));
@@ -156,7 +159,8 @@ export const useTimelineStatistics = (
     return result;
   }, [categoriesData, expenseData, incomeData, fetchExpenseReference, fetchIncomeReference]);
 
-  const isLoading = isLoadingCategories || (fetchExpenseReference && isLoadingExpense) || (fetchIncomeReference && isLoadingIncome);
+  const isLoading =
+    isLoadingCategories || (fetchExpenseReference && isLoadingExpense) || (fetchIncomeReference && isLoadingIncome);
   const error: Error | null =
     errorCategories ||
     (fetchExpenseReference ? errorExpense : null) ||
@@ -173,9 +177,12 @@ export const useTimelineStatistics = (
     }
   }, [refetchCategories, refetchExpense, refetchIncome, fetchExpenseReference, fetchIncomeReference]);
 
-  useEffect(() => () => {
-    queryClient.cancelQueries({ queryKey: [queryKey] });
-  }, [queryClient, queryKey]);
+  useEffect(
+    () => () => {
+      queryClient.cancelQueries({ queryKey: [queryKey] });
+    },
+    [queryClient, queryKey],
+  );
 
   useEffect(() => {
     refetch();
@@ -188,4 +195,3 @@ export const useTimelineStatistics = (
     refetch,
   };
 };
-

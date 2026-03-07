@@ -41,23 +41,14 @@ interface UseAccountDistributionReturn {
 }
 
 export const useAccountDistribution = (
-  {
-    after,
-    before,
-    type,
-    queryKey = 'account-distribution',
-  }: UseAccountDistributionParams,
+  { after, before, type, queryKey = 'account-distribution' }: UseAccountDistributionParams,
   dependencies: DependencyList = [],
 ): UseAccountDistributionReturn => {
   const baseCurrency = useBaseCurrency();
   const queryClient = useQueryClient();
   const accounts = useAccounts();
 
-  const { data, isLoading, error, refetch } = useQuery<
-    ApiRow[],
-    Error,
-    { rows: AccountStat[]; total: number }
-  >({
+  const { data, isLoading, error, refetch } = useQuery<ApiRow[], Error, { rows: AccountStat[]; total: number }>({
     queryKey: [
       queryKey,
       after.format(BACKEND_DATE_FORMAT),

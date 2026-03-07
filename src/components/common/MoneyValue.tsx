@@ -99,13 +99,7 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
     }
 
     content = (
-      <span
-        id={id}
-        className={cn(
-          'inline-block font-numeric',
-          className,
-        )}
-      >
+      <span id={id} className={cn('inline-block font-numeric', className)}>
         {firstValue}
         <span className="text-[95%] opacity-75 hidden md:inline ml-1">
           {' | '}
@@ -115,13 +109,7 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
     );
   } else {
     content = (
-      <span
-        id={id}
-        className={cn(
-          'inline-block font-numeric',
-          className,
-        )}
-      >
+      <span id={id} className={cn('inline-block font-numeric', className)}>
         {renderMoneyElement(amount, symbol, currency || baseCurrency.code)}
       </span>
     );

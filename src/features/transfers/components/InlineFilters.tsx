@@ -23,7 +23,6 @@ import { Timeframe } from '@/types/global';
 interface Props {
   data: TransferFilters;
   onChange: <K extends keyof TransferFilters>(key: K, value: TransferFilters[K] | undefined | null) => void;
-  isLoading?: boolean;
   sortDirection?: 'asc' | 'desc';
   onSortToggle?: () => void;
 }
@@ -43,13 +42,11 @@ const DATE_PRESETS = [
   },
 ];
 
-const Divider: React.FC = () => (
-  <span aria-hidden="true" className="hidden md:block h-6 w-px bg-border mx-1" />
-);
+const Divider: React.FC = () => <span aria-hidden="true" className="hidden md:block h-6 w-px bg-border mx-1" />;
 
 const CURRENCY_CODES = Object.keys(CURRENCIES) as CURRENCY_CODE[];
 
-const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, isLoading, sortDirection, onSortToggle }) => {
+const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, sortDirection, onSortToggle }) => {
   const [minLocal, setMinLocal] = useState('');
   const [maxLocal, setMaxLocal] = useState('');
   const [searchLocal, setSearchLocal] = useState(data.searchTerm ?? '');
@@ -72,35 +69,57 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, isLoading, so
     }, 250),
   ).current;
 
-  useEffect(() => () => { debouncedAmount.cancel(); debouncedSearch.cancel(); }, [debouncedAmount, debouncedSearch]);
+  useEffect(
+    () => () => {
+      debouncedAmount.cancel();
+      debouncedSearch.cancel();
+    },
+    [debouncedAmount, debouncedSearch],
+  );
 
   useEffect(() => {
     const [extMin, extMax] = data.amountRange ?? [];
-    setMinLocal((p) => { const n = (extMin != null && Number.isFinite(extMin)) ? String(extMin) : ''; return p === n ? p : n; });
-    setMaxLocal((p) => { const n = (extMax != null && Number.isFinite(extMax)) ? String(extMax) : ''; return p === n ? p : n; });
+    setMinLocal((p) => {
+      const n = extMin != null && Number.isFinite(extMin) ? String(extMin) : '';
+      return p === n ? p : n;
+    });
+    setMaxLocal((p) => {
+      const n = extMax != null && Number.isFinite(extMax) ? String(extMax) : '';
+      return p === n ? p : n;
+    });
   }, [data.amountRange]);
 
   useEffect(() => {
     setSearchLocal(data.searchTerm ?? '');
   }, [data.searchTerm]);
 
-  const handleMinChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setMinLocal(e.target.value);
-    debouncedAmount(e.target.value, maxLocal);
-  }, [debouncedAmount, maxLocal]);
+  const handleMinChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setMinLocal(e.target.value);
+      debouncedAmount(e.target.value, maxLocal);
+    },
+    [debouncedAmount, maxLocal],
+  );
 
-  const handleMaxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setMaxLocal(e.target.value);
-    debouncedAmount(minLocal, e.target.value);
-  }, [debouncedAmount, minLocal]);
+  const handleMaxChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setMaxLocal(e.target.value);
+      debouncedAmount(minLocal, e.target.value);
+    },
+    [debouncedAmount, minLocal],
+  );
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchLocal(e.target.value);
-    debouncedSearch(e.target.value);
-  }, [debouncedSearch]);
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchLocal(e.target.value);
+      debouncedSearch(e.target.value);
+    },
+    [debouncedSearch],
+  );
 
   const dateLabel = useMemo(() => {
-    if (data.after && data.before) return `${data.after.format(MOMENT_DATEPICKER_FORMAT)} – ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`;
+    if (data.after && data.before)
+      return `${data.after.format(MOMENT_DATEPICKER_FORMAT)} – ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`;
     if (!data.after && data.before) return `Before ${data.before.format(MOMENT_DATEPICKER_FORMAT)}`;
     if (data.after && !data.before) return `After ${data.after.format(MOMENT_DATEPICKER_FORMAT)}`;
     return 'Date';
@@ -116,12 +135,15 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, isLoading, so
 
   const selectedCurrencies: string[] = useMemo(() => (data as any).currencies ?? [], [data]);
 
-  const toggleCurrency = useCallback((code: CURRENCY_CODE) => {
-    const next = selectedCurrencies.includes(code)
-      ? selectedCurrencies.filter((c: string) => c !== code)
-      : [...selectedCurrencies, code];
-    onChange('currencies' as keyof TransferFilters, (next.length ? next : undefined) as any);
-  }, [selectedCurrencies, onChange]);
+  const toggleCurrency = useCallback(
+    (code: CURRENCY_CODE) => {
+      const next = selectedCurrencies.includes(code)
+        ? selectedCurrencies.filter((c: string) => c !== code)
+        : [...selectedCurrencies, code];
+      onChange('currencies' as keyof TransferFilters, (next.length ? next : undefined) as any);
+    },
+    [selectedCurrencies, onChange],
+  );
 
   const clearCurrencies = useCallback(() => {
     onChange('currencies' as keyof TransferFilters, undefined as any);
@@ -129,7 +151,8 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, isLoading, so
 
   const currencyLabel = useMemo(() => {
     if (selectedCurrencies.length === 0) return 'Currency';
-    if (selectedCurrencies.length <= 2) return selectedCurrencies.map((c) => CURRENCIES[c as CURRENCY_CODE]?.symbol ?? c).join(' ');
+    if (selectedCurrencies.length <= 2)
+      return selectedCurrencies.map((c) => CURRENCIES[c as CURRENCY_CODE]?.symbol ?? c).join(' ');
     return `${selectedCurrencies.length} currencies`;
   }, [selectedCurrencies]);
 
@@ -148,7 +171,12 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, isLoading, so
             presets={DATE_PRESETS}
             onChange={handleTimeframeChange}
           >
-            <Button size="sm" type="button" variant="outline" className={cn(H, 'bg-background px-2', onSortToggle && 'rounded-r-none border-r-0')}>
+            <Button
+              size="sm"
+              type="button"
+              variant="outline"
+              className={cn(H, 'bg-background px-2', onSortToggle && 'rounded-r-none border-r-0')}
+            >
               <CalendarIcon aria-hidden="true" className="mr-1.5 h-4 w-4 shrink-0" />
               <span className={DATE_TEXT}>{dateLabel}</span>
             </Button>
@@ -166,9 +194,11 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, isLoading, so
                   className="h-9 w-9 rounded-l-none border border-input shrink-0"
                   onClick={onSortToggle}
                 >
-                  {sortDirection === 'asc'
-                    ? <CalendarArrowUp aria-hidden="true" className="h-4 w-4" />
-                    : <CalendarArrowDown aria-hidden="true" className="h-4 w-4" />}
+                  {sortDirection === 'asc' ? (
+                    <CalendarArrowUp aria-hidden="true" className="h-4 w-4" />
+                  ) : (
+                    <CalendarArrowDown aria-hidden="true" className="h-4 w-4" />
+                  )}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Toggle sort order</TooltipContent>
@@ -202,7 +232,9 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, isLoading, so
             className={cn(H, AMOUNT_W, 'bg-background')}
             onChange={handleMinChange}
           />
-          <span aria-hidden="true" className="text-muted-foreground text-xs">–</span>
+          <span aria-hidden="true" className="text-muted-foreground text-xs">
+            –
+          </span>
           <Input
             aria-label="Maximum amount"
             inputMode="decimal"
@@ -218,7 +250,10 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, isLoading, so
 
         {/* NOTE SEARCH */}
         <div className="relative flex items-center">
-          <Search aria-hidden="true" className="absolute left-2.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <Search
+            aria-hidden="true"
+            className="absolute left-2.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none"
+          />
           <Input
             aria-label="Search by note"
             placeholder="Search notes…"
@@ -239,7 +274,11 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, isLoading, so
                 size="sm"
                 type="button"
                 variant={selectedCurrencies.length > 0 ? 'secondary' : 'outline'}
-                className={cn(H, 'bg-background px-2 gap-1', selectedCurrencies.length > 0 && 'rounded-r-none border-r-0')}
+                className={cn(
+                  H,
+                  'bg-background px-2 gap-1',
+                  selectedCurrencies.length > 0 && 'rounded-r-none border-r-0',
+                )}
               >
                 <span className="text-xs">{currencyLabel}</span>
                 <ChevronDown aria-hidden="true" className="h-3 w-3 shrink-0 opacity-60" />
@@ -276,7 +315,6 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, isLoading, so
             </Button>
           )}
         </div>
-
       </div>
     </div>
   );

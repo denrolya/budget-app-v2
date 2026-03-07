@@ -1,4 +1,3 @@
-
 import type { PieSvgProps } from '@nivo/pie';
 import sortBy from 'lodash/sortBy';
 import moment from 'moment';
@@ -47,21 +46,23 @@ interface Props {
 }
 
 const AccountsCurrenciesPanel: React.FC<Props> = ({
-                                                    tab,
-                                                    timeframe,
-                                                    showMonthlyAverage,
-                                                    selectedCurrency,
-                                                    onCurrencySelect,
-                                                    accountStats,
-                                                    totalAccountsRaw,
-                                                    isLoading,
-                                                    onOpenTransactions,
-                                                  }) => {
+  tab,
+  timeframe,
+  showMonthlyAverage,
+  selectedCurrency,
+  onCurrencySelect,
+  accountStats,
+  totalAccountsRaw,
+  isLoading,
+  onOpenTransactions,
+}) => {
   const calcMonthlyAverage = useCallback(
     (value: number) => {
       const now = moment();
       const { after, before } = timeframe;
-      const months = moment(before).isAfter(now) ? now.diff(moment(after), 'months') : moment(before).diff(moment(after), 'months');
+      const months = moment(before).isAfter(now)
+        ? now.diff(moment(after), 'months')
+        : moment(before).diff(moment(after), 'months');
       return months > 0 ? value / months : value;
     },
     [timeframe],
@@ -122,10 +123,19 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
   }, [accountItemsAll, selectedCurrency]);
 
   const currencyTotal = useMemo(() => currencyAccounts.reduce((sum, item) => sum + item.value, 0), [currencyAccounts]);
-  const currenciesGrandTotal = useMemo(() => currencyItemsAll.reduce((sum, item) => sum + item.value, 0), [currencyItemsAll]);
+  const currenciesGrandTotal = useMemo(
+    () => currencyItemsAll.reduce((sum, item) => sum + item.value, 0),
+    [currencyItemsAll],
+  );
 
-  const accountsById = useMemo(() => new Map(accountItemsAll.map((item) => [String(item.id), item])), [accountItemsAll]);
-  const currenciesById = useMemo(() => new Map(currencyItemsAll.map((item) => [String(item.id), item])), [currencyItemsAll]);
+  const accountsById = useMemo(
+    () => new Map(accountItemsAll.map((item) => [String(item.id), item])),
+    [accountItemsAll],
+  );
+  const currenciesById = useMemo(
+    () => new Map(currencyItemsAll.map((item) => [String(item.id), item])),
+    [currencyItemsAll],
+  );
 
   const accountsColors = useMemo<PieSvgProps<Datum>['colors']>(
     () => (d) => accountsById.get(String((d as { id: string | number }).id))?.color ?? DEFAULT_COLOR,
@@ -167,8 +177,10 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
             item && item.amount != null ? (
               <MoneyValue
                 amount={item.amount}
-                currency={item.currency != null ? item.currency as import('@/constants/currency').CURRENCY_CODE : undefined}
                 useColors={false}
+                currency={
+                  item.currency != null ? (item.currency as import('@/constants/currency').CURRENCY_CODE) : undefined
+                }
                 className="text-2xs leading-4 text-muted-foreground"
               />
             ) : null
@@ -195,8 +207,10 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
             item && item.amount != null ? (
               <MoneyValue
                 amount={item.amount}
-                currency={item.currency != null ? item.currency as import('@/constants/currency').CURRENCY_CODE : undefined}
                 useColors={false}
+                currency={
+                  item.currency != null ? (item.currency as import('@/constants/currency').CURRENCY_CODE) : undefined
+                }
                 className="text-2xs leading-4 text-muted-foreground"
               />
             ) : null
@@ -222,8 +236,10 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
             item && item.amount != null ? (
               <MoneyValue
                 amount={item.amount}
-                currency={item.currency != null ? item.currency as import('@/constants/currency').CURRENCY_CODE : undefined}
                 useColors={false}
+                currency={
+                  item.currency != null ? (item.currency as import('@/constants/currency').CURRENCY_CODE) : undefined
+                }
                 className="text-2xs leading-4 text-muted-foreground"
               />
             ) : null
@@ -265,12 +281,18 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
           renderLabel={({ item, percentage }) => (
             <div className="min-w-0 flex items-center gap-2 text-sm leading-5 [&_*]:text-sm [&_*]:leading-5">
               {'account' in item && item.account ? (
-                <AccountPill account={item.account as unknown as import('@/features/accounts/models/Account').default} tooltip={false} variant="inline" className="min-w-0" />
+                <AccountPill
+                  account={item.account as unknown as import('@/features/accounts/models/Account').default}
+                  tooltip={false}
+                  variant="inline"
+                  className="min-w-0"
+                />
               ) : (
                 <span className="truncate">{item.name}</span>
               )}
-              {item.value > 0 ?
-                <small className="text-xs text-muted-foreground shrink-0">({percentage.toFixed(0)}%)</small> : null}
+              {item.value > 0 ? (
+                <small className="text-xs text-muted-foreground shrink-0">({percentage.toFixed(0)}%)</small>
+              ) : null}
             </div>
           )}
           onViewTransactions={openAccountTransactions}
@@ -316,12 +338,18 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
         renderLabel={({ item, percentage }) => (
           <div className="min-w-0 flex items-center gap-2 text-sm leading-5 [&_*]:text-sm [&_*]:leading-5">
             {'account' in item && item.account ? (
-              <AccountPill account={item.account as unknown as import('@/features/accounts/models/Account').default} tooltip={false} variant="inline" className="min-w-0" />
+              <AccountPill
+                account={item.account as unknown as import('@/features/accounts/models/Account').default}
+                tooltip={false}
+                variant="inline"
+                className="min-w-0"
+              />
             ) : (
               <span className="truncate">{item.name}</span>
             )}
-            {item.value > 0 ?
-              <small className="text-xs text-muted-foreground shrink-0">({percentage.toFixed(0)}%)</small> : null}
+            {item.value > 0 ? (
+              <small className="text-xs text-muted-foreground shrink-0">({percentage.toFixed(0)}%)</small>
+            ) : null}
           </div>
         )}
         onViewTransactions={openAccountTransactions}

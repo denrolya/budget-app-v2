@@ -60,7 +60,6 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
               <React.Fragment key={dateKey}>
                 <DateGroupHeaderRow
                   compact={compact}
-                  cellClassName="bg-muted/40"
                   left={
                     <RelativeDatetimeDisplay
                       showDayBadge
@@ -78,6 +77,7 @@ export const TableListing: React.FC<Props> = ({ groupedItems, compact = true }) 
                       value={totalValue}
                     />
                   }
+                  cellClassName="bg-muted/40"
                 />
 
                 {transfers.map((transfer) => (

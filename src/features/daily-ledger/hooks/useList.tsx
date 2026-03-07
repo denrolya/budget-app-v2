@@ -66,12 +66,12 @@ const groupByDay = (items: CombinedItem[], baseCurrency: string): GroupedItem[] 
 };
 
 export const useTransactionsAndTransfersList = ({
-                                                  initialTransactionFilters = new TransactionFilters(),
-                                                  initialTransferFilters = new TransferFilters(),
-                                                  updateUrl = false,
-                                                  omitTransferTransactions = true,
-                                                  perPage = 500,
-                                                }: UseTransactionsAndTransfersListOptions = {}) => {
+  initialTransactionFilters = new TransactionFilters(),
+  initialTransferFilters = new TransferFilters(),
+  updateUrl = false,
+  omitTransferTransactions = true,
+  perPage = 500,
+}: UseTransactionsAndTransfersListOptions = {}) => {
   const baseCurrency = useBaseCurrency();
   const queryClient = useQueryClient();
 
@@ -123,7 +123,7 @@ export const useTransactionsAndTransfersList = ({
    * Applies the key to whichever filter models support it.
    * Keep pure (no UI side-effects).
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const setFilter = useCallback(
     (key: string, value: unknown) => {
       if (TransactionFilters.isApplicable(key)) {
@@ -176,9 +176,18 @@ export const useTransactionsAndTransfersList = ({
         const next = new URLSearchParams(prev);
 
         // Clear all filter-owned keys before rewriting
-        ['after', 'before', 'q', 'categories', 'accounts', 'currencies', 'amount', 'isDraft', 'withNestedCategories', 'type'].forEach((k) =>
-          next.delete(k),
-        );
+        [
+          'after',
+          'before',
+          'q',
+          'categories',
+          'accounts',
+          'currencies',
+          'amount',
+          'isDraft',
+          'withNestedCategories',
+          'type',
+        ].forEach((k) => next.delete(k));
 
         // Write after/before only when they differ from the default (current ISO week).
         // This keeps the URL clean on initial load.

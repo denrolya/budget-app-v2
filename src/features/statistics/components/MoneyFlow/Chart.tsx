@@ -42,19 +42,19 @@ interface Props {
 }
 
 const MoneyFlowChart: React.FC<Props> = ({
-                                           currentTimeframe,
-                                           previousTimeframe,
-                                           period,
-                                           data,
-                                           chartType,
-                                           showIncome,
-                                           showExpenses,
-                                           showRevenue,
-                                           showPreviousPeriod,
-                                           showYearBoundary,
-                                           showMonthBoundary,
-                                           showSeasonBoundary,
-                                         }) => {
+  currentTimeframe,
+  previousTimeframe,
+  period,
+  data,
+  chartType,
+  showIncome,
+  showExpenses,
+  showRevenue,
+  showPreviousPeriod,
+  showYearBoundary,
+  showMonthBoundary,
+  showSeasonBoundary,
+}) => {
   const transformedData = data.map((item) => ({
     ...item,
     expenses: -item.expenses,
@@ -153,9 +153,8 @@ const MoneyFlowChart: React.FC<Props> = ({
     return null;
   };
 
-  const findClosestTimestamp = (timestamps: number[], target: number): number => timestamps.reduce((prev, curr) =>
-    Math.abs(curr - target) < Math.abs(prev - target) ? curr : prev,
-  );
+  const findClosestTimestamp = (timestamps: number[], target: number): number =>
+    timestamps.reduce((prev, curr) => (Math.abs(curr - target) < Math.abs(prev - target) ? curr : prev));
 
   const generateNonOverlappingBoundaries = (
     dataTimestamps: number[],

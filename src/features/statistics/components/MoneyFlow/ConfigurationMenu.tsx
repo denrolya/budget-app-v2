@@ -110,39 +110,47 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = (props) => {
             <Switch
               icon={icon}
               label={label}
-              checked={id === 'income'
-                ? props.showIncome
-                : id === 'expenses'
-                  ? props.showExpenses
-                  : id === 'revenue'
-                    ? props.showRevenue
-                    : props.showPreviousPeriod}
+              checked={
+                id === 'income'
+                  ? props.showIncome
+                  : id === 'expenses'
+                    ? props.showExpenses
+                    : id === 'revenue'
+                      ? props.showRevenue
+                      : props.showPreviousPeriod
+              }
               iconClassName={color}
               key={id}
-              onChange={id === 'income'
-                ? props.setShowIncome
-                : id === 'expenses'
-                  ? props.setShowExpenses
-                  : id === 'revenue'
-                    ? props.setShowRevenue
-                    : props.setShowPreviousPeriod} />
+              onChange={
+                id === 'income'
+                  ? props.setShowIncome
+                  : id === 'expenses'
+                    ? props.setShowExpenses
+                    : id === 'revenue'
+                      ? props.setShowRevenue
+                      : props.setShowPreviousPeriod
+              }
+            />
           ))}
 
           <Switch
             checked={props.showYearBoundary}
             icon={CalendarX}
             label="Show Year Boundary"
-            onChange={props.setShowYearBoundary} />
+            onChange={props.setShowYearBoundary}
+          />
           <Switch
             checked={props.showSeasonBoundary}
             icon={CalendarX}
             label="Show Season Boundary"
-            onChange={props.setShowSeasonBoundary} />
+            onChange={props.setShowSeasonBoundary}
+          />
           <Switch
             checked={props.showMonthBoundary}
             icon={CalendarX}
             label="Show Month Boundary"
-            onChange={props.setShowMonthBoundary} />
+            onChange={props.setShowMonthBoundary}
+          />
         </div>
       </div>
     </div>

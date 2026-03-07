@@ -12,7 +12,9 @@ const DonutTooltip: React.FC<Props> = ({ label, value, percent, extra }) => (
     <div className="font-semibold leading-5 truncate">{label}</div>
     <div className="mt-1 flex items-baseline gap-2">
       <MoneyValue amount={value} useColors={false} />
-      <span className="text-xs text-muted-foreground">{Number.isFinite(percent) ? `${percent.toFixed(0)}%` : '0%'}</span>
+      <span className="text-xs text-muted-foreground">
+        {Number.isFinite(percent) ? `${percent.toFixed(0)}%` : '0%'}
+      </span>
     </div>
     {extra ? <div className="mt-1">{extra}</div> : null}
   </div>

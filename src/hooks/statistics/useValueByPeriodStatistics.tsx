@@ -18,7 +18,12 @@ import { generatePreviousTimeframe } from '@/lib/datetime/generatePreviousTimefr
 const getDateRange = (timeframe: Interval, after?: Moment, before?: Moment): [Moment, Moment] => {
   const { value, unit } = timeframe;
   const end = before || moment().endOf(unit);
-  const start = after || end.clone().subtract(value - 1, unit).startOf(unit);
+  const start =
+    after ||
+    end
+      .clone()
+      .subtract(value - 1, unit)
+      .startOf(unit);
   return [start, end];
 };
 
@@ -46,7 +51,9 @@ const calculateStatisticsValues = <T extends StatisticsType>(
       return (totalDays > 0 ? values.reduce((a, b) => a + b, 0) / totalDays : 0) as StatisticsData<T>;
     }
     case StatisticsType.Avg:
-      return (nonZeroValues.length > 0 ? nonZeroValues.reduce((a, b) => a + b, 0) / nonZeroValues.length : 0) as StatisticsData<T>;
+      return (
+        nonZeroValues.length > 0 ? nonZeroValues.reduce((a, b) => a + b, 0) / nonZeroValues.length : 0
+      ) as StatisticsData<T>;
     case StatisticsType.MinMax: {
       if (isCurrentPeriod && nonZeroValues.length === 0) {
         return { min: 0, max: 0 } as StatisticsData<T>;
@@ -91,7 +98,10 @@ export const useValueByPeriod = <T extends StatisticsType>(
     [categories, categoryList],
   );
 
-  const periodString = useMemo(() => (period ? `${period.value} ${period.unit}` : `${timeframe.value} ${timeframe.unit}`), [period, timeframe]);
+  const periodString = useMemo(
+    () => (period ? `${period.value} ${period.unit}` : `${timeframe.value} ${timeframe.unit}`),
+    [period, timeframe],
+  );
 
   const {
     data: currentData,
@@ -131,8 +141,22 @@ export const useValueByPeriod = <T extends StatisticsType>(
     categories: categoryIds,
   });
 
-  const currentValue = calculateStatisticsValues<T>(currentData || [], type, statType, periodStart, periodEnd, isCurrentPeriod);
-  const comparisonValue = calculateStatisticsValues<T>(comparisonData || [], type, statType, comparisonStart, comparisonEnd, false);
+  const currentValue = calculateStatisticsValues<T>(
+    currentData || [],
+    type,
+    statType,
+    periodStart,
+    periodEnd,
+    isCurrentPeriod,
+  );
+  const comparisonValue = calculateStatisticsValues<T>(
+    comparisonData || [],
+    type,
+    statType,
+    comparisonStart,
+    comparisonEnd,
+    false,
+  );
 
   const calculateChange = (current: number, comparison: number): number => {
     if (comparison === 0) return current === 0 ? 0 : 100;

@@ -15,14 +15,14 @@ interface Props extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 const SummaryItem: React.FC<Props> = ({
-                                        label,
-                                        colors = false,
-                                        showSign = false,
-                                        value,
-                                        comparisonValue,
-                                        comparisonPercentage,
-                                        ...props
-                                      }) => (
+  label,
+  colors = false,
+  showSign = false,
+  value,
+  comparisonValue,
+  comparisonPercentage,
+  ...props
+}) => (
   <div {...props}>
     <p className="text-muted-foreground flex items-center justify-start md:justify-center text-xs">{label}</p>
     <div className="flex items-center justify-start md:justify-center">

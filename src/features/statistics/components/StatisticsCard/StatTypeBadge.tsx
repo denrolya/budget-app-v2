@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils';
 import { BarChartIcon, CalendarIcon, DollarSignIcon, TrendingUpIcon } from 'lucide-react';
 import React from 'react';
 
+import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
 export type StatType = 'sum' | 'daily' | 'avg' | 'min-max';

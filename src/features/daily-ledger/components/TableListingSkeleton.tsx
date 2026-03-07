@@ -19,13 +19,13 @@ interface Props {
 }
 
 export const TableListingSkeleton: React.FC<Props> = ({
-                                                        after,
-                                                        before,
-                                                        compact = true,
-                                                        rowsPerDay = 3,
-                                                        isReversedOrder = true,
-                                                        showEmptyDays = true,
-                                                      }) => {
+  after,
+  before,
+  compact = true,
+  rowsPerDay = 3,
+  isReversedOrder = true,
+  showEmptyDays = true,
+}) => {
   const dates = useMemo(() => {
     const out: Moment[] = [];
     const current = after.clone();
@@ -71,7 +71,8 @@ export const TableListingSkeleton: React.FC<Props> = ({
                       badgeSize="sm"
                       date={date}
                       showTime={false}
-                      variant="default" />
+                      variant="default"
+                    />
                     <div className="flex items-center gap-3 font-normal">
                       <Skeleton className="h-6 w-28 sm:w-32" />
                       <Skeleton className="h-6 w-28 sm:w-32" />

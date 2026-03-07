@@ -26,18 +26,12 @@ export const useFinanceData = () => {
   const categories = useCategoriesQuery();
   const debts = useDebtsQuery();
 
-  const isLoading =
-    exchangeRates.isLoading || accounts.isLoading || categories.isLoading || debts.isLoading;
+  const isLoading = exchangeRates.isLoading || accounts.isLoading || categories.isLoading || debts.isLoading;
 
   const error = exchangeRates.error ?? accounts.error ?? categories.error ?? debts.error ?? null;
 
   const refetchAll = async () => {
-    await Promise.all([
-      exchangeRates.refetch(),
-      accounts.refetch(),
-      categories.refetch(),
-      debts.refetch(),
-    ]);
+    await Promise.all([exchangeRates.refetch(), accounts.refetch(), categories.refetch(), debts.refetch()]);
   };
 
   return {

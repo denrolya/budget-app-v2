@@ -182,14 +182,14 @@ const ActionsCell: React.FC<{
 );
 
 export const ListingRow: React.FC<Props> = ({
-                                              transfer,
-                                              compact = true,
-                                              renderDetails,
-                                              onDelete,
-                                              sheetOpen,
-                                              onSheetOpenChange,
-                                              className,
-                                            }) => {
+  transfer,
+  compact = true,
+  renderDetails,
+  onDelete,
+  sheetOpen,
+  onSheetOpenChange,
+  className,
+}) => {
   const titleId = useId();
   const descId = useId();
 

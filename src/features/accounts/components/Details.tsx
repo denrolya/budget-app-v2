@@ -1,26 +1,24 @@
-import { cn } from '@/lib/utils';
-import { AlertCircle, Plus, Star, StarOff } from 'lucide-react';
+import { AlertCircle, Star, StarOff } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import BalanceHistoryChart from '@/features/accounts/components/BalanceHistoryChart';
-import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
 import AccountPill from '@/features/accounts/components/Pill';
+import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
 import Account from '@/features/accounts/models/Account';
 import { UpdateAccountDTO } from '@/features/accounts/types';
 import DailyList from '@/features/daily-ledger/components/DailyList';
 import TableListing from '@/features/daily-ledger/components/TableListing';
 import TableListingSkeleton from '@/features/daily-ledger/components/TableListingSkeleton';
 import { useTransactionsAndTransfersList } from '@/features/daily-ledger/hooks/useList';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { confirm } from '@/lib/confirmation';
+import { cn } from '@/lib/utils';
 
 interface Props {
   account: Account;
@@ -28,15 +26,16 @@ interface Props {
 }
 
 const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
-  const isMobile = useIsMobile();
-  const { openForm } = useFormContext();
   const currentDate = moment().startOf('day');
   const daysPerPage = 15;
 
-  const defaultRange = useMemo(() => ({
-    after: currentDate.clone().subtract(daysPerPage - 1, 'days'),
-    before: currentDate.clone().endOf('day'),
-  }), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const defaultRange = useMemo(
+    () => ({
+      after: currentDate.clone().subtract(daysPerPage - 1, 'days'),
+      before: currentDate.clone().endOf('day'),
+    }),
+    [],
+  );
 
   const [heatmapRange, setHeatmapRange] = useState<{ after: moment.Moment; before: moment.Moment } | null>(null);
   const activeRange = heatmapRange ?? defaultRange;
@@ -148,17 +147,17 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
                   className="h-7 w-7"
                   onClick={toggleSidebarVisibility}
                 >
-                  {account.isDisplayedOnSidebar
-                    ? <Star className="h-3.5 w-3.5" />
-                    : <StarOff className="h-3.5 w-3.5" />}
+                  {account.isDisplayedOnSidebar ? (
+                    <Star className="h-3.5 w-3.5" />
+                  ) : (
+                    <StarOff className="h-3.5 w-3.5" />
+                  )}
                   <span className="sr-only">
                     {account.isDisplayedOnSidebar ? 'Hide from sidebar' : 'Show in sidebar'}
                   </span>
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
-                {account.isDisplayedOnSidebar ? 'Pinned to sidebar' : 'Pin to sidebar'}
-              </TooltipContent>
+              <TooltipContent>{account.isDisplayedOnSidebar ? 'Pinned to sidebar' : 'Pin to sidebar'}</TooltipContent>
             </Tooltip>
           </CardTitle>
           <CardDescription>
@@ -182,8 +181,8 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
           <TransactionHeatmapChart
             accountIds={[account.id]}
             currency={account.currency}
-            onRangeSelect={handleHeatmapRangeSelect}
             onRangeClear={handleHeatmapRangeClear}
+            onRangeSelect={handleHeatmapRangeSelect}
           />
         </CardContent>
       </Card>

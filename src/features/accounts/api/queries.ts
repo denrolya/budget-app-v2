@@ -8,12 +8,7 @@ import Account from '../models/Account';
 import { queryKeys } from './keys';
 import { accountService, type BalanceHistoryResponse, type DailyStatsResponse } from './service';
 
-export const useGlobalDailyStats = (
-  accountIds: number[],
-  after: Moment,
-  before: Moment,
-  affectingProfit = false,
-) => {
+export const useGlobalDailyStats = (accountIds: number[], after: Moment, before: Moment, affectingProfit = false) => {
   const afterStr = after.format('YYYY-MM-DD');
   const beforeStr = before.format('YYYY-MM-DD');
 
@@ -51,12 +46,7 @@ export const useDailyStats = (accountId: number, after: Moment, before: Moment) 
   });
 };
 
-export const useBalanceHistory = (
-  accountId: number,
-  after: Moment,
-  before: Moment,
-  interval: string,
-) => {
+export const useBalanceHistory = (accountId: number, after: Moment, before: Moment, interval: string) => {
   const afterStr = after.format('YYYY-MM-DD');
   const beforeStr = before.format('YYYY-MM-DD');
 

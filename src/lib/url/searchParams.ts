@@ -45,10 +45,7 @@ export const readParamNumberArray = (sp: URLSearchParams, key: string): number[]
 /**
  * CSV range helper, e.g. ?amount=10,200
  */
-export const readParamNumberRange = (
-  sp: URLSearchParams,
-  key: string,
-): { min?: number; max?: number } | undefined => {
+export const readParamNumberRange = (sp: URLSearchParams, key: string): { min?: number; max?: number } | undefined => {
   const raw = sp.get(key);
   if (!raw) return undefined;
 

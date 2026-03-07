@@ -1,14 +1,15 @@
-import { cn } from '@/lib/utils';
 import { forwardRef, ReactNode, useCallback, useMemo } from 'react';
 
+import { cn } from '@/lib/utils';
 import MoneyValue from '@/components/common/MoneyValue';
 import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
 import Debt from '@/features/debts/models/Debt';
 import { useDebts } from '@/hooks/financeData';
 
-type DebtTypeaheadProps =
-  Omit<TypeaheadV2Props<Debt, string>, 'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'>
-  & {
+type DebtTypeaheadProps = Omit<
+  TypeaheadV2Props<Debt, string>,
+  'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'
+> & {
   className?: string;
 };
 
@@ -37,13 +38,7 @@ const DebtTypeahead = forwardRef<HTMLInputElement, DebtTypeaheadProps>(
       for (const d of debts) {
         map.set(
           String(d.id),
-          [
-            d.debtor,
-            d.debtorWithCurrency,
-            d.currency,
-            d.note ?? '',
-            d.isClosed() ? 'closed' : '',
-          ]
+          [d.debtor, d.debtorWithCurrency, d.currency, d.note ?? '', d.isClosed() ? 'closed' : '']
             .join(' ')
             .toLowerCase(),
         );

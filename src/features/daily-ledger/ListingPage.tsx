@@ -12,9 +12,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
 import BulkCreateTableForm from '@/features/transactions/components/BulkCreateTableForm';
+import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
 
 import ListingContainer, { type ListingHandle } from './components/ListingContainer';
-import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
 
 export const DailyLedgerPage: React.FC = () => {
   const { openForm } = useFormContext();
@@ -134,8 +134,8 @@ export const DailyLedgerPage: React.FC = () => {
             <TransactionHeatmapChart
               accountIds={[]}
               resetTrigger={heatmapResetTrigger}
-              onRangeSelect={handleHeatmapRangeSelect}
               onRangeClear={() => listingRef.current?.resetFilters()}
+              onRangeSelect={handleHeatmapRangeSelect}
             />
           </div>
 

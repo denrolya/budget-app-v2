@@ -13,11 +13,11 @@ interface ConvertedCurrenciesTooltipProps {
 }
 
 const ConvertedCurrenciesTooltip: React.FC<ConvertedCurrenciesTooltipProps> = ({
-                                                                                 originalCurrency,
-                                                                                 convertedValues,
-                                                                                 decimals,
-                                                                                 children,
-                                                                               }) => {
+  originalCurrency,
+  convertedValues,
+  decimals,
+  children,
+}) => {
   const formatMoney = (value: number, currency: CURRENCY_CODE, symbol: string) =>
     `${symbol} ${formatMoneyValue(value, currency, decimals)}`;
 

@@ -6,10 +6,6 @@ interface Props {
   type: CategoryType;
 }
 
-const CategorySelectField: React.FC<Props> = ({ type: _type }) => (
-  <div>
-
-  </div>
-);
+const CategorySelectField: React.FC<Props> = ({ type: _type }) => <div></div>;
 
 export default CategorySelectField;

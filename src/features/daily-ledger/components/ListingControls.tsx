@@ -22,10 +22,9 @@ import { cn } from '@/lib/utils';
 import { Timeframe } from '@/types/global';
 
 interface Props {
-  isLoading?: boolean;
   transactionFilters: TransactionFilters;
   transferFilters: TransferFilters;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   setFilter: (key: string, value: any) => void;
   setShowTransactions: (value: boolean) => void;
   setShowTransfers: (value: boolean) => void;
@@ -44,14 +43,11 @@ const DATE_TEXT = 'max-w-40 truncate';
 // Connects the category typeahead's right edge to the nested-toggle button.
 const TYPEAHEAD_JOINED = cn(TYPEAHEAD_W, '[&>div:first-child]:rounded-r-none [&>div:first-child]:border-r-0');
 
-const Divider: React.FC = () => (
-  <span aria-hidden="true" className="hidden xl:block h-6 w-px bg-border mx-1" />
-);
+const Divider: React.FC = () => <span aria-hidden="true" className="hidden xl:block h-6 w-px bg-border mx-1" />;
 
 const CURRENCY_CODES = Object.keys(CURRENCIES) as CURRENCY_CODE[];
 
 export const ListingControls: React.FC<Props> = ({
-  isLoading,
   transactionFilters,
   transferFilters,
   setFilter,
@@ -63,7 +59,6 @@ export const ListingControls: React.FC<Props> = ({
   isReversedOrder,
   setIsReversedOrder,
 }) => {
-
   // --- Amount range: local strings + debounced commit ---
   const [minLocal, setMinLocal] = useState('');
   const [maxLocal, setMaxLocal] = useState('');
@@ -87,33 +82,54 @@ export const ListingControls: React.FC<Props> = ({
     }, 250),
   ).current;
 
-  useEffect(() => () => { debouncedAmount.cancel(); debouncedSearch.cancel(); }, [debouncedAmount, debouncedSearch]);
+  useEffect(
+    () => () => {
+      debouncedAmount.cancel();
+      debouncedSearch.cancel();
+    },
+    [debouncedAmount, debouncedSearch],
+  );
 
   // Sync external amount → local
   useEffect(() => {
     const [extMin, extMax] = transactionFilters.amountRange ?? [];
-    setMinLocal((p) => { const n = (extMin != null && Number.isFinite(extMin)) ? String(extMin) : ''; return p === n ? p : n; });
-    setMaxLocal((p) => { const n = (extMax != null && Number.isFinite(extMax)) ? String(extMax) : ''; return p === n ? p : n; });
+    setMinLocal((p) => {
+      const n = extMin != null && Number.isFinite(extMin) ? String(extMin) : '';
+      return p === n ? p : n;
+    });
+    setMaxLocal((p) => {
+      const n = extMax != null && Number.isFinite(extMax) ? String(extMax) : '';
+      return p === n ? p : n;
+    });
   }, [transactionFilters.amountRange]);
 
   useEffect(() => {
     setSearchLocal(transactionFilters.searchTerm ?? '');
   }, [transactionFilters.searchTerm]);
 
-  const handleMinChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setMinLocal(e.target.value);
-    debouncedAmount(e.target.value, maxLocal);
-  }, [debouncedAmount, maxLocal]);
+  const handleMinChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setMinLocal(e.target.value);
+      debouncedAmount(e.target.value, maxLocal);
+    },
+    [debouncedAmount, maxLocal],
+  );
 
-  const handleMaxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setMaxLocal(e.target.value);
-    debouncedAmount(minLocal, e.target.value);
-  }, [debouncedAmount, minLocal]);
+  const handleMaxChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setMaxLocal(e.target.value);
+      debouncedAmount(minLocal, e.target.value);
+    },
+    [debouncedAmount, minLocal],
+  );
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchLocal(e.target.value);
-    debouncedSearch(e.target.value);
-  }, [debouncedSearch]);
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchLocal(e.target.value);
+      debouncedSearch(e.target.value);
+    },
+    [debouncedSearch],
+  );
 
   const handleTimeframeChange = useCallback(
     (range: Timeframe) => {
@@ -134,14 +150,20 @@ export const ListingControls: React.FC<Props> = ({
     setFilter('withNestedCategories', !transactionFilters.withNestedCategories as any);
   }, [setFilter, transactionFilters.withNestedCategories]);
 
-  const selectedCurrencies: string[] = useMemo(() => (transactionFilters as any).currencies ?? [], [transactionFilters]);
+  const selectedCurrencies: string[] = useMemo(
+    () => (transactionFilters as any).currencies ?? [],
+    [transactionFilters],
+  );
 
-  const toggleCurrency = useCallback((code: CURRENCY_CODE) => {
-    const next = selectedCurrencies.includes(code)
-      ? selectedCurrencies.filter((c: string) => c !== code)
-      : [...selectedCurrencies, code];
-    setFilter('currencies', (next.length ? next : undefined) as any);
-  }, [selectedCurrencies, setFilter]);
+  const toggleCurrency = useCallback(
+    (code: CURRENCY_CODE) => {
+      const next = selectedCurrencies.includes(code)
+        ? selectedCurrencies.filter((c: string) => c !== code)
+        : [...selectedCurrencies, code];
+      setFilter('currencies', (next.length ? next : undefined) as any);
+    },
+    [selectedCurrencies, setFilter],
+  );
 
   const clearCurrencies = useCallback(() => {
     setFilter('currencies', undefined as any);
@@ -149,7 +171,8 @@ export const ListingControls: React.FC<Props> = ({
 
   const currencyLabel = useMemo(() => {
     if (selectedCurrencies.length === 0) return 'Currency';
-    if (selectedCurrencies.length <= 2) return selectedCurrencies.map((c) => CURRENCIES[c as CURRENCY_CODE]?.symbol ?? c).join(' ');
+    if (selectedCurrencies.length <= 2)
+      return selectedCurrencies.map((c) => CURRENCIES[c as CURRENCY_CODE]?.symbol ?? c).join(' ');
     return `${selectedCurrencies.length} currencies`;
   }, [selectedCurrencies]);
 
@@ -270,7 +293,9 @@ export const ListingControls: React.FC<Props> = ({
             className={cn(H, AMOUNT_W, 'bg-background')}
             onChange={handleMinChange}
           />
-          <span aria-hidden="true" className="text-muted-foreground text-xs">–</span>
+          <span aria-hidden="true" className="text-muted-foreground text-xs">
+            –
+          </span>
           <Input
             aria-label="Maximum amount"
             inputMode="decimal"
@@ -286,7 +311,10 @@ export const ListingControls: React.FC<Props> = ({
 
         {/* NOTE SEARCH */}
         <div className="relative flex items-center">
-          <Search aria-hidden="true" className="absolute left-2.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <Search
+            aria-hidden="true"
+            className="absolute left-2.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none"
+          />
           <Input
             aria-label="Search by note"
             placeholder="Search notes…"
@@ -307,7 +335,11 @@ export const ListingControls: React.FC<Props> = ({
                 size="sm"
                 type="button"
                 variant={selectedCurrencies.length > 0 ? 'secondary' : 'outline'}
-                className={cn(H, 'bg-background px-2 gap-1', selectedCurrencies.length > 0 && 'rounded-r-none border-r-0')}
+                className={cn(
+                  H,
+                  'bg-background px-2 gap-1',
+                  selectedCurrencies.length > 0 && 'rounded-r-none border-r-0',
+                )}
               >
                 <span className="text-xs">{currencyLabel}</span>
                 <ChevronDown aria-hidden="true" className="h-3 w-3 shrink-0 opacity-60" />
@@ -344,7 +376,6 @@ export const ListingControls: React.FC<Props> = ({
             </Button>
           )}
         </div>
-
       </div>
     </div>
   );

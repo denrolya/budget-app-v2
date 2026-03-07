@@ -12,12 +12,12 @@ type Props = Omit<React.ComponentPropsWithoutRef<'span'>, 'children'> & {
 };
 
 const RateDisplay: React.FC<Props> = ({
-                                        transfer,
-                                        useSymbol = false,
-                                        showWhenSameCurrency = false,
-                                        className,
-                                        ...props
-                                      }) => {
+  transfer,
+  useSymbol = false,
+  showWhenSameCurrency = false,
+  className,
+  ...props
+}) => {
   const fromCurrency = transfer.fromExpense.account.currency as CURRENCY_CODE;
   const toCurrency = transfer.toIncome.account.currency as CURRENCY_CODE;
 

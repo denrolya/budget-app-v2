@@ -11,7 +11,12 @@ import { FormType, useForm } from '@/contexts/Form';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { confirm } from '@/lib/confirmation';
 
-import { queryKeys, useTransactions as useDebtTransactions, useList as useDebtsQuery, useMutations as useDebtMutations } from '../api';
+import {
+  queryKeys,
+  useTransactions as useDebtTransactions,
+  useList as useDebtsQuery,
+  useMutations as useDebtMutations,
+} from '../api';
 import DebtDetails from '../components/Details';
 import SidebarListing from '../components/SidebarListing';
 import type Debt from '../models/Debt';
@@ -192,7 +197,7 @@ const DebtDetailsRoute: React.FC = () => {
       </PageWithSidebar.Header>
 
       <div className="p-4 min-w-0 overflow-x-hidden">
-        <DebtDetails debt={debt} transactions={transactions} isLoadingTransactions={isLoadingTransactions} />
+        <DebtDetails debt={debt} isLoadingTransactions={isLoadingTransactions} transactions={transactions} />
       </div>
     </>
   );

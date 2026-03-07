@@ -34,15 +34,15 @@ const ROW_INTERACTIVE =
   'hover:bg-muted/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
 const DistributionTable: React.FC<Props> = ({
-                                              ariaLabel,
-                                              items,
-                                              total,
-                                              getDotColor,
-                                              onRowClick,
-                                              onViewTransactions,
-                                              renderLabel,
-                                              renderTooltip,
-                                            }) => {
+  ariaLabel,
+  items,
+  total,
+  getDotColor,
+  onRowClick,
+  onViewTransactions,
+  renderLabel,
+  renderTooltip,
+}) => {
   const rows = useMemo(() => [...items].reverse(), [items]);
 
   const DefaultLabel = useMemo(
@@ -104,8 +104,12 @@ const DistributionTable: React.FC<Props> = ({
                   {item.amount && (
                     <MoneyValue
                       amount={item.amount}
-                      currency={item.currency != null ? item.currency as import('@/constants/currency').CURRENCY_CODE : undefined}
                       useColors={false}
+                      currency={
+                        item.currency != null
+                          ? (item.currency as import('@/constants/currency').CURRENCY_CODE)
+                          : undefined
+                      }
                       className="text-2xs leading-4 text-muted-foreground"
                     />
                   )}
@@ -139,11 +143,7 @@ const DistributionTable: React.FC<Props> = ({
             }
 
             return (
-              <DistributionListRowMenu
-                item={item}
-                key={rowKey}
-                onViewTransactions={() => onViewTransactions(rowKey)}
-              >
+              <DistributionListRowMenu item={item} key={rowKey} onViewTransactions={() => onViewTransactions(rowKey)}>
                 <div className={`${ROW_BASE} ${ROW_INTERACTIVE}`} onContextMenu={(e) => e.stopPropagation()}>
                   <div className="min-w-0 flex-1">{left}</div>
                   {right}

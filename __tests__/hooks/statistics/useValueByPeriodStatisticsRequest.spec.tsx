@@ -5,9 +5,10 @@ import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { UseStatisticsParams, ValueByPeriodDataDTO } from '@/types/valueByPeriodStatistics';
-import { Type as TransactionType } from '@/types/transaction';
 import { axiosFetcher } from '@/services/api';
 import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
+
+import { Type as TransactionType } from '@/types/transaction';
 
 vi.mock('@/services/api', () => ({
   axiosFetcher: vi.fn(),
@@ -71,8 +72,7 @@ describe('useValueByPeriodStatisticsRequest', () => {
   });
 
   it.skip('should handle API error and log it correctly', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {
-    });
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // Mock axiosFetcher to reject with an error
     mockAxiosFetcher.mockRejectedValueOnce(new Error('API Error'));

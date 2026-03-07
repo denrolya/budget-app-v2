@@ -14,38 +14,29 @@ export type InlineEditConfig = {
 
 export const useInlineEdit = ({ isUpdating, onSave }: InlineEditConfig) => {
   const [editingCell, setEditingCell] = useState<EditingCell>(null);
-  const [editValue, setEditValue] = useState<
-    | string
-    | number
-    | Moment
-    | { id: number }
-    | null
-  >(null);
+  const [editValue, setEditValue] = useState<string | number | Moment | { id: number } | null>(null);
 
-  const startEdit = useCallback(
-    (transaction: Transaction, field: TransactionEditableField) => {
-      setEditingCell({ transactionId: transaction.id, field });
+  const startEdit = useCallback((transaction: Transaction, field: TransactionEditableField) => {
+    setEditingCell({ transactionId: transaction.id, field });
 
-      switch (field) {
-        case 'amount':
-          setEditValue(transaction.amount);
-          break;
-        case 'executedAt':
-          setEditValue(transaction.executedAt);
-          break;
-        case 'account':
-          setEditValue(transaction.account);
-          break;
-        case 'category':
-          setEditValue(transaction.category);
-          break;
-        case 'note':
-        default:
-          setEditValue(transaction.note ?? '');
-      }
-    },
-    [],
-  );
+    switch (field) {
+      case 'amount':
+        setEditValue(transaction.amount);
+        break;
+      case 'executedAt':
+        setEditValue(transaction.executedAt);
+        break;
+      case 'account':
+        setEditValue(transaction.account);
+        break;
+      case 'category':
+        setEditValue(transaction.category);
+        break;
+      case 'note':
+      default:
+        setEditValue(transaction.note ?? '');
+    }
+  }, []);
 
   const cancelEdit = useCallback(() => {
     setEditingCell(null);
@@ -99,13 +90,16 @@ export const useInlineEdit = ({ isUpdating, onSave }: InlineEditConfig) => {
     [buildUpdates, cancelEdit, isUpdating, onSave],
   );
 
-  const keyHandler = useMemo(() => ({
+  const keyHandler = useMemo(
+    () => ({
       onKeyDown: (e: React.KeyboardEvent, tx: Transaction) => {
         if (e.key === 'Escape') cancelEdit();
         // pick ONE behavior and standardize; I recommend Ctrl/⌘+Enter to save
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) void save(tx);
       },
-    }), [cancelEdit, save]);
+    }),
+    [cancelEdit, save],
+  );
 
   return {
     editingCell,

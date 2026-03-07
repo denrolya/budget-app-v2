@@ -19,17 +19,11 @@ type Props = {
   onViewTransactions?: (id: string) => void;
 };
 
-export const DistributionListRowMenu: React.FC<Props> = ({
-                                                           item,
-                                                           children,
-                                                           onSelect,
-                                                           onViewTransactions,
-                                                         }) => {
+export const DistributionListRowMenu: React.FC<Props> = ({ item, children, onSelect, onViewTransactions }) => {
   const copy = useCallback(async (value: string) => {
     try {
       await navigator.clipboard.writeText(value);
-    } catch {
-    }
+    } catch {}
   }, []);
 
   const id = String(item.id);
@@ -39,9 +33,7 @@ export const DistributionListRowMenu: React.FC<Props> = ({
       <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 
       <ContextMenuContent className="w-56">
-        <ContextMenuLabel className="truncate text-sm font-medium">
-          {item.name}
-        </ContextMenuLabel>
+        <ContextMenuLabel className="truncate text-sm font-medium">{item.name}</ContextMenuLabel>
 
         <ContextMenuSeparator />
 

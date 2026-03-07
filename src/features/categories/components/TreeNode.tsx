@@ -60,26 +60,26 @@ const sortChildren = (children: Category[]) =>
   });
 
 const TreeNode: React.FC<Props> = ({
-                                     category,
-                                     depth,
-                                     isOpen,
-                                     onOpenChange,
-                                     onToggle,
-                                     onEdit,
-                                     onDelete,
-                                     onAddChild,
-                                     draggedId,
-                                     dropTargetId,
-                                     dropPosition,
-                                     onDragStart,
-                                     onDragEnd,
-                                     onDragOver,
-                                     onDragLeave,
-                                     onDrop,
-                                     openById,
-                                     setOpenById,
-                                     toggleOpenById,
-                                   }) => {
+  category,
+  depth,
+  isOpen,
+  onOpenChange,
+  onToggle,
+  onEdit,
+  onDelete,
+  onAddChild,
+  draggedId,
+  dropTargetId,
+  dropPosition,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  openById,
+  setOpenById,
+  toggleOpenById,
+}) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const hasChildren = category.children.length > 0;
@@ -210,7 +210,8 @@ const TreeNode: React.FC<Props> = ({
                       'group-hover:opacity-100 group-focus-visible:opacity-100': !menuOpen,
                     },
                   )}
-                  onClick={stop}>
+                  onClick={stop}
+                >
                   <GripVertical className="size-3.5" />
                 </div>
 

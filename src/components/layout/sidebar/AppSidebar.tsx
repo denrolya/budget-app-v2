@@ -7,7 +7,6 @@ import NavAccounts from './NavAccounts';
 import NavMain from './NavMain';
 import NavUser from './NavUser';
 
-
 const AppSidebar: React.FC<React.ComponentProps<typeof Sidebar>> = (props) => (
   <Sidebar collapsible="icon" {...props}>
     <SidebarHeader>

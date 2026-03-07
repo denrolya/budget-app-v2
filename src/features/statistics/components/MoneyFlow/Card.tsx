@@ -107,11 +107,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
       </CardHeader>
       <CardContent className="p-0 flex-grow overflow-hidden flex flex-col">
         {!controlledTimeframe?.timeframe?.after && (
-          <DaterangePickerWithPresets
-            after={timeframe.after}
-            before={timeframe.before}
-            onChange={setTimeframe}
-          >
+          <DaterangePickerWithPresets after={timeframe.after} before={timeframe.before} onChange={setTimeframe}>
             <span className="cursor-pointer hover:underline inline-flex flex-row px-4">
               <span className="text-xs flex items-center">
                 <CalendarIcon className="inline h-3 w-3 mr-1" />

@@ -28,30 +28,33 @@ export default function Component() {
   const lastTap = useRef(0);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const handleInteraction: FunnelPartEventHandler<{ id: string; value: number; expenses: number }> = useCallback((part) => {
-    const now = Date.now();
-    const DOUBLE_TAP_DELAY = 300; // ms
+  const handleInteraction: FunnelPartEventHandler<{ id: string; value: number; expenses: number }> = useCallback(
+    (part) => {
+      const now = Date.now();
+      const DOUBLE_TAP_DELAY = 300; // ms
 
-    if (now - lastTap.current < DOUBLE_TAP_DELAY) {
-      // Double tap detected
-      setSelectedMonth(String(part.data.id));
-      setIsDrawerOpen(true);
-      if (tooltipTimeout.current) {
-        clearTimeout(tooltipTimeout.current);
+      if (now - lastTap.current < DOUBLE_TAP_DELAY) {
+        // Double tap detected
+        setSelectedMonth(String(part.data.id));
+        setIsDrawerOpen(true);
+        if (tooltipTimeout.current) {
+          clearTimeout(tooltipTimeout.current);
+        }
+        setTooltipContent(null);
+      } else {
+        // Single tap
+        if (tooltipTimeout.current) {
+          clearTimeout(tooltipTimeout.current);
+        }
+        tooltipTimeout.current = setTimeout(() => {
+          setTooltipContent(part.data);
+        }, 100);
       }
-      setTooltipContent(null);
-    } else {
-      // Single tap
-      if (tooltipTimeout.current) {
-        clearTimeout(tooltipTimeout.current);
-      }
-      tooltipTimeout.current = setTimeout(() => {
-        setTooltipContent(part.data);
-      }, 100);
-    }
 
-    lastTap.current = now;
-  }, []);
+      lastTap.current = now;
+    },
+    [],
+  );
 
   return (
     <Card className="w-full max-w-3xl">

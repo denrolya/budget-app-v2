@@ -43,7 +43,9 @@ const toNumber = (v: unknown): number => {
 };
 
 const normalizeCurrency = (v: unknown): CURRENCY_CODE => {
-  const raw = String(v ?? '').trim().toUpperCase();
+  const raw = String(v ?? '')
+    .trim()
+    .toUpperCase();
   return (Object.values(CURRENCY_CODE) as string[]).includes(raw) ? (raw as CURRENCY_CODE) : CURRENCY_CODE.EUR;
 };
 

@@ -20,14 +20,7 @@ interface Props {
  * Reusable date-group header row for all table listings.
  * Rendered once per date bucket, spans all columns.
  */
-const DateGroupHeaderRow: React.FC<Props> = ({
-  colSpan = 8,
-  compact,
-  rowClassName,
-  cellClassName,
-  left,
-  right,
-}) => (
+const DateGroupHeaderRow: React.FC<Props> = ({ colSpan = 8, compact, rowClassName, cellClassName, left, right }) => (
   <TableRow className={rowClassName}>
     <TableCell colSpan={colSpan} className={cn('px-4', compact && 'py-0', cellClassName)}>
       <div className="flex items-center justify-between gap-2">

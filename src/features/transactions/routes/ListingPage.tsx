@@ -13,15 +13,15 @@ import { Toggle } from '@/components/ui/toggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useMutations } from '@/features/transactions/api/mutations';
-import { useList as useTransactionsList } from '@/features/transactions';
-import ListFiltersSheet from '@/features/transactions/components/ListFiltersSheet';
-import InlineFilters from '@/features/transactions/components/InlineFilters';
-import FormattedListing from '@/features/transactions/components/FormattedListing';
-import BulkCreateTableForm from '@/features/transactions/components/BulkCreateTableForm';
-import { useListHotkeys as useHotkeys } from '@/features/transactions/hooks/useHotkeys';
 import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
+import { useList as useTransactionsList } from '@/features/transactions';
+import { useMutations } from '@/features/transactions/api/mutations';
+import BulkCreateTableForm from '@/features/transactions/components/BulkCreateTableForm';
+import FormattedListing from '@/features/transactions/components/FormattedListing';
+import InlineFilters from '@/features/transactions/components/InlineFilters';
+import ListFiltersSheet from '@/features/transactions/components/ListFiltersSheet';
+import { useListHotkeys as useHotkeys } from '@/features/transactions/hooks/useHotkeys';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const TransactionsListPage: React.FC = () => {
   const isMobile = useIsMobile();
@@ -187,8 +187,14 @@ export const TransactionsListPage: React.FC = () => {
           <div className="shrink-0 border-b">
             <TransactionHeatmapChart
               accountIds={(filters.accounts as string[]).map(Number)}
-              onRangeSelect={(after, before) => { setFilter('after', after); setFilter('before', before); }}
-              onRangeClear={() => { setFilter('after', moment().subtract(30, 'days').startOf('day')); setFilter('before', moment().endOf('day')); }}
+              onRangeClear={() => {
+                setFilter('after', moment().subtract(30, 'days').startOf('day'));
+                setFilter('before', moment().endOf('day'));
+              }}
+              onRangeSelect={(after, before) => {
+                setFilter('after', after);
+                setFilter('before', before);
+              }}
             />
           </div>
 
@@ -196,7 +202,6 @@ export const TransactionsListPage: React.FC = () => {
             <div className="shrink-0">
               <InlineFilters
                 data={filters}
-                isLoading={isLoading}
                 sortDirection={sort.direction}
                 onChange={setFilter}
                 onSortToggle={handleSortToggle}

@@ -53,18 +53,18 @@ const getPeriodDuration = (period: ISO8601Period): moment.Duration => {
  * @param enablePeriod
  */
 export const useTimeframeControl = ({
-                                      defaultPreset,
-                                      defaultTimeframe,
-                                      defaultPeriod = 'P1M',
-                                      presets = [],
-                                      enablePreviousTimeframe = false,
-                                      enablePeriod = false,
-                                    }: UseTimeframeControlOptions): UseTimeframeControl => {
+  defaultPreset,
+  defaultTimeframe,
+  defaultPeriod = 'P1M',
+  presets = [],
+  enablePreviousTimeframe = false,
+  enablePeriod = false,
+}: UseTimeframeControlOptions): UseTimeframeControl => {
   const [preset, setPresetInternal] = useState<string | undefined>(defaultPreset);
   const [manualTimeframe, setManualTimeframe] = useState<Timeframe | undefined>(defaultTimeframe);
   const [period, setPeriodInternal] = useState<ISO8601Period>(defaultPeriod);
 
-  const selectedPreset = useMemo(() => presets.find(p => p.value === preset), [preset, presets]);
+  const selectedPreset = useMemo(() => presets.find((p) => p.value === preset), [preset, presets]);
 
   const timeframe = useMemo<Timeframe>(() => {
     const now = moment();
@@ -77,21 +77,16 @@ export const useTimeframeControl = ({
     };
   }, [preset, selectedPreset, manualTimeframe]);
 
-  const timeframeDuration = useMemo(
-    () => moment.duration(timeframe.before.diff(timeframe.after)),
-    [timeframe],
-  );
+  const timeframeDuration = useMemo(() => moment.duration(timeframe.before.diff(timeframe.after)), [timeframe]);
 
   const availablePeriods: PeriodOption[] = useMemo(
     () =>
-      PERIOD_OPTIONS.filter(p =>
-        getPeriodDuration(p.value).asMilliseconds() <= timeframeDuration.asMilliseconds(),
-      ),
+      PERIOD_OPTIONS.filter((p) => getPeriodDuration(p.value).asMilliseconds() <= timeframeDuration.asMilliseconds()),
     [timeframeDuration],
   );
 
   useEffect(() => {
-    if (enablePeriod && !availablePeriods.find(p => p.value === period)) {
+    if (enablePeriod && !availablePeriods.find((p) => p.value === period)) {
       const fallback = availablePeriods.at(-1);
       if (fallback) setPeriodInternal(fallback.value);
     }

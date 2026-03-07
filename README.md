@@ -1,9 +1,9 @@
-
 # Financial Budgeting Application
 
 This is a financial budgeting application built using **React**, **TypeScript**, and **Vite**. The application allows users to manage their financial transactions (incomes and expenses), view statistics, and navigate using a secure private route setup.
 
 ## Table of Contents
+
 - [System Requirements](#system-requirements)
 - [Installation](#installation)
 - [Usage](#usage)

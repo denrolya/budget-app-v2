@@ -68,10 +68,17 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
     [activeAccounts, baseCurrency],
   );
 
-  const groupedAccounts = useMemo(() => Object.values(AccountType).reduce((acc, type) => {
-    acc[type] = filteredAccounts.filter((account) => account.type === type);
-    return acc;
-  }, {} as Record<AccountType, Account[]>), [filteredAccounts]);
+  const groupedAccounts = useMemo(
+    () =>
+      Object.values(AccountType).reduce(
+        (acc, type) => {
+          acc[type] = filteredAccounts.filter((account) => account.type === type);
+          return acc;
+        },
+        {} as Record<AccountType, Account[]>,
+      ),
+    [filteredAccounts],
+  );
 
   return (
     <div
@@ -230,10 +237,14 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
                           {/* Left */}
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 min-w-0">
-                              <AccountPill account={account} size="sm" tooltip={false} variant="inline" textClassName="text-sm" />
-                              {isArchived && (
-                                <span className="text-2xs text-muted-foreground shrink-0">Archived</span>
-                              )}
+                              <AccountPill
+                                account={account}
+                                size="sm"
+                                tooltip={false}
+                                variant="inline"
+                                textClassName="text-sm"
+                              />
+                              {isArchived && <span className="text-2xs text-muted-foreground shrink-0">Archived</span>}
                             </div>
 
                             <div className="mt-1 text-2xs text-muted-foreground truncate">

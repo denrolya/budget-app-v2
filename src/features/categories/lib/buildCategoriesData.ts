@@ -1,5 +1,6 @@
-import { buildCategoriesData as buildTree, CategoriesData } from './buildTree';
 import type { CategoryDTO } from '../types';
+
+import { buildCategoriesData as buildTree, CategoriesData } from './buildTree';
 
 export type { CategoriesData };
 

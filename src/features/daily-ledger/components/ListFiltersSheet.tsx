@@ -28,7 +28,7 @@ import { Timeframe } from '@/types/global';
 interface ListFiltersContentProps {
   transactionFilters: TransactionFilters;
   transferFilters: TransferFilters;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   setFilter: (key: string, value: any) => void;
   showTransactions: boolean;
   setShowTransactions: (value: boolean) => void;
@@ -83,39 +83,63 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
     }, 250),
   ).current;
 
-  useEffect(() => () => { debouncedAmount.cancel(); debouncedSearch.cancel(); }, [debouncedAmount, debouncedSearch]);
+  useEffect(
+    () => () => {
+      debouncedAmount.cancel();
+      debouncedSearch.cancel();
+    },
+    [debouncedAmount, debouncedSearch],
+  );
 
   useEffect(() => {
     const [extMin, extMax] = transactionFilters.amountRange ?? [];
-    setMinLocal((p) => { const n = (extMin != null && Number.isFinite(extMin)) ? String(extMin) : ''; return p === n ? p : n; });
-    setMaxLocal((p) => { const n = (extMax != null && Number.isFinite(extMax)) ? String(extMax) : ''; return p === n ? p : n; });
+    setMinLocal((p) => {
+      const n = extMin != null && Number.isFinite(extMin) ? String(extMin) : '';
+      return p === n ? p : n;
+    });
+    setMaxLocal((p) => {
+      const n = extMax != null && Number.isFinite(extMax) ? String(extMax) : '';
+      return p === n ? p : n;
+    });
   }, [transactionFilters.amountRange]);
 
   useEffect(() => {
     setSearchLocal(transactionFilters.searchTerm ?? '');
   }, [transactionFilters.searchTerm]);
 
-  const handleMinChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setMinLocal(e.target.value);
-    debouncedAmount(e.target.value, maxLocal);
-  }, [debouncedAmount, maxLocal]);
+  const handleMinChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setMinLocal(e.target.value);
+      debouncedAmount(e.target.value, maxLocal);
+    },
+    [debouncedAmount, maxLocal],
+  );
 
-  const handleMaxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setMaxLocal(e.target.value);
-    debouncedAmount(minLocal, e.target.value);
-  }, [debouncedAmount, minLocal]);
+  const handleMaxChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setMaxLocal(e.target.value);
+      debouncedAmount(minLocal, e.target.value);
+    },
+    [debouncedAmount, minLocal],
+  );
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchLocal(e.target.value);
-    debouncedSearch(e.target.value);
-  }, [debouncedSearch]);
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchLocal(e.target.value);
+      debouncedSearch(e.target.value);
+    },
+    [debouncedSearch],
+  );
 
-  const handleTimeframeChange = useCallback((range: Timeframe) => {
-    setTimeframe({
-      after: range.after ? range.after.clone().startOf('day') : timeframe.after,
-      before: range.before ? range.before.clone().endOf('day') : timeframe.before,
-    });
-  }, [setTimeframe, timeframe.after, timeframe.before]);
+  const handleTimeframeChange = useCallback(
+    (range: Timeframe) => {
+      setTimeframe({
+        after: range.after ? range.after.clone().startOf('day') : timeframe.after,
+        before: range.before ? range.before.clone().endOf('day') : timeframe.before,
+      });
+    },
+    [setTimeframe, timeframe.after, timeframe.before],
+  );
 
   const dateLabel = useMemo(
     () => `${timeframe.after.format('DD MMM YYYY')} – ${timeframe.before.format('DD MMM YYYY')}`,
@@ -128,14 +152,20 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
     return [...new Set([...t, ...tr])];
   }, [transactionFilters.accounts, transferFilters.accounts]);
 
-  const selectedCurrencies: string[] = useMemo(() => (transactionFilters as any).currencies ?? [], [transactionFilters]);
+  const selectedCurrencies: string[] = useMemo(
+    () => (transactionFilters as any).currencies ?? [],
+    [transactionFilters],
+  );
 
-  const toggleCurrency = useCallback((code: CURRENCY_CODE) => {
-    const next = selectedCurrencies.includes(code)
-      ? selectedCurrencies.filter((c: string) => c !== code)
-      : [...selectedCurrencies, code];
-    setFilter('currencies' as any, (next.length ? next : undefined) as any);
-  }, [selectedCurrencies, setFilter]);
+  const toggleCurrency = useCallback(
+    (code: CURRENCY_CODE) => {
+      const next = selectedCurrencies.includes(code)
+        ? selectedCurrencies.filter((c: string) => c !== code)
+        : [...selectedCurrencies, code];
+      setFilter('currencies' as any, (next.length ? next : undefined) as any);
+    },
+    [selectedCurrencies, setFilter],
+  );
 
   const clearCurrencies = useCallback(() => {
     setFilter('currencies' as any, undefined as any);
@@ -143,13 +173,17 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
 
   const currencyLabel = useMemo(() => {
     if (selectedCurrencies.length === 0) return 'Currency';
-    if (selectedCurrencies.length <= 2) return selectedCurrencies.map((c) => CURRENCIES[c as CURRENCY_CODE]?.symbol ?? c).join(' ');
+    if (selectedCurrencies.length <= 2)
+      return selectedCurrencies.map((c) => CURRENCIES[c as CURRENCY_CODE]?.symbol ?? c).join(' ');
     return `${selectedCurrencies.length} currencies`;
   }, [selectedCurrencies]);
 
-  const setType = useCallback((type: TransactionType) => {
-    setFilter('type', transactionFilters.type === type ? undefined : type);
-  }, [setFilter, transactionFilters.type]);
+  const setType = useCallback(
+    (type: TransactionType) => {
+      setFilter('type', transactionFilters.type === type ? undefined : type);
+    },
+    [setFilter, transactionFilters.type],
+  );
 
   const toggleDraft = useCallback(() => {
     setFilter('isDraft', transactionFilters.isDraft === undefined ? true : !transactionFilters.isDraft || undefined);
@@ -163,15 +197,10 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
 
   return (
     <div className="space-y-5 px-1">
-
       {/* DATE RANGE */}
       <div className="space-y-2">
         <Label className={LABEL_CLS}>Date range</Label>
-        <DaterangePickerWithPresets
-          after={timeframe.after}
-          before={timeframe.before}
-          onChange={handleTimeframeChange}
-        >
+        <DaterangePickerWithPresets after={timeframe.after} before={timeframe.before} onChange={handleTimeframeChange}>
           <Button size="sm" type="button" variant="outline" className="w-full justify-start bg-background h-9 px-2">
             <CalendarIcon aria-hidden="true" className="mr-1.5 h-4 w-4 shrink-0" />
             <span className="truncate text-xs">{dateLabel}</span>
@@ -268,7 +297,9 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
             className="bg-background flex-1 h-9"
             onChange={handleMinChange}
           />
-          <span aria-hidden="true" className="text-muted-foreground text-xs shrink-0">–</span>
+          <span aria-hidden="true" className="text-muted-foreground text-xs shrink-0">
+            –
+          </span>
           <Input
             aria-label="Maximum amount"
             inputMode="decimal"
@@ -285,7 +316,10 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
       <div className="space-y-2">
         <Label className={LABEL_CLS}>Search</Label>
         <div className="relative flex items-center">
-          <Search aria-hidden="true" className="absolute left-2.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <Search
+            aria-hidden="true"
+            className="absolute left-2.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none"
+          />
           <Input
             aria-label="Search by note"
             placeholder="Search notes…"
@@ -307,8 +341,10 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
                 size="sm"
                 type="button"
                 variant={selectedCurrencies.length > 0 ? 'secondary' : 'outline'}
-                className={cn('flex-1 justify-between bg-background px-3 gap-1 h-9',
-                  selectedCurrencies.length > 0 && 'rounded-r-none border-r-0')}
+                className={cn(
+                  'flex-1 justify-between bg-background px-3 gap-1 h-9',
+                  selectedCurrencies.length > 0 && 'rounded-r-none border-r-0',
+                )}
               >
                 <span className="text-xs">{currencyLabel}</span>
                 <ChevronDown aria-hidden="true" className="h-3 w-3 shrink-0 opacity-60" />

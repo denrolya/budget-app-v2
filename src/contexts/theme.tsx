@@ -25,11 +25,7 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
-export const ThemeProvider = ({
-                                children,
-                                defaultTheme = Theme.Light,
-                                storageKey = 'ui-mode',
-                              }: ThemeProviderProps) => {
+export const ThemeProvider = ({ children, defaultTheme = Theme.Light, storageKey = 'ui-mode' }: ThemeProviderProps) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
       return (localStorage.getItem(storageKey) as Theme) || defaultTheme;
@@ -40,16 +36,10 @@ export const ThemeProvider = ({
   useEffect(() => {
     const root = window.document.documentElement;
 
-    root.classList.remove(
-      Theme.Light,
-      Theme.Dark,
-      Theme.TronDark,
-    );
+    root.classList.remove(Theme.Light, Theme.Dark, Theme.TronDark);
 
     if (theme === Theme.System) {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? Theme.Dark
-        : Theme.Light;
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? Theme.Dark : Theme.Light;
       root.classList.add(systemTheme);
     } else {
       root.classList.add(theme);
@@ -63,11 +53,7 @@ export const ThemeProvider = ({
     setThemeState(newTheme);
   };
 
-  return (
-    <ThemeProviderContext.Provider value={{ theme, setTheme }}>
-      {children}
-    </ThemeProviderContext.Provider>
-  );
+  return <ThemeProviderContext.Provider value={{ theme, setTheme }}>{children}</ThemeProviderContext.Provider>;
 };
 
 export const useTheme = () => {

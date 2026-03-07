@@ -10,6 +10,7 @@ import { confirm } from '@/lib/confirmation';
 
 import { useListBudgets, useDeleteBudget } from '../api';
 import type { BudgetDTO, BudgetPeriodType } from '../api/types';
+
 import BudgetCreateDialog from './BudgetCreateDialog';
 
 interface Props {
@@ -41,9 +42,7 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
 
   const grouped = PERIOD_ORDER.reduce<Record<BudgetPeriodType, BudgetDTO[]>>(
     (acc, pt) => {
-      acc[pt] = budgets
-        .filter((b) => b.periodType === pt)
-        .sort((a, b) => b.startDate.localeCompare(a.startDate));
+      acc[pt] = budgets.filter((b) => b.periodType === pt).sort((a, b) => b.startDate.localeCompare(a.startDate));
       return acc;
     },
     { monthly: [], yearly: [], custom: [] },
@@ -75,11 +74,11 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
         <div className="flex items-center justify-between px-3 py-3 border-b shrink-0">
           <span className="text-sm font-semibold">Budgets</span>
           <Button
+            aria-label="New budget"
             size="icon"
             variant="ghost"
             className="h-7 w-7"
             onClick={() => setDialogOpen(true)}
-            aria-label="New budget"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -91,17 +90,17 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
               const items = grouped[pt];
               if (items.length === 0) return null;
               return (
-                <div key={pt} className="mb-2">
+                <div className="mb-2" key={pt}>
                   <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                     {PERIOD_LABELS[pt]}
                   </p>
                   {items.map((b) => (
                     <div
-                      key={b.id}
                       className={cn(
                         'group flex items-center justify-between pr-2 hover:bg-accent transition-colors',
                         String(b.id) === selectedId && 'bg-accent',
                       )}
+                      key={b.id}
                     >
                       <button
                         type="button"
@@ -113,8 +112,8 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
                         </span>
                       </button>
                       <button
-                        type="button"
                         aria-label="Delete budget"
+                        type="button"
                         className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-destructive transition-colors"
                         onClick={(e) => handleDelete(e, b)}
                       >
@@ -129,12 +128,7 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
             {budgets.length === 0 && (
               <div className="px-3 py-8 text-center">
                 <p className="text-sm text-muted-foreground">No budgets yet.</p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mt-2"
-                  onClick={() => setDialogOpen(true)}
-                >
+                <Button size="sm" variant="outline" className="mt-2" onClick={() => setDialogOpen(true)}>
                   Create first budget
                 </Button>
               </div>
@@ -143,12 +137,7 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
         </ScrollArea>
       </div>
 
-      <BudgetCreateDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        budgets={budgets}
-        onCreated={handleCreated}
-      />
+      <BudgetCreateDialog budgets={budgets} open={dialogOpen} onCreated={handleCreated} onOpenChange={setDialogOpen} />
     </>
   );
 };

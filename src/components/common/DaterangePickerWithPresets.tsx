@@ -27,15 +27,15 @@ interface Props {
 }
 
 const DaterangePickerWithPresets: React.FC<Props> = ({
-                                                       id,
-                                                       after,
-                                                       before,
-                                                       onChange,
-                                                       presets = DASHBOARD_TIMEFRAME_OPTIONS,
-                                                       className,
-                                                       children,
-                                                       debounceMs = 350,
-                                                     }) => {
+  id,
+  after,
+  before,
+  onChange,
+  presets = DASHBOARD_TIMEFRAME_OPTIONS,
+  className,
+  children,
+  debounceMs = 350,
+}) => {
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
 

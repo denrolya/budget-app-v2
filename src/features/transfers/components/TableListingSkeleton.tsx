@@ -91,44 +91,40 @@ const GroupHeaderSkeleton: React.FC<{ compact?: boolean }> = ({ compact = true }
 GroupHeaderSkeleton.displayName = 'TransferListingGroupHeaderSkeleton';
 
 export const TransferTableListingSkeleton: React.FC<TableSkeletonProps> = ({
-                                                                              compact = true,
-                                                                              className,
-                                                                              rowsPerGroup = DEFAULT_ROWS_PER_GROUP,
-                                                                              groups = DEFAULT_GROUPS,
-                                                                              ...tableProps
-                                                                            }) => (
-    <div aria-label="Loading transfers table" role="status" className="overflow-x-auto">
-      <Table {...tableProps}>
-        <TableHeader className="sr-only">
-          <TableRow>
-            <TableHead className="w-4" />
-            <TableHead className="w-1/12">ID</TableHead>
-            <TableHead className="w-3/12">Transfer</TableHead>
-            <TableHead className="w-2/12">Amount</TableHead>
-            <TableHead className="w-2/12">Rate</TableHead>
-            <TableHead className="w-2/12">Note</TableHead>
-            <TableHead className="w-1/12">Time</TableHead>
-            <TableHead className="w-1/12 text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+  compact = true,
+  className,
+  rowsPerGroup = DEFAULT_ROWS_PER_GROUP,
+  groups = DEFAULT_GROUPS,
+  ...tableProps
+}) => (
+  <div aria-label="Loading transfers table" role="status" className="overflow-x-auto">
+    <Table {...tableProps}>
+      <TableHeader className="sr-only">
+        <TableRow>
+          <TableHead className="w-4" />
+          <TableHead className="w-1/12">ID</TableHead>
+          <TableHead className="w-3/12">Transfer</TableHead>
+          <TableHead className="w-2/12">Amount</TableHead>
+          <TableHead className="w-2/12">Rate</TableHead>
+          <TableHead className="w-2/12">Note</TableHead>
+          <TableHead className="w-1/12">Time</TableHead>
+          <TableHead className="w-1/12 text-right">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
 
-        <TableBody aria-busy="true">
-          {Array.from({ length: groups }).map((_, groupIndex) => (
-            <React.Fragment key={groupIndex}>
-              <GroupHeaderSkeleton compact={compact} />
-              {Array.from({ length: rowsPerGroup }).map((__, rowIndex) => (
-                <ListingRowSkeleton
-                  compact={compact}
-                  className={className}
-                  key={`${groupIndex}-${rowIndex}`}
-                />
-              ))}
-            </React.Fragment>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
+      <TableBody aria-busy="true">
+        {Array.from({ length: groups }).map((_, groupIndex) => (
+          <React.Fragment key={groupIndex}>
+            <GroupHeaderSkeleton compact={compact} />
+            {Array.from({ length: rowsPerGroup }).map((__, rowIndex) => (
+              <ListingRowSkeleton compact={compact} className={className} key={`${groupIndex}-${rowIndex}`} />
+            ))}
+          </React.Fragment>
+        ))}
+      </TableBody>
+    </Table>
+  </div>
+);
 
 TransferTableListingSkeleton.displayName = 'TransferTableListingSkeleton';
 

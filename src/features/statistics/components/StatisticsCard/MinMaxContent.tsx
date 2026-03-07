@@ -20,16 +20,16 @@ const MinMaxContent: React.FC<{
   comparison: ComparisonType;
   type: TransactionType;
 }> = ({
-        currentValue,
-        comparisonValue,
-        percentageChange,
-        selectedTimeframe,
-        comparisonTimeframe,
-        comparison,
-        type,
-        minDate,
-        maxDate,
-      }) => (
+  currentValue,
+  comparisonValue,
+  percentageChange,
+  selectedTimeframe,
+  comparisonTimeframe,
+  comparison,
+  type,
+  minDate,
+  maxDate,
+}) => (
   <div className="flex flex-col space-y-1">
     <div className="flex justify-between items-baseline">
       <ResponsiveTooltip

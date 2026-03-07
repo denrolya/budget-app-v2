@@ -40,20 +40,20 @@ const YearPicker: React.FC<YearPickerProps> = ({ year, onChange }) => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="text-xs h-8 px-3 gap-1 tabular-nums">
+        <Button size="sm" variant="outline" className="text-xs h-8 px-3 gap-1 tabular-nums">
           {year}
           <ChevronDown className="h-3 w-3 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-28 p-1" align="end">
+      <PopoverContent align="end" className="w-28 p-1">
         <div className="flex flex-col gap-0.5">
           {presets.map((y) => (
             <button
-              key={y}
               className={cn(
                 'text-sm px-2 py-1 text-left rounded hover:bg-muted transition-colors tabular-nums',
                 y === year && 'bg-muted font-medium',
               )}
+              key={y}
               onClick={() => commit(y)}
             >
               {y}
@@ -61,12 +61,14 @@ const YearPicker: React.FC<YearPickerProps> = ({ year, onChange }) => {
           ))}
           <div className="border-t mt-1 pt-1 flex gap-1">
             <Input
-              type="number"
               placeholder="Year"
-              className="h-7 text-xs"
+              type="number"
               value={input}
+              className="h-7 text-xs"
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleCustom(); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleCustom();
+              }}
             />
             <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={handleCustom}>
               <Check className="h-3 w-3" />
@@ -135,8 +137,8 @@ const ALPHA_STEPS = [0.15, 0.3, 0.5, 0.7, 1];
 //   expense → --destructive (same red as negative MoneyValue)
 //   count   → --primary
 const CSS_VAR: Record<ViewMode, string> = {
-  count:   '--primary',
-  income:  '--success',
+  count: '--primary',
+  income: '--success',
   expense: '--destructive',
 };
 
@@ -213,7 +215,10 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
   // Clear selection when parent signals an external range change (e.g. listing navigation)
   const isFirstResetRef = useRef(true);
   useEffect(() => {
-    if (isFirstResetRef.current) { isFirstResetRef.current = false; return; }
+    if (isFirstResetRef.current) {
+      isFirstResetRef.current = false;
+      return;
+    }
     setSelectedRange(null);
     setDragStart(null);
     setDragEnd(null);
@@ -299,18 +304,27 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
     <div className="px-4 py-2">
       {/* Controls row: view toggle always visible; year picker only when showControls=true */}
       <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-        <ToggleGroup
-          type="single"
-          value={viewMode}
-          onValueChange={(v) => v && setViewMode(v as ViewMode)}
-          size="sm"
-        >
-          <ToggleGroupItem value="count" className="text-xs px-2">Count</ToggleGroupItem>
-          <ToggleGroupItem value="income" className="text-xs px-2">Income</ToggleGroupItem>
-          <ToggleGroupItem value="expense" className="text-xs px-2">Expense</ToggleGroupItem>
+        <ToggleGroup size="sm" type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as ViewMode)}>
+          <ToggleGroupItem value="count" className="text-xs px-2">
+            Count
+          </ToggleGroupItem>
+          <ToggleGroupItem value="income" className="text-xs px-2">
+            Income
+          </ToggleGroupItem>
+          <ToggleGroupItem value="expense" className="text-xs px-2">
+            Expense
+          </ToggleGroupItem>
         </ToggleGroup>
 
-        {showControls && <YearPicker year={year} onChange={(y) => { setYearState(y); handleClear(); }} />}
+        {showControls && (
+          <YearPicker
+            year={year}
+            onChange={(y) => {
+              setYearState(y);
+              handleClear();
+            }}
+          />
+        )}
       </div>
 
       {/* Selection hint — only shown when selectable */}
@@ -325,8 +339,8 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
           </p>
           {selectedRange && (
             <button
-              onClick={handleClear}
               className="text-xs text-muted-foreground hover:text-foreground px-2 py-0.5 rounded hover:bg-muted transition-colors"
+              onClick={handleClear}
             >
               Clear
             </button>
@@ -343,24 +357,31 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
       {!isLoading && (
         <div
           className="w-full overflow-x-auto"
+          onMouseLeave={
+            selectable
+              ? () => {
+                  if (isDragging) commitDrag();
+                  setTooltip(null);
+                }
+              : () => setTooltip(null)
+          }
           onMouseUp={selectable ? commitDrag : undefined}
-          onMouseLeave={selectable ? () => { if (isDragging) commitDrag(); setTooltip(null); } : () => setTooltip(null)}
         >
           <svg
-            width={svgWidth}
             height={svgHeight}
-            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-            className="select-none"
             style={{ minWidth: 300, display: 'block' }}
+            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+            width={svgWidth}
+            className="select-none"
           >
             {monthLabels.map((m) => (
               <text
-                key={`month-${m.weekIdx}`}
+                fontFamily="inherit"
+                fontSize={10}
+                style={{ fill: 'hsl(var(--muted-foreground))' }}
                 x={LEFT_PAD + m.weekIdx * step}
                 y={12}
-                style={{ fill: 'hsl(var(--muted-foreground))' }}
-                fontSize={10}
-                fontFamily="inherit"
+                key={`month-${m.weekIdx}`}
               >
                 {m.label}
               </text>
@@ -369,12 +390,12 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
             {DAY_LABELS.map((label, i) =>
               label ? (
                 <text
-                  key={`dow-${i}`}
+                  fontFamily="inherit"
+                  fontSize={10}
+                  style={{ fill: 'hsl(var(--muted-foreground))' }}
                   x={0}
                   y={TOP_PAD + i * step + CELL_SIZE - 2}
-                  style={{ fill: 'hsl(var(--muted-foreground))' }}
-                  fontSize={10}
-                  fontFamily="inherit"
+                  key={`dow-${i}`}
                 >
                   {label}
                 </text>
@@ -388,32 +409,38 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
               const dimmed = selectable && !!selectedRange && !isDragging && !inRange;
               return (
                 <rect
-                  key={cell.date}
-                  x={x}
-                  y={y}
-                  width={CELL_SIZE}
                   height={CELL_SIZE}
+                  opacity={dimmed ? 0.3 : 1}
                   rx={2}
-                  style={{ fill: heatColor(cell.value, maxValue, cssVar) }}
                   stroke={inRange ? 'hsl(var(--foreground))' : 'transparent'}
                   strokeWidth={inRange ? 1.5 : 0}
-                  opacity={dimmed ? 0.3 : 1}
-                  className={selectable ? 'cursor-crosshair transition-opacity duration-75' : 'transition-opacity duration-75'}
-                  onMouseDown={selectable ? () => {
-                    setIsDragging(true);
-                    setDragStart(cell.date);
-                    setDragEnd(cell.date);
-                    setSelectedRange(null);
-                  } : undefined}
+                  style={{ fill: heatColor(cell.value, maxValue, cssVar) }}
+                  width={CELL_SIZE}
+                  x={x}
+                  y={y}
+                  className={
+                    selectable ? 'cursor-crosshair transition-opacity duration-75' : 'transition-opacity duration-75'
+                  }
+                  key={cell.date}
+                  onMouseDown={
+                    selectable
+                      ? () => {
+                          setIsDragging(true);
+                          setDragStart(cell.date);
+                          setDragEnd(cell.date);
+                          setSelectedRange(null);
+                        }
+                      : undefined
+                  }
                   onMouseEnter={(e) => {
                     if (selectable && isDragging) setDragEnd(cell.date);
                     if (cell.value > 0) setTooltip({ date: cell.date, value: cell.value, x: e.clientX, y: e.clientY });
                     else setTooltip(null);
                   }}
-                  onMouseMove={(e) => {
-                    if (cell.value > 0) setTooltip((t) => t ? { ...t, x: e.clientX, y: e.clientY } : null);
-                  }}
                   onMouseLeave={() => setTooltip(null)}
+                  onMouseMove={(e) => {
+                    if (cell.value > 0) setTooltip((t) => (t ? { ...t, x: e.clientX, y: e.clientY } : null));
+                  }}
                 />
               );
             })}
@@ -424,8 +451,8 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
       {/* Floating tooltip rendered via fixed positioning */}
       {tooltip && (
         <div
-          className="fixed z-50 pointer-events-none rounded-md border bg-background px-3 py-2 shadow-md text-sm"
           style={{ left: tooltip.x + 14, top: tooltip.y - 56 }}
+          className="fixed z-50 pointer-events-none rounded-md border bg-background px-3 py-2 shadow-md text-sm"
         >
           <p className="text-muted-foreground text-xs mb-0.5">
             {moment(tooltip.date, 'YYYY-MM-DD').format(MOMENT_DATE_VIEW_FORMAT_2)}
