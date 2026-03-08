@@ -23,6 +23,7 @@
     "knip:strict": "knip --reporter compact",
     "deploy": "node deploy.mjs deploy",
     "deploy:upload": "node deploy.mjs upload",
+    "deploy:rollback": "node deploy.mjs rollback",
     "deploy:logs": "node deploy.mjs logs",
     "deploy:shell": "node deploy.mjs shell",
     "deploy:nginx:reload": "node deploy.mjs nginx:reload",
