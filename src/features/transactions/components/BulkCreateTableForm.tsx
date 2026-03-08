@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 import * as z from 'zod';
 
 import { cn } from '@/lib/utils';
-import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
-import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
+import { AccountTypeahead } from '@/features/accounts';
+import { CategoryTypeahead } from '@/features/categories';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';

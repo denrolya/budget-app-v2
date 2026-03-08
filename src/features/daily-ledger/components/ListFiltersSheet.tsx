@@ -3,8 +3,8 @@ import { ArrowDownCircle, ArrowUpCircle, CalendarIcon, ChevronDown, FileText, La
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
-import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
-import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
+import { AccountTypeahead } from '@/features/accounts';
+import { CategoryTypeahead } from '@/features/categories';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import {
@@ -19,9 +19,9 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { cn } from '@/lib/utils';
-import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
+import { TransactionFilters } from '@/features/transactions';
 import { Type as TransactionType } from '@/features/transactions';
-import { TransferFilters } from '@/features/transfers/models/TransferFilters';
+import { TransferFilters } from '@/features/transfers';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Timeframe } from '@/types/global';
 

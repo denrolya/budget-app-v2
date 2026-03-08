@@ -2,9 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { useList as useAccountsQuery } from '@/features/accounts';
 import { useList as useCategoriesQuery } from '@/features/categories';
-import { TransactionFactory } from '@/features/transactions/models/Transaction';
-import { transactionService } from '@/features/transactions/api/service';
-import type Transaction from '@/features/transactions/models/Transaction';
+import { TransactionFactory, transactionService, type Transaction } from '@/features/transactions';
 
 import type Debt from '..//models/Debt';
 import { mapDebtDTOToModel } from '../lib/mapDebtDTOToModel';

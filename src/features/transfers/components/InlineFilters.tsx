@@ -3,7 +3,7 @@ import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, ChevronDown, Search, 
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
+import { AccountTypeahead } from '@/features/accounts';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

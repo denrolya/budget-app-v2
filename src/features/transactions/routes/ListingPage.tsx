@@ -1,4 +1,4 @@
-import { CopyPlus, Download, RefreshCw, RotateCcw, SquarePlus } from 'lucide-react';
+import { CopyPlus, Download, PanelTopClose, PanelTopOpen, RefreshCw, RotateCcw, SquarePlus } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useState } from 'react';
 
@@ -13,15 +13,16 @@ import { Toggle } from '@/components/ui/toggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
-import { useList as useTransactionsList } from '@/features/transactions';
-import { useMutations } from '@/features/transactions/api/mutations';
-import BulkCreateTableForm from '@/features/transactions/components/BulkCreateTableForm';
-import FormattedListing from '@/features/transactions/components/FormattedListing';
-import InlineFilters from '@/features/transactions/components/InlineFilters';
-import ListFiltersSheet from '@/features/transactions/components/ListFiltersSheet';
-import { useListHotkeys as useHotkeys } from '@/features/transactions/hooks/useHotkeys';
 import { useIsMobile } from '@/hooks/use-mobile';
+
+import { useList as useTransactionsList } from '../api';
+import { useMutations } from '../api/mutations';
+import { useListHotkeys as useHotkeys } from '../hooks/useHotkeys';
+import TransactionHeatmapChart from '../components/TransactionHeatmapChart';
+import BulkCreateTableForm from '../components/BulkCreateTableForm';
+import FormattedListing from '../components/FormattedListing';
+import InlineFilters from '../components/InlineFilters';
+import ListFiltersSheet from '../components/ListFiltersSheet';
 
 export const TransactionsListPage: React.FC = () => {
   const isMobile = useIsMobile();
@@ -29,6 +30,7 @@ export const TransactionsListPage: React.FC = () => {
 
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
+  const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
 
   const {
     groupedItems,
@@ -174,6 +176,25 @@ export const TransactionsListPage: React.FC = () => {
                 </Tooltip>
               )}
 
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label={isHeatmapVisible ? 'Hide heatmap' : 'Show heatmap'}
+                    size="icon"
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsHeatmapVisible((v) => !v)}
+                  >
+                    {isHeatmapVisible ? (
+                      <PanelTopClose aria-hidden="true" className="h-4 w-4" />
+                    ) : (
+                      <PanelTopOpen aria-hidden="true" className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{isHeatmapVisible ? 'Hide heatmap' : 'Show heatmap'}</TooltipContent>
+              </Tooltip>
+
               <FiltersToggleButton
                 activeCount={filters.activeCount}
                 aria-label={filtersToggleAriaLabel}
@@ -184,19 +205,21 @@ export const TransactionsListPage: React.FC = () => {
         </CardHeader>
 
         <CardContent className="p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
-          <div className="shrink-0 border-b">
-            <TransactionHeatmapChart
-              accountIds={(filters.accounts as string[]).map(Number)}
-              onRangeClear={() => {
-                setFilter('after', moment().subtract(30, 'days').startOf('day'));
-                setFilter('before', moment().endOf('day'));
-              }}
-              onRangeSelect={(after, before) => {
-                setFilter('after', after);
-                setFilter('before', before);
-              }}
-            />
-          </div>
+          {isHeatmapVisible && (
+            <div className="shrink-0 border-b">
+              <TransactionHeatmapChart
+                accountIds={(filters.accounts as string[]).map(Number)}
+                onRangeClear={() => {
+                  setFilter('after', moment().subtract(30, 'days').startOf('day'));
+                  setFilter('before', moment().endOf('day'));
+                }}
+                onRangeSelect={(after, before) => {
+                  setFilter('after', after);
+                  setFilter('before', before);
+                }}
+              />
+            </div>
+          )}
 
           {!isMobile && (
             <div className="shrink-0">

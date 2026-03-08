@@ -5,7 +5,7 @@ import { memo, useEffect, useId, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
-import AccountPill from '@/features/accounts/components/Pill';
+import { Account, AccountPill, Type as AccountType, ACCOUNT_TYPES_ORDER } from '@/features/accounts';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   SidebarGroup,
@@ -22,7 +22,6 @@ import { useBaseCurrency } from '@/features/auth';
 import { CURRENCY_CODE } from '@/constants/currency';
 import { useActiveAccountsWithDefaultOrder, useTotalBalance } from '@/hooks/financeData';
 import { cn } from '@/lib/utils';
-import { Account, Type as AccountType, ACCOUNT_TYPES_ORDER } from '@/features/accounts';
 import storage from '@/services/storage';
 
 const STORAGE_KEY = 'sidebar.showPinnedOnly';

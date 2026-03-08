@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
 import { useForm as useFormContext } from '@/contexts/Form';
-import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
+import { AccountTypeahead } from '@/features/accounts';
 import { useAccountsWithDefaultOrder } from '@/hooks/financeData';
 import { useFormLogic } from '@/hooks/useFormLogic';
 

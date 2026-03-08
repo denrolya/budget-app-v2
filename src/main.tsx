@@ -40,7 +40,7 @@ const App = () => (
 
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
-    <Toaster />
+    <Toaster richColors />
   </StrictMode>
 );
 

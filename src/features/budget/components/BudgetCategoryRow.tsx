@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
-import Category from '@/features/categories/models/Category';
+import { Category } from '@/features/categories';
 
 import type { BudgetLineDTO } from '../api/types';
 
@@ -190,31 +190,52 @@ const BudgetCategoryRow: React.FC<Props> = ({
         {actualValue > 0 ? fmtAmt(actualValue, displayCurrency) : <span className="text-muted-foreground/40">—</span>}
       </td>
 
-      {/* Remaining + % */}
+      {/* Remaining + % + progress bar */}
       <td className="py-1.5 px-4 text-right tabular-nums">
         {remaining !== null ? (
-          <span className={remaining < 0 ? 'text-destructive' : 'text-green-600 dark:text-green-400'}>
-            {remaining < 0 ? '-' : ''}
-            {fmtAmt(remaining, displayCurrency)}
+          <div className="flex flex-col items-end gap-0.5">
+            <span className={remaining < 0 ? 'text-destructive' : 'text-green-600 dark:text-green-400'}>
+              {remaining < 0 ? '-' : ''}
+              {fmtAmt(remaining, displayCurrency)}
+              {pct !== null && (
+                <span
+                  className={cn(
+                    'ml-1 text-xs',
+                    isExpenseSection
+                      ? pct > 100
+                        ? 'text-destructive'
+                        : pct > 80
+                          ? 'text-yellow-600 dark:text-yellow-400'
+                          : 'opacity-60'
+                      : pct > 100
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'opacity-60',
+                  )}
+                >
+                  {pct.toFixed(0)}%
+                </span>
+              )}
+            </span>
             {pct !== null && (
-              <span
-                className={cn(
-                  'ml-1 text-xs',
-                  isExpenseSection
-                    ? pct > 100
-                      ? 'text-destructive'
-                      : pct > 80
-                        ? 'text-yellow-600 dark:text-yellow-400'
-                        : 'opacity-60'
-                    : pct > 100
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'opacity-60',
-                )}
-              >
-                {pct.toFixed(0)}%
-              </span>
+              <div className="w-16 h-1 rounded-full bg-muted overflow-hidden">
+                <div
+                  style={{ width: `${Math.min(pct, 100)}%` }}
+                  className={cn(
+                    'h-full rounded-full transition-all',
+                    isExpenseSection
+                      ? pct > 100
+                        ? 'bg-destructive'
+                        : pct > 80
+                          ? 'bg-yellow-500'
+                          : 'bg-green-500'
+                      : pct >= 100
+                        ? 'bg-green-500'
+                        : 'bg-muted-foreground/40',
+                  )}
+                />
+              </div>
             )}
-          </span>
+          </div>
         ) : (
           <span className="text-muted-foreground/40">—</span>
         )}

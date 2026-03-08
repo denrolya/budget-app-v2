@@ -2,8 +2,8 @@ import debounce from 'lodash/debounce';
 import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, ChevronDown, Layers, Search, X } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
-import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
+import { AccountTypeahead } from '@/features/accounts';
+import { CategoryTypeahead } from '@/features/categories';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

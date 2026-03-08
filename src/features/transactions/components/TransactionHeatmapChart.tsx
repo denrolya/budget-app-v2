@@ -11,7 +11,7 @@ import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { MOMENT_DATE_VIEW_FORMAT_2 } from '@/constants/datetime';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
-import { useGlobalDailyStats } from '@/features/accounts/api';
+import { useGlobalDailyStats } from '@/features/accounts';
 
 // ─── Year picker ───────────────────────────────────────────────────────────────
 
@@ -135,21 +135,21 @@ const ALPHA_STEPS = [0.15, 0.3, 0.5, 0.7, 1];
 // CSS variable references matching MoneyValue colors:
 //   income  → --success (same green as positive MoneyValue)
 //   expense → --destructive (same red as negative MoneyValue)
-//   count   → --primary
+//   count   → --info
 const CSS_VAR: Record<ViewMode, string> = {
-  count: '--primary',
+  count: '--info',
   income: '--success',
   expense: '--destructive',
 };
 
-function heatColor(value: number, max: number, cssVar: string): string {
+const heatColor = (value: number, max: number, cssVar: string): string => {
   if (!value || value <= 0) return 'hsl(var(--muted))';
   const ratio = Math.min(value / max, 1);
   const idx = Math.min(Math.floor(ratio * ALPHA_STEPS.length), ALPHA_STEPS.length - 1);
   return `hsl(var(${cssVar}) / ${ALPHA_STEPS[idx]})`;
-}
+};
 
-function buildGrid(year: number, valueMap: Record<string, number>): DayCell[] {
+const buildGrid = (year: number, valueMap: Record<string, number>): DayCell[] => {
   const cells: DayCell[] = [];
   const start = new Date(`${year}-01-01T00:00:00`);
   const end = new Date(`${year}-12-31T00:00:00`);
@@ -171,9 +171,9 @@ function buildGrid(year: number, valueMap: Record<string, number>): DayCell[] {
     weekIdx++;
   }
   return cells;
-}
+};
 
-function getMonthLabels(cells: DayCell[]) {
+const getMonthLabels = (cells: DayCell[]) => {
   const labels: { label: string; weekIdx: number }[] = [];
   let lastMonth = -1;
   for (const cell of cells) {
@@ -185,7 +185,7 @@ function getMonthLabels(cells: DayCell[]) {
     }
   }
   return labels;
-}
+};
 
 const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
   accountIds,

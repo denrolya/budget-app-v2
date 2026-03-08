@@ -3,8 +3,8 @@ import { ArrowDownCircle, ArrowUpCircle, ChevronDown, FileText, Search, X } from
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Layers } from 'lucide-react';
 
-import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
-import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
+import { AccountTypeahead } from '@/features/accounts';
+import { CategoryTypeahead } from '@/features/categories';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import {

@@ -3,7 +3,7 @@ import sortBy from 'lodash/sortBy';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
-import AccountPill from '@/features/accounts/components/Pill';
+import { AccountPill } from '@/features/accounts';
 import { CURRENCIES } from '@/constants/currency';
 import MoneyValue from '@/components/common/MoneyValue';
 

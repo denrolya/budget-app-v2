@@ -3,11 +3,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { cardConfigsV2 } from '@/constants/dashboard-config';
 import { Type as AccountType } from '@/features/accounts';
 import StatisticsCardsSidebar from '@/features/dashboard/components/StatisticsCardsSidebar';
-import BalanceByAccountType from '@/features/statistics/components/BalanceByAccountType';
-import DistributionDonut from '@/features/statistics/components/DistributionDonut/TripleTabCard';
-import MoneyFlow from '@/features/statistics/components/MoneyFlow/Card';
-import StatisticsCard from '@/features/statistics/components/StatisticsCard/Card';
-import TotalBalanceCard from '@/features/statistics/components/TotalBalanceCard';
+import {
+  BalanceByAccountType,
+  DistributionDonutCard as DistributionDonut,
+  MoneyFlowCard as MoneyFlow,
+  StatisticsCard,
+  TotalBalanceCard,
+} from '@/features/statistics';
 import { generateSlug } from '@/lib/url/generateSlug';
 import { StatisticsConfig } from '@/types/statistics';
 

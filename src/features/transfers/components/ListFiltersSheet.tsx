@@ -2,7 +2,7 @@ import debounce from 'lodash/debounce';
 import { ChevronDown, Search, X } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
+import { AccountTypeahead } from '@/features/accounts';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import {

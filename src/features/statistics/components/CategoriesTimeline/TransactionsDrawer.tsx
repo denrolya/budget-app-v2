@@ -2,7 +2,8 @@ import { Moment } from 'moment/moment';
 import React, { useEffect } from 'react';
 
 import Pagination from '@/components/common/Pagination';
-import FormattedListing from '@/features/transactions/components/FormattedListing';
+import { FormattedListing, TransactionFilters, useList as useTransactionsList } from '@/features/transactions';
+import { Category } from '@/features/categories';
 import {
   Drawer,
   DrawerContent,
@@ -15,9 +16,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
 import { useCategories } from '@/hooks/financeData';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useList as useTransactionsList } from '@/features/transactions';
-import Category from '@/features/categories/models/Category';
-import TransactionFilters from '@/features/transactions/models/TransactionFilters';
 
 interface TransactionsDrawerProps {
   isOpen: boolean;

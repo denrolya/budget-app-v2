@@ -16,9 +16,8 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { MOMENT_DATETIME_FORM_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
-import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
-import AccountPill from '@/features/accounts/components/Pill';
-import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
+import { AccountTypeahead, AccountPill } from '@/features/accounts';
+import { CategoryTypeahead } from '@/features/categories';
 import { cn } from '@/lib/utils';
 import { PopoverContent, PopoverTrigger, Popover } from '@/components/ui/popover';
 

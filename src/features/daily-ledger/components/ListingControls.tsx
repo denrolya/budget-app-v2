@@ -4,8 +4,8 @@ import { Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
-import AccountTypeahead from '@/features/accounts/components/AccountTypeahead';
-import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
+import { AccountTypeahead } from '@/features/accounts';
+import { CategoryTypeahead } from '@/features/categories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -16,8 +16,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
-import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
-import { TransferFilters } from '@/features/transfers/models/TransferFilters';
+import { TransactionFilters } from '@/features/transactions';
+import { TransferFilters } from '@/features/transfers';
 import { cn } from '@/lib/utils';
 import { Timeframe } from '@/types/global';
 

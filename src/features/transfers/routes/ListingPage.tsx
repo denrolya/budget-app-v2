@@ -1,4 +1,4 @@
-import { Edit, RefreshCw, RotateCcw, SquarePlus, Trash2 } from 'lucide-react';
+import { Edit, PanelTopClose, PanelTopOpen, RefreshCw, RotateCcw, SquarePlus, Trash2 } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useState } from 'react';
 
@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
+import { TransactionHeatmapChart } from '@/features/transactions';
 import FormattedListing from '@/features/transfers/components/FormattedListing';
 import InlineFilters from '@/features/transfers/components/InlineFilters';
 import ListFiltersSheet from '@/features/transfers/components/ListFiltersSheet';
@@ -26,6 +26,7 @@ export const TransfersListPage: React.FC = () => {
   const { openForm } = useFormContext();
 
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
   const [selectedTransfers] = useState<number[]>([]); // placeholder until bulk-select is implemented
 
   const {
@@ -128,6 +129,25 @@ export const TransfersListPage: React.FC = () => {
                 </Tooltip>
               )}
 
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label={isHeatmapVisible ? 'Hide heatmap' : 'Show heatmap'}
+                    size="icon"
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsHeatmapVisible((v) => !v)}
+                  >
+                    {isHeatmapVisible ? (
+                      <PanelTopClose aria-hidden="true" className="h-4 w-4" />
+                    ) : (
+                      <PanelTopOpen aria-hidden="true" className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{isHeatmapVisible ? 'Hide heatmap' : 'Show heatmap'}</TooltipContent>
+              </Tooltip>
+
               <FiltersToggleButton
                 activeCount={filters.activeCount}
                 aria-label={filtersToggleAriaLabel}
@@ -164,19 +184,21 @@ export const TransfersListPage: React.FC = () => {
         </CardHeader>
 
         <CardContent className="p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
-          <div className="shrink-0 border-b">
-            <TransactionHeatmapChart
-              accountIds={[]}
-              onRangeClear={() => {
-                setFilter('after', moment().subtract(30, 'days').startOf('day'));
-                setFilter('before', moment().endOf('day'));
-              }}
-              onRangeSelect={(after, before) => {
-                setFilter('after', after);
-                setFilter('before', before);
-              }}
-            />
-          </div>
+          {isHeatmapVisible && (
+            <div className="shrink-0 border-b">
+              <TransactionHeatmapChart
+                accountIds={[]}
+                onRangeClear={() => {
+                  setFilter('after', moment().subtract(30, 'days').startOf('day'));
+                  setFilter('before', moment().endOf('day'));
+                }}
+                onRangeSelect={(after, before) => {
+                  setFilter('after', after);
+                  setFilter('before', before);
+                }}
+              />
+            </div>
+          )}
 
           {!isMobile && (
             <div className="shrink-0">

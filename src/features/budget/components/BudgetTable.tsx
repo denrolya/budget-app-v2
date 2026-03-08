@@ -3,13 +3,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
-import { useList as useCategoryList } from '@/features/categories';
-import Category from '@/features/categories/models/Category';
-import { CategoryType } from '@/features/categories/types';
-import {
-  DrawerListingTarget,
-  TransactionsDrawer,
-} from '@/features/statistics/components/DistributionDonut/TransactionsDrawer';
+import { Category, CategoryType, useList as useCategoryList } from '@/features/categories';
+import { TransactionsDrawer, type DrawerListingTarget } from '@/features/statistics';
 import type { ConvertedValues } from '@/features/transactions';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 

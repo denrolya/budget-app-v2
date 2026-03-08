@@ -3,9 +3,7 @@ import { Separator } from '@/components/ui/separator';
 import { Type as AccountType } from '@/features/accounts';
 import { StatisticsConfig } from '@/types/statistics';
 import { generateSlug } from '@/lib/url/generateSlug';
-import TotalBalanceCard from '@/features/statistics/components/TotalBalanceCard';
-import { StatisticsCard } from '@/features/statistics/components/StatisticsCard/Card';
-import BalanceByAccountType from '@/features/statistics/components/BalanceByAccountType';
+import { BalanceByAccountType, StatisticsCard, TotalBalanceCard } from '@/features/statistics';
 
 interface Props {
   configs: Record<string, StatisticsConfig[]>;

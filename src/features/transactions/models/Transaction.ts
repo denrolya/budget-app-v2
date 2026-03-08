@@ -3,8 +3,9 @@ import moment, { Moment } from 'moment';
 import Debt from '@/features/debts/models/Debt';
 import { useAccounts, useCategories } from '@/hooks/financeData';
 import Category from '@/features/categories/models/Category';
-import { ConvertedValues, Type, TransactionModelProps, RawTransactionDTO } from '@/features/transactions';
 import Account from '@/features/accounts/models/Account';
+
+import { ConvertedValues, Type, TransactionModelProps, RawTransactionDTO } from '../types';
 
 export class Transaction {
   id: number;

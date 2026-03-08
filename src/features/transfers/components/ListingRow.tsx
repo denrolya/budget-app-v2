@@ -14,7 +14,7 @@ import {
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
-import AccountPill from '@/features/accounts/components/Pill';
+import { AccountPill } from '@/features/accounts';
 import RateDisplay from '@/features/transfers/components/RateDisplay';
 import Transfer from '@/features/transfers/models/Transfer';
 import { cn } from '@/lib/utils';

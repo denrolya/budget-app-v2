@@ -3,18 +3,12 @@ import React, { useMemo } from 'react';
 
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import SummaryBadge from '@/components/common/SummaryBadge';
-import TransactionListItem, {
-  ListItemSkeleton as TransactionListItemSkeleton,
-} from '@/features/transactions/components/ListItemV3';
-import TransferListItem, {
-  ListItemSkeleton as TransferListItemSkeleton,
-} from '@/features/transfers/components/ListItem';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROUTES } from '@/constants/routes';
 import { useBaseCurrency } from '@/features/auth';
-import Transaction from '@/features/transactions/models/Transaction';
-import Transfer from '@/features/transfers/models/Transfer';
+import { Transaction, TransactionListItem, TransactionListItemSkeleton } from '@/features/transactions';
+import { Transfer, TransferListItem, TransferListItemSkeleton } from '@/features/transfers';
 
 interface Props {
   date: Moment;

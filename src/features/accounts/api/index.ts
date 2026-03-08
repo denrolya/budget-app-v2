@@ -1,3 +1,3 @@
-export { useList, useBalanceHistory, useDailyStats, useGlobalDailyStats } from './queries';
+export { useList, useBalanceHistory, useGlobalDailyStats } from './queries';
 export { useMutations } from './mutations';
 export { queryKeys } from './keys';

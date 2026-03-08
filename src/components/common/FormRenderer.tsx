@@ -3,11 +3,11 @@ import React, { forwardRef, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { useIsMobile } from '@/hooks/use-mobile';
-import AccountForm from '@/features/accounts/components/Form';
-import TransactionForm from '@/features/transactions/components/Form';
-import TransferForm from '@/features/transfers/components/Form';
-import DebtForm from '@/features/debts/components/Form';
-import CategoryForm from '@/features/categories/components/Form';
+import { AccountForm } from '@/features/accounts';
+import { CategoryForm } from '@/features/categories';
+import { DebtForm } from '@/features/debts';
+import { TransactionForm } from '@/features/transactions';
+import { TransferForm } from '@/features/transfers';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

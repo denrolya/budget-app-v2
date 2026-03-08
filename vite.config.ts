@@ -128,14 +128,17 @@ export default defineConfig({
         manualChunks(id) {
           if (!id.includes('node_modules')) return;
 
-          // leaf-heavy chunks
           if (id.includes('/recharts/') || id.includes('/@nivo/') || id.includes('/d3-')) {
             return 'vendor-charts';
           }
-
           if (id.includes('/@tanstack/')) return 'vendor-tanstack';
+          if (id.includes('/moment/') || id.includes('/moment-timezone/')) return 'vendor-moment';
+          if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/react-router')) {
+            return 'vendor-react';
+          }
+          if (id.includes('/@radix-ui/')) return 'vendor-radix';
+          if (id.includes('/lucide-react/')) return 'vendor-icons';
 
-          // everything else (React, Radix, Sonner, UI libs, utilities, dates, etc.)
           return 'vendor';
         },
       },

@@ -5,9 +5,7 @@ import { cn } from '@/lib/utils';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
-import { useList as useCategoryList } from '@/features/categories';
-import { CategoryType } from '@/features/categories/types';
-import Category from '@/features/categories/models/Category';
+import { Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 
 import type { BudgetDTO, BudgetAnalyticsItem } from '../api/types';
 

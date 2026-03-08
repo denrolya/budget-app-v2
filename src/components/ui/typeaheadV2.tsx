@@ -71,10 +71,7 @@ const chevronIconVariants = cva('', {
 
 type Group<T> = { label: string; options: T[] };
 
-const normalizeSelected = <V extends string | number>(
-  value: V | V[] | null | undefined,
-  multiple: boolean,
-): V[] => {
+const normalizeSelected = <V extends string | number>(value: V | V[] | null | undefined, multiple: boolean): V[] => {
   if (value == null) return [];
   if (multiple) return Array.isArray(value) ? value : [value];
   return Array.isArray(value) ? (value[0] != null ? [value[0]] : []) : [value];
@@ -85,7 +82,8 @@ const readField = <T, K extends keyof T>(obj: T, key: K): T[K] => obj[key];
 const asString = (v: unknown): string => String(v);
 
 export interface TypeaheadV2Props<T, V extends string | number>
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'size'>,
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'size'>,
     VariantProps<typeof typeaheadVariants> {
   multiple?: boolean;
 
@@ -149,15 +147,9 @@ function TypeaheadV2Inner<T, V extends string | number>(
 
   const selectedValues = useMemo(() => normalizeSelected(value, multiple), [value, multiple]);
 
-  const getKey = useCallback(
-    (obj: T): string => asString(readField(obj, valueField as keyof T)),
-    [valueField],
-  );
+  const getKey = useCallback((obj: T): string => asString(readField(obj, valueField as keyof T)), [valueField]);
 
-  const getLabel = useCallback(
-    (obj: T): string => asString(readField(obj, labelField as keyof T)),
-    [labelField],
-  );
+  const getLabel = useCallback((obj: T): string => asString(readField(obj, labelField as keyof T)), [labelField]);
 
   const getRawValue = useCallback(
     (obj: T): V => {
@@ -267,7 +259,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
         setOpen(false);
       } else if (event.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
         const next = selectedValues.slice(0, -1);
-        onChange(multiple ? next : next[0] ?? null);
+        onChange(multiple ? next : (next[0] ?? null));
       }
 
       onKeyDown?.(event);
@@ -408,9 +400,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
               )}
 
               {filteredGroups.map((group, groupIndex) => {
-                const groupOffset = filteredGroups
-                  .slice(0, groupIndex)
-                  .reduce((acc, g) => acc + g.options.length, 0);
+                const groupOffset = filteredGroups.slice(0, groupIndex).reduce((acc, g) => acc + g.options.length, 0);
 
                 return (
                   <div key={group.label || groupIndex}>
@@ -469,7 +459,9 @@ function TypeaheadV2Inner<T, V extends string | number>(
 
 TypeaheadV2Inner.displayName = 'TypeaheadV2';
 
-type TypeaheadV2Component = <T, V extends string | number>(props: TypeaheadV2Props<T, V> & React.RefAttributes<HTMLInputElement>) => React.ReactElement;
+type TypeaheadV2Component = <T, V extends string | number>(
+  props: TypeaheadV2Props<T, V> & React.RefAttributes<HTMLInputElement>,
+) => React.ReactElement;
 
 const TypeaheadV2 = forwardRef(TypeaheadV2Inner) as unknown as TypeaheadV2Component;
 

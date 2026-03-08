@@ -9,15 +9,19 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useMutations as useTransactionsMutations } from '@/features/transactions/api/mutations';
-import { useMutations as useTransfersMutations } from '@/features/transfers/api/mutations';
-import TransactionDetails from '@/features/transactions/components/Details';
-import TransactionRow from '@/features/transactions/components/ListingRow';
-import { useInlineEdit } from '@/features/transactions/hooks/useInlineEdit';
-import Transaction from '@/features/transactions/models/Transaction';
-import TransferDetails from '@/features/transfers/components/Details';
-import TransferRow from '@/features/transfers/components/ListingRow';
-import Transfer from '@/features/transfers/models/Transfer';
+import {
+  useMutations as useTransactionsMutations,
+  TransactionDetails,
+  TransactionListingRow as TransactionRow,
+  useInlineEdit,
+  Transaction,
+} from '@/features/transactions';
+import {
+  useMutations as useTransfersMutations,
+  TransferDetails,
+  TransferListingRow as TransferRow,
+  Transfer,
+} from '@/features/transfers';
 import { confirm } from '@/lib/confirmation';
 import { cn } from '@/lib/utils';
 

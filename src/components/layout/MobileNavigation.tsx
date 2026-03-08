@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ROUTES } from '@/constants/routes';
 import { Theme, useTheme } from '@/contexts/theme';
 import { useAuth } from '@/features/auth';
-import DraftTransactionForm from '@/features/transactions/components/DraftForm';
+import { TransactionDraftForm } from '@/features/transactions';
 import { cn } from '@/lib/utils';
 
 type RouteKey = keyof typeof ROUTES;
@@ -106,7 +106,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
 
           {/* Center FAB */}
           <li className="flex-1 h-full flex items-center justify-center">
-            <DraftTransactionForm>
+            <TransactionDraftForm>
               <Button
                 aria-label="Create draft transaction"
                 type="button"
@@ -118,7 +118,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
               >
                 <Plus aria-hidden="true" className="h-6 w-6" />
               </Button>
-            </DraftTransactionForm>
+            </TransactionDraftForm>
           </li>
 
           {navItems.slice(2).map((item) => (

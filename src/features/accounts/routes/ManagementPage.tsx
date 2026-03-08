@@ -1,5 +1,4 @@
 import { Archive, ArchiveRestore, Edit, Plus } from 'lucide-react';
-import { motion } from 'framer-motion';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Navigate, Route, Routes, useMatch, useNavigate, useParams } from 'react-router-dom';
 
@@ -206,12 +205,7 @@ const AccountsIndex: React.FC = () => {
   return (
     <div className="flex h-full flex-col bg-muted overflow-hidden">
       {/* Main card — fills all available space */}
-      <motion.div
-        animate={{ opacity: 1, y: 0 }}
-        initial={{ opacity: 0, y: 14 }}
-        transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="flex-1 min-h-0 p-4"
-      >
+      <div className="flex-1 min-h-0 p-4 animate-in fade-in slide-in-from-bottom-4 duration-[350ms] ease-out">
         <Card className="h-full overflow-hidden flex flex-col">
           {/* ── Stats strip ──────────────────────────────────────────── */}
           <div className="flex-none border-b px-5 py-2.5 flex items-center gap-4 text-xs">
@@ -278,14 +272,9 @@ const AccountsIndex: React.FC = () => {
               <ScrollArea className="flex-1">
                 <div className="space-y-5 p-4 pb-3">
                   {currencyGroups.map((group, groupIdx) => (
-                    <motion.div
-                      animate={{ opacity: 1, x: 0 }}
-                      initial={{ opacity: 0, x: 14 }}
-                      transition={{
-                        duration: 0.3,
-                        delay: 0.1 + groupIdx * 0.07,
-                        ease: 'easeOut',
-                      }}
+                    <div
+                      style={{ animationDelay: `${100 + groupIdx * 70}ms` }}
+                      className="animate-in fade-in slide-in-from-right-4 duration-300 ease-out [animation-fill-mode:both]"
                       key={group.currency}
                     >
                       {/* Currency header */}
@@ -332,18 +321,16 @@ const AccountsIndex: React.FC = () => {
                           </button>
                         ))}
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </ScrollArea>
 
               {/* Type distribution — fixed at bottom */}
               {typeGroups.length > 0 && (
-                <motion.div
-                  animate={{ opacity: 1 }}
-                  initial={{ opacity: 0 }}
-                  transition={{ duration: 0.3, delay: 0.3 }}
-                  className="flex-none border-t p-4 space-y-2.5"
+                <div
+                  style={{ animationDelay: '300ms' }}
+                  className="flex-none border-t p-4 space-y-2.5 animate-in fade-in duration-300 ease-out [animation-fill-mode:both]"
                 >
                   <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                     By account type
@@ -355,21 +342,19 @@ const AccountsIndex: React.FC = () => {
                         <span className="font-medium text-foreground tabular-nums">{percentage.toFixed(0)}%</span>
                       </div>
                       <div className="h-1 bg-secondary rounded-full overflow-hidden">
-                        <motion.div
-                          animate={{ width: `${percentage}%` }}
-                          initial={{ width: 0 }}
-                          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.35 }}
-                          className="h-full bg-primary rounded-full"
+                        <div
+                          style={{ width: `${percentage}%` }}
+                          className="h-full bg-primary rounded-full transition-[width] duration-500 ease-out"
                         />
                       </div>
                     </div>
                   ))}
-                </motion.div>
+                </div>
               )}
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     </div>
   );
 };

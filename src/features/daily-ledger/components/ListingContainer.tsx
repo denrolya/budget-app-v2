@@ -10,23 +10,25 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
-import DailyList from '@/features/daily-ledger/components/DailyList';
-import DisplayMenu from '@/features/daily-ledger/components/DisplayMenu';
-import ListFiltersSheet from '@/features/daily-ledger/components/ListFiltersSheet';
-import ListingControls from '@/features/daily-ledger/components/ListingControls';
-import TableListing from '@/features/daily-ledger/components/TableListing';
-import TableListingSkeleton from '@/features/daily-ledger/components/TableListingSkeleton';
-import { useTransactionsAndTransfersList } from '@/features/daily-ledger/hooks/useList';
+import { TransactionFilters } from '@/features/transactions';
+import { TransferFilters } from '@/features/transfers';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Timeframe } from '@/types/global';
+
+import { useTransactionsAndTransfersList } from '../hooks/useList';
 import {
   detectPeriod,
   getInitialTimeframe,
   snapToPeriod,
   useTimeframe,
-} from '@/features/daily-ledger/hooks/useTimeframe';
-import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
-import { TransferFilters } from '@/features/transfers/models/TransferFilters';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Timeframe } from '@/types/global';
+} from '../hooks/useTimeframe';
+
+import DailyList from './DailyList';
+import DisplayMenu from './DisplayMenu';
+import ListFiltersSheet from './ListFiltersSheet';
+import ListingControls from './ListingControls';
+import TableListing from './TableListing';
+import TableListingSkeleton from './TableListingSkeleton';
 
 type ViewMode = 'table' | 'list';
 

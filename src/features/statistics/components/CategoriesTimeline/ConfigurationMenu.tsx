@@ -2,7 +2,7 @@ import { BarChart, LineChart, Move3D, Percent, SettingsIcon, Tags, TrendingDown,
 import React from 'react';
 
 import { useIsMobile } from '@/hooks/use-mobile';
-import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
+import { CategoryTypeahead } from '@/features/categories';
 import { Button } from '@/components/ui/button';
 import {
   Drawer,

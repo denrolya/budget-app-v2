@@ -35,17 +35,6 @@ export const useList = () => {
   });
 };
 
-export const useDailyStats = (accountId: number, after: Moment, before: Moment) => {
-  const afterStr = after.format('YYYY-MM-DD');
-  const beforeStr = before.format('YYYY-MM-DD');
-
-  return useQuery<DailyStatsResponse, Error>({
-    queryKey: queryKeys.dailyStats(accountId, afterStr, beforeStr),
-    queryFn: () => accountService.fetchDailyStats(accountId, afterStr, beforeStr),
-    staleTime: 1000 * 60 * 5,
-  });
-};
-
 export const useBalanceHistory = (accountId: number, after: Moment, before: Moment, interval: string) => {
   const afterStr = after.format('YYYY-MM-DD');
   const beforeStr = before.format('YYYY-MM-DD');

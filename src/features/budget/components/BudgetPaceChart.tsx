@@ -6,10 +6,8 @@ import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
-import { useList as useCategoryList } from '@/features/categories';
-import { CategoryType } from '@/features/categories/types';
-import Category from '@/features/categories/models/Category';
-import { useGlobalDailyStats } from '@/features/accounts/api';
+import { useGlobalDailyStats } from '@/features/accounts';
+import { Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 
 import type { BudgetDTO, BudgetAnalyticsItem } from '../api/types';
 

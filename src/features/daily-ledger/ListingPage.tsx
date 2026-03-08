@@ -1,4 +1,4 @@
-import { CopyPlus, RotateCcw, SquarePlus } from 'lucide-react';
+import { CopyPlus, PanelTopClose, PanelTopOpen, RotateCcw, SquarePlus } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -11,8 +11,7 @@ import { Toggle } from '@/components/ui/toggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
-import BulkCreateTableForm from '@/features/transactions/components/BulkCreateTableForm';
-import TransactionHeatmapChart from '@/features/accounts/components/TransactionHeatmapChart';
+import { BulkCreateTableForm, TransactionHeatmapChart } from '@/features/transactions';
 
 import ListingContainer, { type ListingHandle } from './components/ListingContainer';
 
@@ -23,6 +22,7 @@ export const DailyLedgerPage: React.FC = () => {
   const listingRef = useRef<ListingHandle | null>(null);
 
   const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
+  const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
   const [displayMenuTarget, setDisplayMenuTarget] = useState<HTMLDivElement | null>(null);
 
@@ -120,6 +120,25 @@ export const DailyLedgerPage: React.FC = () => {
                 </Tooltip>
               )}
 
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label={isHeatmapVisible ? 'Hide heatmap' : 'Show heatmap'}
+                    size="icon"
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsHeatmapVisible((v) => !v)}
+                  >
+                    {isHeatmapVisible ? (
+                      <PanelTopClose aria-hidden="true" className="h-4 w-4" />
+                    ) : (
+                      <PanelTopOpen aria-hidden="true" className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{isHeatmapVisible ? 'Hide heatmap' : 'Show heatmap'}</TooltipContent>
+              </Tooltip>
+
               <FiltersToggleButton
                 activeCount={activeFilterCount}
                 aria-label="Toggle filters"
@@ -130,14 +149,16 @@ export const DailyLedgerPage: React.FC = () => {
         </CardHeader>
 
         <CardContent className="w-full min-w-0 p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
-          <div className="shrink-0 border-b">
-            <TransactionHeatmapChart
-              accountIds={[]}
-              resetTrigger={heatmapResetTrigger}
-              onRangeClear={() => listingRef.current?.resetFilters()}
-              onRangeSelect={handleHeatmapRangeSelect}
-            />
-          </div>
+          {isHeatmapVisible && (
+            <div className="shrink-0 border-b">
+              <TransactionHeatmapChart
+                accountIds={[]}
+                resetTrigger={heatmapResetTrigger}
+                onRangeClear={() => listingRef.current?.resetFilters()}
+                onRangeSelect={handleHeatmapRangeSelect}
+              />
+            </div>
+          )}
 
           {isBulkCreateOpen && (
             <div className="shrink-0 border-b bg-muted/50 supports-[backdrop-filter]:bg-muted/50">

@@ -2,7 +2,7 @@ import { ArrowRightLeft, Eye } from 'lucide-react';
 import React from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
-import AccountPill from '@/features/accounts/components/Pill';
+import { AccountPill } from '@/features/accounts';
 import TransferDetails from '@/features/transfers/components/Details';
 import FeeIndicator from '@/features/transfers/components/ListItemFeeIndicator';
 import { Button } from '@/components/ui/button';

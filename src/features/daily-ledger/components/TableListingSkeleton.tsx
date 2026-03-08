@@ -6,8 +6,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { cn } from '@/lib/utils';
-import { ListingRowSkeleton as TransferListingRowSkeleton } from '@/features/transfers/components/TableListingSkeleton';
-import { ListingRowSkeleton as TransactionListingRowSkeleton } from '@/features/transactions/components/TableListingSkeleton';
+import { TransactionListingRowSkeleton } from '@/features/transactions';
+import { TransferListingRowSkeleton } from '@/features/transfers';
 
 interface Props {
   after: Moment;

@@ -1,5 +1,3 @@
-import { CURRENCIES } from '@/constants/currency';
-
 import type { ProcessedCategory } from './types';
 
 type CategoryApiNode = {
@@ -30,14 +28,3 @@ export const processCategoryTree = (data: CategoryApiNode[]): ProcessedCategory[
       children,
     };
   }) || [];
-
-export const renderNativeLine = (amount?: number, code?: string | null) => {
-  if (typeof amount !== 'number' || !code) return null;
-  const symbol = CURRENCIES[code as keyof typeof CURRENCIES]?.symbol;
-
-  return (
-    <span className="text-2xs leading-4 text-muted-foreground">
-      {symbol ? `${symbol} ${amount.toLocaleString()}` : `${amount.toLocaleString()} ${code}`}
-    </span>
-  );
-};

@@ -10,7 +10,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
+import { CategoryTypeahead } from '@/features/categories';
 import { Type as TransactionType } from '@/features/transactions';
 import { StatisticsConfig } from '@/types/statistics';
 // @ts-nocheck

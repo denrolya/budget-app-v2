@@ -6,9 +6,9 @@ import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui
 import { Badge } from '@/components/ui/badge';
 
 type Option = {
-  value: string
-  label: string
-}
+  value: string;
+  label: string;
+};
 
 interface TypeaheadProps {
   name: string;
@@ -18,20 +18,17 @@ interface TypeaheadProps {
   placeholder?: string;
 }
 
-export function Typeahead({
-                                   name,
-                                   value,
-                                   onChange,
-                                   options,
-                                   placeholder = 'Select options...',
-                                 }: TypeaheadProps) {
+export function Typeahead({ name, value, onChange, options, placeholder = 'Select options...' }: TypeaheadProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState('');
 
-  const handleUnselect = React.useCallback((option: Option) => {
-    onChange(value.filter((s) => s.value !== option.value));
-  }, [onChange, value]);
+  const handleUnselect = React.useCallback(
+    (option: Option) => {
+      onChange(value.filter((s) => s.value !== option.value));
+    },
+    [onChange, value],
+  );
 
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -50,15 +47,10 @@ export function Typeahead({
     [onChange, value],
   );
 
-  const selectables = options.filter(
-    (option) => !value.some(item => item.value === option.value),
-  );
+  const selectables = options.filter((option) => !value.some((item) => item.value === option.value));
 
   return (
-    <Command
-      onKeyDown={handleKeyDown}
-      className="overflow-visible bg-transparent"
-    >
+    <Command onKeyDown={handleKeyDown} className="overflow-visible bg-transparent">
       <div className="group rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
         <div className="flex flex-wrap gap-1">
           {value.map((option) => (

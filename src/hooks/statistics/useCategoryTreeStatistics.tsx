@@ -5,7 +5,7 @@ import { DependencyList, useEffect } from 'react';
 import { useBaseCurrency } from '@/features/auth';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useCategories } from '@/hooks/financeData';
-import Category from '@/features/categories/models/Category';
+import { Category } from '@/features/categories';
 import { axiosFetcher } from '@/services/api';
 import { Type as TransactionType } from '@/features/transactions';
 import { generateQueryParamsString } from '@/lib/url/generateQueryParamsString';

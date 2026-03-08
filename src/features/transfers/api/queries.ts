@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useBaseCurrency } from '@/features/auth';
 import { FormType, useFormSubmitListener } from '@/contexts/Form';
-import { TransactionFactory } from '@/features/transactions/models/Transaction';
+import { TransactionFactory } from '@/features/transactions';
 import { queryKeys } from '@/features/transfers/api/keys';
 import { transferService } from '@/features/transfers/api/service';
 import Transfer from '@/features/transfers/models/Transfer';

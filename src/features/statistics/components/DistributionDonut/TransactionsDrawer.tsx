@@ -2,7 +2,7 @@ import type { Moment } from 'moment';
 import React, { useMemo } from 'react';
 
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
-import ListingContainer from '@/features/daily-ledger/components/ListingContainer';
+import { ListingContainer } from '@/features/daily-ledger';
 
 export type DrawerListingTarget = {
   title: string;
