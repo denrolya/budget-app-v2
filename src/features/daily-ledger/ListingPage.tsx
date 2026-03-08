@@ -1,27 +1,21 @@
-import { CopyPlus, PanelTopClose, PanelTopOpen, RotateCcw, SquarePlus } from 'lucide-react';
+import { PanelTopClose, PanelTopOpen, RotateCcw, SquarePlus } from 'lucide-react';
 import moment from 'moment';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
+import React, { useCallback, useRef, useState } from 'react';
 
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Toggle } from '@/components/ui/toggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
-import { BulkCreateTableForm, TransactionHeatmapChart } from '@/features/transactions';
+import { TransactionHeatmapChart } from '@/features/transactions';
 
 import ListingContainer, { type ListingHandle } from './components/ListingContainer';
 
 export const DailyLedgerPage: React.FC = () => {
   const { openForm } = useFormContext();
-  const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
-
   const listingRef = useRef<ListingHandle | null>(null);
 
-  const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
   const [displayMenuTarget, setDisplayMenuTarget] = useState<HTMLDivElement | null>(null);
@@ -44,22 +38,10 @@ export const DailyLedgerPage: React.FC = () => {
     setHeatmapResetTrigger((n) => n + 1);
   }, []);
 
-  const toggleBulkCreate = useCallback(() => {
-    setIsBulkCreateOpen((p) => !p);
-  }, []);
-
   const openNewTransactionForm = useCallback(() => {
     openForm(FormType.Transaction);
   }, [openForm]);
 
-  useHotkeys('b', toggleBulkCreate, { preventDefault: true }, [toggleBulkCreate]);
-  useEffect(() => {
-    const hotkeys = [{ windows: 'B', mac: 'B', description: 'Toggle Bulk Create' }];
-    addPageHotkeys('Daily Ledger', hotkeys);
-    return () => removePageHotkeys('Daily Ledger');
-  }, [addPageHotkeys, removePageHotkeys]);
-
-  const bulkCreateAriaLabel = isBulkCreateOpen ? 'Hide bulk create' : 'Show bulk create';
 
   return (
     <FullHeightPageContent>
@@ -69,23 +51,6 @@ export const DailyLedgerPage: React.FC = () => {
             <CardTitle className="text-2xl font-bold">Ledger</CardTitle>
 
             <div aria-label="Ledger actions" role="toolbar" className="flex flex-wrap items-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Toggle
-                    aria-label={bulkCreateAriaLabel}
-                    aria-pressed={isBulkCreateOpen}
-                    pressed={isBulkCreateOpen}
-                    type="button"
-                    variant="outline"
-                    className="hidden md:flex"
-                    onPressedChange={setIsBulkCreateOpen}
-                  >
-                    <CopyPlus aria-hidden="true" className="h-4 w-4" />
-                  </Toggle>
-                </TooltipTrigger>
-                <TooltipContent>Bulk Create</TooltipContent>
-              </Tooltip>
-
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -157,14 +122,6 @@ export const DailyLedgerPage: React.FC = () => {
                 onRangeClear={() => listingRef.current?.resetFilters()}
                 onRangeSelect={handleHeatmapRangeSelect}
               />
-            </div>
-          )}
-
-          {isBulkCreateOpen && (
-            <div className="shrink-0 border-b bg-muted/50 supports-[backdrop-filter]:bg-muted/50">
-              <div className="px-4 py-3">
-                <BulkCreateTableForm />
-              </div>
             </div>
           )}
 

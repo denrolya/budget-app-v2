@@ -110,7 +110,7 @@ export const useList = (options: UseTransfersListOptions = {}): UseTransfersList
     queryClient.invalidateQueries({ queryKey: queryKeyBase });
   }, [queryClient, queryKeyBase]);
 
-  useFormSubmitListener([FormType.Transaction, FormType.Transfer], handleFormSubmit);
+  useFormSubmitListener([FormType.Transaction, FormType.Transfer, FormType.BulkTransaction], handleFormSubmit);
 
   useEffect(() => {
     if (!listState.isError) return;

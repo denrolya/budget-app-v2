@@ -89,7 +89,17 @@ export const TableListing: React.FC<Props> = ({ compact = true, groupedItems, ..
 
   return (
     <div className="overflow-x-auto" {...props}>
-      <Table className="min-w-[700px]">
+      <Table className="min-w-[860px] table-fixed">
+        <colgroup>
+          <col className="w-4" />
+          <col className="w-24" />
+          <col className="w-[220px]" />
+          <col className="w-40" />
+          <col className="w-32" />
+          <col />
+          <col className="w-20" />
+          <col className="w-24" />
+        </colgroup>
         <TableHeader className="sr-only">
           <TableRow>
             <TableHead />

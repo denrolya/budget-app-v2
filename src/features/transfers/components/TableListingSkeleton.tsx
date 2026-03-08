@@ -98,17 +98,27 @@ export const TransferTableListingSkeleton: React.FC<TableSkeletonProps> = ({
   ...tableProps
 }) => (
   <div aria-label="Loading transfers table" role="status" className="overflow-x-auto">
-    <Table {...tableProps}>
+    <Table className="min-w-[860px] table-fixed" {...tableProps}>
+      <colgroup>
+        <col className="w-4" />
+        <col className="w-24" />
+        <col className="w-[220px]" />
+        <col className="w-40" />
+        <col className="w-32" />
+        <col />
+        <col className="w-20" />
+        <col className="w-24" />
+      </colgroup>
       <TableHeader className="sr-only">
         <TableRow>
-          <TableHead className="w-4" />
-          <TableHead className="w-1/12">ID</TableHead>
-          <TableHead className="w-3/12">Transfer</TableHead>
-          <TableHead className="w-2/12">Amount</TableHead>
-          <TableHead className="w-2/12">Rate</TableHead>
-          <TableHead className="w-2/12">Note</TableHead>
-          <TableHead className="w-1/12">Time</TableHead>
-          <TableHead className="w-1/12 text-right">Actions</TableHead>
+          <TableHead />
+          <TableHead>ID</TableHead>
+          <TableHead>Transfer</TableHead>
+          <TableHead>Amount</TableHead>
+          <TableHead>Rate</TableHead>
+          <TableHead>Note</TableHead>
+          <TableHead>Time</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
 

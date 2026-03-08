@@ -122,7 +122,7 @@ export const useList = (options: UseTransactionsListOptions = {}): UseTransactio
     queryClient.invalidateQueries({ queryKey: [queryKeyBase] });
   }, [queryClient, queryKeyBase]);
 
-  useFormSubmitListener([FormType.Transaction, FormType.Transfer], handleFormSubmit);
+  useFormSubmitListener([FormType.Transaction, FormType.Transfer, FormType.BulkTransaction], handleFormSubmit);
 
   // Toast on error
   useEffect(() => {

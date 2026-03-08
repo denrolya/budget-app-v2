@@ -6,6 +6,7 @@ export enum FormType {
   Account = 'account',
   Debt = 'debt',
   Category = 'category',
+  BulkTransaction = 'bulk-transaction',
 }
 
 interface FormState {

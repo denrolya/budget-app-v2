@@ -87,10 +87,21 @@ export const TransactionsTableListingSkeleton: React.FC<TableListingSkeletonProp
   groups = DEFAULT_GROUPS,
   ...tableProps
 }) => (
-  <Table {...tableProps}>
+  <div aria-label="Loading transactions table" role="status" className="overflow-x-auto">
+  <Table className="min-w-[860px] table-fixed" {...tableProps}>
+    <colgroup>
+      <col className="w-4" />
+      <col className="w-24" />
+      <col className="w-[220px]" />
+      <col className="w-40" />
+      <col className="w-32" />
+      <col />
+      <col className="w-20" />
+      <col className="w-24" />
+    </colgroup>
     <TableHeader className="sr-only">
       <TableRow>
-        <TableHead className="w-4" />
+        <TableHead />
         <TableHead>ID</TableHead>
         <TableHead>Account</TableHead>
         <TableHead>Amount</TableHead>
@@ -112,6 +123,7 @@ export const TransactionsTableListingSkeleton: React.FC<TableListingSkeletonProp
       ))}
     </TableBody>
   </Table>
+  </div>
 );
 
 TransactionsTableListingSkeleton.displayName = 'TransactionsTableListingSkeleton';

@@ -29,7 +29,7 @@ const typeaheadControlVariants = cva(
   cn(
     'flex items-center gap-1 rounded-md border border-input bg-background ring-offset-background',
     'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
-    'transition-colors',
+    'transition-colors aria-invalid:border-destructive',
   ),
   {
     variants: {
@@ -130,6 +130,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
     disabled,
     onKeyDown,
     onFocus,
+    'aria-invalid': ariaInvalid,
     ...inputProps
   }: TypeaheadV2Props<T, V>,
   ref: React.Ref<HTMLInputElement>,
@@ -298,7 +299,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
   const inputHasSelection = selectedOptions.length > 0;
 
   return (
-    <div className={cn(typeaheadVariants({ size }), className)} data-typeahead-root="true">
+    <div className={cn(typeaheadVariants({ size }), className)} aria-invalid={ariaInvalid} data-typeahead-root="true">
       <div
         className={cn(typeaheadControlVariants({ size }), disabled && 'opacity-50 cursor-not-allowed')}
         role="combobox"

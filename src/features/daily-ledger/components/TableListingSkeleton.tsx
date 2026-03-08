@@ -45,17 +45,27 @@ export const TableListingSkeleton: React.FC<Props> = ({
 
   return (
     <div aria-label="Loading transactions and transfers table" role="status" className="overflow-x-auto">
-      <Table className="w-full">
+      <Table className="min-w-[860px] table-fixed">
+        <colgroup>
+          <col className="w-4" />
+          <col className="w-24" />
+          <col className="w-[220px]" />
+          <col className="w-40" />
+          <col className="w-32" />
+          <col />
+          <col className="w-20" />
+          <col className="w-24" />
+        </colgroup>
         <TableHeader className="sr-only">
           <TableRow>
-            <TableHead className="w-4" />
-            <TableHead className="w-1/12">ID</TableHead>
-            <TableHead className="w-2/12">Account/Transfer</TableHead>
-            <TableHead className="w-2/12">Amount</TableHead>
-            <TableHead className="w-2/12">Category/Rate</TableHead>
-            <TableHead className="w-2/12">Note</TableHead>
-            <TableHead className="w-1/12">Time</TableHead>
-            <TableHead className="w-1/12 text-right">Actions</TableHead>
+            <TableHead />
+            <TableHead>ID</TableHead>
+            <TableHead>Account/Transfer</TableHead>
+            <TableHead>Amount</TableHead>
+            <TableHead>Category/Rate</TableHead>
+            <TableHead>Note</TableHead>
+            <TableHead>Time</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
 

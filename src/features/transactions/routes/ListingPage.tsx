@@ -1,4 +1,4 @@
-import { CopyPlus, Download, PanelTopClose, PanelTopOpen, RefreshCw, RotateCcw, SquarePlus } from 'lucide-react';
+import { Download, PanelTopClose, PanelTopOpen, RefreshCw, RotateCcw, SquarePlus } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useState } from 'react';
 
@@ -9,7 +9,6 @@ import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Toggle } from '@/components/ui/toggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
@@ -19,7 +18,6 @@ import { useList as useTransactionsList } from '../api';
 import { useMutations } from '../api/mutations';
 import { useListHotkeys as useHotkeys } from '../hooks/useHotkeys';
 import TransactionHeatmapChart from '../components/TransactionHeatmapChart';
-import BulkCreateTableForm from '../components/BulkCreateTableForm';
 import FormattedListing from '../components/FormattedListing';
 import InlineFilters from '../components/InlineFilters';
 import ListFiltersSheet from '../components/ListFiltersSheet';
@@ -29,7 +27,6 @@ export const TransactionsListPage: React.FC = () => {
   const { openForm } = useFormContext();
 
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [isBulkCreateOpen, setIsBulkCreateOpen] = useState(false);
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
 
   const {
@@ -55,7 +52,6 @@ export const TransactionsListPage: React.FC = () => {
 
   const isUpdatingBannerVisible = isFetching && !isLoading;
 
-  const bulkCreateAriaLabel = isBulkCreateOpen ? 'Hide bulk create' : 'Show bulk create';
   const filtersToggleAriaLabel = isFiltersOpen ? 'Close filters' : 'Open filters';
 
   const openNewTransactionForm = useCallback(() => {
@@ -64,10 +60,6 @@ export const TransactionsListPage: React.FC = () => {
 
   const toggleFilters = useCallback(() => {
     setIsFiltersOpen((prev) => !prev);
-  }, []);
-
-  const toggleBulkCreate = useCallback(() => {
-    setIsBulkCreateOpen((prev) => !prev);
   }, []);
 
   const refreshList = useCallback(() => {
@@ -82,7 +74,6 @@ export const TransactionsListPage: React.FC = () => {
     onPrevPage: () => currentPage > 1 && setCurrentPage(currentPage - 1),
     onNextPage: () => currentPage < totalPages && setCurrentPage(currentPage + 1),
     onFiltersToggle: toggleFilters,
-    onBulkCreateToggle: toggleBulkCreate,
   });
 
   return (
@@ -94,23 +85,6 @@ export const TransactionsListPage: React.FC = () => {
 
             <div aria-label="Transactions actions" role="toolbar" className="flex flex-wrap items-center gap-2">
               <SummaryBadge count={totalItems} icon={ROUTES.TRANSACTION_LIST.icon} value={totalValue} />
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Toggle
-                    aria-label={bulkCreateAriaLabel}
-                    aria-pressed={isBulkCreateOpen}
-                    pressed={isBulkCreateOpen}
-                    type="button"
-                    variant="outline"
-                    className="hidden md:flex"
-                    onPressedChange={setIsBulkCreateOpen}
-                  >
-                    <CopyPlus aria-hidden="true" className="h-4 w-4" />
-                  </Toggle>
-                </TooltipTrigger>
-                <TooltipContent>Bulk Create</TooltipContent>
-              </Tooltip>
 
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -229,14 +203,6 @@ export const TransactionsListPage: React.FC = () => {
                 onChange={setFilter}
                 onSortToggle={handleSortToggle}
               />
-            </div>
-          )}
-
-          {isBulkCreateOpen && (
-            <div className="shrink-0 border-b bg-muted/50 supports-[backdrop-filter]:bg-muted/50">
-              <div className="px-2 py-2 md:px-0 md:py-3">
-                <BulkCreateTableForm />
-              </div>
             </div>
           )}
 

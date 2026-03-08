@@ -21,6 +21,7 @@ export const globalHotkeys: Hotkey[] = [
   { windows: 'Shift+R', mac: 'Shift+R', description: 'Open Transfer Form' },
   { windows: 'Shift+O', mac: 'Shift+O', description: 'Open Category Form' },
   { windows: 'Shift+D', mac: 'Shift+D', description: 'Open Debt Form' },
+  { windows: 'Shift+B', mac: 'Shift+B', description: 'Open Bulk Create Transactions' },
   { windows: 'Shift+C', mac: 'Shift+C', description: 'Open Currency Converter' },
 ];
 
@@ -127,6 +128,16 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
     (event) => {
       event.preventDefault();
       openForm(FormType.Debt);
+    },
+    { preventDefault: true },
+    [openForm],
+  );
+
+  useReactHotkeysHook(
+    'shift+b',
+    (event) => {
+      event.preventDefault();
+      openForm(FormType.BulkTransaction);
     },
     { preventDefault: true },
     [openForm],

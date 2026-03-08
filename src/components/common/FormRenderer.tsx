@@ -6,7 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { AccountForm } from '@/features/accounts';
 import { CategoryForm } from '@/features/categories';
 import { DebtForm } from '@/features/debts';
-import { TransactionForm } from '@/features/transactions';
+import { BulkCreateTableForm, TransactionForm } from '@/features/transactions';
 import { TransferForm } from '@/features/transfers';
 import { Button } from '@/components/ui/button';
 import {
@@ -90,6 +90,23 @@ export const FormRenderer: React.FC = () => {
   };
 
   if (!formState.type) return null;
+
+  // BulkTransaction gets its own full-height bottom Drawer
+  if (formState.type === FormType.BulkTransaction) {
+    return (
+      <Drawer open={formState.isOpen} onOpenChange={handleOpenChange}>
+        <DrawerContent className="h-[85vh] flex flex-col">
+          <DrawerHeader className="shrink-0 border-b pb-3">
+            <DrawerTitle>Bulk Create Transactions</DrawerTitle>
+            <DrawerDescription className="sr-only">Create multiple transactions at once</DrawerDescription>
+          </DrawerHeader>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <BulkCreateTableForm />
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   const isEditMode = !!formState.values?.id;
   const title = `${isEditMode ? 'Edit' : 'New'} ${formState.type.charAt(0).toUpperCase() + formState.type.slice(1)}`;

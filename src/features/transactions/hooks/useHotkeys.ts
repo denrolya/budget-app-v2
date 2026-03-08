@@ -6,17 +6,14 @@ export const useListHotkeys = ({
   onPrevPage,
   onNextPage,
   onFiltersToggle,
-  onBulkCreateToggle,
 }: {
   onPrevPage: () => void;
   onNextPage: () => void;
   onFiltersToggle: () => void;
-  onBulkCreateToggle: () => void;
 }) => {
   const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
   useHotkeys('arrowleft', onPrevPage);
   useHotkeys('arrowright', onNextPage);
-  useHotkeys('b', onBulkCreateToggle);
   useHotkeys('f', onFiltersToggle);
 
   useEffect(() => {
@@ -30,11 +27,6 @@ export const useListHotkeys = ({
         windows: 'ArrowRight',
         mac: 'ArrowRight',
         description: 'Go to next page',
-      },
-      {
-        windows: 'B',
-        mac: 'B',
-        description: 'Toggle Bulk Create',
       },
       {
         windows: 'F',
