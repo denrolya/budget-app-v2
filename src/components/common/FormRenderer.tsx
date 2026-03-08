@@ -21,7 +21,9 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } f
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { Separator } from '@/components/ui/separator';
 
-const formComponents = {
+type StandardFormType = Exclude<FormType, FormType.BulkTransaction>;
+
+const formComponents: Record<StandardFormType, React.ComponentType<any>> = {
   [FormType.Account]: AccountForm,
   [FormType.Transaction]: TransactionForm,
   [FormType.Transfer]: TransferForm,
@@ -36,7 +38,7 @@ interface FormState {
 }
 
 interface FormContentProps {
-  formType: FormType;
+  formType: StandardFormType;
   values: any;
   onClose: () => void;
   setFormState: (updates: Partial<FormState>) => void;
@@ -95,7 +97,7 @@ export const FormRenderer: React.FC = () => {
   if (formState.type === FormType.BulkTransaction) {
     return (
       <Drawer open={formState.isOpen} onOpenChange={handleOpenChange}>
-        <DrawerContent className="h-[85vh] flex flex-col">
+        <DrawerContent className="h-[65vh] flex flex-col">
           <DrawerHeader className="shrink-0 border-b pb-3">
             <DrawerTitle>Bulk Create Transactions</DrawerTitle>
             <DrawerDescription className="sr-only">Create multiple transactions at once</DrawerDescription>
@@ -113,7 +115,7 @@ export const FormRenderer: React.FC = () => {
 
   const content = (
     <FormContent
-      formType={formState.type as FormType}
+      formType={formState.type as StandardFormType}
       setFormState={updateFormState}
       values={formState.values}
       key={formKey}

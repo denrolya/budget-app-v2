@@ -29,7 +29,7 @@ const typeaheadControlVariants = cva(
   cn(
     'flex items-center gap-1 rounded-md border border-input bg-background ring-offset-background',
     'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
-    'transition-colors aria-invalid:border-destructive',
+    'transition-colors aria-[invalid=true]:border-destructive',
   ),
   {
     variants: {
