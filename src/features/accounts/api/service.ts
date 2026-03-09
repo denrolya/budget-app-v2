@@ -49,14 +49,21 @@ export const accountService = {
   },
 
   async fetchGlobalDailyStats(
-    accountIds: number[],
+    filters: HeatmapFilters,
     after: string,
     before: string,
-    affectingProfit = false,
   ): Promise<DailyStatsResponse> {
     const params = new URLSearchParams({ after, before });
-    accountIds.forEach((id) => params.append('accounts[]', String(id)));
-    if (affectingProfit) params.set('affectingProfit', '1');
+    filters.accounts?.forEach((id) => params.append('accounts[]', String(id)));
+    filters.categories?.forEach((id) => params.append('categories[]', String(id)));
+    filters.excludedCategories?.forEach((id) => params.append('excludedCategories[]', String(id)));
+    if (filters.type) params.set('type', filters.type);
+    filters.currencies?.forEach((c) => params.append('currencies[]', c));
+    if (filters.isDraft !== undefined) params.set('isDraft', filters.isDraft ? '1' : '0');
+    if (filters.note) params.set('note', filters.note);
+    if (filters.amountGte !== undefined) params.set('amount[gte]', String(filters.amountGte));
+    if (filters.amountLte !== undefined) params.set('amount[lte]', String(filters.amountLte));
+    if (filters.affectingProfit !== undefined) params.set('affectingProfit', filters.affectingProfit ? '1' : '0');
     const { data } = await api.get<DailyStatsResponse>(`/api/v2/statistics/daily?${params}`);
     return data;
   },
@@ -80,3 +87,21 @@ export type BalanceHistoryResponse = { currency: string; data: BalanceHistoryPoi
 export type DailyStatsCurrencyValues = { income: number; expense: number };
 export type DailyStatsDatum = { day: string; count: number; convertedValues: Record<string, DailyStatsCurrencyValues> };
 export type DailyStatsResponse = { data: DailyStatsDatum[] };
+
+/**
+ * Filter params forwarded to the /statistics/daily endpoint.
+ * Date range (after/before) is managed separately by HeatmapPanel.
+ */
+export interface HeatmapFilters {
+  accounts?: number[];
+  categories?: Array<string | number>;
+  excludedCategories?: Array<string | number>;
+  type?: string;
+  currencies?: string[];
+  isDraft?: boolean;
+  note?: string;
+  amountGte?: number;
+  amountLte?: number;
+  /** When true, only count transactions whose category.isAffectingProfit = true. */
+  affectingProfit?: boolean;
+}

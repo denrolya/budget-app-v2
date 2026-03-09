@@ -1,4 +1,5 @@
-import { AlertCircle, Star, StarOff } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { AlertCircle, ChevronDown, ChevronUp, FileText, Star, StarOff } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -6,19 +7,21 @@ import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import BalanceHistoryChart from '@/features/accounts/components/BalanceHistoryChart';
 import AccountPill from '@/features/accounts/components/Pill';
-import { TransactionHeatmapChart } from '@/features/transactions';
+import { HeatmapPanel } from '@/features/transactions';
+import { transactionService } from '@/features/transactions/api/service';
 import Account from '@/features/accounts/models/Account';
-import { UpdateAccountDTO } from '@/features/accounts/types';
+import { Type as AccountType, UpdateAccountDTO } from '@/features/accounts/types';
 import {
   DailyList,
   TableListing,
   TableListingSkeleton,
   useTransactionsAndTransfersList,
 } from '@/features/daily-ledger';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { confirm } from '@/lib/confirmation';
 import { cn } from '@/lib/utils';
 
@@ -28,24 +31,48 @@ interface Props {
 }
 
 const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
-  const currentDate = moment().startOf('day');
   const daysPerPage = 15;
+  const isMobile = useIsMobile();
 
   const defaultRange = useMemo(
-    () => ({
-      after: currentDate.clone().subtract(daysPerPage - 1, 'days'),
-      before: currentDate.clone().endOf('day'),
-    }),
+    () => {
+      const today = moment().startOf('day');
+      return {
+        after: today.clone().subtract(daysPerPage - 1, 'days'),
+        before: today.clone().endOf('day'),
+      };
+    },
     [],
   );
 
   const [heatmapRange, setHeatmapRange] = useState<{ after: moment.Moment; before: moment.Moment } | null>(null);
   const activeRange = heatmapRange ?? defaultRange;
 
+  // Collapse heatmap by default on small screens
+  const [heatmapExpanded, setHeatmapExpanded] = useState(() => window.innerHeight > 680);
+  // Open a sheet on mobile when a heatmap range is selected
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
   const { groupedItems, isLoading, isError, error, setFilter } = useTransactionsAndTransfersList({
     updateUrl: true,
     omitTransferTransactions: true,
   });
+
+  // Draft count for bank accounts
+  const draftCountQuery = useQuery({
+    queryKey: ['details-drafts', account.id],
+    queryFn: () =>
+      transactionService.fetchList({
+        page: 1,
+        perPage: 1,
+        filters: { accounts: [account.id], isDraft: true } as any,
+        sort: {} as any,
+        omitTransferTransactions: false,
+      }),
+    enabled: account.type === AccountType.Bank && !!account.bankIntegration?.isActive,
+    staleTime: 1000 * 30,
+  });
+  const draftCount = draftCountQuery.data?.totalItems ?? 0;
 
   useEffect(() => {
     setFilter('after', activeRange.after);
@@ -56,13 +83,29 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
     setFilter('accounts', [account.id]);
   }, [account, setFilter]);
 
-  const handleHeatmapRangeSelect = useCallback((after: moment.Moment, before: moment.Moment) => {
-    setHeatmapRange({ after, before });
-  }, []);
+  const handleHeatmapRangeSelect = useCallback(
+    (after: moment.Moment, before: moment.Moment) => {
+      setHeatmapRange({ after, before });
+      if (isMobile) setMobileDrawerOpen(true);
+    },
+    [isMobile],
+  );
 
   const handleHeatmapRangeClear = useCallback(() => {
     setHeatmapRange(null);
+    setMobileDrawerOpen(false);
   }, []);
+
+  const highlightDates = useMemo(() => {
+    const dates: string[] = [];
+    const cursor = activeRange.after.clone().startOf('day');
+    const end = activeRange.before.clone().startOf('day');
+    while (cursor.isSameOrBefore(end, 'day')) {
+      dates.push(cursor.format('YYYY-MM-DD'));
+      cursor.add(1, 'day');
+    }
+    return dates;
+  }, [activeRange.after, activeRange.before]);
 
   const toggleSidebarVisibility = async () => {
     const confirmed = await confirm({
@@ -126,9 +169,9 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
   };
 
   return (
-    <>
+    <div className="h-full flex flex-col min-h-0">
       {/* Hero card: account info + embedded balance history chart */}
-      <Card className="mb-4 overflow-hidden">
+      <Card className="mb-4 overflow-hidden shrink-0">
         <CardHeader className="pb-1">
           <CardTitle className="flex items-center gap-2 flex-wrap">
             <AccountPill showName account={account} tooltip={false} variant="inline" />
@@ -173,37 +216,95 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
         </CardContent>
       </Card>
 
-      {/* Transaction heatmap */}
-      <Card className="mb-4 overflow-hidden">
-        <CardHeader className="pb-0">
-          <CardTitle className="text-base">Activity</CardTitle>
-          <CardDescription>Transaction activity by day — drag to filter the list below</CardDescription>
+      {/* Pending draft transactions notice — only for active bank accounts */}
+      {account.type === AccountType.Bank && draftCount > 0 && (
+        <div className="mb-4 flex items-center justify-between rounded-lg border border-warning/40 bg-warning/10 px-4 py-2.5 text-sm shrink-0">
+          <div className="flex items-center gap-2 text-foreground">
+            <FileText className="h-4 w-4 shrink-0 text-warning" />
+            <span>
+              <span className="font-medium">{draftCount}</span> pending transaction{draftCount !== 1 ? 's' : ''} to review
+            </span>
+          </div>
+          <Button size="sm" variant="link" className="h-auto p-0 text-xs" onClick={() => setFilter('isDraft', true)}>
+            Review drafts →
+          </Button>
+        </div>
+      )}
+
+      {/* Activity card: heatmap + ledger merged, fills remaining height */}
+      <Card className="flex-1 min-h-0 flex flex-col overflow-hidden">
+        <CardHeader className="flex-row items-start justify-between gap-2 pb-0 shrink-0">
+          <div className="min-w-0">
+            <CardTitle className="text-base">Activity</CardTitle>
+            <CardDescription>
+              {heatmapRange
+                ? `${heatmapRange.after.format('D MMM')} – ${heatmapRange.before.format('D MMM YYYY')}`
+                : `Transactions for the past ${daysPerPage} days — drag to filter`}
+            </CardDescription>
+          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                aria-label={heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7 shrink-0 mt-0.5"
+                onClick={() => setHeatmapExpanded((prev) => !prev)}
+              >
+                {heatmapExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                <span className="sr-only">{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</TooltipContent>
+          </Tooltip>
         </CardHeader>
-        <CardContent className="p-0">
-          <TransactionHeatmapChart
-            accountIds={[account.id]}
-            currency={account.currency}
-            onRangeClear={handleHeatmapRangeClear}
-            onRangeSelect={handleHeatmapRangeSelect}
-          />
+        <CardContent className="p-0 flex-1 min-h-0 flex flex-col overflow-hidden">
+          {heatmapExpanded && (
+            <HeatmapPanel
+              currency={account.currency}
+              filters={{ accounts: [account.id] }}
+              highlightDates={highlightDates}
+              onRangeClear={handleHeatmapRangeClear}
+              onRangeSelect={handleHeatmapRangeSelect}
+            />
+          )}
+          {/* On desktop: show transactions inline */}
+          {!isMobile && (
+            <div className={cn('border-t flex-1 min-h-0 overflow-y-auto', !heatmapExpanded && 'border-0')}>
+              {renderActivityContent()}
+            </div>
+          )}
+          {/* On mobile: show transactions inline when no range selected; otherwise open drawer */}
+          {isMobile && !heatmapRange && (
+            <div className={cn('border-t flex-1 min-h-0 overflow-y-auto', !heatmapExpanded && 'border-0')}>
+              {renderActivityContent()}
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Recent activity */}
-      <Card>
-        <CardHeader className="sr-only">
-          <CardTitle>Activity</CardTitle>
-          <CardDescription>
-            {heatmapRange
-              ? `${heatmapRange.after.format('D MMM')} – ${heatmapRange.before.format('D MMM YYYY')}`
-              : `Transactions for the past ${daysPerPage} days`}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-          <ScrollArea className="h-[400px]">{renderActivityContent()}</ScrollArea>
-        </CardContent>
-      </Card>
-    </>
+      {/* Mobile drawer: transactions for selected heatmap range */}
+      <Sheet
+        open={isMobile && mobileDrawerOpen}
+        onOpenChange={(v) => {
+          if (!v) handleHeatmapRangeClear();
+          setMobileDrawerOpen(v);
+        }}
+      >
+        <SheetContent side="bottom" className="h-[80dvh] flex flex-col p-0">
+          <SheetHeader className="px-4 pt-4 pb-2 shrink-0">
+            <SheetTitle className="text-sm font-medium">
+              {heatmapRange
+                ? `${heatmapRange.after.format('D MMM')} – ${heatmapRange.before.format('D MMM YYYY')}`
+                : 'Transactions'}
+            </SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            {renderActivityContent()}
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
   );
 };
 

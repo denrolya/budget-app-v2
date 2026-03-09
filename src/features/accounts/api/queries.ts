@@ -6,15 +6,15 @@ import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
 import Account from '../models/Account';
 
 import { queryKeys } from './keys';
-import { accountService, type BalanceHistoryResponse, type DailyStatsResponse } from './service';
+import { accountService, type BalanceHistoryResponse, type DailyStatsResponse, type HeatmapFilters } from './service';
 
-export const useGlobalDailyStats = (accountIds: number[], after: Moment, before: Moment, affectingProfit = false) => {
+export const useGlobalDailyStats = (filters: HeatmapFilters, after: Moment, before: Moment) => {
   const afterStr = after.format('YYYY-MM-DD');
   const beforeStr = before.format('YYYY-MM-DD');
 
   return useQuery<DailyStatsResponse, Error>({
-    queryKey: [...queryKeys.globalDailyStats(accountIds, afterStr, beforeStr), affectingProfit],
-    queryFn: () => accountService.fetchGlobalDailyStats(accountIds, afterStr, beforeStr, affectingProfit),
+    queryKey: queryKeys.globalDailyStats(filters, afterStr, beforeStr),
+    queryFn: () => accountService.fetchGlobalDailyStats(filters, afterStr, beforeStr),
     staleTime: 1000 * 60 * 5,
   });
 };

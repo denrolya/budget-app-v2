@@ -17,6 +17,7 @@ export { useInlineEdit } from './hooks/useInlineEdit';
 export { default as TransactionForm } from './components/Form';
 export { default as FormattedListing } from './components/FormattedListing';
 export { default as TransactionHeatmapChart } from './components/TransactionHeatmapChart';
+export { default as HeatmapPanel } from './components/HeatmapPanel';
 export { default as TransactionDetails } from './components/Details';
 export { default as BulkCreateTableForm } from './components/BulkCreateTableForm';
 export {

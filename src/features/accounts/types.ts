@@ -25,4 +25,6 @@ export type UpdateAccountDTO = Partial<Omit<CreateAccountDTO, 'balance'>> & {
   isDisplayedOnSidebar?: boolean;
   balance?: number;
   archivedAt?: string | null;
+  bankIntegration?: string | null;
+  externalAccountId?: string | null;
 };

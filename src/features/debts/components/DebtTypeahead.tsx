@@ -67,25 +67,27 @@ const DebtTypeahead = forwardRef<HTMLInputElement, DebtTypeaheadProps>(
 
     const renderElement: TypeaheadV2Props<Debt, string>['renderElement'] = useCallback(
       (el): ReactNode => (
-        <>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{el.debtorWithCurrency}</p>
+        <div className="flex items-center justify-between w-full min-w-0 gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-sm font-medium truncate">{el.debtor}</span>
+            <span className="shrink-0 text-xs text-muted-foreground font-mono">{el.currency}</span>
+            {el.isClosed() && (
+              <span className="shrink-0 text-2xs text-muted-foreground border border-border rounded px-1 leading-4">
+                closed
+              </span>
+            )}
           </div>
-
-          <div className="shrink-0 text-right">
-            <MoneyValue
-              showSign
-              amount={el.balance}
-              currency={el.currency}
-              className={cn('font-medium text-xs tabular-nums whitespace-nowrap', {
-                'text-destructive': el.balance < 0,
-                'text-success': el.balance > 0,
-                'text-muted-foreground': el.balance === 0,
-              })}
-            />
-            {el.isClosed() ? <p className="text-2xs text-muted-foreground">Closed</p> : null}
-          </div>
-        </>
+          <MoneyValue
+            showSign
+            amount={el.balance}
+            currency={el.currency}
+            className={cn('shrink-0 font-medium text-xs tabular-nums whitespace-nowrap', {
+              'text-destructive': el.balance < 0,
+              'text-success': el.balance > 0,
+              'text-muted-foreground': el.balance === 0,
+            })}
+          />
+        </div>
       ),
       [],
     );

@@ -24,25 +24,54 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
       return [...incomeCategories, ...expenseCategories];
     }, [expenseCategories, incomeCategories, type]);
 
-    const sortedOptions = useMemo(
-      () => options.slice().sort((a, b) => a.getFullPath().join(' > ').localeCompare(b.getFullPath().join(' > '))),
-      [options],
-    );
+    // File-explorer sort: folders (has children) before leaves, then lexicographic within each level.
+    // Preserves parent→child ordering by sorting the full path segment-by-segment.
+    const sortedOptions = useMemo(() => {
+      return options.slice().sort((a, b) => {
+        const aPath = a.getFullPath();
+        const bPath = b.getFullPath();
+        const len = Math.min(aPath.length, bPath.length);
+        for (let i = 0; i < len; i++) {
+          const cmp = aPath[i].localeCompare(bPath[i]);
+          if (cmp !== 0) return cmp;
+        }
+        // Same prefix: folder (has children) before leaf
+        if (aPath.length !== bPath.length) {
+          const aIsFolder = a.children.length > 0;
+          const bIsFolder = b.children.length > 0;
+          if (aIsFolder && !bIsFolder) return -1;
+          if (!aIsFolder && bIsFolder) return 1;
+        }
+        return aPath.length - bPath.length;
+      });
+    }, [options]);
 
     const renderElement = useCallback<TypeaheadV2Props<Category, string>['renderElement']>(
-      (el): ReactNode => (
-        <>
-          <div className="flex flex-col min-w-0">
-            <span className="truncate">{el.name}</span>
-            <span className="text-xs text-muted-foreground truncate">{el.getFullPath().join(' > ')}</span>
+      (el, _vf, _lf, { isFiltered }): ReactNode => {
+        const depth = el.depth;
+        if (isFiltered) {
+          return (
+            <div className="flex flex-col min-w-0 w-full">
+              <span className="truncate text-sm">{el.name}</span>
+              {depth > 0 && (
+                <span className="truncate text-xs text-muted-foreground">
+                  {el.getFullPath().slice(0, -1).join(' › ')}
+                </span>
+              )}
+            </div>
+          );
+        }
+        return (
+          <div className="flex items-center w-full min-w-0" style={{ paddingLeft: Math.min(depth, 3) * 14 }}>
+            <div className="flex items-center gap-1.5 min-w-0">
+              {depth > 0 && (
+                <span className="shrink-0 text-muted-foreground/50 select-none" aria-hidden="true">└</span>
+              )}
+              <span className="truncate">{el.name}</span>
+            </div>
           </div>
-
-          <div className="ml-auto flex items-center space-x-2 shrink-0">
-            <span style={{ backgroundColor: el.color }} className="w-3 h-3 rounded-full" />
-            <span className="text-xs font-medium">{el.type}</span>
-          </div>
-        </>
-      ),
+        );
+      },
       [],
     );
 
@@ -60,6 +89,7 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
 
     return (
       <TypeaheadV2<Category, string>
+        hideCheckmarkColumn={false}
         filterFn={filterFn}
         groupBy="type"
         labelField="name"

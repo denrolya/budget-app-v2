@@ -17,10 +17,11 @@ import { useActiveAccounts } from '@/hooks/financeData';
 
 import { useList as useAccountsQuery, useMutations } from '../api';
 import AccountDetails from '../components/Details';
+import BankSheet from '../components/BankSheet';
 import AccountsSunburstChart, { type HoveredSunburstNode } from '../components/AccountsSunburstChart';
 import SidebarListing from '../components/SidebarListing';
 import Account from '../models/Account';
-import { UpdateAccountDTO } from '../types';
+import { Type as AccountType, UpdateAccountDTO } from '../types';
 
 // ─── Type display labels ──────────────────────────────────────────────────────
 
@@ -402,6 +403,8 @@ const AccountDetailsRoute: React.FC = () => {
     // Details route manages its own scroll
     <div className="h-full flex flex-col min-h-0">
       <PageWithSidebar.Header title="Account Details" onBack={() => navigate('/accounts')}>
+        {/* Bank connection management — only for bank accounts */}
+        {account.type === AccountType.Bank && <BankSheet account={account} onAccountUpdate={onAccountUpdate} />}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -447,10 +450,8 @@ const AccountDetailsRoute: React.FC = () => {
       </PageWithSidebar.Header>
 
       {/* Details content scrolls independently */}
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        <div className="p-4">
-          <AccountDetails account={account} onAccountUpdate={onAccountUpdate} />
-        </div>
+      <div className="flex-1 min-h-0 overflow-hidden p-4">
+        <AccountDetails account={account} onAccountUpdate={onAccountUpdate} />
       </div>
     </div>
   );

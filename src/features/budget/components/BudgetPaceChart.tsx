@@ -43,7 +43,7 @@ const BudgetPaceChart: React.FC<Props> = ({ budget, analytics: _analytics, displ
   const after = useMemo(() => moment(budget.startDate), [budget.startDate]);
   const before = useMemo(() => moment(budget.endDate), [budget.endDate]);
 
-  const { data: dailyStatsData, isLoading } = useGlobalDailyStats([], after, before);
+  const { data: dailyStatsData, isLoading } = useGlobalDailyStats({}, after, before);
   const { data: catData } = useCategoryList();
 
   const { paceData, actualData, totalPlanned } = useMemo(() => {

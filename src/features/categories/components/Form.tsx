@@ -199,7 +199,6 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
                   disabled={field.disabled}
                   multiple={false}
                   name={field.name}
-                  size="sm"
                   type={form.watch('type') as TransactionType}
                   value={field.value != null ? String(field.value) : null}
                   onBlur={field.onBlur}

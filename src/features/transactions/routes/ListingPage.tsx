@@ -1,6 +1,6 @@
 import { Download, PanelTopClose, PanelTopOpen, RefreshCw, RotateCcw, SquarePlus } from 'lucide-react';
 import moment from 'moment';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import Pagination from '@/components/common/Pagination';
@@ -17,7 +17,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useList as useTransactionsList } from '../api';
 import { useMutations } from '../api/mutations';
 import { useListHotkeys as useHotkeys } from '../hooks/useHotkeys';
-import TransactionHeatmapChart from '../components/TransactionHeatmapChart';
+import HeatmapPanel from '../components/HeatmapPanel';
 import FormattedListing from '../components/FormattedListing';
 import InlineFilters from '../components/InlineFilters';
 import ListFiltersSheet from '../components/ListFiltersSheet';
@@ -47,6 +47,11 @@ export const TransactionsListPage: React.FC = () => {
   const handleSortToggle = useCallback(() => {
     sort.setSort({ field: sort.field || 'executedAt', direction: sort.direction === 'desc' ? 'asc' : 'desc' });
   }, [sort]);
+
+  const highlightDates = useMemo(
+    () => groupedItems.map(([date]) => date.format('YYYY-MM-DD')),
+    [groupedItems],
+  );
 
   const { exportTransactionsCsv, isExportingCsv } = useMutations({ invalidateKey: 'transactions' });
 
@@ -181,8 +186,19 @@ export const TransactionsListPage: React.FC = () => {
         <CardContent className="p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
           {isHeatmapVisible && (
             <div className="shrink-0 border-b">
-              <TransactionHeatmapChart
-                accountIds={(filters.accounts as string[]).map(Number)}
+              <HeatmapPanel
+                highlightDates={highlightDates}
+                filters={{
+                  accounts: (filters.accounts as string[]).map(Number),
+                  categories: filters.categories,
+                  excludedCategories: filters.excludedCategories,
+                  type: filters.type,
+                  currencies: filters.currencies,
+                  isDraft: filters.isDraft,
+                  note: filters.searchTerm || undefined,
+                  amountGte: Number.isFinite(filters.amountRange?.[0]) ? filters.amountRange![0] : undefined,
+                  amountLte: Number.isFinite(filters.amountRange?.[1]) ? filters.amountRange![1] : undefined,
+                }}
                 onRangeClear={() => {
                   setFilter('after', moment().subtract(30, 'days').startOf('day'));
                   setFilter('before', moment().endOf('day'));

@@ -1,5 +1,5 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
+import * as PopoverPrimitive from '@radix-ui/react-popover';
 import React, {
   forwardRef,
   useCallback,
@@ -18,56 +18,23 @@ import { cn } from '@/lib/utils';
 
 const HIDE_DROPDOWN_TIMEOUT = 150;
 
-const typeaheadVariants = cva('relative w-full', {
-  variants: {
-    size: { default: '', sm: '', lg: '' },
-  },
-  defaultVariants: { size: 'default' },
-});
+const typeaheadRootClass = 'relative w-full';
 
-const typeaheadControlVariants = cva(
-  cn(
-    'flex items-center gap-1 rounded-md border border-input bg-background ring-offset-background',
-    'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
-    'transition-colors aria-[invalid=true]:border-destructive',
-  ),
-  {
-    variants: {
-      size: {
-        default: 'min-h-9 px-3 py-2 text-sm',
-        sm: 'min-h-8 px-2.5 py-1.5 text-xs',
-        lg: 'min-h-10 px-4 py-2 text-base',
-      },
-    },
-    defaultVariants: { size: 'default' },
-  },
+const typeaheadControlClass = cn(
+  'flex items-center gap-1 rounded-md border border-input bg-background ring-offset-background',
+  'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
+  'transition-colors aria-[invalid=true]:border-destructive',
+  'min-h-9 px-3 py-2 text-sm',
 );
 
-const typeaheadInputVariants = cva('flex-1 bg-transparent outline-none placeholder:text-muted-foreground', {
-  variants: {
-    size: {
-      default: 'min-w-[50px] text-sm',
-      sm: 'min-w-[40px] text-xs',
-      lg: 'min-w-[60px] text-base',
-    },
-  },
-  defaultVariants: { size: 'default' },
-});
+const typeaheadInputClass =
+  'flex-1 bg-transparent outline-none focus-visible:outline-none focus-visible:ring-0 placeholder:text-muted-foreground min-w-[50px] text-sm';
 
-const typeaheadChipVariants = cva('whitespace-nowrap shadow-md bg-background', {
-  variants: { size: { default: 'text-xs py-0 px-1', sm: 'text-xs py-0 px-1', lg: 'text-sm py-0 px-1.5' } },
-  defaultVariants: { size: 'default' },
-});
+const typeaheadChipClass = 'whitespace-nowrap shadow-md bg-background text-xs py-0 px-1';
 
-const chevronButtonVariants = cva('ml-auto p-0 hover:bg-transparent', {
-  variants: { size: { default: 'h-4 w-4', sm: 'h-4 w-4', lg: 'h-5 w-5' } },
-  defaultVariants: { size: 'default' },
-});
+const chevronButtonClass = 'ml-auto p-0 hover:bg-transparent h-4 w-4';
 
-const chevronIconVariants = cva('', {
-  variants: { size: { default: 'h-4 w-4', sm: 'h-4 w-4', lg: 'h-5 w-5' } },
-  defaultVariants: { size: 'default' },
-});
+const chevronIconClass = 'h-4 w-4';
 
 type Group<T> = { label: string; options: T[] };
 
@@ -82,9 +49,7 @@ const readField = <T, K extends keyof T>(obj: T, key: K): T[K] => obj[key];
 const asString = (v: unknown): string => String(v);
 
 export interface TypeaheadV2Props<T, V extends string | number>
-  extends
-    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'size'>,
-    VariantProps<typeof typeaheadVariants> {
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
   multiple?: boolean;
 
   options: T[];
@@ -95,7 +60,7 @@ export interface TypeaheadV2Props<T, V extends string | number>
   groupBy?: keyof T & string;
 
   /** Custom option renderer (you own the layout) */
-  renderElement: (element: T, valueField: keyof T & string, labelField: keyof T & string) => React.ReactNode;
+  renderElement: (element: T, valueField: keyof T & string, labelField: keyof T & string, ctx: { isFiltered: boolean }) => React.ReactNode;
 
   emptyMessage?: string;
 
@@ -109,12 +74,14 @@ export interface TypeaheadV2Props<T, V extends string | number>
    * Use this when you typically exclude already selected options.
    */
   hideCheckmarkColumn?: boolean;
+
+  /** Extra classes applied to the dropdown panel. Use e.g. "min-w-full w-max" to let it grow beyond the trigger width. */
+  dropdownClassName?: string;
 }
 
 function TypeaheadV2Inner<T, V extends string | number>(
   {
     multiple = false,
-    size = 'default',
     options,
     valueField,
     labelField,
@@ -127,6 +94,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
     className,
     filterFn,
     hideCheckmarkColumn = true,
+    dropdownClassName,
     disabled,
     onKeyDown,
     onFocus,
@@ -140,7 +108,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const listboxId = useId();
 
@@ -184,15 +152,12 @@ function TypeaheadV2Inner<T, V extends string | number>(
 
   const filteredGroups: Group<T>[] = useMemo(() => {
     const query = inputValue.trim().toLowerCase();
-    const selectedSet = new Set(selectedValues.map(String));
 
     const matchesDefault = (option: T) => getLabel(option).toLowerCase().includes(query);
 
     return groupedOptions
       .map((group) => {
         const groupOptions = group.options.filter((option) => {
-          const optionValue = getKey(option);
-          if (selectedSet.has(optionValue)) return false;
           if (!query) return true;
           return filterFn ? filterFn(option, inputValue) : matchesDefault(option);
         });
@@ -200,13 +165,15 @@ function TypeaheadV2Inner<T, V extends string | number>(
         return { ...group, options: groupOptions };
       })
       .filter((g) => g.options.length > 0);
-  }, [groupedOptions, inputValue, selectedValues, filterFn, getKey, getLabel]);
+  }, [groupedOptions, inputValue, filterFn, getKey, getLabel]);
 
   const flatFilteredOptions = useMemo(() => filteredGroups.flatMap((g) => g.options), [filteredGroups]);
 
   const closeDropdownSoon = useCallback(() => {
     window.setTimeout(() => setOpen(false), HIDE_DROPDOWN_TIMEOUT);
   }, []);
+
+  // Radix Popover handles outside-click closing; we only need closeDropdownSoon for onBlur.
 
   const handleSelect = useCallback(
     (option: T) => {
@@ -258,6 +225,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
         if (option) handleSelect(option);
       } else if (event.key === 'Escape') {
         setOpen(false);
+        inputRef.current?.blur();
       } else if (event.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
         const next = selectedValues.slice(0, -1);
         onChange(multiple ? next : (next[0] ?? null));
@@ -274,21 +242,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
     setOpen(true);
   }, []);
 
-  useEffect(() => {
-    const onDocMouseDown = (event: MouseEvent) => {
-      const target = event.target as Node | null;
-      if (!target) return;
-
-      const inputRoot = inputRef.current?.closest('[data-typeahead-root="true"]') as HTMLElement | null;
-      if (inputRoot && inputRoot.contains(target)) return;
-      if (dropdownRef.current && dropdownRef.current.contains(target)) return;
-
-      setOpen(false);
-    };
-
-    document.addEventListener('mousedown', onDocMouseDown);
-    return () => document.removeEventListener('mousedown', onDocMouseDown);
-  }, []);
+  // No manual outside-click listener needed — Radix Popover handles it.
 
   useEffect(() => {
     if (open && highlightedIndex !== -1) {
@@ -297,11 +251,16 @@ function TypeaheadV2Inner<T, V extends string | number>(
   }, [open, highlightedIndex]);
 
   const inputHasSelection = selectedOptions.length > 0;
+  const selectedSet = useMemo(() => new Set(selectedValues.map(String)), [selectedValues]);
+  const showLabelOverlay = !multiple && inputValue === '' && inputHasSelection;
 
   return (
-    <div className={cn(typeaheadVariants({ size }), className)} aria-invalid={ariaInvalid} data-typeahead-root="true">
+    <PopoverPrimitive.Root open={open} onOpenChange={(v) => { if (!v) setOpen(false); }}>
+    <div className={cn(typeaheadRootClass, className)} aria-invalid={ariaInvalid} data-typeahead-root="true">
+      <PopoverPrimitive.Anchor asChild>
       <div
-        className={cn(typeaheadControlVariants({ size }), disabled && 'opacity-50 cursor-not-allowed')}
+        ref={triggerRef}
+        className={cn(typeaheadControlClass, disabled && 'opacity-50 cursor-not-allowed')}
         role="combobox"
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -317,13 +276,13 @@ function TypeaheadV2Inner<T, V extends string | number>(
       >
         <ScrollArea className="flex-1 min-w-0">
           <div className="flex items-center gap-1 min-w-0">
-            {selectedOptions.map((option) => {
+            {multiple && selectedOptions.map((option) => {
               const key = getKey(option);
               const label = getLabel(option);
               const rawValue = getRawValue(option);
 
               return (
-                <Badge key={key} variant="outline" className={cn(typeaheadChipVariants({ size }))}>
+                <Badge key={key} variant="outline" className={typeaheadChipClass}>
                   <span className="truncate max-w-[100px]">{label}</span>
                   <Button
                     type="button"
@@ -344,27 +303,33 @@ function TypeaheadV2Inner<T, V extends string | number>(
               );
             })}
 
-            <input
-              {...inputProps}
-              ref={inputRef}
-              autoComplete="off"
-              disabled={disabled}
-              value={inputValue}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDownInternal}
-              onFocus={(e) => {
-                if (!disabled) setOpen(true);
-                onFocus?.(e);
-              }}
-              onBlur={() => {
-                if (!disabled) closeDropdownSoon();
-              }}
-              placeholder={!inputHasSelection ? placeholder : ''}
-              className={cn(typeaheadInputVariants({ size }), !multiple && inputHasSelection && 'w-0 p-0')}
-              aria-autocomplete="list"
-              aria-controls={listboxId}
-              aria-activedescendant={highlightedIndex >= 0 ? `${listboxId}-opt-${highlightedIndex}` : undefined}
-            />
+            <div className="relative flex-1 min-w-0 flex items-center">
+              {showLabelOverlay && (
+                <span className="absolute inset-0 flex items-center text-sm pointer-events-none truncate">
+                  {selectedOptions[0] ? getLabel(selectedOptions[0]) : null}
+                </span>
+              )}
+              <input
+                {...inputProps}
+                ref={inputRef}
+                autoComplete="off"
+                disabled={disabled}
+                value={inputValue}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDownInternal}
+                onFocus={(e) => {
+                  if (!disabled) onFocus?.(e);
+                }}
+                onBlur={() => {
+                  if (!disabled) closeDropdownSoon();
+                }}
+                placeholder={!inputHasSelection ? placeholder : ''}
+                className={cn(typeaheadInputClass, 'w-full', showLabelOverlay && 'caret-transparent')}
+                aria-autocomplete="list"
+                aria-controls={listboxId}
+                aria-activedescendant={highlightedIndex >= 0 ? `${listboxId}-opt-${highlightedIndex}` : undefined}
+              />
+            </div>
           </div>
 
           <ScrollBar orientation="horizontal" className="h-0.5" />
@@ -375,7 +340,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
           type="button"
           variant="ghost"
           size="sm"
-          className={cn(chevronButtonVariants({ size }))}
+          className={chevronButtonClass}
           onClick={(e) => {
             e.stopPropagation();
             if (!disabled) setOpen((v) => !v);
@@ -383,14 +348,26 @@ function TypeaheadV2Inner<T, V extends string | number>(
           disabled={disabled}
           aria-label={open ? 'Close options' : 'Open options'}
         >
-          <ChevronsUpDown className={cn('opacity-50', chevronIconVariants({ size }))} aria-hidden="true" />
+          <ChevronsUpDown className={cn('opacity-50', chevronIconClass)} aria-hidden="true" />
         </Button>
       </div>
+      </PopoverPrimitive.Anchor>
 
-      {open && !disabled && (
-        <div
-          className="absolute z-50 w-full left-0 mt-1 bg-popover border border-input rounded-md shadow-md overflow-hidden"
-          ref={dropdownRef}
+      <PopoverPrimitive.Portal>
+        <PopoverPrimitive.Content
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+          side="bottom"
+          align="start"
+          sideOffset={4}
+          style={{ width: 'var(--radix-popover-trigger-width)' }}
+          className={cn(
+            'z-50 bg-popover border border-input rounded-md shadow-md overflow-hidden',
+            'data-[state=open]:animate-in data-[state=closed]:animate-out',
+            'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+            'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+            dropdownClassName,
+          )}
         >
           <ScrollArea className="max-h-[300px] overflow-y-auto" tabIndex={-1}>
             <div className="p-1 min-w-0" role="listbox" id={listboxId} aria-label="Options">
@@ -415,6 +392,7 @@ function TypeaheadV2Inner<T, V extends string | number>(
                       const flatIndex = groupOffset + index;
                       const optionKey = getKey(option);
                       const isHighlighted = highlightedIndex === flatIndex;
+                      const isSelected = selectedSet.has(optionKey);
 
                       return (
                         <div
@@ -424,12 +402,14 @@ function TypeaheadV2Inner<T, V extends string | number>(
                             optionRefs.current[flatIndex] = el;
                           }}
                           role="option"
-                          aria-selected={false}
+                          aria-selected={isSelected}
                           className={cn(
                             'flex items-center px-2 py-1.5 cursor-pointer min-w-0 text-sm',
                             isHighlighted
                               ? 'bg-accent text-accent-foreground'
-                              : 'text-popover-foreground hover:bg-accent hover:text-accent-foreground',
+                              : isSelected
+                                ? 'bg-accent/40 text-accent-foreground'
+                                : 'text-popover-foreground hover:bg-accent hover:text-accent-foreground',
                           )}
                           onMouseEnter={() => setHighlightedIndex(flatIndex)}
                           onMouseDown={(e) => {
@@ -439,11 +419,11 @@ function TypeaheadV2Inner<T, V extends string | number>(
                         >
                           {!hideCheckmarkColumn && (
                             <span className="mr-2 flex h-4 w-4 items-center justify-center shrink-0" aria-hidden="true">
-                              <Check className="h-4 w-4 opacity-0" />
+                              {isSelected ? <Check className="h-4 w-4" /> : null}
                             </span>
                           )}
 
-                          {renderElement(option, valueField, labelField)}
+                          {renderElement(option, valueField, labelField, { isFiltered: inputValue.trim() !== '' })}
                         </div>
                       );
                     })}
@@ -452,9 +432,10 @@ function TypeaheadV2Inner<T, V extends string | number>(
               })}
             </div>
           </ScrollArea>
-        </div>
-      )}
+        </PopoverPrimitive.Content>
+      </PopoverPrimitive.Portal>
     </div>
+    </PopoverPrimitive.Root>
   );
 }
 

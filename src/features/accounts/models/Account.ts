@@ -1,6 +1,7 @@
 import moment, { Moment } from 'moment';
 
 import { CURRENCIES } from '@/constants/currency';
+import type { BankIntegrationRaw } from '@/features/bank-integrations';
 
 import { Type as AccountType } from '../types';
 
@@ -15,6 +16,8 @@ export interface AccountRawData {
   archivedAt?: string | null;
   convertedValues?: Record<string, number>;
   isDisplayedOnSidebar: boolean;
+  externalAccountId?: string | null;
+  bankIntegration?: BankIntegrationRaw | null;
 }
 
 export default class Account {
@@ -29,6 +32,8 @@ export default class Account {
   color: string;
   convertedValues?: Record<string, number>;
   isDisplayedOnSidebar: boolean;
+  externalAccountId?: string | null;
+  bankIntegration?: BankIntegrationRaw | null;
 
   constructor(data: AccountRawData) {
     this.id = data.id;
@@ -42,6 +47,8 @@ export default class Account {
     this.color = `var(--account-${this.type.toLowerCase()}-${this.currency})`;
     this.convertedValues = data.convertedValues || undefined;
     this.isDisplayedOnSidebar = data.isDisplayedOnSidebar;
+    this.externalAccountId = data.externalAccountId ?? null;
+    this.bankIntegration = data.bankIntegration ?? null;
   }
 
   isPositive() {

@@ -1,6 +1,6 @@
 import { Edit, PanelTopClose, PanelTopOpen, RefreshCw, RotateCcw, SquarePlus, Trash2 } from 'lucide-react';
 import moment from 'moment';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import Pagination from '@/components/common/Pagination';
@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { TransactionHeatmapChart } from '@/features/transactions';
+import { HeatmapPanel } from '@/features/transactions';
 import FormattedListing from '@/features/transfers/components/FormattedListing';
 import InlineFilters from '@/features/transfers/components/InlineFilters';
 import ListFiltersSheet from '@/features/transfers/components/ListFiltersSheet';
@@ -45,6 +45,11 @@ export const TransfersListPage: React.FC = () => {
   } = useList();
 
   const isUpdatingBannerVisible = isFetching && !isLoading;
+
+  const highlightDates = useMemo(
+    () => groupedItems.map(([date]) => date.format('YYYY-MM-DD')),
+    [groupedItems],
+  );
 
   const handleSortToggle = useCallback(() => {
     sort.setSort({ field: sort.field || 'executedAt', direction: sort.direction === 'desc' ? 'asc' : 'desc' });
@@ -186,8 +191,8 @@ export const TransfersListPage: React.FC = () => {
         <CardContent className="p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
           {isHeatmapVisible && (
             <div className="shrink-0 border-b">
-              <TransactionHeatmapChart
-                accountIds={[]}
+              <HeatmapPanel
+                highlightDates={highlightDates}
                 onRangeClear={() => {
                   setFilter('after', moment().subtract(30, 'days').startOf('day'));
                   setFilter('before', moment().endOf('day'));

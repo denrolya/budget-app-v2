@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
-import { TransactionHeatmapChart } from '@/features/transactions';
+import { HeatmapPanel } from '@/features/transactions';
 
 import ListingContainer, { type ListingHandle } from './components/ListingContainer';
 
@@ -19,6 +19,7 @@ export const DailyLedgerPage: React.FC = () => {
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
   const [displayMenuTarget, setDisplayMenuTarget] = useState<HTMLDivElement | null>(null);
+  const [visibleDates, setVisibleDates] = useState<string[]>([]);
 
   // Heatmap ↔ listing sync: track when the heatmap is driving a range change so we
   // don't clear its selection in response to the resulting timeframe update.
@@ -116,8 +117,8 @@ export const DailyLedgerPage: React.FC = () => {
         <CardContent className="w-full min-w-0 p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
           {isHeatmapVisible && (
             <div className="shrink-0 border-b">
-              <TransactionHeatmapChart
-                accountIds={[]}
+              <HeatmapPanel
+                highlightDates={visibleDates}
                 resetTrigger={heatmapResetTrigger}
                 onRangeClear={() => listingRef.current?.resetFilters()}
                 onRangeSelect={handleHeatmapRangeSelect}
@@ -130,6 +131,7 @@ export const DailyLedgerPage: React.FC = () => {
             displayMenuPortalTarget={displayMenuTarget}
             onActiveCountChange={setActiveFilterCount}
             onTimeframeChange={handleListingTimeframeChange}
+            onVisibleDatesChange={setVisibleDates}
             ref={listingRef}
           />
         </CardContent>

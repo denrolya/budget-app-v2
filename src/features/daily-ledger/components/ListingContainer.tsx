@@ -60,6 +60,7 @@ type Props = {
   initialTimeframe?: Timeframe;
   onActiveCountChange?: (count: number) => void;
   onTimeframeChange?: (after: moment.Moment, before: moment.Moment) => void;
+  onVisibleDatesChange?: (dates: string[]) => void;
   displayMenuPortalTarget?: HTMLDivElement | null;
 };
 
@@ -109,6 +110,7 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
       initialTimeframe: initialTimeframeProp,
       onActiveCountChange,
       onTimeframeChange,
+      onVisibleDatesChange,
       displayMenuPortalTarget,
     },
     ref,
@@ -245,6 +247,18 @@ const ListingContainer = forwardRef<ListingHandle, Props>(
     useEffect(() => {
       onActiveCountChange?.(transactionFilters.activeCount);
     }, [onActiveCountChange, transactionFilters.activeCount]);
+
+    // Notify parent of visible dates (all calendar days in the current timeframe, including zero-transaction days)
+    useEffect(() => {
+      const dates: string[] = [];
+      const cursor = timeframe.after.clone().startOf('day');
+      const end = timeframe.before.clone().startOf('day');
+      while (cursor.isSameOrBefore(end, 'day')) {
+        dates.push(cursor.format(BACKEND_DATE_FORMAT));
+        cursor.add(1, 'day');
+      }
+      onVisibleDatesChange?.(dates);
+    }, [onVisibleDatesChange, timeframe.after, timeframe.before]);
 
     // expose imperative API
     useImperativeHandle(

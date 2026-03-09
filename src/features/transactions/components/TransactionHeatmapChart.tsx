@@ -1,4 +1,4 @@
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, X } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -11,7 +11,7 @@ import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { MOMENT_DATE_VIEW_FORMAT_2 } from '@/constants/datetime';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
-import { useGlobalDailyStats } from '@/features/accounts';
+import type { DailyStatsResponse } from '@/features/accounts/api/service';
 
 // ─── Year picker ───────────────────────────────────────────────────────────────
 
@@ -45,7 +45,7 @@ const YearPicker: React.FC<YearPickerProps> = ({ year, onChange }) => {
           <ChevronDown className="h-3 w-3 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-28 p-1">
+      <PopoverContent align="start" className="w-28 p-1">
         <div className="flex flex-col gap-0.5">
           {presets.map((y) => (
             <button
@@ -83,8 +83,10 @@ const YearPicker: React.FC<YearPickerProps> = ({ year, onChange }) => {
 type ViewMode = 'count' | 'income' | 'expense';
 
 export interface TransactionHeatmapChartProps {
-  /** Account IDs to show data for. Empty array = all accounts. */
-  accountIds: number[];
+  /** Pre-fetched daily stats data (from the parent / HeatmapPanel). */
+  data?: DailyStatsResponse;
+  /** Loading state forwarded from the data source. */
+  isLoading?: boolean;
   /** Currency code for formatting amounts in the tooltip. */
   currency?: string;
   /** Increment to clear the current drag selection (used when an external source changes the date range). */
@@ -99,11 +101,12 @@ export interface TransactionHeatmapChartProps {
   defaultViewMode?: ViewMode;
   /** Which year to show. Defaults to current year. */
   year?: number;
-  /** Override the API query date range (e.g. budget period). Grid still shows the full year; cells outside the range will have no data. */
-  rangeAfter?: moment.Moment;
-  rangeBefore?: moment.Moment;
-  /** When true, only counts transactions whose category.isAffectingProfit = true. Defaults to true. */
-  affectingProfit?: boolean;
+  /** Called when the user picks a different year (so the parent can re-fetch). */
+  onYearChange?: (year: number) => void;
+  /** Called when the view mode changes (count/income/expense). Used by HeatmapPanel to sync the stats sidebar. */
+  onViewModeChange?: (mode: 'count' | 'income' | 'expense') => void;
+  /** Dates (YYYY-MM-DD) to subtly highlight — e.g. dates currently visible in the listing below. */
+  highlightDates?: string[];
 }
 
 interface DayCell {
@@ -162,7 +165,9 @@ const buildGrid = (year: number, valueMap: Record<string, number>): DayCell[] =>
   const cursor = new Date(firstMonday);
   while (cursor <= end) {
     for (let d = 0; d < 7; d++) {
-      const dateStr = cursor.toISOString().split('T')[0];
+      const mm = cursor.getMonth() + 1;
+      const dd = cursor.getDate();
+      const dateStr = `${cursor.getFullYear()}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
       if (cursor >= start && cursor <= end) {
         cells.push({ date: dateStr, value: valueMap[dateStr] ?? 0, weekIdx, dayOfWeek: d });
       }
@@ -188,7 +193,8 @@ const getMonthLabels = (cells: DayCell[]) => {
 };
 
 const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
-  accountIds,
+  data,
+  isLoading = false,
   currency = 'EUR',
   resetTrigger,
   onRangeSelect,
@@ -197,14 +203,21 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
   showControls = true,
   defaultViewMode = 'count',
   year: yearProp,
-  rangeAfter,
-  rangeBefore,
-  affectingProfit = true,
+  onYearChange,
+  onViewModeChange,
+  highlightDates,
 }) => {
   const thisYear = moment().year();
   const [yearState, setYearState] = useState(yearProp ?? thisYear);
   const year = yearProp ?? yearState;
   const [viewMode, setViewMode] = useState<ViewMode>(defaultViewMode);
+
+  const handleViewModeChange = (v: string) => {
+    if (!v) return;
+    const mode = v as ViewMode;
+    setViewMode(mode);
+    onViewModeChange?.(mode);
+  };
 
   const [dragStart, setDragStart] = useState<string | null>(null);
   const [dragEnd, setDragEnd] = useState<string | null>(null);
@@ -224,17 +237,6 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
     setDragEnd(null);
   }, [resetTrigger]);
 
-  const after = useMemo(() => moment({ year, month: 0, day: 1 }).startOf('day'), [year]);
-  const before = useMemo(
-    () => (year === thisYear ? moment().endOf('day') : moment({ year, month: 11, day: 31 }).endOf('day')),
-    [year, thisYear],
-  );
-
-  // Use explicit range if provided (e.g. budget period), otherwise full year
-  const queryAfter = rangeAfter ?? after;
-  const queryBefore = rangeBefore ?? before;
-
-  const { data, isLoading } = useGlobalDailyStats(accountIds, queryAfter, queryBefore, affectingProfit);
   const { data: ratesData } = useExchangeRatesQuery();
   const rates = ratesData?.fixer ?? null;
 
@@ -301,10 +303,34 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
   };
 
   return (
-    <div className="px-4 py-2">
-      {/* Controls row: view toggle always visible; year picker only when showControls=true */}
+    <div className="px-4 py-2 w-fit">
+      {/* Controls row */}
       <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-        <ToggleGroup size="sm" type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as ViewMode)}>
+        <div className="flex items-center gap-1.5">
+          {showControls && (
+            <YearPicker
+              year={year}
+              onChange={(y) => {
+                setYearState(y);
+                onYearChange?.(y);
+                handleClear();
+              }}
+            />
+          )}
+          {selectable && isDragging && (
+            <span className="text-xs text-muted-foreground">Release to select…</span>
+          )}
+          {selectable && selectedRange && !isDragging && (
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted rounded-md px-2 py-1">
+              {moment(selectedRange.start).format('D MMM')} – {moment(selectedRange.end).format('D MMM YYYY')}
+              <button className="hover:text-foreground transition-colors" onClick={handleClear}>
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          )}
+        </div>
+
+        <ToggleGroup size="sm" type="single" value={viewMode} onValueChange={handleViewModeChange}>
           <ToggleGroupItem value="count" className="text-xs px-2">
             Count
           </ToggleGroupItem>
@@ -315,38 +341,7 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
             Expense
           </ToggleGroupItem>
         </ToggleGroup>
-
-        {showControls && (
-          <YearPicker
-            year={year}
-            onChange={(y) => {
-              setYearState(y);
-              handleClear();
-            }}
-          />
-        )}
       </div>
-
-      {/* Selection hint — only shown when selectable */}
-      {selectable && (
-        <div className="flex items-center justify-between mb-1 min-h-[16px]">
-          <p className="text-xs text-muted-foreground">
-            {isDragging
-              ? 'Release to select range'
-              : selectedRange
-                ? `${moment(selectedRange.start).format('D MMM')} – ${moment(selectedRange.end).format('D MMM YYYY')}`
-                : 'Drag to filter the transaction list'}
-          </p>
-          {selectedRange && (
-            <button
-              className="text-xs text-muted-foreground hover:text-foreground px-2 py-0.5 rounded hover:bg-muted transition-colors"
-              onClick={handleClear}
-            >
-              Clear
-            </button>
-          )}
-        </div>
-      )}
 
       {isLoading && (
         <div className="h-24 flex items-center justify-center">
@@ -406,14 +401,15 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
               const x = LEFT_PAD + cell.weekIdx * step;
               const y = TOP_PAD + cell.dayOfWeek * step;
               const inRange = isInRange(cell.date);
-              const dimmed = selectable && !!selectedRange && !isDragging && !inRange;
+              const isHighlighted = !inRange && (highlightDates?.includes(cell.date) ?? false);
+              const dimmed = selectable && !!selectedRange && !isDragging && !inRange && !isHighlighted;
               return (
                 <rect
                   height={CELL_SIZE}
                   opacity={dimmed ? 0.3 : 1}
                   rx={2}
-                  stroke={inRange ? 'hsl(var(--foreground))' : 'transparent'}
-                  strokeWidth={inRange ? 1.5 : 0}
+                  stroke={inRange ? 'hsl(var(--foreground))' : isHighlighted ? 'hsl(var(--foreground) / 0.4)' : 'transparent'}
+                  strokeWidth={inRange ? 1.5 : isHighlighted ? 1 : 0}
                   style={{ fill: heatColor(cell.value, maxValue, cssVar) }}
                   width={CELL_SIZE}
                   x={x}

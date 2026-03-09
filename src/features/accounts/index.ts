@@ -3,6 +3,7 @@ export { default as AccountsManagementPage } from './routes/ManagementPage';
 
 // Public hooks (feature API)
 export { useList, queryKeys, useGlobalDailyStats } from './api';
+export type { DailyStatsDatum, HeatmapFilters } from './api';
 
 // Models / types
 export { default as Account } from './models/Account';

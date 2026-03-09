@@ -6,7 +6,7 @@ import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
 import { Category, CategoryType, useList as useCategoryList } from '@/features/categories';
-import { TransactionHeatmapChart } from '@/features/transactions';
+import { HeatmapPanel } from '@/features/transactions';
 
 import type { BudgetDTO, BudgetAnalyticsItem } from '../api/types';
 
@@ -105,14 +105,15 @@ const BudgetHeatmapSection: React.FC<Props> = ({ budget, analytics, displayCurre
     <div className="flex gap-4 items-start">
       {/* Heatmap — no controls, locked to budget year, expense view */}
       <div className="flex-1 min-w-0 overflow-hidden">
-        <TransactionHeatmapChart
-          accountIds={[]}
+        <HeatmapPanel
           currency={displayCurrency}
           defaultViewMode="expense"
+          filters={{ affectingProfit: false }}
           rangeAfter={heatmapAfter}
           rangeBefore={heatmapBefore}
           selectable={false}
           showControls={false}
+          showStats={false}
           year={heatmapYear}
         />
       </div>

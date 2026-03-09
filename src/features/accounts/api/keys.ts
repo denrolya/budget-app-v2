@@ -5,6 +5,6 @@ export const queryKeys = {
     [...queryKeys.all, 'balance-history', id, after, before, interval] as const,
   dailyStats: (id: number, after: string, before: string) =>
     [...queryKeys.all, 'daily-stats', id, after, before] as const,
-  globalDailyStats: (accountIds: number[], after: string, before: string) =>
-    ['global-daily-stats', accountIds, after, before] as const,
+  globalDailyStats: (filters: object, after: string, before: string) =>
+    ['global-daily-stats', filters, after, before] as const,
 };
