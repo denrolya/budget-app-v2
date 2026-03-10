@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import type { BankAccountData, BankIntegrationRaw } from '../types';
+
 import { queryKeys } from './keys';
 import { bankIntegrationService } from './service';
 

@@ -110,6 +110,22 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     setIsInitialized(true);
   }, [login]);
 
+  // Redirect to login on any 401 response (expired token)
+  useEffect(() => {
+    const id = api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        const url: string = error.config?.url ?? '';
+        const status: number | undefined = error.response?.status;
+        if (status === 401 && !url.includes('/api/login_check') && !url.includes('/api/v2/auth/token/refresh')) {
+          logout();
+        }
+        return Promise.reject(error);
+      },
+    );
+    return () => api.interceptors.response.eject(id);
+  }, [logout]);
+
   return (
     <AuthContext.Provider
       value={{

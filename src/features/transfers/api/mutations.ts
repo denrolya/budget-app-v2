@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { api } from '@/services/api';
 import { queryKeys as accountQueryKeys } from '@/features/accounts';
 
-import type { CreateTransferInput } from '../types';
+import type { CreateTransferInput, UpdateTransferInput } from '../types';
 
 import { queryKeys } from './keys';
 
@@ -59,11 +59,38 @@ export const useMutations = (opts?: { invalidateKey?: readonly unknown[] }) => {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, ...input }: UpdateTransferInput) => {
+      const payload = {
+        from: input.from,
+        to: input.to,
+        amount: String(input.amount),
+        rate: String(input.rate),
+        fee: input.fee != null ? String(input.fee) : undefined,
+        feeAccount: input.feeAccount,
+        executedAt: moment(input.executedAt).toISOString(),
+        note: input.note ?? '',
+      };
+      return api.put(`/api/transfers/${id}`, payload).then((r) => r.data);
+    },
+    onSuccess: async () => {
+      await invalidate();
+      toast.success('Transfer updated successfully');
+    },
+    onError: (error: any) => {
+      toast.error('Failed to update transfer', {
+        description: error?.message || 'Unexpected error.',
+      });
+    },
+  });
+
   return {
     create: createMutation.mutateAsync,
+    update: updateMutation.mutateAsync,
     delete: deleteMutation.mutateAsync,
 
     isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
   };
 };

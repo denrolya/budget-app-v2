@@ -25,6 +25,8 @@ interface Props {
   onChange: <K extends keyof TransactionFilters>(key: K, value: TransactionFilters[K] | undefined | null) => void;
   sortDirection?: 'asc' | 'desc';
   onSortToggle?: () => void;
+  /** When true, hides the accounts typeahead (e.g. when already scoped to one account). */
+  hideAccountFilter?: boolean;
 }
 
 const H = 'h-9';
@@ -39,7 +41,7 @@ const Divider: React.FC = () => <span aria-hidden="true" className="hidden md:bl
 
 const CURRENCY_CODES = Object.keys(CURRENCIES) as CURRENCY_CODE[];
 
-const InlineFilters: React.FC<Props> = ({ data, onChange, sortDirection, onSortToggle }) => {
+const InlineFilters: React.FC<Props> = ({ data, onChange, sortDirection, onSortToggle, hideAccountFilter }) => {
   // --- Local amount state (avoids caret jumps on debounce) ---
   const [minLocal, setMinLocal] = useState('');
   const [maxLocal, setMaxLocal] = useState('');
@@ -205,18 +207,20 @@ const InlineFilters: React.FC<Props> = ({ data, onChange, sortDirection, onSortT
           )}
         </div>
 
-        <Divider />
-
-        {/* ACCOUNTS */}
-        <div aria-label="Accounts filter" role="group" className={cn('flex items-center', TYPEAHEAD_W)}>
-          <AccountTypeahead
-            multiple
-            placeholder="Accounts"
-            value={data.accounts}
-            className="w-full"
-            onChange={(accounts) => onChange('accounts', accounts as string[] | null)}
-          />
-        </div>
+        {!hideAccountFilter && (
+          <>
+            <Divider />
+            <div aria-label="Accounts filter" role="group" className={cn('flex items-center', TYPEAHEAD_W)}>
+              <AccountTypeahead
+                multiple
+                placeholder="Accounts"
+                value={data.accounts}
+                className="w-full"
+                onChange={(accounts) => onChange('accounts', accounts as string[] | null)}
+              />
+            </div>
+          </>
+        )}
 
         <Divider />
 

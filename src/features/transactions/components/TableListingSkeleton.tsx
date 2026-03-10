@@ -88,41 +88,41 @@ export const TransactionsTableListingSkeleton: React.FC<TableListingSkeletonProp
   ...tableProps
 }) => (
   <div aria-label="Loading transactions table" role="status" className="overflow-x-auto">
-  <Table className="min-w-[860px] table-fixed" {...tableProps}>
-    <colgroup>
-      <col className="w-4" />
-      <col className="w-24" />
-      <col className="w-[220px]" />
-      <col className="w-40" />
-      <col className="w-32" />
-      <col />
-      <col className="w-20" />
-      <col className="w-24" />
-    </colgroup>
-    <TableHeader className="sr-only">
-      <TableRow>
-        <TableHead />
-        <TableHead>ID</TableHead>
-        <TableHead>Account</TableHead>
-        <TableHead>Amount</TableHead>
-        <TableHead>Category</TableHead>
-        <TableHead>Note</TableHead>
-        <TableHead>Time</TableHead>
-        <TableHead className="text-right">Actions</TableHead>
-      </TableRow>
-    </TableHeader>
+    <Table className="min-w-[860px] table-fixed" {...tableProps}>
+      <colgroup>
+        <col className="w-4" />
+        <col className="w-24" />
+        <col className="w-[220px]" />
+        <col className="w-40" />
+        <col className="w-32" />
+        <col />
+        <col className="w-20" />
+        <col className="w-24" />
+      </colgroup>
+      <TableHeader className="sr-only">
+        <TableRow>
+          <TableHead />
+          <TableHead>ID</TableHead>
+          <TableHead>Account</TableHead>
+          <TableHead>Amount</TableHead>
+          <TableHead>Category</TableHead>
+          <TableHead>Note</TableHead>
+          <TableHead>Time</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
 
-    <TableBody aria-busy="true">
-      {Array.from({ length: groups }).map((_, groupIndex) => (
-        <React.Fragment key={groupIndex}>
-          <GroupHeaderSkeleton compact={compact} />
-          {Array.from({ length: rowsPerGroup }).map((__, rowIndex) => (
-            <ListingRowSkeleton compact={compact} className={className} key={`${groupIndex}-${rowIndex}`} />
-          ))}
-        </React.Fragment>
-      ))}
-    </TableBody>
-  </Table>
+      <TableBody aria-busy="true">
+        {Array.from({ length: groups }).map((_, groupIndex) => (
+          <React.Fragment key={groupIndex}>
+            <GroupHeaderSkeleton compact={compact} />
+            {Array.from({ length: rowsPerGroup }).map((__, rowIndex) => (
+              <ListingRowSkeleton compact={compact} className={className} key={`${groupIndex}-${rowIndex}`} />
+            ))}
+          </React.Fragment>
+        ))}
+      </TableBody>
+    </Table>
   </div>
 );
 

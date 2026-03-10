@@ -87,7 +87,6 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(
     return (
       <TypeaheadV2<Account, string>
         hideCheckmarkColumn
-        dropdownClassName="min-w-[var(--radix-popover-trigger-width)] w-max max-w-sm"
         filterFn={filterFn}
         groupBy="type"
         labelField="displayName"
@@ -98,6 +97,7 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(
         value={value}
         valueField="id"
         className={className}
+        dropdownClassName="min-w-[var(--radix-popover-trigger-width)] w-max max-w-sm"
         onChange={onChange}
         ref={ref}
         {...props}

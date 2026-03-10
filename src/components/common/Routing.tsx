@@ -9,27 +9,18 @@ import { LoginPage, LogoutRoute } from '@/features/auth';
 const AccountsManagementPage = lazy(() =>
   import('@/features/accounts').then(({ AccountsManagementPage: C }) => ({ default: C })),
 );
-const BudgetingPage = lazy(() =>
-  import('@/features/budget').then(({ BudgetingPage: C }) => ({ default: C })),
-);
+const BudgetingPage = lazy(() => import('@/features/budget').then(({ BudgetingPage: C }) => ({ default: C })));
 const CategoriesManagementPage = lazy(() =>
   import('@/features/categories').then(({ CategoriesManagementPage: C }) => ({ default: C })),
 );
 const DailyLedgerPage = lazy(() =>
   import('@/features/daily-ledger').then(({ DailyLedgerPage: C }) => ({ default: C })),
 );
-const DashboardV1Page = lazy(() =>
-  import('@/features/dashboard').then(({ DashboardV1Page: C }) => ({ default: C })),
-);
-const DashboardV2Page = lazy(() =>
-  import('@/features/dashboard').then(({ DashboardV2Page: C }) => ({ default: C })),
-);
+const DashboardPage = lazy(() => import('@/features/dashboard').then(({ DashboardPage: C }) => ({ default: C })));
 const DebtsManagementPage = lazy(() =>
   import('@/features/debts').then(({ DebtsManagementPage: C }) => ({ default: C })),
 );
-const SandboxPage = lazy(() =>
-  import('@/features/sandbox').then(({ SandboxPage: C }) => ({ default: C })),
-);
+const SandboxPage = lazy(() => import('@/features/sandbox').then(({ SandboxPage: C }) => ({ default: C })));
 const TransactionsListPage = lazy(() =>
   import('@/features/transactions').then(({ TransactionsListPage: C }) => ({ default: C })),
 );
@@ -44,8 +35,7 @@ const AppShell: React.FC = () => (
         <Routes>
           <Route index element={<Navigate replace to="/ledger" />} />
 
-          <Route element={<DashboardV1Page />} path="/dashboard/v1" />
-          <Route element={<DashboardV2Page />} path="/dashboard/v2" />
+          <Route element={<DashboardPage />} path="/dashboard" />
           <Route element={<TransactionsListPage />} path="/transactions" />
           <Route element={<TransfersListPage />} path="/transfers" />
           <Route element={<DailyLedgerPage />} path="/ledger" />

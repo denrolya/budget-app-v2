@@ -159,7 +159,7 @@ export const BulkCreateTableForm: React.FC = () => {
     <Form {...form}>
       <form
         aria-label="Bulk create transactions"
-        className="flex flex-col h-full"
+        className="flex flex-col flex-1 min-h-0"
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <div className="flex-1 overflow-y-auto overflow-x-auto">

@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { getExchangeRate } from '@/lib/getExchangeRates';
@@ -123,6 +123,7 @@ const HeatmapPanel: React.FC<HeatmapPanelProps> = ({
   rangeAfter,
   rangeBefore,
   onYearChange,
+  onViewModeChange: onViewModeChangeProp,
   currency = 'EUR',
   showStats = true,
   ...chartProps
@@ -147,6 +148,14 @@ const HeatmapPanel: React.FC<HeatmapPanelProps> = ({
 
   const [viewMode, setViewMode] = useState<ViewMode>((chartProps.defaultViewMode as ViewMode | undefined) ?? 'count');
 
+  const handleViewModeChange = useCallback(
+    (mode: ViewMode) => {
+      setViewMode(mode);
+      onViewModeChangeProp?.(mode);
+    },
+    [onViewModeChangeProp],
+  );
+
   const rows = data?.data ?? [];
 
   return (
@@ -157,7 +166,7 @@ const HeatmapPanel: React.FC<HeatmapPanelProps> = ({
         data={data}
         isLoading={isLoading}
         year={yearProp ?? year}
-        onViewModeChange={setViewMode}
+        onViewModeChange={handleViewModeChange}
         onYearChange={yearProp === undefined ? setYear : onYearChange}
       />
       {showStats && !isLoading && rows.length > 0 && (

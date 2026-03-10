@@ -14,6 +14,7 @@ export type SunburstNode = {
   color?: string;
   currency?: string;
   accountId?: number; // set on account leaves for tooltip lookup
+  accountColor?: string; // account.color — per-account pill color
   rawBalance?: number;
   convertedValue?: number;
   children?: SunburstNode[];
@@ -69,6 +70,7 @@ const AccountsSunburstChart: React.FC<Props> = ({ onHoverChange }) => {
             name: acc.name,
             value: Math.max(Math.abs(converted ?? acc.balance), 0.001),
             color: ringColor, // explicit fallback so arcs are never black
+            accountColor: acc.color, // individual per-account color (same as AccountPill marker)
             currency: acc.currency,
             accountId: acc.id, // for tooltip lookup
             rawBalance: acc.balance,
@@ -159,8 +161,8 @@ const AccountsSunburstChart: React.FC<Props> = ({ onHoverChange }) => {
       isInteractive
       animate={true}
       borderColor={{ theme: 'background' }}
-      borderWidth={6}
-      childColor={{ from: 'color', modifiers: [['brighter', 0.35]] }}
+      borderWidth={10}
+      inheritColorFromParent={false}
       cornerRadius={3}
       data={sunburstData}
       enableArcLabels={false}
@@ -170,9 +172,10 @@ const AccountsSunburstChart: React.FC<Props> = ({ onHoverChange }) => {
       tooltip={SunburstTooltip as any}
       transitionMode="pushIn"
       value="value"
-      // Use a function so both ring nodes and account nodes get their currency colour
+      // Leaves use their own account.color (matches AccountPill); rings use the currency CSS var
       colors={(node) => {
         const d = node.data as SunburstNode;
+        if (d.accountColor) return d.accountColor;
         if (d.currency) return getCurrencyBaseColor(d.currency);
         return '#888';
       }}

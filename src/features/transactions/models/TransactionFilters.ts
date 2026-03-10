@@ -11,6 +11,7 @@ interface TransactionFiltersProps {
   amountRange?: number[];
   categories?: string[] | number[];
   excludedCategories?: string[] | number[];
+  debts?: string[] | number[];
   accounts?: string[];
   withNestedCategories?: boolean;
   isDraft?: boolean;
@@ -77,6 +78,7 @@ export class TransactionFilters extends BaseFilters {
   amountRange!: number[];
   categories!: number[] | string[];
   excludedCategories!: number[] | string[];
+  debts!: number[] | string[];
   accounts!: string[];
   withNestedCategories!: boolean;
   isDraft?: boolean;
@@ -93,6 +95,7 @@ export class TransactionFilters extends BaseFilters {
       amountRange: initial.amountRange ?? [],
       categories: initial.categories ?? [],
       excludedCategories: initial.excludedCategories ?? [],
+      debts: initial.debts ?? [],
       accounts: initial.accounts ?? [],
       withNestedCategories: initial.withNestedCategories ?? false,
       isDraft: initial.isDraft,
@@ -108,6 +111,7 @@ export class TransactionFilters extends BaseFilters {
       amountRange: [...(filled.amountRange ?? [])],
       categories: [...(filled.categories ?? [])] as string[] | number[],
       excludedCategories: [...(filled.excludedCategories ?? [])] as string[] | number[],
+      debts: [...(filled.debts ?? [])] as string[] | number[],
       accounts: [...(filled.accounts ?? [])],
       currencies: [...(filled.currencies ?? [])],
     };
@@ -119,6 +123,7 @@ export class TransactionFilters extends BaseFilters {
     this.amountRange = toAmountRange(this.amountRange);
     this.categories = toMixedIdArray(this.categories) as string[] | number[];
     this.excludedCategories = toMixedIdArray(this.excludedCategories) as string[] | number[];
+    this.debts = toMixedIdArray(this.debts) as string[] | number[];
     this.currencies = toStringArray(this.currencies);
   }
 
@@ -135,6 +140,7 @@ export class TransactionFilters extends BaseFilters {
 
       case 'categories':
       case 'excludedCategories':
+      case 'debts':
       case 'accounts':
       case 'currencies':
         return readParamArray(params, paramKey);
@@ -182,6 +188,7 @@ export class TransactionFilters extends BaseFilters {
 
       case 'categories':
       case 'excludedCategories':
+      case 'debts':
         // Allow string|number IDs; normalize to array
         return toMixedIdArray(value as ScalarOrArray);
 
@@ -225,6 +232,7 @@ export class TransactionFilters extends BaseFilters {
       amountRange: [...(this._defaults.amountRange ?? [])],
       categories: [...(this._defaults.categories ?? [])],
       excludedCategories: [...(this._defaults.excludedCategories ?? [])],
+      debts: [...(this._defaults.debts ?? [])],
       accounts: [...(this._defaults.accounts ?? [])],
       currencies: [...(this._defaults.currencies ?? [])],
     });

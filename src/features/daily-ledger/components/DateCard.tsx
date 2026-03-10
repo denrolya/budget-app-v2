@@ -47,7 +47,7 @@ export const DateCard: React.FC<Props> = ({ date, items }) => {
   }, [transactions, transfers, baseCurrency]);
 
   return (
-    <Card className="h-full w-full overflow-hidden">
+    <Card className="h-full w-full overflow-hidden animate-in fade-in-0 zoom-in-[0.98] duration-300 ease-out">
       <CardContent className="h-full p-0 flex flex-col">
         <div className="flex items-start justify-between gap-3 border-b px-3 py-2">
           <h4 className="text-base font-semibold leading-6">
@@ -68,8 +68,12 @@ export const DateCard: React.FC<Props> = ({ date, items }) => {
         {items.length > 0 && (
           <div className="flex-1 min-h-0 overflow-y-auto px-3 py-2">
             <ul className="flex flex-col gap-3">
-              {items.map((item) => (
-                <li className="max-w-full" key={item.id}>
+              {items.map((item, i) => (
+                <li
+                  style={{ animationDelay: `${Math.min(i * 40, 320)}ms` }}
+                  className="max-w-full animate-in fade-in-0 slide-in-from-bottom-2 duration-200 ease-out [animation-fill-mode:both]"
+                  key={item.id}
+                >
                   {item instanceof Transaction && <TransactionListItem transaction={item} />}
                   {item instanceof Transfer && <TransferListItem transfer={item} />}
                 </li>

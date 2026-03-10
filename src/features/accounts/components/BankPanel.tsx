@@ -72,7 +72,8 @@ const BankPanel: React.FC<Props> = ({ account, onAccountUpdate, onConnectClick, 
   const handleDisconnect = async () => {
     const confirmed = await confirm({
       title: 'Disconnect bank account?',
-      description: 'This will unlink the bank integration from this account. No transactions will be deleted. You can reconnect later.',
+      description:
+        'This will unlink the bank integration from this account. No transactions will be deleted. You can reconnect later.',
       confirmText: 'Disconnect',
       cancelText: 'Cancel',
     });
@@ -122,7 +123,9 @@ const BankPanel: React.FC<Props> = ({ account, onAccountUpdate, onConnectClick, 
 
           <span className="ml-auto">
             {integration.lastSyncedAt ? (
-              <>Synced <RelativeDatetimeDisplay date={moment(integration.lastSyncedAt)} /></>
+              <>
+                Synced <RelativeDatetimeDisplay date={moment(integration.lastSyncedAt)} />
+              </>
             ) : (
               'Never synced'
             )}
@@ -150,7 +153,10 @@ const BankPanel: React.FC<Props> = ({ account, onAccountUpdate, onConnectClick, 
                 <Button
                   size="sm"
                   variant="outline"
-                  className={cn('w-full justify-start text-left font-normal text-xs h-8', !syncFrom && 'text-muted-foreground')}
+                  className={cn(
+                    'w-full justify-start text-left font-normal text-xs h-8',
+                    !syncFrom && 'text-muted-foreground',
+                  )}
                 >
                   <CalendarIcon className="mr-1.5 h-3 w-3" />
                   {syncFrom ? format(syncFrom, 'dd MMM yyyy') : 'All time'}
@@ -169,7 +175,10 @@ const BankPanel: React.FC<Props> = ({ account, onAccountUpdate, onConnectClick, 
                 <Button
                   size="sm"
                   variant="outline"
-                  className={cn('w-full justify-start text-left font-normal text-xs h-8', !syncTo && 'text-muted-foreground')}
+                  className={cn(
+                    'w-full justify-start text-left font-normal text-xs h-8',
+                    !syncTo && 'text-muted-foreground',
+                  )}
                 >
                   <CalendarIcon className="mr-1.5 h-3 w-3" />
                   {syncTo ? format(syncTo, 'dd MMM yyyy') : 'Today'}
@@ -183,12 +192,7 @@ const BankPanel: React.FC<Props> = ({ account, onAccountUpdate, onConnectClick, 
         </div>
 
         <div className="flex gap-2 justify-end">
-          <Button
-            disabled={sync.isPending}
-            size="sm"
-            variant="outline"
-            onClick={handleSync}
-          >
+          <Button disabled={sync.isPending} size="sm" variant="outline" onClick={handleSync}>
             {sync.isPending ? (
               <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
             ) : (

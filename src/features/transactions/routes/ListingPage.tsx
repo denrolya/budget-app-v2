@@ -1,85 +1,94 @@
 import { Download, PanelTopClose, PanelTopOpen, RefreshCw, RotateCcw, SquarePlus } from 'lucide-react';
-import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
+import moment, { type Moment } from 'moment';
+import React, { useCallback, useState } from 'react';
 
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
-import Pagination from '@/components/common/Pagination';
 import SummaryBadge from '@/components/common/SummaryBadge';
 import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import { LedgerView, useLedger } from '@/features/daily-ledger';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-import { useList as useTransactionsList } from '../api';
 import { useMutations } from '../api/mutations';
-import { useListHotkeys as useHotkeys } from '../hooks/useHotkeys';
 import HeatmapPanel from '../components/HeatmapPanel';
-import FormattedListing from '../components/FormattedListing';
 import InlineFilters from '../components/InlineFilters';
 import ListFiltersSheet from '../components/ListFiltersSheet';
+
+const DEFAULT_HEATMAP_RANGE = {
+  after: moment().subtract(30, 'days').startOf('day'),
+  before: moment().endOf('day'),
+};
 
 export const TransactionsListPage: React.FC = () => {
   const isMobile = useIsMobile();
   const { openForm } = useFormContext();
-
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
 
-  const {
-    groupedItems,
-    isLoading,
-    isError,
-    error,
-    refetch,
-    pagination: { currentPage, totalPages, perPage, totalItems, setCurrentPage, setPerPage },
-    filters,
-    setFilter,
-    resetFilters,
-    isFetching,
-    totalValue,
-    sort,
-  } = useTransactionsList();
-
-  const handleSortToggle = useCallback(() => {
-    sort.setSort({ field: sort.field || 'executedAt', direction: sort.direction === 'desc' ? 'asc' : 'desc' });
-  }, [sort]);
-
-  const highlightDates = useMemo(
-    () => groupedItems.map(([date]) => date.format('YYYY-MM-DD')),
-    [groupedItems],
-  );
-
+  const ledger = useLedger({ updateUrl: true, omitTransferTransactions: true });
   const { exportTransactionsCsv, isExportingCsv } = useMutations({ invalidateKey: 'transactions' });
 
-  const isUpdatingBannerVisible = isFetching && !isLoading;
+  const totalItems = ledger.transactionsState.pagination.totalItems;
+  const totalValue = ledger.transactionsState.totalValue;
+  const isUpdatingBannerVisible = ledger.isFetching && !ledger.isLoading;
 
-  const filtersToggleAriaLabel = isFiltersOpen ? 'Close filters' : 'Open filters';
+  const openNewTransactionForm = useCallback(() => openForm(FormType.Transaction), [openForm]);
 
-  const openNewTransactionForm = useCallback(() => {
-    openForm(FormType.Transaction);
-  }, [openForm]);
+  const exportCsv = useCallback(
+    () => void exportTransactionsCsv(ledger.transactionFilters),
+    [exportTransactionsCsv, ledger],
+  );
 
-  const toggleFilters = useCallback(() => {
-    setIsFiltersOpen((prev) => !prev);
-  }, []);
+  const handleFilterChange = useCallback(
+    (key: string, value: unknown) => {
+      if (key === 'after' && value) {
+        ledger.setTimeframe({ after: value as Moment, before: ledger.timeframe.before });
+        return;
+      }
+      if (key === 'before' && value) {
+        ledger.setTimeframe({ after: ledger.timeframe.after, before: value as Moment });
+        return;
+      }
+      ledger.setFilter(key, value);
+    },
+    [ledger],
+  );
 
-  const refreshList = useCallback(() => {
-    void refetch();
-  }, [refetch]);
+  const handleHeatmapRangeSelect = useCallback(
+    (after: Moment, before: Moment) => ledger.setTimeframe({ after, before }),
+    [ledger],
+  );
 
-  const exportCsv = useCallback(() => {
-    void exportTransactionsCsv(filters);
-  }, [exportTransactionsCsv, filters]);
+  const handleHeatmapRangeClear = useCallback(() => ledger.setTimeframe(DEFAULT_HEATMAP_RANGE), [ledger]);
 
-  useHotkeys({
-    onPrevPage: () => currentPage > 1 && setCurrentPage(currentPage - 1),
-    onNextPage: () => currentPage < totalPages && setCurrentPage(currentPage + 1),
-    onFiltersToggle: toggleFilters,
-  });
+  const handleSortToggle = useCallback(() => ledger.setIsReversedOrder(!ledger.isReversedOrder), [ledger]);
+
+  const toggleHeatmap = useCallback(() => setIsHeatmapVisible((v) => !v), []);
+
+  const heatmapFilters = {
+    accounts: ((ledger.transactionFilters.accounts as string[]) ?? []).map(Number),
+    categories: ledger.transactionFilters.categories,
+    excludedCategories: ledger.transactionFilters.excludedCategories,
+    type: ledger.transactionFilters.type,
+    currencies: ledger.transactionFilters.currencies,
+    isDraft: ledger.transactionFilters.isDraft,
+    note: ledger.transactionFilters.searchTerm || undefined,
+    amountGte: Number.isFinite(ledger.transactionFilters.amountRange?.[0])
+      ? ledger.transactionFilters.amountRange![0]
+      : undefined,
+    amountLte: Number.isFinite(ledger.transactionFilters.amountRange?.[1])
+      ? ledger.transactionFilters.amountRange![1]
+      : undefined,
+  };
+
+  const heatmapIcon = isHeatmapVisible ? (
+    <PanelTopClose aria-hidden="true" className="h-4 w-4" />
+  ) : (
+    <PanelTopOpen aria-hidden="true" className="h-4 w-4" />
+  );
 
   return (
     <FullHeightPageContent>
@@ -126,11 +135,11 @@ export const TransactionsListPage: React.FC = () => {
                 <TooltipTrigger asChild>
                   <Button
                     aria-label="Refresh transactions list"
-                    disabled={isLoading}
+                    disabled={ledger.isLoading}
                     size="icon"
                     type="button"
                     variant="outline"
-                    onClick={refreshList}
+                    onClick={ledger.refetch}
                   >
                     <RefreshCw aria-hidden="true" className="h-4 w-4" />
                   </Button>
@@ -138,7 +147,7 @@ export const TransactionsListPage: React.FC = () => {
                 <TooltipContent>Refresh</TooltipContent>
               </Tooltip>
 
-              {filters.activeCount > 0 && (
+              {ledger.activeFilterCount > 0 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -146,7 +155,7 @@ export const TransactionsListPage: React.FC = () => {
                       size="icon"
                       type="button"
                       variant="outline"
-                      onClick={resetFilters}
+                      onClick={ledger.resetAll}
                     >
                       <RotateCcw aria-hidden="true" className="h-4 w-4" />
                     </Button>
@@ -162,22 +171,18 @@ export const TransactionsListPage: React.FC = () => {
                     size="icon"
                     type="button"
                     variant="outline"
-                    onClick={() => setIsHeatmapVisible((v) => !v)}
+                    onClick={toggleHeatmap}
                   >
-                    {isHeatmapVisible ? (
-                      <PanelTopClose aria-hidden="true" className="h-4 w-4" />
-                    ) : (
-                      <PanelTopOpen aria-hidden="true" className="h-4 w-4" />
-                    )}
+                    {heatmapIcon}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>{isHeatmapVisible ? 'Hide heatmap' : 'Show heatmap'}</TooltipContent>
               </Tooltip>
 
               <FiltersToggleButton
-                activeCount={filters.activeCount}
-                aria-label={filtersToggleAriaLabel}
-                onClick={toggleFilters}
+                activeCount={ledger.activeFilterCount}
+                aria-label={ledger.isFiltersOpen ? 'Close filters' : 'Open filters'}
+                onClick={ledger.toggleFilters}
               />
             </div>
           </div>
@@ -187,26 +192,12 @@ export const TransactionsListPage: React.FC = () => {
           {isHeatmapVisible && (
             <div className="shrink-0 border-b">
               <HeatmapPanel
-                highlightDates={highlightDates}
-                filters={{
-                  accounts: (filters.accounts as string[]).map(Number),
-                  categories: filters.categories,
-                  excludedCategories: filters.excludedCategories,
-                  type: filters.type,
-                  currencies: filters.currencies,
-                  isDraft: filters.isDraft,
-                  note: filters.searchTerm || undefined,
-                  amountGte: Number.isFinite(filters.amountRange?.[0]) ? filters.amountRange![0] : undefined,
-                  amountLte: Number.isFinite(filters.amountRange?.[1]) ? filters.amountRange![1] : undefined,
-                }}
-                onRangeClear={() => {
-                  setFilter('after', moment().subtract(30, 'days').startOf('day'));
-                  setFilter('before', moment().endOf('day'));
-                }}
-                onRangeSelect={(after, before) => {
-                  setFilter('after', after);
-                  setFilter('before', before);
-                }}
+                showViewMode={false}
+                year={ledger.timeframe.after.year()}
+                filters={heatmapFilters}
+                highlightDates={ledger.visibleDates}
+                onRangeClear={handleHeatmapRangeClear}
+                onRangeSelect={handleHeatmapRangeSelect}
               />
             </div>
           )}
@@ -214,37 +205,16 @@ export const TransactionsListPage: React.FC = () => {
           {!isMobile && (
             <div className="shrink-0">
               <InlineFilters
-                data={filters}
-                sortDirection={sort.direction}
-                onChange={setFilter}
+                data={ledger.transactionFilters}
+                sortDirection={ledger.isReversedOrder ? 'desc' : 'asc'}
+                onChange={handleFilterChange as any}
                 onSortToggle={handleSortToggle}
               />
             </div>
           )}
 
-          <ScrollArea aria-label="Transactions list" className="flex-1 min-h-0">
-            <FormattedListing
-              error={error}
-              groupedItems={groupedItems}
-              isError={isError}
-              isLoading={isLoading}
-              refetch={refetch}
-              onAdd={openNewTransactionForm}
-            />
-          </ScrollArea>
+          <LedgerView ledger={ledger} showControls={false} showFiltersSheet={false} />
         </CardContent>
-
-        <CardFooter className="flex justify-end p-2 bg-background md:bg-card border-t">
-          <Pagination
-            currentPage={currentPage}
-            isLoading={isLoading}
-            perPage={perPage}
-            totalItems={totalItems}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            onPerPageChange={setPerPage}
-          />
-        </CardFooter>
       </Card>
 
       {isUpdatingBannerVisible && (
@@ -258,11 +228,11 @@ export const TransactionsListPage: React.FC = () => {
       )}
 
       <ListFiltersSheet
-        data={filters}
-        isOpen={isFiltersOpen}
-        setIsOpen={setIsFiltersOpen}
-        onChange={setFilter}
-        onReset={resetFilters}
+        data={ledger.transactionFilters}
+        isOpen={ledger.isFiltersOpen}
+        setIsOpen={ledger.setIsFiltersOpen}
+        onChange={handleFilterChange as any}
+        onReset={ledger.resetAll}
       />
     </FullHeightPageContent>
   );

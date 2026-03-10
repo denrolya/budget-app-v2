@@ -1,80 +1,76 @@
 import { Edit, PanelTopClose, PanelTopOpen, RefreshCw, RotateCcw, SquarePlus, Trash2 } from 'lucide-react';
-import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
+import moment, { type Moment } from 'moment';
+import React, { useCallback, useState } from 'react';
 
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
-import Pagination from '@/components/common/Pagination';
 import SummaryBadge from '@/components/common/SummaryBadge';
 import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
+import { LedgerView, useLedger } from '@/features/daily-ledger';
 import { HeatmapPanel } from '@/features/transactions';
-import FormattedListing from '@/features/transfers/components/FormattedListing';
 import InlineFilters from '@/features/transfers/components/InlineFilters';
 import ListFiltersSheet from '@/features/transfers/components/ListFiltersSheet';
-import { useListHotkeys as useHotkeys } from '@/features/transfers/hooks/useHotkeys';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-import { useList } from '../api';
+const DEFAULT_HEATMAP_RANGE = {
+  after: moment().subtract(30, 'days').startOf('day'),
+  before: moment().endOf('day'),
+};
 
 export const TransfersListPage: React.FC = () => {
   const isMobile = useIsMobile();
   const { openForm } = useFormContext();
-
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
   const [selectedTransfers] = useState<number[]>([]); // placeholder until bulk-select is implemented
 
-  const {
-    groupedItems,
-    isLoading,
-    isError,
-    error,
-    refetch,
-    pagination: { currentPage, totalPages, totalItems, perPage, setCurrentPage, setPerPage },
-    filters,
-    setFilter,
-    resetFilters,
-    isFetching,
-    totalValue,
-    sort,
-  } = useList();
-
-  const isUpdatingBannerVisible = isFetching && !isLoading;
-
-  const highlightDates = useMemo(
-    () => groupedItems.map(([date]) => date.format('YYYY-MM-DD')),
-    [groupedItems],
-  );
-
-  const handleSortToggle = useCallback(() => {
-    sort.setSort({ field: sort.field || 'executedAt', direction: sort.direction === 'desc' ? 'asc' : 'desc' });
-  }, [sort]);
-
-  const openNewTransferForm = useCallback(() => {
-    openForm(FormType.Transfer);
-  }, [openForm]);
-
-  const toggleFilters = useCallback(() => {
-    setIsFiltersOpen((prev) => !prev);
-  }, []);
-
-  const refreshList = useCallback(() => {
-    void refetch();
-  }, [refetch]);
-
-  useHotkeys({
-    onFiltersToggle: toggleFilters,
-    onPrevPage: () => currentPage > 1 && setCurrentPage(currentPage - 1),
-    onNextPage: () => currentPage < totalPages && setCurrentPage(currentPage + 1),
+  const ledger = useLedger({
+    updateUrl: true,
+    omitTransferTransactions: false,
+    omitTransactions: true,
   });
 
+  const totalItems = ledger.transfersState.pagination.totalItems;
+  const totalValue = ledger.transfersState.totalValue;
+  const isUpdatingBannerVisible = ledger.isFetching && !ledger.isLoading;
   const bulkSelectionVisible = selectedTransfers.length > 0;
-  const filtersToggleAriaLabel = isFiltersOpen ? 'Close filters' : 'Open filters';
+
+  const openNewTransferForm = useCallback(() => openForm(FormType.Transfer), [openForm]);
+
+  const handleFilterChange = useCallback(
+    (key: string, value: unknown) => {
+      if (key === 'after' && value) {
+        ledger.setTimeframe({ after: value as Moment, before: ledger.timeframe.before });
+        return;
+      }
+      if (key === 'before' && value) {
+        ledger.setTimeframe({ after: ledger.timeframe.after, before: value as Moment });
+        return;
+      }
+      ledger.setFilter(key, value);
+    },
+    [ledger],
+  );
+
+  const handleHeatmapRangeSelect = useCallback(
+    (after: Moment, before: Moment) => ledger.setTimeframe({ after, before }),
+    [ledger],
+  );
+
+  const handleHeatmapRangeClear = useCallback(() => ledger.setTimeframe(DEFAULT_HEATMAP_RANGE), [ledger]);
+
+  const handleSortToggle = useCallback(() => ledger.setIsReversedOrder(!ledger.isReversedOrder), [ledger]);
+
+  const toggleHeatmap = useCallback(() => setIsHeatmapVisible((v) => !v), []);
+
+  const heatmapIcon = isHeatmapVisible ? (
+    <PanelTopClose aria-hidden="true" className="h-4 w-4" />
+  ) : (
+    <PanelTopOpen aria-hidden="true" className="h-4 w-4" />
+  );
 
   return (
     <FullHeightPageContent>
@@ -105,11 +101,11 @@ export const TransfersListPage: React.FC = () => {
                 <TooltipTrigger asChild>
                   <Button
                     aria-label="Refresh transfers list"
-                    disabled={isLoading}
+                    disabled={ledger.isLoading}
                     size="icon"
                     type="button"
                     variant="outline"
-                    onClick={refreshList}
+                    onClick={ledger.refetch}
                   >
                     <RefreshCw aria-hidden="true" className="h-4 w-4" />
                   </Button>
@@ -117,7 +113,7 @@ export const TransfersListPage: React.FC = () => {
                 <TooltipContent>Refresh</TooltipContent>
               </Tooltip>
 
-              {filters.activeCount > 0 && (
+              {ledger.activeFilterCount > 0 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -125,7 +121,7 @@ export const TransfersListPage: React.FC = () => {
                       size="icon"
                       type="button"
                       variant="outline"
-                      onClick={resetFilters}
+                      onClick={ledger.resetAll}
                     >
                       <RotateCcw aria-hidden="true" className="h-4 w-4" />
                     </Button>
@@ -141,22 +137,18 @@ export const TransfersListPage: React.FC = () => {
                     size="icon"
                     type="button"
                     variant="outline"
-                    onClick={() => setIsHeatmapVisible((v) => !v)}
+                    onClick={toggleHeatmap}
                   >
-                    {isHeatmapVisible ? (
-                      <PanelTopClose aria-hidden="true" className="h-4 w-4" />
-                    ) : (
-                      <PanelTopOpen aria-hidden="true" className="h-4 w-4" />
-                    )}
+                    {heatmapIcon}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>{isHeatmapVisible ? 'Hide heatmap' : 'Show heatmap'}</TooltipContent>
               </Tooltip>
 
               <FiltersToggleButton
-                activeCount={filters.activeCount}
-                aria-label={filtersToggleAriaLabel}
-                onClick={toggleFilters}
+                activeCount={ledger.activeFilterCount}
+                aria-label={ledger.isFiltersOpen ? 'Close filters' : 'Open filters'}
+                onClick={ledger.toggleFilters}
               />
             </div>
           </div>
@@ -192,15 +184,11 @@ export const TransfersListPage: React.FC = () => {
           {isHeatmapVisible && (
             <div className="shrink-0 border-b">
               <HeatmapPanel
-                highlightDates={highlightDates}
-                onRangeClear={() => {
-                  setFilter('after', moment().subtract(30, 'days').startOf('day'));
-                  setFilter('before', moment().endOf('day'));
-                }}
-                onRangeSelect={(after, before) => {
-                  setFilter('after', after);
-                  setFilter('before', before);
-                }}
+                showViewMode={false}
+                year={ledger.timeframe.after.year()}
+                highlightDates={ledger.visibleDates}
+                onRangeClear={handleHeatmapRangeClear}
+                onRangeSelect={handleHeatmapRangeSelect}
               />
             </div>
           )}
@@ -208,37 +196,16 @@ export const TransfersListPage: React.FC = () => {
           {!isMobile && (
             <div className="shrink-0">
               <InlineFilters
-                data={filters}
-                sortDirection={sort.direction}
-                onChange={setFilter}
+                data={ledger.transferFilters}
+                sortDirection={ledger.isReversedOrder ? 'desc' : 'asc'}
+                onChange={handleFilterChange as any}
                 onSortToggle={handleSortToggle}
               />
             </div>
           )}
 
-          <ScrollArea aria-label="Transfers list" className="flex-1 min-h-0">
-            <FormattedListing
-              error={error}
-              groupedItems={groupedItems}
-              isError={isError}
-              isLoading={isLoading}
-              refetch={refetch}
-              onAdd={openNewTransferForm}
-            />
-          </ScrollArea>
+          <LedgerView ledger={ledger} showControls={false} showFiltersSheet={false} />
         </CardContent>
-
-        <CardFooter className="flex justify-end p-2 bg-background md:bg-card border-t">
-          <Pagination
-            currentPage={currentPage}
-            isLoading={isLoading}
-            perPage={perPage}
-            totalItems={totalItems}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            onPerPageChange={setPerPage}
-          />
-        </CardFooter>
       </Card>
 
       {isUpdatingBannerVisible && (
@@ -252,11 +219,11 @@ export const TransfersListPage: React.FC = () => {
       )}
 
       <ListFiltersSheet
-        data={filters}
-        isOpen={isFiltersOpen}
-        setIsOpen={setIsFiltersOpen}
-        onChange={setFilter}
-        onReset={resetFilters}
+        data={ledger.transferFilters}
+        isOpen={ledger.isFiltersOpen}
+        setIsOpen={ledger.setIsFiltersOpen}
+        onChange={handleFilterChange as any}
+        onReset={ledger.resetAll}
       />
     </FullHeightPageContent>
   );

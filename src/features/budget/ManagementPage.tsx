@@ -99,7 +99,13 @@ const BudgetDetailRoute: React.FC = () => {
   return (
     <div className="h-full flex flex-col min-h-0">
       {/* Header */}
-      <PageWithSidebar.Header title={title} onBack={() => navigate('/budget')}>
+      <PageWithSidebar.Header
+        title={title}
+        subContent={
+          <BudgetSummaryCards analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
+        }
+        onBack={() => navigate('/budget')}
+      >
         <BudgetDisplayCurrency value={displayCurrency} onChange={setDisplayCurrency} />
         <Tooltip>
           <TooltipTrigger asChild>
@@ -123,9 +129,6 @@ const BudgetDetailRoute: React.FC = () => {
       {/* Scrollable content */}
       <ScrollArea className="flex-1 min-h-0">
         <div className="p-4 space-y-6 pb-8">
-          {/* Summary cards */}
-          <BudgetSummaryCards analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
-
           {/* Spending heatmap + daily stats */}
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">

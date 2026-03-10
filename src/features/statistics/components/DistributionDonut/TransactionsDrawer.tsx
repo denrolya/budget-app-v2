@@ -2,7 +2,7 @@ import type { Moment } from 'moment';
 import React, { useMemo } from 'react';
 
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
-import { ListingContainer } from '@/features/daily-ledger';
+import { LedgerView, useLedger } from '@/features/daily-ledger';
 
 export type DrawerListingTarget = {
   title: string;
@@ -14,6 +14,21 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   target: DrawerListingTarget | null;
   timeframe: { after: Moment; before: Moment };
+};
+
+type DrawerContentProps = {
+  target: DrawerListingTarget;
+  timeframe: { after: Moment; before: Moment };
+};
+
+const DrawerListing: React.FC<DrawerContentProps> = ({ target, timeframe }) => {
+  const ledger = useLedger({
+    updateUrl: false,
+    omitTransferTransactions: false,
+    initialFilters: target.initialFilters,
+    initialTimeframe: timeframe,
+  });
+  return <LedgerView enableHotkeys={false} ledger={ledger} showControls={false} />;
 };
 
 export const TransactionsDrawer: React.FC<Props> = ({ open, onOpenChange, target, timeframe }) => {
@@ -33,16 +48,7 @@ export const TransactionsDrawer: React.FC<Props> = ({ open, onOpenChange, target
         </DrawerHeader>
 
         <div className="h-[80vh] min-h-0 flex flex-col">
-          {target ? (
-            <ListingContainer
-              enableHotkeys={false}
-              initialFilters={target.initialFilters}
-              initialTimeframe={timeframe}
-              omitTransferTransactions={false}
-              updateUrl={false}
-              key={listingKey}
-            />
-          ) : null}
+          {target && <DrawerListing target={target} timeframe={timeframe} key={listingKey} />}
         </div>
       </DrawerContent>
     </Drawer>

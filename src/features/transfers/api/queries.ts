@@ -23,6 +23,7 @@ interface UseTransfersListOptions {
   initialFilters?: TransferFilters;
   initialSort?: Sorting;
   updateUrl?: boolean;
+  enabled?: boolean;
   omitTransferTransactions?: never; // guard: transfers list shouldn't have this option
   queryKeyBase?: readonly unknown[];
 }
@@ -65,12 +66,14 @@ export const useList = (options: UseTransfersListOptions = {}): UseTransfersList
     initialFilters = new TransferFilters(),
     initialSort = { field: 'executedAt', direction: 'desc' } as Sorting,
     updateUrl = true,
+    enabled = true,
     queryKeyBase = queryKeys.all,
   } = options;
 
   const { createTransaction } = TransactionFactory();
 
   const { data, ...listState } = useListState<TransferFilters, TransformedResponse>({
+    enabled,
     initialPerPage,
     initialFilters,
     initialSort,

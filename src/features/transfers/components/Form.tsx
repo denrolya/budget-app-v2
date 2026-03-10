@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeftRight, Loader2 } from 'lucide-react';
+import { ArrowLeftRight, Loader2, Trash2 } from 'lucide-react';
 import moment from 'moment';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
@@ -11,13 +11,16 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
 import { useForm as useFormContext } from '@/contexts/Form';
 import { AccountTypeahead } from '@/features/accounts';
 import { useAccountsWithDefaultOrder } from '@/hooks/financeData';
+import { confirm } from '@/lib/confirmation';
 import { useFormLogic } from '@/hooks/useFormLogic';
 
+import Transfer from '../models/Transfer';
 import { useMutations } from '../api';
 
 const formSchema = z
@@ -69,25 +72,39 @@ interface TransferFormRef {
 
 export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
   const accounts = useAccountsWithDefaultOrder();
-  const { submitForm, updateFormState } = useFormContext();
-  const { create: createTransfer, isCreating } = useMutations();
+  const { submitForm, updateFormState, formState, closeForm } = useFormContext();
+  const {
+    create: createTransfer,
+    update: updateTransfer,
+    delete: deleteTransfer,
+    isCreating,
+    isUpdating,
+    isDeleting,
+  } = useMutations();
+
+  const initialTransfer = formState.values instanceof Transfer ? (formState.values as Transfer) : null;
+  const isEditMode = !!initialTransfer;
 
   const [rateMode, setRateMode] = useState<RateMode>('toPerFrom');
   const [rateText, setRateText] = useState('0');
 
+  const defaultValues = {
+    from: initialTransfer?.fromExpense.account.id,
+    to: initialTransfer?.toIncome.account.id,
+    amount: initialTransfer ? Math.abs(initialTransfer.fromExpense.amount) : 0,
+    rate: initialTransfer?.rate ?? 0,
+    fee: initialTransfer?.feeExpense ? Math.abs(initialTransfer.feeExpense.amount) : undefined,
+    feeAccount: initialTransfer?.feeExpense?.account.id,
+    executedAt: initialTransfer
+      ? initialTransfer.executedAt.format(MOMENT_DATETIME_FORM_FORMAT)
+      : moment().format(MOMENT_DATETIME_FORM_FORMAT),
+    note: initialTransfer?.note || undefined,
+    feeIncludedInAmount: false as boolean,
+  };
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      from: undefined,
-      to: undefined,
-      amount: 0,
-      rate: 0,
-      fee: undefined,
-      feeAccount: undefined,
-      executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
-      note: undefined,
-      feeIncludedInAmount: false,
-    },
+    defaultValues,
     mode: 'onChange',
   });
 
@@ -178,7 +195,7 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
         const payloadAmount =
           values.feeIncludedInAmount && feeFrom ? Math.max(values.amount - feeNum, 0) : values.amount;
 
-        await createTransfer({
+        const payload = {
           from: values.from,
           to: values.to,
           amount: payloadAmount,
@@ -187,7 +204,13 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
           feeAccount: values.feeAccount ?? undefined,
           executedAt: values.executedAt,
           note: values.note || '',
-        });
+        };
+
+        if (isEditMode) {
+          await updateTransfer({ id: initialTransfer!.id, ...payload });
+        } else {
+          await createTransfer(payload);
+        }
 
         submitForm(values);
       } catch (error: any) {
@@ -199,6 +222,23 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
       }
     },
   });
+
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: 'Delete transfer?',
+      description: `Transfer #${initialTransfer!.id} will be permanently deleted. This cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    });
+    if (!confirmed) return;
+
+    try {
+      await deleteTransfer(initialTransfer!.id);
+      closeForm();
+    } catch {
+      // mutation already shows toast
+    }
+  };
 
   useImperativeHandle(ref, () => formRef.current!);
 
@@ -468,23 +508,50 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
           )}
         />
 
-        {/* Optional submit button if you ever render this standalone */}
-        <div className="pt-2">
+        {/* Actions */}
+        <div className="pt-2 space-y-2">
           <Button
-            disabled={isCreating}
+            disabled={isCreating || isUpdating}
             type="button"
             className="w-full"
             onClick={() => formRef.current?.submitForm?.()}
           >
-            {isCreating ? (
+            {isCreating || isUpdating ? (
               <span className="flex items-center justify-center gap-2">
                 <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
-                Submitting…
+                {isEditMode ? 'Updating…' : 'Submitting…'}
               </span>
+            ) : isEditMode ? (
+              'Update Transfer'
             ) : (
-              'Submit'
+              'Create Transfer'
             )}
           </Button>
+
+          {isEditMode && (
+            <>
+              <Separator />
+              <Button
+                disabled={isDeleting}
+                type="button"
+                variant="destructive"
+                className="w-full"
+                onClick={handleDelete}
+              >
+                {isDeleting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+                    Deleting…
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <Trash2 aria-hidden="true" className="h-4 w-4" />
+                    Delete Transfer
+                  </span>
+                )}
+              </Button>
+            </>
+          )}
         </div>
       </form>
     </Form>

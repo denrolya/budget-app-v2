@@ -97,8 +97,14 @@ export interface TransactionHeatmapChartProps {
   selectable?: boolean;
   /** When false, hides the view-mode toggle and year selector — renders only the grid + legend. Defaults to true. */
   showControls?: boolean;
+  /** When false, hides only the view-mode toggle (Count/Income/Expense) while keeping other controls. Defaults to showControls. */
+  showViewMode?: boolean;
   /** Which view mode to start with (and lock to when showControls=false). Defaults to 'count'. */
   defaultViewMode?: ViewMode;
+  /** Externally controlled view mode. When provided, the internal toggle is ignored. */
+  viewMode?: ViewMode;
+  /** When true, uses tighter padding — for secondary/embedded contexts. */
+  compact?: boolean;
   /** Which year to show. Defaults to current year. */
   year?: number;
   /** Called when the user picks a different year (so the parent can re-fetch). */
@@ -201,7 +207,10 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
   onRangeClear,
   selectable = true,
   showControls = true,
+  showViewMode,
   defaultViewMode = 'count',
+  viewMode: viewModeProp,
+  compact = false,
   year: yearProp,
   onYearChange,
   onViewModeChange,
@@ -210,12 +219,13 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
   const thisYear = moment().year();
   const [yearState, setYearState] = useState(yearProp ?? thisYear);
   const year = yearProp ?? yearState;
-  const [viewMode, setViewMode] = useState<ViewMode>(defaultViewMode);
+  const [viewModeState, setViewModeState] = useState<ViewMode>(defaultViewMode);
+  const viewMode = viewModeProp ?? viewModeState;
 
   const handleViewModeChange = (v: string) => {
     if (!v) return;
     const mode = v as ViewMode;
-    setViewMode(mode);
+    if (viewModeProp === undefined) setViewModeState(mode);
     onViewModeChange?.(mode);
   };
 
@@ -303,11 +313,11 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
   };
 
   return (
-    <div className="px-4 py-2 w-fit">
+    <div className={cn('w-fit', compact ? 'px-3 py-1' : 'px-4 py-2')}>
       {/* Controls row */}
       <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
         <div className="flex items-center gap-1.5">
-          {showControls && (
+          {showControls && yearProp === undefined && (
             <YearPicker
               year={year}
               onChange={(y) => {
@@ -317,9 +327,7 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
               }}
             />
           )}
-          {selectable && isDragging && (
-            <span className="text-xs text-muted-foreground">Release to select…</span>
-          )}
+          {selectable && isDragging && <span className="text-xs text-muted-foreground">Release to select…</span>}
           {selectable && selectedRange && !isDragging && (
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted rounded-md px-2 py-1">
               {moment(selectedRange.start).format('D MMM')} – {moment(selectedRange.end).format('D MMM YYYY')}
@@ -330,17 +338,19 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
           )}
         </div>
 
-        <ToggleGroup size="sm" type="single" value={viewMode} onValueChange={handleViewModeChange}>
-          <ToggleGroupItem value="count" className="text-xs px-2">
-            Count
-          </ToggleGroupItem>
-          <ToggleGroupItem value="income" className="text-xs px-2">
-            Income
-          </ToggleGroupItem>
-          <ToggleGroupItem value="expense" className="text-xs px-2">
-            Expense
-          </ToggleGroupItem>
-        </ToggleGroup>
+        {(showViewMode ?? showControls) && (
+          <ToggleGroup size="sm" type="single" value={viewMode} onValueChange={handleViewModeChange}>
+            <ToggleGroupItem value="count" className="text-xs px-2">
+              Count
+            </ToggleGroupItem>
+            <ToggleGroupItem value="income" className="text-xs px-2">
+              Income
+            </ToggleGroupItem>
+            <ToggleGroupItem value="expense" className="text-xs px-2">
+              Expense
+            </ToggleGroupItem>
+          </ToggleGroup>
+        )}
       </div>
 
       {isLoading && (
@@ -408,7 +418,9 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
                   height={CELL_SIZE}
                   opacity={dimmed ? 0.3 : 1}
                   rx={2}
-                  stroke={inRange ? 'hsl(var(--foreground))' : isHighlighted ? 'hsl(var(--foreground) / 0.4)' : 'transparent'}
+                  stroke={
+                    inRange ? 'hsl(var(--foreground))' : isHighlighted ? 'hsl(var(--foreground) / 0.4)' : 'transparent'
+                  }
                   strokeWidth={inRange ? 1.5 : isHighlighted ? 1 : 0}
                   style={{ fill: heatColor(cell.value, maxValue, cssVar) }}
                   width={CELL_SIZE}

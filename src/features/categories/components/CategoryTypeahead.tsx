@@ -26,35 +26,37 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
 
     // File-explorer sort: folders (has children) before leaves, then lexicographic within each level.
     // Preserves parent→child ordering by sorting the full path segment-by-segment.
-    const sortedOptions = useMemo(() => {
-      return options.slice().sort((a, b) => {
-        const aPath = a.getFullPath();
-        const bPath = b.getFullPath();
-        const len = Math.min(aPath.length, bPath.length);
-        for (let i = 0; i < len; i++) {
-          const cmp = aPath[i].localeCompare(bPath[i]);
-          if (cmp !== 0) return cmp;
-        }
-        // Same prefix: folder (has children) before leaf
-        if (aPath.length !== bPath.length) {
-          const aIsFolder = a.children.length > 0;
-          const bIsFolder = b.children.length > 0;
-          if (aIsFolder && !bIsFolder) return -1;
-          if (!aIsFolder && bIsFolder) return 1;
-        }
-        return aPath.length - bPath.length;
-      });
-    }, [options]);
+    const sortedOptions = useMemo(
+      () =>
+        options.slice().sort((a, b) => {
+          const aPath = a.getFullPath();
+          const bPath = b.getFullPath();
+          const len = Math.min(aPath.length, bPath.length);
+          for (let i = 0; i < len; i++) {
+            const cmp = aPath[i].localeCompare(bPath[i]);
+            if (cmp !== 0) return cmp;
+          }
+          // Same prefix: folder (has children) before leaf
+          if (aPath.length !== bPath.length) {
+            const aIsFolder = a.children.length > 0;
+            const bIsFolder = b.children.length > 0;
+            if (aIsFolder && !bIsFolder) return -1;
+            if (!aIsFolder && bIsFolder) return 1;
+          }
+          return aPath.length - bPath.length;
+        }),
+      [options],
+    );
 
     const renderElement = useCallback<TypeaheadV2Props<Category, string>['renderElement']>(
       (el, _vf, _lf, { isFiltered }): ReactNode => {
         const depth = el.depth;
         if (isFiltered) {
           return (
-            <div className="flex flex-col min-w-0 w-full">
-              <span className="truncate text-sm">{el.name}</span>
+            <div className="flex flex-col">
+              <span className="whitespace-nowrap text-sm">{el.name}</span>
               {depth > 0 && (
-                <span className="truncate text-xs text-muted-foreground">
+                <span className="whitespace-nowrap text-xs text-muted-foreground">
                   {el.getFullPath().slice(0, -1).join(' › ')}
                 </span>
               )}
@@ -62,12 +64,14 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
           );
         }
         return (
-          <div className="flex items-center w-full min-w-0" style={{ paddingLeft: Math.min(depth, 3) * 14 }}>
-            <div className="flex items-center gap-1.5 min-w-0">
+          <div style={{ paddingLeft: Math.min(depth, 3) * 14 }} className="flex items-center">
+            <div className="flex items-center gap-1.5">
               {depth > 0 && (
-                <span className="shrink-0 text-muted-foreground/50 select-none" aria-hidden="true">└</span>
+                <span aria-hidden="true" className="shrink-0 text-muted-foreground/50 select-none">
+                  └
+                </span>
               )}
-              <span className="truncate">{el.name}</span>
+              <span className="whitespace-nowrap">{el.name}</span>
             </div>
           </div>
         );
@@ -89,9 +93,9 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
 
     return (
       <TypeaheadV2<Category, string>
-        hideCheckmarkColumn={false}
         filterFn={filterFn}
         groupBy="type"
+        hideCheckmarkColumn={false}
         labelField="name"
         multiple={multiple}
         options={sortedOptions}
@@ -100,6 +104,7 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
         value={value}
         valueField="id"
         className={className}
+        dropdownClassName="max-w-[480px]"
         onChange={onChange}
         ref={ref}
         {...props}

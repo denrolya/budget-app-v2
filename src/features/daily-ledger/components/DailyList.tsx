@@ -40,12 +40,16 @@ const DailyList: React.FC<Props> = ({ isLoading, groupedItems, after, before, re
     <div className="h-full w-full min-w-0">
       {!isMobile && (
         <div className="flex h-full min-w-max gap-3 px-4 py-3">
-          {orderedDates.map((date) => {
+          {orderedDates.map((date, idx) => {
             const group = groupedItems?.find((g) => g[0].isSame(date, 'day'));
             const items = group ? group[1] : [];
 
             return (
-              <div className={`shrink-0 ${DESKTOP_COL_W} h-full`} key={date.format(BACKEND_DATE_FORMAT)}>
+              <div
+                style={{ animationDelay: `${Math.min(idx * 60, 480)}ms` }}
+                className={`shrink-0 ${DESKTOP_COL_W} h-full animate-in fade-in-0 slide-in-from-bottom-3 duration-300 ease-out [animation-fill-mode:both]`}
+                key={date.format(BACKEND_DATE_FORMAT)}
+              >
                 {isLoading && <DateCardSkeleton />}
                 {!isLoading && <DateCard date={date} items={items} />}
               </div>
@@ -56,12 +60,16 @@ const DailyList: React.FC<Props> = ({ isLoading, groupedItems, after, before, re
 
       {isMobile && (
         <div className="flex flex-col gap-3 px-2 py-2">
-          {orderedDates.map((date) => {
+          {orderedDates.map((date, idx) => {
             const group = groupedItems?.find((g) => g[0].isSame(date, 'day'));
             const items = group ? group[1] : [];
 
             return (
-              <div className="w-full" key={date.format(BACKEND_DATE_FORMAT)}>
+              <div
+                style={{ animationDelay: `${Math.min(idx * 50, 400)}ms` }}
+                className="w-full animate-in fade-in-0 slide-in-from-bottom-2 duration-300 ease-out [animation-fill-mode:both]"
+                key={date.format(BACKEND_DATE_FORMAT)}
+              >
                 {isLoading && <DateCardSkeleton />}
                 {!isLoading && <DateCard date={date} items={items} />}
               </div>

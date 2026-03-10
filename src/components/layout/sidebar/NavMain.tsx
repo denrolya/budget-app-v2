@@ -26,15 +26,9 @@ const ITEMS: {
   }[];
 }[] = [
   {
-    title: ROUTES.DASHBOARD_V1.label,
-    url: ROUTES.DASHBOARD_V1.path,
-    icon: ROUTES.DASHBOARD_V1.icon,
-  },
-  {
-    title: ROUTES.DASHBOARD_V2.label,
-    url: ROUTES.DASHBOARD_V2.path,
-    icon: ROUTES.DASHBOARD_V2.icon,
-    isActive: true,
+    title: ROUTES.DASHBOARD.label,
+    url: ROUTES.DASHBOARD.path,
+    icon: ROUTES.DASHBOARD.icon,
   },
   {
     title: ROUTES.DAILY_LEDGER.label,

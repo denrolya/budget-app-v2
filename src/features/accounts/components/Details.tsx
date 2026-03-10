@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, ChevronDown, ChevronUp, FileText, Star, StarOff } from 'lucide-react';
-import moment from 'moment';
+import { ChevronDown, ChevronUp, FileText, Filter, Maximize2, Minimize2, Star, StarOff } from 'lucide-react';
+import moment, { type Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import AccountDraftBadge from '@/features/accounts/components/AccountDraftBadge';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -15,12 +17,8 @@ import { HeatmapPanel } from '@/features/transactions';
 import { transactionService } from '@/features/transactions/api/service';
 import Account from '@/features/accounts/models/Account';
 import { Type as AccountType, UpdateAccountDTO } from '@/features/accounts/types';
-import {
-  DailyList,
-  TableListing,
-  TableListingSkeleton,
-  useTransactionsAndTransfersList,
-} from '@/features/daily-ledger';
+import InlineFilters from '@/features/transactions/components/InlineFilters';
+import { LedgerView, useLedger } from '@/features/daily-ledger';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { confirm } from '@/lib/confirmation';
 import { cn } from '@/lib/utils';
@@ -31,36 +29,45 @@ interface Props {
 }
 
 const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
-  const daysPerPage = 15;
   const isMobile = useIsMobile();
 
+  // Keep initial range bounded to avoid very large first-load payloads.
   const defaultRange = useMemo(
-    () => {
-      const today = moment().startOf('day');
-      return {
-        after: today.clone().subtract(daysPerPage - 1, 'days'),
-        before: today.clone().endOf('day'),
-      };
-    },
+    () => ({
+      after: moment().subtract(90, 'days').startOf('day'),
+      before: moment().endOf('day'),
+    }),
     [],
   );
 
-  const [heatmapRange, setHeatmapRange] = useState<{ after: moment.Moment; before: moment.Moment } | null>(null);
-  const activeRange = heatmapRange ?? defaultRange;
+  const [isHeatmapRangeActive, setIsHeatmapRangeActive] = useState(false);
 
-  // Collapse heatmap by default on small screens
-  const [heatmapExpanded, setHeatmapExpanded] = useState(() => window.innerHeight > 680);
+  // Defer heavy heatmap query and rendering until user expands it.
+  const [heatmapExpanded, setHeatmapExpanded] = useState(false);
+  const [heatmapMounted, setHeatmapMounted] = useState(false);
+  useEffect(() => {
+    if (heatmapExpanded && !heatmapMounted) setHeatmapMounted(true);
+  }, [heatmapExpanded, heatmapMounted]);
   // Open a sheet on mobile when a heatmap range is selected
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  // Activity card fullscreen overlay
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  // Bank integration details collapsed by default
+  const [bankDetailsOpen, setBankDetailsOpen] = useState(false);
 
-  const { groupedItems, isLoading, isError, error, setFilter } = useTransactionsAndTransfersList({
-    updateUrl: true,
+  const ledger = useLedger({
+    updateUrl: false,
     omitTransferTransactions: true,
+    omitTransfers: true,
+    initialPerPage: 120,
+    initialShowEmptyDays: false,
+    initialFilters: { accounts: [account.id] },
+    initialTimeframe: defaultRange,
   });
 
   // Draft count for bank accounts
   const draftCountQuery = useQuery({
-    queryKey: ['details-drafts', account.id],
+    queryKey: ['account-drafts', account.id],
     queryFn: () =>
       transactionService.fetchList({
         page: 1,
@@ -74,38 +81,42 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
   });
   const draftCount = draftCountQuery.data?.totalItems ?? 0;
 
-  useEffect(() => {
-    setFilter('after', activeRange.after);
-    setFilter('before', activeRange.before);
-  }, [activeRange, setFilter]);
-
-  useEffect(() => {
-    setFilter('accounts', [account.id]);
-  }, [account, setFilter]);
-
   const handleHeatmapRangeSelect = useCallback(
     (after: moment.Moment, before: moment.Moment) => {
-      setHeatmapRange({ after, before });
+      setIsHeatmapRangeActive(true);
+      ledger.setTimeframe({ after, before });
       if (isMobile) setMobileDrawerOpen(true);
     },
-    [isMobile],
+    [isMobile, ledger],
   );
 
   const handleHeatmapRangeClear = useCallback(() => {
-    setHeatmapRange(null);
+    setIsHeatmapRangeActive(false);
     setMobileDrawerOpen(false);
-  }, []);
+    ledger.setTimeframe(defaultRange);
+  }, [ledger, defaultRange]);
 
-  const highlightDates = useMemo(() => {
-    const dates: string[] = [];
-    const cursor = activeRange.after.clone().startOf('day');
-    const end = activeRange.before.clone().startOf('day');
-    while (cursor.isSameOrBefore(end, 'day')) {
-      dates.push(cursor.format('YYYY-MM-DD'));
-      cursor.add(1, 'day');
-    }
-    return dates;
-  }, [activeRange.after, activeRange.before]);
+  const handleFilterChange = useCallback(
+    (key: string, value: unknown) => {
+      if (key === 'after' && value) {
+        ledger.setTimeframe({ after: value as Moment, before: ledger.timeframe.before });
+        return;
+      }
+      if (key === 'before' && value) {
+        ledger.setTimeframe({ after: ledger.timeframe.after, before: value as Moment });
+        return;
+      }
+      ledger.setFilter(key, value);
+    },
+    [ledger],
+  );
+
+  const handleSortToggle = useCallback(() => ledger.setIsReversedOrder(!ledger.isReversedOrder), [ledger]);
+
+  const handleLedgerReset = useCallback(() => {
+    ledger.resetAll();
+    ledger.setFilter('accounts', [account.id]);
+  }, [ledger, account.id]);
 
   const toggleSidebarVisibility = async () => {
     const confirmed = await confirm({
@@ -123,55 +134,20 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
     onAccountUpdate(account, { isDisplayedOnSidebar: account.isDisplayedOnSidebar });
   };
 
-  const renderActivityContent = () => {
-    if (isError) {
-      return (
-        <div className="flex flex-col items-center justify-center h-[200px] text-center">
-          <AlertCircle className="h-10 w-10 text-destructive mb-2" />
-          <p className="text-lg font-semibold text-destructive">Error loading transactions</p>
-          <p className="text-sm text-muted-foreground">{error?.message || 'An unexpected error occurred.'}</p>
-        </div>
-      );
-    }
-
-    if (!isLoading && groupedItems.length === 0) {
-      return (
-        <div className="flex flex-col items-center justify-center h-[200px] text-center">
-          <p className="text-lg font-semibold">No activity found</p>
-          <p className="text-sm text-muted-foreground">No transactions or transfers for the selected period.</p>
-        </div>
-      );
-    }
-
-    return (
-      <>
-        <div className={cn('md:hidden')}>
-          <DailyList
-            after={activeRange.after}
-            before={activeRange.before}
-            groupedItems={groupedItems}
-            isLoading={isLoading}
-          />
-        </div>
-        <div className="hidden md:block">
-          {isLoading && <TableListingSkeleton after={activeRange.after} before={activeRange.before} />}
-          {!isLoading && (
-            <TableListing
-              after={activeRange.after}
-              before={activeRange.before}
-              groupedItems={groupedItems}
-              isLoading={isLoading}
-            />
-          )}
-        </div>
-      </>
-    );
-  };
+  const renderActivityContent = () => (
+    <LedgerView
+      enableHotkeys={false}
+      ledger={ledger}
+      showControls={false}
+      showFooter={false}
+      onReset={handleLedgerReset}
+    />
+  );
 
   return (
     <div className="h-full flex flex-col min-h-0">
       {/* Hero card: account info + embedded balance history chart */}
-      <Card className="mb-4 overflow-hidden shrink-0">
+      <Card className="mb-4 overflow-hidden shrink-0 animate-in fade-in-0 slide-in-from-top-3 duration-500 ease-out">
         <CardHeader className="pb-1">
           <CardTitle className="flex items-center gap-2 flex-wrap">
             <AccountPill showName account={account} tooltip={false} variant="inline" />
@@ -182,6 +158,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
               currency={account.currency}
               values={account.convertedValues}
             />
+            <AccountDraftBadge account={account} />
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -205,9 +182,66 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
               <TooltipContent>{account.isDisplayedOnSidebar ? 'Pinned to sidebar' : 'Pin to sidebar'}</TooltipContent>
             </Tooltip>
           </CardTitle>
-          <CardDescription>
-            Created: <RelativeDatetimeDisplay date={account.createdAt} />
-          </CardDescription>
+
+          {/* Account property grid */}
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            <span>
+              Created: <RelativeDatetimeDisplay date={account.createdAt} />
+            </span>
+            {account.externalAccountId && (
+              <>
+                <span className="text-border select-none">·</span>
+                <span className="font-mono text-[10px]">ID: {account.externalAccountId}</span>
+              </>
+            )}
+            {account.isArchived() && (
+              <>
+                <span className="text-border select-none">·</span>
+                <span className="text-orange-500">Archived {account.archivedAt?.format('D MMM YYYY')}</span>
+              </>
+            )}
+          </div>
+
+          {/* Bank integration details — compact toggle */}
+          {account.bankIntegration && (
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              <button
+                type="button"
+                className="flex items-center gap-1.5 font-medium text-foreground/80 hover:text-foreground transition-colors"
+                onClick={() => setBankDetailsOpen((v) => !v)}
+              >
+                <span className="capitalize">
+                  {account.bankIntegration.provider.charAt(0).toUpperCase() + account.bankIntegration.provider.slice(1)}
+                </span>
+                <Badge
+                  variant={account.bankIntegration.isActive ? 'default' : 'destructive'}
+                  className="text-[10px] px-1.5 py-0 pointer-events-none"
+                >
+                  {account.bankIntegration.isActive ? 'Active' : 'Inactive'}
+                </Badge>
+                {bankDetailsOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              </button>
+
+              {bankDetailsOpen && (
+                <>
+                  {account.bankIntegration.syncMethod && (
+                    <>
+                      <span className="text-border select-none">·</span>
+                      <span className="capitalize">{account.bankIntegration.syncMethod}</span>
+                    </>
+                  )}
+                  {account.bankIntegration.lastSyncedAt && (
+                    <>
+                      <span className="text-border select-none">·</span>
+                      <span>
+                        Last sync: <RelativeDatetimeDisplay date={moment(account.bankIntegration.lastSyncedAt)} />
+                      </span>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </CardHeader>
 
         {/* Chart flush to card edges — no horizontal padding */}
@@ -218,70 +252,139 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
 
       {/* Pending draft transactions notice — only for active bank accounts */}
       {account.type === AccountType.Bank && draftCount > 0 && (
-        <div className="mb-4 flex items-center justify-between rounded-lg border border-warning/40 bg-warning/10 px-4 py-2.5 text-sm shrink-0">
+        <div className="mb-4 flex items-center justify-between rounded-lg border border-warning/40 bg-warning/10 px-4 py-2.5 text-sm shrink-0 animate-in fade-in-0 slide-in-from-top-2 duration-300 ease-out">
           <div className="flex items-center gap-2 text-foreground">
             <FileText className="h-4 w-4 shrink-0 text-warning" />
             <span>
-              <span className="font-medium">{draftCount}</span> pending transaction{draftCount !== 1 ? 's' : ''} to review
+              <span className="font-medium">{draftCount}</span> pending transaction{draftCount !== 1 ? 's' : ''} to
+              review
             </span>
           </div>
-          <Button size="sm" variant="link" className="h-auto p-0 text-xs" onClick={() => setFilter('isDraft', true)}>
+          <Button
+            size="sm"
+            variant="link"
+            className="h-auto p-0 text-xs"
+            onClick={() => ledger.setFilter('isDraft', true)}
+          >
             Review drafts →
           </Button>
         </div>
       )}
 
       {/* Activity card: heatmap + ledger merged, fills remaining height */}
-      <Card className="flex-1 min-h-0 flex flex-col overflow-hidden">
-        <CardHeader className="flex-row items-start justify-between gap-2 pb-0 shrink-0">
-          <div className="min-w-0">
+      <div
+        className={cn(
+          'flex-1 min-h-0',
+          isFullscreen &&
+            'fixed inset-0 z-50 bg-background p-3 animate-in fade-in-0 zoom-in-[0.98] duration-200 ease-out',
+        )}
+      >
+        <Card className="h-full flex flex-col overflow-hidden animate-in fade-in-0 slide-in-from-bottom-4 duration-500 ease-out">
+          <CardHeader className="pb-1 shrink-0 relative pr-[5.5rem]">
             <CardTitle className="text-base">Activity</CardTitle>
             <CardDescription>
-              {heatmapRange
-                ? `${heatmapRange.after.format('D MMM')} – ${heatmapRange.before.format('D MMM YYYY')}`
-                : `Transactions for the past ${daysPerPage} days — drag to filter`}
+              {isHeatmapRangeActive
+                ? `${ledger.timeframe.after.format('D MMM')} – ${ledger.timeframe.before.format('D MMM YYYY')}`
+                : 'Latest activity — drag on heatmap to filter'}
             </CardDescription>
-          </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                aria-label={heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}
-                size="icon"
-                variant="ghost"
-                className="h-7 w-7 shrink-0 mt-0.5"
-                onClick={() => setHeatmapExpanded((prev) => !prev)}
-              >
-                {heatmapExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                <span className="sr-only">{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</TooltipContent>
-          </Tooltip>
-        </CardHeader>
-        <CardContent className="p-0 flex-1 min-h-0 flex flex-col overflow-hidden">
-          {heatmapExpanded && (
-            <HeatmapPanel
-              currency={account.currency}
-              filters={{ accounts: [account.id] }}
-              highlightDates={highlightDates}
-              onRangeClear={handleHeatmapRangeClear}
-              onRangeSelect={handleHeatmapRangeSelect}
-            />
-          )}
-          {/* On desktop: show transactions inline */}
-          {!isMobile && (
-            <div className={cn('border-t flex-1 min-h-0 overflow-y-auto', !heatmapExpanded && 'border-0')}>
-              {renderActivityContent()}
+            {/* Action buttons pinned to top-right corner of the card */}
+            <div className="absolute top-2 right-2 flex items-center gap-0.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label="Open filters"
+                    size="icon"
+                    variant="ghost"
+                    className="relative h-7 w-7"
+                    onClick={ledger.toggleFilters}
+                  >
+                    <Filter className="h-3.5 w-3.5" />
+                    {ledger.activeFilterCount > 0 && (
+                      <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-primary" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {ledger.activeFilterCount > 0 ? `Filters (${ledger.activeFilterCount})` : 'Filters'}
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label={isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7"
+                    onClick={() => setIsFullscreen((prev) => !prev)}
+                  >
+                    {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+                    <span className="sr-only">{isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label={heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7"
+                    onClick={() => setHeatmapExpanded((prev) => !prev)}
+                  >
+                    {heatmapExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                    <span className="sr-only">{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</TooltipContent>
+              </Tooltip>
             </div>
-          )}
-          {/* On mobile: show transactions inline when no range selected; otherwise open drawer */}
-          {isMobile && !heatmapRange && (
-            <div className={cn('border-t flex-1 min-h-0 overflow-y-auto', !heatmapExpanded && 'border-0')}>
-              {renderActivityContent()}
+          </CardHeader>
+          <CardContent className="p-0 flex-1 min-h-0 flex flex-col overflow-hidden">
+            {/* CSS grid-rows accordion animation for heatmap */}
+            <div
+              className={cn(
+                'grid transition-[grid-template-rows] duration-300 ease-in-out shrink-0',
+                heatmapExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+              )}
+            >
+              <div className="overflow-hidden">
+                {heatmapMounted && (
+                  <HeatmapPanel
+                    showViewMode={false}
+                    year={ledger.timeframe.after.year()}
+                    currency={account.currency}
+                    filters={{ accounts: [account.id] }}
+                    highlightDates={ledger.visibleDates}
+                    onRangeClear={handleHeatmapRangeClear}
+                    onRangeSelect={handleHeatmapRangeSelect}
+                  />
+                )}
+              </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            {/* Inline filters toolbar — desktop only */}
+            {!isMobile && (
+              <div className="shrink-0">
+                <InlineFilters
+                  hideAccountFilter
+                  data={ledger.transactionFilters}
+                  sortDirection={ledger.isReversedOrder ? 'desc' : 'asc'}
+                  onChange={handleFilterChange as any}
+                  onSortToggle={handleSortToggle}
+                />
+              </div>
+            )}
+            {/* On desktop: show transactions inline */}
+            {!isMobile && <div className="border-t flex-1 min-h-0 overflow-y-auto">{renderActivityContent()}</div>}
+            {/* On mobile: show transactions inline when no range selected; otherwise open drawer */}
+            {isMobile && !isHeatmapRangeActive && (
+              <div className={cn('border-t flex-1 min-h-0 overflow-y-auto', !heatmapExpanded && 'border-0')}>
+                {renderActivityContent()}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Mobile drawer: transactions for selected heatmap range */}
       <Sheet
@@ -294,14 +397,12 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
         <SheetContent side="bottom" className="h-[80dvh] flex flex-col p-0">
           <SheetHeader className="px-4 pt-4 pb-2 shrink-0">
             <SheetTitle className="text-sm font-medium">
-              {heatmapRange
-                ? `${heatmapRange.after.format('D MMM')} – ${heatmapRange.before.format('D MMM YYYY')}`
+              {isHeatmapRangeActive
+                ? `${ledger.timeframe.after.format('D MMM')} – ${ledger.timeframe.before.format('D MMM YYYY')}`
                 : 'Transactions'}
             </SheetTitle>
           </SheetHeader>
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            {renderActivityContent()}
-          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto">{renderActivityContent()}</div>
         </SheetContent>
       </Sheet>
     </div>

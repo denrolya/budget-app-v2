@@ -8,11 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Account, Type as AccountType } from '@/features/accounts';
+import { Account } from '@/features/accounts';
+import AccountDraftBadge from '@/features/accounts/components/AccountDraftBadge';
 import AccountPill from '@/features/accounts/components/Pill';
 import { useBaseCurrency } from '@/features/auth';
 import { useAccountsWithDefaultOrder, useActiveAccountsWithDefaultOrder } from '@/hooks/financeData';
 import { cn } from '@/lib/utils';
+
+// ─── Listing ──────────────────────────────────────────────────────────────────
 
 interface SidebarListingProps {
   selectedId: string | null;
@@ -200,7 +203,7 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
                 </div>
 
                 <div aria-label={`${type} accounts`} role="group">
-                  {items.map((account) => {
+                  {items.map((account: Account) => {
                     const accountIdStr = String(account.id);
                     const isSelected = selectedId === accountIdStr;
                     const isArchived = account.isArchived();
@@ -244,7 +247,17 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
                                 variant="inline"
                                 textClassName="text-sm"
                               />
+                              {account.bankIntegration && (
+                                <span
+                                  aria-label={`Bank integration: ${account.bankIntegration.isActive ? 'Active' : 'Inactive'}`}
+                                  className={cn(
+                                    'h-2 w-2 rounded-full shrink-0',
+                                    account.bankIntegration.isActive ? 'bg-green-500' : 'bg-yellow-500',
+                                  )}
+                                />
+                              )}
                               {isArchived && <span className="text-2xs text-muted-foreground shrink-0">Archived</span>}
+                              <AccountDraftBadge account={account} />
                             </div>
 
                             <div className="mt-1 text-2xs text-muted-foreground truncate">

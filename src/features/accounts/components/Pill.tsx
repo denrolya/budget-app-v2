@@ -66,13 +66,22 @@ const Marker = ({ account, size }: { account: Account; size: 'sm' | 'md' | 'lg' 
   const shape = shapeKindByType[account.type];
   const isHollow = shape === 'hollow-square';
 
+  const integration = account.bankIntegration;
+  const integrationRingColor = integration
+    ? integration.isActive
+      ? 'hsl(var(--success))'
+      : 'hsl(var(--warning))'
+    : null;
+
+  const outerShadow = integrationRingColor ? `, 0 0 0 2px ${integrationRingColor}` : '';
+
   return (
     <span
       aria-hidden="true"
       style={{
         clipPath: shape === 'diamond' ? 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' : undefined,
         backgroundColor: isHollow ? 'transparent' : color,
-        boxShadow: `inset 0 0 0 1px ${color}`,
+        boxShadow: `inset 0 0 0 1px ${color}${outerShadow}`,
       }}
       className={cn('inline-block shrink-0 flex-none align-middle', sizeMap[size].marker, {
         'rounded-full': shape === 'circle',

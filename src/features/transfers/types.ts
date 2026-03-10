@@ -51,3 +51,5 @@ export type CreateTransferInput = {
 
   note?: string;
 };
+
+export type UpdateTransferInput = { id: number } & CreateTransferInput;

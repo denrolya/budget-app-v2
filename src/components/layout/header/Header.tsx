@@ -2,6 +2,7 @@ import { CopyPlus } from 'lucide-react';
 import React from 'react';
 
 import ExchangeRatesDetails from '@/components/layout/header/ExchangeRatesDetails';
+import NavUser from '@/components/layout/sidebar/NavUser';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -18,16 +19,18 @@ export const Header: React.FC<Props> = ({ className }) => {
   return (
     <header
       className={cn(
-        'group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear',
+        'group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[height] ease-linear overflow-hidden',
         className,
       )}
     >
-      <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+      <div className="flex items-center gap-1 px-4 shrink-0">
         <SidebarTrigger className="-ml-1" />
       </div>
 
-      <div className="flex items-center space-x-2">
-        <nav className="hidden md:flex space-x-4">
+      <div className="flex-1 min-w-0" />
+
+      <div className="flex items-center gap-1 px-4 shrink-0">
+        <nav className="hidden md:flex">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -42,10 +45,8 @@ export const Header: React.FC<Props> = ({ className }) => {
             <TooltipContent>Bulk Create Transactions (Shift+B)</TooltipContent>
           </Tooltip>
         </nav>
-      </div>
-
-      <div className="flex items-center space-x-2 md:space-x-4 px-4">
         <ExchangeRatesDetails />
+        <NavUser />
       </div>
     </header>
   );

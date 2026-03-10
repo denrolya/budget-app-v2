@@ -94,6 +94,7 @@ export const useList = (options: UseTransactionsListOptions = {}): UseTransactio
       status: 'status',
       amountRange: 'amount',
       categories: 'categories',
+      debts: 'debts',
       accounts: 'accounts',
       withNestedCategories: 'withNestedCategories',
       isDraft: 'isDraft',

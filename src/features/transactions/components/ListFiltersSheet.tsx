@@ -1,27 +1,26 @@
 import debounce from 'lodash/debounce';
-import { ArrowDownCircle, ArrowUpCircle, ChevronDown, FileText, Search, X } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, ChevronDown, FileText, Layers, Search, X } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Layers } from 'lucide-react';
 
 import { AccountTypeahead } from '@/features/accounts';
 import { CategoryTypeahead } from '@/features/categories';
 import { Button } from '@/components/ui/button';
-import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Drawer, DrawerContent, DrawerHeader, DrawerDescription, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { cn } from '@/lib/utils';
 import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
 import { Type as TransactionType } from '@/features/transactions';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Label } from '@/components/ui/label';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface Props {
   isOpen?: boolean;
@@ -32,7 +31,7 @@ interface Props {
 }
 
 const CURRENCY_CODES = Object.keys(CURRENCIES) as CURRENCY_CODE[];
-const LABEL_CLS = 'text-xs font-medium text-muted-foreground uppercase tracking-wider';
+const LABEL_CLS = 'mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground';
 
 const Content: React.FC<Props> = ({ data, onChange, onReset }) => {
   const [minLocal, setMinLocal] = useState('');

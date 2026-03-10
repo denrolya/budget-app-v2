@@ -48,11 +48,7 @@ export const accountService = {
     return data;
   },
 
-  async fetchGlobalDailyStats(
-    filters: HeatmapFilters,
-    after: string,
-    before: string,
-  ): Promise<DailyStatsResponse> {
+  async fetchGlobalDailyStats(filters: HeatmapFilters, after: string, before: string): Promise<DailyStatsResponse> {
     const params = new URLSearchParams({ after, before });
     filters.accounts?.forEach((id) => params.append('accounts[]', String(id)));
     filters.categories?.forEach((id) => params.append('categories[]', String(id)));

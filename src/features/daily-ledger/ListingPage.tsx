@@ -10,26 +10,19 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { HeatmapPanel } from '@/features/transactions';
 
-import ListingContainer, { type ListingHandle } from './components/ListingContainer';
+import LedgerView from './components/LedgerView';
+import { useLedger } from './hooks/useLedger';
 
 export const DailyLedgerPage: React.FC = () => {
   const { openForm } = useFormContext();
-  const listingRef = useRef<ListingHandle | null>(null);
 
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
-  const [activeFilterCount, setActiveFilterCount] = useState(0);
   const [displayMenuTarget, setDisplayMenuTarget] = useState<HTMLDivElement | null>(null);
-  const [visibleDates, setVisibleDates] = useState<string[]>([]);
 
-  // Heatmap ↔ listing sync: track when the heatmap is driving a range change so we
-  // don't clear its selection in response to the resulting timeframe update.
+  // Heatmap ↔ listing sync: track when the heatmap is driving a range select so we
+  // don't clear its selection in response to the resulting timeframe change.
   const isHeatmapDrivingRef = useRef(false);
   const [heatmapResetTrigger, setHeatmapResetTrigger] = useState(0);
-
-  const handleHeatmapRangeSelect = useCallback((after: moment.Moment, before: moment.Moment) => {
-    isHeatmapDrivingRef.current = true;
-    listingRef.current?.setDateRange(after, before);
-  }, []);
 
   const handleListingTimeframeChange = useCallback(() => {
     if (isHeatmapDrivingRef.current) {
@@ -39,10 +32,19 @@ export const DailyLedgerPage: React.FC = () => {
     setHeatmapResetTrigger((n) => n + 1);
   }, []);
 
+  const ledger = useLedger({ updateUrl: true, onTimeframeChange: handleListingTimeframeChange });
+
+  const handleHeatmapRangeSelect = useCallback(
+    (after: moment.Moment, before: moment.Moment) => {
+      isHeatmapDrivingRef.current = true;
+      ledger.setTimeframe({ after, before });
+    },
+    [ledger.setTimeframe],
+  );
+
   const openNewTransactionForm = useCallback(() => {
     openForm(FormType.Transaction);
   }, [openForm]);
-
 
   return (
     <FullHeightPageContent>
@@ -69,7 +71,7 @@ export const DailyLedgerPage: React.FC = () => {
 
               <div className="hidden md:contents" ref={setDisplayMenuTarget} />
 
-              {activeFilterCount > 0 && (
+              {ledger.activeFilterCount > 0 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -77,7 +79,7 @@ export const DailyLedgerPage: React.FC = () => {
                       size="icon"
                       type="button"
                       variant="outline"
-                      onClick={() => listingRef.current?.resetFilters()}
+                      onClick={ledger.resetAll}
                     >
                       <RotateCcw aria-hidden="true" className="h-4 w-4" />
                     </Button>
@@ -106,9 +108,9 @@ export const DailyLedgerPage: React.FC = () => {
               </Tooltip>
 
               <FiltersToggleButton
-                activeCount={activeFilterCount}
+                activeCount={ledger.activeFilterCount}
                 aria-label="Toggle filters"
-                onClick={() => listingRef.current?.toggleFilters()}
+                onClick={ledger.toggleFilters}
               />
             </div>
           </div>
@@ -118,22 +120,17 @@ export const DailyLedgerPage: React.FC = () => {
           {isHeatmapVisible && (
             <div className="shrink-0 border-b">
               <HeatmapPanel
-                highlightDates={visibleDates}
+                showViewMode={false}
+                year={ledger.timeframe.after.year()}
+                highlightDates={ledger.visibleDates}
                 resetTrigger={heatmapResetTrigger}
-                onRangeClear={() => listingRef.current?.resetFilters()}
+                onRangeClear={ledger.resetAll}
                 onRangeSelect={handleHeatmapRangeSelect}
               />
             </div>
           )}
 
-          <ListingContainer
-            updateUrl
-            displayMenuPortalTarget={displayMenuTarget}
-            onActiveCountChange={setActiveFilterCount}
-            onTimeframeChange={handleListingTimeframeChange}
-            onVisibleDatesChange={setVisibleDates}
-            ref={listingRef}
-          />
+          <LedgerView enableHotkeys showControls displayMenuPortalTarget={displayMenuTarget} ledger={ledger} />
         </CardContent>
       </Card>
     </FullHeightPageContent>

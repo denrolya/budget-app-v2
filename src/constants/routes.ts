@@ -1,25 +1,21 @@
 import {
+  ArrowLeftRight,
   CalendarDays,
-  CreditCardIcon,
+  FileText,
   FolderTree,
   Handshake,
   LayoutDashboard,
   PieChart,
   PiggyBank,
-  Repeat,
   TestTube2,
+  Wallet,
 } from 'lucide-react';
 
 export const ROUTES = {
-  DASHBOARD_V1: {
-    path: '/dashboard/v1',
+  DASHBOARD: {
+    path: '/dashboard',
     icon: LayoutDashboard,
     label: 'Dashboard',
-  },
-  DASHBOARD_V2: {
-    path: '/dashboard/v2',
-    icon: LayoutDashboard,
-    label: 'Dashboard V2',
   },
   DAILY_LEDGER: {
     path: '/ledger',
@@ -28,17 +24,17 @@ export const ROUTES = {
   },
   TRANSACTION_LIST: {
     path: '/transactions',
-    icon: CreditCardIcon,
+    icon: FileText,
     label: 'Transactions',
   },
   TRANSFER_LIST: {
     path: '/transfers',
-    icon: Repeat,
+    icon: ArrowLeftRight,
     label: 'Transfers',
   },
   ACCOUNT_LIST: {
     path: '/accounts',
-    icon: PiggyBank,
+    icon: Wallet,
     label: 'Accounts',
   },
   DEBT_LIST: {
@@ -53,7 +49,7 @@ export const ROUTES = {
   },
   BUDGET_PAGE: {
     path: '/budget',
-    icon: PieChart,
+    icon: PiggyBank,
     label: 'Budget Planning',
   },
   SANDBOX_PAGE: {

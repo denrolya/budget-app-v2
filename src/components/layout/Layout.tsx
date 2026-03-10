@@ -20,7 +20,7 @@ const Layout: React.FC<React.PropsWithChildren> = ({ children }) => (
             <AppSidebar />
 
             <SidebarInset>
-              <div className="flex flex-col h-screen">
+              <div className="flex flex-col h-screen overflow-hidden">
                 <Header className="hidden md:flex" />
 
                 <main className="flex flex-col flex-1 min-h-0 md:overflow-hidden bg-background">{children}</main>

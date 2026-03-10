@@ -1,4 +1,4 @@
-import { ArrowRight, Eye, Trash2 } from 'lucide-react';
+import { ArrowRight, Eye, Pencil, Trash2 } from 'lucide-react';
 import React, { useId, useMemo } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
@@ -25,6 +25,7 @@ type Props = {
 
   renderDetails: (transfer: Transfer) => React.ReactNode;
   onDelete: (transfer: Transfer) => void;
+  onEdit?: (transfer: Transfer) => void;
 
   sheetOpen?: boolean;
   onSheetOpenChange?: (open: boolean) => void;
@@ -157,8 +158,21 @@ const ActionsCell: React.FC<{
   transfer: Transfer;
   onView: () => void;
   onDelete: () => void;
-}> = ({ transfer, onView, onDelete }) => (
+  onEdit?: () => void;
+}> = ({ transfer, onView, onDelete, onEdit }) => (
   <div className="flex justify-end gap-2 shrink-0">
+    {onEdit && (
+      <Button
+        aria-label={`Edit transfer #${transfer.id}`}
+        size="icon"
+        variant="ghost"
+        className="h-8 w-8 p-0"
+        onClick={onEdit}
+      >
+        <Pencil className="h-4 w-4" />
+      </Button>
+    )}
+
     <Button
       aria-label={`View transfer #${transfer.id} details`}
       size="icon"
@@ -186,6 +200,7 @@ export const ListingRow: React.FC<Props> = ({
   compact = true,
   renderDetails,
   onDelete,
+  onEdit,
   sheetOpen,
   onSheetOpenChange,
   className,
@@ -235,7 +250,12 @@ export const ListingRow: React.FC<Props> = ({
           </TableCell>
 
           <TableCell className={cellClassName(compact, 'text-right')}>
-            <ActionsCell transfer={transfer} onDelete={() => onDelete(transfer)} onView={onView} />
+            <ActionsCell
+              transfer={transfer}
+              onDelete={() => onDelete(transfer)}
+              onEdit={onEdit ? () => onEdit(transfer) : undefined}
+              onView={onView}
+            />
           </TableCell>
         </TableRow>
       </ContextMenuTrigger>
@@ -252,6 +272,13 @@ export const ListingRow: React.FC<Props> = ({
           <Eye className="mr-2 h-4 w-4" />
           View details
         </ContextMenuItem>
+
+        {onEdit && (
+          <ContextMenuItem onSelect={() => onEdit(transfer)}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Edit
+          </ContextMenuItem>
+        )}
 
         <ContextMenuSeparator />
 

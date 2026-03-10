@@ -21,6 +21,7 @@ type PageWithSidebarComponent = React.FC<PageWithSidebarProps> & {
       onBack?: () => void;
       overrideContent?: boolean;
       backAriaLabel?: string;
+      subContent?: ReactNode;
     }
   >;
   Sidebar: React.FC<React.ComponentPropsWithoutRef<'aside'> & { ariaLabel?: string }>;
@@ -109,39 +110,56 @@ const Header: React.FC<
     onBack?: () => void;
     overrideContent?: boolean;
     backAriaLabel?: string;
+    subContent?: ReactNode;
   }
-> = ({ children, className = '', title, onBack, overrideContent = false, backAriaLabel = 'Back', ...props }) => {
+> = ({
+  children,
+  className = '',
+  title,
+  onBack,
+  overrideContent = false,
+  backAriaLabel = 'Back',
+  subContent,
+  ...props
+}) => {
   const titleId = useId();
 
+  if (overrideContent) {
+    return (
+      <header className={cn('bg-background border-b p-4', className)} {...props}>
+        {children}
+      </header>
+    );
+  }
+
+  let labelledById: string | undefined;
+  if (typeof title === 'string') labelledById = titleId;
+
+  let titleNode: ReactNode;
+  if (typeof title === 'string') {
+    titleNode = (
+      <h1 id={titleId} className="text-xl font-bold truncate">
+        {title}
+      </h1>
+    );
+  } else {
+    titleNode = <div className="min-w-0">{title}</div>;
+  }
+
   return (
-    <header
-      aria-labelledby={typeof title === 'string' ? titleId : undefined}
-      className={cn('bg-background border-b p-4', className)}
-      {...props}
-    >
-      {overrideContent ? (
-        children
-      ) : (
-        <div className="flex items-center justify-between gap-2 min-w-0">
-          <div className="flex items-center gap-2 min-w-0">
-            {onBack && (
-              <Button aria-label={backAriaLabel} size="icon" type="button" variant="ghost" onClick={onBack}>
-                <ChevronLeft aria-hidden="true" className="h-6 w-6" />
-              </Button>
-            )}
-
-            {typeof title === 'string' ? (
-              <h1 id={titleId} className="text-xl font-bold truncate">
-                {title}
-              </h1>
-            ) : (
-              <div className="min-w-0">{title}</div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">{children}</div>
+    <header aria-labelledby={labelledById} className={cn('bg-background border-b p-4', className)} {...props}>
+      <div className="flex items-center justify-between gap-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
+          {onBack && (
+            <Button aria-label={backAriaLabel} size="icon" type="button" variant="ghost" onClick={onBack}>
+              <ChevronLeft aria-hidden="true" className="h-6 w-6" />
+            </Button>
+          )}
+          {titleNode}
         </div>
-      )}
+        <div className="flex items-center gap-2">{children}</div>
+      </div>
+      {subContent && <div className="mt-2">{subContent}</div>}
     </header>
   );
 };

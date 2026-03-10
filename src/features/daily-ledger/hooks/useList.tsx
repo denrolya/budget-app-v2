@@ -14,6 +14,8 @@ interface UseTransactionsAndTransfersListOptions {
   initialTransferFilters?: TransferFilters;
   updateUrl?: boolean;
   omitTransferTransactions?: boolean;
+  omitTransactions?: boolean;
+  omitTransfers?: boolean;
   perPage?: number;
 }
 
@@ -70,6 +72,8 @@ export const useTransactionsAndTransfersList = ({
   initialTransferFilters = new TransferFilters(),
   updateUrl = false,
   omitTransferTransactions = true,
+  omitTransactions = false,
+  omitTransfers = false,
   perPage = 500,
 }: UseTransactionsAndTransfersListOptions = {}) => {
   const baseCurrency = useBaseCurrency();
@@ -90,6 +94,7 @@ export const useTransactionsAndTransfersList = ({
   });
 
   const transfersState = useTransfersList({
+    enabled: !omitTransfers,
     initialPerPage: perPage,
     initialFilters: initialTransferFilters,
     updateUrl: false,
@@ -103,9 +108,9 @@ export const useTransactionsAndTransfersList = ({
     queryClient.invalidateQueries({ queryKey: ['transfers'] });
   });
 
-  const isLoading = transactionsState.isLoading || transfersState.isLoading;
-  const isError = transactionsState.isError || transfersState.isError;
-  const error = transactionsState.error ?? transfersState.error;
+  const isLoading = transactionsState.isLoading || (!omitTransfers && transfersState.isLoading);
+  const isError = transactionsState.isError || (!omitTransfers && transfersState.isError);
+  const error = transactionsState.error ?? (!omitTransfers ? transfersState.error : null);
 
   /**
    * Business rule:
@@ -116,7 +121,8 @@ export const useTransactionsAndTransfersList = ({
     return Array.isArray(categories) && categories.length > 0;
   }, [transactionsState.filters.categories]);
 
-  const effectiveShowTransfers = showTransfers && !shouldForceHideTransfers;
+  const effectiveShowTransfers = !omitTransfers && showTransfers && !shouldForceHideTransfers;
+  const effectiveShowTransactions = showTransactions && !omitTransactions;
 
   /**
    * Unified filter setter:
@@ -141,18 +147,18 @@ export const useTransactionsAndTransfersList = ({
    */
   const items: CombinedItem[] = useMemo(() => {
     const out: CombinedItem[] = [];
-    if (showTransactions) out.push(...(transactionsState.items ?? []));
+    if (effectiveShowTransactions) out.push(...(transactionsState.items ?? []));
     if (effectiveShowTransfers) out.push(...(transfersState.items ?? []));
     out.sort(sortDescByExecutedAt);
     return out;
-  }, [transactionsState.items, transfersState.items, showTransactions, effectiveShowTransfers]);
+  }, [transactionsState.items, transfersState.items, effectiveShowTransactions, effectiveShowTransfers]);
 
   const groupedItems: GroupedItem[] = useMemo(() => groupByDay(items, baseCurrency), [items, baseCurrency]);
 
   const refetch = useCallback(() => {
     void transactionsState.refetch();
-    void transfersState.refetch();
-  }, [transactionsState.refetch, transfersState.refetch]);
+    if (!omitTransfers) void transfersState.refetch();
+  }, [transactionsState.refetch, transfersState.refetch, omitTransfers]);
 
   /**
    * Correct reset: do NOT call filters.reset() directly (mutates instance, doesn’t update state).

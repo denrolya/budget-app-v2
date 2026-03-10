@@ -128,7 +128,7 @@ const TableListing: React.FC<Props> = ({
   );
 
   return (
-    <div className="overflow-x-auto">
+    <div className="animate-in fade-in-0 duration-300 ease-out">
       <Table className="min-w-[860px] table-fixed">
         <colgroup>
           <col className="w-4" />
@@ -188,17 +188,21 @@ const TableListing: React.FC<Props> = ({
                   }
                   right={
                     <>
-                      <SummaryBadge
-                        count={transactionsCount}
-                        icon={ROUTES.TRANSACTION_LIST.icon}
-                        value={transactionsValue}
-                      />
-                      <SummaryBadge
-                        count={transfersCount}
-                        icon={ROUTES.TRANSFER_LIST.icon}
-                        useColors={false}
-                        value={transfersValue}
-                      />
+                      {transactionsCount > 0 && (
+                        <SummaryBadge
+                          count={transactionsCount}
+                          icon={ROUTES.TRANSACTION_LIST.icon}
+                          value={transactionsValue}
+                        />
+                      )}
+                      {transfersCount > 0 && (
+                        <SummaryBadge
+                          count={transfersCount}
+                          icon={ROUTES.TRANSFER_LIST.icon}
+                          useColors={false}
+                          value={transfersValue}
+                        />
+                      )}
                     </>
                   }
                   rowClassName={cn({
@@ -225,6 +229,7 @@ const TableListing: React.FC<Props> = ({
                           transfer={transfer}
                           key={`transfer-${transfer.id}`}
                           onDelete={(t) => handleDelete(t)}
+                          onEdit={(t) => openForm(FormType.Transfer, t)}
                           onSheetOpenChange={(open) => setOpenSheetId(open ? transfer.id : null)}
                         />
                       );

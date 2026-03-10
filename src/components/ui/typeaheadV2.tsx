@@ -48,8 +48,10 @@ const readField = <T, K extends keyof T>(obj: T, key: K): T[K] => obj[key];
 
 const asString = (v: unknown): string => String(v);
 
-export interface TypeaheadV2Props<T, V extends string | number>
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
+export interface TypeaheadV2Props<T, V extends string | number> extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'onChange' | 'value'
+> {
   multiple?: boolean;
 
   options: T[];
@@ -60,7 +62,12 @@ export interface TypeaheadV2Props<T, V extends string | number>
   groupBy?: keyof T & string;
 
   /** Custom option renderer (you own the layout) */
-  renderElement: (element: T, valueField: keyof T & string, labelField: keyof T & string, ctx: { isFiltered: boolean }) => React.ReactNode;
+  renderElement: (
+    element: T,
+    valueField: keyof T & string,
+    labelField: keyof T & string,
+    ctx: { isFiltered: boolean },
+  ) => React.ReactNode;
 
   emptyMessage?: string;
 
@@ -106,9 +113,11 @@ function TypeaheadV2Inner<T, V extends string | number>(
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | undefined>(undefined);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
+  const listScrollRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const listboxId = useId();
 
@@ -250,191 +259,234 @@ function TypeaheadV2Inner<T, V extends string | number>(
     }
   }, [open, highlightedIndex]);
 
+  useEffect(() => {
+    if (!triggerRef.current) return;
+
+    // Mount inside active dialog/drawer content so overlay scroll-lock allows
+    // wheel/trackpad interaction on the dropdown list.
+    const dialogContent = triggerRef.current.closest('[role="dialog"]') as HTMLElement | null;
+    setPortalContainer(dialogContent ?? undefined);
+  }, [open]);
+
+  useEffect(() => {
+    const el = listScrollRef.current;
+    if (!el || !open) return;
+
+    const handleWheel = (event: WheelEvent) => {
+      if (event.deltaY === 0) return;
+
+      // Use a non-passive native listener so preventDefault is legal and
+      // modal scroll-lock cannot steal wheel interaction.
+      event.preventDefault();
+      event.stopPropagation();
+      el.scrollTop += event.deltaY;
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      el.removeEventListener('wheel', handleWheel);
+    };
+  }, [open]);
+
   const inputHasSelection = selectedOptions.length > 0;
   const selectedSet = useMemo(() => new Set(selectedValues.map(String)), [selectedValues]);
   const showLabelOverlay = !multiple && inputValue === '' && inputHasSelection;
 
   return (
-    <PopoverPrimitive.Root open={open} onOpenChange={(v) => { if (!v) setOpen(false); }}>
-    <div className={cn(typeaheadRootClass, className)} aria-invalid={ariaInvalid} data-typeahead-root="true">
-      <PopoverPrimitive.Anchor asChild>
-      <div
-        ref={triggerRef}
-        className={cn(typeaheadControlClass, disabled && 'opacity-50 cursor-not-allowed')}
-        role="combobox"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-controls={listboxId}
-        onMouseDown={(e) => {
-          if (!disabled) e.preventDefault();
-        }}
-        onClick={() => {
-          if (disabled) return;
-          setOpen(true);
-          inputRef.current?.focus();
-        }}
-      >
-        <ScrollArea className="flex-1 min-w-0">
-          <div className="flex items-center gap-1 min-w-0">
-            {multiple && selectedOptions.map((option) => {
-              const key = getKey(option);
-              const label = getLabel(option);
-              const rawValue = getRawValue(option);
+    <PopoverPrimitive.Root
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) setOpen(false);
+      }}
+    >
+      <div className={cn(typeaheadRootClass, className)} aria-invalid={ariaInvalid} data-typeahead-root="true">
+        <PopoverPrimitive.Anchor asChild>
+          <div
+            ref={triggerRef}
+            className={cn(typeaheadControlClass, disabled && 'opacity-50 cursor-not-allowed')}
+            role="combobox"
+            aria-haspopup="listbox"
+            aria-expanded={open}
+            aria-controls={listboxId}
+            onMouseDown={(e) => {
+              if (!disabled) e.preventDefault();
+            }}
+            onClick={() => {
+              if (disabled) return;
+              setOpen(true);
+              inputRef.current?.focus();
+            }}
+          >
+            <ScrollArea className="flex-1 min-w-0">
+              <div className="flex items-center gap-1 min-w-0">
+                {multiple &&
+                  selectedOptions.map((option) => {
+                    const key = getKey(option);
+                    const label = getLabel(option);
+                    const rawValue = getRawValue(option);
 
-              return (
-                <Badge key={key} variant="outline" className={typeaheadChipClass}>
-                  <span className="truncate max-w-[100px]">{label}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="ml-1 h-4 w-4 p-0"
-                    tabIndex={-1}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemove(rawValue);
-                    }}
-                    disabled={disabled}
-                    aria-label={`Remove ${label}`}
-                  >
-                    <X className="h-3 w-3" aria-hidden="true" />
-                  </Button>
-                </Badge>
-              );
-            })}
-
-            <div className="relative flex-1 min-w-0 flex items-center">
-              {showLabelOverlay && (
-                <span className="absolute inset-0 flex items-center text-sm pointer-events-none truncate">
-                  {selectedOptions[0] ? getLabel(selectedOptions[0]) : null}
-                </span>
-              )}
-              <input
-                {...inputProps}
-                ref={inputRef}
-                autoComplete="off"
-                disabled={disabled}
-                value={inputValue}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDownInternal}
-                onFocus={(e) => {
-                  if (!disabled) onFocus?.(e);
-                }}
-                onBlur={() => {
-                  if (!disabled) closeDropdownSoon();
-                }}
-                placeholder={!inputHasSelection ? placeholder : ''}
-                className={cn(typeaheadInputClass, 'w-full', showLabelOverlay && 'caret-transparent')}
-                aria-autocomplete="list"
-                aria-controls={listboxId}
-                aria-activedescendant={highlightedIndex >= 0 ? `${listboxId}-opt-${highlightedIndex}` : undefined}
-              />
-            </div>
-          </div>
-
-          <ScrollBar orientation="horizontal" className="h-0.5" />
-        </ScrollArea>
-
-        <Button
-          tabIndex={-1}
-          type="button"
-          variant="ghost"
-          size="sm"
-          className={chevronButtonClass}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!disabled) setOpen((v) => !v);
-          }}
-          disabled={disabled}
-          aria-label={open ? 'Close options' : 'Open options'}
-        >
-          <ChevronsUpDown className={cn('opacity-50', chevronIconClass)} aria-hidden="true" />
-        </Button>
-      </div>
-      </PopoverPrimitive.Anchor>
-
-      <PopoverPrimitive.Portal>
-        <PopoverPrimitive.Content
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          onCloseAutoFocus={(e) => e.preventDefault()}
-          side="bottom"
-          align="start"
-          sideOffset={4}
-          style={{ width: 'var(--radix-popover-trigger-width)' }}
-          className={cn(
-            'z-50 bg-popover border border-input rounded-md shadow-md overflow-hidden',
-            'data-[state=open]:animate-in data-[state=closed]:animate-out',
-            'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-            'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-            dropdownClassName,
-          )}
-        >
-          <ScrollArea className="max-h-[300px] overflow-y-auto" tabIndex={-1}>
-            <div className="p-1 min-w-0" role="listbox" id={listboxId} aria-label="Options">
-              {filteredGroups.length === 0 && (
-                <div className="p-2 text-sm text-muted-foreground" role="status">
-                  {emptyMessage}
-                </div>
-              )}
-
-              {filteredGroups.map((group, groupIndex) => {
-                const groupOffset = filteredGroups.slice(0, groupIndex).reduce((acc, g) => acc + g.options.length, 0);
-
-                return (
-                  <div key={group.label || groupIndex}>
-                    {groupBy && group.label && (
-                      <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground capitalize">
-                        {group.label}
-                      </div>
-                    )}
-
-                    {group.options.map((option, index) => {
-                      const flatIndex = groupOffset + index;
-                      const optionKey = getKey(option);
-                      const isHighlighted = highlightedIndex === flatIndex;
-                      const isSelected = selectedSet.has(optionKey);
-
-                      return (
-                        <div
-                          key={optionKey}
-                          id={`${listboxId}-opt-${flatIndex}`}
-                          ref={(el) => {
-                            optionRefs.current[flatIndex] = el;
+                    return (
+                      <Badge key={key} variant="outline" className={typeaheadChipClass}>
+                        <span className="truncate max-w-[100px]">{label}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="ml-1 h-4 w-4 p-0"
+                          tabIndex={-1}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemove(rawValue);
                           }}
-                          role="option"
-                          aria-selected={isSelected}
-                          className={cn(
-                            'flex items-center px-2 py-1.5 cursor-pointer min-w-0 text-sm',
-                            isHighlighted
-                              ? 'bg-accent text-accent-foreground'
-                              : isSelected
-                                ? 'bg-accent/40 text-accent-foreground'
-                                : 'text-popover-foreground hover:bg-accent hover:text-accent-foreground',
-                          )}
-                          onMouseEnter={() => setHighlightedIndex(flatIndex)}
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                          }}
-                          onClick={() => handleSelect(option)}
+                          disabled={disabled}
+                          aria-label={`Remove ${label}`}
                         >
-                          {!hideCheckmarkColumn && (
-                            <span className="mr-2 flex h-4 w-4 items-center justify-center shrink-0" aria-hidden="true">
-                              {isSelected ? <Check className="h-4 w-4" /> : null}
-                            </span>
-                          )}
+                          <X className="h-3 w-3" aria-hidden="true" />
+                        </Button>
+                      </Badge>
+                    );
+                  })}
 
-                          {renderElement(option, valueField, labelField, { isFiltered: inputValue.trim() !== '' })}
-                        </div>
-                      );
-                    })}
+                <div className="relative flex-1 min-w-0 flex items-center">
+                  {showLabelOverlay && (
+                    <span className="absolute inset-0 flex items-center text-sm pointer-events-none truncate">
+                      {selectedOptions[0] ? getLabel(selectedOptions[0]) : null}
+                    </span>
+                  )}
+                  <input
+                    {...inputProps}
+                    ref={inputRef}
+                    autoComplete="off"
+                    disabled={disabled}
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDownInternal}
+                    onFocus={(e) => {
+                      if (!disabled) onFocus?.(e);
+                    }}
+                    onBlur={() => {
+                      if (!disabled) closeDropdownSoon();
+                    }}
+                    placeholder={!inputHasSelection ? placeholder : ''}
+                    className={cn(typeaheadInputClass, 'w-full', showLabelOverlay && 'caret-transparent')}
+                    aria-autocomplete="list"
+                    aria-controls={listboxId}
+                    aria-activedescendant={highlightedIndex >= 0 ? `${listboxId}-opt-${highlightedIndex}` : undefined}
+                  />
+                </div>
+              </div>
+
+              <ScrollBar orientation="horizontal" className="h-0.5" />
+            </ScrollArea>
+
+            <Button
+              tabIndex={-1}
+              type="button"
+              variant="ghost"
+              size="sm"
+              className={chevronButtonClass}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!disabled) setOpen((v) => !v);
+              }}
+              disabled={disabled}
+              aria-label={open ? 'Close options' : 'Open options'}
+            >
+              <ChevronsUpDown className={cn('opacity-50', chevronIconClass)} aria-hidden="true" />
+            </Button>
+          </div>
+        </PopoverPrimitive.Anchor>
+
+        <PopoverPrimitive.Portal container={portalContainer}>
+          <PopoverPrimitive.Content
+            data-vaul-no-drag
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            onCloseAutoFocus={(e) => e.preventDefault()}
+            side="bottom"
+            align="start"
+            sideOffset={4}
+            collisionPadding={8}
+            avoidCollisions
+            sticky="always"
+            style={{ minWidth: 'var(--radix-popover-trigger-width)' }}
+            className={cn(
+              'z-50 bg-popover border border-input rounded-md shadow-md overflow-hidden max-w-[calc(100vw-1rem)]',
+              'data-[state=open]:animate-in data-[state=closed]:animate-out',
+              'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+              'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+              dropdownClassName,
+            )}
+          >
+            <div ref={listScrollRef} className="max-h-[300px] overflow-y-auto overscroll-contain" tabIndex={-1}>
+              <div className="p-1 min-w-0" role="listbox" id={listboxId} aria-label="Options">
+                {filteredGroups.length === 0 && (
+                  <div className="p-2 text-sm text-muted-foreground" role="status">
+                    {emptyMessage}
                   </div>
-                );
-              })}
+                )}
+
+                {filteredGroups.map((group, groupIndex) => {
+                  const groupOffset = filteredGroups.slice(0, groupIndex).reduce((acc, g) => acc + g.options.length, 0);
+
+                  return (
+                    <div key={group.label || groupIndex}>
+                      {groupBy && group.label && (
+                        <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground capitalize">
+                          {group.label}
+                        </div>
+                      )}
+
+                      {group.options.map((option, index) => {
+                        const flatIndex = groupOffset + index;
+                        const optionKey = getKey(option);
+                        const isHighlighted = highlightedIndex === flatIndex;
+                        const isSelected = selectedSet.has(optionKey);
+
+                        return (
+                          <div
+                            key={optionKey}
+                            id={`${listboxId}-opt-${flatIndex}`}
+                            ref={(el) => {
+                              optionRefs.current[flatIndex] = el;
+                            }}
+                            role="option"
+                            aria-selected={isSelected}
+                            className={cn(
+                              'flex items-center px-2 py-1.5 cursor-pointer min-w-0 text-sm',
+                              isHighlighted
+                                ? 'bg-accent text-accent-foreground'
+                                : isSelected
+                                  ? 'bg-accent/40 text-accent-foreground'
+                                  : 'text-popover-foreground hover:bg-accent hover:text-accent-foreground',
+                            )}
+                            onMouseEnter={() => setHighlightedIndex(flatIndex)}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                            }}
+                            onClick={() => handleSelect(option)}
+                          >
+                            {!hideCheckmarkColumn && (
+                              <span
+                                className="mr-2 flex h-4 w-4 items-center justify-center shrink-0"
+                                aria-hidden="true"
+                              >
+                                {isSelected ? <Check className="h-4 w-4" /> : null}
+                              </span>
+                            )}
+
+                            {renderElement(option, valueField, labelField, { isFiltered: inputValue.trim() !== '' })}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </ScrollArea>
-        </PopoverPrimitive.Content>
-      </PopoverPrimitive.Portal>
-    </div>
+          </PopoverPrimitive.Content>
+        </PopoverPrimitive.Portal>
+      </div>
     </PopoverPrimitive.Root>
   );
 }

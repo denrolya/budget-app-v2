@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { Account, AccountPill, Type as AccountType, ACCOUNT_TYPES_ORDER } from '@/features/accounts';
+import AccountDraftBadge from '@/features/accounts/components/AccountDraftBadge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   SidebarGroup,
@@ -86,6 +87,9 @@ const NavAccounts = () => {
             <div className="min-w-0 flex-1 overflow-hidden">
               <AccountPill showName account={a} size="sm" tooltip={false} variant="inline" />
             </div>
+
+            {/* Draft badge — only visible for bank accounts with pending drafts */}
+            <AccountDraftBadge account={a} />
 
             {/* Amount block - must be able to shrink */}
             <div className="flex min-w-0 flex-col items-end gap-0.5 overflow-hidden">

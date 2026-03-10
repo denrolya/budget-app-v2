@@ -35,9 +35,13 @@ export const bankIntegrationService = {
   },
 
   async sync(id: number, from?: string, to?: string): Promise<{ created: number }> {
-    const { data } = await api.post<{ created: number }>(`${BASE_URL}/${id}/sync`, {}, {
-      params: { ...(from && { from }), ...(to && { to }) },
-    });
+    const { data } = await api.post<{ created: number }>(
+      `${BASE_URL}/${id}/sync`,
+      {},
+      {
+        params: { ...(from && { from }), ...(to && { to }) },
+      },
+    );
     return data;
   },
 

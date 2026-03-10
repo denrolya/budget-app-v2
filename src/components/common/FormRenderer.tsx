@@ -42,14 +42,13 @@ interface FormContentProps {
   values: any;
   onClose: () => void;
   setFormState: (updates: Partial<FormState>) => void;
-  key: string;
 }
 
 const FormContent = forwardRef<{ submitForm: () => Promise<void> }, FormContentProps>((props, ref) => {
-  const { key, formType } = props;
+  const { formType } = props;
   const FormComponent = formComponents[formType];
 
-  return <FormComponent key={key} ref={ref} />;
+  return <FormComponent ref={ref} />;
 });
 
 export const FormRenderer: React.FC = () => {
@@ -102,7 +101,7 @@ export const FormRenderer: React.FC = () => {
             <DrawerTitle>Bulk Create Transactions</DrawerTitle>
             <DrawerDescription className="sr-only">Create multiple transactions at once</DrawerDescription>
           </DrawerHeader>
-          <div className="flex-1 min-h-0 overflow-hidden">
+          <div data-vaul-no-drag className="flex-1 min-h-0 overflow-hidden flex flex-col">
             <BulkCreateTableForm />
           </div>
         </DrawerContent>
@@ -145,12 +144,12 @@ export const FormRenderer: React.FC = () => {
   if (!isMobile) {
     return (
       <Dialog open={formState.isOpen} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-visible">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription className="sr-only">Form: {title}</DialogDescription>
           </DialogHeader>
-          {content}
+          <div className="max-h-[calc(90vh-11rem)] overflow-y-auto pr-1">{content}</div>
           <DialogFooter className="border-t pt-2">{footer}</DialogFooter>
         </DialogContent>
       </Dialog>

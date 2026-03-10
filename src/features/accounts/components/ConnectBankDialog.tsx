@@ -11,13 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   BankProvider,
@@ -44,7 +38,12 @@ const PROVIDER_LABELS: Record<BankProvider, string> = {
 
 const PROVIDER_DESCRIPTIONS: Record<BankProvider, string> = {
   [BankProvider.Monobank]: 'Import transactions via webhook (real-time)',
-  [BankProvider.Wise]: 'Import transactions via scheduled polling',
+  [BankProvider.Wise]: 'Import transactions via webhook or scheduled polling',
+};
+
+const SYNC_METHOD_LABELS: Record<SyncMethod, string> = {
+  [SyncMethod.Webhook]: 'Webhook (real-time)',
+  [SyncMethod.Polling]: 'Polling (scheduled)',
 };
 
 type Step = 'setup' | 'connect';
@@ -52,6 +51,7 @@ type Step = 'setup' | 'connect';
 const ConnectBankDialog: React.FC<Props> = ({ open, onOpenChange, account }) => {
   const [step, setStep] = useState<Step>('connect');
   const [selectedProvider, setSelectedProvider] = useState<BankProvider | null>(null);
+  const [selectedSyncMethod, setSelectedSyncMethod] = useState<SyncMethod | null>(null);
   const [selectedIntegrationId, setSelectedIntegrationId] = useState<number | null>(null);
   const [selectedExternalId, setSelectedExternalId] = useState<string | null>(null);
 
@@ -67,6 +67,7 @@ const ConnectBankDialog: React.FC<Props> = ({ open, onOpenChange, account }) => 
   useEffect(() => {
     if (!open) return;
     setSelectedProvider(null);
+    setSelectedSyncMethod(null);
     setSelectedExternalId(null);
 
     if (integrations.isSuccess) {
@@ -96,13 +97,18 @@ const ConnectBankDialog: React.FC<Props> = ({ open, onOpenChange, account }) => 
   }, [selectedIntegrationId]);
 
   const selectedIntegration = integrations.data?.find((i) => i.id === selectedIntegrationId) ?? null;
-  const isWebhookProvider = selectedIntegration?.provider === BankProvider.Monobank;
+  const shouldRegisterWebhook = selectedIntegration?.syncMethod === SyncMethod.Webhook;
   const canConnect = !!selectedIntegrationId && !!selectedExternalId;
   const isConnecting = isUpdating || registerWebhook.isPending;
 
   const handleSetup = async () => {
     if (!selectedProvider) return;
-    const syncMethod = selectedProvider === BankProvider.Monobank ? SyncMethod.Webhook : SyncMethod.Polling;
+
+    const syncMethod =
+      selectedProvider === BankProvider.Wise
+        ? (selectedSyncMethod ?? SyncMethod.Polling)
+        : SyncMethod.Webhook;
+
     const created = await createIntegration.mutateAsync({ provider: selectedProvider, syncMethod });
     setSelectedIntegrationId(created.id);
     setStep('connect');
@@ -117,7 +123,7 @@ const ConnectBankDialog: React.FC<Props> = ({ open, onOpenChange, account }) => 
         externalAccountId: selectedExternalId,
       },
     });
-    if (isWebhookProvider) {
+    if (shouldRegisterWebhook) {
       await registerWebhook.mutateAsync();
     }
     onOpenChange(false);
@@ -137,12 +143,15 @@ const ConnectBankDialog: React.FC<Props> = ({ open, onOpenChange, account }) => 
               <button
                 type="button"
                 className={`flex flex-col items-start rounded-lg border px-4 py-3 text-left transition-colors hover:border-primary/60 hover:bg-muted/50 ${
-                  selectedProvider === provider
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border bg-transparent'
+                  selectedProvider === provider ? 'border-primary bg-primary/5' : 'border-border bg-transparent'
                 }`}
                 key={provider}
-                onClick={() => setSelectedProvider(provider)}
+                onClick={() => {
+                  setSelectedProvider(provider);
+                  if (provider !== BankProvider.Wise) {
+                    setSelectedSyncMethod(SyncMethod.Webhook);
+                  }
+                }}
               >
                 <span className="font-medium text-sm">{PROVIDER_LABELS[provider]}</span>
                 <span className="text-xs text-muted-foreground mt-0.5">{PROVIDER_DESCRIPTIONS[provider]}</span>
@@ -150,12 +159,37 @@ const ConnectBankDialog: React.FC<Props> = ({ open, onOpenChange, account }) => 
             ))}
           </div>
         </div>
+
+        {selectedProvider === BankProvider.Wise && (
+          <div className="flex flex-col gap-1.5">
+            <Label>Sync method</Label>
+            <div className="flex flex-col gap-2">
+              {Object.values(SyncMethod).map((method) => (
+                <button
+                  type="button"
+                  className={`flex items-center rounded-lg border px-4 py-2 text-left transition-colors hover:border-primary/60 hover:bg-muted/50 ${
+                    selectedSyncMethod === method ? 'border-primary bg-primary/5' : 'border-border bg-transparent'
+                  }`}
+                  key={method}
+                  onClick={() => setSelectedSyncMethod(method)}
+                >
+                  <span className="font-medium text-sm">{SYNC_METHOD_LABELS[method]}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       <DialogFooter>
         <Button variant="outline" onClick={() => onOpenChange(false)}>
           Cancel
         </Button>
-        <Button disabled={!selectedProvider || createIntegration.isPending} onClick={handleSetup}>
+        <Button
+          disabled={
+            !selectedProvider || (selectedProvider === BankProvider.Wise && !selectedSyncMethod) || createIntegration.isPending
+          }
+          onClick={handleSetup}
+        >
           {createIntegration.isPending && <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />}
           Set up integration
         </Button>
@@ -240,9 +274,9 @@ const ConnectBankDialog: React.FC<Props> = ({ open, onOpenChange, account }) => 
           </div>
         )}
 
-        {isWebhookProvider && selectedIntegrationId && (
+        {shouldRegisterWebhook && selectedIntegrationId && (
           <p className="text-xs text-muted-foreground">
-            Monobank uses webhooks. The webhook URL will be registered automatically on connect.
+            Webhook mode is enabled. The webhook URL will be registered automatically on connect.
           </p>
         )}
       </div>
