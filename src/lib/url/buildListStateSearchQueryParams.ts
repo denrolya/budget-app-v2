@@ -5,6 +5,49 @@ import BaseFilters from '@/models/BaseFilters';
 import { Sorting } from '@/types/pagination';
 import { isSameValue } from '@/lib/isSameValue';
 
+/**
+ * Serializes the FULL filter state for use as a TanStack Query cache key.
+ * Unlike buildListStateSearchParams, this does NOT skip values equal to defaults.
+ * This prevents cache collisions between ledger instances that share the same
+ * queryKeyBase but have different initialFilters (e.g. account details vs main ledger).
+ */
+export const buildQueryKey = <FilterType extends BaseFilters>(
+  state: {
+    pagination: { currentPage: number; perPage: number };
+    filters: FilterType;
+    sort: Sorting;
+  },
+  keys: Record<string, string>,
+  formatMoment: string,
+): string => {
+  const params = new URLSearchParams();
+
+  params.set('page', state.pagination.currentPage.toString());
+  params.set('perPage', state.pagination.perPage.toString());
+
+  Object.entries(state.filters).forEach(([key, value]) => {
+    if (key === '_defaults') return;
+    if (isNil(value) || value === '') return;
+    const paramKey = keys[key] || key;
+    if (moment.isMoment(value)) {
+      params.set(paramKey, value.format(formatMoment));
+    } else if (Array.isArray(value)) {
+      if (value.length > 0) {
+        params.set(paramKey, value.map((v) => (typeof v === 'number' && !Number.isFinite(v) ? '' : String(v))).join(','));
+      }
+    } else {
+      params.set(paramKey, String(value));
+    }
+  });
+
+  if (state.sort.field && state.sort.direction) {
+    params.set('sortField', state.sort.field);
+    params.set('sortDirection', state.sort.direction);
+  }
+
+  return params.toString();
+};
+
 export const buildListStateSearchParams = <FilterType extends BaseFilters>(
   state: {
     pagination: { currentPage: number; perPage: number };

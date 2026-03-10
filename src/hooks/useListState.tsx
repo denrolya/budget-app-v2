@@ -4,7 +4,7 @@ import isEqual from 'lodash/isEqual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import { buildListStateSearchParams } from '@/lib/url/buildListStateSearchQueryParams';
+import { buildListStateSearchParams, buildQueryKey } from '@/lib/url/buildListStateSearchQueryParams';
 import { type Sorting } from '@/types/pagination';
 import BaseFilters, { type FilterConstructor } from '@/models/BaseFilters';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
@@ -198,10 +198,18 @@ export const useListState = <FilterType extends BaseFilters, DataType extends { 
     };
   }, [state, stateAsParams, updateSearchParamsDebounced, updateUrl]);
 
-  // Use URL params as the canonical, deterministic query key part
+  // Build query key from the FULL filter state (not just diff from defaults).
+  // stateAsParams only captures values that differ from defaults, so two ledger
+  // instances with different initialFilters but the same diff would collide on
+  // the same cache key (e.g. account details ledger vs main ledger).
+  const queryKeyString = useMemo(
+    () => buildQueryKey(state, searchParamKeys as Record<string, string>, formatMoment),
+    [state, searchParamKeys, formatMoment],
+  );
+
   const queryKey = useMemo(
-    () => [queryKeyBase, stateAsParams.toString(), ...additionalFetchDependencies],
-    [queryKeyBase, stateAsParams, additionalFetchDependencies],
+    () => [queryKeyBase, queryKeyString, ...additionalFetchDependencies],
+    [queryKeyBase, queryKeyString, additionalFetchDependencies],
   );
 
   const response = useQuery<DataType, Error>({
