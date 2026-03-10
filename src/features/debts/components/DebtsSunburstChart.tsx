@@ -102,7 +102,7 @@ const DebtsSunburstChart: React.FC<Props> = ({ debts, onHoverChange }) => {
 
   const DebtTooltip = ({ value, percentage, color, data }: HoveredSunburstNode) => {
     const isDebt = data.debtId !== undefined;
-    const debt = isDebt ? debts.find((d) => d.id === data.debtId) ?? null : null;
+    const debt = isDebt ? (debts.find((d) => d.id === data.debtId) ?? null) : null;
 
     if (debt) {
       return (
@@ -164,12 +164,12 @@ const DebtsSunburstChart: React.FC<Props> = ({ debts, onHoverChange }) => {
       isInteractive
       borderColor={{ theme: 'background' }}
       borderWidth={10}
-      inheritColorFromParent={false}
       colors={(node) => (node.data as SunburstNode).color ?? OPEN_RING_COLOR}
       cornerRadius={3}
       data={sunburstData}
       enableArcLabels={false}
       id="name"
+      inheritColorFromParent={false}
       margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
       motionConfig="gentle"
       tooltip={DebtTooltip as any}

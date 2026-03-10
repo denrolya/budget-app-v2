@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Account } from '@/features/accounts';
+import { Account, Type as AccountType } from '@/features/accounts';
 import AccountDraftBadge from '@/features/accounts/components/AccountDraftBadge';
 import AccountPill from '@/features/accounts/components/Pill';
 import { useBaseCurrency } from '@/features/auth';
@@ -22,6 +22,8 @@ interface SidebarListingProps {
   onSelect: (account: Account) => void;
   onClear?: () => void;
 }
+
+const ACCOUNT_TYPES = Object.values(AccountType) as AccountType[];
 
 const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, onClear }) => {
   const baseCurrency = useBaseCurrency();
@@ -71,14 +73,19 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
     [activeAccounts, baseCurrency],
   );
 
-  const groupedAccounts = useMemo(
+  const groupedAccounts = useMemo<Record<AccountType, Account[]>>(
     () =>
-      Object.values(AccountType).reduce(
+      ACCOUNT_TYPES.reduce<Record<AccountType, Account[]>>(
         (acc, type) => {
           acc[type] = filteredAccounts.filter((account) => account.type === type);
           return acc;
         },
-        {} as Record<AccountType, Account[]>,
+        {
+          [AccountType.Bank]: [],
+          [AccountType.Cash]: [],
+          [AccountType.Internet]: [],
+          [AccountType.Basic]: [],
+        },
       ),
     [filteredAccounts],
   );
@@ -178,7 +185,7 @@ const SidebarListing: React.FC<SidebarListingProps> = ({ selectedId, onSelect, o
       {/* List */}
       <ScrollArea className="flex-1 overflow-x-hidden">
         <div role="list" className="overflow-x-hidden">
-          {Object.values(AccountType).map((type) => {
+          {ACCOUNT_TYPES.map((type) => {
             const items = groupedAccounts[type];
             if (!items?.length) return null;
 

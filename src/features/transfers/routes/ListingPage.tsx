@@ -184,9 +184,9 @@ export const TransfersListPage: React.FC = () => {
           {isHeatmapVisible && (
             <div className="shrink-0 border-b">
               <HeatmapPanel
+                highlightDates={ledger.visibleDates}
                 showViewMode={false}
                 year={ledger.timeframe.after.year()}
-                highlightDates={ledger.visibleDates}
                 onRangeClear={handleHeatmapRangeClear}
                 onRangeSelect={handleHeatmapRangeSelect}
               />

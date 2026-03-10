@@ -120,10 +120,10 @@ export const DailyLedgerPage: React.FC = () => {
           {isHeatmapVisible && (
             <div className="shrink-0 border-b">
               <HeatmapPanel
-                showViewMode={false}
-                year={ledger.timeframe.after.year()}
                 highlightDates={ledger.visibleDates}
                 resetTrigger={heatmapResetTrigger}
+                showViewMode={false}
+                year={ledger.timeframe.after.year()}
                 onRangeClear={ledger.resetAll}
                 onRangeSelect={handleHeatmapRangeSelect}
               />

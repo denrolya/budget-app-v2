@@ -105,9 +105,7 @@ const ConnectBankDialog: React.FC<Props> = ({ open, onOpenChange, account }) => 
     if (!selectedProvider) return;
 
     const syncMethod =
-      selectedProvider === BankProvider.Wise
-        ? (selectedSyncMethod ?? SyncMethod.Polling)
-        : SyncMethod.Webhook;
+      selectedProvider === BankProvider.Wise ? (selectedSyncMethod ?? SyncMethod.Polling) : SyncMethod.Webhook;
 
     const created = await createIntegration.mutateAsync({ provider: selectedProvider, syncMethod });
     setSelectedIntegrationId(created.id);
@@ -186,7 +184,9 @@ const ConnectBankDialog: React.FC<Props> = ({ open, onOpenChange, account }) => 
         </Button>
         <Button
           disabled={
-            !selectedProvider || (selectedProvider === BankProvider.Wise && !selectedSyncMethod) || createIntegration.isPending
+            !selectedProvider ||
+            (selectedProvider === BankProvider.Wise && !selectedSyncMethod) ||
+            createIntegration.isPending
           }
           onClick={handleSetup}
         >

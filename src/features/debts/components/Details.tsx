@@ -26,6 +26,7 @@ import TransactionHeatmapChart from '@/features/transactions/components/Transact
 import { useIsMobile } from '@/hooks/use-mobile';
 
 import Debt from '../models/Debt';
+
 import DebtBalanceChart from './DebtBalanceChart';
 
 interface Props {
@@ -159,7 +160,10 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
 
   // All-years daily stats for the heatmap — the chart filters to the active year internally.
   const dailyStats = useMemo<DailyStatsResponse>(() => {
-    const perDay = new Map<string, { count: number; convertedValues: Record<string, { income: number; expense: number }> }>();
+    const perDay = new Map<
+      string,
+      { count: number; convertedValues: Record<string, { income: number; expense: number }> }
+    >();
 
     for (const tx of transactions) {
       const day = tx.executedAt.format(BACKEND_DATE_FORMAT);
@@ -268,11 +272,7 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
 
           {transactions.length > 1 && (
             <div className="border-b">
-              <DebtBalanceChart
-                currency={debt.currency}
-                currentBalance={debt.balance}
-                transactions={transactions}
-              />
+              <DebtBalanceChart currency={debt.currency} currentBalance={debt.balance} transactions={transactions} />
             </div>
           )}
 
@@ -342,61 +342,57 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
                   </CardDescription>
 
                   <div className="absolute top-2 right-2 flex items-center gap-0.5">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            aria-label="Open filters"
-                            size="icon"
-                            variant="ghost"
-                            className="relative h-7 w-7"
-                            onClick={ledger.toggleFilters}
-                          >
-                            <Filter className="h-3.5 w-3.5" />
-                            {ledger.activeFilterCount > 0 && (
-                              <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-primary" />
-                            )}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {ledger.activeFilterCount > 0 ? `Filters (${ledger.activeFilterCount})` : 'Filters'}
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            aria-label={isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7"
-                            onClick={() => setIsFullscreen((prev) => !prev)}
-                          >
-                            {isFullscreen ? (
-                              <Minimize2 className="h-3.5 w-3.5" />
-                            ) : (
-                              <Maximize2 className="h-3.5 w-3.5" />
-                            )}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}</TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            aria-label={heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7"
-                            onClick={() => setHeatmapExpanded((prev) => !prev)}
-                          >
-                            {heatmapExpanded ? (
-                              <ChevronUp className="h-3.5 w-3.5" />
-                            ) : (
-                              <ChevronDown className="h-3.5 w-3.5" />
-                            )}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</TooltipContent>
-                      </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          aria-label="Open filters"
+                          size="icon"
+                          variant="ghost"
+                          className="relative h-7 w-7"
+                          onClick={ledger.toggleFilters}
+                        >
+                          <Filter className="h-3.5 w-3.5" />
+                          {ledger.activeFilterCount > 0 && (
+                            <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-primary" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {ledger.activeFilterCount > 0 ? `Filters (${ledger.activeFilterCount})` : 'Filters'}
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          aria-label={isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7"
+                          onClick={() => setIsFullscreen((prev) => !prev)}
+                        >
+                          {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>{isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          aria-label={heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7"
+                          onClick={() => setHeatmapExpanded((prev) => !prev)}
+                        >
+                          {heatmapExpanded ? (
+                            <ChevronUp className="h-3.5 w-3.5" />
+                          ) : (
+                            <ChevronDown className="h-3.5 w-3.5" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</TooltipContent>
+                    </Tooltip>
                   </div>
                 </CardHeader>
 
@@ -414,10 +410,10 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
                           <TransactionHeatmapChart
                             currency={baseCurrency}
                             data={dailyStats}
+                            highlightDates={ledger.visibleDates}
                             isLoading={ledger.transactionsState.isLoading && transactions.length === 0}
                             selectable={true}
                             year={heatmapYear}
-                            highlightDates={ledger.visibleDates}
                             onRangeClear={handleHeatmapRangeClear}
                             onRangeSelect={handleHeatmapRangeSelect}
                             onViewModeChange={handleHeatmapViewModeChange}
@@ -440,7 +436,9 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
                       />
                     </div>
                   )}
-                  {!isMobile && <div className="border-t flex-1 min-h-0 overflow-y-auto">{renderActivityContent()}</div>}
+                  {!isMobile && (
+                    <div className="border-t flex-1 min-h-0 overflow-y-auto">{renderActivityContent()}</div>
+                  )}
                   {isMobile && !isHeatmapRangeActive && (
                     <div className={cn('border-t flex-1 min-h-0 overflow-y-auto', !heatmapExpanded && 'border-0')}>
                       {renderActivityContent()}

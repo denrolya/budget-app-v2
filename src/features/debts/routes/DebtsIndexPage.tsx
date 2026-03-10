@@ -119,9 +119,7 @@ const DebtsIndexPage: React.FC = () => {
                     />
                   </p>
                   {centerInfo.sub && (
-                    <p className="text-xs text-muted-foreground mt-1.5 leading-tight">
-                      {centerInfo.sub}
-                    </p>
+                    <p className="text-xs text-muted-foreground mt-1.5 leading-tight">{centerInfo.sub}</p>
                   )}
                 </div>
               </div>
@@ -224,9 +222,7 @@ const DebtsIndexPage: React.FC = () => {
                     </div>
                   )}
 
-                  {debts.length === 0 && (
-                    <p className="text-sm text-muted-foreground">No debts recorded yet.</p>
-                  )}
+                  {debts.length === 0 && <p className="text-sm text-muted-foreground">No debts recorded yet.</p>}
                 </div>
               </ScrollArea>
 
@@ -238,7 +234,10 @@ const DebtsIndexPage: React.FC = () => {
                 <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                   By status
                 </p>
-                {[{ label: 'Open', value: openTotal, total }, { label: 'Closed', value: closedTotal, total }].map(({ label, value, total: t }) => (
+                {[
+                  { label: 'Open', value: openTotal, total },
+                  { label: 'Closed', value: closedTotal, total },
+                ].map(({ label, value, total: t }) => (
                   <div className="space-y-1" key={label}>
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">{label}</span>

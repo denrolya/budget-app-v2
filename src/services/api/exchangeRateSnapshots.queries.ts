@@ -28,11 +28,11 @@ export type ExchangeRateSnapshotsData = {
  * All stored values use EUR as the base; cross-rates are computed via EUR.
  * Returns null if either leg of the conversion is unavailable.
  */
-export function getRateFromSnapshot(
+export const getRateFromSnapshot = (
   snapshot: ExchangeRateSnapshot,
   from: CURRENCY_CODE,
   to: CURRENCY_CODE,
-): number | null {
+): number | null => {
   if (from === to) return 1;
 
   // Value of 1 unit of `from` expressed in EUR
@@ -60,7 +60,7 @@ export function getRateFromSnapshot(
 
   if (xToEur === null || eurToY === null) return null;
   return xToEur * eurToY;
-}
+};
 
 // ─── Query hook ───────────────────────────────────────────────────────────────
 

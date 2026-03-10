@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-import { generatePreviousTimeframe } from '@/lib/generatePreviousTimeframe';
+import { generatePreviousTimeframe } from '@/lib/datetime/generatePreviousTimeframe';
 
 describe('generatePreviousTimeframe', () => {
   it('should throw an error if startDate is invalid', () => {

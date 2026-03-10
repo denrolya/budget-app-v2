@@ -5,7 +5,6 @@ import {
   FolderTree,
   Handshake,
   LayoutDashboard,
-  PieChart,
   PiggyBank,
   TestTube2,
   Wallet,

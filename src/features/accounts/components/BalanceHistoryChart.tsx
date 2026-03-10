@@ -209,7 +209,4 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
   );
 };
 
-export default React.memo(
-  BalanceHistoryChart,
-  (prevProps, nextProps) => prevProps.account.id === nextProps.account.id,
-);
+export default React.memo(BalanceHistoryChart, (prevProps, nextProps) => prevProps.account.id === nextProps.account.id);

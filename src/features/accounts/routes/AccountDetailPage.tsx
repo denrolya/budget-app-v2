@@ -143,7 +143,7 @@ const AccountDetailPage: React.FC = () => {
       <div className="flex-1 min-h-0 overflow-hidden">
         <ScrollArea className="h-full">
           <div className="min-h-full min-w-0 flex flex-col p-4">
-            <AccountDetails key={account.id} account={account} onAccountUpdate={onAccountUpdate} />
+            <AccountDetails account={account} key={account.id} onAccountUpdate={onAccountUpdate} />
           </div>
         </ScrollArea>
       </div>

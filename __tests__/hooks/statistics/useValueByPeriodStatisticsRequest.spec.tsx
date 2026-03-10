@@ -7,8 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { UseStatisticsParams, ValueByPeriodDataDTO } from '@/types/valueByPeriodStatistics';
 import { axiosFetcher } from '@/services/api';
 import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
-
-import { Type as TransactionType } from '@/types/transaction';
+import { Type as TransactionType } from '@/features/transactions';
 
 vi.mock('@/services/api', () => ({
   axiosFetcher: vi.fn(),

@@ -39,8 +39,17 @@ const DebtDetailsHeader: React.FC<{
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button aria-label={isClosed ? 'Reopen debt' : 'Close debt'} size="icon" variant="outline" onClick={onToggleClosed}>
-            {isClosed ? <ArchiveRestore aria-hidden="true" className="h-4 w-4" /> : <Archive aria-hidden="true" className="h-4 w-4" />}
+          <Button
+            aria-label={isClosed ? 'Reopen debt' : 'Close debt'}
+            size="icon"
+            variant="outline"
+            onClick={onToggleClosed}
+          >
+            {isClosed ? (
+              <ArchiveRestore aria-hidden="true" className="h-4 w-4" />
+            ) : (
+              <Archive aria-hidden="true" className="h-4 w-4" />
+            )}
           </Button>
         </TooltipTrigger>
         <TooltipContent>{isClosed ? 'Reopen debt' : 'Close debt'}</TooltipContent>

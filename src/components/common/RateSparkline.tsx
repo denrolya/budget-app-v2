@@ -9,7 +9,7 @@ const CHART_HEIGHT = 52;
  * Needed because SVG stop-color doesn't support var() references.
  * Uses a temporary element so the browser's CSS engine does the conversion.
  */
-function resolveCssVar(varName: string): string {
+const resolveCssVar = (varName: string): string => {
   if (typeof window === 'undefined') return '#888';
   const raw = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
   if (!raw) return '#888';
@@ -20,7 +20,7 @@ function resolveCssVar(varName: string): string {
   const resolved = getComputedStyle(el).color; // "rgb(R, G, B)"
   el.remove();
   return resolved || '#888';
-}
+};
 
 interface Props {
   /** Array of {x: 'YYYY-MM-DD', y: rate} points, sorted chronologically */

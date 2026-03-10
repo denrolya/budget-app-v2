@@ -2,9 +2,8 @@ import moment from 'moment';
 import qs from 'qs';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
-
-import { Type as TransactionType } from '@/types/transaction';
-import { generateQueryParamsString } from '@/lib/generateQueryParamsString'; // adjust import based on your file structure
+import { Type as TransactionType } from '@/features/transactions';
+import { generateQueryParamsString } from '@/lib/url/generateQueryParamsString';
 
 describe('generateQueryParamsString', () => {
   it('should generate query string with default formats and no optional params', () => {

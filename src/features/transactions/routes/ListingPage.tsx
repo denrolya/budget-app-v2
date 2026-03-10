@@ -192,10 +192,10 @@ export const TransactionsListPage: React.FC = () => {
           {isHeatmapVisible && (
             <div className="shrink-0 border-b">
               <HeatmapPanel
-                showViewMode={false}
-                year={ledger.timeframe.after.year()}
                 filters={heatmapFilters}
                 highlightDates={ledger.visibleDates}
+                showViewMode={false}
+                year={ledger.timeframe.after.year()}
                 onRangeClear={handleHeatmapRangeClear}
                 onRangeSelect={handleHeatmapRangeSelect}
               />

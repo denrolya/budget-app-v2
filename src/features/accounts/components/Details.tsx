@@ -351,11 +351,11 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
               <div className="overflow-hidden">
                 {heatmapMounted && (
                   <HeatmapPanel
-                    showViewMode={false}
-                    year={ledger.timeframe.after.year()}
                     currency={account.currency}
                     filters={{ accounts: [account.id] }}
                     highlightDates={ledger.visibleDates}
+                    showViewMode={false}
+                    year={ledger.timeframe.after.year()}
                     onRangeClear={handleHeatmapRangeClear}
                     onRangeSelect={handleHeatmapRangeSelect}
                   />

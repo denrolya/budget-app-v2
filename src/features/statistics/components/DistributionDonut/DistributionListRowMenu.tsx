@@ -23,7 +23,9 @@ export const DistributionListRowMenu: React.FC<Props> = ({ item, children, onSel
   const copy = useCallback(async (value: string) => {
     try {
       await navigator.clipboard.writeText(value);
-    } catch {}
+    } catch {
+      return;
+    }
   }, []);
 
   const id = String(item.id);

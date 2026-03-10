@@ -60,23 +60,15 @@ const AccountsIndexPage: React.FC = () => {
       typeMap.set(acc.type, (typeMap.get(acc.type) ?? 0) + converted);
     }
 
-    const total = accounts.reduce(
-      (sum, acc) => sum + Math.abs(acc.convertedValues?.[baseCurrency] ?? 0),
-      0,
-    );
+    const total = accounts.reduce((sum, acc) => sum + Math.abs(acc.convertedValues?.[baseCurrency] ?? 0), 0);
 
     const groups: CurrencyGroup[] = [];
     for (const [currency, accs] of grouped) {
-      const currencyTotal = accs.reduce(
-        (sum, acc) => sum + Math.abs(acc.convertedValues?.[baseCurrency] ?? 0),
-        0,
-      );
+      const currencyTotal = accs.reduce((sum, acc) => sum + Math.abs(acc.convertedValues?.[baseCurrency] ?? 0), 0);
       const currencyInfo = CURRENCIES[currency as keyof typeof CURRENCIES];
       const color =
         typeof window !== 'undefined'
-          ? getComputedStyle(document.documentElement)
-              .getPropertyValue(`--account-bank-${currency}`)
-              .trim() || '#888'
+          ? getComputedStyle(document.documentElement).getPropertyValue(`--account-bank-${currency}`).trim() || '#888'
           : '#888';
 
       const sortedAccs = accs
@@ -154,8 +146,7 @@ const AccountsIndexPage: React.FC = () => {
   const formatCenter = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: centerInfo.currency,
-    maximumFractionDigits:
-      centerInfo.currency === 'BTC' || centerInfo.currency === 'ETH' ? 6 : 0,
+    maximumFractionDigits: centerInfo.currency === 'BTC' || centerInfo.currency === 'ETH' ? 6 : 0,
   });
 
   return (
@@ -183,9 +174,7 @@ const AccountsIndexPage: React.FC = () => {
                     className="inline-block h-1.5 w-1.5 rounded-full flex-none"
                   />
                   {currencyGroups[0].currency} leads at{' '}
-                  <span className="font-semibold text-foreground">
-                    {currencyGroups[0].percentage.toFixed(0)}%
-                  </span>
+                  <span className="font-semibold text-foreground">{currencyGroups[0].percentage.toFixed(0)}%</span>
                 </span>
               </>
             )}
@@ -213,9 +202,7 @@ const AccountsIndexPage: React.FC = () => {
                     {formatCenter.format(centerInfo.value)}
                   </p>
                   {centerInfo.sub && (
-                    <p className="text-xs text-muted-foreground mt-1.5 leading-tight">
-                      {centerInfo.sub}
-                    </p>
+                    <p className="text-xs text-muted-foreground mt-1.5 leading-tight">{centerInfo.sub}</p>
                   )}
                 </div>
               </div>
@@ -229,9 +216,9 @@ const AccountsIndexPage: React.FC = () => {
                 <div className="space-y-5 p-4 pb-3">
                   {currencyGroups.map((group, groupIdx) => (
                     <div
-                      key={group.currency}
                       style={{ animationDelay: `${100 + groupIdx * 70}ms` }}
                       className="animate-in fade-in slide-in-from-right-4 duration-300 ease-out [animation-fill-mode:both]"
+                      key={group.currency}
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-2">
@@ -252,18 +239,16 @@ const AccountsIndexPage: React.FC = () => {
                               maximumFractionDigits: 0,
                             }).format(group.total)}
                           </span>
-                          <span className="text-muted-foreground ml-1">
-                            {group.percentage.toFixed(0)}%
-                          </span>
+                          <span className="text-muted-foreground ml-1">{group.percentage.toFixed(0)}%</span>
                         </div>
                       </div>
 
                       <div className="space-y-0.5 pl-[18px]">
                         {group.accounts.map((acc) => (
                           <button
-                            key={acc.id}
                             type="button"
                             className="w-full flex items-center justify-between text-xs text-muted-foreground gap-2 hover:text-foreground hover:bg-muted rounded px-1.5 py-1 transition-colors cursor-pointer text-left"
+                            key={acc.id}
                             onClick={() => navigate(`/accounts/${acc.id}`)}
                           >
                             <span className="truncate">{acc.name}</span>
@@ -291,12 +276,10 @@ const AccountsIndexPage: React.FC = () => {
                     By account type
                   </p>
                   {typeGroups.map(({ type, percentage }) => (
-                    <div key={type} className="space-y-1">
+                    <div className="space-y-1" key={type}>
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-muted-foreground">{TYPE_LABELS[type] ?? type}</span>
-                        <span className="font-medium text-foreground tabular-nums">
-                          {percentage.toFixed(0)}%
-                        </span>
+                        <span className="font-medium text-foreground tabular-nums">{percentage.toFixed(0)}%</span>
                       </div>
                       <div className="h-1 bg-secondary rounded-full overflow-hidden">
                         <div

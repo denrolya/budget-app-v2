@@ -141,13 +141,7 @@ const DebtBalanceChart: React.FC<Props> = ({ currency, currentBalance, transacti
         <p className="text-muted-foreground mb-1">
           {moment(point.data.x as string, 'YYYY-MM-DD').format('D MMM YYYY')}
         </p>
-        <MoneyValue
-          showSign
-          useColors
-          amount={balance}
-          currency={currency as any}
-          className="font-semibold text-sm"
-        />
+        <MoneyValue showSign useColors amount={balance} currency={currency as any} className="font-semibold text-sm" />
       </div>
     );
   };
@@ -158,9 +152,7 @@ const DebtBalanceChart: React.FC<Props> = ({ currency, currentBalance, transacti
     const points = chartData[0].data;
     if (points.length <= 8) return undefined;
     const step = Math.ceil(points.length / 6);
-    return points
-      .filter((_, i) => i === 0 || i === points.length - 1 || i % step === 0)
-      .map((p) => p.x);
+    return points.filter((_, i) => i === 0 || i === points.length - 1 || i % step === 0).map((p) => p.x);
   }, [chartData]);
 
   return (

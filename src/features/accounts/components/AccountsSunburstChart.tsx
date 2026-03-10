@@ -34,14 +34,12 @@ interface Props {
 }
 
 // Resolve CSS custom property at runtime — Nivo SVG renderer needs a real color string
-function resolveCssVar(varName: string): string {
+const resolveCssVar = (varName: string): string => {
   if (typeof window === 'undefined') return '#888';
   return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || '#888';
-}
+};
 
-function getCurrencyBaseColor(currency: string): string {
-  return resolveCssVar(`--account-bank-${currency}`);
-}
+const getCurrencyBaseColor = (currency: string): string => resolveCssVar(`--account-bank-${currency}`);
 
 const AccountsSunburstChart: React.FC<Props> = ({ onHoverChange }) => {
   const accounts = useActiveAccounts();
@@ -85,7 +83,7 @@ const AccountsSunburstChart: React.FC<Props> = ({ onHoverChange }) => {
 
   // ── Custom tooltip ─────────────────────────────────────────────────────────
   // Defined inside the component so it has access to accounts / baseCurrency
-  function SunburstTooltip({ value, percentage, color, data }: HoveredSunburstNode) {
+  const SunburstTooltip = ({ value, percentage, color, data }: HoveredSunburstNode) => {
     const node = data;
     const isAccount = node.rawBalance !== undefined;
     const account =
@@ -154,7 +152,7 @@ const AccountsSunburstChart: React.FC<Props> = ({ onHoverChange }) => {
         </div>
       </div>
     );
-  }
+  };
 
   return (
     <ResponsiveSunburst<SunburstNode>
@@ -162,11 +160,11 @@ const AccountsSunburstChart: React.FC<Props> = ({ onHoverChange }) => {
       animate={true}
       borderColor={{ theme: 'background' }}
       borderWidth={10}
-      inheritColorFromParent={false}
       cornerRadius={3}
       data={sunburstData}
       enableArcLabels={false}
       id="name"
+      inheritColorFromParent={false}
       margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
       motionConfig="gentle"
       tooltip={SunburstTooltip as any}

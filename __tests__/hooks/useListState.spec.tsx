@@ -6,8 +6,7 @@ import { vi } from 'vitest';
 
 import BaseFilters from '@/models/BaseFilters';
 import { useListState } from '@/hooks/useListState';
-
-import { buildListStateSearchParams } from '@/lib/buildListStateSearchQueryParams';
+import { buildListStateSearchParams } from '@/lib/url/buildListStateSearchQueryParams';
 
 const setSearchParamsMock = vi.fn();
 const getSearchParamsMock = vi.fn(() => new URLSearchParams());

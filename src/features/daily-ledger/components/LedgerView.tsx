@@ -64,7 +64,7 @@ const EmptyActivityState: React.FC<{ onReset: () => void }> = ({ onReset }) => (
       <p className="mt-1.5 text-sm text-muted-foreground">
         There are no transactions or transfers for the selected range and filters.
       </p>
-      <Button className="mt-4" variant="outline" onClick={onReset}>
+      <Button variant="outline" className="mt-4" onClick={onReset}>
         Reset filters and period
       </Button>
     </div>

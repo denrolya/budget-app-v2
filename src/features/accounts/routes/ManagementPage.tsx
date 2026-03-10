@@ -9,8 +9,22 @@ const AccountDetailPage = lazy(() => import('./AccountDetailPage'));
 const ManagementPage: React.FC = () => (
   <div className="h-full min-h-0 flex flex-col overflow-hidden">
     <Routes>
-      <Route index element={<Suspense fallback={null}><AccountsIndexPage /></Suspense>} />
-      <Route element={<Suspense fallback={null}><AccountDetailPage /></Suspense>} path=":accountId" />
+      <Route
+        index
+        element={
+          <Suspense fallback={null}>
+            <AccountsIndexPage />
+          </Suspense>
+        }
+      />
+      <Route
+        element={
+          <Suspense fallback={null}>
+            <AccountDetailPage />
+          </Suspense>
+        }
+        path=":accountId"
+      />
       <Route element={<Navigate replace to="/accounts" />} path="*" />
     </Routes>
   </div>

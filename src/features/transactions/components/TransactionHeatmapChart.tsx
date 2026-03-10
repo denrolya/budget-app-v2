@@ -418,14 +418,14 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
                   height={CELL_SIZE}
                   opacity={dimmed ? 0.3 : 1}
                   rx={2}
-                  stroke={
-                    inRange ? 'hsl(var(--foreground))' : isHighlighted ? 'hsl(var(--foreground) / 0.4)' : 'transparent'
-                  }
                   strokeWidth={inRange ? 1.5 : isHighlighted ? 1 : 0}
                   style={{ fill: heatColor(cell.value, maxValue, cssVar) }}
                   width={CELL_SIZE}
                   x={x}
                   y={y}
+                  stroke={
+                    inRange ? 'hsl(var(--foreground))' : isHighlighted ? 'hsl(var(--foreground) / 0.4)' : 'transparent'
+                  }
                   className={
                     selectable ? 'cursor-crosshair transition-opacity duration-75' : 'transition-opacity duration-75'
                   }
