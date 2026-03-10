@@ -82,24 +82,41 @@ export const useListState = <FilterType extends BaseFilters, DataType extends { 
   const hasSearchParams = [...searchParams.keys()].length > 0;
   const FilterClass = initialFilters.constructor as FilterConstructor<FilterType>;
 
-  const getInitialState = (): UseListState<FilterType> => ({
-    pagination: {
-      currentPage: parseInt(searchParams.get('page') || '1', 10),
-      perPage: parseInt(searchParams.get('perPage') || initialPerPage.toString(), 10),
-    },
-    filters:
-      hasSearchParams && typeof FilterClass.fromSearchParams === 'function'
-        ? (FilterClass.fromSearchParams(
-            searchParams,
-            searchParamKeys as Record<string, string>,
-            formatMoment,
-          ) as FilterType)
-        : initialFilters,
-    sort: {
-      field: searchParams.get('sortField') || initialSort?.field || '',
-      direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || initialSort?.direction || 'asc',
-    },
-  });
+  const getInitialState = (): UseListState<FilterType> => {
+    // When not managing the URL, always use the provided initialFilters directly.
+    // Reading URL params here when updateUrl=false causes two bugs:
+    // 1. Stale params from other pages contaminate the query key → stale cached data is served.
+    // 2. initialFilters with page-specific values (e.g. accounts/debts filter) get overridden.
+    if (!updateUrl) {
+      return {
+        pagination: { currentPage: 1, perPage: initialPerPage },
+        filters: initialFilters,
+        sort: {
+          field: initialSort?.field || '',
+          direction: initialSort?.direction || 'asc',
+        },
+      };
+    }
+
+    return {
+      pagination: {
+        currentPage: parseInt(searchParams.get('page') || '1', 10),
+        perPage: parseInt(searchParams.get('perPage') || initialPerPage.toString(), 10),
+      },
+      filters:
+        hasSearchParams && typeof FilterClass.fromSearchParams === 'function'
+          ? (FilterClass.fromSearchParams(
+              searchParams,
+              searchParamKeys as Record<string, string>,
+              formatMoment,
+            ) as FilterType)
+          : initialFilters,
+      sort: {
+        field: searchParams.get('sortField') || initialSort?.field || '',
+        direction: (searchParams.get('sortDirection') as 'asc' | 'desc') || initialSort?.direction || 'asc',
+      },
+    };
+  };
 
   const [state, setState] = useState<UseListState<FilterType>>(() => getInitialState());
   const prevStateRef = useRef(state);

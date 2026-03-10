@@ -86,6 +86,7 @@ export const useTransactionsAndTransfersList = ({
   // Sub-hooks use isolated cache keys so they never collide with the standalone
   // transactions/transfers list pages that use the default 'transactions'/'transfers' keys.
   const transactionsState = useTransactionsList({
+    enabled: !omitTransactions,
     initialPerPage: perPage,
     initialFilters: initialTransactionFilters,
     updateUrl: false,

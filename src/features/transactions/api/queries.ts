@@ -30,6 +30,7 @@ interface UseTransactionsListOptions {
    * override this; otherwise defaults to txKeys.all[0] ("transactions").
    */
   queryKeyBase?: string;
+  enabled?: boolean;
 }
 
 interface TransformedResponse {
@@ -76,12 +77,14 @@ export const useList = (options: UseTransactionsListOptions = {}): UseTransactio
     updateUrl = true,
     omitTransferTransactions = false,
     queryKeyBase = queryKeys.all[0], // "transactions"
+    enabled = true,
   } = options;
 
   // Must exist before queryFn uses it
   const { createTransaction } = TransactionFactory();
 
   const { data, ...listState } = useListState<TransactionFilters, TransformedResponse>({
+    enabled,
     initialPerPage,
     initialFilters,
     initialSort,
