@@ -44,7 +44,6 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
 
   // Controlled display month — ensures prev/next navigation always works
   // regardless of popover position, portals, or parent re-renders.
-  const [displayMonth, setDisplayMonth] = useState<Date>(() => committed.from ?? after.toDate());
 
   const debounceRef = useRef<number | null>(null);
 
@@ -73,7 +72,6 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
   useEffect(() => {
     if (isOpen) {
       setDraft(committed);
-      setDisplayMonth(committed.from ?? after.toDate());
       clearDebounce();
     }
   }, [isOpen, committed, clearDebounce, after]);
