@@ -200,7 +200,6 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
       enableHotkeys={false}
       ledger={ledger}
       showControls={false}
-      showFooter={false}
       onReset={handleLedgerReset}
     />
   );

@@ -1,17 +1,14 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Pagination from '@/components/common/Pagination';
 import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from '@/components/ui/button';
 
 import { type UseLedgerReturn } from '../hooks/useLedger';
-import { snapToPeriod } from '../hooks/useTimeframe';
 
 import DailyList from './DailyList';
 import DisplayMenu from './DisplayMenu';
@@ -35,12 +32,6 @@ export type LedgerViewProps = {
 };
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
-
-const PERIOD_PRESETS = [
-  { value: 'day', label: '1 day' },
-  { value: 'week', label: '1 week' },
-  { value: 'month', label: '1 month' },
-] as const;
 
 const ErrorBanner: React.FC<{ error: unknown }> = ({ error }) => {
   const message =
@@ -98,9 +89,6 @@ const LedgerView: React.FC<LedgerViewProps> = ({
     error,
     timeframe,
     setTimeframe,
-    goToNextPeriod,
-    goToPreviousPeriod,
-    activePeriod,
     transactionFilters,
     transferFilters,
     setFilter,
@@ -124,19 +112,27 @@ const LedgerView: React.FC<LedgerViewProps> = ({
   } = ledger;
 
   // ─ Hotkeys ────────────────────────────────────────────────────────────────
-  const hkPrev = enableHotkeys ? goToPreviousPeriod : () => undefined;
-  const hkNext = enableHotkeys ? goToNextPeriod : () => undefined;
+  const hkPrevPage = enableHotkeys
+    ? () => {
+        if (pagination.currentPage > 1) pagination.setCurrentPage(pagination.currentPage - 1);
+      }
+    : () => undefined;
+  const hkNextPage = enableHotkeys
+    ? () => {
+        if (pagination.currentPage < pagination.totalPages) pagination.setCurrentPage(pagination.currentPage + 1);
+      }
+    : () => undefined;
   const hkFilters = enableHotkeys ? toggleFilters : () => undefined;
 
-  useHotkeys('arrowleft', hkPrev, { preventDefault: true }, [hkPrev]);
-  useHotkeys('arrowright', hkNext, { preventDefault: true }, [hkNext]);
+  useHotkeys('arrowleft', hkPrevPage, { preventDefault: true }, [hkPrevPage]);
+  useHotkeys('arrowright', hkNextPage, { preventDefault: true }, [hkNextPage]);
   useHotkeys('f', hkFilters, { preventDefault: true }, [hkFilters]);
 
   useEffect(() => {
     if (!enableHotkeys) return;
     const hotkeys = [
-      { windows: 'ArrowLeft', mac: 'ArrowLeft', description: 'Go to previous period' },
-      { windows: 'ArrowRight', mac: 'ArrowRight', description: 'Go to next period' },
+      { windows: 'ArrowLeft', mac: 'ArrowLeft', description: 'Previous page' },
+      { windows: 'ArrowRight', mac: 'ArrowRight', description: 'Next page' },
       { windows: 'F', mac: 'F', description: 'Toggle Filters Dialog' },
     ];
     addPageHotkeys('Combined Listing', hotkeys);
@@ -181,7 +177,7 @@ const LedgerView: React.FC<LedgerViewProps> = ({
           <ScrollArea aria-label="Ledger table listing" className="flex-1 min-h-0 w-full min-w-0">
             <div className="min-h-full">
               {isLoading ? (
-                <TableListingSkeleton after={timeframe.after} before={timeframe.before} compact={isCompactTable} />
+                <TableListingSkeleton after={timeframe.after} before={timeframe.before} compact={isCompactTable} showEmptyDays={showEmptyDays} />
               ) : (
                 <TableListing
                   after={timeframe.after}
@@ -225,66 +221,17 @@ const LedgerView: React.FC<LedgerViewProps> = ({
         ) : null}
 
         {/* Period footer */}
-        {showFooter && (
-          <div className="shrink-0 flex flex-col gap-0 bg-background md:bg-card border-t">
-            {/* Pagination */}
-            {pagination.totalItems > 0 && (
-              <div className="px-3 py-2 border-b">
-                <Pagination
-                  currentPage={pagination.currentPage}
-                  isLoading={isFetching}
-                  perPage={pagination.perPage}
-                  totalItems={pagination.totalItems}
-                  totalPages={pagination.totalPages}
-                  onPageChange={pagination.setCurrentPage}
-                  onPerPageChange={pagination.setPerPage}
-                />
-              </div>
-            )}
-
-            {/* Period navigation */}
-            <div className="shrink-0 flex items-center justify-between md:justify-end gap-2 p-2">
-              <Button
-                aria-label="Previous period"
-                disabled={isLoading}
-                size="icon"
-                type="button"
-                variant="outline"
-                onClick={goToPreviousPeriod}
-              >
-                <ChevronLeft aria-hidden="true" className="h-4 w-4" />
-              </Button>
-
-              <Select
-                value={activePeriod === 'custom' ? '' : activePeriod}
-                onValueChange={(val) => {
-                  const preset = val as 'day' | 'week' | 'month';
-                  setTimeframe(snapToPeriod(timeframe.after, preset));
-                }}
-              >
-                <SelectTrigger aria-label="Select time period" className="w-44">
-                  <SelectValue placeholder="Custom" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PERIOD_PRESETS.map(({ value, label }) => (
-                    <SelectItem value={value} key={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Button
-                aria-label="Next period"
-                disabled={isLoading}
-                size="icon"
-                type="button"
-                variant="outline"
-                onClick={goToNextPeriod}
-              >
-                <ChevronRight aria-hidden="true" className="h-4 w-4" />
-              </Button>
-            </div>
+        {showFooter && pagination.totalItems > 0 && (
+          <div className="shrink-0 px-3 py-2 bg-background md:bg-card border-t">
+            <Pagination
+              currentPage={pagination.currentPage}
+              isLoading={isFetching}
+              perPage={pagination.perPage}
+              totalItems={pagination.totalItems}
+              totalPages={pagination.totalPages}
+              onPageChange={pagination.setCurrentPage}
+              onPerPageChange={pagination.setPerPage}
+            />
           </div>
         )}
       </div>

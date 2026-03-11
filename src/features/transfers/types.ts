@@ -22,9 +22,9 @@ export interface TransferDTO {
   from: TransferAccountRefDTO;
   to: TransferAccountRefDTO;
 
-  amount: number;
-  rate: number;
-  fee: number;
+  amount: number | string;
+  rate: number | string;
+  fee: number | string;
   note: string;
   executedAt: string;
 

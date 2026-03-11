@@ -5,7 +5,7 @@ import { CURRENCY_CODE } from '@/constants/currency';
 
 export interface TransferProps {
   id: number;
-  rate: number;
+  rate: number | string;
   note: string;
   executedAt: string;
   transactions: Transaction[];
@@ -22,7 +22,7 @@ export class Transfer {
 
   constructor({ id, rate, note, executedAt, transactions }: TransferProps) {
     this.id = id;
-    this.rate = rate;
+    this.rate = Number(rate);
     this.note = note;
     this.executedAt = moment(executedAt);
     this.fromExpense = transactions.find((t) => t.type === 'expense' && t.category.name === 'Transfer')!;

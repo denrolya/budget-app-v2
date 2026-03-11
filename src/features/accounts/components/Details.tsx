@@ -137,7 +137,6 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
       enableHotkeys={false}
       ledger={ledger}
       showControls={false}
-      showFooter={false}
       onReset={handleLedgerReset}
     />
   );

@@ -4,8 +4,8 @@ import { useCallback, useState } from 'react';
 import { Timeframe } from '@/types/global';
 
 export const getInitialTimeframe = (): Timeframe => ({
-  after: moment().startOf('isoWeek'),
-  before: moment().endOf('isoWeek'),
+  after: moment().startOf('month'),
+  before: moment().endOf('month'),
 });
 
 export type DetectedPeriod = 'day' | 'week' | 'month' | 'custom';

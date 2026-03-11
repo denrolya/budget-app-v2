@@ -29,7 +29,7 @@ export type UseLedgerOptions = {
   initialTimeframe?: Timeframe;
   /** Initial fetch size per type. Defaults to 500. */
   initialPerPage?: number;
-  /** Whether empty days are shown in the listing. Defaults to true. */
+  /** Whether empty days are shown in the listing. Defaults to false. */
   initialShowEmptyDays?: boolean;
   // Convenience callbacks — same values are also available on the return object
   onActiveCountChange?: (count: number) => void;
@@ -157,7 +157,7 @@ export const useLedger = ({
   initialFilters,
   initialTimeframe: initialTimeframeProp,
   initialPerPage = 30,
-  initialShowEmptyDays = true,
+  initialShowEmptyDays = false,
   onActiveCountChange,
   onTimeframeChange,
   onVisibleDatesChange,
