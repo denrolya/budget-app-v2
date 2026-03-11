@@ -6,8 +6,9 @@ import { getExchangeRate } from '@/lib/getExchangeRates';
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
 import { useGlobalDailyStats, type HeatmapFilters } from '@/features/accounts';
 import type { DailyStatsDatum } from '@/features/accounts/api/service';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
-import TransactionHeatmapChart, { type TransactionHeatmapChartProps } from './TransactionHeatmapChart';
+import TransactionHeatmapChart, { type TransactionHeatmapChartProps, YearPicker } from './TransactionHeatmapChart';
 
 export type { HeatmapFilters };
 
@@ -19,31 +20,55 @@ interface HeatmapPanelProps extends Omit<
   year?: number;
   rangeAfter?: moment.Moment;
   rangeBefore?: moment.Moment;
-  /** Currency used for amount stats in the sidebar. Defaults to 'EUR'. */
+  /** Currency used for amount stats. Defaults to 'EUR'. */
   currency?: string;
-  /** When false, the stats sidebar is hidden. Defaults to true. */
+  /** When false, the stats strip is hidden. Defaults to true. */
   showStats?: boolean;
 }
 
-// ─── Stats sidebar ────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 type ViewMode = 'count' | 'income' | 'expense';
+
+// ─── localStorage persistence ─────────────────────────────────────────────────
+
+const HEATMAP_VIEW_MODE_KEY = 'heatmap-view-mode';
+
+const getStoredViewMode = (): ViewMode => {
+  try {
+    const v = localStorage.getItem(HEATMAP_VIEW_MODE_KEY);
+    if (v === 'count' || v === 'income' || v === 'expense') return v;
+  } catch {
+    // ignore
+  }
+  return 'count';
+};
+
+// ─── Stats computation ────────────────────────────────────────────────────────
+
+interface StatsResult {
+  totalCount: number;
+  totalAmount: number;
+  activeDays: number;
+  peakDate: string;
+  peakValue: number;
+  avgPerActiveDay: number;
+  avgAmountPerActiveDay: number;
+}
 
 const computeStats = (
   rows: DailyStatsDatum[],
   viewMode: ViewMode,
   currency: string,
   rates: Record<string, number> | null,
-) => {
+): StatsResult | null => {
   if (!rows.length) return null;
-
   const activeDays = rows.filter((r) => r.count > 0);
   if (!activeDays.length) return null;
 
   const totalCount = rows.reduce((s, r) => s + r.count, 0);
 
-  const getValue = (row: DailyStatsDatum): number => {
-    if (viewMode === 'count') return row.count;
+  const getAmountValue = (row: DailyStatsDatum): number => {
     let total = 0;
     for (const [nat, cv] of Object.entries(row.convertedValues)) {
       const rate = nat === currency ? 1 : getExchangeRate(nat, currency, rates);
@@ -52,10 +77,16 @@ const computeStats = (
     return total;
   };
 
+  const getValue = (row: DailyStatsDatum) =>
+    viewMode === 'count' ? row.count : getAmountValue(row);
+
   let peakDay = activeDays[0];
   let peakValue = 0;
+  let totalAmount = 0;
+
   for (const row of activeDays) {
     const v = getValue(row);
+    if (viewMode !== 'count') totalAmount += v;
     if (v > peakValue) {
       peakValue = v;
       peakDay = row;
@@ -64,59 +95,77 @@ const computeStats = (
 
   return {
     totalCount,
+    totalAmount,
     activeDays: activeDays.length,
     peakDate: peakDay.day,
     peakValue,
     avgPerActiveDay: totalCount / activeDays.length,
+    avgAmountPerActiveDay: activeDays.length > 0 ? totalAmount / activeDays.length : 0,
   };
 };
 
-const fmtAmount = (v: number, currency: string) => {
+// ─── Inline stats strip ───────────────────────────────────────────────────────
+
+const fmtAmt = (v: number, currency: string) => {
   const sym = CURRENCIES[currency as CURRENCY_CODE]?.symbol ?? currency;
   return `${sym}${Math.round(v).toLocaleString('en-US')}`;
 };
 
-interface StatsSidebarProps {
-  rows: DailyStatsDatum[];
+const Bullet = () => (
+  <span aria-hidden className="text-muted-foreground/30 select-none font-light">
+    ·
+  </span>
+);
+
+interface InlineStatsProps {
+  stats: StatsResult;
   viewMode: ViewMode;
   currency: string;
 }
 
-const StatsSidebar: React.FC<StatsSidebarProps> = ({ rows, viewMode, currency }) => {
-  const { data: ratesData } = useExchangeRatesQuery();
-  const rates = ratesData?.fixer ?? null;
-  const stats = useMemo(() => computeStats(rows, viewMode, currency, rates), [rows, viewMode, currency, rates]);
+const InlineStats: React.FC<InlineStatsProps> = ({ stats, viewMode, currency }) => {
+  const isCount = viewMode === 'count';
 
-  if (!stats) return null;
+  const total = isCount
+    ? `${stats.totalCount.toLocaleString('en-US')} txns`
+    : fmtAmt(stats.totalAmount, currency);
 
-  const peakLabel =
-    viewMode === 'count'
-      ? `${stats.peakValue} txn${stats.peakValue !== 1 ? 's' : ''}`
-      : fmtAmount(stats.peakValue, currency);
+  const avg = isCount
+    ? `${stats.avgPerActiveDay.toFixed(1)} / day`
+    : `${fmtAmt(stats.avgAmountPerActiveDay, currency)} / day`;
 
-  const statRows = [
-    { label: 'Total', value: viewMode === 'count' ? String(stats.totalCount) : null },
-    { label: 'Active days', value: String(stats.activeDays) },
-    { label: 'Avg / day', value: viewMode === 'count' ? stats.avgPerActiveDay.toFixed(1) : null },
-    { label: 'Peak day', value: moment(stats.peakDate).format('D MMM'), sub: peakLabel },
-  ].filter((r): r is { label: string; value: string; sub?: string } => r.value !== null);
+  const peakSub = isCount
+    ? `${stats.peakValue} txn${stats.peakValue !== 1 ? 's' : ''}`
+    : fmtAmt(stats.peakValue, currency);
 
   return (
-    <div className="shrink-0 w-36 pt-8 pb-2 pr-4 hidden lg:flex flex-col gap-3">
-      {statRows.map(({ label, value, sub }) => (
-        <div key={label}>
-          <p className="text-xs text-muted-foreground">{label}</p>
-          <p className="text-sm font-semibold tabular-nums">{value}</p>
-          {sub && <p className="text-xs text-muted-foreground tabular-nums">{sub}</p>}
-        </div>
-      ))}
+    <div className="flex items-center gap-2 ml-auto text-xs text-muted-foreground flex-wrap">
+      <Bullet />
+      <span className="font-semibold tabular-nums text-foreground">{total}</span>
+      <Bullet />
+      <span>
+        <span className="font-semibold tabular-nums text-foreground">{stats.activeDays}</span>
+        {' '}active days
+      </span>
+      <span className="hidden sm:contents">
+        <Bullet />
+        <span>avg <span className="font-semibold tabular-nums text-foreground">{avg}</span></span>
+      </span>
+      <Bullet />
+      <span>
+        peak{' '}
+        <span className="font-semibold tabular-nums text-foreground">
+          {moment(stats.peakDate).format('D MMM')}
+        </span>
+        <span className="opacity-50"> ({peakSub})</span>
+      </span>
     </div>
   );
 };
 
 // ─── Panel ────────────────────────────────────────────────────────────────────
 
-/** Smart wrapper around TransactionHeatmapChart. Owns data fetching and year state. */
+/** Smart wrapper around TransactionHeatmapChart with its own compact header. */
 const HeatmapPanel: React.FC<HeatmapPanelProps> = ({
   filters = {},
   year: yearProp,
@@ -126,13 +175,19 @@ const HeatmapPanel: React.FC<HeatmapPanelProps> = ({
   onViewModeChange: onViewModeChangeProp,
   currency = 'EUR',
   showStats = true,
+  showControls,
+  showViewMode,
+  defaultViewMode: defaultViewModeProp,
   ...chartProps
 }) => {
   const thisYear = moment().year();
   const [year, setYear] = useState(yearProp ?? thisYear);
   const effectiveYear = yearProp ?? year;
 
-  const after = useMemo(() => moment({ year: effectiveYear, month: 0, day: 1 }).startOf('day'), [effectiveYear]);
+  const after = useMemo(
+    () => moment({ year: effectiveYear, month: 0, day: 1 }).startOf('day'),
+    [effectiveYear],
+  );
   const before = useMemo(
     () =>
       effectiveYear === thisYear
@@ -145,33 +200,101 @@ const HeatmapPanel: React.FC<HeatmapPanelProps> = ({
   const queryBefore = rangeBefore ?? before;
 
   const { data, isLoading } = useGlobalDailyStats(filters, queryAfter, queryBefore);
+  const { data: ratesData } = useExchangeRatesQuery();
+  const rates = ratesData?.fixer ?? null;
 
-  const [viewMode, setViewMode] = useState<ViewMode>((chartProps.defaultViewMode as ViewMode | undefined) ?? 'count');
+  // Resolve initial view mode: explicit prop > localStorage > 'count'
+  const initialViewMode: ViewMode = defaultViewModeProp ?? getStoredViewMode();
+  const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
 
   const handleViewModeChange = useCallback(
     (mode: ViewMode) => {
       setViewMode(mode);
+      if (!defaultViewModeProp) {
+        try {
+          localStorage.setItem(HEATMAP_VIEW_MODE_KEY, mode);
+        } catch {
+          // ignore
+        }
+      }
       onViewModeChangeProp?.(mode);
     },
-    [onViewModeChangeProp],
+    [onViewModeChangeProp, defaultViewModeProp],
+  );
+
+  const handleYearChange = useCallback(
+    (y: number) => {
+      setYear(y);
+      onYearChange?.(y);
+    },
+    [onYearChange],
   );
 
   const rows = data?.data ?? [];
+  const stats = useMemo(
+    () => computeStats(rows, viewMode, currency, rates),
+    [rows, viewMode, currency, rates],
+  );
+
+  // Header visibility logic — mirrors the chart's own showControls semantics
+  const effectiveShowControls = showControls !== false;
+  const showToggle = effectiveShowControls && showViewMode !== false;
+  // Year picker only appears when HeatmapPanel owns the year (no external yearProp)
+  const showYearPicker = effectiveShowControls && yearProp === undefined;
+  const showStatsStrip = showStats && !!stats && !isLoading;
+  const hasHeader = showYearPicker || showToggle || showStatsStrip;
 
   return (
-    <div className="flex items-start">
+    <div className="w-full">
+      {/* ── Compact header: year · toggle · inline stats ── */}
+      {hasHeader && (
+        <div className="flex items-center flex-wrap gap-x-2 gap-y-1.5 px-4 pt-2 pb-1 min-h-9">
+          {showYearPicker && (
+            <YearPicker year={effectiveYear} onChange={handleYearChange} />
+          )}
+
+          {showToggle && (
+            <ToggleGroup
+              size="sm"
+              type="single"
+              value={viewMode}
+              onValueChange={(v) => {
+                if (v) handleViewModeChange(v as ViewMode);
+              }}
+            >
+              <ToggleGroupItem value="count" className="text-xs px-2.5 h-7">
+                Count
+              </ToggleGroupItem>
+              <ToggleGroupItem value="income" className="text-xs px-2.5 h-7">
+                Income
+              </ToggleGroupItem>
+              <ToggleGroupItem value="expense" className="text-xs px-2.5 h-7">
+                Expense
+              </ToggleGroupItem>
+            </ToggleGroup>
+          )}
+
+          {showStatsStrip && (
+            <InlineStats currency={currency} stats={stats} viewMode={viewMode} />
+          )}
+        </div>
+      )}
+
+      {/* ── Chart: internal controls fully suppressed, view mode controlled ── */}
       <TransactionHeatmapChart
         {...chartProps}
+        compact
+        showControls={false}
+        showViewMode={false}
+        defaultViewMode={initialViewMode}
+        viewMode={viewMode}
         currency={currency}
         data={data}
         isLoading={isLoading}
-        year={yearProp ?? year}
+        year={effectiveYear}
         onViewModeChange={handleViewModeChange}
-        onYearChange={yearProp === undefined ? setYear : onYearChange}
+        onYearChange={handleYearChange}
       />
-      {showStats && !isLoading && rows.length > 0 && (
-        <StatsSidebar currency={currency} rows={rows} viewMode={viewMode} />
-      )}
     </div>
   );
 };

@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { AccountTypeahead } from '@/features/accounts';
 import { CategoryTypeahead } from '@/features/categories';
+import { DebtTypeahead } from '@/features/debts';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import {
@@ -18,6 +19,7 @@ import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { FILTER_PRESETS } from '@/constants/datetime';
 import { cn } from '@/lib/utils';
 import { TransactionFilters } from '@/features/transactions';
 import { Type as TransactionType } from '@/features/transactions';
@@ -200,7 +202,7 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
       {/* DATE RANGE */}
       <div className="space-y-2">
         <Label className={LABEL_CLS}>Date range</Label>
-        <DaterangePickerWithPresets after={timeframe.after} before={timeframe.before} onChange={handleTimeframeChange}>
+        <DaterangePickerWithPresets after={timeframe.after} before={timeframe.before} presets={FILTER_PRESETS} onChange={handleTimeframeChange}>
           <Button size="sm" type="button" variant="outline" className="w-full justify-start bg-background h-9 px-2">
             <CalendarIcon aria-hidden="true" className="mr-1.5 h-4 w-4 shrink-0" />
             <span className="truncate text-xs">{dateLabel}</span>
@@ -282,6 +284,18 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
             <TooltipContent>Include nested categories</TooltipContent>
           </Tooltip>
         </div>
+      </div>
+
+      {/* DEBT */}
+      <div className="space-y-2">
+        <Label className={LABEL_CLS}>Debt</Label>
+        <DebtTypeahead
+          multiple
+          placeholder="All debts"
+          value={transactionFilters.debts as string[]}
+          className="w-full"
+          onChange={(debts) => setFilter('debts' as any, debts as any)}
+        />
       </div>
 
       {/* AMOUNT RANGE */}

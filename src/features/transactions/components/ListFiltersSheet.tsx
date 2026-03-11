@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { AccountTypeahead } from '@/features/accounts';
 import { CategoryTypeahead } from '@/features/categories';
+import { DebtTypeahead } from '@/features/debts';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerDescription, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
@@ -187,6 +188,18 @@ const Content: React.FC<Props> = ({ data, onChange, onReset }) => {
             <TooltipContent>Include nested categories</TooltipContent>
           </Tooltip>
         </div>
+      </div>
+
+      {/* DEBT */}
+      <div className="space-y-2">
+        <Label className={LABEL_CLS}>Debt</Label>
+        <DebtTypeahead
+          multiple
+          placeholder="All debts"
+          value={data.debts as string[]}
+          className="w-full"
+          onChange={(debts) => onChange('debts', debts as string[] | null)}
+        />
       </div>
 
       {/* AMOUNT RANGE */}

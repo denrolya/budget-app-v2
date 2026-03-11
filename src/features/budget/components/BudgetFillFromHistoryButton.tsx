@@ -1,6 +1,6 @@
 import { History, Loader2 } from 'lucide-react';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
+import { Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 
 import { useHistoryAverages, useUpsertBudgetLine } from '../api';
 import type { BudgetDTO } from '../api/types';
@@ -34,6 +35,17 @@ const fmtAmt = (n: number, currency: string) => {
   return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 };
 
+const catLabel = (cat: Category) => (cat.icon ? `${cat.icon} ${cat.name}` : cat.name);
+
+type SuggestionItem = { cat: Category; suggested: number };
+type GroupedSuggestion = { root: Category; items: SuggestionItem[] };
+
+const findRoot = (cat: Category): Category => {
+  let c = cat;
+  while (c.parent) c = c.parent;
+  return c;
+};
+
 const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency, rates }) => {
   const [open, setOpen] = useState(false);
 
@@ -42,14 +54,19 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
     HISTORY_MONTHS,
   );
   const { mutateAsync: upsertLine, isPending: isSaving } = useUpsertBudgetLine(budget.id);
+  const { data: catData } = useCategoryList();
+
+  const categoryMap = useMemo(
+    () => new Map((catData?.list ?? []).map((c) => [c.id, c])),
+    [catData],
+  );
 
   const linesMap = new Map((budget.lines ?? []).map((l) => [l.categoryId, l]));
 
   // Compute suggestions: average monthly expense per category, only for categories with no existing line
-  const suggestions = React.useMemo(() => {
+  const suggestions = useMemo(() => {
     if (!historyData) return [];
 
-    // Budget period scale factor vs 1 month
     const budgetDays = moment(budget.endDate).diff(moment(budget.startDate), 'days') + 1;
     const scaleFactor = budgetDays / 30;
 
@@ -67,6 +84,31 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
       })
       .filter((s) => s.suggested > 1);
   }, [historyData, linesMap, displayCurrency, rates, budget]);
+
+  // Group suggestions by root category, split by expense/income
+  const { expenseGroups, incomeGroups } = useMemo(() => {
+    const expMap = new Map<number, GroupedSuggestion>();
+    const incMap = new Map<number, GroupedSuggestion>();
+
+    for (const s of suggestions) {
+      const cat = categoryMap.get(s.categoryId);
+      if (!cat) continue;
+
+      const root = findRoot(cat);
+      const isExpense = (root.type as string) === (CategoryType.Expense as string);
+      const map = isExpense ? expMap : incMap;
+
+      if (!map.has(root.id)) map.set(root.id, { root, items: [] });
+      map.get(root.id)!.items.push({ cat, suggested: s.suggested });
+    }
+
+    const sortGroups = (m: Map<number, GroupedSuggestion>): GroupedSuggestion[] =>
+      [...m.values()]
+        .map((g) => ({ ...g, items: [...g.items].sort((a, b) => a.cat.name.localeCompare(b.cat.name)) }))
+        .sort((a, b) => a.root.name.localeCompare(b.root.name));
+
+    return { expenseGroups: sortGroups(expMap), incomeGroups: sortGroups(incMap) };
+  }, [suggestions, categoryMap]);
 
   const handleApply = async () => {
     let count = 0;
@@ -89,6 +131,35 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
     toast.success(`Added ${count} budget lines from history`);
   };
 
+  const renderGroups = (groups: GroupedSuggestion[]) => {
+    if (groups.length === 0)
+      return <p className="text-muted-foreground text-center py-4 text-xs">No suggestions</p>;
+
+    return groups.map(({ root, items }) => (
+      <div key={root.id} className="mb-3 last:mb-0">
+        {/* Root group header — only if items are children; if item IS root, skip header */}
+        {!(items.length === 1 && items[0].cat.id === root.id) && (
+          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-1 border-b mb-0.5">
+            {catLabel(root)}
+          </div>
+        )}
+        {items.map(({ cat, suggested }) => {
+          const isRoot = cat.id === root.id;
+          return (
+            <div
+              key={cat.id}
+              className="flex justify-between items-center py-0.5"
+              style={{ paddingLeft: isRoot ? 0 : '0.75rem' }}
+            >
+              <span className="text-sm truncate text-foreground">{catLabel(cat)}</span>
+              <span className="font-medium tabular-nums shrink-0 ml-2 text-sm">{fmtAmt(suggested, displayCurrency)}</span>
+            </div>
+          );
+        })}
+      </div>
+    ));
+  };
+
   return (
     <>
       <Tooltip>
@@ -101,7 +172,7 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
       </Tooltip>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Fill from history</DialogTitle>
             <DialogDescription>
@@ -110,25 +181,34 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
             </DialogDescription>
           </DialogHeader>
 
-          <div className="max-h-64 overflow-y-auto space-y-1 text-sm">
-            {historyLoading && (
-              <div className="flex items-center justify-center py-6 text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Loading history…
+          {historyLoading ? (
+            <div className="flex items-center justify-center py-8 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Loading history…
+            </div>
+          ) : suggestions.length === 0 ? (
+            <p className="text-muted-foreground text-center py-6 text-xs">
+              No suggestions — all categories already have budget lines, or no historical spending found.
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 gap-0 divide-x max-h-96 overflow-hidden">
+              {/* Expenses */}
+              <div className="pr-4 overflow-y-auto">
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                  Expenses
+                </div>
+                {renderGroups(expenseGroups)}
               </div>
-            )}
-            {!historyLoading && suggestions.length === 0 && (
-              <p className="text-muted-foreground text-center py-4 text-xs">
-                No suggestions — all budgeted categories already have lines, or no historical spending found.
-              </p>
-            )}
-            {suggestions.map((s) => (
-              <div key={s.categoryId} className="flex justify-between items-center py-1 border-b last:border-0">
-                <span className="text-muted-foreground text-xs">cat #{s.categoryId}</span>
-                <span className="font-medium tabular-nums">{fmtAmt(s.suggested, displayCurrency)}</span>
+
+              {/* Income */}
+              <div className="pl-4 overflow-y-auto">
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                  Income
+                </div>
+                {renderGroups(incomeGroups)}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>

@@ -20,7 +20,7 @@ interface YearPickerProps {
   onChange: (year: number) => void;
 }
 
-const YearPicker: React.FC<YearPickerProps> = ({ year, onChange }) => {
+export const YearPicker: React.FC<YearPickerProps> = ({ year, onChange }) => {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const thisYear = moment().year();
@@ -312,46 +312,52 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
     return `${sym}${Math.round(value).toLocaleString('en-US')}`;
   };
 
+  const showToggle = showViewMode ?? showControls;
+  const hasDragState = selectable && (isDragging || !!selectedRange);
+  const showControlsRow = showControls || showToggle || hasDragState;
+
   return (
     <div className={cn('w-fit', compact ? 'px-3 py-1' : 'px-4 py-2')}>
-      {/* Controls row */}
-      <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-        <div className="flex items-center gap-1.5">
-          {showControls && yearProp === undefined && (
-            <YearPicker
-              year={year}
-              onChange={(y) => {
-                setYearState(y);
-                onYearChange?.(y);
-                handleClear();
-              }}
-            />
-          )}
-          {selectable && isDragging && <span className="text-xs text-muted-foreground">Release to select…</span>}
-          {selectable && selectedRange && !isDragging && (
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted rounded-md px-2 py-1">
-              {moment(selectedRange.start).format('D MMM')} – {moment(selectedRange.end).format('D MMM YYYY')}
-              <button className="hover:text-foreground transition-colors" onClick={handleClear}>
-                <X className="h-3 w-3" />
-              </button>
-            </span>
+      {/* Controls row — only rendered when there is content */}
+      {showControlsRow && (
+        <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5">
+            {showControls && yearProp === undefined && (
+              <YearPicker
+                year={year}
+                onChange={(y) => {
+                  setYearState(y);
+                  onYearChange?.(y);
+                  handleClear();
+                }}
+              />
+            )}
+            {selectable && isDragging && <span className="text-xs text-muted-foreground">Release to select…</span>}
+            {selectable && selectedRange && !isDragging && (
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted rounded-md px-2 py-1">
+                {moment(selectedRange.start).format('D MMM')} – {moment(selectedRange.end).format('D MMM YYYY')}
+                <button className="hover:text-foreground transition-colors" onClick={handleClear}>
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+          </div>
+
+          {showToggle && (
+            <ToggleGroup size="sm" type="single" value={viewMode} onValueChange={handleViewModeChange}>
+              <ToggleGroupItem value="count" className="text-xs px-2">
+                Count
+              </ToggleGroupItem>
+              <ToggleGroupItem value="income" className="text-xs px-2">
+                Income
+              </ToggleGroupItem>
+              <ToggleGroupItem value="expense" className="text-xs px-2">
+                Expense
+              </ToggleGroupItem>
+            </ToggleGroup>
           )}
         </div>
-
-        {(showViewMode ?? showControls) && (
-          <ToggleGroup size="sm" type="single" value={viewMode} onValueChange={handleViewModeChange}>
-            <ToggleGroupItem value="count" className="text-xs px-2">
-              Count
-            </ToggleGroupItem>
-            <ToggleGroupItem value="income" className="text-xs px-2">
-              Income
-            </ToggleGroupItem>
-            <ToggleGroupItem value="expense" className="text-xs px-2">
-              Expense
-            </ToggleGroupItem>
-          </ToggleGroup>
-        )}
-      </div>
+      )}
 
       {isLoading && (
         <div className="h-24 flex items-center justify-center">

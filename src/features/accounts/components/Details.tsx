@@ -364,7 +364,6 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
                     currency={account.currency}
                     filters={{ accounts: [account.id] }}
                     highlightDates={ledger.visibleDates}
-                    showViewMode={false}
                     year={ledger.timeframe.after.year()}
                     onRangeClear={handleHeatmapRangeClear}
                     onRangeSelect={handleHeatmapRangeSelect}
