@@ -36,7 +36,7 @@ interface Props {
 const DebtDetails: React.FC<Props> = ({ debt }) => {
   const [activeTab, setActiveTab] = useState('transactions');
   const isMobile = useIsMobile();
-  const transactions = debt.transactions ?? [];
+  const transactions = useMemo(() => debt.transactions ?? [], [debt.transactions]);
 
   const defaultRange = useMemo(
     () => ({
@@ -48,9 +48,7 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
 
   const ledger = useLedger({
     updateUrl: false,
-    omitTransferTransactions: true,
     omitTransfers: true,
-    initialPerPage: 120,
     initialShowEmptyDays: false,
     initialFilters: { debts: [debt.id] },
     initialTimeframe: defaultRange,

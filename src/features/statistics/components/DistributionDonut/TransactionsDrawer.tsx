@@ -24,7 +24,6 @@ type DrawerContentProps = {
 const DrawerListing: React.FC<DrawerContentProps> = ({ target, timeframe }) => {
   const ledger = useLedger({
     updateUrl: false,
-    omitTransferTransactions: false,
     initialFilters: target.initialFilters,
     initialTimeframe: timeframe,
   });

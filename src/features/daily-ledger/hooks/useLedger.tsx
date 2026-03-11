@@ -4,9 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { TransactionFilters } from '@/features/transactions';
-import type { UseTransactionsListReturn } from '@/features/transactions/api/queries';
 import { TransferFilters } from '@/features/transfers';
-import type { UseTransfersListReturn } from '@/features/transfers/api/queries';
 import { Timeframe } from '@/types/global';
 
 import { type GroupedItem, useTransactionsAndTransfersList } from './useList';
@@ -18,7 +16,6 @@ export type LedgerViewMode = 'table' | 'list';
 
 export type UseLedgerOptions = {
   updateUrl?: boolean;
-  omitTransferTransactions?: boolean;
   /** Exclude transactions entirely (e.g. transfers-only listing page). */
   omitTransactions?: boolean;
   /** Exclude transfers entirely (e.g. account details page). */
@@ -49,9 +46,48 @@ export type UseLedgerReturn = {
   error: unknown;
   refetch: () => void;
 
+  // ─ Pagination ─────────────────────────────────────────────────────────────
+  pagination: {
+    totalItems: number;
+    totalPages: number;
+    perPage: number;
+    currentPage: number;
+    setCurrentPage: (page: number) => void;
+    setPerPage: (perPage: number) => void;
+  };
+
   // ─ Sub-states (for accessing pagination, totalValue, etc.) ───────────────
-  transactionsState: UseTransactionsListReturn;
-  transfersState: UseTransfersListReturn;
+  transactionsState: {
+    isFetching: boolean;
+    isLoading: boolean;
+    pagination: {
+      totalItems: number;
+      totalPages: number;
+      perPage: number;
+      currentPage: number;
+      setCurrentPage: (page: number) => void;
+      setPerPage: (perPage: number) => void;
+    };
+    totalValue: number;
+    filters: TransactionFilters;
+    setFilter: (key: keyof TransactionFilters, value: unknown) => void;
+    resetFilters: () => void;
+  };
+  transfersState: {
+    isFetching: boolean;
+    pagination: {
+      totalItems: number;
+      totalPages: number;
+      perPage: number;
+      currentPage: number;
+      setCurrentPage: (page: number) => void;
+      setPerPage: (perPage: number) => void;
+    };
+    totalValue: number;
+    filters: TransferFilters;
+    setFilter: (key: keyof TransferFilters, value: unknown) => void;
+    resetFilters: () => void;
+  };
 
   // ─ Timeframe ─────────────────────────────────────────────────────────────
   timeframe: Timeframe;
@@ -116,12 +152,11 @@ const readTimeframeFromParams = (searchParams: URLSearchParams): Timeframe | und
 
 export const useLedger = ({
   updateUrl = true,
-  omitTransferTransactions = true,
   omitTransactions = false,
   omitTransfers = false,
   initialFilters,
   initialTimeframe: initialTimeframeProp,
-  initialPerPage = 500,
+  initialPerPage = 30,
   initialShowEmptyDays = true,
   onActiveCountChange,
   onTimeframeChange,
@@ -149,16 +184,6 @@ export const useLedger = ({
   const initialTransactionFilters = useMemo(
     () =>
       new TransactionFilters({
-        after: effectiveInitialTimeframeRef.current.after,
-        before: effectiveInitialTimeframeRef.current.before,
-        ...(normalizedInitialFilters as any),
-      }),
-    [normalizedInitialFilters],
-  );
-
-  const initialTransferFilters = useMemo(
-    () =>
-      new TransferFilters({
         after: effectiveInitialTimeframeRef.current.after,
         before: effectiveInitialTimeframeRef.current.before,
         ...(normalizedInitialFilters as any),
@@ -200,16 +225,15 @@ export const useLedger = ({
     setShowTransactions,
     showTransfers,
     setShowTransfers,
+    pagination,
     transactionsState,
     transfersState,
   } = useTransactionsAndTransfersList({
     updateUrl,
-    omitTransferTransactions,
     omitTransactions,
     omitTransfers,
     initialTransactionFilters,
-    initialTransferFilters,
-    perPage: initialPerPage,
+    initialPerPage,
   });
 
   // ─ Sync timeframe → filter params ─────────────────────────────────────────
@@ -264,6 +288,7 @@ export const useLedger = ({
     isError,
     error,
     refetch,
+    pagination,
     transactionsState,
     transfersState,
     timeframe,

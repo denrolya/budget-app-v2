@@ -28,7 +28,7 @@ export const TransactionsListPage: React.FC = () => {
   const { openForm } = useFormContext();
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
 
-  const ledger = useLedger({ updateUrl: true, omitTransferTransactions: true });
+  const ledger = useLedger({ updateUrl: true, omitTransfers: true });
   const { exportTransactionsCsv, isExportingCsv } = useMutations({ invalidateKey: 'transactions' });
 
   const totalItems = ledger.transactionsState.pagination.totalItems;

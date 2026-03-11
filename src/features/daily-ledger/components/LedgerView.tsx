@@ -6,6 +6,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Pagination from '@/components/common/Pagination';
 import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -92,6 +93,7 @@ const LedgerView: React.FC<LedgerViewProps> = ({
   const {
     groupedItems,
     isLoading,
+    isFetching,
     isError,
     error,
     timeframe,
@@ -118,6 +120,7 @@ const LedgerView: React.FC<LedgerViewProps> = ({
     isFiltersOpen,
     setIsFiltersOpen,
     toggleFilters,
+    pagination,
   } = ledger;
 
   // ─ Hotkeys ────────────────────────────────────────────────────────────────
@@ -223,47 +226,65 @@ const LedgerView: React.FC<LedgerViewProps> = ({
 
         {/* Period footer */}
         {showFooter && (
-          <div className="shrink-0 flex items-center justify-between md:justify-end gap-2 p-2 bg-background md:bg-card border-t">
-            <Button
-              aria-label="Previous period"
-              disabled={isLoading}
-              size="icon"
-              type="button"
-              variant="outline"
-              onClick={goToPreviousPeriod}
-            >
-              <ChevronLeft aria-hidden="true" className="h-4 w-4" />
-            </Button>
+          <div className="shrink-0 flex flex-col gap-0 bg-background md:bg-card border-t">
+            {/* Pagination */}
+            {pagination.totalItems > 0 && (
+              <div className="px-3 py-2 border-b">
+                <Pagination
+                  currentPage={pagination.currentPage}
+                  isLoading={isFetching}
+                  perPage={pagination.perPage}
+                  totalItems={pagination.totalItems}
+                  totalPages={pagination.totalPages}
+                  onPageChange={pagination.setCurrentPage}
+                  onPerPageChange={pagination.setPerPage}
+                />
+              </div>
+            )}
 
-            <Select
-              value={activePeriod === 'custom' ? '' : activePeriod}
-              onValueChange={(val) => {
-                const preset = val as 'day' | 'week' | 'month';
-                setTimeframe(snapToPeriod(timeframe.after, preset));
-              }}
-            >
-              <SelectTrigger aria-label="Select time period" className="w-44">
-                <SelectValue placeholder="Custom" />
-              </SelectTrigger>
-              <SelectContent>
-                {PERIOD_PRESETS.map(({ value, label }) => (
-                  <SelectItem value={value} key={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Period navigation */}
+            <div className="shrink-0 flex items-center justify-between md:justify-end gap-2 p-2">
+              <Button
+                aria-label="Previous period"
+                disabled={isLoading}
+                size="icon"
+                type="button"
+                variant="outline"
+                onClick={goToPreviousPeriod}
+              >
+                <ChevronLeft aria-hidden="true" className="h-4 w-4" />
+              </Button>
 
-            <Button
-              aria-label="Next period"
-              disabled={isLoading}
-              size="icon"
-              type="button"
-              variant="outline"
-              onClick={goToNextPeriod}
-            >
-              <ChevronRight aria-hidden="true" className="h-4 w-4" />
-            </Button>
+              <Select
+                value={activePeriod === 'custom' ? '' : activePeriod}
+                onValueChange={(val) => {
+                  const preset = val as 'day' | 'week' | 'month';
+                  setTimeframe(snapToPeriod(timeframe.after, preset));
+                }}
+              >
+                <SelectTrigger aria-label="Select time period" className="w-44">
+                  <SelectValue placeholder="Custom" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PERIOD_PRESETS.map(({ value, label }) => (
+                    <SelectItem value={value} key={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Button
+                aria-label="Next period"
+                disabled={isLoading}
+                size="icon"
+                type="button"
+                variant="outline"
+                onClick={goToNextPeriod}
+              >
+                <ChevronRight aria-hidden="true" className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         )}
       </div>

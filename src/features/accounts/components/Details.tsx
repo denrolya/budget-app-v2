@@ -57,9 +57,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
 
   const ledger = useLedger({
     updateUrl: false,
-    omitTransferTransactions: true,
     omitTransfers: true,
-    initialPerPage: 120,
     initialShowEmptyDays: false,
     initialFilters: { accounts: [account.id] },
     initialTimeframe: defaultRange,

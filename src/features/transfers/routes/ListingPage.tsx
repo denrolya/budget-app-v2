@@ -29,7 +29,6 @@ export const TransfersListPage: React.FC = () => {
 
   const ledger = useLedger({
     updateUrl: true,
-    omitTransferTransactions: false,
     omitTransactions: true,
   });
 
