@@ -5,6 +5,7 @@ export interface BudgetLineDTO {
   categoryId: number;
   plannedAmount: number;
   plannedCurrency: string;
+  note?: string | null;
 }
 
 export interface BudgetDTO {
@@ -35,6 +36,7 @@ export interface UpsertBudgetLineDTO {
   categoryId: number;
   plannedAmount: number;
   plannedCurrency: string;
+  note?: string | null;
 }
 
 export type BudgetCurrencyValues = { income: number; expense: number };
@@ -46,4 +48,25 @@ export interface BudgetAnalyticsItem {
 
 export interface BudgetAnalyticsResponse {
   data: BudgetAnalyticsItem[];
+}
+
+export interface BudgetHistoryAveragesResponse {
+  data: BudgetAnalyticsItem[];
+  months: number;
+  from: string;
+  to: string;
+}
+
+export interface CategoryDayStats {
+  day: string;
+  convertedValues: Record<string, BudgetCurrencyValues>;
+}
+
+export interface CategoryDailyStatsItem {
+  categoryId: number;
+  days: CategoryDayStats[];
+}
+
+export interface CategoryDailyStatsResponse {
+  data: CategoryDailyStatsItem[];
 }

@@ -1,6 +1,6 @@
 import moment from 'moment';
-import { RefreshCw } from 'lucide-react';
-import React, { useState } from 'react';
+import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 import { Navigate, Route, Routes, useMatch, useNavigate, useParams } from 'react-router-dom';
 
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
@@ -11,10 +11,13 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
 
-import { useBudget, useBudgetAnalytics, useListBudgets } from './api';
+import { useBudget, useBudgetAnalytics, useCategoryDailyStats, useListBudgets } from './api';
+import BudgetAlertsSection from './components/BudgetAlertsSection';
 import BudgetCategoryBarChart from './components/BudgetCategoryBarChart';
 import BudgetDisplayCurrency, { DisplayCurrency } from './components/BudgetDisplayCurrency';
 import BudgetDistributionChart from './components/BudgetDistributionChart';
+import BudgetExportButton from './components/BudgetExportButton';
+import BudgetFillFromHistoryButton from './components/BudgetFillFromHistoryButton';
 import BudgetHeatmapSection from './components/BudgetHeatmapSection';
 import BudgetPaceChart from './components/BudgetPaceChart';
 import BudgetSidebar from './components/BudgetSidebar';
@@ -50,7 +53,6 @@ const BudgetIndex: React.FC = () => {
   const { data } = useListBudgets();
   const budgets = data ?? [];
 
-  // Auto-redirect to first budget if any
   if (budgets.length > 0) {
     return <Navigate replace to={`/budget/${budgets[0].id}`} />;
   }
@@ -76,10 +78,24 @@ const BudgetDetailRoute: React.FC = () => {
 
   const { data: budget, isLoading: budgetLoading, refetch: refetchBudget } = useBudget(id);
   const { data: analyticsData, isLoading: analyticsLoading, refetch: refetchAnalytics } = useBudgetAnalytics(id);
+  const { data: dailyStatsData } = useCategoryDailyStats(id);
+  const { data: allBudgets } = useListBudgets();
   const { data: ratesData } = useExchangeRatesQuery();
 
   const rates = ratesData?.fixer ?? null;
   const analytics = analyticsData?.data ?? [];
+  const dailyStats = dailyStatsData?.data;
+
+  // Prev / next navigation — sort by startDate asc
+  const { prevId, nextId } = useMemo(() => {
+    if (!allBudgets || !id) return { prevId: null, nextId: null };
+    const sorted = [...allBudgets].sort((a, b) => a.startDate.localeCompare(b.startDate));
+    const idx = sorted.findIndex((b) => b.id === id);
+    return {
+      prevId: idx > 0 ? sorted[idx - 1].id : null,
+      nextId: idx < sorted.length - 1 ? sorted[idx + 1].id : null,
+    };
+  }, [allBudgets, id]);
 
   if (!id) return <Navigate replace to="/budget" />;
   if (budgetLoading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
@@ -106,7 +122,42 @@ const BudgetDetailRoute: React.FC = () => {
         }
         onBack={() => navigate('/budget')}
       >
+        {/* Prev / Next navigation */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              aria-label="Previous budget"
+              disabled={!prevId}
+              size="icon"
+              variant="outline"
+              onClick={() => prevId && navigate(`/budget/${prevId}`)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Previous budget</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              aria-label="Next budget"
+              disabled={!nextId}
+              size="icon"
+              variant="outline"
+              onClick={() => nextId && navigate(`/budget/${nextId}`)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Next budget</TooltipContent>
+        </Tooltip>
+
         <BudgetDisplayCurrency value={displayCurrency} onChange={setDisplayCurrency} />
+
+        <BudgetFillFromHistoryButton budget={budget} displayCurrency={displayCurrency} rates={rates} />
+
+        <BudgetExportButton analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -129,7 +180,15 @@ const BudgetDetailRoute: React.FC = () => {
       {/* Scrollable content */}
       <ScrollArea className="flex-1 min-h-0">
         <div className="p-4 space-y-6 pb-8">
-          {/* Spending heatmap + daily stats */}
+          {/* Alerts */}
+          <BudgetAlertsSection
+            analytics={analytics}
+            budget={budget}
+            displayCurrency={displayCurrency}
+            rates={rates}
+          />
+
+          {/* Spending heatmap */}
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
               Spending heatmap
@@ -195,6 +254,7 @@ const BudgetDetailRoute: React.FC = () => {
                 analytics={analytics}
                 budget={budget}
                 budgetId={budget.id}
+                dailyStats={dailyStats}
                 displayCurrency={displayCurrency}
                 rates={rates}
               />

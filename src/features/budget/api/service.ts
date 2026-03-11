@@ -3,6 +3,8 @@ import { api } from '@/services/api';
 import type {
   BudgetAnalyticsResponse,
   BudgetDTO,
+  BudgetHistoryAveragesResponse,
+  CategoryDailyStatsResponse,
   CreateBudgetDTO,
   UpdateBudgetDTO,
   UpsertBudgetLineDTO,
@@ -52,6 +54,18 @@ export const budgetService = {
 
   async analytics(budgetId: number): Promise<BudgetAnalyticsResponse> {
     const { data } = await api.get<BudgetAnalyticsResponse>(`${BASE}/${budgetId}/analytics`);
+    return data;
+  },
+
+  async analyticsDailyStats(budgetId: number): Promise<CategoryDailyStatsResponse> {
+    const { data } = await api.get<CategoryDailyStatsResponse>(`${BASE}/${budgetId}/analytics/daily`);
+    return data;
+  },
+
+  async historyAverages(budgetId: number, months = 6): Promise<BudgetHistoryAveragesResponse> {
+    const { data } = await api.get<BudgetHistoryAveragesResponse>(`${BASE}/${budgetId}/history-averages`, {
+      params: { months },
+    });
     return data;
   },
 };

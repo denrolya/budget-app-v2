@@ -28,3 +28,12 @@ export const useUpsertBudgetLine = (budgetId: number) => {
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.detail(budgetId) }),
   });
 };
+
+export const useUpdateBudgetLineNote = (budgetId: number) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ lineId, note }: { lineId: number; note: string | null }) =>
+      budgetService.updateLine(budgetId, lineId, { note }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.detail(budgetId) }),
+  });
+};

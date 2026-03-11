@@ -1,11 +1,15 @@
-export { useListBudgets, useBudget, useBudgetAnalytics } from './queries';
-export { useCreateBudget, useDeleteBudget, useUpsertBudgetLine } from './mutations';
+export { useListBudgets, useBudget, useBudgetAnalytics, useCategoryDailyStats, useHistoryAverages } from './queries';
+export { useCreateBudget, useDeleteBudget, useUpsertBudgetLine, useUpdateBudgetLineNote } from './mutations';
 export type {
   BudgetDTO,
   BudgetLineDTO,
   BudgetPeriodType,
   BudgetAnalyticsItem,
   BudgetCurrencyValues,
+  BudgetHistoryAveragesResponse,
+  CategoryDailyStatsItem,
+  CategoryDayStats,
+  CategoryDailyStatsResponse,
   CreateBudgetDTO,
   UpdateBudgetDTO,
   UpsertBudgetLineDTO,

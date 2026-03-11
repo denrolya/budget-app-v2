@@ -3,13 +3,14 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 import { TransactionsDrawer, type DrawerListingTarget } from '@/features/statistics';
 import type { ConvertedValues } from '@/features/transactions';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 
-import { useUpsertBudgetLine } from '../api';
-import type { BudgetAnalyticsItem, BudgetDTO, BudgetLineDTO } from '../api/types';
+import { useUpsertBudgetLine, useUpdateBudgetLineNote } from '../api';
+import type { BudgetAnalyticsItem, BudgetDTO, BudgetLineDTO, CategoryDailyStatsItem } from '../api/types';
 
 import BudgetCategoryRow from './BudgetCategoryRow';
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
@@ -20,6 +21,7 @@ interface Props {
   analytics: BudgetAnalyticsItem[];
   displayCurrency: DisplayCurrency;
   rates: ConvertedValues | null;
+  dailyStats?: CategoryDailyStatsItem[];
 }
 
 const sortCats = (cats: Category[]): Category[] =>
@@ -42,22 +44,22 @@ const fmtAmt = (n: number, currency: string) => {
   return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 };
 
-const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurrency, rates }) => {
+const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurrency, rates, dailyStats }) => {
   const { data: catData } = useCategoryList();
   const { mutate: upsertLine, isPending: isSaving } = useUpsertBudgetLine(budgetId);
+  const { mutate: updateNote } = useUpdateBudgetLineNote(budgetId);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTarget, setDrawerTarget] = useState<DrawerListingTarget | null>(null);
 
   const timeframe = useMemo(
     () => ({
-      after: moment(budget.startDate),
-      before: moment(budget.endDate),
+      after: moment(budget.startDate, BACKEND_DATE_FORMAT),
+      before: moment(budget.endDate, BACKEND_DATE_FORMAT),
     }),
     [budget.startDate, budget.endDate],
   );
 
-  // Empty set = all categories collapsed (only roots visible by default)
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
 
   const toggle = useCallback((id: number) => {
@@ -69,7 +71,6 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
     });
   }, []);
 
-  // Build lookup maps
   const analyticsMap = useMemo(() => {
     const map = new Map<number, BudgetAnalyticsItem>();
     analytics.forEach((item) => map.set(item.categoryId, item));
@@ -82,7 +83,12 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
     return map;
   }, [budget.lines]);
 
-  // Aggregate actual for a category (self + all descendants) converting all native currencies
+  const dailyStatsMap = useMemo(() => {
+    const map = new Map<number, CategoryDailyStatsItem>();
+    (dailyStats ?? []).forEach((item) => map.set(item.categoryId, item));
+    return map;
+  }, [dailyStats]);
+
   const getActual = useCallback(
     (cat: Category) => {
       const ids = getAllIds(cat);
@@ -104,7 +110,6 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
     [analyticsMap, displayCurrency, rates],
   );
 
-  // Convert planned line amount to display currency
   const getPlanned = useCallback(
     (line: BudgetLineDTO | null): number | null => {
       if (!line) return null;
@@ -135,7 +140,19 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
     [upsertLine],
   );
 
-  // Recursively render rows for a section
+  const handleNoteUpdate = useCallback(
+    (lineId: number, note: string | null) => {
+      updateNote(
+        { lineId, note },
+        {
+          onSuccess: () => toast.success(note ? 'Note saved' : 'Note removed'),
+          onError: () => toast.error('Failed to save note'),
+        },
+      );
+    },
+    [updateNote],
+  );
+
   const renderCategory = (cat: Category, depth: number, isExpenseSection: boolean): React.ReactNode[] => {
     if (!cat.isAffectingProfit) return [];
 
@@ -155,8 +172,11 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
         isSaving={isSaving}
         line={linesMap.get(cat.id) ?? null}
         plannedInDisplayCurrency={getPlanned(linesMap.get(cat.id) ?? null)}
+        rates={rates}
+        sparklineData={dailyStatsMap.get(cat.id)?.days}
         key={cat.id}
         onCategoryClick={handleCategoryClick}
+        onNoteUpdate={handleNoteUpdate}
         onSave={handleSave}
         onToggle={() => toggle(cat.id)}
       />,
@@ -178,7 +198,6 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
     catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income) ?? [],
   );
 
-  // Section totals — planned sums lines matching this section's category IDs
   const sectionTotals = (roots: Category[], isExpense: boolean) => {
     const allIds = new Set(roots.flatMap(getAllIds));
     let totalPlanned = 0;

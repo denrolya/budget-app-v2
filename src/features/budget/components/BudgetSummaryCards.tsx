@@ -38,6 +38,51 @@ const Stat: React.FC<{ label: string; value: React.ReactNode; className?: string
   </span>
 );
 
+function computeHealthScore(
+  percentUsed: number,
+  daysElapsed: number,
+  daysTotal: number,
+  totalPlannedIncome: number,
+  totalActualIncome: number,
+): { score: number; grade: string; gradeColor: string } {
+  let score = 100;
+
+  // Overspending penalty
+  if (percentUsed > 100) {
+    score -= Math.min(40, (percentUsed - 100) * 0.5);
+  } else if (percentUsed > 80) {
+    score -= 10;
+  }
+
+  // Pace penalty (only while budget is in progress)
+  if (daysTotal > 0 && daysElapsed > 0 && daysElapsed < daysTotal) {
+    const expectedPct = (daysElapsed / daysTotal) * 100;
+    if (percentUsed > expectedPct + 10) {
+      score -= Math.min(20, (percentUsed - expectedPct - 10) * 0.3);
+    }
+  }
+
+  // Income shortfall penalty
+  if (totalPlannedIncome > 0) {
+    const incomePct = (totalActualIncome / totalPlannedIncome) * 100;
+    if (incomePct < 90) {
+      score -= Math.min(15, (90 - incomePct) * 0.2);
+    }
+  }
+
+  score = Math.max(0, Math.round(score));
+
+  let grade: string;
+  let gradeColor: string;
+  if (score >= 90) { grade = 'A'; gradeColor = 'text-green-600 dark:text-green-400'; }
+  else if (score >= 75) { grade = 'B'; gradeColor = 'text-green-600 dark:text-green-400'; }
+  else if (score >= 60) { grade = 'C'; gradeColor = 'text-yellow-600 dark:text-yellow-400'; }
+  else if (score >= 45) { grade = 'D'; gradeColor = 'text-orange-600 dark:text-orange-400'; }
+  else { grade = 'F'; gradeColor = 'text-destructive'; }
+
+  return { score, grade, gradeColor };
+}
+
 const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrency, rates }) => {
   const { data: catData } = useCategoryList();
 
@@ -106,6 +151,14 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
         : undefined;
   const savingsColor = stats.netSavings >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive';
 
+  const { score, grade, gradeColor } = computeHealthScore(
+    stats.percentUsed,
+    stats.daysElapsed,
+    stats.daysTotal,
+    stats.totalPlannedIncome,
+    stats.totalActualIncome,
+  );
+
   return (
     <div className="rounded-lg border bg-card px-4 py-3 space-y-2 text-sm">
       {/* Expense row */}
@@ -145,6 +198,26 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
           value={`${stats.netSavings >= 0 ? '+' : '-'}${fmtAmt(stats.netSavings, displayCurrency)}`}
           className={savingsColor}
         />
+      </div>
+
+      {/* Health score row */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-2">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground w-16 shrink-0">Health</span>
+        <span className={cn('font-bold text-base tabular-nums', gradeColor)}>{grade}</span>
+        <span className="text-xs text-muted-foreground">{score}/100</span>
+        <Divider />
+        <div className="flex items-center gap-1">
+          <div className="w-24 h-1.5 rounded-full bg-muted overflow-hidden">
+            <div
+              style={{ width: `${score}%` }}
+              className={cn('h-full rounded-full transition-all', gradeColor === 'text-destructive'
+                ? 'bg-destructive'
+                : gradeColor.includes('yellow') || gradeColor.includes('orange')
+                  ? 'bg-yellow-500'
+                  : 'bg-green-500')}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
