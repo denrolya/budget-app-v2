@@ -138,7 +138,7 @@ const csvFilenameFromFilters = (filters: TransactionFilters) => {
 export const transactionService = {
   async fetchList({
     page = 1,
-    perPage = 30,
+    perPage = 50,
     filters,
     sort,
     omitTransferTransactions,

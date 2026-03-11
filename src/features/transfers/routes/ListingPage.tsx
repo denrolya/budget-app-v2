@@ -5,8 +5,9 @@ import React, { useCallback, useState } from 'react';
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import SummaryBadge from '@/components/common/SummaryBadge';
 import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
+import { usePageHeaderTitle } from '@/components/layout/header/PageHeaderContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
@@ -22,6 +23,8 @@ const DEFAULT_HEATMAP_RANGE = {
 };
 
 export const TransfersListPage: React.FC = () => {
+  usePageHeaderTitle('Transfers');
+
   const isMobile = useIsMobile();
   const { openForm } = useFormContext();
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
@@ -75,8 +78,16 @@ export const TransfersListPage: React.FC = () => {
     <FullHeightPageContent>
       <Card className="shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
         <CardHeader className="p-0 md:p-3 bg-background md:bg-card md:border-b">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <CardTitle className="text-2xl font-bold">Transfers</CardTitle>
+          <div className="hidden md:flex md:items-start md:justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <InlineFilters
+                inHeader
+                data={ledger.transferFilters}
+                sortDirection={ledger.isReversedOrder ? 'desc' : 'asc'}
+                onChange={handleFilterChange as any}
+                onSortToggle={handleSortToggle}
+              />
+            </div>
 
             <div aria-label="Transfers actions" role="toolbar" className="flex flex-wrap items-center gap-2">
               <SummaryBadge count={totalItems} icon={ROUTES.TRANSFER_LIST.icon} useColors={false} value={totalValue} />
@@ -152,6 +163,14 @@ export const TransfersListPage: React.FC = () => {
             </div>
           </div>
 
+          <div className="md:hidden flex justify-end">
+            <FiltersToggleButton
+              activeCount={ledger.activeFilterCount}
+              aria-label={ledger.isFiltersOpen ? 'Close filters' : 'Open filters'}
+              onClick={ledger.toggleFilters}
+            />
+          </div>
+
           {bulkSelectionVisible && (
             <div className="flex items-center gap-2 px-3 pb-3 md:px-0 md:pb-0">
               <span aria-live="polite" className="text-sm text-muted-foreground">
@@ -188,17 +207,6 @@ export const TransfersListPage: React.FC = () => {
                 year={ledger.timeframe.after.year()}
                 onRangeClear={handleHeatmapRangeClear}
                 onRangeSelect={handleHeatmapRangeSelect}
-              />
-            </div>
-          )}
-
-          {!isMobile && (
-            <div className="shrink-0">
-              <InlineFilters
-                data={ledger.transferFilters}
-                sortDirection={ledger.isReversedOrder ? 'desc' : 'asc'}
-                onChange={handleFilterChange as any}
-                onSortToggle={handleSortToggle}
               />
             </div>
           )}

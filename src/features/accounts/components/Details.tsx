@@ -336,6 +336,19 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
                 <TooltipContent>{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</TooltipContent>
               </Tooltip>
             </div>
+
+            {!isMobile && (
+              <div className="pt-2 min-w-0">
+                <InlineFilters
+                  inHeader
+                  hideAccountFilter
+                  data={ledger.transactionFilters}
+                  sortDirection={ledger.isReversedOrder ? 'desc' : 'asc'}
+                  onChange={handleFilterChange as any}
+                  onSortToggle={handleSortToggle}
+                />
+              </div>
+            )}
           </CardHeader>
           <CardContent className="p-0 flex-1 min-h-0 flex flex-col overflow-hidden">
             {/* CSS grid-rows accordion animation for heatmap */}
@@ -359,18 +372,6 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
                 )}
               </div>
             </div>
-            {/* Inline filters toolbar — desktop only */}
-            {!isMobile && (
-              <div className="shrink-0">
-                <InlineFilters
-                  hideAccountFilter
-                  data={ledger.transactionFilters}
-                  sortDirection={ledger.isReversedOrder ? 'desc' : 'asc'}
-                  onChange={handleFilterChange as any}
-                  onSortToggle={handleSortToggle}
-                />
-              </div>
-            )}
             {/* On desktop: show transactions inline */}
             {!isMobile && <div className="border-t flex-1 min-h-0 overflow-y-auto">{renderActivityContent()}</div>}
             {/* On mobile: show transactions inline when no range selected; otherwise open drawer */}

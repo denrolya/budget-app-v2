@@ -1,5 +1,5 @@
 import debounce from 'lodash/debounce';
-import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, ChevronDown, Layers, Search, X } from 'lucide-react';
+import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, ChevronDown, FileText, Layers, Search, X } from 'lucide-react';
 import { Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -150,6 +150,10 @@ export const ListingControls: React.FC<Props> = ({
     setFilter('withNestedCategories', !transactionFilters.withNestedCategories as any);
   }, [setFilter, transactionFilters.withNestedCategories]);
 
+  const toggleDraftOnly = useCallback(() => {
+    setFilter('isDraft', (transactionFilters.isDraft === true ? undefined : true) as any);
+  }, [setFilter, transactionFilters.isDraft]);
+
   const selectedCurrencies: string[] = useMemo(
     () => (transactionFilters as any).currencies ?? [],
     [transactionFilters],
@@ -187,11 +191,11 @@ export const ListingControls: React.FC<Props> = ({
   const OrderIcon = isReversedOrder ? CalendarArrowUp : CalendarArrowDown;
 
   return (
-    <div className="border-b bg-muted/30 supports-[backdrop-filter]:bg-muted/30">
+    <div className="min-w-0">
       <div
         aria-label="Ledger filters"
         role="toolbar"
-        className="flex flex-wrap items-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2"
+        className="flex min-w-max flex-nowrap items-center gap-1.5 overflow-x-auto px-0 py-0"
       >
         {/* DATE + ORDER — visually joined as input-group */}
         <div className="flex items-stretch">
@@ -324,6 +328,26 @@ export const ListingControls: React.FC<Props> = ({
             onChange={handleSearchChange}
           />
         </div>
+
+        <Divider />
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              aria-label="Show drafts only"
+              aria-pressed={transactionFilters.isDraft === true}
+              size="sm"
+              type="button"
+              variant={transactionFilters.isDraft === true ? 'secondary' : 'outline'}
+              className={cn(H, 'px-2')}
+              onClick={toggleDraftOnly}
+            >
+              <FileText aria-hidden="true" className="h-3.5 w-3.5" />
+              <span className="text-xs">Drafts</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{transactionFilters.isDraft === true ? 'Showing drafts only' : 'Show drafts only'}</TooltipContent>
+        </Tooltip>
 
         <Divider />
 

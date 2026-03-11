@@ -9,12 +9,15 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { cn } from '@/lib/utils';
 
+import { usePageHeader } from './PageHeaderContext';
+
 interface Props {
   className?: string;
 }
 
 export const Header: React.FC<Props> = ({ className }) => {
   const { openForm } = useFormContext();
+  const { title } = usePageHeader();
 
   return (
     <header
@@ -27,7 +30,9 @@ export const Header: React.FC<Props> = ({ className }) => {
         <SidebarTrigger className="-ml-1" />
       </div>
 
-      <div className="flex-1 min-w-0" />
+      <div className="flex-1 min-w-0 px-2">
+        {title ? <h1 className="text-sm font-semibold tracking-tight truncate">{title}</h1> : null}
+      </div>
 
       <div className="flex items-center gap-1 px-4 shrink-0">
         <nav className="hidden md:flex">

@@ -27,7 +27,7 @@ const DrawerListing: React.FC<DrawerContentProps> = ({ target, timeframe }) => {
     initialFilters: target.initialFilters,
     initialTimeframe: timeframe,
   });
-  return <LedgerView enableHotkeys={false} ledger={ledger} showControls={false} />;
+  return <LedgerView enableHotkeys={false} ledger={ledger} showControls />;
 };
 
 export const TransactionsDrawer: React.FC<Props> = ({ open, onOpenChange, target, timeframe }) => {

@@ -25,6 +25,7 @@ interface Props {
   onChange: <K extends keyof TransferFilters>(key: K, value: TransferFilters[K] | undefined | null) => void;
   sortDirection?: 'asc' | 'desc';
   onSortToggle?: () => void;
+  inHeader?: boolean;
 }
 
 const H = 'h-9';
@@ -46,7 +47,13 @@ const Divider: React.FC = () => <span aria-hidden="true" className="hidden md:bl
 
 const CURRENCY_CODES = Object.keys(CURRENCIES) as CURRENCY_CODE[];
 
-const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, sortDirection, onSortToggle }) => {
+const InlineFiltersTransfers: React.FC<Props> = ({
+  data,
+  onChange,
+  sortDirection,
+  onSortToggle,
+  inHeader = false,
+}) => {
   const [minLocal, setMinLocal] = useState('');
   const [maxLocal, setMaxLocal] = useState('');
   const [searchLocal, setSearchLocal] = useState(data.searchTerm ?? '');
@@ -157,11 +164,14 @@ const InlineFiltersTransfers: React.FC<Props> = ({ data, onChange, sortDirection
   }, [selectedCurrencies]);
 
   return (
-    <div className="border-b bg-muted/30 supports-[backdrop-filter]:bg-muted/30">
+    <div className={cn('min-w-0', !inHeader && 'border-b bg-muted/30 supports-[backdrop-filter]:bg-muted/30')}>
       <div
         aria-label="Transfer filters"
         role="toolbar"
-        className="flex flex-wrap items-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2"
+        className={cn(
+          'flex items-center gap-1.5',
+          inHeader ? 'min-w-max flex-nowrap overflow-x-auto px-0 py-0' : 'flex-wrap px-2.5 py-1.5 md:px-3 md:py-2',
+        )}
       >
         {/* DATE + SORT ORDER */}
         <div className="flex items-stretch">

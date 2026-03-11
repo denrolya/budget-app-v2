@@ -83,4 +83,12 @@ describe('formatTransferExchangeRate', () => {
       { currency: CURRENCY_CODE.UAH, amount: 44.26 }, // Rounded correctly
     ]);
   });
+
+  // Regression: backend DECIMAL columns are serialized as strings ("0.024100...").
+  // The Transfer model constructor must coerce them before they reach this function,
+  // otherwise rate.toFixed() throws "rate.toFixed is not a function".
+  it('throws when rate is a string (regression guard — coercion must happen upstream)', () => {
+    // @ts-expect-error intentionally passing string to simulate uncoerced API response
+    expect(() => formatTransferExchangeRate([CURRENCY_CODE.EUR, CURRENCY_CODE.UAH], '39.4567')).toThrow();
+  });
 });

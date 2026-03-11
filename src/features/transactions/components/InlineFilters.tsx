@@ -27,6 +27,7 @@ interface Props {
   onSortToggle?: () => void;
   /** When true, hides the accounts typeahead (e.g. when already scoped to one account). */
   hideAccountFilter?: boolean;
+  inHeader?: boolean;
 }
 
 const H = 'h-9';
@@ -41,7 +42,14 @@ const Divider: React.FC = () => <span aria-hidden="true" className="hidden md:bl
 
 const CURRENCY_CODES = Object.keys(CURRENCIES) as CURRENCY_CODE[];
 
-const InlineFilters: React.FC<Props> = ({ data, onChange, sortDirection, onSortToggle, hideAccountFilter }) => {
+const InlineFilters: React.FC<Props> = ({
+  data,
+  onChange,
+  sortDirection,
+  onSortToggle,
+  hideAccountFilter,
+  inHeader = false,
+}) => {
   // --- Local amount state (avoids caret jumps on debounce) ---
   const [minLocal, setMinLocal] = useState('');
   const [maxLocal, setMaxLocal] = useState('');
@@ -158,11 +166,14 @@ const InlineFilters: React.FC<Props> = ({ data, onChange, sortDirection, onSortT
   }, [selectedCurrencies]);
 
   return (
-    <div className="border-b bg-muted/30 supports-[backdrop-filter]:bg-muted/30">
+    <div className={cn('min-w-0', !inHeader && 'border-b bg-muted/30 supports-[backdrop-filter]:bg-muted/30')}>
       <div
         aria-label="Transaction filters"
         role="toolbar"
-        className="flex flex-wrap items-center gap-1.5 px-2.5 py-1.5 md:px-3 md:py-2"
+        className={cn(
+          'flex items-center gap-1.5',
+          inHeader ? 'min-w-max flex-nowrap overflow-x-auto px-0 py-0' : 'flex-wrap px-2.5 py-1.5 md:px-3 md:py-2',
+        )}
       >
         {/* DATE + SORT ORDER */}
         <div className="flex items-stretch">

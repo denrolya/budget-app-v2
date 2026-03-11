@@ -82,7 +82,7 @@ export const useTransactionsAndTransfersList = ({
   updateUrl = false,
   omitTransactions = false,
   omitTransfers = false,
-  initialPerPage = 30,
+  initialPerPage = 50,
 }: UseTransactionsAndTransfersListOptions = {}) => {
   const baseCurrency = useBaseCurrency();
   const queryClient = useQueryClient();

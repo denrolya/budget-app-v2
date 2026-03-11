@@ -8,6 +8,7 @@ import { FormProvider } from '@/contexts/Form';
 import { HotkeysProvider } from '@/contexts/Hotkeys';
 
 import Header from './header/Header';
+import { PageHeaderProvider } from './header/PageHeaderContext';
 import MobileNavigation from './MobileNavigation';
 import AppSidebar from './sidebar/AppSidebar';
 
@@ -17,18 +18,20 @@ const Layout: React.FC<React.PropsWithChildren> = ({ children }) => (
       <SidebarProvider defaultOpen={false} className="overflow-hidden">
         <CurrencyConverterProvider>
           <HotkeysProvider>
-            <AppSidebar />
+            <PageHeaderProvider>
+              <AppSidebar />
 
-            <SidebarInset>
-              <div className="flex flex-col h-screen overflow-hidden">
-                <Header className="hidden md:flex" />
+              <SidebarInset>
+                <div className="flex flex-col h-screen overflow-hidden">
+                  <Header className="hidden md:flex" />
 
-                <main className="flex flex-col flex-1 min-h-0 md:overflow-hidden bg-background">{children}</main>
+                  <main className="flex flex-col flex-1 min-h-0 md:overflow-hidden bg-background">{children}</main>
 
-                <MobileNavigation />
-                <FormRenderer />
-              </div>
-            </SidebarInset>
+                  <MobileNavigation />
+                  <FormRenderer />
+                </div>
+              </SidebarInset>
+            </PageHeaderProvider>
           </HotkeysProvider>
         </CurrencyConverterProvider>
       </SidebarProvider>

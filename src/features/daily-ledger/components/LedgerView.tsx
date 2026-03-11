@@ -29,6 +29,7 @@ export type LedgerViewProps = {
   /** When false, the internal ListFiltersSheet is suppressed so the parent can render its own. */
   showFiltersSheet?: boolean;
   displayMenuPortalTarget?: HTMLDivElement | null;
+  controlsPortalTarget?: HTMLDivElement | null;
 };
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
@@ -77,6 +78,7 @@ const LedgerView: React.FC<LedgerViewProps> = ({
   onReset,
   showFiltersSheet = true,
   displayMenuPortalTarget,
+  controlsPortalTarget,
 }) => {
   const isMobile = useIsMobile();
   const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
@@ -150,7 +152,7 @@ const LedgerView: React.FC<LedgerViewProps> = ({
     <>
       <div className="w-full min-w-0 flex-1 min-h-0 overflow-hidden flex flex-col bg-background md:bg-card">
         {/* Controls bar (desktop only) */}
-        {!isMobile && showControls && (
+        {!isMobile && showControls && !controlsPortalTarget && (
           <div className="shrink-0">
             <ListingControls
               activeView={viewMode}
@@ -273,6 +275,25 @@ const LedgerView: React.FC<LedgerViewProps> = ({
             transactionFilters={transactionFilters}
           />,
           displayMenuPortalTarget,
+        )}
+
+      {controlsPortalTarget &&
+        !isMobile &&
+        showControls &&
+        createPortal(
+          <ListingControls
+            activeView={viewMode}
+            isReversedOrder={isReversedOrder}
+            setFilter={setFilter}
+            setIsReversedOrder={setIsReversedOrder}
+            setShowTransactions={setShowTransactions}
+            setShowTransfers={setShowTransfers}
+            setTimeframe={setTimeframe}
+            timeframe={timeframe}
+            transactionFilters={transactionFilters}
+            transferFilters={transferFilters}
+          />,
+          controlsPortalTarget,
         )}
     </>
   );
