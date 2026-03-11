@@ -144,6 +144,7 @@ export const useTransactionsAndTransfersList = ({
       categories: transactionFilters.categories?.map(Number) ?? undefined,
       debts: transactionFilters.debts?.map(Number) ?? undefined,
       note: transactionFilters.searchTerm || undefined,
+      isDraft: transactionFilters.isDraft,
       page,
       perPage,
     }),

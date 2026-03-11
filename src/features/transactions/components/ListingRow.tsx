@@ -19,12 +19,11 @@ import { MOMENT_DATETIME_FORM_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constant
 import { AccountTypeahead, AccountPill } from '@/features/accounts';
 import { CategoryTypeahead } from '@/features/categories';
 import { cn } from '@/lib/utils';
-import { PopoverContent, PopoverTrigger, Popover } from '@/components/ui/popover';
+import CellPopover from '@/components/common/CellPopover';
 
 import { TransactionEditableField, useInlineEdit } from '../hooks/useInlineEdit';
 import Transaction from '../models/Transaction';
 
-import EditableCell from './EditableCell';
 import TransactionValue from './TransactionValue';
 
 export type TransactionRowColumn =
@@ -52,7 +51,6 @@ type Props = {
 
 type CellRendererArgs = {
   tx: Transaction;
-  compact: boolean;
   disabled: boolean;
   inlineEdit: ReturnType<typeof useInlineEdit>;
   onOpenForm: (tx: Transaction) => void;
@@ -65,31 +63,10 @@ type CellRendererArgs = {
   renderDetails: (tx: Transaction) => React.ReactNode;
 };
 
-const Editable = (
-  field: TransactionEditableField,
-  display: React.ReactNode,
-  editor: React.ReactNode,
-  args: Pick<CellRendererArgs, 'tx' | 'compact' | 'disabled' | 'inlineEdit'>,
-) => {
-  const { tx, compact, disabled, inlineEdit } = args;
-  const { isEditing, startEdit, cancelEdit, save } = inlineEdit;
-
-  return (
-    <EditableCell
-      compact={compact}
-      disabled={disabled}
-      display={display}
-      editor={editor}
-      isEditing={isEditing(tx.id, field)}
-      onCancel={cancelEdit}
-      onSave={() => void save(tx)}
-      onStartEdit={() => startEdit(tx, field)}
-    />
-  );
-};
-
 const cellClassName = (compact: boolean, extra?: string) =>
   cn('min-w-0 align-middle', compact ? 'py-0' : undefined, extra);
+
+// ─── Cell renderers ───────────────────────────────────────────────────────────
 
 const IdCell = ({
   tx,
@@ -155,187 +132,148 @@ const IdCell = ({
 
 const AccountCell = ({
   tx,
-  compact,
   disabled,
   inlineEdit,
-}: Pick<CellRendererArgs, 'tx' | 'compact' | 'disabled' | 'inlineEdit'>) => {
-  const { editValue, setEditValue, keyHandler } = inlineEdit;
+}: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
+  const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
-  return Editable(
-    'account',
-    <div className="min-w-0 [&_*]:min-w-0">
-      <AccountPill account={tx.account} size="sm" variant="inline" className="min-w-0" />
-    </div>,
-    <div className="min-w-0">
+  return (
+    <CellPopover
+      trigger={
+        <div className="min-w-0 [&_*]:min-w-0">
+          <AccountPill account={tx.account} size="sm" variant="inline" className="min-w-0" />
+        </div>
+      }
+      onOpen={() => startEdit(tx, 'account')}
+      onSave={() => void save(tx)}
+      onCancel={cancelEdit}
+      disabled={disabled}
+      saveOnEnter={false}
+      contentClassName="w-56"
+    >
       <AccountTypeahead
         autoFocus
         multiple={false}
         value={((editValue as any)?.id ?? editValue) as any}
         onChange={(v) => setEditValue(v as any)}
-        onKeyDown={(e) => keyHandler.onKeyDown(e, tx)}
       />
-    </div>,
-    { tx, compact, disabled, inlineEdit },
+    </CellPopover>
   );
 };
 
 const AmountCell = ({
   tx,
-  compact,
   disabled,
   inlineEdit,
-}: Pick<CellRendererArgs, 'tx' | 'compact' | 'disabled' | 'inlineEdit'>) => {
-  const { editValue, setEditValue, keyHandler } = inlineEdit;
+}: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
+  const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
-  return Editable(
-    'amount',
-    <div className="min-w-0">
-      <TransactionValue revert transaction={tx} className="font-semibold tracking-tight" />
-    </div>,
-    <Input
-      autoFocus
-      type="number"
-      value={String(editValue ?? '')}
-      className="min-w-0"
-      onChange={(e) => setEditValue(e.target.value)}
-      onKeyDown={(e) => keyHandler.onKeyDown(e, tx)}
-    />,
-    { tx, compact, disabled, inlineEdit },
+  return (
+    <CellPopover
+      trigger={<TransactionValue revert transaction={tx} className="font-semibold tracking-tight" />}
+      onOpen={() => startEdit(tx, 'amount')}
+      onSave={() => void save(tx)}
+      onCancel={cancelEdit}
+      disabled={disabled}
+      contentClassName="w-40"
+    >
+      <Input
+        autoFocus
+        type="number"
+        value={String(editValue ?? '')}
+        onChange={(e) => setEditValue(e.target.value)}
+      />
+    </CellPopover>
   );
 };
 
 const CategoryCell = ({
   tx,
-  compact,
   disabled,
   inlineEdit,
-}: Pick<CellRendererArgs, 'tx' | 'compact' | 'disabled' | 'inlineEdit'>) => {
-  const { editValue, setEditValue, keyHandler } = inlineEdit;
+}: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
+  const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
-  return Editable(
-    'category',
-    <Badge variant="outline" className="max-w-full px-1 py-0 whitespace-nowrap bg-background shadow-md truncate">
-      {tx.category.name}
-    </Badge>,
-    <div className="min-w-0">
+  return (
+    <CellPopover
+      trigger={
+        <Badge
+          variant="outline"
+          className="max-w-full px-1 py-0 whitespace-nowrap bg-background shadow-md truncate"
+        >
+          {tx.category.name}
+        </Badge>
+      }
+      onOpen={() => startEdit(tx, 'category')}
+      onSave={() => void save(tx)}
+      onCancel={cancelEdit}
+      disabled={disabled}
+      saveOnEnter={false}
+      contentClassName="w-56"
+    >
       <CategoryTypeahead
         autoFocus
         multiple={false}
         type={tx.type}
         value={((editValue as any)?.id ?? editValue) != null ? String((editValue as any)?.id ?? editValue) : null}
         onChange={(v) => setEditValue(v as any)}
-        onKeyDown={(e) => keyHandler.onKeyDown(e, tx)}
       />
-    </div>,
-    { tx, compact, disabled, inlineEdit },
+    </CellPopover>
   );
 };
 
 const NoteCell = ({
   tx,
-  compact,
   disabled,
   inlineEdit,
-}: Pick<CellRendererArgs, 'tx' | 'compact' | 'disabled' | 'inlineEdit'>) => {
-  const { editValue, setEditValue, keyHandler } = inlineEdit;
+}: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
+  const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
-  const display = <span className="block min-w-0 truncate text-muted-foreground">{tx.note}</span>;
-
-  const editor = (
-    <Input
-      autoFocus
-      value={String(editValue ?? '')}
-      className="min-w-0 w-full"
-      onChange={(e) => setEditValue(e.target.value)}
-      onKeyDown={(e) => keyHandler.onKeyDown(e, tx)}
-    />
+  return (
+    <CellPopover
+      trigger={<span className="block min-w-0 truncate text-muted-foreground">{tx.note}</span>}
+      onOpen={() => startEdit(tx, 'note')}
+      onSave={() => void save(tx)}
+      onCancel={cancelEdit}
+      disabled={disabled}
+      contentClassName="w-64"
+    >
+      <Input
+        autoFocus
+        value={String(editValue ?? '')}
+        placeholder="Note…"
+        onChange={(e) => setEditValue(e.target.value)}
+      />
+    </CellPopover>
   );
-
-  return Editable('note', display, editor, { tx, compact, disabled, inlineEdit });
 };
 
 const ExecutedAtCell = ({
   tx,
-  compact,
   disabled,
   inlineEdit,
-}: Pick<CellRendererArgs, 'tx' | 'compact' | 'disabled' | 'inlineEdit'>) => {
+}: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
-  const [open, setOpen] = React.useState(false);
-
-  const handleOpen = () => {
-    if (disabled) return;
-    startEdit(tx, 'executedAt');
-    setEditValue(tx.executedAt.toISOString()); // или то, что ты и так туда кладёшь
-    setOpen(true);
-  };
-
-  const handleSave = () => {
-    void save(tx);
-    setOpen(false);
-  };
-
-  const handleCancel = () => {
-    cancelEdit();
-    setOpen(false);
-  };
 
   return (
-    <Popover
-      open={open}
-      onOpenChange={(next) => {
-        if (!next) {
-          handleCancel();
-        } else {
-          handleOpen();
-        }
-      }}
-    >
-      <PopoverTrigger asChild>
-        <button
-          disabled={disabled}
-          type="button"
-          className={cn(
-            'w-full text-left whitespace-nowrap tabular-nums',
-            compact ? 'py-0' : 'py-1',
-            disabled ? 'opacity-60 cursor-default' : 'cursor-pointer hover:bg-muted/50 rounded',
-          )}
-        >
+    <CellPopover
+      trigger={
+        <span className="tabular-nums whitespace-nowrap">
           {tx.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
-        </button>
-      </PopoverTrigger>
-
-      <PopoverContent
-        align="start"
-        className="w-auto space-y-2"
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            handleSave();
-          }
-          if (e.key === 'Escape') {
-            e.preventDefault();
-            handleCancel();
-          }
-        }}
-      >
-        <Input
-          autoFocus
-          type="datetime-local"
-          value={moment(editValue as any).format(MOMENT_DATETIME_FORM_FORMAT)}
-          onChange={(e) => setEditValue(e.target.value)}
-        />
-
-        <div className="flex justify-end gap-2">
-          <Button size="sm" type="button" variant="ghost" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button size="sm" type="button" onClick={handleSave}>
-            Save
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
+        </span>
+      }
+      onOpen={() => startEdit(tx, 'executedAt')}
+      onSave={() => void save(tx)}
+      onCancel={cancelEdit}
+      disabled={disabled}
+    >
+      <Input
+        autoFocus
+        type="datetime-local"
+        value={moment(editValue as any).format(MOMENT_DATETIME_FORM_FORMAT)}
+        onChange={(e) => setEditValue(e.target.value)}
+      />
+    </CellPopover>
   );
 };
 
@@ -378,6 +316,8 @@ const ActionsCell = ({
   </div>
 );
 
+// ─── Row ──────────────────────────────────────────────────────────────────────
+
 export const ListingRow = ({
   transaction,
   compact = true,
@@ -401,7 +341,6 @@ export const ListingRow = ({
   const ctx = useMemo<CellRendererArgs>(
     () => ({
       tx: transaction,
-      compact,
       disabled,
       inlineEdit,
       onOpenForm,
@@ -415,7 +354,6 @@ export const ListingRow = ({
     }),
     [
       transaction,
-      compact,
       disabled,
       inlineEdit,
       onOpenForm,
@@ -442,13 +380,11 @@ export const ListingRow = ({
           onToggleDraft={ctx.onToggleDraft}
         />
       ),
-      account: <AccountCell compact={ctx.compact} disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />,
-      amount: <AmountCell compact={ctx.compact} disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />,
-      category: <CategoryCell compact={ctx.compact} disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />,
-      note: <NoteCell compact={ctx.compact} disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />,
-      executedAt: (
-        <ExecutedAtCell compact={ctx.compact} disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />
-      ),
+      account: <AccountCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />,
+      amount: <AmountCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />,
+      category: <CategoryCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />,
+      note: <NoteCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />,
+      executedAt: <ExecutedAtCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />,
       actions: (
         <ActionsCell
           tx={ctx.tx}
@@ -475,10 +411,10 @@ export const ListingRow = ({
             className,
           )}
         >
-          <TableCell className={cellClassName(ctx.compact, 'w-4')} />
+          <TableCell className={cellClassName(compact, 'w-4')} />
 
           {normalizedColumns.map((c, idx) => (
-            <TableCell className={cellClassName(ctx.compact, c.className)} key={`${c.key}-${idx}`}>
+            <TableCell className={cellClassName(compact, c.className)} key={`${c.key}-${idx}`}>
               {cellsByKey[c.key]}
             </TableCell>
           ))}

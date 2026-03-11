@@ -5,6 +5,7 @@ import {
   FolderTree,
   Handshake,
   LayoutDashboard,
+  Layers,
   PiggyBank,
   TestTube2,
   Wallet,
@@ -50,6 +51,11 @@ export const ROUTES = {
     path: '/budget',
     icon: PiggyBank,
     label: 'Budget Planning',
+  },
+  BUCKETS_PAGE: {
+    path: '/buckets',
+    icon: Layers,
+    label: 'Buckets',
   },
   SANDBOX_PAGE: {
     path: '/sandbox',

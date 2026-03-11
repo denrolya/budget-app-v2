@@ -14,6 +14,7 @@ export interface LedgerQueryParams {
   categories?: number[];
   debts?: number[];
   note?: string;
+  isDraft?: boolean;
   page?: number;
   perPage?: number;
 }
@@ -45,6 +46,7 @@ const buildQueryParams = (params: LedgerQueryParams): URLSearchParams => {
   if (params.accounts?.length) appendArray(query, 'account[]', params.accounts);
   if (params.categories?.length) appendArray(query, 'category[]', params.categories);
   if (params.debts?.length) appendArray(query, 'debt[]', params.debts);
+  if (params.isDraft !== undefined) query.set('isDraft', params.isDraft ? '1' : '0');
 
   return query;
 };
@@ -76,5 +78,6 @@ export const buildLedgerQueryKey = (params: LedgerQueryParams): string => {
   if (params.accounts?.length) p.set('accounts', params.accounts.slice().sort().join(','));
   if (params.categories?.length) p.set('categories', params.categories.slice().sort().join(','));
   if (params.debts?.length) p.set('debts', params.debts.slice().sort().join(','));
+  if (params.isDraft !== undefined) p.set('isDraft', String(params.isDraft));
   return p.toString();
 };

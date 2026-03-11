@@ -151,7 +151,8 @@ export const ListingControls: React.FC<Props> = ({
   }, [setFilter, transactionFilters.withNestedCategories]);
 
   const toggleDraftOnly = useCallback(() => {
-    setFilter('isDraft', (transactionFilters.isDraft === true ? undefined : true) as any);
+    const next = transactionFilters.isDraft === undefined ? true : transactionFilters.isDraft === true ? false : undefined;
+    setFilter('isDraft', next as any);
   }, [setFilter, transactionFilters.isDraft]);
 
   const selectedCurrencies: string[] = useMemo(
@@ -334,19 +335,23 @@ export const ListingControls: React.FC<Props> = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              aria-label="Show drafts only"
-              aria-pressed={transactionFilters.isDraft === true}
+              aria-label={transactionFilters.isDraft === undefined ? 'Show drafts only' : transactionFilters.isDraft ? 'Showing drafts only' : 'Showing non-drafts only'}
+              aria-pressed={transactionFilters.isDraft !== undefined}
               size="sm"
               type="button"
-              variant={transactionFilters.isDraft === true ? 'secondary' : 'outline'}
+              variant={transactionFilters.isDraft !== undefined ? 'secondary' : 'outline'}
               className={cn(H, 'px-2')}
               onClick={toggleDraftOnly}
             >
               <FileText aria-hidden="true" className="h-3.5 w-3.5" />
-              <span className="text-xs">Drafts</span>
+              <span className="text-xs">
+                {transactionFilters.isDraft === false ? 'No drafts' : 'Drafts'}
+              </span>
             </Button>
           </TooltipTrigger>
-          <TooltipContent>{transactionFilters.isDraft === true ? 'Showing drafts only' : 'Show drafts only'}</TooltipContent>
+          <TooltipContent>
+            {transactionFilters.isDraft === undefined ? 'Show drafts only' : transactionFilters.isDraft ? 'Showing drafts only — click for non-drafts' : 'Showing non-drafts only — click to clear'}
+          </TooltipContent>
         </Tooltip>
 
         <Divider />

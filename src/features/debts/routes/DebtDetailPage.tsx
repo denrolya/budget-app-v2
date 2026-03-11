@@ -1,4 +1,4 @@
-import { Archive, ArchiveRestore, ChevronLeft, Download, Edit, Trash2 } from 'lucide-react';
+import { Archive, ArchiveRestore, ChevronLeft, Download, Edit, Plus, Trash2 } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -17,9 +17,10 @@ const DebtDetailsHeader: React.FC<{
   onBack: () => void;
   onDelete: () => Promise<void>;
   onEdit: () => void;
+  onAddTransaction: () => void;
   onExport: () => void;
   onToggleClosed: () => Promise<void>;
-}> = ({ isClosed, onBack, onDelete, onEdit, onExport, onToggleClosed }) => (
+}> = ({ isClosed, onBack, onDelete, onEdit, onAddTransaction, onExport, onToggleClosed }) => (
   <div className="flex items-center gap-2 px-4 h-12 border-b bg-background shrink-0">
     <Button aria-label="Back to debts" size="icon" variant="ghost" onClick={onBack}>
       <ChevronLeft aria-hidden="true" className="h-5 w-5" />
@@ -28,6 +29,14 @@ const DebtDetailsHeader: React.FC<{
     <span className="flex-1 text-sm font-semibold truncate">Debt Details</span>
 
     <div className="flex items-center gap-1">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button aria-label="Add Transaction" size="icon" variant="outline" onClick={onAddTransaction}>
+            <Plus aria-hidden="true" className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Add new account transaction</TooltipContent>
+      </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button aria-label="Export" size="icon" variant="outline" onClick={onExport}>
@@ -141,6 +150,7 @@ const DebtDetailPage: React.FC = () => {
     <div className="h-full flex flex-col min-h-0">
       <DebtDetailsHeader
         isClosed={Boolean(debt.closedAt)}
+        onAddTransaction={() => openForm(FormType.Transaction, { debt })}
         onBack={() => navigate('/debts')}
         onDelete={onDelete}
         onEdit={() => openForm(FormType.Debt, debt)}

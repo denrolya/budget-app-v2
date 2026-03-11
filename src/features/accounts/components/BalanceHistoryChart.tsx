@@ -298,7 +298,7 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
               'axes',
               'areas',
               'lines',
-              CandleLayer,   // replaces built-in 'crosshair'
+              CandleLayer,   // dot + wick indicator (replaces built-in 'crosshair')
               'slices',
               'mesh',
             ]}

@@ -24,8 +24,10 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
       return [...incomeCategories, ...expenseCategories];
     }, [expenseCategories, incomeCategories, type]);
 
-    // File-explorer sort: folders (has children) before leaves, then lexicographic within each level.
-    // Preserves parent→child ordering by sorting the full path segment-by-segment.
+    // File-explorer sort: folders before leaves at each path level, then lexicographic.
+    // At divergence point i: if a's ancestor at level i is a folder (has items below it) and b's is not,
+    // a comes first. An item's ancestor at level i is a "folder" when i < path.length-1 (item is
+    // deeper, meaning a descendant exists) or when i === path.length-1 and item itself has children.
     const sortedOptions = useMemo(
       () =>
         options.slice().sort((a, b) => {
@@ -33,16 +35,14 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
           const bPath = b.getFullPath();
           const len = Math.min(aPath.length, bPath.length);
           for (let i = 0; i < len; i++) {
-            const cmp = aPath[i].localeCompare(bPath[i]);
-            if (cmp !== 0) return cmp;
+            if (aPath[i] !== bPath[i]) {
+              const aAncestorIsFolder = i < aPath.length - 1 || a.children.length > 0;
+              const bAncestorIsFolder = i < bPath.length - 1 || b.children.length > 0;
+              if (aAncestorIsFolder !== bAncestorIsFolder) return aAncestorIsFolder ? -1 : 1;
+              return aPath[i].localeCompare(bPath[i]);
+            }
           }
-          // Same prefix: folder (has children) before leaf
-          if (aPath.length !== bPath.length) {
-            const aIsFolder = a.children.length > 0;
-            const bIsFolder = b.children.length > 0;
-            if (aIsFolder && !bIsFolder) return -1;
-            if (!aIsFolder && bIsFolder) return 1;
-          }
+          // One path is a prefix of the other — parent (shorter) before child (longer)
           return aPath.length - bPath.length;
         }),
       [options],

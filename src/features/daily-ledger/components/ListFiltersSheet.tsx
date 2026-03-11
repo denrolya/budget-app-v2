@@ -187,8 +187,8 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
     [setFilter, transactionFilters.type],
   );
 
-  const toggleDraft = useCallback(() => {
-    setFilter('isDraft', transactionFilters.isDraft === undefined ? true : !transactionFilters.isDraft || undefined);
+  const setDraftFilter = useCallback((value: boolean) => {
+    setFilter('isDraft', transactionFilters.isDraft === value ? undefined : value);
   }, [setFilter, transactionFilters.isDraft]);
 
   const toggleNestedCategories = useCallback(() => {
@@ -429,17 +429,30 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
       {/* STATUS */}
       <div className="space-y-2">
         <Label className={LABEL_CLS}>Status</Label>
-        <Button
-          aria-pressed={transactionFilters.isDraft === true}
-          size="sm"
-          type="button"
-          variant={transactionFilters.isDraft === true ? 'secondary' : 'outline'}
-          className="w-full justify-start"
-          onClick={toggleDraft}
-        >
-          <FileText className="mr-2 h-4 w-4" />
-          {transactionFilters.isDraft === true ? 'Showing drafts only' : 'Show drafts only'}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            aria-pressed={transactionFilters.isDraft === true}
+            size="sm"
+            type="button"
+            variant={transactionFilters.isDraft === true ? 'secondary' : 'outline'}
+            className="flex-1"
+            onClick={() => setDraftFilter(true)}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Drafts
+          </Button>
+          <Button
+            aria-pressed={transactionFilters.isDraft === false}
+            size="sm"
+            type="button"
+            variant={transactionFilters.isDraft === false ? 'secondary' : 'outline'}
+            className="flex-1"
+            onClick={() => setDraftFilter(false)}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Non-drafts
+          </Button>
+        </div>
       </div>
 
       {/* RESET */}

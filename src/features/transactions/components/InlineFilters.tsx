@@ -1,5 +1,5 @@
 import debounce from 'lodash/debounce';
-import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, ChevronDown, Layers, Search, X } from 'lucide-react';
+import { CalendarArrowDown, CalendarArrowUp, CalendarIcon, ChevronDown, FileText, Layers, Search, X } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AccountTypeahead } from '@/features/accounts';
@@ -157,6 +157,11 @@ const InlineFilters: React.FC<Props> = ({
   const clearCurrencies = useCallback(() => {
     onChange('currencies' as any, undefined as any);
   }, [onChange]);
+
+  const toggleDraft = useCallback(() => {
+    const next = data.isDraft === undefined ? true : data.isDraft === true ? false : undefined;
+    onChange('isDraft', next);
+  }, [data.isDraft, onChange]);
 
   const currencyLabel = useMemo(() => {
     if (selectedCurrencies.length === 0) return 'Currency';
@@ -361,6 +366,31 @@ const InlineFilters: React.FC<Props> = ({
             </Button>
           )}
         </div>
+
+        <Divider />
+
+        {/* DRAFT TOGGLE */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              aria-label={data.isDraft === undefined ? 'Show drafts only' : data.isDraft ? 'Showing drafts only' : 'Showing non-drafts only'}
+              aria-pressed={data.isDraft !== undefined}
+              size="sm"
+              type="button"
+              variant={data.isDraft !== undefined ? 'secondary' : 'outline'}
+              className={cn(H, 'bg-background px-2 gap-1')}
+              onClick={toggleDraft}
+            >
+              <FileText aria-hidden="true" className="h-4 w-4" />
+              {data.isDraft !== undefined && (
+                <span className="text-xs">{data.isDraft ? 'Drafts' : 'No drafts'}</span>
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {data.isDraft === undefined ? 'Show drafts only' : data.isDraft ? 'Showing drafts only — click for non-drafts' : 'Showing non-drafts only — click to clear'}
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );

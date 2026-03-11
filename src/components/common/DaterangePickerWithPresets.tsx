@@ -44,6 +44,7 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
 
   // Controlled display month — ensures prev/next navigation always works
   // regardless of popover position, portals, or parent re-renders.
+  const [displayMonth, setDisplayMonth] = useState<Date>(() => committed.from ?? after.toDate());
 
   const debounceRef = useRef<number | null>(null);
 
@@ -72,6 +73,7 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
   useEffect(() => {
     if (isOpen) {
       setDraft(committed);
+      setDisplayMonth(committed.from ?? after.toDate());
       clearDebounce();
     }
   }, [isOpen, committed, clearDebounce, after]);
@@ -144,6 +146,7 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
 
       const next: DraftRange = { from, to };
       setDraft(next);
+      setDisplayMonth(from);
 
       // presets should feel instant, not delayed
       onChange({ after: moment(from).startOf('day'), before: moment(to).endOf('day') });
@@ -167,7 +170,8 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
       <PopoverContent align="start" className="w-auto p-0">
         <Calendar
           initialFocus
-          defaultMonth={draft.from ?? after.toDate()}
+          month={displayMonth}
+          onMonthChange={setDisplayMonth}
           mode="range"
           numberOfMonths={isMobile ? 1 : 2}
           selected={draft.from ? { from: draft.from, to: draft.to } : undefined}

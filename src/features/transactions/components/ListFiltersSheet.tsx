@@ -135,8 +135,8 @@ const Content: React.FC<Props> = ({ data, onChange, onReset }) => {
     [data.type, onChange],
   );
 
-  const toggleDraft = useCallback(() => {
-    onChange('isDraft', data.isDraft === undefined ? true : !data.isDraft || undefined);
+  const setDraftFilter = useCallback((value: boolean) => {
+    onChange('isDraft', data.isDraft === value ? undefined : value);
   }, [data.isDraft, onChange]);
 
   const toggleNestedCategories = useCallback(() => {
@@ -333,17 +333,30 @@ const Content: React.FC<Props> = ({ data, onChange, onReset }) => {
       {/* STATUS */}
       <div className="space-y-2">
         <Label className={LABEL_CLS}>Status</Label>
-        <Button
-          aria-pressed={data.isDraft === true}
-          size="sm"
-          type="button"
-          variant={data.isDraft === true ? 'secondary' : 'outline'}
-          className="w-full justify-start"
-          onClick={toggleDraft}
-        >
-          <FileText className="mr-2 h-4 w-4" />
-          {data.isDraft === true ? 'Showing drafts only' : 'Show drafts only'}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            aria-pressed={data.isDraft === true}
+            size="sm"
+            type="button"
+            variant={data.isDraft === true ? 'secondary' : 'outline'}
+            className="flex-1"
+            onClick={() => setDraftFilter(true)}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Drafts
+          </Button>
+          <Button
+            aria-pressed={data.isDraft === false}
+            size="sm"
+            type="button"
+            variant={data.isDraft === false ? 'secondary' : 'outline'}
+            className="flex-1"
+            onClick={() => setDraftFilter(false)}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Non-drafts
+          </Button>
+        </div>
       </div>
 
       {/* RESET */}

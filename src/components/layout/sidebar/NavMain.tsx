@@ -66,16 +66,14 @@ const ITEMS: {
     icon: ROUTES.BUDGET_PAGE.icon,
   },
   {
-    title: 'Experimental',
-    url: '#',
-    icon: SquareTerminal,
-    items: [
-      {
-        title: ROUTES.SANDBOX_PAGE.label,
-        url: ROUTES.SANDBOX_PAGE.path,
-        icon: ROUTES.SANDBOX_PAGE.icon,
-      },
-    ],
+    title: ROUTES.BUCKETS_PAGE.label,
+    url: ROUTES.BUCKETS_PAGE.path,
+    icon: ROUTES.BUCKETS_PAGE.icon,
+  },
+  {
+    title: ROUTES.SANDBOX_PAGE.label,
+    url: ROUTES.SANDBOX_PAGE.path,
+    icon: ROUTES.SANDBOX_PAGE.icon,
   },
 ];
 

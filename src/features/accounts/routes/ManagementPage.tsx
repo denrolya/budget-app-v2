@@ -18,12 +18,12 @@ const ManagementPage: React.FC = () => (
         }
       />
       <Route
+        path=":accountId"
         element={
           <Suspense fallback={null}>
             <AccountDetailPage />
           </Suspense>
         }
-        path=":accountId"
       />
       <Route element={<Navigate replace to="/accounts" />} path="*" />
     </Routes>

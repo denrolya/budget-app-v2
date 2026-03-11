@@ -20,6 +20,7 @@ const DashboardPage = lazy(() => import('@/features/dashboard').then(({ Dashboar
 const DebtsManagementPage = lazy(() =>
   import('@/features/debts').then(({ DebtsManagementPage: C }) => ({ default: C })),
 );
+const BucketsPage = lazy(() => import('@/features/buckets').then(({ BucketsPage: C }) => ({ default: C })));
 const SandboxPage = lazy(() => import('@/features/sandbox').then(({ SandboxPage: C }) => ({ default: C })));
 const TransactionsListPage = lazy(() =>
   import('@/features/transactions').then(({ TransactionsListPage: C }) => ({ default: C })),
@@ -41,7 +42,8 @@ const AppShell: React.FC = () => (
           <Route element={<DailyLedgerPage />} path="/ledger" />
           <Route element={<AccountsManagementPage />} path="/accounts/*" />
           <Route element={<DebtsManagementPage />} path="/debts/*" />
-          <Route element={<SandboxPage />} path="/testing" />
+          <Route element={<BucketsPage />} path="/buckets" />
+          <Route element={<SandboxPage />} path="/sandbox" />
           <Route element={<BudgetingPage />} path="/budget/*" />
           <Route element={<CategoriesManagementPage />} path="/categories" />
 
