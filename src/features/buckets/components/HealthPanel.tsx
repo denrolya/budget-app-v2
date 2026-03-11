@@ -1,9 +1,11 @@
+import { Info } from 'lucide-react';
 import React, { useRef } from 'react';
 
 import { cn } from '@/lib/utils';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 import { HealthSummary, statusColor, statusIcon } from '../hooks/useHealthRules';
 import { RuleWithResult } from '../hooks/useHealthRules';
@@ -41,6 +43,26 @@ const HealthPanel: React.FC<Props> = ({
         <div className="flex items-baseline gap-1.5">
           <span className={cn('text-3xl font-bold tabular-nums', GRADE_COLOR[health.grade])}>{health.grade}</span>
           <span className="text-sm text-muted-foreground">{health.score}/100</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button type="button" className="text-muted-foreground/40 hover:text-muted-foreground transition-colors ml-0.5">
+                <Info className="h-3.5 w-3.5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="max-w-xs text-xs space-y-1.5 p-3">
+              <p className="font-semibold text-sm">Portfolio Health Score</p>
+              <p>Scored across 10 personal finance rules. Each rule is: ✅ pass (+10), ⚠️ warn (+5), or ❌ fail (+0). N/A rules are excluded.</p>
+              <p className="font-medium mt-1">Grade thresholds:</p>
+              <ul className="space-y-0.5 pl-1">
+                <li><span className="text-green-500 font-bold">A</span> ≥ 90 — excellent</li>
+                <li><span className="text-emerald-500 font-bold">B</span> ≥ 75 — good</li>
+                <li><span className="text-yellow-500 font-bold">C</span> ≥ 60 — fair</li>
+                <li><span className="text-orange-500 font-bold">D</span> ≥ 45 — needs work</li>
+                <li><span className="text-red-500 font-bold">F</span> &lt; 45 — critical</li>
+              </ul>
+              <p className="text-muted-foreground">Rules cover: emergency fund, savings rate, liquid reserves, diversification, currency strength, and more.</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Score bar */}

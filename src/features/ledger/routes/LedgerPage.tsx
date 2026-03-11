@@ -47,26 +47,6 @@ export const LedgerPage: React.FC = () => {
     <FullHeightPageContent>
       <Card className="w-full min-w-0 shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
         <CardContent className="w-full min-w-0 p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
-          {/* Heatmap (collapsible) */}
-          <div
-            className={cn(
-              'grid transition-[grid-template-rows] duration-300 ease-in-out shrink-0',
-              isHeatmapVisible ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-            )}
-          >
-            <div className="overflow-hidden">
-              <div className="border-b">
-                <HeatmapPanel
-                  highlightDates={ledger.visibleDates}
-                  resetTrigger={heatmapResetTrigger}
-                  year={ledger.timeframe.after.year()}
-                  onRangeClear={ledger.resetAll}
-                  onRangeSelect={handleHeatmapRangeSelect}
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Sticky filters bar — always visible, never scrolls with the listing */}
           <div className="shrink-0 hidden md:flex items-center gap-2 border-b bg-card px-3 py-2 flex-wrap">
             <div className="flex-1 min-w-0 overflow-x-auto">
@@ -128,6 +108,26 @@ export const LedgerPage: React.FC = () => {
                 aria-label="Toggle filters"
                 onClick={ledger.toggleFilters}
               />
+            </div>
+          </div>
+
+          {/* Heatmap (collapsible) — below the filters bar */}
+          <div
+            className={cn(
+              'grid transition-[grid-template-rows] duration-300 ease-in-out shrink-0',
+              isHeatmapVisible ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+            )}
+          >
+            <div className="overflow-hidden">
+              <div className="border-b">
+                <HeatmapPanel
+                  highlightDates={ledger.visibleDates}
+                  resetTrigger={heatmapResetTrigger}
+                  year={ledger.timeframe.after.year()}
+                  onRangeClear={ledger.resetAll}
+                  onRangeSelect={handleHeatmapRangeSelect}
+                />
+              </div>
             </div>
           </div>
 

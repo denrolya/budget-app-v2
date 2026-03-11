@@ -1,9 +1,11 @@
+import { Info } from 'lucide-react';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { getExchangeRate } from '@/lib/getExchangeRates';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { ConvertedValues } from '@/features/transactions';
 import { Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 
@@ -232,7 +234,34 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
       <div className="px-4 py-2.5 flex items-center gap-3">
         <span className={cn('font-bold text-2xl tabular-nums leading-none shrink-0', gradeColor)}>{grade}</span>
         <div className="flex-1 min-w-0 space-y-1.5">
-          <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Health</div>
+          <div className="flex items-center gap-1">
+            <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Health</div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button type="button" className="text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+                  <Info className="h-3 w-3" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs text-xs space-y-1.5 p-3">
+                <p className="font-semibold text-sm">Budget Health Score</p>
+                <p>Starts at 100 and deducts points for:</p>
+                <ul className="space-y-0.5 pl-1">
+                  <li>Spending &gt;100% of budget: up to −40</li>
+                  <li>Spending &gt;80% of budget: −10</li>
+                  <li>Pace ahead of schedule: up to −20</li>
+                  <li>Income below 90% of planned: up to −15</li>
+                </ul>
+                <p className="font-medium mt-1">Grade thresholds:</p>
+                <ul className="space-y-0.5 pl-1">
+                  <li><span className="text-green-500 font-bold">A</span> ≥ 90 — excellent</li>
+                  <li><span className="text-green-500 font-bold">B</span> ≥ 75 — good</li>
+                  <li><span className="text-yellow-500 font-bold">C</span> ≥ 60 — fair</li>
+                  <li><span className="text-orange-500 font-bold">D</span> ≥ 45 — needs work</li>
+                  <li><span className="text-red-500 font-bold">F</span> &lt; 45 — critical</li>
+                </ul>
+              </TooltipContent>
+            </Tooltip>
+          </div>
           <div className="flex items-center gap-2">
             <MiniBar colorClass={gradeBarColor} value={score} />
             <span className="text-2xs tabular-nums text-muted-foreground shrink-0">{score}</span>

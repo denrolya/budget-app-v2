@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { FileText } from 'lucide-react';
 import React from 'react';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -11,7 +10,7 @@ interface Props {
   account: Account;
 }
 
-/** Shared badge showing the number of pending draft transactions for a bank account. */
+/** Small dot indicating pending draft transactions for a bank account. Zero layout impact. */
 const AccountDraftBadge: React.FC<Props> = ({ account }) => {
   const enabled = account.type === AccountType.Bank;
 
@@ -37,11 +36,8 @@ const AccountDraftBadge: React.FC<Props> = ({ account }) => {
       <TooltipTrigger asChild>
         <span
           aria-label={`${count} pending draft transaction${count !== 1 ? 's' : ''}`}
-          className="inline-flex items-center gap-0.5 rounded-full border border-amber-400/40 bg-amber-400/15 px-1.5 py-0 text-[10px] font-semibold leading-4 text-amber-600 dark:text-amber-400 select-none"
-        >
-          <FileText aria-hidden="true" className="h-2.5 w-2.5 shrink-0" />
-          {count > 99 ? '99+' : count}
-        </span>
+          className="inline-block w-2 h-2 rounded-full bg-amber-500 shrink-0 ring-1 ring-background select-none"
+        />
       </TooltipTrigger>
       <TooltipContent>
         {count} pending draft transaction{count !== 1 ? 's' : ''}
