@@ -12,7 +12,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { LedgerView, useLedger } from '@/features/daily-ledger';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 import { useMutations } from '../api/mutations';
 import HeatmapPanel from '../components/HeatmapPanel';
@@ -27,7 +26,6 @@ const DEFAULT_HEATMAP_RANGE = {
 export const TransactionsListPage: React.FC = () => {
   usePageHeaderTitle('Transactions');
 
-  const isMobile = useIsMobile();
   const { openForm } = useFormContext();
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
 

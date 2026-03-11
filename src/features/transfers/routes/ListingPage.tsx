@@ -15,7 +15,6 @@ import { LedgerView, useLedger } from '@/features/daily-ledger';
 import { HeatmapPanel } from '@/features/transactions';
 import InlineFilters from '@/features/transfers/components/InlineFilters';
 import ListFiltersSheet from '@/features/transfers/components/ListFiltersSheet';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const DEFAULT_HEATMAP_RANGE = {
   after: moment().subtract(30, 'days').startOf('day'),
@@ -25,7 +24,6 @@ const DEFAULT_HEATMAP_RANGE = {
 export const TransfersListPage: React.FC = () => {
   usePageHeaderTitle('Transfers');
 
-  const isMobile = useIsMobile();
   const { openForm } = useFormContext();
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
   const [selectedTransfers] = useState<number[]>([]); // placeholder until bulk-select is implemented
