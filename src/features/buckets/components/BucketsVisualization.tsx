@@ -88,23 +88,25 @@ const BucketsVisualization: React.FC<Props> = ({
 
   // ── Pie ─────────────────────────────────────────────────────────────────────
 
-  const pieData = useMemo(() => {
-    return allBuckets
-      .map((bucket) => {
-        const total =
-          bucket.id === '__unassigned__'
-            ? unassignedEntries.reduce((s, e) => s + e.unallocatedBalance, 0)
-            : (entriesByBucket[bucket.id] ?? []).reduce((s, e) => s + e.allocatedBalance, 0);
-        if (total <= 0) return null;
-        return {
-          id: bucket.id,
-          label: `${bucket.emoji} ${bucket.name}`,
-          value: total,
-          color: bucket.color,
-        };
-      })
-      .filter(Boolean) as { id: string; label: string; value: number; color: string }[];
-  }, [allBuckets, entriesByBucket, unassignedEntries]);
+  const pieData = useMemo(
+    () =>
+      allBuckets
+        .map((bucket) => {
+          const total =
+            bucket.id === '__unassigned__'
+              ? unassignedEntries.reduce((s, e) => s + e.unallocatedBalance, 0)
+              : (entriesByBucket[bucket.id] ?? []).reduce((s, e) => s + e.allocatedBalance, 0);
+          if (total <= 0) return null;
+          return {
+            id: bucket.id,
+            label: `${bucket.emoji} ${bucket.name}`,
+            value: total,
+            color: bucket.color,
+          };
+        })
+        .filter(Boolean) as { id: string; label: string; value: number; color: string }[],
+    [allBuckets, entriesByBucket, unassignedEntries],
+  );
 
   const totalPie = pieData.reduce((s, d) => s + d.value, 0);
 
@@ -113,22 +115,22 @@ const BucketsVisualization: React.FC<Props> = ({
 
     return (
       <ResponsiveTreeMap
-        data={treemapData as any}
-        identity="id"
-        value="value"
-        valueFormat={(v) => fmtMoney(v, baseCurrency)}
-        margin={{ top: 4, right: 4, bottom: 4, left: 4 }}
-        tile="squarify"
-        innerPadding={3}
-        outerPadding={6}
-        leavesOnly
         enableLabel
-        label={(node) => (node.data as any).accountName ?? node.id}
-        labelSkipSize={32}
-        colors={(node) => (node.data as any).color ?? '#888'}
+        leavesOnly
         borderColor={{ from: 'color', modifiers: [['darker', 0.3]] }}
         borderWidth={1}
+        colors={(node) => (node.data as any).color ?? '#888'}
+        data={treemapData as any}
+        identity="id"
+        innerPadding={3}
+        label={(node) => (node.data as any).accountName ?? node.id}
+        labelSkipSize={32}
+        margin={{ top: 4, right: 4, bottom: 4, left: 4 }}
+        outerPadding={6}
         theme={nivoTheme}
+        tile="squarify"
+        value="value"
+        valueFormat={(v) => fmtMoney(v, baseCurrency)}
         tooltip={({ node }) => {
           const d = node.data as any;
           return (
@@ -155,21 +157,21 @@ const BucketsVisualization: React.FC<Props> = ({
 
   return (
     <ResponsivePie
-      data={pieData}
-      margin={{ top: 20, right: 100, bottom: 20, left: 100 }}
-      innerRadius={0.5}
-      padAngle={2}
-      cornerRadius={3}
-      colors={(d) => d.data.color}
-      borderWidth={1}
-      borderColor={{ from: 'color', modifiers: [['darker', 0.3]] }}
       arcLabel={(d) => `${((d.value / totalPie) * 100).toFixed(0)}%`}
       arcLabelsSkipAngle={12}
       arcLinkLabel={(d) => d.data.label}
+      arcLinkLabelsColor={{ from: 'color' }}
       arcLinkLabelsSkipAngle={10}
       arcLinkLabelsTextColor="hsl(var(--foreground))"
       arcLinkLabelsThickness={1}
-      arcLinkLabelsColor={{ from: 'color' }}
+      borderColor={{ from: 'color', modifiers: [['darker', 0.3]] }}
+      borderWidth={1}
+      colors={(d) => d.data.color}
+      cornerRadius={3}
+      data={pieData}
+      innerRadius={0.5}
+      margin={{ top: 20, right: 100, bottom: 20, left: 100 }}
+      padAngle={2}
       theme={nivoTheme}
       tooltip={({ datum }) => (
         <div className="bg-background border rounded-lg shadow-lg px-3 py-2 text-sm">

@@ -79,7 +79,7 @@ export const MobileNavigation: React.FC<Props> = ({ className }) => {
     trackMouse: false,
   });
 
-  const navItems = useMemo(() => [ROUTES.DASHBOARD, ROUTES.DAILY_LEDGER, ROUTES.TRANSACTION_LIST], []);
+  const navItems = useMemo(() => [ROUTES.DASHBOARD, ROUTES.LEDGER], []);
 
   const pathname = location.pathname;
 

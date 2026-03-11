@@ -42,6 +42,8 @@ interface MultiSelectProps
     icon?: React.ComponentType<{ className?: string }>;
   }[];
   onValueChange: (value: string[]) => void;
+  /** Controlled selected values. Takes precedence over defaultValue when provided. */
+  value?: string[];
   defaultValue?: string[];
   placeholder?: string;
   maxCount?: number;
@@ -56,6 +58,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
       options,
       onValueChange,
       variant,
+      value: controlledValue,
       defaultValue = [],
       placeholder = 'Select options',
       maxCount = 3,
@@ -66,7 +69,18 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
     },
     ref,
   ) => {
-    const [selectedValues, setSelectedValues] = React.useState<string[]>(defaultValue);
+    const [internalValues, setInternalValues] = React.useState<string[]>(defaultValue);
+    const isControlled = controlledValue !== undefined;
+    const selectedValues = isControlled ? controlledValue : internalValues;
+
+    const setSelectedValues = React.useCallback(
+      (updater: string[] | ((prev: string[]) => string[])) => {
+        if (!isControlled) {
+          setInternalValues(updater);
+        }
+      },
+      [isControlled],
+    );
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
     const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {

@@ -29,32 +29,21 @@ const getAllIds = (cat: Category): number[] => {
   return ids;
 };
 
-const Divider = () => <span className="text-border select-none">·</span>;
-
-const Stat: React.FC<{ label: string; value: React.ReactNode; className?: string }> = ({ label, value, className }) => (
-  <span className="flex items-baseline gap-1">
-    <span className="text-muted-foreground text-xs">{label}</span>
-    <span className={cn('font-semibold tabular-nums text-sm', className)}>{value}</span>
-  </span>
-);
-
-function computeHealthScore(
+const computeHealthScore = (
   percentUsed: number,
   daysElapsed: number,
   daysTotal: number,
   totalPlannedIncome: number,
   totalActualIncome: number,
-): { score: number; grade: string; gradeColor: string } {
+): { score: number; grade: string; gradeColor: string } => {
   let score = 100;
 
-  // Overspending penalty
   if (percentUsed > 100) {
     score -= Math.min(40, (percentUsed - 100) * 0.5);
   } else if (percentUsed > 80) {
     score -= 10;
   }
 
-  // Pace penalty (only while budget is in progress)
   if (daysTotal > 0 && daysElapsed > 0 && daysElapsed < daysTotal) {
     const expectedPct = (daysElapsed / daysTotal) * 100;
     if (percentUsed > expectedPct + 10) {
@@ -62,7 +51,6 @@ function computeHealthScore(
     }
   }
 
-  // Income shortfall penalty
   if (totalPlannedIncome > 0) {
     const incomePct = (totalActualIncome / totalPlannedIncome) * 100;
     if (incomePct < 90) {
@@ -74,14 +62,34 @@ function computeHealthScore(
 
   let grade: string;
   let gradeColor: string;
-  if (score >= 90) { grade = 'A'; gradeColor = 'text-green-600 dark:text-green-400'; }
-  else if (score >= 75) { grade = 'B'; gradeColor = 'text-green-600 dark:text-green-400'; }
-  else if (score >= 60) { grade = 'C'; gradeColor = 'text-yellow-600 dark:text-yellow-400'; }
-  else if (score >= 45) { grade = 'D'; gradeColor = 'text-orange-600 dark:text-orange-400'; }
-  else { grade = 'F'; gradeColor = 'text-destructive'; }
+  if (score >= 90) {
+    grade = 'A';
+    gradeColor = 'text-green-600 dark:text-green-400';
+  } else if (score >= 75) {
+    grade = 'B';
+    gradeColor = 'text-green-600 dark:text-green-400';
+  } else if (score >= 60) {
+    grade = 'C';
+    gradeColor = 'text-yellow-600 dark:text-yellow-400';
+  } else if (score >= 45) {
+    grade = 'D';
+    gradeColor = 'text-orange-600 dark:text-orange-400';
+  } else {
+    grade = 'F';
+    gradeColor = 'text-destructive';
+  }
 
   return { score, grade, gradeColor };
-}
+};
+
+const MiniBar: React.FC<{ value: number; max?: number; colorClass: string }> = ({ value, max = 100, colorClass }) => (
+  <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden min-w-0">
+    <div
+      style={{ width: `${Math.min((value / max) * 100, 100)}%` }}
+      className={cn('h-full rounded-full transition-all', colorClass)}
+    />
+  </div>
+);
 
 const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrency, rates }) => {
   const { data: catData } = useCategoryList();
@@ -142,13 +150,17 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
     };
   }, [budget, analytics, displayCurrency, rates, catData]);
 
-  const remainingColor = stats.remaining < 0 ? 'text-destructive' : 'text-green-600 dark:text-green-400';
   const pctColor =
     stats.percentUsed > 100
       ? 'text-destructive'
       : stats.percentUsed > 80
         ? 'text-yellow-600 dark:text-yellow-400'
         : undefined;
+
+  const pctBarColor =
+    stats.percentUsed > 100 ? 'bg-destructive' : stats.percentUsed > 80 ? 'bg-yellow-500' : 'bg-primary';
+
+  const remainingColor = stats.remaining < 0 ? 'text-destructive' : 'text-green-600 dark:text-green-400';
   const savingsColor = stats.netSavings >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive';
 
   const { score, grade, gradeColor } = computeHealthScore(
@@ -159,64 +171,87 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
     stats.totalActualIncome,
   );
 
+  const gradeBarColor =
+    gradeColor === 'text-destructive'
+      ? 'bg-destructive'
+      : gradeColor.includes('yellow') || gradeColor.includes('orange')
+        ? 'bg-yellow-500'
+        : 'bg-green-500';
+
+  const daysPct = stats.daysTotal > 0 ? (stats.daysElapsed / stats.daysTotal) * 100 : 0;
+
   return (
-    <div className="rounded-lg border bg-card px-4 py-3 space-y-2 text-sm">
-      {/* Expense row */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground w-16 shrink-0">
-          Expenses
-        </span>
-        <Stat label="planned" value={fmtAmt(stats.totalPlannedExpense, displayCurrency)} />
-        <Divider />
-        <Stat label="actual" value={fmtAmt(stats.totalActualExpense, displayCurrency)} />
-        <Divider />
-        <Stat
-          label={stats.remaining < 0 ? 'over' : 'left'}
-          value={fmtAmt(stats.remaining, displayCurrency)}
-          className={remainingColor}
-        />
-        <Divider />
-        <Stat label="used" value={`${stats.percentUsed.toFixed(1)}%`} className={pctColor} />
-        <Divider />
-        <Stat label="days" value={`${stats.daysElapsed}/${stats.daysTotal}`} />
-        {stats.daysLeft > 0 && <span className="text-xs text-muted-foreground">({stats.daysLeft} left)</span>}
+    <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-border -mx-4 border-t text-sm">
+      {/* Expenses */}
+      <div className="px-4 py-2.5 space-y-1.5">
+        <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Expenses</div>
+        <div className="flex items-baseline gap-1 min-w-0">
+          <span className={cn('font-semibold tabular-nums truncate', pctColor)}>
+            {fmtAmt(stats.totalActualExpense, displayCurrency)}
+          </span>
+          <span className="text-2xs text-muted-foreground shrink-0">
+            / {fmtAmt(stats.totalPlannedExpense, displayCurrency)}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <MiniBar colorClass={pctBarColor} value={stats.percentUsed} />
+          <span className={cn('text-2xs tabular-nums font-medium shrink-0', pctColor)}>
+            {stats.percentUsed.toFixed(0)}%
+          </span>
+        </div>
+        <div className={cn('text-2xs font-medium tabular-nums truncate', remainingColor)}>
+          {stats.remaining < 0
+            ? `${fmtAmt(Math.abs(stats.remaining), displayCurrency)} over`
+            : `${fmtAmt(stats.remaining, displayCurrency)} left`}
+        </div>
       </div>
 
-      {/* Income row */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-2">
-        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground w-16 shrink-0">Income</span>
-        <Stat label="planned" value={fmtAmt(stats.totalPlannedIncome, displayCurrency)} />
-        <Divider />
-        <Stat
-          label="actual"
-          value={fmtAmt(stats.totalActualIncome, displayCurrency)}
-          className="text-green-600 dark:text-green-400"
-        />
-        <Divider />
-        <Stat
-          label="net savings"
-          value={`${stats.netSavings >= 0 ? '+' : '-'}${fmtAmt(stats.netSavings, displayCurrency)}`}
-          className={savingsColor}
-        />
+      {/* Income */}
+      <div className="px-4 py-2.5 space-y-1.5">
+        <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Income</div>
+        <div className="flex items-baseline gap-1 min-w-0">
+          <span className="font-semibold tabular-nums text-green-600 dark:text-green-400 truncate">
+            {fmtAmt(stats.totalActualIncome, displayCurrency)}
+          </span>
+          {stats.totalPlannedIncome > 0 && (
+            <span className="text-2xs text-muted-foreground shrink-0">
+              / {fmtAmt(stats.totalPlannedIncome, displayCurrency)}
+            </span>
+          )}
+        </div>
+        {stats.totalPlannedIncome > 0 && (
+          <MiniBar colorClass="bg-green-500" max={stats.totalPlannedIncome} value={stats.totalActualIncome} />
+        )}
+        <div className={cn('text-2xs font-medium tabular-nums truncate', savingsColor)}>
+          {stats.netSavings >= 0 ? '+' : '-'}
+          {fmtAmt(Math.abs(stats.netSavings), displayCurrency)} net
+        </div>
       </div>
 
-      {/* Health score row */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-2">
-        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground w-16 shrink-0">Health</span>
-        <span className={cn('font-bold text-base tabular-nums', gradeColor)}>{grade}</span>
-        <span className="text-xs text-muted-foreground">{score}/100</span>
-        <Divider />
-        <div className="flex items-center gap-1">
-          <div className="w-24 h-1.5 rounded-full bg-muted overflow-hidden">
-            <div
-              style={{ width: `${score}%` }}
-              className={cn('h-full rounded-full transition-all', gradeColor === 'text-destructive'
-                ? 'bg-destructive'
-                : gradeColor.includes('yellow') || gradeColor.includes('orange')
-                  ? 'bg-yellow-500'
-                  : 'bg-green-500')}
-            />
+      {/* Health */}
+      <div className="px-4 py-2.5 flex items-center gap-3">
+        <span className={cn('font-bold text-2xl tabular-nums leading-none shrink-0', gradeColor)}>{grade}</span>
+        <div className="flex-1 min-w-0 space-y-1.5">
+          <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Health</div>
+          <div className="flex items-center gap-2">
+            <MiniBar colorClass={gradeBarColor} value={score} />
+            <span className="text-2xs tabular-nums text-muted-foreground shrink-0">{score}</span>
           </div>
+        </div>
+      </div>
+
+      {/* Period */}
+      <div className="px-4 py-2.5 space-y-1.5">
+        <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Period</div>
+        <div className="flex items-baseline gap-1 min-w-0">
+          <span className="font-semibold tabular-nums">{stats.daysElapsed}</span>
+          <span className="text-2xs text-muted-foreground">/ {stats.daysTotal} days</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <MiniBar colorClass="bg-primary" value={daysPct} />
+          {stats.daysLeft > 0 && (
+            <span className="text-2xs tabular-nums text-muted-foreground shrink-0">{stats.daysLeft} left</span>
+          )}
         </div>
       </div>
     </div>

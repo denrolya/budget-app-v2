@@ -2,6 +2,7 @@ import { Eye, Pencil, Trash2 } from 'lucide-react';
 import moment from 'moment';
 import React, { useId, useMemo } from 'react';
 
+import CellPopover from '@/components/common/CellPopover';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,12 +17,11 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { MOMENT_DATETIME_FORM_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
-import { AccountTypeahead, AccountPill } from '@/features/accounts';
+import { AccountPill, AccountTypeahead } from '@/features/accounts';
 import { CategoryTypeahead } from '@/features/categories';
 import { cn } from '@/lib/utils';
-import CellPopover from '@/components/common/CellPopover';
 
-import { TransactionEditableField, useInlineEdit } from '../hooks/useInlineEdit';
+import { useInlineEdit } from '../hooks/useInlineEdit';
 import Transaction from '../models/Transaction';
 
 import TransactionValue from './TransactionValue';
@@ -130,26 +130,22 @@ const IdCell = ({
   </div>
 );
 
-const AccountCell = ({
-  tx,
-  disabled,
-  inlineEdit,
-}: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
+const AccountCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
   return (
     <CellPopover
+      disabled={disabled}
+      saveOnEnter={false}
       trigger={
         <div className="min-w-0 [&_*]:min-w-0">
           <AccountPill account={tx.account} size="sm" variant="inline" className="min-w-0" />
         </div>
       }
+      contentClassName="w-56"
+      onCancel={cancelEdit}
       onOpen={() => startEdit(tx, 'account')}
       onSave={() => void save(tx)}
-      onCancel={cancelEdit}
-      disabled={disabled}
-      saveOnEnter={false}
-      contentClassName="w-56"
     >
       <AccountTypeahead
         autoFocus
@@ -161,55 +157,39 @@ const AccountCell = ({
   );
 };
 
-const AmountCell = ({
-  tx,
-  disabled,
-  inlineEdit,
-}: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
+const AmountCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
   return (
     <CellPopover
+      disabled={disabled}
       trigger={<TransactionValue revert transaction={tx} className="font-semibold tracking-tight" />}
+      contentClassName="w-40"
+      onCancel={cancelEdit}
       onOpen={() => startEdit(tx, 'amount')}
       onSave={() => void save(tx)}
-      onCancel={cancelEdit}
-      disabled={disabled}
-      contentClassName="w-40"
     >
-      <Input
-        autoFocus
-        type="number"
-        value={String(editValue ?? '')}
-        onChange={(e) => setEditValue(e.target.value)}
-      />
+      <Input autoFocus type="number" value={String(editValue ?? '')} onChange={(e) => setEditValue(e.target.value)} />
     </CellPopover>
   );
 };
 
-const CategoryCell = ({
-  tx,
-  disabled,
-  inlineEdit,
-}: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
+const CategoryCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
   return (
     <CellPopover
+      disabled={disabled}
+      saveOnEnter={false}
       trigger={
-        <Badge
-          variant="outline"
-          className="max-w-full px-1 py-0 whitespace-nowrap bg-background shadow-md truncate"
-        >
+        <Badge variant="outline" className="max-w-full px-1 py-0 whitespace-nowrap bg-background shadow-md truncate">
           {tx.category.name}
         </Badge>
       }
+      contentClassName="w-56"
+      onCancel={cancelEdit}
       onOpen={() => startEdit(tx, 'category')}
       onSave={() => void save(tx)}
-      onCancel={cancelEdit}
-      disabled={disabled}
-      saveOnEnter={false}
-      contentClassName="w-56"
     >
       <CategoryTypeahead
         autoFocus
@@ -222,50 +202,38 @@ const CategoryCell = ({
   );
 };
 
-const NoteCell = ({
-  tx,
-  disabled,
-  inlineEdit,
-}: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
+const NoteCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
   return (
     <CellPopover
+      disabled={disabled}
       trigger={<span className="block min-w-0 truncate text-muted-foreground">{tx.note}</span>}
+      contentClassName="w-64"
+      onCancel={cancelEdit}
       onOpen={() => startEdit(tx, 'note')}
       onSave={() => void save(tx)}
-      onCancel={cancelEdit}
-      disabled={disabled}
-      contentClassName="w-64"
     >
       <Input
         autoFocus
-        value={String(editValue ?? '')}
         placeholder="Note…"
+        value={String(editValue ?? '')}
         onChange={(e) => setEditValue(e.target.value)}
       />
     </CellPopover>
   );
 };
 
-const ExecutedAtCell = ({
-  tx,
-  disabled,
-  inlineEdit,
-}: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
+const ExecutedAtCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
   return (
     <CellPopover
-      trigger={
-        <span className="tabular-nums whitespace-nowrap">
-          {tx.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
-        </span>
-      }
+      disabled={disabled}
+      trigger={<span className="tabular-nums whitespace-nowrap">{tx.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}</span>}
+      onCancel={cancelEdit}
       onOpen={() => startEdit(tx, 'executedAt')}
       onSave={() => void save(tx)}
-      onCancel={cancelEdit}
-      disabled={disabled}
     >
       <Input
         autoFocus

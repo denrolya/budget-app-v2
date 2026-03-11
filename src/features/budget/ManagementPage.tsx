@@ -120,7 +120,7 @@ const BudgetDetailRoute: React.FC = () => {
         subContent={
           <BudgetSummaryCards analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
         }
-        onBack={() => navigate('/budget')}
+        className="px-4 pt-2 pb-0"
       >
         {/* Prev / Next navigation */}
         <Tooltip>
@@ -181,12 +181,7 @@ const BudgetDetailRoute: React.FC = () => {
       <ScrollArea className="flex-1 min-h-0">
         <div className="p-4 space-y-6 pb-8">
           {/* Alerts */}
-          <BudgetAlertsSection
-            analytics={analytics}
-            budget={budget}
-            displayCurrency={displayCurrency}
-            rates={rates}
-          />
+          <BudgetAlertsSection analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
 
           {/* Spending heatmap */}
           <div className="space-y-1">

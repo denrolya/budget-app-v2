@@ -12,6 +12,7 @@ import type { ConvertedValues } from '@/features/transactions';
 import { Category } from '@/features/categories';
 
 import type { BudgetLineDTO, CategoryDayStats } from '../api/types';
+
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 import { DISPLAY_CURRENCIES } from './BudgetDisplayCurrency';
 
@@ -60,13 +61,11 @@ const Sparkline: React.FC<{ data: CategoryDayStats[]; currency: DisplayCurrency;
   const H = 14;
   if (values.length < 2) return null;
 
-  const pts = values
-    .map((v, i) => `${(i / (values.length - 1)) * W},${H - (v / max) * (H - 1)}`)
-    .join(' ');
+  const pts = values.map((v, i) => `${(i / (values.length - 1)) * W},${H - (v / max) * (H - 1)}`).join(' ');
 
   return (
-    <svg width={W} height={H} className="text-muted-foreground/50">
-      <polyline points={pts} fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+    <svg height={H} width={W} className="text-muted-foreground/50">
+      <polyline fill="none" points={pts} stroke="currentColor" strokeLinejoin="round" strokeWidth="1.2" />
     </svg>
   );
 };
@@ -84,32 +83,40 @@ const NotePopover: React.FC<{
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') { setOpen(false); }
+    if (e.key === 'Escape') {
+      setOpen(false);
+    }
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) save();
   };
 
   return (
-    <Popover open={open} onOpenChange={(v) => { if (v) setDraft(line.note ?? ''); setOpen(v); }}>
+    <Popover
+      open={open}
+      onOpenChange={(v) => {
+        if (v) setDraft(line.note ?? '');
+        setOpen(v);
+      }}
+    >
       <PopoverTrigger asChild>
         <button
+          aria-label="Note"
+          title={line.note ? line.note : 'Add note'}
           type="button"
           className={cn(
             'p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity',
             line.note ? 'opacity-100 text-primary' : 'text-muted-foreground',
           )}
-          title={line.note ? line.note : 'Add note'}
-          aria-label="Note"
         >
           <StickyNote className="h-3 w-3" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-64 p-3 space-y-2" side="right">
+      <PopoverContent side="right" className="w-64 p-3 space-y-2">
         <p className="text-xs font-medium text-muted-foreground">{line ? 'Edit note' : 'Add note'}</p>
         <Textarea
           autoFocus
-          className="text-xs min-h-[72px] resize-none"
           placeholder="Add a note for this budget line…"
           value={draft}
+          className="text-xs min-h-[72px] resize-none"
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={handleKeyDown}
         />
@@ -129,7 +136,10 @@ const NotePopover: React.FC<{
           <button
             type="button"
             className="text-xs text-destructive hover:underline w-full text-left"
-            onClick={() => { onNoteUpdate(line.id, null); setOpen(false); }}
+            onClick={() => {
+              onNoteUpdate(line.id, null);
+              setOpen(false);
+            }}
           >
             Remove note
           </button>
@@ -230,7 +240,7 @@ const BudgetCategoryRow: React.FC<Props> = ({
           )}
           {line && <NotePopover line={line} onNoteUpdate={onNoteUpdate} />}
           {line?.note && (
-            <span className="text-xs text-muted-foreground italic truncate max-w-[80px]" title={line.note}>
+            <span title={line.note} className="text-xs text-muted-foreground italic truncate max-w-[80px]">
               {line.note}
             </span>
           )}
@@ -303,7 +313,7 @@ const BudgetCategoryRow: React.FC<Props> = ({
           <div className="flex flex-col items-end gap-0.5">
             <span>{fmtAmt(actualValue, displayCurrency)}</span>
             {sparklineData && sparklineData.length >= 2 && (
-              <Sparkline data={sparklineData} currency={displayCurrency} rates={rates} />
+              <Sparkline currency={displayCurrency} data={sparklineData} rates={rates} />
             )}
           </div>
         ) : (

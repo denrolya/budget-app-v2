@@ -20,6 +20,7 @@ import { Category, CategoryType, useList as useCategoryList } from '@/features/c
 
 import { useHistoryAverages, useUpsertBudgetLine } from '../api';
 import type { BudgetDTO } from '../api/types';
+
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
 interface Props {
@@ -49,17 +50,11 @@ const findRoot = (cat: Category): Category => {
 const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency, rates }) => {
   const [open, setOpen] = useState(false);
 
-  const { data: historyData, isLoading: historyLoading } = useHistoryAverages(
-    open ? budget.id : null,
-    HISTORY_MONTHS,
-  );
+  const { data: historyData, isLoading: historyLoading } = useHistoryAverages(open ? budget.id : null, HISTORY_MONTHS);
   const { mutateAsync: upsertLine, isPending: isSaving } = useUpsertBudgetLine(budget.id);
   const { data: catData } = useCategoryList();
 
-  const categoryMap = useMemo(
-    () => new Map((catData?.list ?? []).map((c) => [c.id, c])),
-    [catData],
-  );
+  const categoryMap = useMemo(() => new Map((catData?.list ?? []).map((c) => [c.id, c])), [catData]);
 
   const linesMap = new Map((budget.lines ?? []).map((l) => [l.categoryId, l]));
 
@@ -132,11 +127,10 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
   };
 
   const renderGroups = (groups: GroupedSuggestion[]) => {
-    if (groups.length === 0)
-      return <p className="text-muted-foreground text-center py-4 text-xs">No suggestions</p>;
+    if (groups.length === 0) return <p className="text-muted-foreground text-center py-4 text-xs">No suggestions</p>;
 
     return groups.map(({ root, items }) => (
-      <div key={root.id} className="mb-3 last:mb-0">
+      <div className="mb-3 last:mb-0" key={root.id}>
         {/* Root group header — only if items are children; if item IS root, skip header */}
         {!(items.length === 1 && items[0].cat.id === root.id) && (
           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-1 border-b mb-0.5">
@@ -147,12 +141,14 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
           const isRoot = cat.id === root.id;
           return (
             <div
-              key={cat.id}
-              className="flex justify-between items-center py-0.5"
               style={{ paddingLeft: isRoot ? 0 : '0.75rem' }}
+              className="flex justify-between items-center py-0.5"
+              key={cat.id}
             >
               <span className="text-sm truncate text-foreground">{catLabel(cat)}</span>
-              <span className="font-medium tabular-nums shrink-0 ml-2 text-sm">{fmtAmt(suggested, displayCurrency)}</span>
+              <span className="font-medium tabular-nums shrink-0 ml-2 text-sm">
+                {fmtAmt(suggested, displayCurrency)}
+              </span>
             </div>
           );
         })}
@@ -202,9 +198,7 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
 
               {/* Income */}
               <div className="pl-4 overflow-y-auto">
-                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                  Income
-                </div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Income</div>
                 {renderGroups(incomeGroups)}
               </div>
             </div>

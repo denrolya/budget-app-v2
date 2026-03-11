@@ -8,7 +8,6 @@ import FeeIndicator from '@/features/transfers/components/ListItemFeeIndicator';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Skeleton } from '@/components/ui/skeleton';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import Transfer from '@/features/transfers/models/Transfer';
 
@@ -64,31 +63,6 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
       </div>
     </CardContent>
   </Card>
-);
-
-export const ListItemSkeleton: React.FC = () => (
-  <div className="relative mb-4 mt-4">
-    <Card>
-      <CardContent className="px-4 py-2">
-        <div className="flex w-full items-center justify-between">
-          <div className="flex items-center space-x-2 overflow-hidden">
-            <Skeleton className="h-4 w-4 rounded-full flex-shrink-0" />
-            <Skeleton className="h-4 w-20 flex-shrink-0" />
-            <div className="hidden sm:flex items-center space-x-2 overflow-hidden">
-              <Skeleton className="h-6 w-16 rounded-full flex-shrink-0" />
-              <Skeleton className="h-3 w-3 flex-shrink-0" />
-              <Skeleton className="h-6 w-16 rounded-full flex-shrink-0" />
-            </div>
-            <Skeleton className="h-2 w-2 rounded-full flex-shrink-0" />
-          </div>
-          <div className="flex items-center space-x-2 ml-2 flex-shrink-0">
-            <Skeleton className="h-4 w-24 hidden sm:inline-block" />
-            <Skeleton className="h-6 w-6 rounded-full" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
 );
 
 export default ListItem;

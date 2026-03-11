@@ -39,21 +39,19 @@ const HealthPanel: React.FC<Props> = ({
       {/* Score row */}
       <div className="flex items-center gap-4 mb-3">
         <div className="flex items-baseline gap-1.5">
-          <span className={cn('text-3xl font-bold tabular-nums', GRADE_COLOR[health.grade])}>
-            {health.grade}
-          </span>
+          <span className={cn('text-3xl font-bold tabular-nums', GRADE_COLOR[health.grade])}>{health.grade}</span>
           <span className="text-sm text-muted-foreground">{health.score}/100</span>
         </div>
 
         {/* Score bar */}
         <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
           <div
+            style={{ width: `${health.score}%` }}
             className={cn('h-full rounded-full transition-all duration-500', {
               'bg-green-500': health.score >= 75,
               'bg-yellow-500': health.score >= 45 && health.score < 75,
               'bg-red-500': health.score < 45,
             })}
-            style={{ width: `${health.score}%` }}
           />
         </div>
 
@@ -69,16 +67,16 @@ const HealthPanel: React.FC<Props> = ({
                 {baseSym}
               </span>
               <Input
-                ref={inputRef}
-                type="number"
                 min={0}
                 placeholder="0"
+                type="number"
                 value={monthlyExpenses ?? ''}
                 className="w-28 h-7 pl-6 text-xs"
                 onChange={(e) => {
                   const v = e.target.value === '' ? null : Number(e.target.value);
                   onMonthlyExpensesChange(v && v > 0 ? v : null);
                 }}
+                ref={inputRef}
               />
             </div>
           </div>
@@ -104,7 +102,7 @@ const HealthPanel: React.FC<Props> = ({
       {/* Rules grid */}
       <div className="grid grid-cols-2 gap-1.5">
         {health.rules.map((rule) => (
-          <RuleRow key={rule.id} rule={rule} />
+          <RuleRow rule={rule} key={rule.id} />
         ))}
       </div>
     </div>

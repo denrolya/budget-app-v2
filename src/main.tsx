@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
 
 import Routing from '@/components/common/Routing';
+import TopProgressBar from '@/components/common/TopProgressBar';
 import { Toaster } from '@/components/ui/sonner';
 import { Theme, ThemeProvider } from '@/contexts/theme';
 import { AuthProvider } from '@/features/auth';
@@ -27,6 +28,7 @@ if (typeof window !== 'undefined') {
 const App = () => (
   <StrictMode>
     <QueryClientProvider client={queryClient}>
+      <TopProgressBar />
       <ThemeProvider defaultTheme={Theme.System}>
         <AuthProvider>
           <Router>

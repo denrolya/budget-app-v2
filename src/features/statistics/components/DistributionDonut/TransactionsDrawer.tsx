@@ -2,7 +2,7 @@ import type { Moment } from 'moment';
 import React, { useMemo } from 'react';
 
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
-import { LedgerView, useLedger } from '@/features/daily-ledger';
+import { LedgerView, useLedger } from '@/features/ledger';
 
 export type DrawerListingTarget = {
   title: string;
@@ -27,7 +27,7 @@ const DrawerListing: React.FC<DrawerContentProps> = ({ target, timeframe }) => {
     initialFilters: target.initialFilters,
     initialTimeframe: timeframe,
   });
-  return <LedgerView enableHotkeys={false} ledger={ledger} showControls />;
+  return <LedgerView showControls enableHotkeys={false} ledger={ledger} />;
 };
 
 export const TransactionsDrawer: React.FC<Props> = ({ open, onOpenChange, target, timeframe }) => {

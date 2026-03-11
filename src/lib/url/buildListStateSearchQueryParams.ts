@@ -33,7 +33,10 @@ export const buildQueryKey = <FilterType extends BaseFilters>(
       params.set(paramKey, value.format(formatMoment));
     } else if (Array.isArray(value)) {
       if (value.length > 0) {
-        params.set(paramKey, value.map((v) => (typeof v === 'number' && !Number.isFinite(v) ? '' : String(v))).join(','));
+        params.set(
+          paramKey,
+          value.map((v) => (typeof v === 'number' && !Number.isFinite(v) ? '' : String(v))).join(','),
+        );
       }
     } else {
       params.set(paramKey, String(value));

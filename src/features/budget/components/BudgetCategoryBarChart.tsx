@@ -41,6 +41,8 @@ const fmtAmt = (n: number, currency: string) => {
   return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 };
 
+type BarDatum = { category: string; Planned: number; Actual: number };
+
 const BudgetCategoryBarChart: React.FC<Props> = ({ budget, analytics, displayCurrency, rates }) => {
   const { data: catData } = useCategoryList();
 
@@ -55,7 +57,7 @@ const BudgetCategoryBarChart: React.FC<Props> = ({ budget, analytics, displayCur
 
     const expenseRoots = catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense);
 
-    return expenseRoots
+    const rows = expenseRoots
       .map((cat) => {
         const ids = getAllIds(cat);
 
@@ -85,7 +87,18 @@ const BudgetCategoryBarChart: React.FC<Props> = ({ budget, analytics, displayCur
           Actual: Math.round(actual),
         };
       })
-      .filter(Boolean) as { category: string; Planned: number; Actual: number }[];
+      .filter(Boolean) as BarDatum[];
+
+    // Sort: overspent (actual > planned) first, then by actual desc
+    rows.sort((a, b) => {
+      const aOver = a.Actual - a.Planned;
+      const bOver = b.Actual - b.Planned;
+      if (aOver > 0 && bOver <= 0) return -1;
+      if (bOver > 0 && aOver <= 0) return 1;
+      return b.Actual - a.Actual;
+    });
+
+    return rows;
   }, [catData, analytics, budget, displayCurrency, rates]);
 
   if (chartData.length === 0) {
@@ -94,36 +107,37 @@ const BudgetCategoryBarChart: React.FC<Props> = ({ budget, analytics, displayCur
     );
   }
 
+  const sym = CURRENCIES[displayCurrency as CURRENCY_CODE]?.symbol ?? displayCurrency;
+
   return (
-    <div style={{ height: Math.max(140, chartData.length * 36) }}>
+    <div style={{ height: Math.max(120, chartData.length * 40) }}>
       <ResponsiveBar
+        axisLeft={{ tickSize: 0, tickPadding: 8 }}
         borderRadius={2}
-        colors={['hsl(var(--muted-foreground) / 0.5)', 'hsl(var(--destructive))']}
         data={chartData}
         groupMode="grouped"
         indexBy="category"
         keys={['Planned', 'Actual']}
-        labelSkipWidth={40}
+        labelSkipWidth={36}
         labelTextColor="hsl(var(--background))"
         layout="horizontal"
-        margin={{ top: 8, right: 80, bottom: 24, left: 110 }}
-        padding={0.3}
+        margin={{ top: 8, right: 64, bottom: 28, left: 110 }}
+        padding={0.28}
         theme={nivoTheme}
         axisBottom={{
           tickSize: 0,
           tickPadding: 4,
           format: (v) => {
-            const sym = CURRENCIES[displayCurrency as CURRENCY_CODE]?.symbol ?? displayCurrency;
             const abs = Math.abs(v as number);
-            return abs >= 1000 ? `${sym}${(abs / 1000).toFixed(0)}k` : `${sym}${abs.toLocaleString('en-US')}`;
+            return abs >= 1000 ? `${sym}${(abs / 1000).toFixed(0)}k` : `${sym}${abs}`;
           },
         }}
-        axisLeft={{
-          tickSize: 0,
-          tickPadding: 8,
+        colors={(bar) => {
+          if (bar.id === 'Planned') return 'hsl(var(--muted-foreground) / 0.35)';
+          const d = bar.data as BarDatum;
+          return d.Actual > d.Planned && d.Planned > 0 ? 'hsl(var(--destructive))' : 'hsl(var(--primary))';
         }}
         label={(d) => {
-          const sym = CURRENCIES[displayCurrency as CURRENCY_CODE]?.symbol ?? displayCurrency;
           const abs = Math.abs(d.value as number);
           return abs >= 1000 ? `${sym}${(abs / 1000).toFixed(abs >= 10000 ? 0 : 1)}k` : `${sym}${abs}`;
         }}
@@ -133,24 +147,46 @@ const BudgetCategoryBarChart: React.FC<Props> = ({ budget, analytics, displayCur
             anchor: 'bottom-right',
             direction: 'column',
             justify: false,
-            translateX: 80,
+            translateX: 64,
             translateY: 0,
             itemsSpacing: 4,
-            itemWidth: 70,
-            itemHeight: 20,
+            itemWidth: 58,
+            itemHeight: 18,
             itemTextColor: 'hsl(var(--muted-foreground))',
-            symbolSize: 10,
+            symbolSize: 8,
             symbolShape: 'circle',
           },
         ]}
-        tooltip={({ id, value, indexValue }) => (
-          <div className="rounded-md border bg-background px-3 py-2 shadow-md text-sm">
-            <p className="text-muted-foreground text-xs mb-1">{indexValue}</p>
-            <p className="font-semibold">
-              {id}: {fmtAmt(value, displayCurrency)}
-            </p>
-          </div>
-        )}
+        tooltip={({ indexValue, data: d }) => {
+          const row = d as BarDatum;
+          const pct = row.Planned > 0 ? Math.round((row.Actual / row.Planned) * 100) : null;
+          const over = row.Actual > row.Planned && row.Planned > 0;
+          return (
+            <div className="rounded-md border bg-background px-3 py-2 shadow-md text-sm min-w-[160px]">
+              <p className="text-muted-foreground text-xs mb-1.5">{indexValue}</p>
+              <div className="space-y-0.5">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted-foreground text-xs">Planned</span>
+                  <span className="tabular-nums text-xs font-medium">{fmtAmt(row.Planned, displayCurrency)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted-foreground text-xs">Actual</span>
+                  <span className={`tabular-nums text-xs font-semibold ${over ? 'text-destructive' : 'text-primary'}`}>
+                    {fmtAmt(row.Actual, displayCurrency)}
+                  </span>
+                </div>
+                {pct !== null && (
+                  <div className="flex items-center justify-between gap-4 border-t pt-0.5 mt-0.5">
+                    <span className="text-muted-foreground text-xs">Used</span>
+                    <span className={`tabular-nums text-xs font-semibold ${over ? 'text-destructive' : ''}`}>
+                      {pct}%
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        }}
       />
     </div>
   );

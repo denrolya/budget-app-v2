@@ -1,5 +1,5 @@
 import moment, { Moment } from 'moment';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { cn } from '@/lib/utils';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
@@ -19,6 +19,8 @@ interface Props {
   rates: ConvertedValues | null;
 }
 
+type HeatmapMode = 'expense' | 'income';
+
 const getAllIds = (cat: Category): number[] => {
   const ids: number[] = [cat.id];
   for (const child of cat.children) ids.push(...getAllIds(child));
@@ -32,24 +34,35 @@ const fmtAmt = (n: number, currency: string) => {
 
 const BudgetHeatmapSection: React.FC<Props> = ({ budget, analytics, displayCurrency, rates }) => {
   const { data: catData } = useCategoryList();
+  const [heatmapMode, setHeatmapMode] = useState<HeatmapMode>('expense');
 
   const stats = useMemo(() => {
     const expenseIds = new Set(
       (catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense) ?? []).flatMap(getAllIds),
     );
+    const incomeIds = new Set(
+      (catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income) ?? []).flatMap(getAllIds),
+    );
 
     let totalPlannedExpense = 0;
+    let totalPlannedIncome = 0;
     for (const line of budget.lines ?? []) {
-      if (!expenseIds.has(line.categoryId)) continue;
       const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
-      if (rate !== null) totalPlannedExpense += line.plannedAmount * rate;
+      if (rate === null) continue;
+      const converted = line.plannedAmount * rate;
+      if (expenseIds.has(line.categoryId)) totalPlannedExpense += converted;
+      else if (incomeIds.has(line.categoryId)) totalPlannedIncome += converted;
     }
 
     let totalActualExpense = 0;
+    let totalActualIncome = 0;
     for (const item of analytics) {
       for (const [currency, cv] of Object.entries(item.convertedValues)) {
         const rate = currency === displayCurrency ? 1 : getExchangeRate(currency, displayCurrency, rates);
-        if (rate !== null) totalActualExpense += cv.expense * rate;
+        if (rate !== null) {
+          totalActualExpense += cv.expense * rate;
+          totalActualIncome += cv.income * rate;
+        }
       }
     }
 
@@ -61,20 +74,25 @@ const BudgetHeatmapSection: React.FC<Props> = ({ budget, analytics, displayCurre
 
     const dailyBudget = daysTotal > 0 ? totalPlannedExpense / daysTotal : 0;
     const dailyAvg = totalActualExpense / daysElapsed;
-
-    // Expected cumulative by now (linear pace)
     const expectedByNow = (daysElapsed / daysTotal) * totalPlannedExpense;
-    const paceOffset = totalActualExpense - expectedByNow; // positive = over pace
+    const paceOffset = totalActualExpense - expectedByNow;
 
-    return { dailyBudget, dailyAvg, paceOffset, totalPlannedExpense };
+    return {
+      dailyBudget,
+      dailyAvg,
+      paceOffset,
+      totalPlannedExpense,
+      totalPlannedIncome,
+      totalActualExpense,
+      totalActualIncome,
+    };
   }, [budget, analytics, displayCurrency, rates, catData]);
 
-  // Heatmap year locked to the budget's start date year; query range locked to budget period
   const heatmapYear = moment(budget.startDate).year();
   const heatmapAfter: Moment = useMemo(() => moment(budget.startDate).startOf('day'), [budget.startDate]);
   const heatmapBefore: Moment = useMemo(() => moment(budget.endDate).endOf('day'), [budget.endDate]);
 
-  const paceLabel =
+  const expensePaceLabel =
     stats.totalPlannedExpense === 0
       ? null
       : stats.paceOffset > 0
@@ -83,37 +101,86 @@ const BudgetHeatmapSection: React.FC<Props> = ({ budget, analytics, displayCurre
           ? { text: `${fmtAmt(Math.abs(stats.paceOffset), displayCurrency)} under pace`, color: 'text-success' }
           : { text: 'On pace', color: 'text-muted-foreground' };
 
-  const statRows: { label: string; value: string; valueClass?: string }[] = [
-    {
-      label: 'Budget / day',
-      value: stats.dailyBudget > 0 ? fmtAmt(stats.dailyBudget, displayCurrency) : '—',
-    },
-    {
-      label: 'Avg spend / day',
-      value: fmtAmt(stats.dailyAvg, displayCurrency),
-      valueClass:
-        stats.totalPlannedExpense > 0
-          ? stats.dailyAvg > stats.dailyBudget
-            ? 'text-destructive'
-            : 'text-success'
-          : undefined,
-    },
-    ...(paceLabel ? [{ label: 'Pace', value: paceLabel.text, valueClass: paceLabel.color }] : []),
-  ];
+  const statRows: { label: string; value: string; valueClass?: string }[] =
+    heatmapMode === 'expense'
+      ? [
+          {
+            label: 'Budget / day',
+            value: stats.dailyBudget > 0 ? fmtAmt(stats.dailyBudget, displayCurrency) : '—',
+          },
+          {
+            label: 'Avg spend / day',
+            value: fmtAmt(stats.dailyAvg, displayCurrency),
+            valueClass:
+              stats.totalPlannedExpense > 0
+                ? stats.dailyAvg > stats.dailyBudget
+                  ? 'text-destructive'
+                  : 'text-success'
+                : undefined,
+          },
+          ...(expensePaceLabel
+            ? [{ label: 'Pace', value: expensePaceLabel.text, valueClass: expensePaceLabel.color }]
+            : []),
+        ]
+      : [
+          {
+            label: 'Planned income',
+            value: stats.totalPlannedIncome > 0 ? fmtAmt(stats.totalPlannedIncome, displayCurrency) : '—',
+          },
+          {
+            label: 'Actual income',
+            value: fmtAmt(stats.totalActualIncome, displayCurrency),
+            valueClass:
+              stats.totalPlannedIncome > 0
+                ? stats.totalActualIncome >= stats.totalPlannedIncome
+                  ? 'text-success'
+                  : 'text-destructive'
+                : 'text-success',
+          },
+          ...(stats.totalPlannedIncome > 0
+            ? [
+                {
+                  label: 'Coverage',
+                  value: `${Math.round((stats.totalActualIncome / stats.totalPlannedIncome) * 100)}%`,
+                  valueClass:
+                    stats.totalActualIncome >= stats.totalPlannedIncome
+                      ? 'text-success'
+                      : 'text-yellow-600 dark:text-yellow-400',
+                },
+              ]
+            : []),
+        ];
 
   return (
     <div className="flex gap-4 items-start">
-      {/* Heatmap — no controls, locked to budget year, expense view */}
+      {/* Heatmap — view mode toggled externally, locked to budget year */}
       <div className="flex-1 min-w-0 overflow-hidden">
+        <div className="flex items-center gap-2 mb-1.5">
+          {(['expense', 'income'] as HeatmapMode[]).map((mode) => (
+            <button
+              type="button"
+              className={cn(
+                'text-xs px-2.5 py-0.5 rounded border transition-colors',
+                heatmapMode === mode
+                  ? 'bg-foreground text-background border-foreground'
+                  : 'text-muted-foreground border-border hover:text-foreground hover:border-foreground/50',
+              )}
+              key={mode}
+              onClick={() => setHeatmapMode(mode)}
+            >
+              {mode.charAt(0).toUpperCase() + mode.slice(1)}
+            </button>
+          ))}
+        </div>
         <HeatmapPanel
           currency={displayCurrency}
-          defaultViewMode="expense"
           filters={{ affectingProfit: false }}
           rangeAfter={heatmapAfter}
           rangeBefore={heatmapBefore}
           selectable={false}
           showControls={false}
           showStats={false}
+          viewMode={heatmapMode}
           year={heatmapYear}
         />
       </div>

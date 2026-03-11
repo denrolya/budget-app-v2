@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { Skeleton } from '@/components/ui/skeleton';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 
 import Transaction from '../models/Transaction';
@@ -33,6 +32,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
       className={cn('ease-in-out hover:shadow-md dark:hover:shadow-primary/25 transition-colors group relative', {
         'border-l-2 border-success': colorBorder && transaction.isIncome(),
         'border-l-2 border-destructive': colorBorder && transaction.isExpense(),
+        'bg-warning/15 dark:bg-warning/10': transaction.isDraft,
       })}
     >
       <CardContent className="p-2 flex flex-col space-y-1">
@@ -46,11 +46,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
                 {transaction.debt.debtor}
               </Badge>
             )}
-            {transaction.isDraft && (
-              <Badge variant="outline" className="bg-primary text-primary-foreground text-[10px] px-1">
-                Draft
-              </Badge>
-            )}
+
             {transaction.compensations && transaction.compensations.length > 0 && (
               <Badge variant="outline" className="bg-secondary text-secondary-foreground text-[10px] px-1">
                 Compensated
@@ -101,26 +97,5 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
     </Card>
   );
 };
-
-export const ListItemSkeleton: React.FC = () => (
-  <div className="relative mb-4 mt-4">
-    <Card>
-      <CardContent className="p-2 flex flex-col space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex-grow flex items-center space-x-2">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-4 w-20" />
-          </div>
-          <div className="flex flex-row items-center space-x-2">
-            <Skeleton className="h-4 w-16" />
-            <Skeleton className="h-4 w-4 rounded-full" />
-          </div>
-        </div>
-        <Skeleton className="h-5 w-full" />
-      </CardContent>
-    </Card>
-    <Skeleton className="absolute top-0 left-0 h-4 w-16 -translate-y-1/2 z-10" />
-  </div>
-);
 
 export default ListItem;

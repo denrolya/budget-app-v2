@@ -1,21 +1,11 @@
-import { Moment } from 'moment/moment';
-import React, { useEffect } from 'react';
+import { type Moment } from 'moment/moment';
+import React, { useMemo } from 'react';
 
-import Pagination from '@/components/common/Pagination';
-import { FormattedListing, TransactionFilters, useList as useTransactionsList } from '@/features/transactions';
-import { Category } from '@/features/categories';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
+import { Category } from '@/features/categories';
+import { LedgerView, useLedger } from '@/features/ledger';
 import { useCategories } from '@/hooks/financeData';
-import { FormType, useForm as useFormContext } from '@/contexts/Form';
 
 interface TransactionsDrawerProps {
   isOpen: boolean;
@@ -28,6 +18,26 @@ interface TransactionsDrawerProps {
   fetchFromSubcategories?: boolean;
 }
 
+type DrawerListingProps = {
+  categories: number[];
+  timeframe: { after: Moment; before: Moment };
+  fetchFromSubcategories: boolean;
+};
+
+const DrawerListing: React.FC<DrawerListingProps> = ({ categories, timeframe, fetchFromSubcategories }) => {
+  const ledger = useLedger({
+    updateUrl: false,
+    omitTransfers: true,
+    initialFilters: {
+      categories,
+      withNestedCategories: fetchFromSubcategories,
+    },
+    initialTimeframe: timeframe,
+  });
+
+  return <LedgerView showControls disabledFilters={['categories']} enableHotkeys={false} ledger={ledger} />;
+};
+
 export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
   isOpen,
   onOpenChange,
@@ -35,33 +45,15 @@ export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
   timeframe,
   fetchFromSubcategories = true,
 }) => {
-  const { openForm } = useFormContext();
   const { list: allCategories } = useCategories();
   const categories = selectedCategories
     .map((id) => allCategories.find((category: Category) => category.id === id))
     .filter((c): c is Category => c !== undefined);
-  const {
-    groupedItems: groupedTransactions,
-    isLoading: isTransactionsLoading,
-    isError: isTransactionsError,
-    error: transactionsError,
-    refetch: refetchTransactions,
-    pagination: { currentPage, perPage, totalPages, totalItems, setCurrentPage, setPerPage },
-    setFilter,
-  } = useTransactionsList({
-    updateUrl: false,
-    initialFilters: new TransactionFilters({
-      withNestedCategories: fetchFromSubcategories,
-    }),
-  });
 
-  useEffect(() => {
-    if (isOpen && selectedCategories.length) {
-      setFilter('categories', selectedCategories);
-      setFilter('after', timeframe.after);
-      setFilter('before', timeframe.before);
-    }
-  }, [isOpen, selectedCategories, timeframe, setFilter, refetchTransactions]);
+  const listingKey = useMemo(
+    () => `${selectedCategories.join(',')}:${timeframe.after.valueOf()}-${timeframe.before.valueOf()}`,
+    [selectedCategories, timeframe.after, timeframe.before],
+  );
 
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
@@ -72,27 +64,14 @@ export const TransactionsDrawer: React.FC<TransactionsDrawerProps> = ({
             {timeframe.after.format(MOMENT_DATEPICKER_FORMAT)} - {timeframe.before.format(MOMENT_DATEPICKER_FORMAT)}
           </DrawerDescription>
         </DrawerHeader>
-        <ScrollArea className="h-[60vh] px-4">
-          <FormattedListing
-            error={transactionsError}
-            groupedItems={groupedTransactions}
-            isError={isTransactionsError}
-            isLoading={isTransactionsLoading}
-            refetch={refetchTransactions}
-            onAdd={() => openForm(FormType.Transaction)}
+        <div className="h-[60vh] min-h-0 flex flex-col">
+          <DrawerListing
+            categories={selectedCategories}
+            fetchFromSubcategories={fetchFromSubcategories}
+            timeframe={timeframe}
+            key={listingKey}
           />
-        </ScrollArea>
-        <DrawerFooter>
-          <Pagination
-            currentPage={currentPage}
-            isLoading={isTransactionsLoading}
-            perPage={perPage}
-            totalItems={totalItems}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            onPerPageChange={setPerPage}
-          />
-        </DrawerFooter>
+        </div>
       </DrawerContent>
     </Drawer>
   );

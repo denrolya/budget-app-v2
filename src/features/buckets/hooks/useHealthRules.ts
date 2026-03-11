@@ -110,10 +110,18 @@ const RULES: HealthRule[] = [
   },
 ];
 
-function pass(detail: string): HealthResult { return { status: 'pass', detail }; }
-function warn(detail: string): HealthResult { return { status: 'warn', detail }; }
-function fail(detail: string): HealthResult { return { status: 'fail', detail }; }
-function na(detail: string): HealthResult { return { status: 'na', detail }; }
+function pass(detail: string): HealthResult {
+  return { status: 'pass', detail };
+}
+function warn(detail: string): HealthResult {
+  return { status: 'warn', detail };
+}
+function fail(detail: string): HealthResult {
+  return { status: 'fail', detail };
+}
+function na(detail: string): HealthResult {
+  return { status: 'na', detail };
+}
 
 export function useHealthRules(ctx: HealthContext) {
   return useMemo(() => {
@@ -143,18 +151,26 @@ export type HealthSummary = ReturnType<typeof useHealthRules>;
 
 export function statusColor(status: RuleStatus): string {
   switch (status) {
-    case 'pass': return 'text-green-500';
-    case 'warn': return 'text-yellow-500';
-    case 'fail': return 'text-red-500';
-    default: return 'text-muted-foreground';
+    case 'pass':
+      return 'text-green-500';
+    case 'warn':
+      return 'text-yellow-500';
+    case 'fail':
+      return 'text-red-500';
+    default:
+      return 'text-muted-foreground';
   }
 }
 
 export function statusIcon(status: RuleStatus): string {
   switch (status) {
-    case 'pass': return '✅';
-    case 'warn': return '⚠️';
-    case 'fail': return '❌';
-    default: return '—';
+    case 'pass':
+      return '✅';
+    case 'warn':
+      return '⚠️';
+    case 'fail':
+      return '❌';
+    default:
+      return '—';
   }
 }

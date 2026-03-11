@@ -18,36 +18,53 @@ const ConvertedCurrenciesTooltip: React.FC<ConvertedCurrenciesTooltipProps> = ({
   decimals,
   children,
 }) => {
-  const formatMoney = (value: number, currency: CURRENCY_CODE, symbol: string) =>
-    `${symbol} ${formatMoneyValue(value, currency, decimals)}`;
+  const formatMoney = (value: number, currency: CURRENCY_CODE) => {
+    const symbol = CURRENCIES[currency]?.symbol ?? currency;
+    return `${symbol} ${formatMoneyValue(value, currency, decimals)}`;
+  };
+
+  const entries = Object.entries(convertedValues);
+  const original = entries.find(([code]) => code === originalCurrency);
+  const conversions = entries.filter(([code]) => code !== originalCurrency);
 
   return (
     <ResponsiveTooltip
       desktopComponent="hovercard"
       content={
-        <ul>
-          {Object.entries(convertedValues).map(([code, val]) => {
-            const currencyData = CURRENCIES[code as CURRENCY_CODE];
-            const currencySymbol = currencyData?.symbol || '';
-            const formatted = formatMoney(val, code as CURRENCY_CODE, currencySymbol);
-            const isOriginal = code === originalCurrency;
-            return (
-              <li
-                className={cn('flex justify-between items-center p-1 rounded', {
-                  'bg-warning/10 border border-warning font-semibold': isOriginal,
-                })}
-                key={code}
-              >
-                <div className="flex items-center space-x-1">
-                  <span>{code}</span>
+        <div className="min-w-[160px] text-xs space-y-2">
+          {original && (
+            <div className="flex items-center justify-between gap-4 border-l-2 border-primary pl-2">
+              <span className="font-mono text-[10px] tracking-widest text-muted-foreground uppercase">
+                {original[0]}
+              </span>
+              <span className="font-semibold tabular-nums text-foreground">
+                {formatMoney(original[1], original[0] as CURRENCY_CODE)}
+              </span>
+            </div>
+          )}
+          {conversions.length > 0 && (
+            <div className="space-y-1 pt-0.5">
+              {original && <div className="h-px bg-border -mx-1" />}
+              {conversions.map(([code, val]) => (
+                <div className="flex items-center justify-between gap-4" key={code}>
+                  <span
+                    className={cn(
+                      'font-mono text-[10px] tracking-widest uppercase',
+                      code === originalCurrency ? 'text-foreground' : 'text-muted-foreground',
+                    )}
+                  >
+                    {code}
+                  </span>
+                  <span className="tabular-nums text-muted-foreground">
+                    ≈ {formatMoney(val, code as CURRENCY_CODE)}
+                  </span>
                 </div>
-                <span className="font-numeric text-xs">{formatted}</span>
-              </li>
-            );
-          })}
-        </ul>
+              ))}
+            </div>
+          )}
+        </div>
       }
-      contentClassName="p-2 rounded-lg"
+      contentClassName="p-3 rounded-lg"
       triggerClassName="cursor-help"
     >
       {children}

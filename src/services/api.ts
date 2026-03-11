@@ -1,18 +1,37 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
 import storage from '@/services/storage';
+import { requestProgress } from '@/services/requestProgress';
 
 const api: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = storage.getItem('token');
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+api.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = storage.getItem('token');
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    requestProgress.increment();
+    return config;
+  },
+  (error) => {
+    requestProgress.decrement();
+    return Promise.reject(error);
+  },
+);
+
+api.interceptors.response.use(
+  (response) => {
+    requestProgress.decrement();
+    return response;
+  },
+  (error) => {
+    requestProgress.decrement();
+    return Promise.reject(error);
+  },
+);
 
 const axiosFetcher = (url: string) => api.get(url).then((res) => res.data);
 

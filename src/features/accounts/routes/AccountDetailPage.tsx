@@ -1,9 +1,10 @@
-import { Archive, ArchiveRestore, ChevronLeft, Edit, Plus } from 'lucide-react';
-import React, { useCallback, useMemo } from 'react';
+import { Archive, ArchiveRestore, Check, ChevronLeft, Edit, Plus, X } from 'lucide-react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import { confirm } from '@/lib/confirmation';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FormType, useForm } from '@/contexts/Form';
@@ -13,6 +14,93 @@ import BankSheet from '../components/BankSheet';
 import AccountDetails from '../components/Details';
 import Account from '../models/Account';
 import { Type as AccountType, UpdateAccountDTO } from '../types';
+
+// ─── Inline name editor ──────────────────────────────────────────────────────
+
+interface InlineNameProps {
+  account: Account;
+  onSave: (name: string) => Promise<void>;
+}
+
+const InlineName: React.FC<InlineNameProps> = ({ account, onSave }) => {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(account.name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Sync displayed value if account name changes externally (not during active edit)
+  React.useEffect(() => {
+    if (!editing) setValue(account.name);
+  }, [account.name, editing]);
+
+  // Auto-select text after React commits the input to the DOM
+  React.useEffect(() => {
+    if (editing) inputRef.current?.select();
+  }, [editing]);
+
+  const handleEdit = () => {
+    setValue(account.name);
+    setEditing(true);
+  };
+
+  const handleSave = async () => {
+    const trimmed = value.trim();
+    if (trimmed && trimmed !== account.name) {
+      await onSave(trimmed);
+    }
+    setEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') void handleSave();
+    if (e.key === 'Escape') {
+      setValue(account.name);
+      setEditing(false);
+    }
+  };
+
+  if (editing) {
+    return (
+      <div className="flex-1 flex items-center gap-1 min-w-0">
+        <Input
+          value={value}
+          className="h-7 text-sm font-semibold px-1.5 py-0 flex-1 min-w-0"
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          ref={inputRef}
+        />
+        <Button aria-label="Save name" size="icon" variant="ghost" className="h-6 w-6" onClick={handleSave}>
+          <Check className="h-3.5 w-3.5" />
+        </Button>
+        <Button
+          aria-label="Cancel edit"
+          size="icon"
+          variant="ghost"
+          className="h-6 w-6"
+          onClick={() => {
+            setValue(account.name);
+            setEditing(false);
+          }}
+        >
+          <X className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className="flex-1 text-sm font-semibold truncate text-left hover:text-foreground/80 transition-colors group flex items-center gap-1 min-w-0"
+      onClick={handleEdit}
+    >
+      <span className="truncate">{account.name}</span>
+      <Edit
+        aria-hidden="true"
+        className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 shrink-0 transition-opacity"
+      />
+    </button>
+  );
+};
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
@@ -38,17 +126,22 @@ const AccountDetailsHeader: React.FC<AccountDetailsHeaderProps> = ({
   const ArchiveIcon = account.isArchived() ? ArchiveRestore : Archive;
   const archiveLabel = account.isArchived() ? 'Unarchive account' : 'Archive account';
 
+  const handleNameSave = useCallback(
+    async (name: string) => {
+      await onAccountUpdate(account, { name });
+    },
+    [account, onAccountUpdate],
+  );
+
   return (
     <div className="flex items-center gap-2 px-4 h-12 border-b bg-background shrink-0">
       <Button aria-label="Back to accounts" size="icon" variant="ghost" onClick={onBack}>
         <ChevronLeft aria-hidden="true" className="h-5 w-5" />
       </Button>
 
-      <span className="flex-1 text-sm font-semibold truncate">Account Details</span>
+      <InlineName account={account} onSave={handleNameSave} />
 
       <div className="flex items-center gap-1">
-        {account.type === AccountType.Bank && <BankSheet account={account} onAccountUpdate={onAccountUpdate} />}
-
         <Tooltip>
           <TooltipTrigger asChild>
             <Button aria-label="Add Transaction" size="icon" variant="outline" onClick={onAddTransaction}>
@@ -56,6 +149,17 @@ const AccountDetailsHeader: React.FC<AccountDetailsHeaderProps> = ({
             </Button>
           </TooltipTrigger>
           <TooltipContent>Add new account transaction</TooltipContent>
+        </Tooltip>
+
+        {account.type === AccountType.Bank && <BankSheet account={account} onAccountUpdate={onAccountUpdate} />}
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button aria-label="Edit account details" size="icon" variant="outline" onClick={onEdit}>
+              <Edit aria-hidden="true" className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Edit account details</TooltipContent>
         </Tooltip>
 
         <Tooltip>
@@ -71,15 +175,6 @@ const AccountDetailsHeader: React.FC<AccountDetailsHeaderProps> = ({
             </Button>
           </TooltipTrigger>
           <TooltipContent>{archiveLabel}</TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button aria-label="Edit account details" size="icon" variant="outline" onClick={onEdit}>
-              <Edit aria-hidden="true" className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Edit account details</TooltipContent>
         </Tooltip>
       </div>
     </div>

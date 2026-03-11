@@ -1,24 +1,25 @@
 import { useQuery } from '@tanstack/react-query';
-import { ChevronDown, ChevronUp, FileText, Filter, Maximize2, Minimize2, Star, StarOff } from 'lucide-react';
-import moment, { type Moment } from 'moment';
+import { ChevronDown, ChevronUp, FileText, Maximize2, Minimize2, Star, StarOff } from 'lucide-react';
+import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import AccountDraftBadge from '@/features/accounts/components/AccountDraftBadge';
+import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import AccountDraftBadge from '@/features/accounts/components/AccountDraftBadge';
 import BalanceHistoryChart from '@/features/accounts/components/BalanceHistoryChart';
 import AccountPill from '@/features/accounts/components/Pill';
-import { HeatmapPanel } from '@/features/transactions';
-import { transactionService } from '@/features/transactions/api/service';
 import Account from '@/features/accounts/models/Account';
 import { Type as AccountType, UpdateAccountDTO } from '@/features/accounts/types';
-import InlineFilters from '@/features/transactions/components/InlineFilters';
-import { LedgerView, useLedger } from '@/features/daily-ledger';
+import { LedgerView, useLedger } from '@/features/ledger';
+import ListingControls from '@/features/ledger/components/ListingControls';
+import { HeatmapPanel } from '@/features/transactions';
+import { transactionService } from '@/features/transactions/api/service';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { confirm } from '@/lib/confirmation';
 import { cn } from '@/lib/utils';
@@ -94,23 +95,6 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
     ledger.setTimeframe(defaultRange);
   }, [ledger, defaultRange]);
 
-  const handleFilterChange = useCallback(
-    (key: string, value: unknown) => {
-      if (key === 'after' && value) {
-        ledger.setTimeframe({ after: value as Moment, before: ledger.timeframe.before });
-        return;
-      }
-      if (key === 'before' && value) {
-        ledger.setTimeframe({ after: ledger.timeframe.after, before: value as Moment });
-        return;
-      }
-      ledger.setFilter(key, value);
-    },
-    [ledger],
-  );
-
-  const handleSortToggle = useCallback(() => ledger.setIsReversedOrder(!ledger.isReversedOrder), [ledger]);
-
   const handleLedgerReset = useCallback(() => {
     ledger.resetAll();
     ledger.setFilter('accounts', [account.id]);
@@ -134,6 +118,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
 
   const renderActivityContent = () => (
     <LedgerView
+      disabledFilters={['accounts']}
       enableHotkeys={false}
       ledger={ledger}
       showControls={false}
@@ -277,78 +262,56 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
         )}
       >
         <Card className="h-full flex flex-col overflow-hidden animate-in fade-in-0 slide-in-from-bottom-4 duration-500 ease-out">
-          <CardHeader className="pb-1 shrink-0 relative pr-[5.5rem]">
-            <CardTitle className="text-base">Activity</CardTitle>
-            <CardDescription>
-              {isHeatmapRangeActive
-                ? `${ledger.timeframe.after.format('D MMM')} – ${ledger.timeframe.before.format('D MMM YYYY')}`
-                : 'Latest activity — drag on heatmap to filter'}
-            </CardDescription>
-            {/* Action buttons pinned to top-right corner of the card */}
-            <div className="absolute top-2 right-2 flex items-center gap-0.5">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    aria-label="Open filters"
-                    size="icon"
-                    variant="ghost"
-                    className="relative h-7 w-7"
-                    onClick={ledger.toggleFilters}
-                  >
-                    <Filter className="h-3.5 w-3.5" />
-                    {ledger.activeFilterCount > 0 && (
-                      <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-primary" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {ledger.activeFilterCount > 0 ? `Filters (${ledger.activeFilterCount})` : 'Filters'}
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    aria-label={isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}
-                    size="icon"
-                    variant="ghost"
-                    className="h-7 w-7"
-                    onClick={() => setIsFullscreen((prev) => !prev)}
-                  >
-                    {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-                    <span className="sr-only">{isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    aria-label={heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}
-                    size="icon"
-                    variant="ghost"
-                    className="h-7 w-7"
-                    onClick={() => setHeatmapExpanded((prev) => !prev)}
-                  >
-                    {heatmapExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                    <span className="sr-only">{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</TooltipContent>
-              </Tooltip>
-            </div>
-
-            {!isMobile && (
-              <div className="pt-2 min-w-0">
-                <InlineFilters
-                  inHeader
-                  hideAccountFilter
-                  data={ledger.transactionFilters}
-                  sortDirection={ledger.isReversedOrder ? 'desc' : 'asc'}
-                  onChange={handleFilterChange as any}
-                  onSortToggle={handleSortToggle}
+          <CardHeader className="p-2 md:p-3 shrink-0 border-b">
+            <div className="flex items-center gap-2">
+              <div className="hidden md:flex flex-1 min-w-0 overflow-x-auto">
+                <ListingControls
+                  disabledFilters={['accounts']}
+                  isReversedOrder={ledger.isReversedOrder}
+                  setFilter={ledger.setFilter}
+                  setIsReversedOrder={ledger.setIsReversedOrder}
+                  setShowTransactions={ledger.setShowTransactions}
+                  setShowTransfers={ledger.setShowTransfers}
+                  setTimeframe={ledger.setTimeframe}
+                  showTransactions={ledger.showTransactions}
+                  showTransfers={ledger.showTransfers}
+                  timeframe={ledger.timeframe}
+                  transactionFilters={ledger.transactionFilters}
+                  transferFilters={ledger.transferFilters}
                 />
               </div>
-            )}
+              <div aria-label="Activity actions" role="toolbar" className="flex items-center gap-2 shrink-0 ml-auto">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label={isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}
+                      size="icon"
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsFullscreen((prev) => !prev)}
+                    >
+                      {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label={heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}
+                      size="icon"
+                      type="button"
+                      variant="outline"
+                      onClick={() => setHeatmapExpanded((prev) => !prev)}
+                    >
+                      {heatmapExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</TooltipContent>
+                </Tooltip>
+                <FiltersToggleButton activeCount={ledger.activeFilterCount} onClick={ledger.toggleFilters} />
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="p-0 flex-1 min-h-0 flex flex-col overflow-hidden">
             {/* CSS grid-rows accordion animation for heatmap */}

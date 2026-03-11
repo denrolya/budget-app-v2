@@ -17,7 +17,7 @@ interface Props {
 
 export const Header: React.FC<Props> = ({ className }) => {
   const { openForm } = useFormContext();
-  const { title } = usePageHeader();
+  const { title, headerSlot } = usePageHeader();
 
   return (
     <header
@@ -30,8 +30,9 @@ export const Header: React.FC<Props> = ({ className }) => {
         <SidebarTrigger className="-ml-1" />
       </div>
 
-      <div className="flex-1 min-w-0 px-2">
-        {title ? <h1 className="text-sm font-semibold tracking-tight truncate">{title}</h1> : null}
+      <div className="flex-1 min-w-0 flex items-center gap-2 px-2 overflow-hidden">
+        {title ? <h1 className="text-sm font-semibold tracking-tight truncate shrink-0">{title}</h1> : null}
+        {headerSlot && <div className="flex-1 min-w-0 flex items-center">{headerSlot}</div>}
       </div>
 
       <div className="flex items-center gap-1 px-4 shrink-0">

@@ -32,7 +32,7 @@ const NavAccounts = () => {
   const accounts = useActiveAccountsWithDefaultOrder() as Account[];
   const total = useTotalBalance() as number;
 
-  const [showPinnedOnly, setShowPinnedOnly] = useState<boolean>(true);
+  const [showPinnedOnly, setShowPinnedOnly] = useState<boolean>(false);
 
   const switchId = useId();
   const pinnedHintId = useId();
@@ -165,10 +165,10 @@ const NavAccounts = () => {
   return (
     <SidebarGroup
       aria-label="Accounts sidebar"
-      className={cn('group-data-[collapsible=icon]:hidden mt-auto', 'overflow-x-hidden')}
+      className={cn('group-data-[collapsible=icon]:hidden flex-1 flex flex-col min-h-0 overflow-x-hidden')}
     >
       {/* pinned toggle bar */}
-      <SidebarMenu className="mb-1 overflow-x-hidden">
+      <SidebarMenu className="mb-1 shrink-0 overflow-x-hidden">
         <SidebarMenuItem className="flex items-center justify-between px-2 py-1">
           <TooltipProvider delayDuration={150}>
             <Tooltip>
@@ -216,7 +216,7 @@ const NavAccounts = () => {
         </SidebarMenuItem>
       </SidebarMenu>
 
-      <SidebarMenu aria-label="Accounts list" className={cn('max-h-[300px] overflow-y-auto overflow-x-hidden')}>
+      <SidebarMenu aria-label="Accounts list" className={cn('flex-1 min-h-0 overflow-y-auto overflow-x-hidden')}>
         {ACCOUNT_TYPES_ORDER.map((type) => {
           const items = byTypeVisible[type];
           if (!items?.length) return null;
@@ -227,7 +227,7 @@ const NavAccounts = () => {
         })}
       </SidebarMenu>
 
-      <SidebarMenu aria-label="Accounts totals" className="mt-1 overflow-x-hidden">
+      <SidebarMenu aria-label="Accounts totals" className="mt-1 shrink-0 overflow-x-hidden">
         <SidebarMenuItem className="-mx-2 px-2">
           <div aria-orientation="horizontal" role="separator" className="-mx-2 mb-1 h-px bg-border" />
 

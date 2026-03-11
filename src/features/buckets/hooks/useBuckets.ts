@@ -25,7 +25,7 @@ function loadConfig(): BucketsConfig {
 
     const allocationMap = (parsed.allocationMap as AllocationMap) ?? {};
     // Detect old percentage-based v2 data — reset allocationMap (amounts can't be inferred)
-    const firstShare = Object.values(allocationMap)[0]?.[0] as Record<string, unknown> | undefined;
+    const firstShare = Object.values(allocationMap)[0]?.[0] as unknown as Record<string, unknown> | undefined;
     if (firstShare && 'percentage' in firstShare) {
       return {
         ...DEFAULT_CONFIG,
@@ -98,24 +98,25 @@ export function useBuckets() {
 
   // ── Derived: unassigned entries ─────────────────────────────────────────────
 
-  const unassignedEntries = useMemo<UnassignedEntry[]>(() => {
-    return accounts
-      .map((account) => {
-        const available = Math.max(0, account.balance);
-        const allocated = sumAllocated(account.id, config.allocationMap);
-        const unallocatedAmount = Math.max(0, available - allocated);
-        const convertedFull = account.convertedValues?.[baseCurrency] ?? 0;
-        const unallocatedBalance =
-          available > 0 ? convertedFull * (unallocatedAmount / available) : 0;
-        return {
-          account,
-          unallocatedAmount,
-          unallocatedBalance,
-          isPartial: allocated > 0 && unallocatedAmount > 0,
-        };
-      })
-      .filter((e) => e.unallocatedAmount > 0);
-  }, [accounts, config.allocationMap, baseCurrency]);
+  const unassignedEntries = useMemo<UnassignedEntry[]>(
+    () =>
+      accounts
+        .map((account) => {
+          const available = Math.max(0, account.balance);
+          const allocated = sumAllocated(account.id, config.allocationMap);
+          const unallocatedAmount = Math.max(0, available - allocated);
+          const convertedFull = account.convertedValues?.[baseCurrency] ?? 0;
+          const unallocatedBalance = available > 0 ? convertedFull * (unallocatedAmount / available) : 0;
+          return {
+            account,
+            unallocatedAmount,
+            unallocatedBalance,
+            isPartial: allocated > 0 && unallocatedAmount > 0,
+          };
+        })
+        .filter((e) => e.unallocatedAmount > 0),
+    [accounts, config.allocationMap, baseCurrency],
+  );
 
   // ── Derived: bucket balances ────────────────────────────────────────────────
 
@@ -204,9 +205,7 @@ export function useBuckets() {
         const toIdx = withoutFrom.findIndex((s) => s.bucketId === toBucketId);
         const updated =
           toIdx >= 0
-            ? withoutFrom.map((s, i) =>
-                i === toIdx ? { ...s, amount: s.amount + fromShare.amount } : s,
-              )
+            ? withoutFrom.map((s, i) => (i === toIdx ? { ...s, amount: s.amount + fromShare.amount } : s))
             : [...withoutFrom, { bucketId: toBucketId, amount: fromShare.amount }];
 
         return { ...prev, allocationMap: { ...prev.allocationMap, [accountId]: updated } };
@@ -223,9 +222,7 @@ export function useBuckets() {
         if (!account) return prev;
         const available = Math.max(0, account.balance);
         const existing = prev.allocationMap[accountId] ?? [];
-        const otherTotal = existing
-          .filter((s) => s.bucketId !== bucketId)
-          .reduce((s, sh) => s + sh.amount, 0);
+        const otherTotal = existing.filter((s) => s.bucketId !== bucketId).reduce((s, sh) => s + sh.amount, 0);
         const clamped = Math.max(0, Math.min(available - otherTotal, Math.round(newAmount)));
 
         if (clamped === 0) {
@@ -245,6 +242,15 @@ export function useBuckets() {
       });
     },
     [update, accounts],
+  );
+
+  const setBucketTarget = useCallback(
+    (bucketId: string, amount: number | null) =>
+      update((prev) => ({
+        ...prev,
+        buckets: prev.buckets.map((b) => (b.id === bucketId ? { ...b, targetAmount: amount } : b)),
+      })),
+    [update],
   );
 
   const setMonthlyExpenses = useCallback(
@@ -299,6 +305,7 @@ export function useBuckets() {
     removeAllocation,
     moveAllocation,
     setAllocationAmount,
+    setBucketTarget,
     setMonthlyExpenses,
     setVisualization,
     exportConfig,

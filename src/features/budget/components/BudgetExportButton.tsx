@@ -10,6 +10,7 @@ import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
 
 import type { BudgetAnalyticsItem, BudgetDTO } from '../api/types';
+
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
 interface Props {

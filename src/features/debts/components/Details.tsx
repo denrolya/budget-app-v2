@@ -2,10 +2,11 @@ import groupBy from 'lodash/groupBy';
 import sortBy from 'lodash/sortBy';
 import sumBy from 'lodash/sumBy';
 import toPairs from 'lodash/toPairs';
-import { Filter, Maximize2, Minimize2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Maximize2, Minimize2, ChevronDown, ChevronUp } from 'lucide-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Badge, BadgeVariant } from '@/components/ui/badge';
@@ -14,8 +15,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { LedgerView, useLedger } from '@/features/daily-ledger';
-import InlineFilters from '@/features/transactions/components/InlineFilters';
+import { LedgerView, useLedger } from '@/features/ledger';
+import ListingControls from '@/features/ledger/components/ListingControls';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BACKEND_DATE_FORMAT, MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
@@ -25,6 +26,7 @@ import { Transaction } from '@/features/transactions';
 import TransactionHeatmapChart from '@/features/transactions/components/TransactionHeatmapChart';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+import { useTransactions as useDebtTransactions } from '../api';
 import Debt from '../models/Debt';
 
 import DebtBalanceChart from './DebtBalanceChart';
@@ -36,7 +38,8 @@ interface Props {
 const DebtDetails: React.FC<Props> = ({ debt }) => {
   const [activeTab, setActiveTab] = useState('transactions');
   const isMobile = useIsMobile();
-  const transactions = useMemo(() => debt.transactions ?? [], [debt.transactions]);
+  // Fetch transactions for this debt directly (list API doesn't embed them in the Debt model)
+  const { data: transactions = [] } = useDebtTransactions(debt.id);
 
   const defaultRange = useMemo(
     () => ({
@@ -97,23 +100,6 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
     [ledger],
   );
 
-  const handleFilterChange = useCallback(
-    (key: string, value: unknown) => {
-      if (key === 'after' && value) {
-        ledger.setTimeframe({ after: value as Moment, before: ledger.timeframe.before });
-        return;
-      }
-      if (key === 'before' && value) {
-        ledger.setTimeframe({ after: ledger.timeframe.after, before: value as Moment });
-        return;
-      }
-      ledger.setFilter(key, value);
-    },
-    [ledger],
-  );
-
-  const handleSortToggle = useCallback(() => ledger.setIsReversedOrder(!ledger.isReversedOrder), [ledger]);
-
   const handleLedgerReset = useCallback(() => {
     ledger.resetAll();
     ledger.setFilter('debts', [debt.id]);
@@ -153,8 +139,6 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
   const latestTransactionAt = transactions.length
     ? sortBy(transactions, (tx) => -tx.executedAt.valueOf())[0]?.executedAt
     : null;
-  const relatedAccountsCount = new Set(transactions.map((tx) => tx.account.id)).size;
-  const relatedCategoriesCount = new Set(transactions.map((tx) => tx.category.id)).size;
 
   // All-years daily stats for the heatmap — the chart filters to the active year internally.
   const dailyStats = useMemo<DailyStatsResponse>(() => {
@@ -197,6 +181,7 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
 
   const renderActivityContent = () => (
     <LedgerView
+      disabledFilters={['debts']}
       enableHotkeys={false}
       ledger={ledger}
       showControls={false}
@@ -273,46 +258,56 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
             </div>
           )}
 
-          <CardContent className="min-w-0">
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-2 border-b border-t py-4 text-xs">
-              <p className="text-xs">
-                <strong>Opened on:</strong> <RelativeDatetimeDisplay date={debt.createdAt} />
-              </p>
-              {debt.updatedAt && (
-                <p className="text-xs">
-                  <strong>Last updated:</strong> <RelativeDatetimeDisplay date={debt.updatedAt} />
-                </p>
-              )}
-              <p className="text-xs">
-                <strong>Transactions:</strong> {totalTransactionsCount}
-              </p>
-              <p className="text-xs">
-                <strong>Related accounts:</strong> {relatedAccountsCount}
-              </p>
-              <p className="text-xs">
-                <strong>Related categories:</strong> {relatedCategoriesCount}
-              </p>
-              {firstTransactionAt && (
-                <p className="text-xs">
-                  <strong>First transaction:</strong> <RelativeDatetimeDisplay date={firstTransactionAt} />
-                </p>
-              )}
-              {latestTransactionAt && (
-                <p className="text-xs">
-                  <strong>Latest transaction:</strong> <RelativeDatetimeDisplay date={latestTransactionAt} />
-                </p>
-              )}
-              <p className="text-xs">
-                <strong>Net flow in {baseCurrency}:</strong>{' '}
-                <MoneyValue showSign amount={totalTransactionsValue} currency={baseCurrency} values={{}} />
-              </p>
-            </section>
-
-            <section className="mt-4 min-w-0">
-              <h4>Note:</h4>
-              <p className="text-sm text-muted-foreground break-words">{debt.note}</p>
-            </section>
-          </CardContent>
+          {(totalTransactionsCount > 0 || debt.note) && (
+            <CardContent className="min-w-0 pt-0 pb-3">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground border-t pt-3">
+                <span>
+                  Opened: <RelativeDatetimeDisplay date={debt.createdAt} />
+                </span>
+                {debt.updatedAt && (
+                  <>
+                    <span className="text-border select-none">·</span>
+                    <span>
+                      Updated: <RelativeDatetimeDisplay date={debt.updatedAt} />
+                    </span>
+                  </>
+                )}
+                {totalTransactionsCount > 0 && (
+                  <>
+                    <span className="text-border select-none">·</span>
+                    <span>
+                      {totalTransactionsCount} transaction{totalTransactionsCount !== 1 ? 's' : ''}
+                    </span>
+                  </>
+                )}
+                {firstTransactionAt && (
+                  <>
+                    <span className="text-border select-none">·</span>
+                    <span>
+                      First: <RelativeDatetimeDisplay date={firstTransactionAt} />
+                    </span>
+                  </>
+                )}
+                {latestTransactionAt && (
+                  <>
+                    <span className="text-border select-none">·</span>
+                    <span>
+                      Latest: <RelativeDatetimeDisplay date={latestTransactionAt} />
+                    </span>
+                  </>
+                )}
+                {totalTransactionsCount > 0 && (
+                  <>
+                    <span className="text-border select-none">·</span>
+                    <span className="font-medium">
+                      Net: <MoneyValue showSign amount={totalTransactionsValue} currency={baseCurrency} values={{}} />
+                    </span>
+                  </>
+                )}
+              </div>
+              {debt.note && <p className="mt-2 text-xs text-muted-foreground break-words">{debt.note}</p>}
+            </CardContent>
+          )}
         </Card>
 
         <Tabs value={activeTab} className="min-w-0" onValueChange={setActiveTab}>
@@ -330,80 +325,60 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
               )}
             >
               <Card className={cn('min-w-0 overflow-hidden flex flex-col', isFullscreen && 'h-full')}>
-                <CardHeader className="pb-1 shrink-0 relative pr-[5.5rem]">
-                  <CardTitle className="text-base">Activity</CardTitle>
-                  <CardDescription>
-                    {isHeatmapRangeActive
-                      ? `${ledger.timeframe.after.format('D MMM')} – ${ledger.timeframe.before.format('D MMM YYYY')}`
-                      : 'Latest activity — drag on heatmap to filter'}
-                  </CardDescription>
-
-                  <div className="absolute top-2 right-2 flex items-center gap-0.5">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          aria-label="Open filters"
-                          size="icon"
-                          variant="ghost"
-                          className="relative h-7 w-7"
-                          onClick={ledger.toggleFilters}
-                        >
-                          <Filter className="h-3.5 w-3.5" />
-                          {ledger.activeFilterCount > 0 && (
-                            <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-primary" />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {ledger.activeFilterCount > 0 ? `Filters (${ledger.activeFilterCount})` : 'Filters'}
-                      </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          aria-label={isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}
-                          size="icon"
-                          variant="ghost"
-                          className="h-7 w-7"
-                          onClick={() => setIsFullscreen((prev) => !prev)}
-                        >
-                          {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>{isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          aria-label={heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}
-                          size="icon"
-                          variant="ghost"
-                          className="h-7 w-7"
-                          onClick={() => setHeatmapExpanded((prev) => !prev)}
-                        >
-                          {heatmapExpanded ? (
-                            <ChevronUp className="h-3.5 w-3.5" />
-                          ) : (
-                            <ChevronDown className="h-3.5 w-3.5" />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</TooltipContent>
-                    </Tooltip>
-                  </div>
-
-                  {!isMobile && (
-                    <div className="pt-2 min-w-0">
-                      <InlineFilters
-                        inHeader
-                        hideAccountFilter
-                        data={ledger.transactionFilters}
-                        sortDirection={ledger.isReversedOrder ? 'desc' : 'asc'}
-                        onChange={handleFilterChange as any}
-                        onSortToggle={handleSortToggle}
+                <CardHeader className="p-2 md:p-3 shrink-0 border-b">
+                  <div className="flex items-center gap-2">
+                    <div className="hidden md:flex flex-1 min-w-0 overflow-x-auto">
+                      <ListingControls
+                        disabledFilters={['debts']}
+                        isReversedOrder={ledger.isReversedOrder}
+                        setFilter={ledger.setFilter}
+                        setIsReversedOrder={ledger.setIsReversedOrder}
+                        setShowTransactions={ledger.setShowTransactions}
+                        setShowTransfers={ledger.setShowTransfers}
+                        setTimeframe={ledger.setTimeframe}
+                        showTransactions={ledger.showTransactions}
+                        showTransfers={ledger.showTransfers}
+                        timeframe={ledger.timeframe}
+                        transactionFilters={ledger.transactionFilters}
+                        transferFilters={ledger.transferFilters}
                       />
                     </div>
-                  )}
+                    <div
+                      aria-label="Activity actions"
+                      role="toolbar"
+                      className="flex items-center gap-2 shrink-0 ml-auto"
+                    >
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            aria-label={isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}
+                            size="icon"
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsFullscreen((prev) => !prev)}
+                          >
+                            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            aria-label={heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}
+                            size="icon"
+                            type="button"
+                            variant="outline"
+                            onClick={() => setHeatmapExpanded((prev) => !prev)}
+                          >
+                            {heatmapExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</TooltipContent>
+                      </Tooltip>
+                      <FiltersToggleButton activeCount={ledger.activeFilterCount} onClick={ledger.toggleFilters} />
+                    </div>
+                  </div>
                 </CardHeader>
 
                 <CardContent className="p-0 flex-1 min-h-0 flex flex-col overflow-hidden min-w-0">

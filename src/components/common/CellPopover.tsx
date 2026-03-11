@@ -85,7 +85,7 @@ const CellPopover: React.FC<CellPopoverProps> = ({
 
       <PopoverContent
         align={align}
-        className={cn('p-2 space-y-2', contentClassName)}
+        className={cn('p-2 space-y-2 z-[9999]', contentClassName)}
         onKeyDown={(e) => {
           if (e.key === 'Escape') {
             e.preventDefault();

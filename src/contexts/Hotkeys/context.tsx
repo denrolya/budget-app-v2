@@ -1,8 +1,8 @@
-import React, { createContext, useCallback, useMemo, useReducer, useState } from 'react';
+import React, { createContext, useCallback, useMemo, useReducer, useRef, useState } from 'react';
 import { useHotkeys as useReactHotkeysHook } from 'react-hotkeys-hook';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { HotkeysDialog } from '@/components/common/HotkeysDialog';
+import { CommandPalette } from '@/components/common/CommandPalette';
 import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import type { Hotkey, HotkeyCategory, HotkeysContextType } from '@/types/hotkeys';
@@ -10,9 +10,8 @@ import type { Hotkey, HotkeyCategory, HotkeysContextType } from '@/types/hotkeys
 export const HotkeysContext = createContext<HotkeysContextType | null>(null);
 
 export const navigationHotkeys: Hotkey[] = [
-  { windows: 'H', mac: 'H', description: 'Open/Close this window' },
+  { windows: '⇧⇧', mac: '⇧⇧', description: 'Open/Close Commands' },
   { windows: 'L', mac: 'L', description: 'Open Daily Ledger page' },
-  { windows: 'T', mac: 'T', description: 'Open Transactions page' },
 ];
 
 export const globalHotkeys: Hotkey[] = [
@@ -72,6 +71,9 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
   const toggleHotkeysDialog = useCallback(() => setIsDialogOpen((prev) => !prev), []);
   const openHotkeysDialog = useCallback(() => setIsDialogOpen(true), []);
   const closeHotkeysDialog = useCallback(() => setIsDialogOpen(false), []);
+
+  // Double-shift detection
+  const lastShiftRef = useRef<number>(0);
 
   const addPageHotkeys = useCallback((pageName: string, hotkeys: Hotkey[]) => {
     dispatch({ type: 'ADD_PAGE_HOTKEYS', payload: { pageName, hotkeys } });
@@ -143,14 +145,20 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
     [openForm],
   );
 
-  // Hotkeys dialog
+  // Double-shift opens command palette
   useReactHotkeysHook(
-    'h',
+    'shift',
     (event) => {
       event.preventDefault();
-      toggleHotkeysDialog();
+      const now = Date.now();
+      if (now - lastShiftRef.current < 400) {
+        toggleHotkeysDialog();
+        lastShiftRef.current = 0;
+      } else {
+        lastShiftRef.current = now;
+      }
     },
-    { preventDefault: true },
+    { preventDefault: false, keydown: true },
     [toggleHotkeysDialog],
   );
 
@@ -159,17 +167,7 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
     'l',
     (event) => {
       event.preventDefault();
-      if (location.pathname !== ROUTES.DAILY_LEDGER.path) navigate(ROUTES.DAILY_LEDGER.path);
-    },
-    { preventDefault: true },
-    [location.pathname, navigate],
-  );
-
-  useReactHotkeysHook(
-    't',
-    (event) => {
-      event.preventDefault();
-      if (location.pathname !== ROUTES.TRANSACTION_LIST.path) navigate(ROUTES.TRANSACTION_LIST.path);
+      if (location.pathname !== ROUTES.LEDGER.path) navigate(ROUTES.LEDGER.path);
     },
     { preventDefault: true },
     [location.pathname, navigate],
@@ -191,7 +189,7 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
   return (
     <HotkeysContext.Provider value={contextValue}>
       {children}
-      <HotkeysDialog isOpen={isDialogOpen} onClose={closeHotkeysDialog} />
+      <CommandPalette isOpen={isDialogOpen} onClose={closeHotkeysDialog} />
     </HotkeysContext.Provider>
   );
 };

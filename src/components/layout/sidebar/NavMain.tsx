@@ -1,4 +1,4 @@
-import { ChevronRightIcon, type LucideIcon, SquareTerminal } from 'lucide-react';
+import { ChevronRightIcon, type LucideIcon } from 'lucide-react';
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -31,19 +31,9 @@ const ITEMS: {
     icon: ROUTES.DASHBOARD.icon,
   },
   {
-    title: ROUTES.DAILY_LEDGER.label,
-    url: ROUTES.DAILY_LEDGER.path,
-    icon: ROUTES.DAILY_LEDGER.icon,
-  },
-  {
-    title: ROUTES.TRANSACTION_LIST.label,
-    url: ROUTES.TRANSACTION_LIST.path,
-    icon: ROUTES.TRANSACTION_LIST.icon,
-  },
-  {
-    title: ROUTES.TRANSFER_LIST.label,
-    url: ROUTES.TRANSFER_LIST.path,
-    icon: ROUTES.TRANSFER_LIST.icon,
+    title: ROUTES.LEDGER.label,
+    url: ROUTES.LEDGER.path,
+    icon: ROUTES.LEDGER.icon,
   },
   {
     title: ROUTES.ACCOUNT_LIST.label,

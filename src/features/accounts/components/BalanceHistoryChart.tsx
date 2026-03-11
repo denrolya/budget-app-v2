@@ -13,8 +13,8 @@ interface Props {
 
 const PRESETS = [
   { label: '1M', months: 1, interval: 'P1D' },
-  { label: '3M', months: 3, interval: 'P1D' },  // daily for smooth curve
-  { label: '6M', months: 6, interval: 'P2D' },  // bi-daily → ~90 pts
+  { label: '3M', months: 3, interval: 'P1D' }, // daily for smooth curve
+  { label: '6M', months: 6, interval: 'P2D' }, // bi-daily → ~90 pts
   { label: '1Y', months: 12, interval: 'P1W' }, // weekly → ~52 pts
 ] as const;
 
@@ -72,26 +72,19 @@ const buildCandleLayer = (candle: CandleState | null, lineColor: string) =>
       <g>
         {/* Wick: dashed line from just below the dot down to the x-axis */}
         <line
-          x1={sx}
-          y1={sy + 7}
-          x2={sx}
-          y2={innerHeight}
           stroke={lineColor}
-          strokeWidth={1}
-          strokeOpacity={0.3}
           strokeDasharray="3 2"
+          strokeOpacity={0.3}
+          strokeWidth={1}
+          x1={sx}
+          x2={sx}
+          y1={sy + 7}
+          y2={innerHeight}
         />
         {/* Outer glow ring */}
-        <circle cx={sx} cy={sy} r={11} fill={lineColor} fillOpacity={0.12} />
+        <circle cx={sx} cy={sy} fill={lineColor} fillOpacity={0.12} r={11} />
         {/* Solid dot head */}
-        <circle
-          cx={sx}
-          cy={sy}
-          r={4.5}
-          fill={lineColor}
-          stroke="hsl(var(--background))"
-          strokeWidth={2}
-        />
+        <circle cx={sx} cy={sy} fill={lineColor} r={4.5} stroke="hsl(var(--background))" strokeWidth={2} />
       </g>
     );
   };
@@ -104,12 +97,7 @@ interface PointTooltipProps extends SliceTooltipProps {
   lineColor: string;
 }
 
-const PointTooltip: React.FC<PointTooltipProps> = ({
-  slice,
-  onCandleChange,
-  currency,
-  lineColor,
-}) => {
+const PointTooltip: React.FC<PointTooltipProps> = ({ slice, onCandleChange, currency, lineColor }) => {
   const point = slice.points[0] ?? null;
   const pointX = (point?.data?.x ?? null) as string | null;
   const pointY = (point?.data?.y ?? null) as number | null;
@@ -133,13 +121,8 @@ const PointTooltip: React.FC<PointTooltipProps> = ({
 
   return (
     <div className="rounded-md border bg-background px-3 py-2 shadow-md text-sm min-w-[120px]">
-      <p className="text-muted-foreground text-xs mb-0.5">
-        {moment(pointX, 'YYYY-MM-DD').format('D MMM YYYY')}
-      </p>
-      <p
-        className="font-semibold tabular-nums"
-        style={{ color: isPositive ? lineColor : 'hsl(var(--destructive))' }}
-      >
+      <p className="text-muted-foreground text-xs mb-0.5">{moment(pointX, 'YYYY-MM-DD').format('D MMM YYYY')}</p>
+      <p style={{ color: isPositive ? lineColor : 'hsl(var(--destructive))' }} className="font-semibold tabular-nums">
         {formatted}
       </p>
     </div>
@@ -219,10 +202,7 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
   }, []);
 
   // Custom candle layer — rebuilt only when hover position or color changes
-  const CandleLayer = useMemo(
-    () => buildCandleLayer(candle, lineColor),
-    [candle, lineColor],
-  );
+  const CandleLayer = useMemo(() => buildCandleLayer(candle, lineColor), [candle, lineColor]);
 
   const sliceTooltip = useCallback(
     (props: SliceTooltipProps) => (
@@ -242,12 +222,7 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
     <div className="relative" onMouseLeave={() => setCandle(null)}>
       {/* Preset toggle — pinned top-right inside the chart area */}
       <div className="absolute top-2 right-3 z-10">
-        <ToggleGroup
-          size="sm"
-          type="single"
-          value={preset}
-          onValueChange={(v) => v && setPreset(v as PresetLabel)}
-        >
+        <ToggleGroup size="sm" type="single" value={preset} onValueChange={(v) => v && setPreset(v as PresetLabel)}>
           {PRESETS.map((p) => (
             <ToggleGroupItem value={p.label} className="text-xs px-2" key={p.label}>
               {p.label}
@@ -293,15 +268,6 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
             enableSlices="x"
             fill={[{ match: '*', id: GRADIENT_ID }]}
             isInteractive={true}
-            layers={[
-              'grid',
-              'axes',
-              'areas',
-              'lines',
-              CandleLayer,   // dot + wick indicator (replaces built-in 'crosshair')
-              'slices',
-              'mesh',
-            ]}
             lineWidth={2}
             margin={{ top: 40, right: 0, bottom: 22, left: 0 }}
             sliceTooltip={sliceTooltip}
@@ -314,6 +280,15 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
               tickSize: 0,
               tickPadding: 5,
             }}
+            layers={[
+              'grid',
+              'axes',
+              'areas',
+              'lines',
+              CandleLayer, // dot + wick indicator (replaces built-in 'crosshair')
+              'slices',
+              'mesh',
+            ]}
           />
         </div>
       )}
@@ -321,7 +296,4 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
   );
 };
 
-export default React.memo(
-  BalanceHistoryChart,
-  (prev, next) => prev.account.id === next.account.id,
-);
+export default React.memo(BalanceHistoryChart, (prev, next) => prev.account.id === next.account.id);

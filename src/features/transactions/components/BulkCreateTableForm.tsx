@@ -163,6 +163,7 @@ export const BulkCreateTableForm: React.FC = () => {
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <div className="flex-1 overflow-y-auto overflow-x-auto">
+          {/* TODO: account & category typeaheads, executedAt should be slighlty wider at expense of note  */}
           <Table className="min-w-[860px] table-fixed">
             <colgroup>
               <col className="w-20" />

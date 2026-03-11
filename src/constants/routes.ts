@@ -1,11 +1,9 @@
 import {
-  ArrowLeftRight,
   CalendarDays,
-  FileText,
   FolderTree,
   Handshake,
-  LayoutDashboard,
   Layers,
+  LayoutDashboard,
   PiggyBank,
   TestTube2,
   Wallet,
@@ -17,20 +15,10 @@ export const ROUTES = {
     icon: LayoutDashboard,
     label: 'Dashboard',
   },
-  DAILY_LEDGER: {
+  LEDGER: {
     path: '/ledger',
     icon: CalendarDays,
     label: 'Ledger',
-  },
-  TRANSACTION_LIST: {
-    path: '/transactions',
-    icon: FileText,
-    label: 'Transactions',
-  },
-  TRANSFER_LIST: {
-    path: '/transfers',
-    icon: ArrowLeftRight,
-    label: 'Transfers',
   },
   ACCOUNT_LIST: {
     path: '/accounts',

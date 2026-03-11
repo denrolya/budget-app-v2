@@ -89,10 +89,7 @@ const DebtsSunburstChart: React.FC<Props> = ({ debts, onHoverChange }) => {
     const open = debts.filter((d) => !d.isClosed());
     const closed = debts.filter((d) => d.isClosed());
 
-    const total = debts.reduce(
-      (s, d) => s + Math.abs(d.convertedValues?.[baseCurrency] ?? d.balance),
-      0,
-    );
+    const total = debts.reduce((s, d) => s + Math.abs(d.convertedValues?.[baseCurrency] ?? d.balance), 0);
 
     const toDebtDatum = (d: Debt, idx: number, isClosedDebt: boolean): DebtDatum => {
       const v = Math.max(Math.abs(d.convertedValues?.[baseCurrency] ?? d.balance), 0.001);
@@ -109,14 +106,8 @@ const DebtsSunburstChart: React.FC<Props> = ({ debts, onHoverChange }) => {
       };
     };
 
-    const openTotal = open.reduce(
-      (s, d) => s + Math.abs(d.convertedValues?.[baseCurrency] ?? d.balance),
-      0,
-    );
-    const closedTotal = closed.reduce(
-      (s, d) => s + Math.abs(d.convertedValues?.[baseCurrency] ?? d.balance),
-      0,
-    );
+    const openTotal = open.reduce((s, d) => s + Math.abs(d.convertedValues?.[baseCurrency] ?? d.balance), 0);
+    const closedTotal = closed.reduce((s, d) => s + Math.abs(d.convertedValues?.[baseCurrency] ?? d.balance), 0);
 
     const inner: GroupDatum[] = [];
     const outer: DebtDatum[] = [];
@@ -182,67 +173,66 @@ const DebtsSunburstChart: React.FC<Props> = ({ debts, onHoverChange }) => {
   // ── Tooltip ────────────────────────────────────────────────────────────────
 
   const renderTooltip = useMemo(
-    () =>
-      (props: any) => {
-        if (!props.active || !props.payload?.[0]) return null;
-        const entry = props.payload[0].payload as GroupDatum | DebtDatum;
-        const isDebt = 'rawBalance' in entry;
+    () => (props: any) => {
+      if (!props.active || !props.payload?.[0]) return null;
+      const entry = props.payload[0].payload as GroupDatum | DebtDatum;
+      const isDebt = 'rawBalance' in entry;
 
-        if (isDebt) {
-          const d = entry as DebtDatum;
-          const debt = debts.find((x) => x.id === d.id) ?? null;
-          if (!debt) return null;
-          return (
-            <div className="bg-background border rounded-lg shadow-lg overflow-hidden text-sm min-w-[190px]">
-              <div className="px-3 pt-2.5 pb-2 flex items-center gap-2">
-                <span style={{ backgroundColor: d.color }} className="h-2.5 w-2.5 rounded-sm flex-none" />
-                <span className="font-semibold truncate">{debt.debtor}</span>
-                {d.isClosed && (
-                  <span className="ml-auto text-[10px] text-muted-foreground border rounded px-1 py-0.5 flex-none">
-                    Closed
-                  </span>
-                )}
-              </div>
-              <div className="border-t px-3 py-2 space-y-1.5">
-                <div className="flex justify-between items-center gap-6">
-                  <span className="text-xs text-muted-foreground">Balance</span>
-                  <MoneyValue
-                    amount={debt.balance}
-                    currency={debt.currency}
-                    useColors={false}
-                    values={debt.convertedValues}
-                    className="text-xs font-semibold"
-                  />
-                </div>
-                <div className="flex justify-between items-center gap-6">
-                  <span className="text-xs text-muted-foreground">Portfolio</span>
-                  <span className="text-xs font-semibold">{d.percentage.toFixed(1)}%</span>
-                </div>
-              </div>
-            </div>
-          );
-        }
-
-        const g = entry as GroupDatum;
+      if (isDebt) {
+        const d = entry as DebtDatum;
+        const debt = debts.find((x) => x.id === d.id) ?? null;
+        if (!debt) return null;
         return (
-          <div className="bg-background border rounded-lg shadow-lg px-3 py-2.5 text-sm min-w-[150px]">
-            <div className="flex items-center gap-2 mb-2">
-              <span style={{ backgroundColor: g.color }} className="h-2.5 w-2.5 rounded-sm flex-none" />
-              <span className="font-semibold">{g.name}</span>
+          <div className="bg-background border rounded-lg shadow-lg overflow-hidden text-sm min-w-[190px]">
+            <div className="px-3 pt-2.5 pb-2 flex items-center gap-2">
+              <span style={{ backgroundColor: d.color }} className="h-2.5 w-2.5 rounded-sm flex-none" />
+              <span className="font-semibold truncate">{debt.debtor}</span>
+              {d.isClosed && (
+                <span className="ml-auto text-[10px] text-muted-foreground border rounded px-1 py-0.5 flex-none">
+                  Closed
+                </span>
+              )}
             </div>
-            <div className="space-y-1">
+            <div className="border-t px-3 py-2 space-y-1.5">
               <div className="flex justify-between items-center gap-6">
-                <span className="text-xs text-muted-foreground">Total (approx.)</span>
-                <MoneyValue amount={g.value} useColors={false} values={{}} className="text-xs font-semibold" />
+                <span className="text-xs text-muted-foreground">Balance</span>
+                <MoneyValue
+                  amount={debt.balance}
+                  currency={debt.currency}
+                  useColors={false}
+                  values={debt.convertedValues}
+                  className="text-xs font-semibold"
+                />
               </div>
               <div className="flex justify-between items-center gap-6">
-                <span className="text-xs text-muted-foreground">Share</span>
-                <span className="text-xs font-semibold">{g.percentage.toFixed(1)}%</span>
+                <span className="text-xs text-muted-foreground">Portfolio</span>
+                <span className="text-xs font-semibold">{d.percentage.toFixed(1)}%</span>
               </div>
             </div>
           </div>
         );
-      },
+      }
+
+      const g = entry as GroupDatum;
+      return (
+        <div className="bg-background border rounded-lg shadow-lg px-3 py-2.5 text-sm min-w-[150px]">
+          <div className="flex items-center gap-2 mb-2">
+            <span style={{ backgroundColor: g.color }} className="h-2.5 w-2.5 rounded-sm flex-none" />
+            <span className="font-semibold">{g.name}</span>
+          </div>
+          <div className="space-y-1">
+            <div className="flex justify-between items-center gap-6">
+              <span className="text-xs text-muted-foreground">Total (approx.)</span>
+              <MoneyValue amount={g.value} useColors={false} values={{}} className="text-xs font-semibold" />
+            </div>
+            <div className="flex justify-between items-center gap-6">
+              <span className="text-xs text-muted-foreground">Share</span>
+              <span className="text-xs font-semibold">{g.percentage.toFixed(1)}%</span>
+            </div>
+          </div>
+        </div>
+      );
+    },
     [debts],
   );
 
@@ -292,7 +282,7 @@ const DebtsSunburstChart: React.FC<Props> = ({ debts, onHoverChange }) => {
               <Cell fill={entry.color} stroke="none" key={`debt-${entry.id}`} />
             ))}
           </Pie>
-          <Tooltip content={renderTooltip} isAnimationActive={false} />
+          <Tooltip isAnimationActive={false} content={renderTooltip} />
         </PieChart>
       </ResponsiveContainer>
     </div>

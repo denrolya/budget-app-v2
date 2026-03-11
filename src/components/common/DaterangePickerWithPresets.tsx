@@ -170,12 +170,12 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
       <PopoverContent align="start" className="w-auto p-0">
         <Calendar
           initialFocus
-          month={displayMonth}
-          onMonthChange={setDisplayMonth}
           mode="range"
+          month={displayMonth}
           numberOfMonths={isMobile ? 1 : 2}
           selected={draft.from ? { from: draft.from, to: draft.to } : undefined}
           onDayClick={onDayClick}
+          onMonthChange={setDisplayMonth}
         />
 
         <div className="p-3 space-y-3">

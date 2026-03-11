@@ -6,6 +6,8 @@ export interface Bucket {
   emoji: string;
   color: string;
   isPreset: boolean;
+  /** Target balance in base currency (min). null = no target. */
+  targetAmount?: number | null;
 }
 
 export interface BucketShare {
@@ -27,17 +29,17 @@ export interface BucketsConfig {
 /** One account's allocated portion inside a specific bucket */
 export interface BucketEntry {
   account: Account;
-  amount: number;           // in account's native currency
+  amount: number; // in account's native currency
   allocatedBalance: number; // in baseCurrency (derived)
-  maxAmount: number;        // max allocatable to this bucket = amount + account's unallocated remainder
+  maxAmount: number; // max allocatable to this bucket = amount + account's unallocated remainder
 }
 
 /** One account's unallocated remainder */
 export interface UnassignedEntry {
   account: Account;
-  unallocatedAmount: number;   // in account's native currency
-  unallocatedBalance: number;  // in baseCurrency (derived)
-  isPartial: boolean;          // true if some of this account is already allocated elsewhere
+  unallocatedAmount: number; // in account's native currency
+  unallocatedBalance: number; // in baseCurrency (derived)
+  isPartial: boolean; // true if some of this account is already allocated elsewhere
 }
 
 export type RuleStatus = 'pass' | 'warn' | 'fail' | 'na';

@@ -13,21 +13,13 @@ const BudgetingPage = lazy(() => import('@/features/budget').then(({ BudgetingPa
 const CategoriesManagementPage = lazy(() =>
   import('@/features/categories').then(({ CategoriesManagementPage: C }) => ({ default: C })),
 );
-const DailyLedgerPage = lazy(() =>
-  import('@/features/daily-ledger').then(({ DailyLedgerPage: C }) => ({ default: C })),
-);
+const LedgerPage = lazy(() => import('@/features/ledger').then(({ LedgerPage: C }) => ({ default: C })));
 const DashboardPage = lazy(() => import('@/features/dashboard').then(({ DashboardPage: C }) => ({ default: C })));
 const DebtsManagementPage = lazy(() =>
   import('@/features/debts').then(({ DebtsManagementPage: C }) => ({ default: C })),
 );
 const BucketsPage = lazy(() => import('@/features/buckets').then(({ BucketsPage: C }) => ({ default: C })));
 const SandboxPage = lazy(() => import('@/features/sandbox').then(({ SandboxPage: C }) => ({ default: C })));
-const TransactionsListPage = lazy(() =>
-  import('@/features/transactions').then(({ TransactionsListPage: C }) => ({ default: C })),
-);
-const TransfersListPage = lazy(() =>
-  import('@/features/transfers').then(({ TransfersListPage: C }) => ({ default: C })),
-);
 
 const AppShell: React.FC = () => (
   <RequiredDataGate>
@@ -37,9 +29,7 @@ const AppShell: React.FC = () => (
           <Route index element={<Navigate replace to="/ledger" />} />
 
           <Route element={<DashboardPage />} path="/dashboard" />
-          <Route element={<TransactionsListPage />} path="/transactions" />
-          <Route element={<TransfersListPage />} path="/transfers" />
-          <Route element={<DailyLedgerPage />} path="/ledger" />
+          <Route element={<LedgerPage />} path="/ledger" />
           <Route element={<AccountsManagementPage />} path="/accounts/*" />
           <Route element={<DebtsManagementPage />} path="/debts/*" />
           <Route element={<BucketsPage />} path="/buckets" />

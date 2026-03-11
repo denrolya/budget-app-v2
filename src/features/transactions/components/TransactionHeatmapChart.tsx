@@ -417,45 +417,67 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
               const x = LEFT_PAD + cell.weekIdx * step;
               const y = TOP_PAD + cell.dayOfWeek * step;
               const inRange = isInRange(cell.date);
-              const isHighlighted = !inRange && (highlightDates?.includes(cell.date) ?? false);
-              const dimmed = selectable && !!selectedRange && !isDragging && !inRange && !isHighlighted;
+              const hasHighlights = !!highlightDates?.length;
+              const isHighlighted = highlightDates?.includes(cell.date) ?? false;
+              const hasActiveRange = selectable && !isDragging && !!selectedRange;
+              const hasActiveDrag = selectable && isDragging;
+
+              // Dim cells that are not in the "focus set":
+              // - If range selected/dragging: dim everything outside the range
+              // - If only highlights active (no range): dim everything not highlighted
+              const dimmed =
+                ((hasActiveRange || hasActiveDrag) && !inRange) ||
+                (!hasActiveRange && !hasActiveDrag && hasHighlights && !isHighlighted);
+
+              const handlers = selectable
+                ? {
+                    onMouseDown: () => {
+                      setIsDragging(true);
+                      setDragStart(cell.date);
+                      setDragEnd(cell.date);
+                      setSelectedRange(null);
+                    },
+                  }
+                : {};
+
               return (
-                <rect
-                  height={CELL_SIZE}
-                  opacity={dimmed ? 0.3 : 1}
-                  rx={2}
-                  strokeWidth={inRange ? 1.5 : isHighlighted ? 1 : 0}
-                  style={{ fill: heatColor(cell.value, maxValue, cssVar) }}
-                  width={CELL_SIZE}
-                  x={x}
-                  y={y}
-                  stroke={
-                    inRange ? 'hsl(var(--foreground))' : isHighlighted ? 'hsl(var(--foreground) / 0.4)' : 'transparent'
-                  }
-                  className={
-                    selectable ? 'cursor-crosshair transition-opacity duration-75' : 'transition-opacity duration-75'
-                  }
-                  key={cell.date}
-                  onMouseDown={
-                    selectable
-                      ? () => {
-                          setIsDragging(true);
-                          setDragStart(cell.date);
-                          setDragEnd(cell.date);
-                          setSelectedRange(null);
-                        }
-                      : undefined
-                  }
-                  onMouseEnter={(e) => {
-                    if (selectable && isDragging) setDragEnd(cell.date);
-                    if (cell.value > 0) setTooltip({ date: cell.date, value: cell.value, x: e.clientX, y: e.clientY });
-                    else setTooltip(null);
-                  }}
-                  onMouseLeave={() => setTooltip(null)}
-                  onMouseMove={(e) => {
-                    if (cell.value > 0) setTooltip((t) => (t ? { ...t, x: e.clientX, y: e.clientY } : null));
-                  }}
-                />
+                <React.Fragment key={cell.date}>
+                  <rect
+                    height={CELL_SIZE}
+                    opacity={dimmed ? 0.2 : 1}
+                    rx={2}
+                    strokeWidth={0}
+                    style={{ fill: heatColor(cell.value, maxValue, cssVar) }}
+                    width={CELL_SIZE}
+                    x={x}
+                    y={y}
+                    className={
+                      selectable ? 'cursor-crosshair transition-opacity duration-75' : 'transition-opacity duration-75'
+                    }
+                    {...handlers}
+                    onMouseEnter={(e) => {
+                      if (selectable && isDragging) setDragEnd(cell.date);
+                      setTooltip({ date: cell.date, value: cell.value, x: e.clientX, y: e.clientY });
+                    }}
+                    onMouseLeave={() => setTooltip(null)}
+                    onMouseMove={(e) => {
+                      setTooltip((t) => (t ? { ...t, x: e.clientX, y: e.clientY } : null));
+                    }}
+                  />
+                  {/* Subtle selection overlay — replaces the border for in-range cells */}
+                  {inRange && (
+                    <rect
+                      fill="hsl(var(--foreground) / 0.15)"
+                      height={CELL_SIZE}
+                      rx={2}
+                      strokeWidth={0}
+                      style={{ pointerEvents: 'none' }}
+                      width={CELL_SIZE}
+                      x={x}
+                      y={y}
+                    />
+                  )}
+                </React.Fragment>
               );
             })}
           </svg>
@@ -468,10 +490,10 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
           style={{ left: tooltip.x + 14, top: tooltip.y - 56 }}
           className="fixed z-50 pointer-events-none rounded-md border bg-background px-3 py-2 shadow-md text-sm"
         >
-          <p className="text-muted-foreground text-xs mb-0.5">
+          <p className={tooltip.value > 0 ? 'text-muted-foreground text-xs mb-0.5' : 'text-muted-foreground text-xs'}>
             {moment(tooltip.date, 'YYYY-MM-DD').format(MOMENT_DATE_VIEW_FORMAT_2)}
           </p>
-          <p className="font-semibold">{formatValue(tooltip.value)}</p>
+          {tooltip.value > 0 && <p className="font-semibold">{formatValue(tooltip.value)}</p>}
         </div>
       )}
     </div>

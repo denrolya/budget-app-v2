@@ -124,11 +124,18 @@ const BudgetPaceChart: React.FC<Props> = ({ budget, analytics: _analytics, displ
 
   const xTickFormat = periodDays <= 120 ? '%b %d' : '%b %Y';
 
+  // Use success/destructive for actual spend based on how it ends
+  const lastActual = actualData[actualData.length - 1]?.y ?? 0;
+  const lastPace = paceData[paceData.length - 1]?.y ?? 0;
+  const actualColor = lastActual > lastPace ? 'hsl(var(--destructive))' : 'hsl(var(--primary))';
+
   return (
     <div style={{ height: 220 }}>
       <ResponsiveLine
+        areaBaselineValue={0}
+        areaOpacity={0.08}
         colors={(d) => (d as any).color}
-        enableArea={false}
+        enableArea={true}
         enableCrosshair={false}
         enableSlices="x"
         lineWidth={2}
@@ -154,12 +161,12 @@ const BudgetPaceChart: React.FC<Props> = ({ budget, analytics: _analytics, displ
           {
             id: 'Budget limit',
             data: paceData,
-            color: 'hsl(var(--muted-foreground))',
+            color: 'hsl(var(--muted-foreground) / 0.6)',
           },
           {
             id: 'Cumulative spend',
             data: actualData,
-            color: 'hsl(var(--destructive))',
+            color: actualColor,
           },
         ]}
         legends={[
@@ -177,21 +184,42 @@ const BudgetPaceChart: React.FC<Props> = ({ budget, analytics: _analytics, displ
             symbolShape: 'circle',
           },
         ]}
-        sliceTooltip={({ slice }) => (
-          <div className="rounded-md border bg-background px-3 py-2 shadow-md text-sm">
-            <p className="text-muted-foreground text-xs mb-1">{slice.points[0]?.data.xFormatted}</p>
-            {slice.points.map((p) => (
-              <div className="flex items-center gap-2" key={p.id}>
-                <span style={{ backgroundColor: p.color }} className="inline-block h-2 w-2 rounded-full shrink-0" />
-                <span className="text-muted-foreground">{p.serieId}:</span>
-                <span className="font-semibold tabular-nums">
-                  {sym}
-                  {Number(p.data.y).toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                </span>
+        sliceTooltip={({ slice }) => {
+          const budgetPoint = slice.points.find((p) => p.serieId === 'Budget limit');
+          const actualPoint = slice.points.find((p) => p.serieId === 'Cumulative spend');
+          const budgetVal = Number(budgetPoint?.data.y ?? 0);
+          const actualVal = Number(actualPoint?.data.y ?? 0);
+          const over = actualVal > budgetVal && budgetVal > 0;
+          return (
+            <div className="rounded-md border bg-background px-3 py-2 shadow-md text-sm min-w-[170px]">
+              <p className="text-muted-foreground text-xs mb-1.5">{slice.points[0]?.data.xFormatted}</p>
+              <div className="space-y-0.5">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted-foreground text-xs">Budget pace</span>
+                  <span className="tabular-nums text-xs font-medium">
+                    {sym}
+                    {budgetVal.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-muted-foreground text-xs">Actual spend</span>
+                  <span className={`tabular-nums text-xs font-semibold ${over ? 'text-destructive' : 'text-primary'}`}>
+                    {sym}
+                    {actualVal.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                  </span>
+                </div>
+                {budgetVal > 0 && (
+                  <div className="flex items-center justify-between gap-4 border-t pt-0.5 mt-0.5">
+                    <span className="text-muted-foreground text-xs">Used</span>
+                    <span className={`tabular-nums text-xs font-semibold ${over ? 'text-destructive' : ''}`}>
+                      {Math.round((actualVal / budgetVal) * 100)}%
+                    </span>
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          );
+        }}
       />
     </div>
   );

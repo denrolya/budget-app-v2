@@ -77,8 +77,7 @@ const computeStats = (
     return total;
   };
 
-  const getValue = (row: DailyStatsDatum) =>
-    viewMode === 'count' ? row.count : getAmountValue(row);
+  const getValue = (row: DailyStatsDatum) => (viewMode === 'count' ? row.count : getAmountValue(row));
 
   let peakDay = activeDays[0];
   let peakValue = 0;
@@ -126,9 +125,7 @@ interface InlineStatsProps {
 const InlineStats: React.FC<InlineStatsProps> = ({ stats, viewMode, currency }) => {
   const isCount = viewMode === 'count';
 
-  const total = isCount
-    ? `${stats.totalCount.toLocaleString('en-US')} txns`
-    : fmtAmt(stats.totalAmount, currency);
+  const total = isCount ? `${stats.totalCount.toLocaleString('en-US')} txns` : fmtAmt(stats.totalAmount, currency);
 
   const avg = isCount
     ? `${stats.avgPerActiveDay.toFixed(1)} / day`
@@ -144,19 +141,18 @@ const InlineStats: React.FC<InlineStatsProps> = ({ stats, viewMode, currency }) 
       <span className="font-semibold tabular-nums text-foreground">{total}</span>
       <Bullet />
       <span>
-        <span className="font-semibold tabular-nums text-foreground">{stats.activeDays}</span>
-        {' '}active days
+        <span className="font-semibold tabular-nums text-foreground">{stats.activeDays}</span> active days
       </span>
       <span className="hidden sm:contents">
         <Bullet />
-        <span>avg <span className="font-semibold tabular-nums text-foreground">{avg}</span></span>
+        <span>
+          avg <span className="font-semibold tabular-nums text-foreground">{avg}</span>
+        </span>
       </span>
       <Bullet />
       <span>
         peak{' '}
-        <span className="font-semibold tabular-nums text-foreground">
-          {moment(stats.peakDate).format('D MMM')}
-        </span>
+        <span className="font-semibold tabular-nums text-foreground">{moment(stats.peakDate).format('D MMM')}</span>
         <span className="opacity-50"> ({peakSub})</span>
       </span>
     </div>
@@ -178,16 +174,14 @@ const HeatmapPanel: React.FC<HeatmapPanelProps> = ({
   showControls,
   showViewMode,
   defaultViewMode: defaultViewModeProp,
+  viewMode: viewModeProp,
   ...chartProps
 }) => {
   const thisYear = moment().year();
   const [year, setYear] = useState(yearProp ?? thisYear);
   const effectiveYear = yearProp ?? year;
 
-  const after = useMemo(
-    () => moment({ year: effectiveYear, month: 0, day: 1 }).startOf('day'),
-    [effectiveYear],
-  );
+  const after = useMemo(() => moment({ year: effectiveYear, month: 0, day: 1 }).startOf('day'), [effectiveYear]);
   const before = useMemo(
     () =>
       effectiveYear === thisYear
@@ -206,6 +200,8 @@ const HeatmapPanel: React.FC<HeatmapPanelProps> = ({
   // Resolve initial view mode: explicit prop > localStorage > 'count'
   const initialViewMode: ViewMode = defaultViewModeProp ?? getStoredViewMode();
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
+  // When a controlled viewMode is passed, honour it; otherwise use internal state
+  const effectiveViewMode: ViewMode = viewModeProp ?? viewMode;
 
   const handleViewModeChange = useCallback(
     (mode: ViewMode) => {
@@ -232,8 +228,8 @@ const HeatmapPanel: React.FC<HeatmapPanelProps> = ({
 
   const rows = data?.data ?? [];
   const stats = useMemo(
-    () => computeStats(rows, viewMode, currency, rates),
-    [rows, viewMode, currency, rates],
+    () => computeStats(rows, effectiveViewMode, currency, rates),
+    [rows, effectiveViewMode, currency, rates],
   );
 
   // Header visibility logic — mirrors the chart's own showControls semantics
@@ -249,15 +245,13 @@ const HeatmapPanel: React.FC<HeatmapPanelProps> = ({
       {/* ── Compact header: year · toggle · inline stats ── */}
       {hasHeader && (
         <div className="flex items-center flex-wrap gap-x-2 gap-y-1.5 px-4 pt-2 pb-1 min-h-9">
-          {showYearPicker && (
-            <YearPicker year={effectiveYear} onChange={handleYearChange} />
-          )}
+          {showYearPicker && <YearPicker year={effectiveYear} onChange={handleYearChange} />}
 
           {showToggle && (
             <ToggleGroup
               size="sm"
               type="single"
-              value={viewMode}
+              value={effectiveViewMode}
               onValueChange={(v) => {
                 if (v) handleViewModeChange(v as ViewMode);
               }}
@@ -274,9 +268,7 @@ const HeatmapPanel: React.FC<HeatmapPanelProps> = ({
             </ToggleGroup>
           )}
 
-          {showStatsStrip && (
-            <InlineStats currency={currency} stats={stats} viewMode={viewMode} />
-          )}
+          {showStatsStrip && <InlineStats currency={currency} stats={stats} viewMode={effectiveViewMode} />}
         </div>
       )}
 
@@ -284,13 +276,13 @@ const HeatmapPanel: React.FC<HeatmapPanelProps> = ({
       <TransactionHeatmapChart
         {...chartProps}
         compact
-        showControls={false}
-        showViewMode={false}
-        defaultViewMode={initialViewMode}
-        viewMode={viewMode}
         currency={currency}
         data={data}
+        defaultViewMode={initialViewMode}
         isLoading={isLoading}
+        showControls={false}
+        showViewMode={false}
+        viewMode={effectiveViewMode}
         year={effectiveYear}
         onViewModeChange={handleViewModeChange}
         onYearChange={handleYearChange}

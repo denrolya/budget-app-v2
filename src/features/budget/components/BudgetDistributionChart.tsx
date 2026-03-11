@@ -1,6 +1,6 @@
-import { ResponsivePie } from '@nivo/pie';
 import React, { useMemo } from 'react';
 
+import { cn } from '@/lib/utils';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
@@ -16,10 +16,18 @@ interface Props {
   rates: ConvertedValues | null;
 }
 
-const nivoTheme = {
-  background: 'transparent',
-  text: { fill: 'hsl(var(--muted-foreground))', fontSize: 11 },
-};
+const PALETTE = [
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))',
+  'hsl(220 70% 50%)',
+  'hsl(160 60% 45%)',
+  'hsl(30 80% 55%)',
+  'hsl(280 65% 55%)',
+  'hsl(60 75% 45%)',
+];
 
 const getAllIds = (cat: Category): number[] => {
   const ids: number[] = [cat.id];
@@ -56,47 +64,67 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, displayCurrency, 
           }
         }
         if (total <= 0) return null;
-        return {
-          id: cat.name,
-          label: cat.name,
-          value: Math.round(total),
-        };
+        return { name: cat.name, value: Math.round(total) };
       })
-      .filter(Boolean) as { id: string; label: string; value: number }[];
+      .filter(Boolean)
+      .sort((a, b) => b!.value - a!.value) as { name: string; value: number }[];
   }, [catData, analytics, displayCurrency, rates]);
 
   if (chartData.length === 0) {
-    return <div className="flex items-center justify-center h-48 text-sm text-muted-foreground">No spending data</div>;
+    return <div className="flex items-center justify-center h-40 text-sm text-muted-foreground">No spending data</div>;
   }
 
   const total = chartData.reduce((s, d) => s + d.value, 0);
+  const maxValue = chartData[0]?.value ?? 1;
 
   return (
-    <div style={{ height: 240 }} className="relative">
-      <ResponsivePie
-        activeOuterRadiusOffset={6}
-        arcLinkLabelsColor={{ from: 'color' }}
-        arcLinkLabelsSkipAngle={10}
-        arcLinkLabelsStraightLength={8}
-        arcLinkLabelsTextColor="hsl(var(--foreground))"
-        arcLinkLabelsThickness={1}
-        colors={{ scheme: 'red_grey' }}
-        cornerRadius={3}
-        data={chartData}
-        enableArcLabels={false}
-        enableArcLinkLabels={true}
-        innerRadius={0.6}
-        margin={{ top: 16, right: 100, bottom: 16, left: 100 }}
-        padAngle={1.5}
-        theme={nivoTheme}
-        tooltip={({ datum }) => (
-          <div className="rounded-md border bg-background px-3 py-2 shadow-md text-sm">
-            <p className="text-muted-foreground text-xs mb-1">{datum.label}</p>
-            <p className="font-semibold">{fmtAmt(datum.value, displayCurrency)}</p>
-            <p className="text-muted-foreground text-xs">{((datum.value / total) * 100).toFixed(1)}% of total</p>
-          </div>
-        )}
-      />
+    <div className="space-y-2.5">
+      {/* Stacked proportional bar */}
+      <div className="flex h-2 rounded-full overflow-hidden gap-px">
+        {chartData.map((item, idx) => (
+          <div
+            title={`${item.name}: ${((item.value / total) * 100).toFixed(1)}%`}
+            style={{
+              width: `${(item.value / total) * 100}%`,
+              backgroundColor: PALETTE[idx % PALETTE.length],
+            }}
+            key={item.name}
+          />
+        ))}
+      </div>
+
+      {/* Ranked list */}
+      <div className="space-y-1.5 pt-1">
+        {chartData.map((item, idx) => {
+          const pct = total > 0 ? (item.value / total) * 100 : 0;
+          const color = PALETTE[idx % PALETTE.length];
+          return (
+            <div className="flex items-center gap-2.5" key={item.name}>
+              <span aria-hidden style={{ backgroundColor: color }} className="h-2 w-2 rounded-sm shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-0.5">
+                  <span className="text-xs font-medium truncate">{item.name}</span>
+                  <span className="text-xs text-muted-foreground tabular-nums shrink-0 ml-2">{pct.toFixed(0)}%</span>
+                </div>
+                <div className="h-1 rounded-full bg-muted overflow-hidden">
+                  <div
+                    style={{ width: `${(item.value / maxValue) * 100}%`, backgroundColor: color, opacity: 0.7 }}
+                    className={cn('h-full rounded-full transition-all duration-500')}
+                  />
+                </div>
+              </div>
+              <span className="text-xs font-semibold tabular-nums shrink-0 w-20 text-right">
+                {fmtAmt(item.value, displayCurrency)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="pt-1 border-t text-right">
+        <span className="text-xs text-muted-foreground">Total </span>
+        <span className="text-xs font-semibold tabular-nums">{fmtAmt(total, displayCurrency)}</span>
+      </div>
     </div>
   );
 };

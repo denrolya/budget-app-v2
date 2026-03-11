@@ -1,5 +1,5 @@
 import { useDroppable, useDraggable } from '@dnd-kit/core';
-import { GripVertical, X } from 'lucide-react';
+import { GripVertical, Target, X } from 'lucide-react';
 import React, { useState } from 'react';
 
 import CellPopover from '@/components/common/CellPopover';
@@ -14,13 +14,11 @@ import { Bucket, BucketEntry, UnassignedEntry } from '../models/types';
 /** accountId dragged from unassigned zone */
 export const unallocatedDragId = (accountId: number) => `unallocated:${accountId}`;
 /** specific bucket allocation dragged */
-export const allocationDragId = (accountId: number, bucketId: string) =>
-  `allocation:${accountId}:${bucketId}`;
+export const allocationDragId = (accountId: number, bucketId: string) => `allocation:${accountId}:${bucketId}`;
 
-export function parseDragId(id: string):
-  | { type: 'unallocated'; accountId: number }
-  | { type: 'allocation'; accountId: number; bucketId: string }
-  | null {
+export function parseDragId(
+  id: string,
+): { type: 'unallocated'; accountId: number } | { type: 'allocation'; accountId: number; bucketId: string } | null {
   if (id.startsWith('unallocated:')) {
     return { type: 'unallocated', accountId: Number(id.slice(12)) };
   }
@@ -66,18 +64,15 @@ export const DraggableBucketEntry: React.FC<DraggableBucketEntryProps> = ({
 
   return (
     <div
-      ref={setNodeRef}
       style={style}
       className={cn(
         'flex items-center gap-2 rounded-md border bg-background px-2 py-2 select-none transition-opacity',
         isDragging && 'opacity-40',
       )}
+      ref={setNodeRef}
       {...attributes}
     >
-      <span
-        {...listeners}
-        className="text-muted-foreground/40 hover:text-muted-foreground cursor-grab shrink-0"
-      >
+      <span {...listeners} className="text-muted-foreground/40 hover:text-muted-foreground cursor-grab shrink-0">
         <GripVertical className="h-3.5 w-3.5" />
       </span>
 
@@ -99,13 +94,13 @@ export const DraggableBucketEntry: React.FC<DraggableBucketEntryProps> = ({
               )}
             </div>
           }
+          contentClassName="w-56"
+          onCancel={() => setEditValue(String(Math.round(entry.amount)))}
           onOpen={() => setEditValue(String(Math.round(entry.amount)))}
           onSave={() => {
             const n = parseFloat(editValue);
             if (!isNaN(n) && n > 0) onUpdateAmount(n);
           }}
-          onCancel={() => setEditValue(String(Math.round(entry.amount)))}
-          contentClassName="w-56"
         >
           <div className="space-y-2">
             <div>
@@ -118,13 +113,13 @@ export const DraggableBucketEntry: React.FC<DraggableBucketEntryProps> = ({
             <div className="flex items-center gap-1.5">
               <span className="text-sm text-muted-foreground shrink-0">{sym}</span>
               <Input
-                type="number"
-                min={1}
-                max={entry.maxAmount}
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                className="h-7 text-sm"
                 autoFocus
+                max={entry.maxAmount}
+                min={1}
+                type="number"
+                value={editValue}
+                className="h-7 text-sm"
+                onChange={(e) => setEditValue(e.target.value)}
               />
             </div>
             <p className="text-[10px] text-muted-foreground">
@@ -136,11 +131,11 @@ export const DraggableBucketEntry: React.FC<DraggableBucketEntryProps> = ({
       </div>
 
       <button
-        type="button"
         aria-label={`Remove ${entry.account.name} from bucket`}
+        type="button"
         className="ml-0.5 shrink-0 text-muted-foreground/40 hover:text-destructive"
-        onPointerDown={(e) => e.stopPropagation()}
         onClick={onRemove}
+        onPointerDown={(e) => e.stopPropagation()}
       >
         <X className="h-3.5 w-3.5" />
       </button>
@@ -155,10 +150,7 @@ interface DraggableUnassignedItemProps {
   baseCurrency: string;
 }
 
-export const DraggableUnassignedItem: React.FC<DraggableUnassignedItemProps> = ({
-  entry,
-  baseCurrency,
-}) => {
+export const DraggableUnassignedItem: React.FC<DraggableUnassignedItemProps> = ({ entry, baseCurrency }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: unallocatedDragId(entry.account.id),
   });
@@ -169,20 +161,18 @@ export const DraggableUnassignedItem: React.FC<DraggableUnassignedItemProps> = (
 
   return (
     <div
-      ref={setNodeRef}
       style={style}
       className={cn(
         'flex items-center gap-2 rounded-md border bg-background px-2 py-2 select-none transition-opacity cursor-grab',
         isDragging && 'opacity-40',
       )}
+      ref={setNodeRef}
       {...attributes}
       {...listeners}
     >
       <GripVertical className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
       <span className="flex-1 truncate text-sm font-medium">{entry.account.name}</span>
-      {entry.isPartial && (
-        <span className="shrink-0 text-[10px] text-amber-500">partial</span>
-      )}
+      {entry.isPartial && <span className="shrink-0 text-[10px] text-amber-500">partial</span>}
       <span className="shrink-0 tabular-nums text-sm text-muted-foreground">
         {baseSym}
         {entry.unallocatedBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
@@ -231,6 +221,7 @@ interface BucketZoneProps {
   totalBalance: number;
   onRemove: (accountId: number) => void;
   onUpdateAmount: (accountId: number, amount: number) => void;
+  onSetTarget: (amount: number | null) => void;
 }
 
 export const DroppableBucketZone: React.FC<BucketZoneProps> = ({
@@ -240,20 +231,24 @@ export const DroppableBucketZone: React.FC<BucketZoneProps> = ({
   totalBalance,
   onRemove,
   onUpdateAmount,
+  onSetTarget,
 }) => {
   const { setNodeRef, isOver } = useDroppable({ id: bucket.id });
+  const [targetEditValue, setTargetEditValue] = useState('');
 
   const bucketTotal = entries.reduce((s, e) => s + e.allocatedBalance, 0);
   const pct = totalBalance > 0 ? (bucketTotal / totalBalance) * 100 : 0;
   const baseSym = CURRENCIES[baseCurrency as CURRENCY_CODE]?.symbol ?? baseCurrency;
+  const target = bucket.targetAmount ?? null;
+  const targetPct = target && target > 0 ? Math.min((bucketTotal / target) * 100, 100) : null;
 
   return (
     <div
-      ref={setNodeRef}
       className={cn(
         'rounded-lg border transition-colors',
         isOver ? 'border-primary bg-primary/5' : 'border-border bg-card',
       )}
+      ref={setNodeRef}
     >
       {/* Bucket header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-border/60">
@@ -261,25 +256,96 @@ export const DroppableBucketZone: React.FC<BucketZoneProps> = ({
           <span className="text-base leading-none">{bucket.emoji}</span>
           <span className="text-sm font-semibold">{bucket.name}</span>
         </div>
-        {bucketTotal > 0 && (
-          <div className="text-right">
-            <div className="text-sm font-semibold tabular-nums">
-              {baseSym}
-              {bucketTotal.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-            </div>
-            <div className="text-[10px] text-muted-foreground">{pct.toFixed(1)}% of portfolio</div>
+        <div className="flex items-center gap-2">
+          {/* Target edit button */}
+          <div onPointerDown={(e) => e.stopPropagation()}>
+            <CellPopover
+              trigger={
+                <button
+                  aria-label="Set target"
+                  type="button"
+                  className={cn(
+                    'p-1 rounded transition-colors',
+                    target ? 'text-primary/70 hover:text-primary' : 'text-muted-foreground/30 hover:text-muted-foreground',
+                  )}
+                >
+                  <Target className="h-3 w-3" />
+                </button>
+              }
+              contentClassName="w-52"
+              onCancel={() => setTargetEditValue(target ? String(Math.round(target)) : '')}
+              onOpen={() => setTargetEditValue(target ? String(Math.round(target)) : '')}
+              onSave={() => {
+                const n = parseFloat(targetEditValue);
+                onSetTarget(n > 0 ? n : null);
+              }}
+            >
+              <div className="space-y-2">
+                <p className="text-xs font-medium">Target amount ({baseCurrency})</p>
+                <p className="text-[10px] text-muted-foreground">Set a funding goal for this bucket</p>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm text-muted-foreground shrink-0">{baseSym}</span>
+                  <Input
+                    autoFocus
+                    min={0}
+                    placeholder="e.g. 15000"
+                    type="number"
+                    value={targetEditValue}
+                    className="h-7 text-sm"
+                    onChange={(e) => setTargetEditValue(e.target.value)}
+                  />
+                </div>
+                {target && (
+                  <button
+                    type="button"
+                    className="text-xs text-destructive hover:underline"
+                    onClick={() => { onSetTarget(null); setTargetEditValue(''); }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
+                    Clear target
+                  </button>
+                )}
+              </div>
+            </CellPopover>
           </div>
-        )}
+
+          {bucketTotal > 0 && (
+            <div className="text-right">
+              <div className="text-sm font-semibold tabular-nums">
+                {baseSym}
+                {bucketTotal.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                {target && (
+                  <span className="text-[10px] font-normal text-muted-foreground ml-1">
+                    / {baseSym}{target.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                  </span>
+                )}
+              </div>
+              {target ? (
+                <div className="mt-0.5 w-full h-1 rounded-full bg-muted overflow-hidden">
+                  <div
+                    style={{ width: `${targetPct}%` }}
+                    className={cn(
+                      'h-full rounded-full transition-all duration-500',
+                      targetPct! >= 100 ? 'bg-green-500' : targetPct! >= 60 ? 'bg-yellow-500' : 'bg-destructive/70',
+                    )}
+                  />
+                </div>
+              ) : (
+                <div className="text-[10px] text-muted-foreground">{pct.toFixed(1)}% of portfolio</div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Entries */}
       <div className="p-2 space-y-1.5 min-h-[52px]">
         {entries.map((entry) => (
           <DraggableBucketEntry
-            key={entry.account.id}
-            entry={entry}
-            bucketId={bucket.id}
             baseCurrency={baseCurrency}
+            bucketId={bucket.id}
+            entry={entry}
+            key={entry.account.id}
             onRemove={() => onRemove(entry.account.id)}
             onUpdateAmount={(amount) => onUpdateAmount(entry.account.id, amount)}
           />
@@ -307,32 +373,25 @@ interface UnassignedZoneProps {
   totalBalance: number;
 }
 
-export const DroppableUnassignedZone: React.FC<UnassignedZoneProps> = ({
-  entries,
-  baseCurrency,
-}) => {
+export const DroppableUnassignedZone: React.FC<UnassignedZoneProps> = ({ entries, baseCurrency }) => {
   const { setNodeRef, isOver } = useDroppable({ id: '__unassigned__' });
 
   if (entries.length === 0) return null;
 
   return (
     <div
-      ref={setNodeRef}
       className={cn(
         'rounded-lg border transition-colors',
         isOver ? 'border-primary bg-primary/5' : 'border-dashed border-muted-foreground/30',
       )}
+      ref={setNodeRef}
     >
       <div className="px-3 py-2 border-b border-border/40">
         <span className="text-sm font-semibold text-muted-foreground">📦 Unassigned</span>
       </div>
       <div className="p-2 space-y-1.5">
         {entries.map((entry) => (
-          <DraggableUnassignedItem
-            key={entry.account.id}
-            entry={entry}
-            baseCurrency={baseCurrency}
-          />
+          <DraggableUnassignedItem baseCurrency={baseCurrency} entry={entry} key={entry.account.id} />
         ))}
       </div>
     </div>

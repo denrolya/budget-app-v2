@@ -159,7 +159,7 @@ const Header: React.FC<
         </div>
         <div className="flex items-center gap-2">{children}</div>
       </div>
-      {subContent && <div className="mt-2">{subContent}</div>}
+      {subContent && <div className="mt-1.5">{subContent}</div>}
     </header>
   );
 };

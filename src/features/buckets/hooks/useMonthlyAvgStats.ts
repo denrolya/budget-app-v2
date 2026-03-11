@@ -21,17 +21,13 @@ export function useMonthlyAvgStats() {
   const avgExpense = useMemo(() => {
     if (!data || data.length === 0) return null;
     const nonZero = data.filter((d) => d.expense > 0);
-    return nonZero.length > 0
-      ? Math.round(nonZero.reduce((s, d) => s + d.expense, 0) / nonZero.length)
-      : null;
+    return nonZero.length > 0 ? Math.round(nonZero.reduce((s, d) => s + d.expense, 0) / nonZero.length) : null;
   }, [data]);
 
   const avgIncome = useMemo(() => {
     if (!data || data.length === 0) return null;
     const nonZero = data.filter((d) => d.income > 0);
-    return nonZero.length > 0
-      ? Math.round(nonZero.reduce((s, d) => s + d.income, 0) / nonZero.length)
-      : null;
+    return nonZero.length > 0 ? Math.round(nonZero.reduce((s, d) => s + d.income, 0) / nonZero.length) : null;
   }, [data]);
 
   return { avgExpense, avgIncome, isLoading };
