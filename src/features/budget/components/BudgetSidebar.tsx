@@ -48,8 +48,8 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
     { monthly: [], yearly: [], custom: [] },
   );
 
-  const handleCreated = (budget: BudgetDTO) => {
-    navigate(`/budget/${budget.id}`);
+  const handleCreated = (budget: BudgetDTO, fillFromHistory?: boolean) => {
+    navigate(`/budget/${budget.id}`, fillFromHistory ? { state: { fillFromHistory: true } } : undefined);
   };
 
   const handleDelete = async (e: React.MouseEvent, b: BudgetDTO) => {

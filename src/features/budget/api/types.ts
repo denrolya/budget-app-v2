@@ -46,12 +46,17 @@ export interface BudgetAnalyticsItem {
   convertedValues: Record<string, BudgetCurrencyValues>;
 }
 
+export interface BudgetHistoryItem extends BudgetAnalyticsItem {
+  activeMonths: number; // distinct calendar months with ≥1 transaction
+  predictedValues: Record<string, BudgetCurrencyValues>; // recency-weighted monthly prediction per currency
+}
+
 export interface BudgetAnalyticsResponse {
   data: BudgetAnalyticsItem[];
 }
 
 export interface BudgetHistoryAveragesResponse {
-  data: BudgetAnalyticsItem[];
+  data: BudgetHistoryItem[];
   months: number;
   from: string;
   to: string;

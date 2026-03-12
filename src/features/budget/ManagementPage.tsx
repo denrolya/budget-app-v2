@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import { Navigate, Route, Routes, useMatch, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useMatch, useNavigate, useParams } from 'react-router-dom';
 
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { MOMENT_DATE_VIEW_FORMAT_2 } from '@/constants/datetime';
@@ -72,6 +72,8 @@ const BudgetIndex: React.FC = () => {
 const BudgetDetailRoute: React.FC = () => {
   const { budgetId } = useParams<{ budgetId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const autoOpenFill = !!(location.state as Record<string, unknown> | null)?.fillFromHistory;
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>('EUR');
 
   const id = budgetId ? Number(budgetId) : null;
@@ -154,7 +156,7 @@ const BudgetDetailRoute: React.FC = () => {
 
         <BudgetDisplayCurrency value={displayCurrency} onChange={setDisplayCurrency} />
 
-        <BudgetFillFromHistoryButton budget={budget} displayCurrency={displayCurrency} rates={rates} />
+        <BudgetFillFromHistoryButton autoOpen={autoOpenFill} budget={budget} displayCurrency={displayCurrency} rates={rates} />
 
         <BudgetExportButton analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
 

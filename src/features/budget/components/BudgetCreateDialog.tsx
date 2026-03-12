@@ -16,7 +16,7 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   budgets: BudgetDTO[];
-  onCreated?: (budget: BudgetDTO) => void;
+  onCreated?: (budget: BudgetDTO, fillFromHistory?: boolean) => void;
 }
 
 const currentYear = new Date().getFullYear();
@@ -71,7 +71,7 @@ const BudgetCreateDialog: React.FC<Props> = ({ open, onOpenChange, budgets, onCr
 
   const isValid = () => periodType !== 'custom' || (!!startDate && !!endDate);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (fillFromHistory = false) => {
     const dates = computeDates();
     if (!dates) return;
 
@@ -83,7 +83,7 @@ const BudgetCreateDialog: React.FC<Props> = ({ open, onOpenChange, budgets, onCr
     };
 
     const budget = await mutateAsync(payload);
-    onCreated?.(budget);
+    onCreated?.(budget, fillFromHistory);
     onOpenChange(false);
     setName('');
     setCopiedFromId('');
@@ -222,7 +222,10 @@ const BudgetCreateDialog: React.FC<Props> = ({ open, onOpenChange, budgets, onCr
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button disabled={!isValid() || isPending} onClick={handleSubmit}>
+          <Button disabled={!isValid() || isPending} variant="secondary" onClick={() => handleSubmit(true)}>
+            {isPending ? 'Creating…' : 'Create & Fill'}
+          </Button>
+          <Button disabled={!isValid() || isPending} onClick={() => handleSubmit(false)}>
             {isPending ? 'Creating…' : 'Create'}
           </Button>
         </DialogFooter>

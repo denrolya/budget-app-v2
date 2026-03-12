@@ -43,7 +43,7 @@ export const useCategoryDailyStats = (id: number | null) =>
 
 export const useHistoryAverages = (id: number | null, months = 6) =>
   useQuery<BudgetHistoryAveragesResponse>({
-    queryKey: queryKeys.historyAverages(id!),
+    queryKey: queryKeys.historyAverages(id!, months),
     queryFn: () => budgetService.historyAverages(id!, months),
     enabled: id !== null,
     staleTime: 1000 * 60 * 10,

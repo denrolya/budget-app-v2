@@ -145,11 +145,13 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
     [openForm],
   );
 
-  // Double-shift opens command palette
+  // Double-shift opens command palette.
+  // Ignore shift presses combined with Cmd/Ctrl/Alt so shortcuts like Cmd+Shift+Z
+  // don't accidentally trigger the palette.
   useReactHotkeysHook(
     'shift',
     (event) => {
-      event.preventDefault();
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
       const now = Date.now();
       if (now - lastShiftRef.current < 400) {
         toggleHotkeysDialog();

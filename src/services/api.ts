@@ -29,6 +29,12 @@ api.interceptors.response.use(
   },
   (error) => {
     requestProgress.decrement();
+    const profilerLink = error.response?.headers?.['x-debug-token-link'];
+    if (profilerLink) {
+      const status = error.response?.status ?? '?';
+      const url = error.config?.url ?? '';
+      console.error(`[API ${status}] ${url}\n  Symfony profiler: ${profilerLink}`);
+    }
     return Promise.reject(error);
   },
 );
