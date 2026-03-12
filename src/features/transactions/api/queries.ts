@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { type Sorting } from '@/types/pagination';
 import { type UseListReturn, useListState } from '@/hooks/useListState';
 import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
-import Transaction, { TransactionFactory } from '@/features/transactions/models/Transaction';
+import Transaction, { useTransactionFactory } from '@/features/transactions/models/Transaction';
 import { FormType, useFormSubmitListener } from '@/contexts/Form';
 import { useBaseCurrency } from '@/features/auth';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
@@ -81,7 +81,7 @@ export const useList = (options: UseTransactionsListOptions = {}): UseTransactio
   } = options;
 
   // Must exist before queryFn uses it
-  const { createTransaction } = TransactionFactory();
+  const { createTransaction } = useTransactionFactory();
 
   const { data, ...listState } = useListState<TransactionFilters, TransformedResponse>({
     enabled,

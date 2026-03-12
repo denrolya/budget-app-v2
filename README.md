@@ -1,115 +1,72 @@
-# Financial Budgeting Application
+# Budget App — Frontend
 
-This is a financial budgeting application built using **React**, **TypeScript**, and **Vite**. The application allows users to manage their financial transactions (incomes and expenses), view statistics, and navigate using a secure private route setup.
+Personal finance management application built with **React 18**, **TypeScript**, and **Vite**.
 
-## Table of Contents
+## Tech Stack
 
-- [System Requirements](#system-requirements)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Testing](#testing)
-- [Features](#features)
-- [Contributing](#contributing)
-- [License](#license)
+- **React 18** + **TypeScript** (strict)
+- **Vite** — build tool and dev server
+- **TanStack Query v5** — server state, caching, mutations
+- **shadcn/ui** + **Tailwind CSS** — component library and styling
+- **Nivo** — data visualization (bar, pie, treemap, heatmap)
+- **dnd-kit** — drag-and-drop (Buckets page)
+- **Moment.js** — date/time handling
+- **Axios** — HTTP client
+- **Vitest** + **Testing Library** — unit and integration tests
 
-## System Requirements
+## Requirements
 
-Ensure that your system meets the following requirements before running the application:
+- Node.js v18+
+- pnpm v9+
 
-- **Node.js**: v18 or higher
-- **npm**: v10 or higher
-- **Vite**: Latest stable version (comes bundled with the installation)
-
-## Installation
-
-Follow these steps to install and set up the application locally:
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/your-repository-url/financial-budgeting-app.git
-   ```
-
-2. Navigate to the project directory:
-
-   ```bash
-   cd financial-budgeting-app
-   ```
-
-3. Install the dependencies:
-
-   ```bash
-   npm i
-   ```
-
-## Usage
-
-To run the application locally:
-
-1. Start the development server:
-
-   ```bash
-   npm run dev
-   ```
-
-2. Open your browser and navigate to:
-
-   ```
-   http://localhost:5173
-   ```
-
-   The application should be running with hot-reload enabled for development.
-
-### Building for Production
-
-To build the application for production:
+## Getting Started
 
 ```bash
-npm run build
-```
+# Install dependencies
+pnpm install
 
-The optimized and minified build will be created in the `dist/` folder.
+# Start dev server (http://localhost:5173)
+pnpm dev
+
+# Type-check
+pnpm tsc --noEmit
+
+# Lint
+pnpm lint
+
+# Build for production
+pnpm build
+```
 
 ## Testing
 
-We use **Vitest** and **Testing Library** to test the components.
-
-### Running Unit and Integration Tests
-
-To run the tests with coverage:
-
 ```bash
-npm run test
+# Run tests
+pnpm test
+
+# Interactive UI
+pnpm test:ui
+
+# Coverage report
+pnpm test:coverage
 ```
-
-For a more detailed output or interactive mode:
-
-```bash
-npm run test:ui
-```
-
-### Coverage Report
-
-To generate and view coverage statistics:
-
-```bash
-npm run test:coverage
-```
-
-The coverage report can be found in the `coverage/` directory, and you can view it by opening `coverage/index.html` in your browser.
 
 ## Features
 
-- **Transaction Management**: Add, edit, and remove incomes and expenses.
-- **Data Visualization**: View charts showing your financial trends.
-- **Private Routes**: Secure routes with authentication checks.
-- **Dark Mode Support**: Switch between light and dark themes seamlessly.
-- **Responsive Design**: Fully responsive UI that works on all devices.
+- **Transactions** — create, edit, bulk-import incomes and expenses with inline editing
+- **Transfers** — track money movements between accounts with exchange rate tracking
+- **Accounts** — manage bank, cash, internet, and crypto accounts; bank integration via Wise / Monobank webhooks
+- **Categories** — hierarchical category tree with income/expense split
+- **Debts** — track money owed to and from others
+- **Statistics** — money flow charts, category distribution donuts, timeline charts, balance history
+- **Buckets** — allocate account balances into purpose buckets (emergency fund, investments, etc.) with health scoring
+- **Ledger** — unified transactions + transfers timeline view
+- **Exchange Rates** — live rates via Fixer, Monobank, and Wise APIs with currency conversion
+- **Dark Mode** — system-aware with manual override (Tron theme included)
+- **PWA** — installable, offline-capable
+- **Command Palette** — keyboard-driven navigation
+- **Hotkeys** — configurable keyboard shortcuts
 
-## Contributing
+## Code Standards
 
-We welcome contributions from the community! Please read our [contributing guidelines](CONTRIBUTING.md) before submitting any pull requests.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+See [CLAUDE.md](./CLAUDE.md) for the full code style guide, naming conventions, architecture rules, and API layer patterns.

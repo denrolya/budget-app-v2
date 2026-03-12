@@ -2,12 +2,12 @@ import { forwardRef, ReactNode, useCallback, useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
 import MoneyValue from '@/components/common/MoneyValue';
-import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
+import Typeahead, { TypeaheadProps } from '@/components/ui/Typeahead';
 import Debt from '@/features/debts/models/Debt';
 import { useDebts } from '@/hooks/financeData';
 
 type DebtTypeaheadProps = Omit<
-  TypeaheadV2Props<Debt, string>,
+  TypeaheadProps<Debt, string>,
   'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'
 > & {
   className?: string;
@@ -47,7 +47,7 @@ const DebtTypeahead = forwardRef<HTMLInputElement, DebtTypeaheadProps>(
       return map;
     }, [debts]);
 
-    const filterFn: TypeaheadV2Props<Debt, string>['filterFn'] = useCallback(
+    const filterFn: TypeaheadProps<Debt, string>['filterFn'] = useCallback(
       (debt: Debt, input: string) => {
         const q = input.trim().toLowerCase();
         if (!q) return true;
@@ -65,7 +65,7 @@ const DebtTypeahead = forwardRef<HTMLInputElement, DebtTypeaheadProps>(
       [searchIndex],
     );
 
-    const renderElement: TypeaheadV2Props<Debt, string>['renderElement'] = useCallback(
+    const renderElement: TypeaheadProps<Debt, string>['renderElement'] = useCallback(
       (el): ReactNode => (
         <div className="flex items-center justify-between w-full min-w-0 gap-3">
           <div className="flex items-center gap-2 min-w-0">
@@ -93,7 +93,7 @@ const DebtTypeahead = forwardRef<HTMLInputElement, DebtTypeaheadProps>(
     );
 
     return (
-      <TypeaheadV2<Debt, string>
+      <Typeahead<Debt, string>
         filterFn={filterFn}
         labelField="debtorWithCurrency"
         multiple={multiple}

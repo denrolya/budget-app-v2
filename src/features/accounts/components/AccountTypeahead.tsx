@@ -2,14 +2,14 @@ import { forwardRef, ReactNode, useCallback, useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
 import MoneyValue from '@/components/common/MoneyValue';
-import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
+import Typeahead, { TypeaheadProps } from '@/components/ui/Typeahead';
 import { useAccountsWithDefaultOrder } from '@/hooks/financeData';
 
 import AccountPill from '../components/Pill';
 import Account from '../models/Account';
 
 type AccountTypeaheadProps = Omit<
-  TypeaheadV2Props<Account, string>,
+  TypeaheadProps<Account, string>,
   'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'
 > & {
   className?: string;
@@ -67,7 +67,7 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(
       );
     }, []);
 
-    const filterFn: TypeaheadV2Props<Account, string>['filterFn'] = useCallback(
+    const filterFn: TypeaheadProps<Account, string>['filterFn'] = useCallback(
       (account: Account, input: string) => {
         const q = input.trim().toLowerCase();
         if (!q) return true;
@@ -85,7 +85,7 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(
     );
 
     return (
-      <TypeaheadV2<Account, string>
+      <Typeahead<Account, string>
         hideCheckmarkColumn
         filterFn={filterFn}
         groupBy="type"

@@ -77,7 +77,7 @@ export class Transaction {
   }
 }
 
-export const TransactionFactory = () => {
+export const useTransactionFactory = () => {
   const { list: categories } = useCategories();
   const accounts = useAccounts();
 

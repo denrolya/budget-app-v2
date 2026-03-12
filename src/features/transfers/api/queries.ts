@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useBaseCurrency } from '@/features/auth';
 import { FormType, useFormSubmitListener } from '@/contexts/Form';
-import { TransactionFactory } from '@/features/transactions';
+import { useTransactionFactory } from '@/features/transactions';
 import { queryKeys } from '@/features/transfers/api/keys';
 import { transferService } from '@/features/transfers/api/service';
 import Transfer from '@/features/transfers/models/Transfer';
@@ -70,7 +70,7 @@ export const useList = (options: UseTransfersListOptions = {}): UseTransfersList
     queryKeyBase = queryKeys.all,
   } = options;
 
-  const { createTransaction } = TransactionFactory();
+  const { createTransaction } = useTransactionFactory();
 
   const { data, ...listState } = useListState<TransferFilters, TransformedResponse>({
     enabled,

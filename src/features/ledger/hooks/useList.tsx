@@ -9,7 +9,7 @@ import { FormType, useFormSubmitListener } from '@/contexts/Form';
 import {
   Transaction,
   TransactionFilters,
-  TransactionFactory,
+  useTransactionFactory,
   queryKeys as transactionQueryKeys,
 } from '@/features/transactions';
 import { Transfer, TransferFilters, queryKeys as transferQueryKeys } from '@/features/transfers';
@@ -154,7 +154,7 @@ export const useTransactionsAndTransfersList = ({
   const queryKey = useMemo(() => [...ledgerQueryKeys.all, buildLedgerQueryKey(queryParams)] as const, [queryParams]);
 
   // ─ Factory (must be called unconditionally as a hook) ─────────────────────
-  const { createTransaction } = TransactionFactory();
+  const { createTransaction } = useTransactionFactory();
 
   // ─ Single unified query ────────────────────────────────────────────────────
   const query = useQuery({

@@ -110,13 +110,23 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
     [analyticsMap, displayCurrency, rates],
   );
 
-  const getPlanned = useCallback(
-    (line: BudgetLineDTO | null): number | null => {
-      if (!line) return null;
-      const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
-      return rate !== null ? line.plannedAmount * rate : null;
+  const getPlannedRollup = useCallback(
+    (cat: Category): number | null => {
+      const ids = getAllIds(cat);
+      let total = 0;
+      let hasAny = false;
+      for (const id of ids) {
+        const line = linesMap.get(id);
+        if (!line) continue;
+        const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
+        if (rate !== null) {
+          total += line.plannedAmount * rate;
+          hasAny = true;
+        }
+      }
+      return hasAny ? total : null;
     },
-    [displayCurrency, rates],
+    [linesMap, displayCurrency, rates],
   );
 
   const handleCategoryClick = useCallback((categoryId: number, categoryName: string) => {
@@ -171,7 +181,7 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
         isExpenseSection={isExpenseSection}
         isSaving={isSaving}
         line={linesMap.get(cat.id) ?? null}
-        plannedInDisplayCurrency={getPlanned(linesMap.get(cat.id) ?? null)}
+        plannedInDisplayCurrency={getPlannedRollup(cat)}
         rates={rates}
         sparklineData={dailyStatsMap.get(cat.id)?.days}
         key={cat.id}

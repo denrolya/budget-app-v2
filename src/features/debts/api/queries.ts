@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { useList as useAccountsQuery } from '@/features/accounts';
 import { useList as useCategoriesQuery } from '@/features/categories';
-import { TransactionFactory, transactionService, type Transaction } from '@/features/transactions';
+import { useTransactionFactory, transactionService, type Transaction } from '@/features/transactions';
 
 import type Debt from '..//models/Debt';
 import { mapDebtDTOToModel } from '../lib/mapDebtDTOToModel';
@@ -13,7 +13,7 @@ import { debtService } from './service';
 export const useTransactions = (id: number | null) => {
   const accounts = useAccountsQuery();
   const categories = useCategoriesQuery();
-  const { createTransaction } = TransactionFactory();
+  const { createTransaction } = useTransactionFactory();
 
   return useQuery<Transaction[], Error>({
     queryKey: queryKeys.transactions(id ?? 0),

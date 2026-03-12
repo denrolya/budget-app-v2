@@ -1,12 +1,12 @@
 import { forwardRef, ReactNode, useCallback, useMemo } from 'react';
 
-import TypeaheadV2, { TypeaheadV2Props } from '@/components/ui/typeaheadV2';
+import Typeahead, { TypeaheadProps } from '@/components/ui/Typeahead';
 import Category from '@/features/categories/models/Category';
 import { Type as TransactionType } from '@/features/transactions';
 import { useExpenseCategories, useIncomeCategories } from '@/hooks/financeData';
 
 type CategoryTypeaheadProps = Omit<
-  TypeaheadV2Props<Category, string>,
+  TypeaheadProps<Category, string>,
   'options' | 'labelField' | 'groupBy' | 'renderElement' | 'valueField'
 > & {
   className?: string;
@@ -48,7 +48,7 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
       [options],
     );
 
-    const renderElement = useCallback<TypeaheadV2Props<Category, string>['renderElement']>(
+    const renderElement = useCallback<TypeaheadProps<Category, string>['renderElement']>(
       (el, _vf, _lf, { isFiltered }): ReactNode => {
         const depth = el.depth;
         if (isFiltered) {
@@ -79,7 +79,7 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
       [],
     );
 
-    const filterFn: TypeaheadV2Props<Category, string>['filterFn'] = (option, input) => {
+    const filterFn: TypeaheadProps<Category, string>['filterFn'] = (option, input) => {
       const q = input.trim().toLowerCase();
       if (!q) return true;
 
@@ -92,7 +92,7 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
     };
 
     return (
-      <TypeaheadV2<Category, string>
+      <Typeahead<Category, string>
         filterFn={filterFn}
         groupBy="type"
         hideCheckmarkColumn={false}

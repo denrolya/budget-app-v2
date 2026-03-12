@@ -17,7 +17,7 @@ import { confirm } from '@/lib/confirmation';
 import { useMutations } from '../api/mutations';
 import Transaction from '../models/Transaction';
 
-import TransactionListItem from './ListItemV3';
+import TransactionListItem from './ListItem';
 
 interface TransactionDetailsProps {
   transaction: Transaction;
