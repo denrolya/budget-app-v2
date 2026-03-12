@@ -15,8 +15,8 @@ import { Type as TransactionType } from '@/features/transactions';
 import { useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { generateSlug } from '@/lib/url/generateSlug';
-import { Interval, StatisticsConfig, StatisticsType } from '@/types/statistics';
-import { PercentageChange, StatisticsData, ValueByPeriodData } from '@/types/valueByPeriodStatistics';
+import { type Interval, type StatisticsConfig, StatisticsType } from '@/types/statistics';
+import { type PercentageChange, type StatisticsData, type ValueByPeriodData } from '@/types/valueByPeriodStatistics';
 
 interface Props {
   onChange: (newConfig: Partial<StatisticsConfig>) => void;

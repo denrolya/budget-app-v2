@@ -16,8 +16,8 @@ import { transactionService } from '@/features/transactions/api/service';
 import { cn } from '@/lib/utils';
 import { confirm } from '@/lib/confirmation';
 
-import Account from '../models/Account';
-import { UpdateAccountDTO } from '../types';
+import type Account from '../models/Account';
+import { type UpdateAccountDTO } from '../types';
 
 const PROVIDER_LABELS: Record<BankProvider, string> = {
   [BankProvider.Monobank]: 'Monobank',

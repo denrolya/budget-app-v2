@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
-import moment from 'moment';
+import type moment from 'moment';
 import React, { useCallback, useRef, useState } from 'react';
 
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';

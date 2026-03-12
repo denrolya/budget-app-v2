@@ -1,12 +1,13 @@
-import { forwardRef, ReactNode, useCallback, useMemo } from 'react';
+import { forwardRef, type ReactNode, useCallback, useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
 import MoneyValue from '@/components/common/MoneyValue';
-import Typeahead, { TypeaheadProps } from '@/components/ui/Typeahead';
 import { useAccountsWithDefaultOrder } from '@/hooks/financeData';
 
 import AccountPill from '../components/Pill';
-import Account from '../models/Account';
+import type Account from '../models/Account';
+
+import Typeahead, { type TypeaheadProps } from '@/components/ui/Typeahead';
 
 type AccountTypeaheadProps = Omit<
   TypeaheadProps<Account, string>,

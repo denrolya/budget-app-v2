@@ -1,4 +1,4 @@
-import { LucideIcon } from 'lucide-react';
+import { type LucideIcon } from 'lucide-react';
 import React, { memo } from 'react';
 
 import { MoneyValue } from '@/components/common/MoneyValue';

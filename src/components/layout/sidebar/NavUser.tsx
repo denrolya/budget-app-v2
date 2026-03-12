@@ -15,7 +15,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { useHotkeys } from '@/contexts/Hotkeys';
 import { Theme, useTheme } from '@/contexts/theme';
 import { useAuth, useBaseCurrency, useUser } from '@/features/auth';

@@ -1,8 +1,8 @@
-import Account, { AccountRawData } from '@/features/accounts/models/Account';
+import Account, { type AccountRawData } from '@/features/accounts/models/Account';
 import type { ConvertedValues } from '@/features/transactions';
 import { api, axiosFetcher } from '@/services/api';
 
-import { CreateAccountDTO, UpdateAccountDTO, Type as AccountType } from '../types';
+import { type CreateAccountDTO, type UpdateAccountDTO, Type as AccountType } from '../types';
 
 type ExchangeRates = Record<string, number>;
 

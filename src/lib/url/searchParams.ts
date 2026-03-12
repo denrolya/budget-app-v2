@@ -1,4 +1,4 @@
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 
 export const readParamString = (sp: URLSearchParams, key: string): string | undefined => {
   const v = sp.get(key);

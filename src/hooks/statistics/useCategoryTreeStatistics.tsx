@@ -1,13 +1,13 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Moment } from 'moment';
-import { DependencyList, useEffect } from 'react';
+import { type Moment } from 'moment';
+import { type DependencyList, useEffect } from 'react';
 
 import { useBaseCurrency } from '@/features/auth';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useCategories } from '@/hooks/financeData';
 import { Category } from '@/features/categories';
 import { axiosFetcher } from '@/services/api';
-import { Type as TransactionType } from '@/features/transactions';
+import { type Type as TransactionType } from '@/features/transactions';
 import { generateQueryParamsString } from '@/lib/url/generateQueryParamsString';
 
 const URL = '/api/v2/statistics/category/tree';

@@ -1,9 +1,9 @@
-import { Moment } from 'moment';
+import { type Moment } from 'moment';
 import React from 'react';
 
-import { ComparisonType, StatisticsType } from '@/types/statistics';
-import { Type as TransactionType } from '@/features/transactions';
-import { PercentageChange, StatisticsData } from '@/types/valueByPeriodStatistics';
+import { type ComparisonType, type StatisticsType } from '@/types/statistics';
+import { type Type as TransactionType } from '@/features/transactions';
+import { type PercentageChange, type StatisticsData } from '@/types/valueByPeriodStatistics';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import MoneyValue from '@/components/common/MoneyValue';
 import PercentageBadge from '@/features/statistics/components/StatisticsCard/PercentageBadge';

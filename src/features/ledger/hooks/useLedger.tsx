@@ -1,11 +1,11 @@
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { TransactionFilters } from '@/features/transactions';
-import { TransferFilters } from '@/features/transfers';
-import { Timeframe } from '@/types/global';
+import { type TransferFilters } from '@/features/transfers';
+import { type Timeframe } from '@/types/global';
 
 import { type GroupedItem, useTransactionsAndTransfersList } from './useList';
 import { detectPeriod, getInitialTimeframe, useTimeframe } from './useTimeframe';

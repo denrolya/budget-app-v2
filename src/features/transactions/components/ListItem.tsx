@@ -10,7 +10,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 
-import Transaction from '../models/Transaction';
+import type Transaction from '../models/Transaction';
 
 import Details from './Details';
 import TransactionValue from './TransactionValue';

@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Transaction } from '@/features/transactions';
+import { type Transaction } from '@/features/transactions';
 import { Type as TransactionType } from '@/features/transactions/types';
 
 interface Props {

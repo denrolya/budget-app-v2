@@ -2,7 +2,7 @@ import moment from 'moment';
 import { useMemo } from 'react';
 
 import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
-import { TransformedData, UseMoneyFlowParams, UseMoneyFlowReturn } from '@/types/statistics/moneyFlow';
+import { type TransformedData, type UseMoneyFlowParams, type UseMoneyFlowReturn } from '@/types/statistics/moneyFlow';
 
 export const useMoneyFlow = ({ period, timeframe, previousTimeframe }: UseMoneyFlowParams): UseMoneyFlowReturn => {
   const {

@@ -3,11 +3,11 @@ import moment from 'moment';
 import React, { useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { ConvertedValues } from '@/features/transactions';
-import { Category, CategoryType, useList as useCategoryList } from '@/features/categories';
+import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 
 import type { BudgetDTO, BudgetAnalyticsItem } from '../api/types';
 

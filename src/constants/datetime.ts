@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-import { PeriodOption, Timeframe, TimeframeOption } from '@/types/global';
+import { type PeriodOption, type Timeframe, type TimeframeOption } from '@/types/global';
 
 export const BACKEND_DATE_FORMAT = 'YYYY-MM-DD';
 export const MOMENT_DATE_GENERIC_FORMAT = 'DD-MM-YYYY';

@@ -2,9 +2,9 @@ import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
-import { Category, CategoryType, useList as useCategoryList } from '@/features/categories';
+import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 import { TransactionsDrawer, type DrawerListingTarget } from '@/features/statistics';
 import type { ConvertedValues } from '@/features/transactions';
 import { getExchangeRate } from '@/lib/getExchangeRates';

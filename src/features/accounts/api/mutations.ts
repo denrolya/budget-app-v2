@@ -6,7 +6,7 @@ import { accountService } from '@/features/accounts/api/service';
 import Account from '@/features/accounts/models/Account';
 import { exchangeRatesQueryKey } from '@/services/api/exchangeRates.queries';
 
-import { CreateAccountDTO, UpdateAccountDTO } from '../types';
+import { type CreateAccountDTO, type UpdateAccountDTO } from '../types';
 
 type ExchangeRatesData = {
   fixer: Record<string, number>;

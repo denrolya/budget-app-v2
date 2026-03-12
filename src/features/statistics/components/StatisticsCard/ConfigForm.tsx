@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { CategoryTypeahead } from '@/features/categories';
 import { Type as TransactionType } from '@/features/transactions';
-import { StatisticsConfig } from '@/types/statistics';
+import { type StatisticsConfig } from '@/types/statistics';
 // @ts-nocheck
 
 const formSchema = z.object({

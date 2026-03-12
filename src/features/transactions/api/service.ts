@@ -3,9 +3,9 @@ import moment from 'moment';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import Account from '@/features/accounts/models/Account';
 import Category from '@/features/categories/models/Category';
-import { RawTransactionDTO, Type as TransactionType } from '@/features/transactions';
-import Transaction from '@/features/transactions/models/Transaction';
-import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
+import { type RawTransactionDTO, Type as TransactionType } from '@/features/transactions';
+import type Transaction from '@/features/transactions/models/Transaction';
+import { type TransactionFilters } from '@/features/transactions/models/TransactionFilters';
 import { api, axiosFetcher } from '@/services/api';
 import { type Sorting } from '@/types/pagination';
 

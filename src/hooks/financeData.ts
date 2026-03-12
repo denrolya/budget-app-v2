@@ -3,10 +3,10 @@ import sumBy from 'lodash/sumBy';
 import { useMemo } from 'react';
 
 import { useBaseCurrency } from '@/features/auth';
-import { Account, useList as useAccountsQuery } from '@/features/accounts';
-import { Category, useList as useCategoriesQuery } from '@/features/categories';
-import { Debt, useList as useDebtsQuery } from '@/features/debts';
-import { ConvertedValues, Type as TransactionType } from '@/features/transactions';
+import { type Account, useList as useAccountsQuery } from '@/features/accounts';
+import { type Category, useList as useCategoriesQuery } from '@/features/categories';
+import { type Debt, useList as useDebtsQuery } from '@/features/debts';
+import { type ConvertedValues, Type as TransactionType } from '@/features/transactions';
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
 
 export type ExchangeRatesData = {

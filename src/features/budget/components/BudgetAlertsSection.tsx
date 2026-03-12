@@ -1,8 +1,8 @@
 import { AlertTriangle, ChevronDown, ChevronUp, TrendingDown } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
-import { Category, CategoryType, useList as useCategoryList } from '@/features/categories';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
+import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
 

@@ -10,7 +10,7 @@ import ConfigurationMenu from '@/features/statistics/components/MoneyFlow/Config
 import MoneyFlowSkeleton from '@/features/statistics/components/MoneyFlow/Skeleton';
 import SummaryItem from '@/features/statistics/components/MoneyFlow/SummaryItem';
 import { useMoneyFlow } from '@/hooks/statistics/useMoneyFlowStatistics';
-import { UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
+import { type UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { formatRange } from '@/lib/datetime/formatShortDate';
 import { cn } from '@/lib/utils';
 

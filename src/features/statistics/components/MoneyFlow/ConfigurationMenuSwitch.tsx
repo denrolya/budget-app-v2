@@ -1,5 +1,5 @@
 import { type LucideIcon } from 'lucide-react';
-import React, { ReactNode, useId } from 'react';
+import React, { type ReactNode, useId } from 'react';
 
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';

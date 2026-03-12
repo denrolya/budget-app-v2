@@ -1,8 +1,8 @@
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
-import { TransferFilters } from '@/features/transfers/models/TransferFilters';
-import { HydraCollection, TransferDTO } from '@/features/transfers/types';
+import { type TransferFilters } from '@/features/transfers/models/TransferFilters';
+import { type HydraCollection, type TransferDTO } from '@/features/transfers/types';
 import { axiosFetcher } from '@/services/api';
-import { Sorting } from '@/types/pagination';
+import { type Sorting } from '@/types/pagination';
 
 interface FetchTransfersParams {
   page: number;

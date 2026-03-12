@@ -1,4 +1,4 @@
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import BaseFilters from '@/models/BaseFilters';

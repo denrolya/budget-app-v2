@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { HealthContext, HealthResult, HealthRule, RuleStatus } from '../models/types';
+import { type HealthContext, type HealthResult, type HealthRule, type RuleStatus } from '../models/types';
 
 const RULES: HealthRule[] = [
   {
@@ -110,20 +110,12 @@ const RULES: HealthRule[] = [
   },
 ];
 
-function pass(detail: string): HealthResult {
-  return { status: 'pass', detail };
-}
-function warn(detail: string): HealthResult {
-  return { status: 'warn', detail };
-}
-function fail(detail: string): HealthResult {
-  return { status: 'fail', detail };
-}
-function na(detail: string): HealthResult {
-  return { status: 'na', detail };
-}
+const pass = (detail: string): HealthResult => ({ status: 'pass', detail });
+const warn = (detail: string): HealthResult => ({ status: 'warn', detail });
+const fail = (detail: string): HealthResult => ({ status: 'fail', detail });
+const na = (detail: string): HealthResult => ({ status: 'na', detail });
 
-export function useHealthRules(ctx: HealthContext) {
+export const useHealthRules = (ctx: HealthContext) => {
   return useMemo(() => {
     const rules = RULES.map((rule) => ({ ...rule, result: rule.evaluate(ctx) }));
     const evaluable = rules.filter((r) => r.result.status !== 'na');
@@ -149,7 +141,7 @@ export function useHealthRules(ctx: HealthContext) {
 export type RuleWithResult = ReturnType<typeof useHealthRules>['rules'][number];
 export type HealthSummary = ReturnType<typeof useHealthRules>;
 
-export function statusColor(status: RuleStatus): string {
+export const statusColor = (status: RuleStatus): string => {
   switch (status) {
     case 'pass':
       return 'text-green-500';
@@ -162,7 +154,7 @@ export function statusColor(status: RuleStatus): string {
   }
 }
 
-export function statusIcon(status: RuleStatus): string {
+export const statusIcon = (status: RuleStatus): string => {
   switch (status) {
     case 'pass':
       return '✅';

@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 
 import CellPopover from '@/components/common/CellPopover';
 import { Input } from '@/components/ui/input';
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { cn } from '@/lib/utils';
 
-import { Bucket, BucketEntry, UnassignedEntry } from '../models/types';
+import { type Bucket, type BucketEntry, type UnassignedEntry } from '../models/types';
 
 // ── Drag ID helpers ─────────────────────────────────────────────────────────
 
@@ -16,9 +16,9 @@ export const unallocatedDragId = (accountId: number) => `unallocated:${accountId
 /** specific bucket allocation dragged */
 export const allocationDragId = (accountId: number, bucketId: string) => `allocation:${accountId}:${bucketId}`;
 
-export function parseDragId(
+export const parseDragId = (
   id: string,
-): { type: 'unallocated'; accountId: number } | { type: 'allocation'; accountId: number; bucketId: string } | null {
+): { type: 'unallocated'; accountId: number } | { type: 'allocation'; accountId: number; bucketId: string } | null => {
   if (id.startsWith('unallocated:')) {
     return { type: 'unallocated', accountId: Number(id.slice(12)) };
   }

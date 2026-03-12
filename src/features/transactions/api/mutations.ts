@@ -3,8 +3,8 @@ import { toast } from 'sonner';
 
 import { queryKeys as accountKeys } from '@/features/accounts';
 
-import Transaction from '../models/Transaction';
-import { TransactionFilters } from '../models/TransactionFilters';
+import type Transaction from '../models/Transaction';
+import { type TransactionFilters } from '../models/TransactionFilters';
 
 import { queryKeys } from './keys';
 import { transactionService } from './service';

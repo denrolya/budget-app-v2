@@ -1,6 +1,6 @@
-import { PieSvgProps, ResponsivePie } from '@nivo/pie';
+import { type PieSvgProps, ResponsivePie } from '@nivo/pie';
 
-import { Datum } from './types';
+import { type Datum } from './types';
 
 interface Props {
   data: Datum[];

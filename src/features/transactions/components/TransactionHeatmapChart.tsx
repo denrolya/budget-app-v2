@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { MOMENT_DATE_VIEW_FORMAT_2 } from '@/constants/datetime';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';

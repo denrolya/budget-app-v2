@@ -4,8 +4,8 @@ import React from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
-import { Category, CategoryType, useList as useCategoryList } from '@/features/categories';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
+import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
 

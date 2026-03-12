@@ -6,10 +6,10 @@ import { useBaseCurrency } from '@/features/auth';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { axiosFetcher } from '@/services/api';
 import {
-  UseStatisticsParams,
-  UseStatisticsReturn,
-  ValueByPeriodData,
-  ValueByPeriodDataDTO,
+  type UseStatisticsParams,
+  type UseStatisticsReturn,
+  type ValueByPeriodData,
+  type ValueByPeriodDataDTO,
 } from '@/types/valueByPeriodStatistics';
 import { generateQueryParamsString } from '@/lib/url/generateQueryParamsString';
 

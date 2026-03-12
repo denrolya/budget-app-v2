@@ -1,4 +1,4 @@
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 
 import type { CategoryDTO, CategoryTagDTO, CategoryType } from '../types';
 

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { ConvertedValues } from '@/features/transactions';
+import { type ConvertedValues } from '@/features/transactions';
 import { axiosFetcher } from '@/services/api';
 
 export type ExchangeRatesData = {

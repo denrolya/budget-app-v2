@@ -15,7 +15,7 @@ import { useForm as useFormContext } from '@/contexts/Form';
 import { useMutations } from '@/features/accounts/api/mutations';
 import { useFormLogic } from '@/hooks/useFormLogic';
 
-import { Type as AccountType, CreateAccountDTO, UpdateAccountDTO } from '../types';
+import { Type as AccountType, type CreateAccountDTO, type UpdateAccountDTO } from '../types';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),

@@ -1,10 +1,10 @@
 import { ResponsiveBar } from '@nivo/bar';
 import React, { useMemo } from 'react';
 
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
-import { Category, CategoryType, useList as useCategoryList } from '@/features/categories';
+import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 
 import type { BudgetDTO, BudgetAnalyticsItem, BudgetLineDTO } from '../api/types';
 

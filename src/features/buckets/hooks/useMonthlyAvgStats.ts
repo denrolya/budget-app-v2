@@ -7,7 +7,7 @@ import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueBy
  * Fetches last 6 months of expense/income data and returns averages
  * (non-zero months only). Used to pre-fill health rule inputs.
  */
-export function useMonthlyAvgStats() {
+export const useMonthlyAvgStats = () => {
   const after = useMemo(() => moment().subtract(5, 'months').startOf('month'), []);
   const before = useMemo(() => moment().endOf('month'), []);
 

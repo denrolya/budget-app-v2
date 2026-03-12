@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Account, Type as AccountType } from '@/features/accounts';
+import { type Account, Type as AccountType } from '@/features/accounts';
 import AccountDraftBadge from '@/features/accounts/components/AccountDraftBadge';
 import AccountPill from '@/features/accounts/components/Pill';
 import { useBaseCurrency } from '@/features/auth';

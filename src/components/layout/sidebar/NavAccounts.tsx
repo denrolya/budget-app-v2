@@ -5,7 +5,7 @@ import { memo, useEffect, useId, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
-import { Account, AccountPill, Type as AccountType, ACCOUNT_TYPES_ORDER } from '@/features/accounts';
+import { type Account, AccountPill, type Type as AccountType, ACCOUNT_TYPES_ORDER } from '@/features/accounts';
 import AccountDraftBadge from '@/features/accounts/components/AccountDraftBadge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
@@ -20,7 +20,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBaseCurrency } from '@/features/auth';
-import { CURRENCY_CODE } from '@/constants/currency';
+import { type CURRENCY_CODE } from '@/constants/currency';
 import { useActiveAccountsWithDefaultOrder, useTotalBalance } from '@/hooks/financeData';
 import { cn } from '@/lib/utils';
 import storage from '@/services/storage';

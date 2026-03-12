@@ -23,12 +23,12 @@ import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { FILTER_PRESETS } from '@/constants/datetime';
-import { TransactionFilters } from '@/features/transactions';
+import { type TransactionFilters } from '@/features/transactions';
 import { Type as TransactionType } from '@/features/transactions';
-import { TransferFilters } from '@/features/transfers';
-import { Timeframe } from '@/types/global';
+import { type TransferFilters } from '@/features/transfers';
+import { type Timeframe } from '@/types/global';
 import { cn } from '@/lib/utils';
 
 type ViewMode = 'transactions' | 'both' | 'transfers';

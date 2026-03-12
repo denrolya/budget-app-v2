@@ -1,10 +1,10 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 
-import Category from '@/features/categories/models/Category';
+import type Category from '@/features/categories/models/Category';
 import { cn } from '@/lib/utils';
 
 import { useMutations } from '../api';
-import { CategoryType } from '../types';
+import { type CategoryType } from '../types';
 
 import TreeNode from './TreeNode';
 

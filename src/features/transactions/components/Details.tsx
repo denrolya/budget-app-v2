@@ -15,7 +15,7 @@ import { useExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from
 import { confirm } from '@/lib/confirmation';
 
 import { useMutations } from '../api/mutations';
-import Transaction from '../models/Transaction';
+import type Transaction from '../models/Transaction';
 
 import TransactionListItem from './ListItem';
 

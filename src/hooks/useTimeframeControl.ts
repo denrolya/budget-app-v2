@@ -2,7 +2,7 @@ import moment from 'moment';
 import { useEffect, useMemo, useState } from 'react';
 
 import { PERIOD_OPTIONS } from '@/constants/datetime';
-import { ISO8601Period, Timeframe, TimeframeOption, PeriodOption } from '@/types/global';
+import { type ISO8601Period, type Timeframe, type TimeframeOption, type PeriodOption } from '@/types/global';
 
 export interface UseTimeframeControlOptions {
   defaultPreset?: string;

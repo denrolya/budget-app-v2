@@ -6,7 +6,7 @@ import React from 'react';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Separator } from '@/components/ui/separator';
-import Transfer from '@/features/transfers/models/Transfer';
+import type Transfer from '@/features/transfers/models/Transfer';
 import { AccountPill } from '@/features/accounts';
 import { TransactionListItem } from '@/features/transactions';
 import RateDisplay from '@/features/transfers/components/RateDisplay';

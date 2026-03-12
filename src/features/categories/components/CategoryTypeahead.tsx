@@ -1,9 +1,10 @@
-import { forwardRef, ReactNode, useCallback, useMemo } from 'react';
+import { forwardRef, type ReactNode, useCallback, useMemo } from 'react';
 
-import Typeahead, { TypeaheadProps } from '@/components/ui/Typeahead';
-import Category from '@/features/categories/models/Category';
+import type Category from '@/features/categories/models/Category';
 import { Type as TransactionType } from '@/features/transactions';
 import { useExpenseCategories, useIncomeCategories } from '@/hooks/financeData';
+
+import Typeahead, { type TypeaheadProps } from '@/components/ui/Typeahead';
 
 type CategoryTypeaheadProps = Omit<
   TypeaheadProps<Category, string>,

@@ -12,8 +12,8 @@ import { FormType, useForm } from '@/contexts/Form';
 import { useList as useAccountsQuery, useMutations } from '../api';
 import BankSheet from '../components/BankSheet';
 import AccountDetails from '../components/Details';
-import Account from '../models/Account';
-import { Type as AccountType, UpdateAccountDTO } from '../types';
+import type Account from '../models/Account';
+import { Type as AccountType, type UpdateAccountDTO } from '../types';
 
 // ─── Inline name editor ──────────────────────────────────────────────────────
 

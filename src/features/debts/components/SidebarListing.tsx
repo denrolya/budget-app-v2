@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBaseCurrency } from '@/features/auth';
-import Debt from '@/features/debts/models/Debt';
+import type Debt from '@/features/debts/models/Debt';
 import { useDebts } from '@/hooks/financeData';
 import { cn } from '@/lib/utils';
 

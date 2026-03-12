@@ -1,9 +1,9 @@
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 
 import { CURRENCIES } from '@/constants/currency';
 import type { BankIntegrationRaw } from '@/features/bank-integrations';
 
-import { Type as AccountType } from '../types';
+import { type Type as AccountType } from '../types';
 
 export interface AccountRawData {
   id: number;

@@ -11,7 +11,7 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { StatisticsConfig } from '@/types/statistics';
+import { type StatisticsConfig } from '@/types/statistics';
 import ConfigForm from '@/features/statistics/components/StatisticsCard/ConfigForm';
 
 interface ConfigContainerProps {

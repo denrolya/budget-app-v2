@@ -13,7 +13,7 @@ import {
   TotalBalanceCard,
 } from '@/features/statistics';
 import { generateSlug } from '@/lib/url/generateSlug';
-import { StatisticsConfig } from '@/types/statistics';
+import { type StatisticsConfig } from '@/types/statistics';
 
 const DashboardPage: React.FC = () => {
   const [configs] = useState(cardConfigs as Record<string, (typeof cardConfigs)[keyof typeof cardConfigs]>);

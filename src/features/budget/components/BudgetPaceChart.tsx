@@ -2,12 +2,12 @@ import { ResponsiveLine } from '@nivo/line';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
 import { useGlobalDailyStats } from '@/features/accounts';
-import { Category, CategoryType, useList as useCategoryList } from '@/features/categories';
+import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 
 import type { BudgetDTO, BudgetAnalyticsItem } from '../api/types';
 

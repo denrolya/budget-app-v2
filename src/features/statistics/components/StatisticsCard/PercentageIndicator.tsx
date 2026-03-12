@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { cn } from '@/lib/utils';
-import { StatisticsType } from '@/types/statistics';
+import { type StatisticsType } from '@/types/statistics';
 import { Type as TransactionType } from '@/features/transactions';
 
 interface Props {

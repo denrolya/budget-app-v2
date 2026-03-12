@@ -11,7 +11,7 @@ import { useBaseCurrency } from '@/features/auth';
 import { useActiveAccounts } from '@/hooks/financeData';
 
 import AccountsSunburstChart, { type HoveredSunburstNode } from '../components/AccountsSunburstChart';
-import Account from '../models/Account';
+import type Account from '../models/Account';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

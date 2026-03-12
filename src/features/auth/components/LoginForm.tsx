@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 
-import { Credentials } from '../types';
+import { type Credentials } from '../types';
 
 const loginSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters'),

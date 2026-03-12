@@ -22,8 +22,8 @@ import {
 import { cn } from '@/lib/utils';
 import { confirm } from '@/lib/confirmation';
 
-import Account from '../models/Account';
-import { UpdateAccountDTO } from '../types';
+import type Account from '../models/Account';
+import { type UpdateAccountDTO } from '../types';
 
 import ConnectBankDialog from './ConnectBankDialog';
 

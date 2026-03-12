@@ -14,8 +14,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import AccountDraftBadge from '@/features/accounts/components/AccountDraftBadge';
 import BalanceHistoryChart from '@/features/accounts/components/BalanceHistoryChart';
 import AccountPill from '@/features/accounts/components/Pill';
-import Account from '@/features/accounts/models/Account';
-import { Type as AccountType, UpdateAccountDTO } from '@/features/accounts/types';
+import type Account from '@/features/accounts/models/Account';
+import { Type as AccountType, type UpdateAccountDTO } from '@/features/accounts/types';
 import { LedgerView, useLedger } from '@/features/ledger';
 import ListingControls from '@/features/ledger/components/ListingControls';
 import { HeatmapPanel } from '@/features/transactions';

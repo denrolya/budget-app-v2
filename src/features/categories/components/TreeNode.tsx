@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/context-menu';
 import { cn } from '@/lib/utils';
 
-import Category from '../models/Category';
+import type Category from '../models/Category';
 
 type DropPosition = 'before' | 'after' | 'inside' | null;
 type OpenStateById = Record<number, boolean>;

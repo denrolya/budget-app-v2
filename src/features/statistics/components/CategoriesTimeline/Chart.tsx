@@ -1,6 +1,6 @@
 import mapValues from 'lodash/mapValues';
 import sumBy from 'lodash/sumBy';
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 import React, { useMemo, useState } from 'react';
 import {
   Bar,
@@ -20,7 +20,7 @@ import { BACKEND_DATE_FORMAT, MOMENT_DATE_VIEW_FORMAT } from '@/constants/dateti
 import { CHART_STYLES } from '@/constants/recharts';
 import { useCategories } from '@/hooks/financeData';
 import { useTheme } from '@/contexts/theme';
-import { ISO8601Period } from '@/types/global';
+import { type ISO8601Period } from '@/types/global';
 import { cn } from '@/lib/utils';
 import ChartTooltip from '@/features/statistics/components/CategoriesTimeline/ChartTooltip';
 

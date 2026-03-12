@@ -3,7 +3,7 @@ import React from 'react';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import AccountPill from '@/features/accounts/components/Pill';
-import Account from '@/features/accounts/models/Account';
+import type Account from '@/features/accounts/models/Account';
 
 interface Props {
   account: Account;

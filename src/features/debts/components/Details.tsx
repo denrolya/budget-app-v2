@@ -3,7 +3,7 @@ import sortBy from 'lodash/sortBy';
 import sumBy from 'lodash/sumBy';
 import toPairs from 'lodash/toPairs';
 import { Maximize2, Minimize2, ChevronDown, ChevronUp } from 'lucide-react';
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
@@ -22,12 +22,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BACKEND_DATE_FORMAT, MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import type { DailyStatsResponse } from '@/features/accounts/api/service';
 import { useBaseCurrency } from '@/features/auth';
-import { Transaction } from '@/features/transactions';
+import { type Transaction } from '@/features/transactions';
 import TransactionHeatmapChart from '@/features/transactions/components/TransactionHeatmapChart';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 import { useTransactions as useDebtTransactions } from '../api';
-import Debt from '../models/Debt';
+import type Debt from '../models/Debt';
 
 import DebtBalanceChart from './DebtBalanceChart';
 

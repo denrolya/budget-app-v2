@@ -1,4 +1,4 @@
-import { RawTransactionDTO } from '@/features/transactions';
+import { type RawTransactionDTO } from '@/features/transactions';
 
 export interface HydraCollection<T> {
   'hydra:member': T[];

@@ -3,7 +3,7 @@ import React from 'react';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { transactionService } from '@/features/transactions/api/service';
-import Account from '@/features/accounts/models/Account';
+import type Account from '@/features/accounts/models/Account';
 import { Type as AccountType } from '@/features/accounts/types';
 
 interface Props {

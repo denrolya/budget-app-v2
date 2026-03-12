@@ -12,7 +12,7 @@ interface State {
 }
 type Action = { type: 'start' } | { type: 'stop' } | { type: 'tick' } | { type: 'reset' };
 
-function reducer(state: State, action: Action): State {
+const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'start':
       return {

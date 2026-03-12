@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { useCallback, useState } from 'react';
 
-import { Timeframe } from '@/types/global';
+import { type Timeframe } from '@/types/global';
 
 export const getInitialTimeframe = (): Timeframe => ({
   after: moment().startOf('month'),

@@ -8,11 +8,11 @@ import RateSparkline from '@/components/common/RateSparkline';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { CURRENCY_CODE } from '@/constants/currency';
-import { ConvertedValues } from '@/features/transactions';
+import { type ConvertedValues } from '@/features/transactions';
 import { useExchangeRates, useMonobankExchangeRates, useWiseExchangeRates } from '@/hooks/financeData';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import {
-  ExchangeRateSnapshot,
+  type ExchangeRateSnapshot,
   getRateFromSnapshot,
   useFixerExchangeRates,
 } from '@/services/api/exchangeRateSnapshots.queries';

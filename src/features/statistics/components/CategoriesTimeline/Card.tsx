@@ -1,14 +1,14 @@
 import { Calendar as CalendarIcon } from 'lucide-react';
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTimelineStatistics } from '@/hooks/statistics/useTimelineStatisticsRequest';
-import { UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
+import { type UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { cn } from '@/lib/utils';
-import { Timeframe } from '@/types/global';
+import { type Timeframe } from '@/types/global';
 import { formatRange } from '@/lib/datetime/formatShortDate';
 import TransactionsDrawer from '@/features/statistics/components/CategoriesTimeline/TransactionsDrawer';
 import ConfigurationMenu from '@/features/statistics/components/CategoriesTimeline/ConfigurationMenu';

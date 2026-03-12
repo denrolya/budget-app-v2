@@ -1,13 +1,13 @@
-import { Moment } from 'moment';
+import { type Moment } from 'moment';
 import React from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import PercentageBadge from '@/features/statistics/components/StatisticsCard/PercentageBadge';
 import TooltipContent from '@/features/statistics/components/StatisticsCard/TooltipContent';
-import { Type as TransactionType } from '@/features/transactions';
-import { ComparisonType, StatisticsType } from '@/types/statistics';
-import { PercentageChange, StatisticsData } from '@/types/valueByPeriodStatistics';
+import { type Type as TransactionType } from '@/features/transactions';
+import { type ComparisonType, type StatisticsType } from '@/types/statistics';
+import { type PercentageChange, type StatisticsData } from '@/types/valueByPeriodStatistics';
 
 const MinMaxContent: React.FC<{
   currentValue: StatisticsData<StatisticsType.MinMax>;

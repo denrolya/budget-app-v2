@@ -1,7 +1,7 @@
 import moment from 'moment';
 import React, { useState, useMemo, useCallback } from 'react';
 
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
 import { useGlobalDailyStats, type HeatmapFilters } from '@/features/accounts';

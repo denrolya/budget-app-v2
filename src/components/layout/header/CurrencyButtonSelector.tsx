@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { useAuth, useBaseCurrency } from '@/features/auth';
 import { confirm } from '@/lib/confirmation';
 import { cn } from '@/lib/utils';

@@ -14,7 +14,7 @@ import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
 import { useBudget, useBudgetAnalytics, useCategoryDailyStats, useListBudgets } from './api';
 import BudgetAlertsSection from './components/BudgetAlertsSection';
 import BudgetCategoryBarChart from './components/BudgetCategoryBarChart';
-import BudgetDisplayCurrency, { DisplayCurrency } from './components/BudgetDisplayCurrency';
+import BudgetDisplayCurrency, { type DisplayCurrency } from './components/BudgetDisplayCurrency';
 import BudgetDistributionChart from './components/BudgetDistributionChart';
 import BudgetExportButton from './components/BudgetExportButton';
 import BudgetFillFromHistoryButton from './components/BudgetFillFromHistoryButton';

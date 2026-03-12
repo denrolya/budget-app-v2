@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm as useFormContext } from '@/contexts/Form';
 import { useFormLogic } from '@/hooks/useFormLogic';
-import Transaction from '@/features/transactions/models/Transaction';
+import type Transaction from '@/features/transactions/models/Transaction';
 import { Type as TransactionType } from '@/features/transactions';
 
 interface TransactionFormProps {

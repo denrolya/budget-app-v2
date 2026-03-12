@@ -1,7 +1,7 @@
-import { Moment } from 'moment';
+import { type Moment } from 'moment';
 
-import { StatisticsConfig, StatisticsType } from '@/types/statistics';
-import { Type as TransactionType } from '@/features/transactions';
+import { type StatisticsConfig, type StatisticsType } from '@/types/statistics';
+import { type Type as TransactionType } from '@/features/transactions';
 
 export interface ValueByPeriodDataDTO {
   expense: number;

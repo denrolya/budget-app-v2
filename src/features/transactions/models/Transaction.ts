@@ -1,11 +1,11 @@
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 
-import Debt from '@/features/debts/models/Debt';
+import type Debt from '@/features/debts/models/Debt';
 import { useAccounts, useCategories } from '@/hooks/financeData';
-import Category from '@/features/categories/models/Category';
-import Account from '@/features/accounts/models/Account';
+import type Category from '@/features/categories/models/Category';
+import type Account from '@/features/accounts/models/Account';
 
-import { ConvertedValues, Type, TransactionModelProps, RawTransactionDTO } from '../types';
+import { type ConvertedValues, Type, type TransactionModelProps, type RawTransactionDTO } from '../types';
 
 export class Transaction {
   id: number;

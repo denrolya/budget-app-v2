@@ -15,7 +15,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
-import { ISO8601Period } from '@/types/global';
+import { type ISO8601Period } from '@/types/global';
 
 const periodOptions: { value: ISO8601Period; label: string }[] = [
   { value: 'P1D', label: 'Daily' },

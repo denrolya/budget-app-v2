@@ -1,6 +1,6 @@
 import { api } from '@/services/api';
 
-import { DebtDTO, DebtWriteDTO } from '../types';
+import { type DebtDTO, type DebtWriteDTO } from '../types';
 
 const BASE = '/api/debts';
 const LIST_ENDPOINT = '/api/v2/debt';

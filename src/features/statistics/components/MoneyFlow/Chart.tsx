@@ -1,4 +1,4 @@
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 import React from 'react';
 import {
   Bar,
@@ -15,7 +15,7 @@ import {
 import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import { CHART_STYLES } from '@/constants/recharts';
 import CustomTooltip from '@/features/statistics/components/MoneyFlow/ChartTooltip';
-import { ISO8601Period } from '@/types/global';
+import { type ISO8601Period } from '@/types/global';
 
 interface Props {
   data: {

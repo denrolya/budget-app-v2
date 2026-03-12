@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
-import { Category } from '@/features/categories';
+import { type Category } from '@/features/categories';
 import { LedgerView, useLedger } from '@/features/ledger';
 import { useCategories } from '@/hooks/financeData';
 

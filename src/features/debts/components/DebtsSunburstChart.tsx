@@ -4,7 +4,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import MoneyValue from '@/components/common/MoneyValue';
 import { useBaseCurrency } from '@/features/auth';
 
-import Debt from '../models/Debt';
+import type Debt from '../models/Debt';
 
 export type SunburstNode = {
   name: string;

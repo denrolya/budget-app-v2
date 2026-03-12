@@ -1,8 +1,8 @@
-import { Moment } from 'moment';
+import { type Moment } from 'moment';
 
-import Debt from '@/features/debts/models/Debt';
-import Account from '@/features/accounts/models/Account';
-import Category from '@/features/categories/models/Category';
+import type Debt from '@/features/debts/models/Debt';
+import type Account from '@/features/accounts/models/Account';
+import type Category from '@/features/categories/models/Category';
 
 export interface ConvertedValues {
   [key: string]: number;

@@ -1,4 +1,4 @@
-import { Bucket } from './models/types';
+import { type Bucket } from './models/types';
 
 export const PRESET_BUCKETS: Bucket[] = [
   { id: 'emergency', name: 'Emergency Fund', emoji: '💰', color: '#22c55e', isPreset: true },

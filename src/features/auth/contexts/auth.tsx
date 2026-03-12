@@ -1,8 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-import { CURRENCY_CODE } from '@/constants/currency';
-import { User } from '@/features/auth';
+import { type CURRENCY_CODE } from '@/constants/currency';
+import { type User } from '@/features/auth';
 import { api } from '@/services/api';
 import storage from '@/services/storage';
 import { parseJwt } from '@/lib/parseJWT';

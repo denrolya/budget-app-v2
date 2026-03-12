@@ -1,7 +1,7 @@
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 
 import BaseFilters from '@/models/BaseFilters';
-import { Type as TransactionType } from '@/features/transactions';
+import { type Type as TransactionType } from '@/features/transactions';
 import { readParamArray, readParamBool, readParamMoment, readParamString } from '@/lib/url/searchParams';
 
 interface TransactionFiltersProps {

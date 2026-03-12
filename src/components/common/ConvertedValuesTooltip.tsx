@@ -1,7 +1,7 @@
 import React from 'react';
 
 import ResponsiveTooltip from '@/components/ui/responsive-tooltip';
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { formatMoney as formatMoneyValue } from '@/lib/formatMoney';
 import { cn } from '@/lib/utils';
 

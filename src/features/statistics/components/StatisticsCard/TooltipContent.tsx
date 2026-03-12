@@ -1,10 +1,10 @@
-import { Moment } from 'moment/moment';
+import { type Moment } from 'moment/moment';
 import React from 'react';
 
 import { Separator } from '@/components/ui/separator';
 import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import MoneyValue from '@/components/common/MoneyValue';
-import { ComparisonType } from '@/types/statistics';
+import { type ComparisonType } from '@/types/statistics';
 import { formatShortDate } from '@/lib/datetime/formatShortDate';
 
 const TooltipContent: React.FC<{

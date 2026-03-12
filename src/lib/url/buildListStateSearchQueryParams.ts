@@ -1,8 +1,8 @@
 import isNil from 'lodash/isNil';
 import moment from 'moment/moment';
 
-import BaseFilters from '@/models/BaseFilters';
-import { Sorting } from '@/types/pagination';
+import type BaseFilters from '@/models/BaseFilters';
+import { type Sorting } from '@/types/pagination';
 import { isSameValue } from '@/lib/isSameValue';
 
 /**

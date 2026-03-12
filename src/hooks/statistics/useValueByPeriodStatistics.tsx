@@ -1,17 +1,17 @@
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 import { useMemo } from 'react';
 
 import { useCategories } from '@/hooks/financeData';
 import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
-import { ComparisonType, Interval, StatisticsType } from '@/types/statistics';
+import { ComparisonType, type Interval, StatisticsType } from '@/types/statistics';
 import { Type as TransactionType } from '@/features/transactions';
 import {
-  IsIncrease,
-  PercentageChange,
-  StatisticsData,
-  UseValueByPeriodReturn,
-  ValueByPeriodData,
-  ValueByPeriodParams,
+  type IsIncrease,
+  type PercentageChange,
+  type StatisticsData,
+  type UseValueByPeriodReturn,
+  type ValueByPeriodData,
+  type ValueByPeriodParams,
 } from '@/types/valueByPeriodStatistics';
 import { generatePreviousTimeframe } from '@/lib/datetime/generatePreviousTimeframe';
 

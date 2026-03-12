@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import { cn } from '@/lib/utils';
-import { ISO8601Period } from '@/types/global';
+import { type ISO8601Period } from '@/types/global';
 
 interface CustomTooltipProps {
   active?: boolean;

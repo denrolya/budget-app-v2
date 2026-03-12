@@ -5,7 +5,7 @@ import React, { useMemo, useState, useCallback, useEffect } from 'react';
 
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useBalanceHistory } from '@/features/accounts/api';
-import Account from '@/features/accounts/models/Account';
+import type Account from '@/features/accounts/models/Account';
 
 interface Props {
   account: Account;

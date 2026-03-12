@@ -1,11 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { useBaseCurrency } from '@/features/auth';
-import Account from '@/features/accounts/models/Account';
+import type Account from '@/features/accounts/models/Account';
 import { useActiveAccounts } from '@/hooks/financeData';
 
 import { PRESET_BUCKETS, STORAGE_KEY, STRONG_CURRENCIES } from '../constants';
-import { AllocationMap, BucketEntry, BucketsConfig, UnassignedEntry } from '../models/types';
+import { type AllocationMap, type BucketEntry, type BucketsConfig, type UnassignedEntry } from '../models/types';
 
 const DEFAULT_CONFIG: BucketsConfig = {
   version: 2,
@@ -15,7 +15,7 @@ const DEFAULT_CONFIG: BucketsConfig = {
   visualization: 'treemap',
 };
 
-function loadConfig(): BucketsConfig {
+const loadConfig = (): BucketsConfig => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_CONFIG;
@@ -48,15 +48,15 @@ function loadConfig(): BucketsConfig {
   }
 }
 
-function persist(config: BucketsConfig): void {
+const persist = (config: BucketsConfig): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
 }
 
-function sumAllocated(accountId: number, allocationMap: AllocationMap): number {
+const sumAllocated = (accountId: number, allocationMap: AllocationMap): number => {
   return (allocationMap[accountId] ?? []).reduce((s, sh) => s + sh.amount, 0);
 }
 
-export function useBuckets() {
+export const useBuckets = () => {
   const [config, setConfig] = useState<BucketsConfig>(loadConfig);
   const accounts = useActiveAccounts();
   const baseCurrency = useBaseCurrency();

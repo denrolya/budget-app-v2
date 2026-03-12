@@ -21,8 +21,8 @@ import { AccountPill, AccountTypeahead } from '@/features/accounts';
 import { CategoryTypeahead } from '@/features/categories';
 import { cn } from '@/lib/utils';
 
-import { useInlineEdit } from '../hooks/useInlineEdit';
-import Transaction from '../models/Transaction';
+import { type useInlineEdit } from '../hooks/useInlineEdit';
+import type Transaction from '../models/Transaction';
 
 import TransactionValue from './TransactionValue';
 

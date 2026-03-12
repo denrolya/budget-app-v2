@@ -5,8 +5,8 @@ import AccountDetailsHoverCard from '@/features/accounts/components/DetailsHover
 import { Badge } from '@/components/ui/badge';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { useAccounts } from '@/hooks/financeData';
-import Account from '@/features/accounts/models/Account';
-import { Type as AccountType } from '@/features/accounts';
+import type Account from '@/features/accounts/models/Account';
+import { type Type as AccountType } from '@/features/accounts';
 
 type PillVariant = 'pill' | 'inline';
 type Tone = 'subtle' | 'filled';

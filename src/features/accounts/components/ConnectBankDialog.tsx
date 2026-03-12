@@ -23,7 +23,7 @@ import {
 } from '@/features/bank-integrations';
 
 import { useMutations } from '../api/mutations';
-import Account from '../models/Account';
+import type Account from '../models/Account';
 
 interface Props {
   open: boolean;

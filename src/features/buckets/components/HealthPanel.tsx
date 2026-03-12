@@ -2,13 +2,13 @@ import { Info } from 'lucide-react';
 import React, { useRef } from 'react';
 
 import { cn } from '@/lib/utils';
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-import { HealthSummary, statusColor, statusIcon } from '../hooks/useHealthRules';
-import { RuleWithResult } from '../hooks/useHealthRules';
+import { type HealthSummary, statusColor, statusIcon } from '../hooks/useHealthRules';
+import { type RuleWithResult } from '../hooks/useHealthRules';
 
 interface Props {
   health: HealthSummary;

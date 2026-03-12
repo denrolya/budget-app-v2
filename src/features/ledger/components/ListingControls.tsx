@@ -9,7 +9,7 @@ import {
   Layers,
   Search,
 } from 'lucide-react';
-import { Moment } from 'moment';
+import { type Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
@@ -19,11 +19,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
-import { TransactionFilters } from '@/features/transactions';
-import { TransferFilters } from '@/features/transfers';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
+import { type TransactionFilters } from '@/features/transactions';
+import { type TransferFilters } from '@/features/transfers';
 import { cn } from '@/lib/utils';
-import { Timeframe } from '@/types/global';
+import { type Timeframe } from '@/types/global';
 
 type ViewMode = 'transactions' | 'both' | 'transfers';
 

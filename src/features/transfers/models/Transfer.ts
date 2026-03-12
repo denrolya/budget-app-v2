@@ -1,6 +1,6 @@
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 
-import { Transaction } from '@/features/transactions';
+import { type Transaction } from '@/features/transactions';
 import { CURRENCY_CODE } from '@/constants/currency';
 
 export interface TransferProps {

@@ -11,9 +11,9 @@ import { processCategoryTree } from '@/features/statistics/components/Distributi
 import { Type as TransactionType } from '@/features/transactions';
 import { useAccountDistribution } from '@/hooks/statistics/useAccountDistributionStatistics';
 import { useCategoryTreeStatistics } from '@/hooks/statistics/useCategoryTreeStatistics';
-import { UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
+import { type UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { formatShortDate } from '@/lib/datetime/formatShortDate';
-import { Timeframe } from '@/types/global';
+import { type Timeframe } from '@/types/global';
 
 import AccountsCurrenciesPanel from './AccountCurrenciesPanel';
 import CategoriesPanel from './CategoriesPanel';

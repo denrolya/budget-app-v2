@@ -2,9 +2,9 @@ import { ResponsivePie } from '@nivo/pie';
 import { ResponsiveTreeMap } from '@nivo/treemap';
 import React, { useMemo } from 'react';
 
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 
-import { Bucket, BucketEntry, UnassignedEntry } from '../models/types';
+import { type Bucket, type BucketEntry, type UnassignedEntry } from '../models/types';
 
 interface Props {
   buckets: Bucket[];

@@ -13,10 +13,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
-import { Category, CategoryType, useList as useCategoryList } from '@/features/categories';
+import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 
 import { useBatchCreateBudgetLines, useHistoryAverages } from '../api';
 import type { BudgetDTO } from '../api/types';
@@ -189,7 +189,7 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
             ? 'text-amber-500'
             : 'text-orange-500';
       return (
-        <span className={`text-xs tabular-nums shrink-0 ml-1.5 ${cls}`} title="Months active out of 6">
+        <span title="Months active out of 6" className={`text-xs tabular-nums shrink-0 ml-1.5 ${cls}`}>
           {activeMonths}/{HISTORY_MONTHS}mo
         </span>
       );
@@ -233,7 +233,7 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
 
           {/* Depth-1 children */}
           {childItems.map(({ cat, suggested, activeMonths }) => (
-            <div key={cat.id} className="flex items-center py-0.5 pl-3 gap-1">
+            <div className="flex items-center py-0.5 pl-3 gap-1" key={cat.id}>
               <span className="text-sm truncate text-muted-foreground flex-1 min-w-0">{cat.name}</span>
               <FreqBadge activeMonths={activeMonths} />
               <span className={`font-medium tabular-nums shrink-0 ml-1 text-sm ${amtCls}`}>

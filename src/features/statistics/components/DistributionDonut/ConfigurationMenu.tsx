@@ -2,7 +2,7 @@ import { ArrowDownCircle, ArrowUpCircle, Sigma, SettingsIcon } from 'lucide-reac
 import React from 'react';
 
 import { cn } from '@/lib/utils';
-import { Timeframe } from '@/types/global';
+import { type Timeframe } from '@/types/global';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import {

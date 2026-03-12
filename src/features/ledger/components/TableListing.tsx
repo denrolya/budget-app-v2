@@ -1,5 +1,5 @@
 import { ArrowLeftRight, FileText } from 'lucide-react';
-import { Moment } from 'moment';
+import { type Moment } from 'moment';
 import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -10,7 +10,7 @@ import { Table, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import {
-  Transaction,
+  type Transaction,
   TransactionDetails,
   TransactionListingRow as TransactionRow,
   useInlineEdit,

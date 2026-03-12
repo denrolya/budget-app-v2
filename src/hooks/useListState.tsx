@@ -1,4 +1,4 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -6,7 +6,8 @@ import { useSearchParams } from 'react-router-dom';
 
 import { buildListStateSearchParams, buildQueryKey } from '@/lib/url/buildListStateSearchQueryParams';
 import { type Sorting } from '@/types/pagination';
-import BaseFilters, { type FilterConstructor } from '@/models/BaseFilters';
+import type BaseFilters from '@/models/BaseFilters';
+import { type FilterConstructor } from '@/models/BaseFilters';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 
 interface PaginationState {

@@ -1,6 +1,6 @@
-import { Moment } from 'moment';
+import { type Moment } from 'moment';
 
-import { ISO8601Period } from '@/types/global';
+import { type ISO8601Period } from '@/types/global';
 
 export interface TransformedData {
   timestamp: number;

@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Switch from '@/features/statistics/components/MoneyFlow/ConfigurationMenuSwitch';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { ISO8601Period } from '@/types/global';
+import { type ISO8601Period } from '@/types/global';
 
 interface UnifiedChartMenuProps {
   period: string;

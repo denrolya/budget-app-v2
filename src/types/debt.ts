@@ -1,5 +1,5 @@
-import { CURRENCY_CODE } from '@/constants/currency';
-import { ConvertedValues, RawTransactionDTO } from '@/features/transactions';
+import { type CURRENCY_CODE } from '@/constants/currency';
+import { type ConvertedValues, type RawTransactionDTO } from '@/features/transactions';
 
 export interface DebtDTO {
   id: number;

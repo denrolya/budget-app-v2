@@ -1,4 +1,4 @@
-import { CURRENCY_CODE } from '@/constants/currency';
+import { type CURRENCY_CODE } from '@/constants/currency';
 
 interface User {
   username: string;

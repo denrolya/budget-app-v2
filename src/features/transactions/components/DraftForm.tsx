@@ -20,7 +20,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useForm as useFormContext } from '@/contexts/Form';
-import Category from '@/features/categories/models/Category';
+import type Category from '@/features/categories/models/Category';
 import { useAccountsWithDefaultOrder, useCategories } from '@/hooks/financeData';
 import { useFormLogic } from '@/hooks/useFormLogic';
 

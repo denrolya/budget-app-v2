@@ -1,7 +1,7 @@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Type as AccountType } from '@/features/accounts';
-import { StatisticsConfig } from '@/types/statistics';
+import { type StatisticsConfig } from '@/types/statistics';
 import { generateSlug } from '@/lib/url/generateSlug';
 import { BalanceByAccountType, StatisticsCard, TotalBalanceCard } from '@/features/statistics';
 

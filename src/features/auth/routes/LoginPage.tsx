@@ -8,7 +8,7 @@ import { LoginForm } from '@/features/auth/components/LoginForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { useAuth } from '../contexts/auth';
-import { Credentials } from '../types';
+import { type Credentials } from '../types';
 
 export const LoginPage = () => {
   const { isAuthenticated, login, user } = useAuth();

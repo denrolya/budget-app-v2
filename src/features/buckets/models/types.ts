@@ -1,4 +1,4 @@
-import Account from '@/features/accounts/models/Account';
+import type Account from '@/features/accounts/models/Account';
 
 export interface Bucket {
   id: string;

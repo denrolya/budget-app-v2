@@ -16,7 +16,7 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { AccountPill } from '@/features/accounts';
 import RateDisplay from '@/features/transfers/components/RateDisplay';
-import Transfer from '@/features/transfers/models/Transfer';
+import type Transfer from '@/features/transfers/models/Transfer';
 import { cn } from '@/lib/utils';
 
 type Props = {

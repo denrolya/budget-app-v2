@@ -1,6 +1,6 @@
 import { ResponsivePie } from '@nivo/pie';
 import sortBy from 'lodash/sortBy';
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
 import { Type as TransactionType } from '@/features/transactions';

@@ -1,6 +1,6 @@
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 
-import { Timeframe } from '@/types/global';
+import { type Timeframe } from '@/types/global';
 
 export const formatShortDate = (date: Moment): string => {
   const today = moment();

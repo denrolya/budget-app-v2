@@ -1,5 +1,5 @@
 import { CalendarIcon } from 'lucide-react';
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';

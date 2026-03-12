@@ -1,7 +1,7 @@
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 
 import { CURRENCIES } from '@/constants/currency';
-import { ConvertedValues, Transaction, Type as TransactionType } from '@/features/transactions';
+import { type ConvertedValues, type Transaction, Type as TransactionType } from '@/features/transactions';
 
 export interface DebtRawData {
   id: number;

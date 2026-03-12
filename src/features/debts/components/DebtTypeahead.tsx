@@ -1,10 +1,11 @@
-import { forwardRef, ReactNode, useCallback, useMemo } from 'react';
+import { forwardRef, type ReactNode, useCallback, useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
 import MoneyValue from '@/components/common/MoneyValue';
-import Typeahead, { TypeaheadProps } from '@/components/ui/Typeahead';
-import Debt from '@/features/debts/models/Debt';
+import type Debt from '@/features/debts/models/Debt';
 import { useDebts } from '@/hooks/financeData';
+
+import Typeahead, { type TypeaheadProps } from '@/components/ui/Typeahead';
 
 type DebtTypeaheadProps = Omit<
   TypeaheadProps<Debt, string>,

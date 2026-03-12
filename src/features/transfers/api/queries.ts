@@ -3,7 +3,7 @@ import groupBy from 'lodash/groupBy';
 import sortBy from 'lodash/sortBy';
 import sumBy from 'lodash/sumBy';
 import toPairs from 'lodash/toPairs';
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 import { useCallback, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 
@@ -15,7 +15,7 @@ import { queryKeys } from '@/features/transfers/api/keys';
 import { transferService } from '@/features/transfers/api/service';
 import Transfer from '@/features/transfers/models/Transfer';
 import { TransferFilters } from '@/features/transfers/models/TransferFilters';
-import { UseListReturn, useListState } from '@/hooks/useListState';
+import { type UseListReturn, useListState } from '@/hooks/useListState';
 import { type Sorting } from '@/types/pagination';
 
 interface UseTransfersListOptions {

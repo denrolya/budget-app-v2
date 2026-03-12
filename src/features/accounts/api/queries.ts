@@ -3,7 +3,7 @@ import type { Moment } from 'moment';
 
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
 
-import Account from '../models/Account';
+import type Account from '../models/Account';
 
 import { queryKeys } from './keys';
 import { accountService, type BalanceHistoryResponse, type DailyStatsResponse, type HeatmapFilters } from './service';

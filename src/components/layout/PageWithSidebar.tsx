@@ -1,5 +1,5 @@
 import { ChevronLeft } from 'lucide-react';
-import React, { ReactNode, useId } from 'react';
+import React, { type ReactNode, useId } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';

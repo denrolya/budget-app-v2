@@ -14,7 +14,7 @@ import CategoryTypeahead from '@/features/categories/components/CategoryTypeahea
 import type Category from '@/features/categories/models/Category';
 import { useExpenseCategories, useIncomeCategories } from '@/hooks/financeData';
 import { useFormLogic } from '@/hooks/useFormLogic';
-import { Type as TransactionType } from '@/features/transactions';
+import { type Type as TransactionType } from '@/features/transactions';
 
 import { useMutations } from '../api';
 import { CategoryType, type CreateCategoryDTO, type UpdateCategoryDTO } from '../types';

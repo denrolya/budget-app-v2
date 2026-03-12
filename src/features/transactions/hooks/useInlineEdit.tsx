@@ -1,7 +1,7 @@
-import moment, { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
 import { useCallback, useMemo, useState } from 'react';
 
-import Transaction from '@/features/transactions/models/Transaction';
+import type Transaction from '@/features/transactions/models/Transaction';
 
 export type TransactionEditableField = 'account' | 'amount' | 'category' | 'note' | 'executedAt';
 
