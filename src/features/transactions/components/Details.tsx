@@ -27,13 +27,7 @@ interface TransactionDetailsProps {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const CURRENCY_ORDER = [
-  CURRENCY_CODE.EUR,
-  CURRENCY_CODE.USD,
-  CURRENCY_CODE.HUF,
-  CURRENCY_CODE.UAH,
-  CURRENCY_CODE.BTC,
-];
+const CURRENCY_ORDER = [CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.HUF, CURRENCY_CODE.UAH, CURRENCY_CODE.BTC];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -122,8 +116,7 @@ const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
   const monobankRates = useMonobankExchangeRates();
   const wiseRates = useWiseExchangeRates();
 
-  const hasConvertedValues =
-    transaction.convertedValues && Object.keys(transaction.convertedValues).length > 0;
+  const hasConvertedValues = transaction.convertedValues && Object.keys(transaction.convertedValues).length > 0;
   const hasCompensations = transaction.compensations && transaction.compensations.length > 0;
 
   const handleDelete = async () => {

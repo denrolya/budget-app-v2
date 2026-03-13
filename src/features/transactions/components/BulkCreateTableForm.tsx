@@ -122,9 +122,30 @@ export const BulkCreateTableForm: React.FC = () => {
     [bulkCreate, closeForm, submitForm, validateRequired],
   );
 
-  useHotkeys('ctrl+n', (e) => { e.preventDefault(); addRow(); }, [addRow]);
-  useHotkeys('ctrl+s,cmd+s', (e) => { e.preventDefault(); form.handleSubmit(onSubmit)(); }, [form, onSubmit]);
-  useHotkeys('ctrl+x', (e) => { e.preventDefault(); removeRow(fields.length - 1); }, [fields.length, removeRow]);
+  useHotkeys(
+    'ctrl+n',
+    (e) => {
+      e.preventDefault();
+      addRow();
+    },
+    [addRow],
+  );
+  useHotkeys(
+    'ctrl+s,cmd+s',
+    (e) => {
+      e.preventDefault();
+      form.handleSubmit(onSubmit)();
+    },
+    [form, onSubmit],
+  );
+  useHotkeys(
+    'ctrl+x',
+    (e) => {
+      e.preventDefault();
+      removeRow(fields.length - 1);
+    },
+    [fields.length, removeRow],
+  );
 
   useEffect(() => {
     addPageHotkeys('Bulk Transaction Creation', [
@@ -137,8 +158,11 @@ export const BulkCreateTableForm: React.FC = () => {
 
   return (
     <Form {...form}>
-      <form aria-label="Bulk create transactions" className="flex flex-col flex-1 min-h-0" onSubmit={form.handleSubmit(onSubmit)}>
-
+      <form
+        aria-label="Bulk create transactions"
+        className="flex flex-col flex-1 min-h-0"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
         {/* ── Terminal command bar ──────────────────────────────────────────── */}
         <div className="shrink-0 border-b bg-muted/30 h-10 px-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -163,12 +187,7 @@ export const BulkCreateTableForm: React.FC = () => {
               ADD ROW
               <kbd className="ml-0.5 text-[9px] bg-muted border border-border rounded px-1 leading-4">⌃N</kbd>
             </Button>
-            <Button
-              disabled={isSubmitting}
-              size="sm"
-              type="submit"
-              className="h-7 px-3 gap-1 text-2xs font-mono"
-            >
+            <Button disabled={isSubmitting} size="sm" type="submit" className="h-7 px-3 gap-1 text-2xs font-mono">
               <Save className="h-3 w-3" />
               {isSubmitting ? 'SAVING…' : 'SAVE ALL'}
               <kbd className="ml-0.5 text-[9px] opacity-60 rounded px-1 leading-4">⌘S</kbd>
@@ -211,12 +230,13 @@ export const BulkCreateTableForm: React.FC = () => {
 
                 return (
                   <TableRow className="even:bg-muted/15 hover:bg-muted/30 transition-colors" key={row.id}>
-
                     {/* ── Meta: index + type badge + draft ─────────────────── */}
-                    <TableCell className={cn(cell, 'border-l-2', {
-                      'border-l-destructive': isExpense,
-                      'border-l-success': !isExpense,
-                    })}>
+                    <TableCell
+                      className={cn(cell, 'border-l-2', {
+                        'border-l-destructive': isExpense,
+                        'border-l-success': !isExpense,
+                      })}
+                    >
                       <div className="flex items-center gap-1 pt-0.5">
                         <span className="w-5 shrink-0 text-2xs font-mono text-muted-foreground/50">
                           {String(index).padStart(2, '0')}

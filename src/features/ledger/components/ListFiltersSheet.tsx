@@ -91,7 +91,9 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
     }, 350),
   ).current;
 
-  const debouncedSearch = useRef(debounce((value: string) => setFilter('searchTerm', value), SEARCH_DEBOUNCE_MS)).current;
+  const debouncedSearch = useRef(
+    debounce((value: string) => setFilter('searchTerm', value), SEARCH_DEBOUNCE_MS),
+  ).current;
 
   useEffect(
     () => () => {
@@ -160,10 +162,7 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
     return [...new Set([...t, ...tr])];
   }, [transactionFilters.accounts, transferFilters.accounts]);
 
-  const selectedCurrencies: string[] = useMemo(
-    () => transactionFilters.currencies ?? [],
-    [transactionFilters],
-  );
+  const selectedCurrencies: string[] = useMemo(() => transactionFilters.currencies ?? [], [transactionFilters]);
 
   const setType = useCallback(
     (type: TransactionType) => {

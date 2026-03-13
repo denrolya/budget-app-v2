@@ -106,7 +106,9 @@ export const useTransactionsAndTransfersList = ({
   );
 
   const setFilter = useCallback((key: string, value: unknown) => {
-    setTransactionFiltersState((prev) => prev.setFilter(key as keyof TransactionFilters, value as TransactionFilters[keyof TransactionFilters]));
+    setTransactionFiltersState((prev) =>
+      prev.setFilter(key as keyof TransactionFilters, value as TransactionFilters[keyof TransactionFilters]),
+    );
     setPage(1);
   }, []);
 

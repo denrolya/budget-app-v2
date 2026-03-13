@@ -133,11 +133,7 @@ export const DebtForm = forwardRef<DebtFormRef, DebtFormProps>((_, ref) => {
             name="closedAt"
             render={({ field }) => (
               <>
-                <button
-                  type="button"
-                  className={chipClass(!isClosed)}
-                  onClick={() => field.onChange('')}
-                >
+                <button type="button" className={chipClass(!isClosed)} onClick={() => field.onChange('')}>
                   open
                 </button>
                 <button
@@ -232,12 +228,7 @@ export const DebtForm = forwardRef<DebtFormRef, DebtFormProps>((_, ref) => {
             render={({ field }) => (
               <FormItem className="flex-1 min-w-0">
                 <FormControl>
-                  <Input
-                    {...field}
-                    aria-label="Note"
-                    placeholder="Note…"
-                    className="h-7 text-xs"
-                  />
+                  <Input {...field} aria-label="Note" placeholder="Note…" className="h-7 text-xs" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -31,18 +31,18 @@ type SunburstTooltipArgs = {
 };
 
 const SunburstTooltip: React.FC<SunburstTooltipArgs> = ({ id, value, color }) => (
-    <div className="rounded-md border border-border bg-popover px-2 py-1 text-popover-foreground shadow-md">
-      <div className="flex items-center gap-2">
-        <span
-          aria-hidden="true"
-          style={{ backgroundColor: color ?? 'transparent' }}
-          className="h-2.5 w-2.5 rounded-full"
-        />
-        <span className="text-xs font-medium leading-5">{String(id)}</span>
-        <span className="text-xs leading-5 text-muted-foreground">{Number.isFinite(value) ? value : 0}</span>
-      </div>
+  <div className="rounded-md border border-border bg-popover px-2 py-1 text-popover-foreground shadow-md">
+    <div className="flex items-center gap-2">
+      <span
+        aria-hidden="true"
+        style={{ backgroundColor: color ?? 'transparent' }}
+        className="h-2.5 w-2.5 rounded-full"
+      />
+      <span className="text-xs font-medium leading-5">{String(id)}</span>
+      <span className="text-xs leading-5 text-muted-foreground">{Number.isFinite(value) ? value : 0}</span>
     </div>
-  );
+  </div>
+);
 
 export const CategoriesSunburst: React.FC<CategoriesSunburstProps> = ({ categories, height = 500 }) => {
   const rootData: SunburstNode = useMemo(

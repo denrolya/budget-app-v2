@@ -105,10 +105,7 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
     debouncedSetCategories(selectedCategories);
   }, [selectedCategories, debouncedSetCategories]);
 
-  const removeCategory = useCallback(
-    (id: number) => setSelectedCategories((prev) => prev.filter((c) => c !== id)),
-    [],
-  );
+  const removeCategory = useCallback((id: number) => setSelectedCategories((prev) => prev.filter((c) => c !== id)), []);
 
   const onChartClick = (chartEvent: ChartEvent) => {
     if (!chartEvent.activeLabel) return;
@@ -270,9 +267,7 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
                   multiple
                   value={selectedCategories.map(String)}
                   className="h-9 w-full"
-                  onChange={(categories) =>
-                    setSelectedCategories((categories as string[] | null)?.map(Number) ?? [])
-                  }
+                  onChange={(categories) => setSelectedCategories((categories as string[] | null)?.map(Number) ?? [])}
                 />
               </PopoverContent>
             </Popover>

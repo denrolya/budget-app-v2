@@ -84,9 +84,7 @@ const MobileLedgerPage: React.FC = () => {
               {label}
             </button>
           ))}
-          <span className="ml-auto font-mono text-2xs text-muted-foreground tabular-nums">
-            {totalItems} tx
-          </span>
+          <span className="ml-auto font-mono text-2xs text-muted-foreground tabular-nums">{totalItems} tx</span>
         </div>
 
         {/* Account chips — horizontally scrollable */}
@@ -125,9 +123,7 @@ const MobileLedgerPage: React.FC = () => {
 
       {/* Transaction list */}
       <div className="flex-1 min-h-0 overflow-y-auto">
-        {ledger.isLoading && (
-          <p className="font-mono text-2xs text-muted-foreground text-center py-10">loading…</p>
-        )}
+        {ledger.isLoading && <p className="font-mono text-2xs text-muted-foreground text-center py-10">loading…</p>}
 
         {!ledger.isLoading && ledger.groupedItems.length === 0 && (
           <p className="font-mono text-2xs text-muted-foreground text-center py-10">no transactions</p>

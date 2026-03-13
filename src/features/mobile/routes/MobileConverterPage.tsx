@@ -14,9 +14,7 @@ const CurrencySelect: React.FC<{
   onChange: (v: CURRENCY_CODE) => void;
 }> = ({ label, value, onChange }) => (
   <div>
-    <label className="block font-mono text-2xs uppercase tracking-wider text-muted-foreground mb-1.5">
-      {label}
-    </label>
+    <label className="block font-mono text-2xs uppercase tracking-wider text-muted-foreground mb-1.5">{label}</label>
     <select
       aria-label={label}
       value={value}
@@ -37,7 +35,9 @@ const MobileConverterPage: React.FC = () => {
   const rates = useExchangeRates();
 
   const [from, setFrom] = useState<CURRENCY_CODE>(baseCurrency);
-  const [to, setTo] = useState<CURRENCY_CODE>(CURRENCY_CODE.USD === baseCurrency ? CURRENCY_CODE.EUR : CURRENCY_CODE.USD);
+  const [to, setTo] = useState<CURRENCY_CODE>(
+    CURRENCY_CODE.USD === baseCurrency ? CURRENCY_CODE.EUR : CURRENCY_CODE.USD,
+  );
   const [amount, setAmount] = useState('1');
 
   const sourceRates = rates.fixer;

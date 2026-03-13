@@ -13,7 +13,9 @@ const byId = <T extends { id: number }>(items: T[]) => {
   return map;
 };
 
-const mapCompensation = (comp: Omit<RawTransactionDTO, 'compensations' | 'transfer' | 'debt'> & { account: Account; category: Category }) =>
+const mapCompensation = (
+  comp: Omit<RawTransactionDTO, 'compensations' | 'transfer' | 'debt'> & { account: Account; category: Category },
+) =>
   new Transaction({
     id: comp.id,
     account: comp.account,
@@ -44,7 +46,11 @@ export const mapDebtDTOToModel = (dto: DebtDTO, deps: { accounts: Account[]; cat
       category,
       executedAt: moment(rawTx.executedAt),
       debt: (rawTx.debt ?? undefined) as Debt | undefined,
-      compensations: rawTx.compensations?.map(mapCompensation as unknown as (comp: Omit<RawTransactionDTO, 'compensations' | 'transfer' | 'debt'>) => Transaction),
+      compensations: rawTx.compensations?.map(
+        mapCompensation as unknown as (
+          comp: Omit<RawTransactionDTO, 'compensations' | 'transfer' | 'debt'>,
+        ) => Transaction,
+      ),
     });
   });
 

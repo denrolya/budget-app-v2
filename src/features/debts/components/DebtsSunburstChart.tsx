@@ -122,7 +122,11 @@ const DebtsSunburstChart: React.FC<Props> = ({ debts, onHoverChange, onNavigate 
       return (
         <div className="rounded-md border bg-background px-3 py-2 shadow-md text-sm min-w-[170px] pointer-events-none">
           <div className="flex items-center gap-2 mb-1.5">
-            <span aria-hidden style={{ backgroundColor: datum.color }} className="inline-block h-2 w-2 rounded-full flex-none" />
+            <span
+              aria-hidden
+              style={{ backgroundColor: datum.color }}
+              className="inline-block h-2 w-2 rounded-full flex-none"
+            />
             <span className="font-medium text-foreground truncate">{debt.debtor}</span>
           </div>
           <div className="space-y-0.5 text-xs">

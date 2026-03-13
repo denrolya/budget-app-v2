@@ -13,10 +13,10 @@ import type Account from '@/features/accounts/models/Account';
 const TYPE_ORDER = [AccountType.Bank, AccountType.Cash, AccountType.Internet, AccountType.Basic] as const;
 
 const TYPE_LABELS: Record<AccountType, string> = {
-  [AccountType.Bank]:     'BANK',
-  [AccountType.Cash]:     'CASH',
+  [AccountType.Bank]: 'BANK',
+  [AccountType.Cash]: 'CASH',
   [AccountType.Internet]: 'NET',
-  [AccountType.Basic]:    'BASIC',
+  [AccountType.Basic]: 'BASIC',
 };
 
 // ── Balance formatter ─────────────────────────────────────────────────────────
@@ -36,13 +36,7 @@ const formatBalance = (balance: number, currency: string): string => {
 // ── Type label chip ───────────────────────────────────────────────────────────
 
 const TypeLabel: React.FC<{ label: string; first: boolean }> = ({ label, first }) => (
-  <span
-    aria-hidden
-    className={cn(
-      'inline-flex items-center self-stretch flex-none gap-1',
-      first ? 'pr-1.5' : 'px-2',
-    )}
-  >
+  <span aria-hidden className={cn('inline-flex items-center self-stretch flex-none gap-1', first ? 'pr-1.5' : 'px-2')}>
     {!first && <span className="w-px h-4 bg-border/50 flex-none" />}
     <span className="font-mono text-3xs uppercase tracking-widest text-muted-foreground bg-muted/40 border border-border/40 rounded px-1 py-px select-none">
       {label}
@@ -91,10 +85,11 @@ const TickerPill = React.memo(({ account }: { account: Account }) => {
 const AccountsTicker: React.FC = () => {
   const accounts = useActiveAccountsWithDefaultOrder();
 
-  const groups = useMemo(() =>
-    TYPE_ORDER
-      .map((type) => ({ type, accounts: accounts.filter((a) => a.type === type) }))
-      .filter((g) => g.accounts.length > 0),
+  const groups = useMemo(
+    () =>
+      TYPE_ORDER.map((type) => ({ type, accounts: accounts.filter((a) => a.type === type) })).filter(
+        (g) => g.accounts.length > 0,
+      ),
     [accounts],
   );
 

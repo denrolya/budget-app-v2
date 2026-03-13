@@ -125,7 +125,17 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
     const root = processCategoryTree((categoryRaw ?? []) as unknown as Parameters<typeof processCategoryTree>[0]);
     const totalRoot = root.reduce((sum, c) => sum + c.value, 0);
     return applyMonthly(currentCategory ? currentCategory.value : totalRoot);
-  }, [tab, totalAccountsRaw, accountStats, selectedCurrency, showMonthlyAverage, timeframe.after, timeframe.before, categoryRaw, currentCategory]);
+  }, [
+    tab,
+    totalAccountsRaw,
+    accountStats,
+    selectedCurrency,
+    showMonthlyAverage,
+    timeframe.after,
+    timeframe.before,
+    categoryRaw,
+    currentCategory,
+  ]);
 
   return (
     <>
@@ -242,9 +252,7 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
             useColors={false}
             className="text-2xs font-semibold font-mono tabular-nums text-foreground pr-0.5"
           />
-          {showMonthlyAverage && (
-            <span className="text-[9px] text-muted-foreground leading-none">/mo</span>
-          )}
+          {showMonthlyAverage && <span className="text-[9px] text-muted-foreground leading-none">/mo</span>}
         </div>
 
         {/* Content */}

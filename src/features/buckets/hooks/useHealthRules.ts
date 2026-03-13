@@ -115,7 +115,8 @@ const warn = (detail: string): HealthResult => ({ status: 'warn', detail });
 const fail = (detail: string): HealthResult => ({ status: 'fail', detail });
 const na = (detail: string): HealthResult => ({ status: 'na', detail });
 
-export const useHealthRules = (ctx: HealthContext) => useMemo(() => {
+export const useHealthRules = (ctx: HealthContext) =>
+  useMemo(() => {
     const rules = RULES.map((rule) => ({ ...rule, result: rule.evaluate(ctx) }));
     const evaluable = rules.filter((r) => r.result.status !== 'na');
     const score =

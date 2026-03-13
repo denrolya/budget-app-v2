@@ -91,7 +91,11 @@ export const ChartTooltip: React.FC<Props> = ({
   }, [dataPoint, data, label, comparisonMode]);
 
   useEffect(() => {
-    const W = 320, H = 200, M = 12, OX = 16, OY = 8;
+    const W = 320,
+      H = 200,
+      M = 12,
+      OX = 16,
+      OY = 8;
     const handleMouseMove = (e: MouseEvent) => {
       if (!activeRef.current) return;
       setPosition({

@@ -10,7 +10,6 @@ import type Account from '../models/Account';
 
 import AccountMarker from './AccountMarker';
 
-
 type AccountTypeaheadProps = Omit<
   TypeaheadProps<Account, string>,
   'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement' | 'renderSelected'
@@ -30,12 +29,15 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(
       return map;
     }, [accounts]);
 
-    const renderSelected = useCallback((account: Account): ReactNode => (
-      <div className="flex items-center gap-1.5 min-w-0">
-        <AccountMarker account={account} size="sm" />
-        <span className="truncate">{account.displayName}</span>
-      </div>
-    ), []);
+    const renderSelected = useCallback(
+      (account: Account): ReactNode => (
+        <div className="flex items-center gap-1.5 min-w-0">
+          <AccountMarker account={account} size="sm" />
+          <span className="truncate">{account.displayName}</span>
+        </div>
+      ),
+      [],
+    );
 
     const renderElement = useCallback((account: Account): ReactNode => {
       const isArchived = !!account.archivedAt;

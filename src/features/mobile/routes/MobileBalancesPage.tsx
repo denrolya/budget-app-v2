@@ -34,13 +34,9 @@ const AccountRow: React.FC<{ account: Account; dimmed?: boolean }> = ({ account,
 
       <div className="text-right shrink-0">
         <p
-          className={cn(
-            'font-mono text-xs tabular-nums',
-            account.balance < 0 ? 'text-destructive' : 'text-foreground',
-          )}
+          className={cn('font-mono text-xs tabular-nums', account.balance < 0 ? 'text-destructive' : 'text-foreground')}
         >
-          {CURRENCIES[account.currency].symbol}{' '}
-          {formatMoney(Math.abs(account.balance), account.currency)}
+          {CURRENCIES[account.currency].symbol} {formatMoney(Math.abs(account.balance), account.currency)}
         </p>
         {showConverted && (
           <p className="font-mono text-2xs text-muted-foreground tabular-nums">
@@ -123,8 +119,7 @@ const MobileBalancesPage: React.FC = () => {
             {archivedAccounts.length} archived
           </button>
 
-          {showArchived &&
-            archivedAccounts.map((a) => <AccountRow dimmed account={a} key={a.id} />)}
+          {showArchived && archivedAccounts.map((a) => <AccountRow dimmed account={a} key={a.id} />)}
         </div>
       )}
     </div>

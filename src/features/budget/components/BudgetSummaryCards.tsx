@@ -152,15 +152,9 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
     };
   }, [budget, analytics, displayCurrency, rates, catData]);
 
-  const pctColor =
-    stats.percentUsed > 100
-      ? 'text-destructive'
-      : stats.percentUsed > 80
-        ? 'text-warning'
-        : undefined;
+  const pctColor = stats.percentUsed > 100 ? 'text-destructive' : stats.percentUsed > 80 ? 'text-warning' : undefined;
 
-  const pctBarColor =
-    stats.percentUsed > 100 ? 'bg-destructive' : stats.percentUsed > 80 ? 'bg-warning' : 'bg-primary';
+  const pctBarColor = stats.percentUsed > 100 ? 'bg-destructive' : stats.percentUsed > 80 ? 'bg-warning' : 'bg-primary';
 
   const remainingColor = stats.remaining < 0 ? 'text-destructive' : 'text-success';
   const savingsColor = stats.netSavings >= 0 ? 'text-success' : 'text-destructive';
@@ -174,11 +168,7 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
   );
 
   const gradeBarColor =
-    gradeColor === 'text-destructive'
-      ? 'bg-destructive'
-      : gradeColor.includes('warning')
-        ? 'bg-warning'
-        : 'bg-success';
+    gradeColor === 'text-destructive' ? 'bg-destructive' : gradeColor.includes('warning') ? 'bg-warning' : 'bg-success';
 
   const daysPct = stats.daysTotal > 0 ? (stats.daysElapsed / stats.daysTotal) * 100 : 0;
 
@@ -238,7 +228,10 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
             <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Health</div>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button type="button" className="text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+                <button
+                  type="button"
+                  className="text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+                >
                   <Info className="h-3 w-3" />
                 </button>
               </TooltipTrigger>
@@ -253,11 +246,21 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
                 </ul>
                 <p className="font-medium mt-1">Grade thresholds:</p>
                 <ul className="space-y-0.5 pl-1">
-                  <li><span className="text-success font-bold">A</span> ≥ 90 — excellent</li>
-                  <li><span className="text-success/75 font-bold">B</span> ≥ 75 — good</li>
-                  <li><span className="text-warning font-bold">C</span> ≥ 60 — fair</li>
-                  <li><span className="text-warning/75 font-bold">D</span> ≥ 45 — needs work</li>
-                  <li><span className="text-destructive font-bold">F</span> &lt; 45 — critical</li>
+                  <li>
+                    <span className="text-success font-bold">A</span> ≥ 90 — excellent
+                  </li>
+                  <li>
+                    <span className="text-success/75 font-bold">B</span> ≥ 75 — good
+                  </li>
+                  <li>
+                    <span className="text-warning font-bold">C</span> ≥ 60 — fair
+                  </li>
+                  <li>
+                    <span className="text-warning/75 font-bold">D</span> ≥ 45 — needs work
+                  </li>
+                  <li>
+                    <span className="text-destructive font-bold">F</span> &lt; 45 — critical
+                  </li>
                 </ul>
               </TooltipContent>
             </Tooltip>

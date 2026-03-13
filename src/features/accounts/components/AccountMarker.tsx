@@ -31,11 +31,7 @@ const AccountMarker: React.FC<Props> = ({ account, size = 'sm' }) => {
   const color = isArchived ? 'hsl(var(--muted-foreground))' : account.color;
 
   const integration = account.bankIntegration;
-  const integrationColor = integration
-    ? integration.isActive
-      ? 'hsl(var(--success))'
-      : 'hsl(var(--warning))'
-    : null;
+  const integrationColor = integration ? (integration.isActive ? 'hsl(var(--success))' : 'hsl(var(--warning))') : null;
 
   return (
     <span className={cn('relative inline-flex shrink-0 flex-none align-middle', SIZE_CLASS[size])}>

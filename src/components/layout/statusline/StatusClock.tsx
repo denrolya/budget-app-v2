@@ -23,11 +23,7 @@ const StatusClock: React.FC = () => {
     return () => clearTimeout(timeout);
   }, []);
 
-  return (
-    <span className="font-mono text-2xs tabular-nums text-muted-foreground leading-none select-none">
-      {time}
-    </span>
-  );
+  return <span className="font-mono text-2xs tabular-nums text-muted-foreground leading-none select-none">{time}</span>;
 };
 
 export default React.memo(StatusClock);

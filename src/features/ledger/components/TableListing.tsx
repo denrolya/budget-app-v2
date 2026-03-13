@@ -152,7 +152,9 @@ const TableListing: React.FC<Props> = ({
         </TableHeader>
 
         {dates.map((date) => {
-          const found = groupedItems?.find((group) => group[0].isSame(date, 'day')) ?? ([null, [], 0, 0, 0, 0] as [Moment | null, (Transaction | Transfer)[], number, number, number, number]);
+          const found =
+            groupedItems?.find((group) => group[0].isSame(date, 'day')) ??
+            ([null, [], 0, 0, 0, 0] as [Moment | null, (Transaction | Transfer)[], number, number, number, number]);
 
           const [, items, transactionsValue, transfersValue, transactionsCount, transfersCount] = found as [
             Moment | null,

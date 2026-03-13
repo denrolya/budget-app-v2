@@ -48,9 +48,8 @@ const SectionDivider: React.FC<{ label?: string }> = ({ label }) => (
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
-  const feePercentage = transfer.hasFee() && transfer.feeExpense
-    ? ((transfer.feeExpense.amount / transfer.amount) * 100).toFixed(2)
-    : null;
+  const feePercentage =
+    transfer.hasFee() && transfer.feeExpense ? ((transfer.feeExpense.amount / transfer.amount) * 100).toFixed(2) : null;
 
   const senderTotal =
     transfer.feeExpense?.account.id === transfer.fromExpense.account.id
@@ -114,12 +113,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
       <div className="space-y-1 mb-3">
         <div className="flex items-center justify-between">
           <span className="text-3xs uppercase tracking-widest text-muted-foreground">Sender</span>
-          <MoneyValue
-            showSign
-            amount={senderTotal}
-            currency={senderCurrency}
-            className="font-mono text-xs"
-          />
+          <MoneyValue showSign amount={senderTotal} currency={senderCurrency} className="font-mono text-xs" />
         </div>
         <TransactionListItem flat transaction={transfer.fromExpense} />
       </div>
@@ -128,12 +122,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
       <div className="space-y-1">
         <div className="flex items-center justify-between">
           <span className="text-3xs uppercase tracking-widest text-muted-foreground">Recipient</span>
-          <MoneyValue
-            showSign
-            amount={recipientTotal}
-            currency={recipientCurrency}
-            className="font-mono text-xs"
-          />
+          <MoneyValue showSign amount={recipientTotal} currency={recipientCurrency} className="font-mono text-xs" />
         </div>
         <TransactionListItem flat transaction={transfer.toIncome} />
       </div>
@@ -153,9 +142,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
                   currency={transfer.feeExpense.account.currency}
                   className="font-mono text-xs font-medium"
                 />
-                {feePercentage && (
-                  <span className="text-3xs text-destructive/75 font-mono">({feePercentage}%)</span>
-                )}
+                {feePercentage && <span className="text-3xs text-destructive/75 font-mono">({feePercentage}%)</span>}
               </div>
             </div>
             <TransactionListItem flat transaction={transfer.feeExpense} />

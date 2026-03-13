@@ -29,7 +29,9 @@ export const useMutations = () => {
 
   const rebuildAccountModel = (raw: unknown): Account => {
     const rates = qc.getQueryData<ExchangeRatesData>(exchangeRatesQueryKey)?.fixer;
-    return rates ? accountService.withConvertedValues(raw as unknown as AccountRawData, rates) : new Account(raw as unknown as AccountRawData);
+    return rates
+      ? accountService.withConvertedValues(raw as unknown as AccountRawData, rates)
+      : new Account(raw as unknown as AccountRawData);
   };
 
   const upsertCache = (next: Account) => {

@@ -175,11 +175,7 @@ const LedgerView: React.FC<LedgerViewProps> = ({
           <ScrollArea aria-label="Ledger table listing" className="flex-1 min-h-0 w-full min-w-0">
             <div className="min-h-full">
               {isLoading && (
-                <TableListingSkeleton
-                  after={timeframe.after}
-                  before={timeframe.before}
-                  showEmptyDays={showEmptyDays}
-                />
+                <TableListingSkeleton after={timeframe.after} before={timeframe.before} showEmptyDays={showEmptyDays} />
               )}
               {!isLoading && (
                 <TableListing

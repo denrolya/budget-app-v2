@@ -15,7 +15,12 @@ import { formatRange } from '@/lib/datetime/formatShortDate';
 import { cn } from '@/lib/utils';
 
 const PERIOD_SHORT: Record<string, string> = {
-  P1D: 'D', P1W: 'W', P1M: 'M', P3M: '3M', P6M: '6M', P1Y: 'Y',
+  P1D: 'D',
+  P1W: 'W',
+  P1M: 'M',
+  P3M: '3M',
+  P6M: '6M',
+  P1Y: 'Y',
 };
 
 interface Props extends React.ComponentPropsWithoutRef<'div'> {
@@ -80,7 +85,12 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
           </CardTitle>
           <div className="flex items-center gap-2">
             {!controlledTimeframe?.timeframe?.after && (
-              <DaterangePickerWithPresets after={timeframe.after} before={timeframe.before} presets={MONEYFLOW_PRESETS} onChange={setTimeframe}>
+              <DaterangePickerWithPresets
+                after={timeframe.after}
+                before={timeframe.before}
+                presets={MONEYFLOW_PRESETS}
+                onChange={setTimeframe}
+              >
                 <button className="inline-flex items-center gap-1 text-2xs text-muted-foreground hover:text-foreground border border-border rounded px-2 py-0.5 leading-none cursor-pointer">
                   <CalendarIcon className="h-2.5 w-2.5" />
                   {formatRange(timeframe)}
@@ -88,10 +98,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
                 </button>
               </DaterangePickerWithPresets>
             )}
-            <ConfigurationMenu
-              setShowPreviousPeriod={setShowPreviousPeriod}
-              showPreviousPeriod={showPreviousPeriod}
-            />
+            <ConfigurationMenu setShowPreviousPeriod={setShowPreviousPeriod} showPreviousPeriod={showPreviousPeriod} />
           </div>
         </div>
         <CardDescription className="sr-only">Money flow statistics for the selected period.</CardDescription>
@@ -218,9 +225,26 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
         <CardFooter className="flex flex-col w-full p-0 border-t">
           <div className="hidden lg:flex w-full divide-x divide-border px-2">
             {[
-              { label: 'Income', value: totalIncome, comparisonValue: previousTotalIncome, comparisonPercentage: incomeChangePercent },
-              { label: 'Expenses', value: totalExpenses, comparisonValue: previousTotalExpenses, comparisonPercentage: expensesChangePercent },
-              { label: 'Net Revenue', value: totalRevenue, comparisonValue: previousTotalRevenue, comparisonPercentage: revenueChangePercent, colors: true, showSign: true },
+              {
+                label: 'Income',
+                value: totalIncome,
+                comparisonValue: previousTotalIncome,
+                comparisonPercentage: incomeChangePercent,
+              },
+              {
+                label: 'Expenses',
+                value: totalExpenses,
+                comparisonValue: previousTotalExpenses,
+                comparisonPercentage: expensesChangePercent,
+              },
+              {
+                label: 'Net Revenue',
+                value: totalRevenue,
+                comparisonValue: previousTotalRevenue,
+                comparisonPercentage: revenueChangePercent,
+                colors: true,
+                showSign: true,
+              },
             ].map((item, index) => (
               <div className="flex-1 px-3 py-2 flex justify-center items-center" key={index}>
                 <SummaryItem {...item} className="text-center" />

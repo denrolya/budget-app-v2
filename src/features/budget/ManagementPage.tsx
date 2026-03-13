@@ -156,7 +156,12 @@ const BudgetDetailRoute: React.FC = () => {
 
         <BudgetDisplayCurrency value={displayCurrency} onChange={setDisplayCurrency} />
 
-        <BudgetFillFromHistoryButton autoOpen={autoOpenFill} budget={budget} displayCurrency={displayCurrency} rates={rates} />
+        <BudgetFillFromHistoryButton
+          autoOpen={autoOpenFill}
+          budget={budget}
+          displayCurrency={displayCurrency}
+          rates={rates}
+        />
 
         <BudgetExportButton analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
 

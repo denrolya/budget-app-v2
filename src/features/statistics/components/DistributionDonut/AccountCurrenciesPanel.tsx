@@ -292,11 +292,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
         <div className="shrink-0 h-[180px] relative">
           <Chart animate colors={accountsColors} data={accountsPieData} tooltip={accountsTooltip} />
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <MoneyValue
-              amount={totalAccounts}
-              useColors={false}
-              className="text-sm font-bold font-mono tabular-nums"
-            />
+            <MoneyValue amount={totalAccounts} useColors={false} className="text-sm font-bold font-mono tabular-nums" />
           </div>
         </div>
         <div className="border-t shrink-0" />
@@ -354,11 +350,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
       <div className="shrink-0 h-[180px] relative">
         <Chart animate colors={accountsColors} data={accountsInCurrencyPieData} tooltip={accountsInCurrencyTooltip} />
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <MoneyValue
-            amount={currencyTotal}
-            useColors={false}
-            className="text-sm font-bold font-mono tabular-nums"
-          />
+          <MoneyValue amount={currencyTotal} useColors={false} className="text-sm font-bold font-mono tabular-nums" />
         </div>
       </div>
       <div className="border-t shrink-0" />

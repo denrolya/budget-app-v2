@@ -22,7 +22,10 @@ const TYPE_LABELS: Record<string, string> = {
 
 const resolveCssVar = (value: string): string => {
   if (typeof window === 'undefined' || !value.startsWith('var(')) return value;
-  const name = value.replace(/^var\(/, '').replace(/\)$/, '').trim();
+  const name = value
+    .replace(/^var\(/, '')
+    .replace(/\)$/, '')
+    .trim();
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888';
 };
 
@@ -78,7 +81,10 @@ const AccountsTreemap: React.FC<Props> = ({ groupBy, onNavigate }) => {
   }
 
   return (
-    <div style={{ cursor: onNavigate ? 'pointer' : 'default' }} className="h-full w-full animate-in fade-in zoom-in-95 duration-500 ease-out [animation-fill-mode:both]">
+    <div
+      style={{ cursor: onNavigate ? 'pointer' : 'default' }}
+      className="h-full w-full animate-in fade-in zoom-in-95 duration-500 ease-out [animation-fill-mode:both]"
+    >
       <ResponsiveTreeMap
         borderColor="hsl(var(--background))"
         borderWidth={2}
@@ -118,12 +124,16 @@ const AccountsTreemap: React.FC<Props> = ({ groupBy, onNavigate }) => {
               <div className="space-y-0.5">
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-2xs font-mono text-muted-foreground uppercase">BAL</span>
-                  <span className="text-2xs font-mono tabular-nums">{nativeFmt.format(Math.abs(d.rawBalance ?? 0))}</span>
+                  <span className="text-2xs font-mono tabular-nums">
+                    {nativeFmt.format(Math.abs(d.rawBalance ?? 0))}
+                  </span>
                 </div>
                 {d.currency !== baseCurrency && (
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-2xs font-mono text-muted-foreground uppercase">≈{baseCurrency}</span>
-                    <span className="text-2xs font-mono tabular-nums text-muted-foreground">{fmt.format(node.value)}</span>
+                    <span className="text-2xs font-mono tabular-nums text-muted-foreground">
+                      {fmt.format(node.value)}
+                    </span>
                   </div>
                 )}
                 <div className="flex items-center justify-between gap-4 border-t border-border/50 pt-0.5 mt-0.5">

@@ -74,11 +74,12 @@ const MobileRatesPage: React.FC = () => {
         const rate = raw / baseRate;
 
         return (
-          <div className="flex items-center justify-between px-3 py-3 border-b border-border/30 last:border-0" key={currency}>
+          <div
+            className="flex items-center justify-between px-3 py-3 border-b border-border/30 last:border-0"
+            key={currency}
+          >
             <div className="flex items-center gap-2.5">
-              <span className="font-mono text-2xs uppercase tracking-wider text-muted-foreground w-8">
-                {currency}
-              </span>
+              <span className="font-mono text-2xs uppercase tracking-wider text-muted-foreground w-8">{currency}</span>
               <span className="text-xs text-muted-foreground">{curr.name}</span>
             </div>
 

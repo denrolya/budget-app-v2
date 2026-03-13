@@ -167,7 +167,11 @@ const LedgerActivityCard: React.FC<Props> = ({
                   </Tooltip>
                 )}
 
-                <FiltersToggleButton activeCount={ledger.activeFilterCount} className="h-7 w-7" onClick={ledger.toggleFilters} />
+                <FiltersToggleButton
+                  activeCount={ledger.activeFilterCount}
+                  className="h-7 w-7"
+                  onClick={ledger.toggleFilters}
+                />
               </div>
             </div>
           </CardHeader>
@@ -180,9 +184,7 @@ const LedgerActivityCard: React.FC<Props> = ({
                   heatmapExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
                 )}
               >
-                <div className="overflow-hidden">
-                  {heatmapMounted && heatmap(heatmapArgs)}
-                </div>
+                <div className="overflow-hidden">{heatmapMounted && heatmap(heatmapArgs)}</div>
               </div>
             )}
 

@@ -48,7 +48,11 @@ const H = 'h-7';
 const TYPEAHEAD_W = 'w-[12rem]';
 const AMOUNT_W = 'w-16';
 const DATE_TEXT = 'max-w-32 truncate';
-const TYPEAHEAD_JOINED = cn('h-7 text-xs', TYPEAHEAD_W, '[&>div:first-child]:rounded-r-none [&>div:first-child]:border-r-0');
+const TYPEAHEAD_JOINED = cn(
+  'h-7 text-xs',
+  TYPEAHEAD_W,
+  '[&>div:first-child]:rounded-r-none [&>div:first-child]:border-r-0',
+);
 
 const Divider: React.FC = () => <span aria-hidden="true" className="hidden xl:block h-6 w-px bg-border mx-1" />;
 
@@ -87,7 +91,9 @@ export const ListingControls: React.FC<Props> = ({
     }, 350),
   ).current;
 
-  const debouncedSearch = useRef(debounce((value: string) => setFilter('searchTerm', value), SEARCH_DEBOUNCE_MS)).current;
+  const debouncedSearch = useRef(
+    debounce((value: string) => setFilter('searchTerm', value), SEARCH_DEBOUNCE_MS),
+  ).current;
 
   useEffect(
     () => () => {
@@ -168,10 +174,7 @@ export const ListingControls: React.FC<Props> = ({
   }, [transactionFilters.accounts, transferFilters.accounts]);
 
   // ─ Currency MultiSelect ───────────────────────────────────────────────────
-  const selectedCurrencies: string[] = useMemo(
-    () => transactionFilters.currencies ?? [],
-    [transactionFilters],
-  );
+  const selectedCurrencies: string[] = useMemo(() => transactionFilters.currencies ?? [], [transactionFilters]);
 
   const handleCurrencyChange = useCallback(
     (values: string[]) => setFilter('currencies', values.length ? values : undefined),
@@ -386,10 +389,7 @@ export const ListingControls: React.FC<Props> = ({
 
         {/* NOTE SEARCH */}
         <div className="relative flex items-center">
-          <Search
-            aria-hidden="true"
-            className="absolute left-2 h-3 w-3 text-muted-foreground pointer-events-none"
-          />
+          <Search aria-hidden="true" className="absolute left-2 h-3 w-3 text-muted-foreground pointer-events-none" />
           <Input
             aria-label="Search by note"
             placeholder="Search notes…"

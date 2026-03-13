@@ -168,14 +168,29 @@ export type PresetOption = { label: string; range: Timeframe };
 
 export const MONEYFLOW_PRESETS: PresetOption[] = [
   { label: 'This Month', range: { after: moment().startOf('month'), before: moment().endOf('month') } },
-  { label: 'Last Month', range: { after: moment().subtract(1, 'month').startOf('month'), before: moment().subtract(1, 'month').endOf('month') } },
+  {
+    label: 'Last Month',
+    range: {
+      after: moment().subtract(1, 'month').startOf('month'),
+      before: moment().subtract(1, 'month').endOf('month'),
+    },
+  },
   { label: 'Last 3 Months', range: { after: moment().subtract(3, 'month').startOf('month'), before: moment() } },
   { label: 'Last 6 Months', range: { after: moment().subtract(6, 'month').startOf('month'), before: moment() } },
   { label: 'This Quarter', range: { after: moment().startOf('quarter'), before: moment().endOf('quarter') } },
-  { label: 'Last Quarter', range: { after: moment().subtract(1, 'quarter').startOf('quarter'), before: moment().subtract(1, 'quarter').endOf('quarter') } },
+  {
+    label: 'Last Quarter',
+    range: {
+      after: moment().subtract(1, 'quarter').startOf('quarter'),
+      before: moment().subtract(1, 'quarter').endOf('quarter'),
+    },
+  },
   { label: 'YTD', range: { after: moment().startOf('year'), before: moment() } },
   { label: 'This Year', range: { after: moment().startOf('year'), before: moment().endOf('year') } },
-  { label: 'Last Year', range: { after: moment().subtract(1, 'year').startOf('year'), before: moment().subtract(1, 'year').endOf('year') } },
+  {
+    label: 'Last Year',
+    range: { after: moment().subtract(1, 'year').startOf('year'), before: moment().subtract(1, 'year').endOf('year') },
+  },
   { label: 'Last 2 Years', range: { after: moment().subtract(2, 'year').startOf('year'), before: moment() } },
   { label: 'Last 3 Years', range: { after: moment().subtract(3, 'year').startOf('year'), before: moment() } },
   { label: 'Last 5 Years', range: { after: moment().subtract(5, 'year').startOf('year'), before: moment() } },
@@ -185,17 +200,38 @@ export const CATEGORIES_TIMELINE_PRESETS: PresetOption[] = [
   { label: 'This Month', range: { after: moment().startOf('month'), before: moment().endOf('month') } },
   { label: 'Last 3 Months', range: { after: moment().subtract(3, 'month').startOf('month'), before: moment() } },
   { label: 'This Quarter', range: { after: moment().startOf('quarter'), before: moment().endOf('quarter') } },
-  { label: 'Last Quarter', range: { after: moment().subtract(1, 'quarter').startOf('quarter'), before: moment().subtract(1, 'quarter').endOf('quarter') } },
+  {
+    label: 'Last Quarter',
+    range: {
+      after: moment().subtract(1, 'quarter').startOf('quarter'),
+      before: moment().subtract(1, 'quarter').endOf('quarter'),
+    },
+  },
   { label: 'YTD', range: { after: moment().startOf('year'), before: moment() } },
   { label: 'This Year', range: { after: moment().startOf('year'), before: moment().endOf('year') } },
-  { label: 'Last Year', range: { after: moment().subtract(1, 'year').startOf('year'), before: moment().subtract(1, 'year').endOf('year') } },
+  {
+    label: 'Last Year',
+    range: { after: moment().subtract(1, 'year').startOf('year'), before: moment().subtract(1, 'year').endOf('year') },
+  },
 ];
 
 export const DISTRIBUTION_PRESETS: PresetOption[] = [
   { label: 'This Month', range: { after: moment().startOf('month'), before: moment().endOf('month') } },
-  { label: 'Last Month', range: { after: moment().subtract(1, 'month').startOf('month'), before: moment().subtract(1, 'month').endOf('month') } },
+  {
+    label: 'Last Month',
+    range: {
+      after: moment().subtract(1, 'month').startOf('month'),
+      before: moment().subtract(1, 'month').endOf('month'),
+    },
+  },
   { label: 'This Quarter', range: { after: moment().startOf('quarter'), before: moment().endOf('quarter') } },
-  { label: 'Last Quarter', range: { after: moment().subtract(1, 'quarter').startOf('quarter'), before: moment().subtract(1, 'quarter').endOf('quarter') } },
+  {
+    label: 'Last Quarter',
+    range: {
+      after: moment().subtract(1, 'quarter').startOf('quarter'),
+      before: moment().subtract(1, 'quarter').endOf('quarter'),
+    },
+  },
   { label: 'YTD', range: { after: moment().startOf('year'), before: moment() } },
   { label: 'This Year', range: { after: moment().startOf('year'), before: moment().endOf('year') } },
 ];

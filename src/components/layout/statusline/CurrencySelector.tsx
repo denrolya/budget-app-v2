@@ -17,10 +17,7 @@ const CurrencySelector: React.FC = () => {
   const { updateCurrency } = useAuth();
   const baseCurrency = useBaseCurrency();
 
-  const fiatCurrencies = React.useMemo(
-    () => Object.values(CURRENCIES).filter((c) => c.type === 'fiat'),
-    [],
-  );
+  const fiatCurrencies = React.useMemo(() => Object.values(CURRENCIES).filter((c) => c.type === 'fiat'), []);
 
   const handleCurrencyChange = async (code: CURRENCY_CODE) => {
     if (code === baseCurrency) return;
@@ -49,10 +46,7 @@ const CurrencySelector: React.FC = () => {
       <DropdownMenuContent align="end" side="top" sideOffset={4} className="min-w-36">
         <DropdownMenuLabel className="text-2xs text-muted-foreground">Base currency</DropdownMenuLabel>
         {fiatCurrencies.map((currency) => (
-          <DropdownMenuItem
-            key={currency.code}
-            onClick={() => handleCurrencyChange(currency.code as CURRENCY_CODE)}
-          >
+          <DropdownMenuItem key={currency.code} onClick={() => handleCurrencyChange(currency.code as CURRENCY_CODE)}>
             <span className="w-5 text-center mr-2 text-sm leading-none">{currency.symbol}</span>
             <span className="flex-1 font-mono text-xs">{currency.code}</span>
             {baseCurrency === currency.code && <Check className="ml-2 h-3 w-3 text-primary shrink-0" />}

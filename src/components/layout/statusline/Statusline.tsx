@@ -63,7 +63,6 @@ const Statusline: React.FC<Props> = ({ className }) => {
 
       {/* ── C: Right cluster ─── */}
       <div className="flex-none flex items-center h-full">
-
         {/* Commands */}
         <Tooltip>
           <TooltipTrigger asChild>

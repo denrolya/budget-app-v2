@@ -243,9 +243,7 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
         <td className="py-2 pl-4 pr-2 text-left">{label} Total</td>
         <td className="py-2 px-2 text-right tabular-nums">{planned > 0 ? fmtAmt(planned, displayCurrency) : '—'}</td>
         <td className="py-2 px-2 text-right tabular-nums">{actual > 0 ? fmtAmt(actual, displayCurrency) : '—'}</td>
-        <td
-          className={`py-2 px-4 text-right tabular-nums ${remaining < 0 ? 'text-destructive' : 'text-success'}`}
-        >
+        <td className={`py-2 px-4 text-right tabular-nums ${remaining < 0 ? 'text-destructive' : 'text-success'}`}>
           {planned > 0 ? (
             <>
               {fmtAmt(remaining, displayCurrency)}

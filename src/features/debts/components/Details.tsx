@@ -331,7 +331,6 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
           </TabsContent>
         </Tabs>
       </div>
-
     </div>
   );
 };

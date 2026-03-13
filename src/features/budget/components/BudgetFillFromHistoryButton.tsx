@@ -179,19 +179,14 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
   };
 
   const renderGroups = (groups: GroupedSuggestion[], type: 'expense' | 'income') => {
-    if (groups.length === 0)
-      return <p className="text-muted-foreground text-center py-4 text-xs">No suggestions</p>;
+    if (groups.length === 0) return <p className="text-muted-foreground text-center py-4 text-xs">No suggestions</p>;
 
     const amtCls = type === 'expense' ? 'text-destructive' : 'text-success';
 
     const FreqBadge = ({ activeMonths }: { activeMonths: number | null }) => {
       if (activeMonths === null) return null;
       const cls =
-        activeMonths >= 5
-          ? 'text-muted-foreground/60'
-          : activeMonths >= 3
-            ? 'text-amber-500'
-            : 'text-orange-500';
+        activeMonths >= 5 ? 'text-muted-foreground/60' : activeMonths >= 3 ? 'text-amber-500' : 'text-orange-500';
       return (
         <span title="Months active out of 6" className={`text-xs tabular-nums shrink-0 ml-1.5 ${cls}`}>
           {activeMonths}/{HISTORY_MONTHS}mo
@@ -273,8 +268,8 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
                   ({moment(historyData.from).format('MMM YYYY')} – {moment(historyData.to).format('MMM YYYY')})
                 </>
               )}
-              . Recent months are weighted higher. Categories active in fewer than 2 months are excluded as
-              one-offs. Group totals include all sub-categories. Only categories without an existing line are shown.
+              . Recent months are weighted higher. Categories active in fewer than 2 months are excluded as one-offs.
+              Group totals include all sub-categories. Only categories without an existing line are shown.
             </DialogDescription>
           </DialogHeader>
 

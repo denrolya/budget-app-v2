@@ -12,10 +12,7 @@ import { cn } from '@/lib/utils';
 import type { Timeframe } from '@/types/global';
 
 const YEAR_START = 2010;
-const YEARS = Array.from(
-  { length: new Date().getFullYear() - YEAR_START + 1 },
-  (_, i) => new Date().getFullYear() - i,
-);
+const YEARS = Array.from({ length: new Date().getFullYear() - YEAR_START + 1 }, (_, i) => new Date().getFullYear() - i);
 
 interface Props {
   id?: string;
@@ -102,10 +99,7 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
     [clearDebounce, onChange],
   );
 
-  const jumpToYear = useCallback(
-    (year: number) => setDisplayMonth((prev) => new Date(year, prev.getMonth(), 1)),
-    [],
-  );
+  const jumpToYear = useCallback((year: number) => setDisplayMonth((prev) => new Date(year, prev.getMonth(), 1)), []);
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -155,7 +149,9 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
           </div>
 
           <div className="p-2 flex flex-col min-h-0 flex-1">
-            <p className="text-2xs font-medium uppercase tracking-widest text-muted-foreground mb-1.5 shrink-0">Presets</p>
+            <p className="text-2xs font-medium uppercase tracking-widest text-muted-foreground mb-1.5 shrink-0">
+              Presets
+            </p>
             <div className="flex flex-col gap-0.5 overflow-y-auto min-h-0 flex-1">
               {presets.map(({ label, range }) => (
                 <button

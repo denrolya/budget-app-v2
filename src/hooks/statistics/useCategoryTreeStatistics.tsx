@@ -52,8 +52,7 @@ export const useCategoryTreeStatistics = (
   const transformCategoryNode = (node: CategoryNode): Category => {
     const categoryList = (categories as unknown as Record<string, Category[]>)[type as string];
     const category =
-      categoryList?.find((c: Category) => c.id === node.id) ||
-      new Category(node as unknown as CategoryDTO);
+      categoryList?.find((c: Category) => c.id === node.id) || new Category(node as unknown as CategoryDTO);
     return {
       ...category,
       total: node.total,

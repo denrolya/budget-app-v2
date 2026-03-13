@@ -63,7 +63,7 @@ const BucketsPage: React.FC = () => {
     if (config.monthlyExpenses === null && avgExpense !== null) {
       setMonthlyExpenses(avgExpense);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally omit config.monthlyExpenses and setMonthlyExpenses; this runs once when avgExpense first arrives
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally omit config.monthlyExpenses and setMonthlyExpenses; this runs once when avgExpense first arrives
   }, [avgExpense]);
 
   // ── Health ──────────────────────────────────────────────────────────────────
@@ -267,7 +267,6 @@ const BucketsPage: React.FC = () => {
   return (
     <div className="flex h-full flex-col bg-muted overflow-hidden">
       <div className="flex-1 min-h-0 p-3 md:p-4 flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-4 duration-[350ms] ease-out">
-
         {isMobile ? (
           /* ── Mobile: tabbed layout ─────────────────────────────────── */
           <Tabs defaultValue="assign" className="flex-1 min-h-0 flex flex-col">

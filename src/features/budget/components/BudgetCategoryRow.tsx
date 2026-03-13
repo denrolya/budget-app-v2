@@ -335,9 +335,7 @@ const BudgetCategoryRow: React.FC<Props> = ({
               {remaining < 0 ? '-' : ''}
               {fmtAmt(remaining, displayCurrency)}
               {pct !== null && (
-                <span className={cn('ml-1 text-xs', remainingColorClass, 'opacity-70')}>
-                  {pct.toFixed(0)}%
-                </span>
+                <span className={cn('ml-1 text-xs', remainingColorClass, 'opacity-70')}>{pct.toFixed(0)}%</span>
               )}
             </span>
             {pct !== null && (

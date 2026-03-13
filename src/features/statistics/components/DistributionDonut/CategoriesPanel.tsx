@@ -103,10 +103,7 @@ const CategoriesPanel: React.FC<Props> = ({
     return sortBy(list, 'value').reverse();
   }, [currentCategories, showMonthlyAverage, calcMonthlyAverage]);
 
-  const categoriesById = useMemo(
-    () => new Map(currentCategories.map((c) => [String(c.id), c])),
-    [currentCategories],
-  );
+  const categoriesById = useMemo(() => new Map(currentCategories.map((c) => [String(c.id), c])), [currentCategories]);
 
   // Sunburst data — always reflects the current drill level
   const sunburstData = useMemo((): SunburstDatum => {
@@ -193,7 +190,10 @@ const CategoriesPanel: React.FC<Props> = ({
   );
 
   const sunburstColors = useMemo(
-    () => ({ scheme: type === TransactionType.Expense ? 'red_grey' : 'greens' } as Parameters<typeof ResponsiveSunburst>[0]['colors']),
+    () =>
+      ({ scheme: type === TransactionType.Expense ? 'red_grey' : 'greens' }) as Parameters<
+        typeof ResponsiveSunburst
+      >[0]['colors'],
     [type],
   );
 
@@ -212,7 +212,11 @@ const CategoriesPanel: React.FC<Props> = ({
               inheritColorFromParent
               borderColor={{ theme: 'background' } as Parameters<typeof ResponsiveSunburst>[0]['borderColor']}
               borderWidth={1}
-              childColor={{ from: 'color', modifiers: [['brighter', 0.35]] } as Parameters<typeof ResponsiveSunburst>[0]['childColor']}
+              childColor={
+                { from: 'color', modifiers: [['brighter', 0.35]] } as Parameters<
+                  typeof ResponsiveSunburst
+                >[0]['childColor']
+              }
               colors={sunburstColors}
               cornerRadius={2}
               data={sunburstData}
@@ -222,14 +226,10 @@ const CategoriesPanel: React.FC<Props> = ({
               motionConfig="gentle"
               value="value"
               onClick={(node) => {
-                const cat = currentCategories.find(
-                  (c) => String(c.id) === String((node.data as SunburstDatum).id),
-                );
+                const cat = currentCategories.find((c) => String(c.id) === String((node.data as SunburstDatum).id));
                 if (cat) handleCategoryStep(cat);
               }}
-              onMouseEnter={(node) =>
-                setHoveredArc({ name: (node.data as SunburstDatum).name, value: node.value })
-              }
+              onMouseEnter={(node) => setHoveredArc({ name: (node.data as SunburstDatum).name, value: node.value })}
               onMouseLeave={() => setHoveredArc(null)}
             />
             {/* Center label */}
@@ -237,9 +237,7 @@ const CategoriesPanel: React.FC<Props> = ({
               <div className="text-center max-w-[88px]">
                 {hoveredArc ? (
                   <>
-                    <p className="text-[9px] text-muted-foreground leading-none mb-0.5 truncate">
-                      {hoveredArc.name}
-                    </p>
+                    <p className="text-[9px] text-muted-foreground leading-none mb-0.5 truncate">{hoveredArc.name}</p>
                     <MoneyValue
                       amount={hoveredArc.value}
                       useColors={false}

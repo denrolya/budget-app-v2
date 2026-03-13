@@ -22,9 +22,7 @@ interface TileProps {
 const KpiTile: React.FC<TileProps> = ({ label, isLoading, children }) => (
   <Card className="overflow-hidden">
     <CardContent className="p-4 flex flex-col gap-1.5">
-      <p className="text-2xs font-semibold uppercase tracking-widest text-muted-foreground leading-none">
-        {label}
-      </p>
+      <p className="text-2xs font-semibold uppercase tracking-widest text-muted-foreground leading-none">{label}</p>
       {isLoading ? (
         <div className="space-y-1.5">
           <Skeleton className="h-6 w-28" />
@@ -145,9 +143,7 @@ const renderTile = (tile: KpiTileConfig, index: number) => {
 };
 
 const DashboardKpiStrip: React.FC = () => (
-  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-    {kpiConfig.map(renderTile)}
-  </div>
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">{kpiConfig.map(renderTile)}</div>
 );
 
 export default DashboardKpiStrip;

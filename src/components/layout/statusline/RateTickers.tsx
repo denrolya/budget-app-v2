@@ -35,9 +35,7 @@ const RateTickers: React.FC = () => {
     const map = new Map<string, { rate: number | null; isUp: boolean | null }>();
     if (!snapshots.length) return map;
 
-    const sorted = [...snapshots].sort(
-      (a, b) => new Date(a.effectiveAt).getTime() - new Date(b.effectiveAt).getTime(),
-    );
+    const sorted = [...snapshots].sort((a, b) => new Date(a.effectiveAt).getTime() - new Date(b.effectiveAt).getTime());
     const first = sorted[0];
     const last = sorted[sorted.length - 1];
 
@@ -94,7 +92,9 @@ const RateTickers: React.FC = () => {
                 )}
                 key={key}
               >
-                <span className="text-muted-foreground">{from}/{to}</span>
+                <span className="text-muted-foreground">
+                  {from}/{to}
+                </span>
                 <span
                   className={cn('font-semibold', {
                     'text-success': isUp === true,
@@ -102,7 +102,8 @@ const RateTickers: React.FC = () => {
                     'text-foreground': isUp === null,
                   })}
                 >
-                  {' '}{formatRate(rate, to)}
+                  {' '}
+                  {formatRate(rate, to)}
                 </span>
                 {isUp === true && <span className="text-success text-3xs">↑</span>}
                 {isUp === false && <span className="text-destructive text-3xs">↓</span>}

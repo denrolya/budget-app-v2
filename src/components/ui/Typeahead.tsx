@@ -48,8 +48,10 @@ const readField = <T, K extends keyof T>(obj: T, key: K): T[K] => obj[key];
 
 const asString = (v: unknown): string => String(v);
 
-export interface TypeaheadProps<T, V extends string | number>
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
+export interface TypeaheadProps<T, V extends string | number> extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'onChange' | 'value'
+> {
   multiple?: boolean;
 
   options: T[];
@@ -286,9 +288,8 @@ const TypeaheadInner = <T, V extends string | number>(
   const showLabelOverlay = !multiple && inputValue === '' && inputHasSelection;
 
   const firstSelected = selectedOptions[0];
-  const selectedDisplay = showLabelOverlay && firstSelected
-    ? (renderSelected?.(firstSelected) ?? getLabel(firstSelected))
-    : null;
+  const selectedDisplay =
+    showLabelOverlay && firstSelected ? (renderSelected?.(firstSelected) ?? getLabel(firstSelected)) : null;
 
   return (
     <PopoverPrimitive.Root
@@ -390,7 +391,10 @@ const TypeaheadInner = <T, V extends string | number>(
               disabled={disabled}
               aria-label={open ? 'Close options' : 'Open options'}
             >
-              <ChevronDown className={cn('h-3 w-3 opacity-40 transition-transform', { 'rotate-180': open })} aria-hidden="true" />
+              <ChevronDown
+                className={cn('h-3 w-3 opacity-40 transition-transform', { 'rotate-180': open })}
+                aria-hidden="true"
+              />
             </Button>
           </div>
         </PopoverPrimitive.Anchor>

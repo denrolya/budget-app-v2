@@ -67,8 +67,12 @@ const IdCell: React.FC<{
         className="p-0 w-full sm:max-w-[380px] flex flex-col"
       >
         {/* A11y labels */}
-        <SheetTitle id={titleId} className="sr-only">Transfer Details</SheetTitle>
-        <SheetDescription id={descId} className="sr-only">#{transfer.id}</SheetDescription>
+        <SheetTitle id={titleId} className="sr-only">
+          Transfer Details
+        </SheetTitle>
+        <SheetDescription id={descId} className="sr-only">
+          #{transfer.id}
+        </SheetDescription>
 
         {/* Compact header strip */}
         <div className="h-10 shrink-0 flex items-center gap-2.5 px-4 border-b">

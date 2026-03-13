@@ -269,7 +269,9 @@ export const DroppableBucketZone: React.FC<BucketZoneProps> = ({
                   type="button"
                   className={cn(
                     'p-1 rounded transition-colors',
-                    target ? 'text-primary/70 hover:text-primary' : 'text-muted-foreground/30 hover:text-muted-foreground',
+                    target
+                      ? 'text-primary/70 hover:text-primary'
+                      : 'text-muted-foreground/30 hover:text-muted-foreground',
                   )}
                 >
                   <Target className="h-3 w-3" />
@@ -302,7 +304,10 @@ export const DroppableBucketZone: React.FC<BucketZoneProps> = ({
                   <button
                     type="button"
                     className="text-xs text-destructive hover:underline"
-                    onClick={() => { onSetTarget(null); setTargetEditValue(''); }}
+                    onClick={() => {
+                      onSetTarget(null);
+                      setTargetEditValue('');
+                    }}
                     onPointerDown={(e) => e.stopPropagation()}
                   >
                     Clear target
@@ -319,7 +324,8 @@ export const DroppableBucketZone: React.FC<BucketZoneProps> = ({
                 {bucketTotal.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 {target && (
                   <span className="text-[10px] font-normal text-muted-foreground ml-1">
-                    / {baseSym}{target.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                    / {baseSym}
+                    {target.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                   </span>
                 )}
               </div>

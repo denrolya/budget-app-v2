@@ -38,8 +38,20 @@ const monthlyExpenseConfig: StatisticsConfig = {
 
 export const kpiConfig: KpiTileConfig[] = [
   { kind: 'net-worth' },
-  { kind: 'stat', label: 'Income · This Month', positiveIsGood: true, queryKey: 'kpi-income', config: monthlyIncomeConfig },
-  { kind: 'stat', label: 'Expenses · This Month', positiveIsGood: false, queryKey: 'kpi-expenses', config: monthlyExpenseConfig },
+  {
+    kind: 'stat',
+    label: 'Income · This Month',
+    positiveIsGood: true,
+    queryKey: 'kpi-income',
+    config: monthlyIncomeConfig,
+  },
+  {
+    kind: 'stat',
+    label: 'Expenses · This Month',
+    positiveIsGood: false,
+    queryKey: 'kpi-expenses',
+    config: monthlyExpenseConfig,
+  },
   { kind: 'net-revenue', incomeConfig: monthlyIncomeConfig, expenseConfig: monthlyExpenseConfig },
 ];
 

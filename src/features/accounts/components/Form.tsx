@@ -46,12 +46,16 @@ const CURRENCY_CHIPS = [
 ] as const;
 
 const normalizeCurrency = (v: unknown): CURRENCY_CODE => {
-  const raw = String(v ?? '').trim().toUpperCase();
+  const raw = String(v ?? '')
+    .trim()
+    .toUpperCase();
   return (Object.values(CURRENCY_CODE) as string[]).includes(raw) ? (raw as CURRENCY_CODE) : CURRENCY_CODE.EUR;
 };
 
 const normalizeType = (v: unknown): FormSchema['type'] => {
-  const raw = String(v ?? '').trim().toLowerCase();
+  const raw = String(v ?? '')
+    .trim()
+    .toLowerCase();
   if (raw === AccountType.Bank || raw === AccountType.Cash || raw === AccountType.Internet) return raw;
   return AccountType.Basic;
 };

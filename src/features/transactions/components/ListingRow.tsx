@@ -106,8 +106,12 @@ const IdCell = ({
         className="p-0 w-full sm:max-w-[380px] flex flex-col"
       >
         {/* A11y labels */}
-        <SheetTitle id={titleId} className="sr-only">Transaction Details</SheetTitle>
-        <SheetDescription id={descId} className="sr-only">#{tx.id}</SheetDescription>
+        <SheetTitle id={titleId} className="sr-only">
+          Transaction Details
+        </SheetTitle>
+        <SheetDescription id={descId} className="sr-only">
+          #{tx.id}
+        </SheetDescription>
 
         {/* Compact header strip */}
         <div className="h-10 shrink-0 flex items-center gap-2.5 px-4 border-b">
@@ -209,7 +213,11 @@ const CategoryCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' 
         autoFocus
         multiple={false}
         type={tx.type}
-        value={((editValue as { id?: number } | null)?.id ?? editValue) != null ? String((editValue as { id?: number } | null)?.id ?? editValue) : null}
+        value={
+          ((editValue as { id?: number } | null)?.id ?? editValue) != null
+            ? String((editValue as { id?: number } | null)?.id ?? editValue)
+            : null
+        }
         onChange={(v) => setEditValue(v as string | number | null)}
       />
     </CellPopover>

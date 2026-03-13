@@ -207,14 +207,8 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
         await createTransaction({
           type: values.type,
           amount: Number.parseFloat(values.amount),
-          category: Number.parseInt(
-            values.category,
-            10,
-          ) as unknown as Category,
-          account: Number.parseInt(
-            values.account,
-            10,
-          ) as unknown as Account,
+          category: Number.parseInt(values.category, 10) as unknown as Category,
+          account: Number.parseInt(values.account, 10) as unknown as Account,
           isDraft: values.isDraft,
           executedAt: values.executedAt as unknown as Moment,
         });
@@ -228,7 +222,10 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
       } catch (error: unknown) {
         // mutations already toast errors in your hook; this is a hard fallback
         toast.error('Failed to submit transaction. Please try again.', {
-          description: typeof error === 'object' && error !== null && 'message' in error ? String((error as { message: unknown }).message) : undefined,
+          description:
+            typeof error === 'object' && error !== null && 'message' in error
+              ? String((error as { message: unknown }).message)
+              : undefined,
           action: { label: 'Close', onClick: () => toast.dismiss() },
         });
         throw error;

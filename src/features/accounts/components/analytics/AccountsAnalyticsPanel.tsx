@@ -22,12 +22,8 @@ const PanelCard: React.FC<{
     className={`flex flex-col min-h-0 rounded-lg border bg-card overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-400 ease-out [animation-fill-mode:both] ${className}`}
   >
     <div className="flex-none px-3 pt-2 pb-1.5 border-b border-border/50 flex items-baseline gap-2">
-      <p className="text-2xs font-mono font-semibold uppercase tracking-widest text-foreground leading-none">
-        {title}
-      </p>
-      {subtitle && (
-        <p className="text-2xs font-mono text-muted-foreground/60 leading-none">{subtitle}</p>
-      )}
+      <p className="text-2xs font-mono font-semibold uppercase tracking-widest text-foreground leading-none">{title}</p>
+      {subtitle && <p className="text-2xs font-mono text-muted-foreground/60 leading-none">{subtitle}</p>}
     </div>
     <div className="flex-1 min-h-0 p-1">{children}</div>
   </div>

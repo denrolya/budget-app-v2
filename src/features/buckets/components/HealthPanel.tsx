@@ -45,22 +45,41 @@ const HealthPanel: React.FC<Props> = ({
           <span className="text-sm text-muted-foreground">{health.score}/100</span>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button type="button" className="text-muted-foreground/40 hover:text-muted-foreground transition-colors ml-0.5">
+              <button
+                type="button"
+                className="text-muted-foreground/40 hover:text-muted-foreground transition-colors ml-0.5"
+              >
                 <Info className="h-3.5 w-3.5" />
               </button>
             </TooltipTrigger>
             <TooltipContent side="right" className="max-w-xs text-xs space-y-1.5 p-3">
               <p className="font-semibold text-sm">Portfolio Health Score</p>
-              <p>Scored across 10 personal finance rules. Each rule is: ✅ pass (+10), ⚠️ warn (+5), or ❌ fail (+0). N/A rules are excluded.</p>
+              <p>
+                Scored across 10 personal finance rules. Each rule is: ✅ pass (+10), ⚠️ warn (+5), or ❌ fail (+0). N/A
+                rules are excluded.
+              </p>
               <p className="font-medium mt-1">Grade thresholds:</p>
               <ul className="space-y-0.5 pl-1">
-                <li><span className="text-success font-bold">A</span> ≥ 90 — excellent</li>
-                <li><span className="text-success/75 font-bold">B</span> ≥ 75 — good</li>
-                <li><span className="text-warning font-bold">C</span> ≥ 60 — fair</li>
-                <li><span className="text-warning/75 font-bold">D</span> ≥ 45 — needs work</li>
-                <li><span className="text-destructive font-bold">F</span> &lt; 45 — critical</li>
+                <li>
+                  <span className="text-success font-bold">A</span> ≥ 90 — excellent
+                </li>
+                <li>
+                  <span className="text-success/75 font-bold">B</span> ≥ 75 — good
+                </li>
+                <li>
+                  <span className="text-warning font-bold">C</span> ≥ 60 — fair
+                </li>
+                <li>
+                  <span className="text-warning/75 font-bold">D</span> ≥ 45 — needs work
+                </li>
+                <li>
+                  <span className="text-destructive font-bold">F</span> &lt; 45 — critical
+                </li>
               </ul>
-              <p className="text-muted-foreground">Rules cover: emergency fund, savings rate, liquid reserves, diversification, currency strength, and more.</p>
+              <p className="text-muted-foreground">
+                Rules cover: emergency fund, savings rate, liquid reserves, diversification, currency strength, and
+                more.
+              </p>
             </TooltipContent>
           </Tooltip>
         </div>

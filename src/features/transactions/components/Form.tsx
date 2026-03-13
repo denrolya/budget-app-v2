@@ -70,7 +70,6 @@ type TransactionData = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
- 
 export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>((_, ref) => {
   const { create: createTransaction, update: updateTransaction } = useMutations();
   const {
@@ -129,9 +128,16 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
 
   useImperativeHandle(ref, () => formRef.current!);
 
-  useHotkeys('meta+enter,ctrl+enter', (e) => { e.preventDefault(); void formRef.current?.submitForm(); }, {
-    enableOnFormTags: true,
-  });
+  useHotkeys(
+    'meta+enter,ctrl+enter',
+    (e) => {
+      e.preventDefault();
+      void formRef.current?.submitForm();
+    },
+    {
+      enableOnFormTags: true,
+    },
+  );
 
   // ── Derived class strings (computed before return to avoid JSX ternaries) ──
 
@@ -167,7 +173,6 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
   return (
     <Form {...form}>
       <form className="space-y-1.5">
-
         {/* ── Command bar ───────────────────────────────────────────────── */}
         <div className="flex items-center justify-between h-9 px-2 mb-1 rounded-md bg-muted/30 border">
           <FormField
@@ -199,12 +204,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                 </button>
               )}
             />
-            <button
-              tabIndex={-1}
-              type="button"
-              className={debtChipClass}
-              onClick={() => setShowDebt((v) => !v)}
-            >
+            <button tabIndex={-1} type="button" className={debtChipClass} onClick={() => setShowDebt((v) => !v)}>
               [debt]
             </button>
             <span className="text-[9px] text-muted-foreground font-mono select-none">⌘↵</span>
@@ -315,13 +315,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
             render={({ field }) => (
               <FormItem className="flex-1 min-w-0">
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Note…"
-                    type="text"
-                    value={field.value ?? ''}
-                    className="h-7 text-xs"
-                  />
+                  <Input {...field} placeholder="Note…" type="text" value={field.value ?? ''} className="h-7 text-xs" />
                 </FormControl>
               </FormItem>
             )}
@@ -418,7 +412,9 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               tabIndex={-1}
               type="button"
               className="flex items-center gap-1 text-2xs font-mono text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => append({ account: -1, amount: 0, executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT) })}
+              onClick={() =>
+                append({ account: -1, amount: 0, executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT) })
+              }
             >
               <Plus className="h-3 w-3" />
               ADD COMP
