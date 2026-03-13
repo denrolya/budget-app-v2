@@ -113,7 +113,7 @@ const DebtsSunburstChart: React.FC<Props> = ({ debts, onHoverChange, onNavigate 
   );
 
   const tooltip = useCallback(
-    ({ datum }: { datum: { id: string; label: string; value: number; color: string; data: PieDatum } }) => {
+    ({ datum }: { datum: { id: string | number; label: string; value: number; color: string; data: PieDatum } }) => {
       const d = datum.data;
       const debt = debts.find((x) => x.id === d.debtId);
       if (!debt) return null;
@@ -173,7 +173,7 @@ const DebtsSunburstChart: React.FC<Props> = ({ debts, onHoverChange, onNavigate 
         innerRadius={0.55}
         motionConfig="gentle"
         padAngle={1.2}
-        tooltip={tooltip}
+        tooltip={tooltip as unknown as Parameters<typeof ResponsivePie>[0]['tooltip']}
         onClick={handleClick as unknown as Parameters<typeof ResponsivePie>[0]['onClick']}
         onMouseEnter={handleMouseEnter as unknown as Parameters<typeof ResponsivePie>[0]['onMouseEnter']}
         onMouseLeave={handleMouseLeave}

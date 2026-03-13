@@ -75,10 +75,11 @@ abstract class BaseFilters implements FilterModel {
   get activeCount(): number {
     let count = 0;
 
-    const keys = Object.keys(this._defaults);
+    const defaults = this._defaults as Record<string, unknown>;
+    const keys = Object.keys(defaults);
     for (const key of keys) {
       const current = this[key];
-      const original = this._defaults[key];
+      const original = defaults[key];
 
       if (moment.isMoment(current) && moment.isMoment(original)) {
         if (!current.isSame(original, 'day')) count++;

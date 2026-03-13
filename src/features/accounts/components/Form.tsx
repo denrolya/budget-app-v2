@@ -72,8 +72,9 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
   const { create, update } = useMutations();
   const {
     updateFormState,
-    formState: { values: data },
+    formState: { values: rawData },
   } = useFormContext();
+  const data = rawData as (Partial<FormSchema> & { id?: number }) | null | undefined;
 
   const defaultValues: FormSchema = useMemo(
     () => ({

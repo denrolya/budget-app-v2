@@ -48,8 +48,9 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
 
   const {
     updateFormState,
-    formState: { values: data },
+    formState: { values: rawData },
   } = useFormContext();
+  const data = rawData as (Partial<Omit<FormValues, 'parent'>> & { id?: number; parent?: unknown }) | null | undefined;
 
   const defaultValues = useMemo<FormValues>(() => {
     let normalizedParent: number | null = null;

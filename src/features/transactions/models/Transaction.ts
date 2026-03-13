@@ -102,6 +102,7 @@ export const useTransactionFactory = () => {
       account,
       category,
       executedAt: moment(rawTransaction.executedAt),
+      debt: (rawTransaction.debt ?? undefined) as Debt | undefined,
       compensations: rawTransaction.compensations?.map((comp) => {
         const compAccount = accounts.find((acc: Account) => acc.id === comp.account.id);
         const compCategory = categories.find((cat: Category) => cat.id === comp.category.id);

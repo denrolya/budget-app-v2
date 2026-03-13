@@ -18,5 +18,6 @@ export { default as TransactionDetails } from './components/Details';
 export { default as BulkCreateTableForm } from './components/BulkCreateTableForm';
 export { default as TransactionListItem } from './components/ListItem';
 export { default as TransactionListingRow } from './components/ListingRow';
+export type { TransactionRowColumn } from './components/ListingRow';
 export { ListingRowSkeleton as TransactionListingRowSkeleton } from './components/TableListingSkeleton';
 export { default as TransactionDraftForm } from './components/DraftForm';

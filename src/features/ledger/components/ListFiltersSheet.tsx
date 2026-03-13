@@ -343,7 +343,7 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
             aria-pressed={transactionFilters.type === TransactionType.Income}
             size="sm"
             type="button"
-            variant={transactionFilters.type === TransactionType.Income ? 'success' : 'outline'}
+            variant={transactionFilters.type === TransactionType.Income ? 'default' : 'outline'}
             className="h-8 gap-1.5"
             onClick={() => setType(TransactionType.Income)}
           >

@@ -43,7 +43,8 @@ export const mapDebtDTOToModel = (dto: DebtDTO, deps: { accounts: Account[]; cat
       account,
       category,
       executedAt: moment(rawTx.executedAt),
-      compensations: rawTx.compensations?.map(mapCompensation),
+      debt: (rawTx.debt ?? undefined) as Debt | undefined,
+      compensations: rawTx.compensations?.map(mapCompensation as unknown as (comp: Omit<RawTransactionDTO, 'compensations' | 'transfer' | 'debt'>) => Transaction),
     });
   });
 

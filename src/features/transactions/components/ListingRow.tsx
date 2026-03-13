@@ -136,6 +136,8 @@ const IdCell = ({
 
 const AccountCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
+  const rawId = (editValue as { id?: number } | null)?.id ?? (editValue as number | null);
+  const accountEditValue = rawId != null ? String(rawId) : null;
 
   return (
     <CellPopover
@@ -154,7 +156,7 @@ const AccountCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' |
       <AccountTypeahead
         autoFocus
         multiple={false}
-        value={((editValue as { id?: number } | null)?.id ?? editValue) as number | null}
+        value={accountEditValue}
         onChange={(v) => setEditValue(v as string | number | null)}
       />
     </CellPopover>

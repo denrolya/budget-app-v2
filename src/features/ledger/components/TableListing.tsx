@@ -11,6 +11,7 @@ import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import {
   type Transaction,
+  type TransactionRowColumn,
   TransactionDetails,
   TransactionListingRow as TransactionRow,
   useInlineEdit,
@@ -111,7 +112,7 @@ const TableListing: React.FC<Props> = ({
     }
   };
 
-  const transactionColumns = useMemo(
+  const transactionColumns = useMemo<TransactionRowColumn[]>(
     () => [
       { key: 'id', className: 'pl-4' },
       { key: 'account' },

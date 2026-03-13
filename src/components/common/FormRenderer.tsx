@@ -24,7 +24,8 @@ import { Separator } from '@/components/ui/separator';
 
 type StandardFormType = Exclude<FormType, FormType.BulkTransaction>;
 
-const formComponents: Record<StandardFormType, React.ComponentType<Record<string, unknown>>> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const formComponents: Record<StandardFormType, React.ComponentType<any>> = {
   [FormType.Account]: AccountForm,
   [FormType.Transaction]: TransactionForm,
   [FormType.Transfer]: TransferForm,
@@ -111,7 +112,7 @@ export const FormRenderer: React.FC = () => {
     );
   }
 
-  const isEditMode = !!formState.values?.id;
+  const isEditMode = !!(formState.values as Record<string, unknown>)?.id;
   const title = `${isEditMode ? 'Edit' : 'New'} ${formState.type.charAt(0).toUpperCase() + formState.type.slice(1)}`;
 
   const content = (

@@ -126,8 +126,9 @@ export const CategoryTimelineChart: React.FC<Props> = ({
   const ChartComponent = (chartType === 'line' ? LineChart : BarChart) as React.ElementType;
   const DataComponent = (chartType === 'line' ? Line : Bar) as React.ElementType;
 
-  const handleLegendClick = (e: { dataKey?: string }) => {
-    const { dataKey } = e;
+  const handleLegendClick = (data: { dataKey?: string | number | ((obj: unknown) => unknown) }) => {
+    const dataKey = typeof data.dataKey === 'string' ? data.dataKey : undefined;
+    if (!dataKey) return;
     setHiddenSeries((prev) => (prev.includes(dataKey) ? prev.filter((key) => key !== dataKey) : [...prev, dataKey]));
   };
 

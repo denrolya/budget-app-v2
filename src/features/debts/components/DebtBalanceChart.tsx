@@ -5,6 +5,7 @@ import React, { useMemo, useState } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import type { CURRENCY_CODE } from '@/constants/currency';
 import { type Transaction } from '@/features/transactions';
 import { Type as TransactionType } from '@/features/transactions/types';
 
@@ -141,7 +142,7 @@ const DebtBalanceChart: React.FC<Props> = ({ currency, currentBalance, transacti
         <p className="text-muted-foreground mb-1">
           {moment(point.data.x as string, 'YYYY-MM-DD').format('D MMM YYYY')}
         </p>
-        <MoneyValue showSign useColors amount={balance} currency={currency} className="font-semibold text-sm" />
+        <MoneyValue showSign useColors amount={balance} currency={currency as CURRENCY_CODE} className="font-semibold text-sm" />
       </div>
     );
   };

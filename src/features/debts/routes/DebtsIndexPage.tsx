@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import MoneyValue from '@/components/common/MoneyValue';
 import { Card, CardContent } from '@/components/ui/card';
+import type { CURRENCY_CODE } from '@/constants/currency';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBaseCurrency } from '@/features/auth';
 
@@ -249,7 +250,7 @@ const DebtsIndexPage: React.FC = () => {
                   <p className="text-3xl font-bold text-foreground leading-tight">
                     <MoneyValue
                       amount={centerInfo.amount}
-                      currency={centerInfo.currency}
+                      currency={centerInfo.currency as CURRENCY_CODE | undefined}
                       useColors={false}
                       values={{}}
                       className="text-3xl font-bold"

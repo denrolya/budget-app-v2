@@ -53,8 +53,9 @@ export const DebtForm = forwardRef<DebtFormRef, DebtFormProps>((_, ref) => {
   const { create, update } = useMutations();
   const {
     updateFormState,
-    formState: { values: data },
+    formState: { values: rawData },
   } = useFormContext();
+  const data = rawData as (Partial<FormValues> & { id?: number }) | null | undefined;
 
   const defaultValues = useMemo<FormValues>(
     () => ({

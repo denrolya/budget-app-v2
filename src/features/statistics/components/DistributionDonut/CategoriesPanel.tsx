@@ -218,7 +218,6 @@ const CategoriesPanel: React.FC<Props> = ({
               data={sunburstData}
               enableArcLabels={false}
               id="id"
-              innerRadius={0.5}
               margin={{ top: 6, right: 6, bottom: 6, left: 6 }}
               motionConfig="gentle"
               value="value"

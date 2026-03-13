@@ -57,8 +57,21 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
   const { create: createTransaction, update: updateTransaction } = useMutations();
   const {
     updateFormState,
-    formState: { values: data },
+    formState: { values: rawData },
   } = useFormContext();
+  type TransactionData = {
+    id?: number;
+    type?: TransactionType;
+    account?: { id?: number } | null;
+    amount?: number;
+    category?: { id?: number } | null;
+    executedAt?: string | null;
+    note?: string;
+    isDraft?: boolean;
+    debt?: { id?: number } | null;
+    compensations?: Transaction[];
+  };
+  const data = rawData as TransactionData | null | undefined;
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -95,7 +108,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
           await updateTransaction({
             id: data.id,
             updates: values as unknown as Partial<Transaction>,
-            originalTransaction: data,
+            originalTransaction: data as unknown as Transaction,
           });
         } else {
           await createTransaction(values as unknown as Partial<Transaction>);
