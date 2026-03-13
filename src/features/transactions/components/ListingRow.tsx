@@ -1,9 +1,11 @@
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, FileCheck, Pencil, Trash2 } from 'lucide-react';
 import moment from 'moment';
 import React, { useId, useMemo } from 'react';
 
 import CellPopover from '@/components/common/CellPopover';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -192,10 +194,11 @@ const CategoryCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' 
     <CellPopover
       disabled={disabled}
       saveOnEnter={false}
+      triggerTitle={tx.category.name}
       trigger={
-        <span className="text-2xs font-mono text-muted-foreground truncate max-w-full whitespace-nowrap">
-          {tx.category.name}
-        </span>
+        <Badge variant="outline" className="text-2xs font-mono font-normal max-w-full overflow-hidden cursor-pointer">
+          <span className="truncate min-w-0">{tx.category.name}</span>
+        </Badge>
       }
       contentClassName="w-56"
       onCancel={cancelEdit}
@@ -260,9 +263,27 @@ const ActionsCell = ({
   tx,
   onOpenForm,
   onDelete,
+  onToggleDraft,
   onSheetOpenChange,
-}: Pick<CellRendererArgs, 'tx' | 'onOpenForm' | 'onDelete' | 'onSheetOpenChange'>) => (
+}: Pick<CellRendererArgs, 'tx' | 'onOpenForm' | 'onDelete' | 'onToggleDraft' | 'onSheetOpenChange'>) => (
   <div className="flex justify-end gap-2 shrink-0">
+    {tx.isDraft && onToggleDraft && (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            aria-label={`Unmark transaction #${tx.id} as draft`}
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 p-0 text-warning hover:text-warning hover:bg-warning/10"
+            onClick={() => onToggleDraft(tx)}
+          >
+            <FileCheck className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Unmark as draft</TooltipContent>
+      </Tooltip>
+    )}
+
     <Button
       aria-label={`View transaction #${tx.id} details`}
       size="icon"
@@ -371,6 +392,7 @@ export const ListingRow = ({
           onDelete={ctx.onDelete}
           onOpenForm={ctx.onOpenForm}
           onSheetOpenChange={ctx.onSheetOpenChange}
+          onToggleDraft={ctx.onToggleDraft}
         />
       ),
     }),
@@ -380,6 +402,7 @@ export const ListingRow = ({
   const onView = useMemo(() => () => ctx.onSheetOpenChange?.(true), [ctx]);
   const onEdit = useMemo(() => () => ctx.onOpenForm(ctx.tx), [ctx]);
   const onRemove = useMemo(() => () => ctx.onDelete(ctx.tx), [ctx]);
+  const onUnmarkDraft = useMemo(() => () => ctx.onToggleDraft?.(ctx.tx), [ctx]);
 
   return (
     <ContextMenu>
@@ -422,6 +445,16 @@ export const ListingRow = ({
           <Pencil className="mr-2 h-4 w-4" />
           Edit
         </ContextMenuItem>
+
+        {ctx.tx.isDraft && ctx.onToggleDraft && (
+          <>
+            <ContextMenuSeparator />
+            <ContextMenuItem onSelect={onUnmarkDraft}>
+              <FileCheck className="mr-2 h-4 w-4 text-warning" />
+              Unmark as draft
+            </ContextMenuItem>
+          </>
+        )}
 
         <ContextMenuSeparator />
 

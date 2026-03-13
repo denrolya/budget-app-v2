@@ -5,6 +5,7 @@ import RequireAuth from '@/components/common/RequireAuth';
 import RequiredDataGate from '@/components/common/RequiredDataGate';
 import Layout from '@/components/layout/LayoutTerminal'; // TUI layout — revert: change to '@/components/layout/Layout'
 import { LoginPage, LogoutRoute } from '@/features/auth';
+import MobileShell from '@/features/mobile/layout/MobileShell';
 
 const AccountsManagementPage = lazy(() =>
   import('@/features/accounts').then(({ AccountsManagementPage: C }) => ({ default: C })),
@@ -19,6 +20,28 @@ const DebtsManagementPage = lazy(() =>
   import('@/features/debts').then(({ DebtsManagementPage: C }) => ({ default: C })),
 );
 const BucketsPage = lazy(() => import('@/features/buckets').then(({ BucketsPage: C }) => ({ default: C })));
+
+const MobileBalancesPage = lazy(() => import('@/features/mobile/routes/MobileBalancesPage'));
+const MobileLedgerPage = lazy(() => import('@/features/mobile/routes/MobileLedgerPage'));
+const MobileRatesPage = lazy(() => import('@/features/mobile/routes/MobileRatesPage'));
+const MobileConverterPage = lazy(() => import('@/features/mobile/routes/MobileConverterPage'));
+
+const MobileApp: React.FC = () => (
+  <RequiredDataGate>
+    <Suspense fallback={null}>
+      <Routes>
+        <Route element={<MobileShell />}>
+          <Route index element={<Navigate replace to="/m/balances" />} />
+          <Route element={<MobileBalancesPage />} path="balances" />
+          <Route element={<MobileLedgerPage />} path="ledger" />
+          <Route element={<MobileRatesPage />} path="rates" />
+          <Route element={<MobileConverterPage />} path="convert" />
+          <Route element={<Navigate replace to="/m/balances" />} path="*" />
+        </Route>
+      </Routes>
+    </Suspense>
+  </RequiredDataGate>
+);
 
 const AppShell: React.FC = () => (
   <RequiredDataGate>
@@ -51,6 +74,7 @@ const Routing: React.FC = () => (
 
     {/* Protected */}
     <Route element={<RequireAuth />}>
+      <Route element={<MobileApp />} path="/m/*" />
       <Route element={<AppShell />} path="/*" />
     </Route>
 

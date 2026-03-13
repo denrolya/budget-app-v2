@@ -70,7 +70,7 @@ type TransactionData = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-// eslint-disable-next-line react-refresh/only-export-components
+ 
 export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>((_, ref) => {
   const { create: createTransaction, update: updateTransaction } = useMutations();
   const {
@@ -292,12 +292,12 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                 <FormControl>
                   <Input
                     {...field}
-                    className="h-7 text-xs font-mono"
                     min="0"
                     placeholder="0.00"
                     step="any"
                     type="number"
                     value={field.value ?? ''}
+                    className="h-7 text-xs font-mono"
                     onChange={(e) => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)}
                   />
                 </FormControl>
@@ -317,10 +317,10 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                 <FormControl>
                   <Input
                     {...field}
-                    className="h-7 text-xs"
                     placeholder="Note…"
                     type="text"
                     value={field.value ?? ''}
+                    className="h-7 text-xs"
                   />
                 </FormControl>
               </FormItem>
@@ -333,7 +333,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
             render={({ field }) => (
               <FormItem className="shrink-0">
                 <FormControl>
-                  <Input {...field} className="h-7 text-xs font-mono w-44" type="datetime-local" />
+                  <Input {...field} type="datetime-local" className="h-7 text-xs font-mono w-44" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -378,9 +378,9 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                       <FormControl>
                         <Input
                           {...f}
-                          className="h-7 text-xs font-mono"
                           placeholder="0.00"
                           type="number"
+                          className="h-7 text-xs font-mono"
                           onChange={(e) => f.onChange(e.target.valueAsNumber)}
                         />
                       </FormControl>
@@ -395,7 +395,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                   render={({ field: f }) => (
                     <FormItem className="shrink-0">
                       <FormControl>
-                        <Input {...f} className="h-7 text-xs font-mono w-40" type="datetime-local" />
+                        <Input {...f} type="datetime-local" className="h-7 text-xs font-mono w-40" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

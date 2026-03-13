@@ -168,9 +168,9 @@ export const DebtForm = forwardRef<DebtFormRef, DebtFormProps>((_, ref) => {
               <div className="flex items-center gap-1">
                 {CURRENCY_CHIPS.map((code) => (
                   <button
-                    key={code}
                     type="button"
                     className={chipClass(watchedCurrency === code)}
+                    key={code}
                     onClick={() => field.onChange(code)}
                   >
                     {CURRENCIES[code]?.symbol ?? code}

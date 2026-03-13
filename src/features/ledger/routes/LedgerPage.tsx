@@ -48,7 +48,7 @@ export const LedgerPage: React.FC = () => {
       <Card className="w-full min-w-0 shadow-none md:shadow-lg rounded-lg overflow-hidden border-0 md:border md:bg-card md:text-card-foreground h-full flex flex-col">
         <CardContent className="w-full min-w-0 p-0 bg-background md:bg-card flex-1 min-h-0 overflow-hidden flex flex-col">
           {/* Sticky filters bar — always visible, never scrolls with the listing */}
-          <div className="shrink-0 hidden md:flex items-center gap-2 border-b bg-card px-3 py-2 flex-wrap">
+          <div className="shrink-0 hidden md:flex items-center gap-2 border-b bg-card px-3 py-1.5 flex-wrap">
             <div className="flex-1 min-w-0 overflow-x-auto">
               <ListingControls
                 disabledFilters={[]}
@@ -75,6 +75,7 @@ export const LedgerPage: React.FC = () => {
                       size="icon"
                       type="button"
                       variant="outline"
+                      className="h-7 w-7"
                       onClick={ledger.resetAll}
                     >
                       <RotateCcw aria-hidden="true" className="h-4 w-4" />
@@ -91,6 +92,7 @@ export const LedgerPage: React.FC = () => {
                     size="icon"
                     type="button"
                     variant="outline"
+                    className="h-7 w-7"
                     onClick={() => setIsHeatmapVisible((v) => !v)}
                   >
                     {isHeatmapVisible ? (
@@ -106,6 +108,7 @@ export const LedgerPage: React.FC = () => {
               <FiltersToggleButton
                 activeCount={ledger.activeFilterCount}
                 aria-label="Toggle filters"
+                className="h-7 w-7"
                 onClick={ledger.toggleFilters}
               />
             </div>

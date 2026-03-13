@@ -211,7 +211,9 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
 
   useHotkeys(
     'meta+enter,ctrl+enter',
-    () => { void formRef.current?.submitForm(); },
+    () => {
+      void formRef.current?.submitForm();
+    },
     { enableOnFormTags: true },
   );
 
@@ -243,9 +245,10 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
         ? 'TO/FROM'
         : 'FROM/TO';
 
-  const receiveValue = Number.isFinite(summary.netTo) && summary.netTo >= 0
-    ? `${summary.netTo.toFixed(2)}${toCurrency ? ` ${toCurrency}` : ''}`
-    : `0.00${toCurrency ? ` ${toCurrency}` : ''}`;
+  const receiveValue =
+    Number.isFinite(summary.netTo) && summary.netTo >= 0
+      ? `${summary.netTo.toFixed(2)}${toCurrency ? ` ${toCurrency}` : ''}`
+      : `0.00${toCurrency ? ` ${toCurrency}` : ''}`;
 
   const chipClass = (active: boolean) =>
     cn('h-6 px-2 rounded border font-mono text-2xs uppercase tracking-wider transition-colors cursor-pointer', {
@@ -258,7 +261,7 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
       <form aria-label="Transfer form" className="flex flex-col gap-2">
         {/* Command bar */}
         <div className="flex items-center gap-1 px-1 py-0.5">
-          <span className="h-6 px-2 rounded border font-mono text-2xs uppercase tracking-wider bg-muted text-foreground border-border">
+          <span className="h-6 px-2 rounded border font-mono text-2xs uppercase tracking-wider bg-muted text-foreground border-border flex items-center">
             transfer
           </span>
 
@@ -488,12 +491,7 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
             render={({ field }) => (
               <FormItem className="w-44 shrink-0">
                 <FormControl>
-                  <Input
-                    {...field}
-                    aria-label="Executed at"
-                    type="datetime-local"
-                    className="h-7 text-xs"
-                  />
+                  <Input {...field} aria-label="Executed at" type="datetime-local" className="h-7 text-xs" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

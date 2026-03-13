@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 interface CellPopoverProps {
@@ -25,6 +26,12 @@ interface CellPopoverProps {
   /** Extra className on PopoverContent — use to set width, e.g. "w-48" */
   contentClassName?: string;
   align?: 'start' | 'center' | 'end';
+  /**
+   * When provided, shows a Shadcn Tooltip with this text on hover.
+   * Useful for truncated cell values (e.g. long category names).
+   * Tooltip and Popover coexist: tooltip = hover, popover = click.
+   */
+  triggerTitle?: string;
 }
 
 /**
@@ -43,6 +50,7 @@ const CellPopover: React.FC<CellPopoverProps> = ({
   saveOnEnter = true,
   contentClassName,
   align = 'start',
+  triggerTitle,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -62,6 +70,24 @@ const CellPopover: React.FC<CellPopoverProps> = ({
     setOpen(false);
   }, [onCancel]);
 
+  /*
+   * -mx-2 px-2: extend into the <td>'s default px-2 so the hover
+   * highlight fills the full cell width, not just the content box.
+   * py-1.5: gives a comfortable vertical hit-target in compact rows.
+   */
+  const triggerButton = (
+    <button
+      disabled={disabled}
+      type="button"
+      className={cn(
+        'block w-full min-w-0 -mx-2 px-2 py-1.5 text-left',
+        disabled ? 'opacity-60 cursor-default' : 'cursor-pointer hover:bg-muted/50',
+      )}
+    >
+      {trigger}
+    </button>
+  );
+
   return (
     <Popover
       open={open}
@@ -70,23 +96,19 @@ const CellPopover: React.FC<CellPopoverProps> = ({
         else handleCancel();
       }}
     >
-      <PopoverTrigger asChild>
-        {/*
-         * -mx-2 px-2: extend into the <td>'s default px-2 so the hover
-         * highlight fills the full cell width, not just the content box.
-         * py-1.5: gives a comfortable vertical hit-target in compact rows.
-         */}
-        <button
-          disabled={disabled}
-          type="button"
-          className={cn(
-            'block w-full min-w-0 -mx-2 px-2 py-1.5 text-left',
-            disabled ? 'opacity-60 cursor-default' : 'cursor-pointer hover:bg-muted/50',
-          )}
-        >
-          {trigger}
-        </button>
-      </PopoverTrigger>
+      {triggerTitle ? (
+        // Both TooltipTrigger and PopoverTrigger use Radix Slot (asChild) to
+        // forward their event handlers onto the same button element without conflict:
+        // tooltip fires on hover, popover fires on click.
+        <Tooltip delayDuration={400}>
+          <PopoverTrigger asChild>
+            <TooltipTrigger asChild>{triggerButton}</TooltipTrigger>
+          </PopoverTrigger>
+          <TooltipContent side="top">{triggerTitle}</TooltipContent>
+        </Tooltip>
+      ) : (
+        <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
+      )}
 
       <PopoverContent
         align={align}

@@ -2,8 +2,8 @@ import path from 'path';
 
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { PluginOption } from 'vite';
-import { VitePWA, VitePWAOptions } from 'vite-plugin-pwa';
+import { type PluginOption } from 'vite';
+import { VitePWA, type VitePWAOptions } from 'vite-plugin-pwa';
 import { configDefaults, defineConfig } from 'vitest/config';
 
 const pwaOptions: Partial<VitePWAOptions> = {
@@ -33,16 +33,28 @@ const pwaOptions: Partial<VitePWAOptions> = {
     'mask-icon.svg',
   ],
   manifest: {
-    name: 'Budget V2',
+    name: 'Budget',
     short_name: 'Budget',
-    description: 'Your personal budget management app',
+    description: 'Personal budget — balances, ledger, rates',
     theme_color: '#000000',
-    background_color: '#ffffff',
+    background_color: '#000000',
+    display: 'standalone',
+    display_override: ['standalone', 'fullscreen'],
+    orientation: 'portrait',
+    start_url: '/m',
+    scope: '/',
     icons: [
       {
         src: '/android-icon-192x192.png',
         sizes: '192x192',
         type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/logo512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any maskable',
       },
       {
         src: '/apple-icon-180x180.png',
@@ -55,43 +67,8 @@ const pwaOptions: Partial<VitePWAOptions> = {
         type: 'image/png',
       },
       {
-        src: '/apple-icon-144x144.png',
-        sizes: '144x144',
-        type: 'image/png',
-      },
-      {
-        src: '/apple-icon-120x120.png',
-        sizes: '120x120',
-        type: 'image/png',
-      },
-      {
-        src: '/apple-icon-114x114.png',
-        sizes: '114x114',
-        type: 'image/png',
-      },
-      {
         src: '/favicon-96x96.png',
         sizes: '96x96',
-        type: 'image/png',
-      },
-      {
-        src: '/apple-icon-76x76.png',
-        sizes: '76x76',
-        type: 'image/png',
-      },
-      {
-        src: '/apple-icon-72x72.png',
-        sizes: '72x72',
-        type: 'image/png',
-      },
-      {
-        src: '/apple-icon-60x60.png',
-        sizes: '60x60',
-        type: 'image/png',
-      },
-      {
-        src: '/apple-icon-57x57.png',
-        sizes: '57x57',
         type: 'image/png',
       },
       {
@@ -104,16 +81,27 @@ const pwaOptions: Partial<VitePWAOptions> = {
         sizes: '16x16',
         type: 'image/png',
       },
+    ],
+    shortcuts: [
       {
-        src: '/ms-icon-144x144.png',
-        sizes: '144x144',
-        type: 'image/png',
-        purpose: 'any maskable',
+        name: 'Balances',
+        short_name: 'Balances',
+        url: '/m/balances',
+        icons: [{ src: '/android-icon-96x96.png', sizes: '96x96' }],
+      },
+      {
+        name: 'Ledger',
+        short_name: 'Ledger',
+        url: '/m/ledger',
+        icons: [{ src: '/android-icon-96x96.png', sizes: '96x96' }],
+      },
+      {
+        name: 'Rates',
+        short_name: 'Rates',
+        url: '/m/rates',
+        icons: [{ src: '/android-icon-96x96.png', sizes: '96x96' }],
       },
     ],
-    start_url: '/',
-    display: 'standalone',
-    orientation: 'portrait',
   },
 };
 

@@ -60,7 +60,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         value={perPage.toString()}
         onValueChange={(value) => onPerPageChange(parseInt(value, 10))}
       >
-        <SelectTrigger aria-label="Items per page" className="w-[100px]">
+        <SelectTrigger aria-label="Items per page" className="h-7 w-[7.5rem] text-xs">
           <SelectValue placeholder="Per page" />
         </SelectTrigger>
         <SelectContent>
@@ -72,19 +72,20 @@ export const Pagination: React.FC<PaginationProps> = ({
         </SelectContent>
       </Select>
 
-      <span className="text-muted-foreground whitespace-nowrap hidden sm:inline">
-        {startItem}-{endItem} of {totalItems} items
+      <span className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline">
+        {startItem}–{endItem} of {totalItems} items
       </span>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <Button
           aria-label="Previous page"
           disabled={currentPage === 1 || isLoading}
           size="icon"
           variant="outline"
+          className="h-7 w-7"
           onClick={() => onPageChange(currentPage - 1)}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-3.5 w-3.5" />
         </Button>
 
         <Input
@@ -94,20 +95,21 @@ export const Pagination: React.FC<PaginationProps> = ({
           min={1}
           type="number"
           value={inputPage}
-          className="w-14 text-center"
+          className="h-7 w-12 text-center text-xs"
           onChange={handlePageInput}
         />
 
-        <span className="text-muted-foreground whitespace-nowrap">of {totalPages}</span>
+        <span className="text-xs text-muted-foreground whitespace-nowrap">of {totalPages}</span>
 
         <Button
           aria-label="Next page"
           disabled={currentPage === totalPages || isLoading}
           size="icon"
           variant="outline"
+          className="h-7 w-7"
           onClick={() => onPageChange(currentPage + 1)}
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-3.5 w-3.5" />
         </Button>
       </div>
     </div>

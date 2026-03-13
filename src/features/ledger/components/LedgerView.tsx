@@ -197,7 +197,7 @@ const LedgerView: React.FC<LedgerViewProps> = ({
 
         {/* Period footer */}
         {showFooter && pagination.totalItems > 0 && (
-          <div className="shrink-0 px-3 py-2 bg-background md:bg-card border-t flex items-center gap-3">
+          <div className="shrink-0 px-3 py-1.5 bg-background md:bg-card border-t flex items-center gap-3">
             <Pagination
               currentPage={pagination.currentPage}
               isLoading={isFetching}

@@ -16,11 +16,9 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { CurrencyConverterProvider } from '@/contexts/CurrencyConverter';
 import { FormProvider } from '@/contexts/Form';
 import { HotkeysProvider } from '@/contexts/Hotkeys';
-import IOSInstallBanner from '@/components/common/IOSInstallBanner';
 
 import CommandBar from './header/CommandBar';
 import { PageHeaderProvider } from './header/PageHeaderContext';
-import MobileNavigation from './MobileNavigation';
 import Statusline from './statusline/Statusline';
 
 const LayoutTerminal: React.FC<React.PropsWithChildren> = ({ children }) => (
@@ -38,14 +36,8 @@ const LayoutTerminal: React.FC<React.PropsWithChildren> = ({ children }) => (
                 {children}
               </main>
 
-              {/* Bottom statusline — hidden on mobile */}
-              <Statusline className="hidden md:flex" />
-
-              {/* iOS install prompt — shown once on iOS Safari until dismissed */}
-              <IOSInstallBanner />
-
-              {/* Mobile bottom nav — shown only on mobile */}
-              <MobileNavigation />
+              {/* Bottom statusline */}
+              <Statusline />
 
               {/* Form modals */}
               <FormRenderer />

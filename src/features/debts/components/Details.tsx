@@ -282,9 +282,6 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
             <LedgerActivityCard
               disabledFilters={['debts']}
               ledger={ledger}
-              onHeatmapRangeClear={handleHeatmapRangeClear}
-              onHeatmapRangeSelect={handleHeatmapRangeSelect}
-              onReset={handleLedgerReset}
               heatmap={({ onRangeSelect, onRangeClear, onRangeReset, year }) => (
                 <div className="border-b overflow-x-auto">
                   <TransactionHeatmapChart
@@ -301,6 +298,9 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
                   />
                 </div>
               )}
+              onHeatmapRangeClear={handleHeatmapRangeClear}
+              onHeatmapRangeSelect={handleHeatmapRangeSelect}
+              onReset={handleLedgerReset}
             />
           </TabsContent>
 

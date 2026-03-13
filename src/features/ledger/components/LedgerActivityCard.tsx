@@ -167,7 +167,7 @@ const LedgerActivityCard: React.FC<Props> = ({
                   </Tooltip>
                 )}
 
-                <FiltersToggleButton activeCount={ledger.activeFilterCount} onClick={ledger.toggleFilters} />
+                <FiltersToggleButton activeCount={ledger.activeFilterCount} className="h-7 w-7" onClick={ledger.toggleFilters} />
               </div>
             </div>
           </CardHeader>

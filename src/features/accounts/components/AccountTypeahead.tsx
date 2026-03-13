@@ -5,9 +5,10 @@ import MoneyValue from '@/components/common/MoneyValue';
 import { useAccountsWithDefaultOrder } from '@/hooks/financeData';
 import Typeahead, { type TypeaheadProps } from '@/components/ui/Typeahead';
 
-import AccountMarker from './AccountMarker';
 import AccountPill from '../components/Pill';
 import type Account from '../models/Account';
+
+import AccountMarker from './AccountMarker';
 
 
 type AccountTypeaheadProps = Omit<
