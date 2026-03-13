@@ -27,6 +27,7 @@ const WindowTab: React.FC<{
   isActive: boolean;
 }> = ({ num, label, path, isActive }) => (
   <Link
+    aria-current={isActive ? 'page' : undefined}
     to={path}
     className={cn(
       'inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-mono tracking-wide select-none',
@@ -35,7 +36,6 @@ const WindowTab: React.FC<{
         ? 'bg-primary/10 text-primary border-primary/30 font-semibold'
         : 'text-muted-foreground border-border/30 hover:text-foreground hover:border-border/60 hover:bg-muted/40',
     )}
-    aria-current={isActive ? 'page' : undefined}
   >
     <span className="text-muted-foreground/50 text-3xs mr-0.5">{num}:</span>
     {label}
@@ -69,22 +69,22 @@ const CommandBar: React.FC = () => {
     <header className="h-9 shrink-0 flex items-center border-b gap-1 px-2 bg-background overflow-hidden">
       {/* ── Wordmark ── */}
       <Link
+        title="Budget"
         to="/"
         className="flex-none font-mono text-xs font-bold tracking-widest text-foreground mr-1 px-1.5 py-0.5 rounded border border-border/40 hover:border-border/70 transition-colors select-none"
-        title="Budget"
       >
         B
       </Link>
 
       {/* ── Window tabs ── */}
-      <nav className="flex items-center gap-0.5" aria-label="Main navigation">
+      <nav aria-label="Main navigation" className="flex items-center gap-0.5">
         {ALL_WINDOWS.map(({ num, label, path }) => (
           <WindowTab
-            key={path}
-            num={num}
-            label={label}
-            path={path}
             isActive={pathname.startsWith(path)}
+            label={label}
+            num={num}
+            path={path}
+            key={path}
           />
         ))}
       </nav>

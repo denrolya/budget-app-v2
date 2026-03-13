@@ -24,11 +24,13 @@ const typeaheadControlClass = cn(
   'flex items-center gap-1 rounded-md border border-input bg-background ring-offset-background',
   'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
   'transition-colors aria-[invalid=true]:border-destructive',
-  'min-h-9 px-3 py-2 text-sm',
+  // h-9 (not min-h-9) so callers can override with h-7 etc via className
+  'h-9 px-3 py-2 text-sm',
 );
 
+// text-sm removed — inherits from control div so callers can override via className
 const typeaheadInputClass =
-  'flex-1 bg-transparent outline-none focus-visible:outline-none focus-visible:ring-0 placeholder:text-muted-foreground min-w-[50px] text-sm';
+  'flex-1 bg-transparent outline-none focus-visible:outline-none focus-visible:ring-0 placeholder:text-muted-foreground min-w-[50px]';
 
 const typeaheadChipClass = 'whitespace-nowrap shadow-md bg-background text-xs py-0 px-1';
 
@@ -288,11 +290,11 @@ const TypeaheadInner = <T, V extends string | number>(
         if (!v) setOpen(false);
       }}
     >
-      <div className={cn(typeaheadRootClass, className)} aria-invalid={ariaInvalid} data-typeahead-root="true">
+      <div className={typeaheadRootClass} aria-invalid={ariaInvalid} data-typeahead-root="true">
         <PopoverPrimitive.Anchor asChild>
           <div
             ref={triggerRef}
-            className={cn(typeaheadControlClass, disabled && 'opacity-50 cursor-not-allowed')}
+            className={cn(typeaheadControlClass, disabled && 'opacity-50 cursor-not-allowed', className)}
             role="combobox"
             aria-haspopup="listbox"
             aria-expanded={open}
@@ -338,7 +340,7 @@ const TypeaheadInner = <T, V extends string | number>(
 
                 <div className="relative flex-1 min-w-0 flex items-center">
                   {showLabelOverlay && (
-                    <span className="absolute inset-0 flex items-center text-sm pointer-events-none truncate">
+                    <span className="absolute inset-0 flex items-center pointer-events-none truncate">
                       {selectedOptions[0] ? getLabel(selectedOptions[0]) : null}
                     </span>
                   )}

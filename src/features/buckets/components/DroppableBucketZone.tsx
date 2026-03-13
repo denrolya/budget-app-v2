@@ -12,10 +12,13 @@ import { type Bucket, type BucketEntry, type UnassignedEntry } from '../models/t
 // ── Drag ID helpers ─────────────────────────────────────────────────────────
 
 /** accountId dragged from unassigned zone */
+// eslint-disable-next-line react-refresh/only-export-components
 export const unallocatedDragId = (accountId: number) => `unallocated:${accountId}`;
 /** specific bucket allocation dragged */
+// eslint-disable-next-line react-refresh/only-export-components
 export const allocationDragId = (accountId: number, bucketId: string) => `allocation:${accountId}:${bucketId}`;
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const parseDragId = (
   id: string,
 ): { type: 'unallocated'; accountId: number } | { type: 'allocation'; accountId: number; bucketId: string } | null => {

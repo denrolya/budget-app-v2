@@ -137,7 +137,7 @@ export const useList = (options: UseTransactionsListOptions = {}): UseTransactio
       description: listState.error?.message || 'An unexpected error occurred.',
       action: { label: 'Retry', onClick: () => listState.refetch() },
     });
-  }, [listState.isError, listState.error, listState.refetch]);
+  }, [listState]);
 
   const items = useMemo(() => data?.items ?? [], [data]);
   const totalValue = data?.totalValue ?? 0;

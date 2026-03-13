@@ -40,7 +40,7 @@ export const useMutations = (opts?: { invalidateKey?: readonly unknown[] }) => {
       await invalidate();
       toast.success('Transfer created successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to create transfer', {
         description: error?.message || 'Unexpected error.',
       });
@@ -53,7 +53,7 @@ export const useMutations = (opts?: { invalidateKey?: readonly unknown[] }) => {
       await invalidate();
       toast.success('Transfer deleted successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to delete transfer', {
         description: error?.message || 'Unexpected error.',
       });
@@ -78,7 +78,7 @@ export const useMutations = (opts?: { invalidateKey?: readonly unknown[] }) => {
       await invalidate();
       toast.success('Transfer updated successfully');
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to update transfer', {
         description: error?.message || 'Unexpected error.',
       });

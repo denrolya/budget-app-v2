@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export enum Theme {
   Dark = 'dark',
   Light = 'light',
@@ -56,6 +57,7 @@ export const ThemeProvider = ({ children, defaultTheme = Theme.Light, storageKey
   return <ThemeProviderContext.Provider value={{ theme, setTheme }}>{children}</ThemeProviderContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
   if (!context) {

@@ -36,7 +36,7 @@ export type LedgerViewProps = {
 const ErrorBanner: React.FC<{ error: unknown }> = ({ error }) => {
   const message =
     typeof error === 'object' && error && 'message' in error
-      ? String((error as any).message)
+      ? String((error as { message: unknown }).message)
       : 'An unexpected error occurred.';
 
   return (

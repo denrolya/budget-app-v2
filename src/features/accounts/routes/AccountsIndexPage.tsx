@@ -177,10 +177,10 @@ const AccountsIndexPage: React.FC = () => {
                               key={acc.id}
                               onClick={() => navigate(`/accounts/${acc.id}`)}
                             >
-                              <AccountPill account={acc} variant="inline" size="sm" tooltip={false} className="min-w-0 truncate" />
+                              <AccountPill account={acc} size="sm" tooltip={false} variant="inline" className="min-w-0 truncate" />
                               <MoneyValue
                                 amount={acc.balance}
-                                currency={acc.currency as any}
+                                currency={acc.currency}
                                 useColors={false}
                                 values={{}}
                                 className="text-xs tabular-nums shrink-0"

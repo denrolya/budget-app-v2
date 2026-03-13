@@ -22,7 +22,7 @@ type DeserializeCtx = {
 };
 
 abstract class BaseFilters implements FilterModel {
-  [key: string]: any;
+  [key: string]: unknown;
 
   /**
    * Override in subclasses to parse specific keys from URLSearchParams.
@@ -51,14 +51,14 @@ abstract class BaseFilters implements FilterModel {
         // Let subclass decide how to read/parse; undefined means "not present"
         const parsed = instance.deserialize(key, { params, paramKey, format });
         if (parsed !== undefined) {
-          instance = instance.setFilter(key as keyof T, parsed as any);
+          instance = instance.setFilter(key as keyof T, parsed as T[keyof T]);
         }
       });
 
     return instance;
   }
 
-  protected constructor(filters: Record<string, any> = {}) {
+  protected constructor(filters: Record<string, unknown> = {}) {
     Object.assign(this, filters);
   }
 

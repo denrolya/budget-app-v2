@@ -151,7 +151,7 @@ const TableListing: React.FC<Props> = ({
         </TableHeader>
 
         {dates.map((date) => {
-          const found = groupedItems?.find((group) => group[0].isSame(date, 'day')) ?? ([null, [], 0, 0, 0, 0] as any);
+          const found = groupedItems?.find((group) => group[0].isSame(date, 'day')) ?? ([null, [], 0, 0, 0, 0] as [Moment | null, (Transaction | Transfer)[], number, number, number, number]);
 
           const [, items, transactionsValue, transfersValue, transactionsCount, transfersCount] = found as [
             Moment | null,
@@ -208,7 +208,7 @@ const TableListing: React.FC<Props> = ({
                     : (a.executedAt as Moment).valueOf() - (b.executedAt as Moment).valueOf(),
                 )
                 .map((item) => {
-                  if (item instanceof Transfer || 'fromExpense' in (item as any)) {
+                  if (item instanceof Transfer || 'fromExpense' in (item as object)) {
                     const transfer = item as Transfer;
 
                     return (
@@ -228,7 +228,7 @@ const TableListing: React.FC<Props> = ({
 
                   return (
                     <TransactionRow
-                      columns={transactionColumns as any}
+                      columns={transactionColumns}
                       inlineEdit={inlineEdit}
                       renderDetails={(transactionItem) => <TransactionDetails transaction={transactionItem} />}
                       sheetOpen={openSheetId === transaction.id}

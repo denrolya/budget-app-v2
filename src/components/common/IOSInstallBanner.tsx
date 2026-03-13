@@ -7,7 +7,7 @@ const isIOS = () =>
   typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
 const isStandalone = () =>
-  typeof window !== 'undefined' && (window.navigator as any).standalone === true;
+  typeof window !== 'undefined' && (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
 
 const IOSInstallBanner: React.FC = () => {
   const [visible, setVisible] = useState(false);
@@ -35,16 +35,16 @@ const IOSInstallBanner: React.FC = () => {
 
   return (
     <div className="md:hidden shrink-0 flex items-center gap-2 px-3 py-2 bg-card border-t text-2xs text-muted-foreground">
-      <Share className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
+      <Share aria-hidden className="h-3.5 w-3.5 shrink-0 text-primary" />
       <span className="flex-1 leading-snug">
         Tap <strong className="text-foreground">Share</strong> then{' '}
         <strong className="text-foreground">"Add to Home Screen"</strong> for the best experience
       </span>
       <button
-        type="button"
         aria-label="Dismiss install banner"
-        onClick={dismiss}
+        type="button"
         className="shrink-0 p-1 rounded hover:bg-muted/60 transition-colors"
+        onClick={dismiss}
       >
         <X className="h-3.5 w-3.5" />
       </button>

@@ -24,7 +24,7 @@ export const RequiredDataGate: React.FC<React.PropsWithChildren> = ({ children }
   const progress = useMemo(() => {
     const done = [rates, accounts, categories, debts].filter((q) => q.isSuccess).length;
     return (done / 4) * 100;
-  }, [rates.isSuccess, accounts.isSuccess, categories.isSuccess, debts.isSuccess]);
+  }, [rates, accounts, categories, debts]);
 
   const retry = () => {
     void qc.invalidateQueries({ queryKey: exchangeRatesQueryKey });

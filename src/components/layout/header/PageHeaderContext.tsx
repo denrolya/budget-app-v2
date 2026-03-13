@@ -26,12 +26,14 @@ export const PageHeaderProvider: React.FC<React.PropsWithChildren> = ({ children
   return <PageHeaderContext.Provider value={value}>{children}</PageHeaderContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePageHeader = (): PageHeaderContextValue => {
   const context = useContext(PageHeaderContext);
   if (!context) throw new Error('usePageHeader must be used within a PageHeaderProvider');
   return context;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePageHeaderTitle = (title: React.ReactNode) => {
   const { setTitle } = usePageHeader();
 
@@ -42,6 +44,7 @@ export const usePageHeaderTitle = (title: React.ReactNode) => {
 };
 
 /** Inject arbitrary ReactNode into the main header's center slot. Cleaned up on unmount. */
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePageHeaderSlot = (slot: React.ReactNode) => {
   const { setHeaderSlot } = usePageHeader();
 

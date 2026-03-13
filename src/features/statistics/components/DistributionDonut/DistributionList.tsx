@@ -30,8 +30,7 @@ const DistributionList: React.FC<Props> = ({
   onRowClick,
   onViewTransactions,
   renderLabel,
-}) => {
-  return (
+}) => (
     <ScrollArea aria-label={ariaLabel} className="h-full min-h-0">
       <div className="py-1">
         {items.map((item) => {
@@ -50,18 +49,18 @@ const DistributionList: React.FC<Props> = ({
 
           return (
             <button
-              key={rowKey}
-              type="button"
               aria-label={`${item.name}: ${percentage.toFixed(0)}%`}
+              type="button"
               className="group w-full flex items-center gap-2 px-2 py-1 text-left rounded hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
+              key={rowKey}
               onClick={handleClick}
             >
               {/* Color dot */}
               {dotColor && (
                 <span
                   aria-hidden="true"
-                  className="h-2 w-2 rounded-full shrink-0"
                   style={{ backgroundColor: dotColor }}
+                  className="h-2 w-2 rounded-full shrink-0"
                 />
               )}
 
@@ -76,12 +75,12 @@ const DistributionList: React.FC<Props> = ({
                 className="flex-[3] h-1 bg-muted rounded-full overflow-hidden shrink-0"
               >
                 <div
-                  className="h-full rounded-full transition-all duration-300"
                   style={{
                     width: `${Math.max(percentage, item.value > 0 ? 2 : 0)}%`,
                     backgroundColor: dotColor ?? 'hsl(var(--primary))',
                     opacity: 0.7,
                   }}
+                  className="h-full rounded-full transition-all duration-300"
                 />
               </div>
 
@@ -95,8 +94,8 @@ const DistributionList: React.FC<Props> = ({
                 {item.amount != null && item.amount !== item.value && (
                   <MoneyValue
                     amount={item.amount}
-                    useColors={false}
                     currency={item.currency != null ? (item.currency as CURRENCY_CODE) : undefined}
+                    useColors={false}
                     className="text-[9px] font-mono tabular-nums leading-none text-muted-foreground mt-0.5"
                   />
                 )}
@@ -120,6 +119,5 @@ const DistributionList: React.FC<Props> = ({
       </div>
     </ScrollArea>
   );
-};
 
 export default DistributionList;

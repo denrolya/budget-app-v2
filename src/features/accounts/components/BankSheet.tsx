@@ -1,10 +1,9 @@
 import { format } from 'date-fns';
-
-import { DATE_FNS_DATE_FORMAT } from '@/constants/datetime';
 import { AlertTriangle, Building2, CalendarIcon, CreditCard, Loader2, RefreshCw, Unplug, Webhook } from 'lucide-react';
 import moment from 'moment';
 import React, { useState } from 'react';
 
+import { DATE_FNS_DATE_FORMAT } from '@/constants/datetime';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Badge, BadgeVariant } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -87,7 +86,7 @@ const BankSheet: React.FC<Props> = ({ account, onAccountUpdate }) => {
   const providerRaw = integration
     ? typeof integration.provider === 'string'
       ? integration.provider
-      : ((integration.provider as any)?.value ?? '')
+      : ((integration.provider as unknown as { value?: string })?.value ?? '')
     : '';
   const providerLabel = (PROVIDER_LABELS[providerRaw as BankProvider] ?? providerRaw) || 'Unknown';
 

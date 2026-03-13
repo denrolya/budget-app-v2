@@ -80,7 +80,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
           </CardTitle>
           <div className="flex items-center gap-2">
             {!controlledTimeframe?.timeframe?.after && (
-              <DaterangePickerWithPresets after={timeframe.after} before={timeframe.before} onChange={setTimeframe} presets={MONEYFLOW_PRESETS}>
+              <DaterangePickerWithPresets after={timeframe.after} before={timeframe.before} presets={MONEYFLOW_PRESETS} onChange={setTimeframe}>
                 <button className="inline-flex items-center gap-1 text-2xs text-muted-foreground hover:text-foreground border border-border rounded px-2 py-0.5 leading-none cursor-pointer">
                   <CalendarIcon className="h-2.5 w-2.5" />
                   {formatRange(timeframe)}
@@ -89,8 +89,8 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
               </DaterangePickerWithPresets>
             )}
             <ConfigurationMenu
-              showPreviousPeriod={showPreviousPeriod}
               setShowPreviousPeriod={setShowPreviousPeriod}
+              showPreviousPeriod={showPreviousPeriod}
             />
           </div>
         </div>
@@ -103,14 +103,14 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
         <div className="flex items-center gap-0.5 bg-muted rounded-md p-0.5">
           {availablePeriods.map((opt) => (
             <button
-              key={opt.value}
-              onClick={() => setPeriod(opt.value as any)}
               className={cn(
                 'h-5 px-2 text-2xs font-medium rounded-sm transition-colors',
                 period === opt.value
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground',
               )}
+              key={opt.value}
+              onClick={() => setPeriod(opt.value)}
             >
               {PERIOD_SHORT[opt.value] ?? opt.label}
             </button>
@@ -122,20 +122,20 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
         {/* Chart type */}
         <div className="flex items-center gap-0.5">
           <button
-            onClick={() => setChartType('bar')}
             className={cn(
               'h-6 w-6 flex items-center justify-center rounded-sm transition-colors',
               chartType === 'bar' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground',
             )}
+            onClick={() => setChartType('bar')}
           >
             <BarChart2 className="h-3.5 w-3.5" />
           </button>
           <button
-            onClick={() => setChartType('line')}
             className={cn(
               'h-6 w-6 flex items-center justify-center rounded-sm transition-colors',
               chartType === 'line' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground',
             )}
+            onClick={() => setChartType('line')}
           >
             <LineChart className="h-3.5 w-3.5" />
           </button>
@@ -146,35 +146,35 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
         {/* Series toggles */}
         <div className="flex items-center gap-1">
           <button
-            onClick={() => setShowIncome(!showIncome)}
             className={cn(
               'h-5 px-2 text-2xs font-medium rounded-sm border transition-colors',
               showIncome
                 ? 'border-success/40 bg-success/10 text-success'
                 : 'border-border text-muted-foreground hover:text-foreground',
             )}
+            onClick={() => setShowIncome(!showIncome)}
           >
             Income
           </button>
           <button
-            onClick={() => setShowExpenses(!showExpenses)}
             className={cn(
               'h-5 px-2 text-2xs font-medium rounded-sm border transition-colors',
               showExpenses
                 ? 'border-destructive/40 bg-destructive/10 text-destructive'
                 : 'border-border text-muted-foreground hover:text-foreground',
             )}
+            onClick={() => setShowExpenses(!showExpenses)}
           >
             Expenses
           </button>
           <button
-            onClick={() => setShowRevenue(!showRevenue)}
             className={cn(
               'h-5 px-2 text-2xs font-medium rounded-sm border transition-colors',
               showRevenue
                 ? 'border-primary/40 bg-primary/10 text-primary'
                 : 'border-border text-muted-foreground hover:text-foreground',
             )}
+            onClick={() => setShowRevenue(!showRevenue)}
           >
             Revenue
           </button>

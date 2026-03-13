@@ -22,6 +22,15 @@ const UNASSIGNED: Bucket = {
   isPreset: false,
 };
 
+interface TreemapLeafData {
+  accountName?: string;
+  accountBalance?: number;
+  accountCurrency?: string;
+  convertedValue?: number;
+  value?: number;
+  color?: string;
+}
+
 const nivoTheme = {
   background: 'transparent',
   text: { fill: 'hsl(var(--muted-foreground))', fontSize: 11 },
@@ -119,11 +128,11 @@ const BucketsVisualization: React.FC<Props> = ({
         leavesOnly
         borderColor={{ from: 'color', modifiers: [['darker', 0.3]] }}
         borderWidth={1}
-        colors={(node) => (node.data as any).color ?? '#888'}
-        data={treemapData as any}
+        colors={(node) => (node.data as unknown as TreemapLeafData).color ?? '#888'}
+        data={treemapData as Parameters<typeof ResponsiveTreeMap>[0]['data']}
         identity="id"
         innerPadding={3}
-        label={(node) => (node.data as any).accountName ?? node.id}
+        label={(node) => (node.data as unknown as TreemapLeafData).accountName ?? node.id}
         labelSkipSize={32}
         margin={{ top: 4, right: 4, bottom: 4, left: 4 }}
         outerPadding={6}
@@ -132,7 +141,7 @@ const BucketsVisualization: React.FC<Props> = ({
         value="value"
         valueFormat={(v) => fmtMoney(v, baseCurrency)}
         tooltip={({ node }) => {
-          const d = node.data as any;
+          const d = node.data as unknown as TreemapLeafData;
           return (
             <div className="bg-background border rounded-lg shadow-lg px-3 py-2 text-sm min-w-[160px]">
               <div className="font-semibold mb-1">{d.accountName ?? node.id}</div>

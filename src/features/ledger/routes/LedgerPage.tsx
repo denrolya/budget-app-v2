@@ -40,7 +40,7 @@ export const LedgerPage: React.FC = () => {
       isHeatmapDrivingRef.current = true;
       ledger.setTimeframe({ after, before });
     },
-    [ledger.setTimeframe],
+    [ledger],
   );
 
   return (

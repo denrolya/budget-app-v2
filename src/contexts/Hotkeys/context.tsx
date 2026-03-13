@@ -1,11 +1,14 @@
 import React, { createContext, useCallback, useMemo, useReducer, useRef, useState } from 'react';
 import { useHotkeys as useReactHotkeysHook } from 'react-hotkeys-hook';
+
 import { CommandPalette } from '@/components/common/CommandPalette';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import type { Hotkey, HotkeyCategory, HotkeysContextType } from '@/types/hotkeys';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const HotkeysContext = createContext<HotkeysContextType | null>(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const navigationHotkeys: Hotkey[] = [
   { windows: '⇧⇧', mac: '⇧⇧', description: 'Open/Close Commands' },
   { windows: '1', mac: '1', description: 'Go to Ledger' },
@@ -17,6 +20,7 @@ export const navigationHotkeys: Hotkey[] = [
   { windows: '7', mac: '7', description: 'Go to Dashboard' },
 ];
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const globalHotkeys: Hotkey[] = [
   { windows: 'Shift+A', mac: 'Shift+A', description: 'Open Account Form' },
   { windows: 'Shift+T', mac: 'Shift+T', description: 'Open Transaction Form' },

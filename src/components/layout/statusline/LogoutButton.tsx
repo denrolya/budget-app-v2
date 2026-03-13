@@ -16,10 +16,10 @@ const LogoutButton: React.FC = () => {
     <Tooltip>
       <TooltipTrigger asChild>
         <button
-          type="button"
           aria-label="Log out"
-          onClick={handleLogout}
+          type="button"
           className="h-full px-2.5 inline-flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-muted/50 transition-colors"
+          onClick={handleLogout}
         >
           <LogOut className="h-3.5 w-3.5" />
         </button>

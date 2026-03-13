@@ -16,7 +16,6 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { CurrencyConverterProvider } from '@/contexts/CurrencyConverter';
 import { FormProvider } from '@/contexts/Form';
 import { HotkeysProvider } from '@/contexts/Hotkeys';
-
 import IOSInstallBanner from '@/components/common/IOSInstallBanner';
 
 import CommandBar from './header/CommandBar';

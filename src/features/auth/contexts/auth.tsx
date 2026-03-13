@@ -61,6 +61,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       toast.error('Invalid authentication token');
       logout();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- logout is defined after login; it is stable (empty deps) and safe to omit
   }, []);
 
   const logout = useCallback(() => {
@@ -142,6 +143,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -150,6 +152,7 @@ export const useAuth = () => {
   return context;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useUser = () => {
   const { user } = useAuth();
   if (!user) {
@@ -158,6 +161,7 @@ export const useUser = () => {
   return user;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useBaseCurrency = () => {
   const { baseCurrency } = useUser();
   return baseCurrency;

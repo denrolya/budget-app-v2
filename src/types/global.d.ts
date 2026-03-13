@@ -8,9 +8,9 @@ declare global {
   let logger:
     | DebugLogger
     | {
-        info: (message: any, component?: string) => void;
-        warn: (message: any, component?: string) => void;
-        error: (message: any, component?: string) => void;
+        info: (message: unknown, component?: string) => void;
+        warn: (message: unknown, component?: string) => void;
+        error: (message: unknown, component?: string) => void;
       };
 }
 

@@ -197,8 +197,8 @@ export class TransactionFilters extends BaseFilters {
         if (isMomentLike(value)) return value;
         // If BaseFilters parsed as string/number, attempt moment coercion
         // (non-strict on purpose — strictness belongs to URL parsing)
-        const m = moment(value as any);
-        return m.isValid() ? m : (value as any);
+        const m = moment(value as string | number | undefined);
+        return m.isValid() ? m : value;
       }
 
       case 'withNestedCategories': {

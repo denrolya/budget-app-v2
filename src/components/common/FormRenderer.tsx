@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AccountForm } from '@/features/accounts';
+import { logger } from '@/services/DebugLogger';
 import { CategoryForm } from '@/features/categories';
 import { DebtForm } from '@/features/debts';
 import { BulkCreateTableForm, TransactionForm } from '@/features/transactions';
@@ -23,7 +24,7 @@ import { Separator } from '@/components/ui/separator';
 
 type StandardFormType = Exclude<FormType, FormType.BulkTransaction>;
 
-const formComponents: Record<StandardFormType, React.ComponentType<any>> = {
+const formComponents: Record<StandardFormType, React.ComponentType<Record<string, unknown>>> = {
   [FormType.Account]: AccountForm,
   [FormType.Transaction]: TransactionForm,
   [FormType.Transfer]: TransferForm,
@@ -34,12 +35,12 @@ const formComponents: Record<StandardFormType, React.ComponentType<any>> = {
 interface FormState {
   isValid: boolean;
   isDirty: boolean;
-  values: any; // You might want to use a more specific type here
+  values: unknown;
 }
 
 interface FormContentProps {
   formType: StandardFormType;
-  values: any;
+  values: unknown;
   onClose: () => void;
   setFormState: (updates: Partial<FormState>) => void;
 }
@@ -71,7 +72,7 @@ export const FormRenderer: React.FC = () => {
           setFormKey((prev) => (parseInt(prev) + 1).toString());
         }
       } catch (error) {
-        console.error('Form submission failed:', error);
+        logger.error(error, 'FormRenderer');
         toast.error('Failed to submit form. Please try again.', {
           action: {
             label: 'Close',
@@ -96,10 +97,11 @@ export const FormRenderer: React.FC = () => {
   if (formState.type === FormType.BulkTransaction) {
     return (
       <Drawer open={formState.isOpen} onOpenChange={handleOpenChange}>
-        <DrawerContent className="h-[65vh] flex flex-col">
-          <DrawerHeader className="shrink-0 border-b pb-3">
+        <DrawerContent className="h-[85vh] flex flex-col">
+          {/* Title kept for screen readers only — form has its own terminal command bar */}
+          <DrawerHeader className="sr-only">
             <DrawerTitle>Bulk Create Transactions</DrawerTitle>
-            <DrawerDescription className="sr-only">Create multiple transactions at once</DrawerDescription>
+            <DrawerDescription>Create multiple transactions at once</DrawerDescription>
           </DrawerHeader>
           <div data-vaul-no-drag className="flex-1 min-h-0 overflow-hidden flex flex-col">
             <BulkCreateTableForm />

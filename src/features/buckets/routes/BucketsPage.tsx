@@ -63,7 +63,8 @@ const BucketsPage: React.FC = () => {
     if (config.monthlyExpenses === null && avgExpense !== null) {
       setMonthlyExpenses(avgExpense);
     }
-  }, [avgExpense]); // intentionally omit deps — run once when avgExpense arrives
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally omit config.monthlyExpenses and setMonthlyExpenses; this runs once when avgExpense first arrives
+  }, [avgExpense]);
 
   // ── Health ──────────────────────────────────────────────────────────────────
 

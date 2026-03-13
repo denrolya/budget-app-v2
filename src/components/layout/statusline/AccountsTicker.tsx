@@ -53,19 +53,19 @@ const TypeLabel: React.FC<{ label: string; first: boolean }> = ({ label, first }
 // ── Single 2-line pill ────────────────────────────────────────────────────────
 
 // Marker: w-3 (12px) + gap-1.5 (6px) = 18px → pl-[18px] to align balance with name
-const TickerPill = React.memo(function TickerPill({ account }: { account: Account }) {
+const TickerPill = React.memo(({ account }: { account: Account }) => {
   const navigate = useNavigate();
 
   return (
     <button
       type="button"
-      onClick={() => navigate(`/accounts/${account.id}`)}
       className={cn(
         'inline-flex flex-col items-start justify-center px-1.5 py-0.5 rounded flex-none',
         'hover:bg-muted/60 transition-colors duration-100 cursor-pointer',
         'border border-transparent hover:border-border/40',
         'select-none whitespace-nowrap',
       )}
+      onClick={() => navigate(`/accounts/${account.id}`)}
     >
       {/* Line 1: marker + name + draft badge */}
       <span className="inline-flex items-center gap-1.5 leading-tight">
@@ -112,9 +112,9 @@ const AccountsTicker: React.FC = () => {
       <div className="flex items-center overflow-x-auto scrollbar-hide h-full gap-0.5">
         {groups.map((g, i) => (
           <React.Fragment key={g.type}>
-            <TypeLabel label={TYPE_LABELS[g.type]} first={i === 0} />
+            <TypeLabel first={i === 0} label={TYPE_LABELS[g.type]} />
             {g.accounts.map((acc) => (
-              <TickerPill key={acc.id} account={acc} />
+              <TickerPill account={acc} key={acc.id} />
             ))}
           </React.Fragment>
         ))}

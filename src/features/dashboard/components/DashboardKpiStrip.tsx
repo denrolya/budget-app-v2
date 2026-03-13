@@ -64,7 +64,7 @@ const NetWorthTile: React.FC = () => {
   const netWorth = totalBalance + totalDebt;
 
   return (
-    <KpiTile label="Net Worth" isLoading={false}>
+    <KpiTile isLoading={false} label="Net Worth">
       <p className="text-2xl font-bold tracking-tight">
         <MoneyValue amount={netWorth} useColors={false} />
       </p>
@@ -98,7 +98,7 @@ const StatKpiTile: React.FC<KpiStatTile> = ({ label, positiveIsGood, config, que
   const pct = stats.percentageChange as number;
 
   return (
-    <KpiTile label={label} isLoading={stats.isLoading}>
+    <KpiTile isLoading={stats.isLoading} label={label}>
       <div className="flex items-baseline gap-2">
         <p className="text-2xl font-bold tracking-tight">
           <MoneyValue amount={value} useColors={false} />
@@ -120,9 +120,9 @@ const NetRevenueTile: React.FC<{ incomeConfig: StatisticsConfig; expenseConfig: 
   const netRevenue = (incomeStats.currentValue as number) - (expenseStats.currentValue as number);
 
   return (
-    <KpiTile label="Net Revenue · This Month" isLoading={isLoading}>
+    <KpiTile isLoading={isLoading} label="Net Revenue · This Month">
       <p className="text-2xl font-bold tracking-tight">
-        <MoneyValue amount={netRevenue} useColors={true} revertColors={netRevenue < 0} />
+        <MoneyValue amount={netRevenue} revertColors={netRevenue < 0} useColors={true} />
       </p>
       <p className={cn('text-xs font-medium', netRevenue >= 0 ? 'text-success' : 'text-destructive')}>
         {netRevenue >= 0 ? 'Surplus' : 'Deficit'}
@@ -140,7 +140,7 @@ const renderTile = (tile: KpiTileConfig, index: number) => {
     case 'stat':
       return <StatKpiTile key={index} {...tile} />;
     case 'net-revenue':
-      return <NetRevenueTile key={index} incomeConfig={tile.incomeConfig} expenseConfig={tile.expenseConfig} />;
+      return <NetRevenueTile expenseConfig={tile.expenseConfig} incomeConfig={tile.incomeConfig} key={index} />;
   }
 };
 

@@ -31,6 +31,7 @@ interface TransactionFormRef {
   submitForm: () => Promise<void>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const formSchema = z.object({
   type: z.nativeEnum(TransactionType),
   account: z.number().int().positive(),
@@ -108,13 +109,14 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
 
   const [noteHeight, setNoteHeight] = useState('auto');
   const noteRef = useRef<HTMLTextAreaElement>(null);
+  const noteValue = form.watch('note');
 
   useEffect(() => {
     if (noteRef.current) {
       noteRef.current.style.height = 'auto';
       noteRef.current.style.height = `${noteRef.current.scrollHeight}px`;
     }
-  }, [form.watch('note')]);
+  }, [noteValue]);
 
   return (
     <Form {...form}>

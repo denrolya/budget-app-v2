@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export enum FormType {
   Transaction = 'transaction',
   Transfer = 'transfer',
@@ -12,18 +13,18 @@ export enum FormType {
 interface FormState {
   isOpen: boolean;
   type: FormType | null;
-  values: any | null;
+  values: unknown;
   isValid: boolean;
   isDirty: boolean;
 }
 
-type FormEventListener<T = any> = (formType: FormType, response: T) => void;
+type FormEventListener<T = unknown> = (formType: FormType, response: T) => void;
 
 interface FormContextType {
   formState: FormState;
-  openForm: (type: FormType, initialValues?: any) => void;
+  openForm: (type: FormType, initialValues?: unknown) => void;
   closeForm: () => void;
-  submitForm: (values: any) => void;
+  submitForm: (values: unknown) => void;
   updateFormState: (updates: Partial<FormState>) => void;
   resetForm: () => void;
   addFormSubmitListener: <T>(listener: FormEventListener<T>) => void;
@@ -40,11 +41,12 @@ const initialFormState: FormState = {
   isDirty: false,
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useFormManager = (): FormContextType => {
   const [formState, setFormState] = useState<FormState>(initialFormState);
   const [listeners, setListeners] = useState<FormEventListener[]>([]);
 
-  const openForm = useCallback((type: FormType, initialValues: any = null) => {
+  const openForm = useCallback((type: FormType, initialValues: unknown = null) => {
     setFormState({
       isOpen: true,
       type,
@@ -64,7 +66,7 @@ export const useFormManager = (): FormContextType => {
         listeners.forEach((listener) => listener(formState.type!, response));
       }
     },
-    [formState.type, listeners, closeForm],
+    [formState.type, listeners],
   );
 
   const resetForm = useCallback(() => {
@@ -106,6 +108,7 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
   return <FormContext.Provider value={formManager}>{children}</FormContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useForm = () => {
   const context = useContext(FormContext);
   if (context === undefined) {
@@ -114,16 +117,12 @@ export const useForm = () => {
   return context;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useFormSubmitListener = <T,>(formTypes: FormType[], callback: (response: T) => void) => {
   const { addFormSubmitListener, removeFormSubmitListener } = useForm();
 
   // Memoize formTypes and callback
-  const memoizedFormTypes = useMemo(
-    () => formTypes,
-    [
-      /* actual dependencies */
-    ],
-  );
+  const memoizedFormTypes = useMemo(() => formTypes, [formTypes]);
   // const memoizedCallback = useCallback(callback, [/* actual dependencies */]);
 
   useEffect(() => {

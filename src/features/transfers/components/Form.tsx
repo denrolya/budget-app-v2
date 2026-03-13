@@ -213,10 +213,10 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
         }
 
         submitForm(values);
-      } catch (error: any) {
+      } catch (error: unknown) {
         // mutation already toasts; keep this minimal
         toast.error('Failed to submit transfer. Please try again.', {
-          description: error?.message || undefined,
+          description: typeof error === 'object' && error !== null && 'message' in error ? String((error as { message: unknown }).message) : undefined,
         });
         throw error;
       }

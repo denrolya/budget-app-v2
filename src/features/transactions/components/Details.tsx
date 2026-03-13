@@ -260,7 +260,6 @@ const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
 
               return (
                 <ResponsiveTooltip
-                  key={`transaction-${transaction.id}-converted-${targetCurrency}`}
                   desktopComponent="hovercard"
                   openDelay={0}
                   content={
@@ -273,8 +272,8 @@ const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
                           amount={transaction.amount}
                           decimals={decimals}
                           rate={historicalRate}
-                          sourceLabel="hist"
                           sourceCurrency={transaction.account.currency as CURRENCY_CODE}
+                          sourceLabel="hist"
                           targetCurrency={targetCurrency}
                         />
                       </div>
@@ -285,30 +284,31 @@ const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
                             amount={transaction.amount}
                             decimals={decimals}
                             rate={fixerRate}
-                            sourceLabel="Fixer"
                             sourceCurrency={transaction.account.currency as CURRENCY_CODE}
+                            sourceLabel="Fixer"
                             targetCurrency={targetCurrency}
                           />
                           <ExchangeRateLine
                             amount={transaction.amount}
                             decimals={decimals}
                             rate={monobankRate}
-                            sourceLabel="Monobank"
                             sourceCurrency={transaction.account.currency as CURRENCY_CODE}
+                            sourceLabel="Monobank"
                             targetCurrency={targetCurrency}
                           />
                           <ExchangeRateLine
                             amount={transaction.amount}
                             decimals={decimals}
                             rate={wiseRate}
-                            sourceLabel="Wise"
                             sourceCurrency={transaction.account.currency as CURRENCY_CODE}
+                            sourceLabel="Wise"
                             targetCurrency={targetCurrency}
                           />
                         </div>
                       </div>
                     </div>
                   }
+                  key={`transaction-${transaction.id}-converted-${targetCurrency}`}
                 >
                   <div className="flex items-center justify-between gap-3 py-0.5 cursor-help group">
                     <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -341,7 +341,7 @@ const Details: React.FC<TransactionDetailsProps> = ({ transaction }) => {
           <SectionDivider label="Compensation Transactions" />
           <div className="space-y-1">
             {transaction.compensations!.map((compensation) => (
-              <TransactionListItem isCompensationView flat transaction={compensation} key={compensation.id} />
+              <TransactionListItem flat isCompensationView transaction={compensation} key={compensation.id} />
             ))}
           </div>
         </>

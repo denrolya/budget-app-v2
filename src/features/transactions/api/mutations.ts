@@ -82,8 +82,9 @@ export const useMutations = (opts?: { invalidateKey?: string | readonly unknown[
     try {
       await exportCsvMutation.mutateAsync(filters);
       toast.success('CSV export started', { id, description: 'Your download should begin shortly.' });
-    } catch (e: any) {
-      toast.error('CSV export failed', { id, description: e?.message || 'Unexpected error.' });
+    } catch (e: unknown) {
+      const message = typeof e === 'object' && e !== null && 'message' in e ? String((e as { message: unknown }).message) : 'Unexpected error.';
+      toast.error('CSV export failed', { id, description: message });
       throw e;
     }
   };

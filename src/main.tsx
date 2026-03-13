@@ -25,6 +25,7 @@ if (typeof window !== 'undefined') {
   window.logger = logger;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 const App = () => (
   <StrictMode>
     <QueryClientProvider client={queryClient}>

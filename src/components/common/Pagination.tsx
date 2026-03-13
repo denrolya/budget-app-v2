@@ -1,6 +1,6 @@
 import debounce from 'lodash/debounce';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,12 +31,13 @@ export const Pagination: React.FC<PaginationProps> = ({
     setInputPage(currentPage.toString());
   }, [currentPage]);
 
-  const debouncedPageChange = useCallback(
-    debounce((newPage: number) => {
-      if (newPage >= 1 && newPage <= totalPages) {
-        onPageChange(newPage);
-      }
-    }, 300),
+  const debouncedPageChange = useMemo(
+    () =>
+      debounce((newPage: number) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+          onPageChange(newPage);
+        }
+      }, 300),
     [onPageChange, totalPages],
   );
 

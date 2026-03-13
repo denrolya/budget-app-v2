@@ -36,7 +36,7 @@ type ViewMode = 'transactions' | 'both' | 'transfers';
 interface ListFiltersContentProps {
   transactionFilters: TransactionFilters;
   transferFilters: TransferFilters;
-  setFilter: (key: string, value: any) => void;
+  setFilter: (key: string, value: unknown) => void;
   showTransactions: boolean;
   showTransfers: boolean;
   setShowTransactions: (value: boolean) => void;
@@ -84,14 +84,14 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
       const min = minStr === '' ? NaN : Number(minStr);
       const max = maxStr === '' ? NaN : Number(maxStr);
       if (!Number.isFinite(min) && !Number.isFinite(max)) {
-        setFilter('amountRange', [] as any);
+        setFilter('amountRange', []);
         return;
       }
-      setFilter('amountRange', [min, max] as any);
+      setFilter('amountRange', [min, max]);
     }, 350),
   ).current;
 
-  const debouncedSearch = useRef(debounce((value: string) => setFilter('searchTerm', value as any), SEARCH_DEBOUNCE_MS)).current;
+  const debouncedSearch = useRef(debounce((value: string) => setFilter('searchTerm', value), SEARCH_DEBOUNCE_MS)).current;
 
   useEffect(
     () => () => {
@@ -161,7 +161,7 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
   }, [transactionFilters.accounts, transferFilters.accounts]);
 
   const selectedCurrencies: string[] = useMemo(
-    () => (transactionFilters as any).currencies ?? [],
+    () => transactionFilters.currencies ?? [],
     [transactionFilters],
   );
 
@@ -246,7 +246,7 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
           placeholder="All accounts"
           value={accountsValue}
           className="w-full"
-          onChange={(accounts) => setFilter('accounts' as any, accounts as any)}
+          onChange={(accounts) => setFilter('accounts', accounts)}
         />
 
         <div className="flex items-stretch">
@@ -257,9 +257,9 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
             value={transactionFilters.categories as string[]}
             className="flex-1 [&>div:first-child]:rounded-r-none [&>div:first-child]:border-r-0"
             onChange={(categories) => {
-              setFilter('categories' as any, categories as any);
+              setFilter('categories', categories);
               if (categories?.length) {
-                setFilter('withNestedCategories' as any, true);
+                setFilter('withNestedCategories', true);
                 setShowTransactions(true);
                 setShowTransfers(false);
               }
@@ -289,7 +289,7 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
           placeholder="All debts"
           value={transactionFilters.debts as string[]}
           className="w-full"
-          onChange={(debts) => setFilter('debts' as any, debts as any)}
+          onChange={(debts) => setFilter('debts', debts)}
         />
       </div>
 
@@ -412,7 +412,7 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
           placeholder="All currencies"
           value={selectedCurrencies}
           className="w-full bg-background border-input"
-          onValueChange={(values) => setFilter('currencies' as any, values.length ? values : (undefined as any))}
+          onValueChange={(values) => setFilter('currencies', values.length ? values : undefined)}
         />
       </div>
 

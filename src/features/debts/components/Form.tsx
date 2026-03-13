@@ -65,6 +65,7 @@ export const DebtForm = forwardRef<DebtFormRef, DebtFormProps>((_, ref) => {
       note: data?.note ?? '',
       closedAt: toDatetimeLocal(data?.closedAt),
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- recompute only when the edited record changes, not on every field update
     [data?.id],
   );
 
@@ -76,6 +77,7 @@ export const DebtForm = forwardRef<DebtFormRef, DebtFormProps>((_, ref) => {
 
   useEffect(() => {
     form.reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset only when the record id changes; including form/defaultValues would cause infinite resets
   }, [data?.id]);
 
   const { formRef } = useFormLogic({

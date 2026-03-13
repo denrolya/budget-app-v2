@@ -149,7 +149,7 @@ export const transactionService = {
     const result: TransactionResponse = await axiosFetcher(url);
 
     // NOTE: count/totalValue returned by backend may include transfers; you currently filter list only.
-    const list = omitTransferTransactions ? result.list.filter((t: any) => !t.transfer?.id) : result.list;
+    const list = omitTransferTransactions ? result.list.filter((t) => !t.transfer?.id) : result.list;
 
     return {
       items: list,

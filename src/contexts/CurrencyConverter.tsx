@@ -49,6 +49,7 @@ export const CurrencyConverterProvider: React.FC<React.PropsWithChildren> = ({ c
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useCurrencyConverter = (): CurrencyConverterContextValue => {
   const ctx = useContext(CurrencyConverterContext);
   if (!ctx) {

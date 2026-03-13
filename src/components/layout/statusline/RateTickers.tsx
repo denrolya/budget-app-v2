@@ -29,7 +29,7 @@ const RateTickers: React.FC = () => {
   );
 
   const { data } = useFixerExchangeRates(fromDate, toDate);
-  const snapshots = data?.snapshots ?? [];
+  const snapshots = useMemo(() => data?.snapshots ?? [], [data?.snapshots]);
 
   const pairData = useMemo(() => {
     const map = new Map<string, { rate: number | null; isUp: boolean | null }>();
@@ -81,18 +81,18 @@ const RateTickers: React.FC = () => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <div className="flex items-center gap-3 cursor-pointer select-none" title="Exchange rates — click for details">
+        <div title="Exchange rates — click for details" className="flex items-center gap-3 cursor-pointer select-none">
           {PAIRS.map(({ from, to }) => {
             const key = `${from}/${to}`;
             const { rate = null, isUp = null } = pairData.get(key) ?? {};
             const flash = flashMap.get(key) ?? '';
             return (
               <span
-                key={key}
                 className={cn(
                   'flex items-center gap-0.5 font-mono text-2xs tabular-nums rounded px-0.5 transition-colors duration-150',
                   flash,
                 )}
+                key={key}
               >
                 <span className="text-muted-foreground">{from}/{to}</span>
                 <span

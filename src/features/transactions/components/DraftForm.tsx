@@ -1,14 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import moment from 'moment';
-
-import { MOMENT_DATETIME_DISPLAY_FORMAT } from '@/constants/datetime';
 import type { Moment } from 'moment';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
+import { MOMENT_DATETIME_DISPLAY_FORMAT } from '@/constants/datetime';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -226,10 +225,10 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
         });
 
         resetForm();
-      } catch (error: any) {
+      } catch (error: unknown) {
         // mutations already toast errors in your hook; this is a hard fallback
         toast.error('Failed to submit transaction. Please try again.', {
-          description: error?.message,
+          description: typeof error === 'object' && error !== null && 'message' in error ? String((error as { message: unknown }).message) : undefined,
           action: { label: 'Close', onClick: () => toast.dismiss() },
         });
         throw error;

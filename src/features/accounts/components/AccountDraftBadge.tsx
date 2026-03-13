@@ -3,8 +3,10 @@ import React from 'react';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { transactionService } from '@/features/transactions/api/service';
+import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
 import type Account from '@/features/accounts/models/Account';
 import { Type as AccountType } from '@/features/accounts/types';
+import type { Sorting } from '@/types/pagination';
 
 interface Props {
   account: Account;
@@ -20,8 +22,8 @@ const AccountDraftBadge: React.FC<Props> = ({ account }) => {
       transactionService.fetchList({
         page: 1,
         perPage: 1,
-        filters: { accounts: [account.id], isDraft: true } as any,
-        sort: {} as any,
+        filters: new TransactionFilters({ accounts: [String(account.id)], isDraft: true }),
+        sort: {} as Sorting,
         omitTransferTransactions: false,
       }),
     enabled,

@@ -226,7 +226,7 @@ const HeatmapPanel: React.FC<HeatmapPanelProps> = ({
     [onYearChange],
   );
 
-  const rows = data?.data ?? [];
+  const rows = useMemo(() => data?.data ?? [], [data?.data]);
   const stats = useMemo(
     () => computeStats(rows, effectiveViewMode, currency, rates),
     [rows, effectiveViewMode, currency, rates],

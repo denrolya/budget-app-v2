@@ -179,8 +179,8 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
             item && item.amount != null ? (
               <MoneyValue
                 amount={item.amount}
-                useColors={false}
                 currency={item.currency != null ? (item.currency as CURRENCY_CODE) : undefined}
+                useColors={false}
                 className="text-2xs leading-4 text-muted-foreground"
               />
             ) : null
@@ -207,8 +207,8 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
             item && item.amount != null ? (
               <MoneyValue
                 amount={item.amount}
-                useColors={false}
                 currency={item.currency != null ? (item.currency as CURRENCY_CODE) : undefined}
+                useColors={false}
                 className="text-2xs leading-4 text-muted-foreground"
               />
             ) : null
@@ -234,8 +234,8 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
             item && item.amount != null ? (
               <MoneyValue
                 amount={item.amount}
-                useColors={false}
                 currency={item.currency != null ? (item.currency as CURRENCY_CODE) : undefined}
+                useColors={false}
                 className="text-2xs leading-4 text-muted-foreground"
               />
             ) : null
@@ -270,10 +270,10 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
         {'account' in item && item.account ? (
           <AccountPill
             account={item.account as unknown as Account}
+            size="sm"
             tooltip={false}
             variant="inline"
             className="min-w-0 text-2xs"
-            size="sm"
           />
         ) : (
           <span className="truncate text-2xs">{item.name}</span>
@@ -304,8 +304,8 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
           <DistributionList
             ariaLabel="Accounts distribution list"
             items={accountItemsAll}
-            total={totalAccounts}
             renderLabel={accountRenderLabel}
+            total={totalAccounts}
             onViewTransactions={openAccountTransactions}
           />
         </div>
@@ -366,8 +366,8 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
         <DistributionList
           ariaLabel={`Accounts in ${selectedCurrency ?? ''} distribution list`}
           items={currencyAccounts}
-          total={currencyTotal}
           renderLabel={accountRenderLabel}
+          total={currencyTotal}
           onViewTransactions={openAccountTransactions}
         />
       </div>

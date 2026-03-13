@@ -182,7 +182,7 @@ export const useLedger = ({
       new TransactionFilters({
         after: effectiveInitialTimeframeRef.current.after,
         before: effectiveInitialTimeframeRef.current.before,
-        ...(normalizedInitialFilters as any),
+        ...normalizedInitialFilters,
       }),
     [normalizedInitialFilters],
   );

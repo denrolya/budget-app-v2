@@ -127,8 +127,8 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
           month={displayMonth}
           numberOfMonths={isMobile ? 1 : 2}
           selected={draft}
-          onSelect={onSelect}
           onMonthChange={setDisplayMonth}
+          onSelect={onSelect}
         />
 
         {/* Sidebar: year jump + presets — height capped to calendar */}
@@ -138,15 +138,15 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
             <div className="flex flex-col gap-0.5 max-h-28 overflow-y-auto">
               {YEARS.map((year) => (
                 <button
-                  key={year}
                   type="button"
-                  onClick={() => jumpToYear(year)}
                   className={cn(
                     'text-left px-1.5 py-0.5 rounded text-xs',
                     displayMonth.getFullYear() === year
                       ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground hover:text-foreground',
                   )}
+                  key={year}
+                  onClick={() => jumpToYear(year)}
                 >
                   {year}
                 </button>
@@ -159,10 +159,10 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
             <div className="flex flex-col gap-0.5 overflow-y-auto min-h-0 flex-1">
               {presets.map(({ label, range }) => (
                 <button
-                  key={label}
                   type="button"
-                  onClick={() => applyPreset(range)}
                   className="text-left px-1.5 py-0.5 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-muted"
+                  key={label}
+                  onClick={() => applyPreset(range)}
                 >
                   {label}
                 </button>

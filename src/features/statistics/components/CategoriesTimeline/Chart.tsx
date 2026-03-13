@@ -43,7 +43,7 @@ interface Props {
   showComparisonInTooltip?: boolean;
   data: TimelineDataProcessed;
   selectedPeriod: ISO8601Period;
-  onClick?: (data: any, index: number) => void;
+  onClick?: (data: Record<string, unknown>, index: number) => void;
   useSeparateAxisForTotals?: boolean;
 }
 
@@ -93,7 +93,7 @@ export const CategoryTimelineChart: React.FC<Props> = ({
     return Array.from(allDates)
       .sort()
       .map((date) => {
-        const point: any = { date };
+        const point: Record<string, string | number> = { date };
         Object.keys(categoryData).forEach((category) => {
           point[category] = categoryData[category][date] || 0;
         });
@@ -126,7 +126,7 @@ export const CategoryTimelineChart: React.FC<Props> = ({
   const ChartComponent = (chartType === 'line' ? LineChart : BarChart) as React.ElementType;
   const DataComponent = (chartType === 'line' ? Line : Bar) as React.ElementType;
 
-  const handleLegendClick = (e: any) => {
+  const handleLegendClick = (e: { dataKey?: string }) => {
     const { dataKey } = e;
     setHiddenSeries((prev) => (prev.includes(dataKey) ? prev.filter((key) => key !== dataKey) : [...prev, dataKey]));
   };

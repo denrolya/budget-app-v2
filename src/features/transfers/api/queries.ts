@@ -92,10 +92,10 @@ export const useList = (options: UseTransfersListOptions = {}): UseTransfersList
 
       const items =
         response.items?.map(
-          (item: any) =>
+          (item) =>
             new Transfer({
               ...item,
-              transactions: item.transactions?.map((tx: any) => createTransaction(tx)) ?? [],
+              transactions: item.transactions?.map((tx) => createTransaction(tx)) ?? [],
             }),
         ) ?? [];
 
@@ -122,7 +122,7 @@ export const useList = (options: UseTransfersListOptions = {}): UseTransfersList
       description: listState.error?.message || 'An unexpected error occurred.',
       action: { label: 'Retry', onClick: () => listState.refetch() },
     });
-  }, [listState.isError, listState.error, listState.refetch]);
+  }, [listState]);
 
   const items = useMemo(() => data?.items ?? [], [data]);
   const totalValue = data?.totalValue ?? 0;

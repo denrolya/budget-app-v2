@@ -7,7 +7,7 @@ import MoneyValue from '@/components/common/MoneyValue';
 import { DISTRIBUTION_PRESETS } from '@/constants/datetime';
 import { processCategoryTree } from '@/features/statistics/components/DistributionDonut/utils';
 import { Type as TransactionType } from '@/features/transactions';
-import { useAccountDistribution } from '@/hooks/statistics/useAccountDistributionStatistics';
+import { useAccountDistribution, type AccountStat } from '@/hooks/statistics/useAccountDistributionStatistics';
 import { useCategoryTreeStatistics } from '@/hooks/statistics/useCategoryTreeStatistics';
 import { type UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
 import { formatRange } from '@/lib/datetime/formatShortDate';
@@ -112,10 +112,10 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
 
     if (tab === 'currencies') {
       if (!selectedCurrency) {
-        const sum = (accountStats ?? []).reduce((acc: number, s: any) => acc + (s?.value ?? 0), 0);
+        const sum = (accountStats ?? []).reduce((acc: number, s: AccountStat) => acc + (s?.value ?? 0), 0);
         return applyMonthly(sum);
       }
-      const sum = (accountStats ?? []).reduce((acc: number, s: any) => {
+      const sum = (accountStats ?? []).reduce((acc: number, s: AccountStat) => {
         const code = s?.account?.currency ?? '—';
         return code !== selectedCurrency ? acc : acc + (s?.value ?? 0);
       }, 0);
@@ -136,15 +136,15 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
           <div className="flex items-center gap-0.5 bg-muted rounded p-0.5">
             {TABS.map((t) => (
               <button
-                key={t.value}
                 type="button"
-                onClick={() => onTabChange(t.value)}
                 className={cn(
                   'h-5 px-1.5 text-2xs font-medium rounded-sm transition-colors',
                   tab === t.value
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground',
                 )}
+                key={t.value}
+                onClick={() => onTabChange(t.value)}
               >
                 {t.label}
               </button>
@@ -156,25 +156,25 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
           {/* Transaction type */}
           <button
             type="button"
-            onClick={() => handleTypeChange(TransactionType.Expense)}
             className={cn(
               'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
               type === TransactionType.Expense
                 ? 'border-destructive/40 bg-destructive/10 text-destructive'
                 : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
+            onClick={() => handleTypeChange(TransactionType.Expense)}
           >
             Exp
           </button>
           <button
             type="button"
-            onClick={() => handleTypeChange(TransactionType.Income)}
             className={cn(
               'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
               type === TransactionType.Income
                 ? 'border-success/40 bg-success/10 text-success'
                 : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
+            onClick={() => handleTypeChange(TransactionType.Income)}
           >
             Inc
           </button>
@@ -185,13 +185,13 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
               <div className="h-4 w-px bg-border mx-0.5" />
               <button
                 type="button"
-                onClick={() => setShowMonthlyAverage(!showMonthlyAverage)}
                 className={cn(
                   'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
                   showMonthlyAverage
                     ? 'border-primary/40 bg-primary/10 text-primary'
                     : 'border-transparent text-muted-foreground hover:text-foreground',
                 )}
+                onClick={() => setShowMonthlyAverage(!showMonthlyAverage)}
               >
                 /mo
               </button>
@@ -204,8 +204,8 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
               <div className="h-4 w-px bg-border mx-0.5" />
               <button
                 type="button"
-                onClick={() => setSelectedCurrency(null)}
                 className="h-5 px-1.5 text-2xs font-medium rounded-sm border border-border text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setSelectedCurrency(null)}
               >
                 ← {selectedCurrency}
               </button>
@@ -221,8 +221,8 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
               <DaterangePickerWithPresets
                 after={timeframe.after}
                 before={timeframe.before}
-                onChange={handleTimeframeChange}
                 presets={DISTRIBUTION_PRESETS}
+                onChange={handleTimeframeChange}
               >
                 <button
                   type="button"

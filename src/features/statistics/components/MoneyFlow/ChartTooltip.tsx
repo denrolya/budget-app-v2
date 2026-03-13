@@ -60,7 +60,7 @@ const formatDateRange = (range: PeriodRange, period: ISO8601Period): string => {
 
 export const ChartTooltip: React.FC<Props> = ({
   active,
-  payload,
+  payload: _payload,
   label,
   data,
   period,

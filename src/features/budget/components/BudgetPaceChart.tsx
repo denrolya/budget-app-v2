@@ -134,7 +134,7 @@ const BudgetPaceChart: React.FC<Props> = ({ budget, analytics: _analytics, displ
       <ResponsiveLine
         areaBaselineValue={0}
         areaOpacity={0.08}
-        colors={(d) => (d as any).color}
+        colors={(d) => (d as { color?: string }).color ?? 'hsl(var(--primary))'}
         enableArea={true}
         enableCrosshair={false}
         enableSlices="x"

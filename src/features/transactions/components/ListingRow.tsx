@@ -71,7 +71,7 @@ const cellClassName = (compact: boolean, extra?: string) =>
 
 const IdCell = ({
   tx,
-  onToggleDraft,
+  onToggleDraft: _onToggleDraft,
   sheetOpen,
   onSheetOpenChange,
   titleId,
@@ -154,8 +154,8 @@ const AccountCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' |
       <AccountTypeahead
         autoFocus
         multiple={false}
-        value={((editValue as any)?.id ?? editValue) as any}
-        onChange={(v) => setEditValue(v as any)}
+        value={((editValue as { id?: number } | null)?.id ?? editValue) as number | null}
+        onChange={(v) => setEditValue(v as string | number | null)}
       />
     </CellPopover>
   );
@@ -199,8 +199,8 @@ const CategoryCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' 
         autoFocus
         multiple={false}
         type={tx.type}
-        value={((editValue as any)?.id ?? editValue) != null ? String((editValue as any)?.id ?? editValue) : null}
-        onChange={(v) => setEditValue(v as any)}
+        value={((editValue as { id?: number } | null)?.id ?? editValue) != null ? String((editValue as { id?: number } | null)?.id ?? editValue) : null}
+        onChange={(v) => setEditValue(v as string | number | null)}
       />
     </CellPopover>
   );
@@ -242,7 +242,7 @@ const ExecutedAtCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx
       <Input
         autoFocus
         type="datetime-local"
-        value={moment(editValue as any).format(MOMENT_DATETIME_FORM_FORMAT)}
+        value={moment(editValue as string | number | null).format(MOMENT_DATETIME_FORM_FORMAT)}
         onChange={(e) => setEditValue(e.target.value)}
       />
     </CellPopover>

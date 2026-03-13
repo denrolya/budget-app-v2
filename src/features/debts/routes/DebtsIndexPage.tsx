@@ -33,6 +33,7 @@ const DebtsIndexPage: React.FC = () => {
       return {
         label: 'Total exposure',
         amount: total,
+        currency: undefined as string | undefined,
         sub: `${open.length} open · ${closed.length} closed`,
         color: null as string | null,
       };
@@ -52,6 +53,7 @@ const DebtsIndexPage: React.FC = () => {
     return {
       label: node.name,
       amount: hovered.value,
+      currency: undefined as string | undefined,
       sub: `${hovered.percentage.toFixed(1)}% of total`,
       color: hovered.color,
     };
@@ -247,7 +249,7 @@ const DebtsIndexPage: React.FC = () => {
                   <p className="text-3xl font-bold text-foreground leading-tight">
                     <MoneyValue
                       amount={centerInfo.amount}
-                      currency={(centerInfo as any).currency}
+                      currency={centerInfo.currency}
                       useColors={false}
                       values={{}}
                       className="text-3xl font-bold"

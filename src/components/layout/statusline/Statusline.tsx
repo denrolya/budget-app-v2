@@ -39,16 +39,16 @@ const Statusline: React.FC<Props> = ({ className }) => {
     >
       {/* ── A: Total balance ─── */}
       <button
-        type="button"
-        onClick={() => navigate('/accounts')}
-        className="flex-none px-3 flex items-center gap-2 h-full hover:bg-muted/50 transition-colors duration-100 cursor-pointer border-r border-border/60"
         title="All accounts"
+        type="button"
+        className="flex-none px-3 flex items-center gap-2 h-full hover:bg-muted/50 transition-colors duration-100 cursor-pointer border-r border-border/60"
+        onClick={() => navigate('/accounts')}
       >
         <span className="font-mono text-2xs uppercase tracking-widest text-muted-foreground select-none">TOT</span>
         <span className="font-mono text-sm font-semibold tabular-nums text-foreground select-none">
           <MoneyValue
             amount={total}
-            currency={baseCurrency as any}
+            currency={baseCurrency}
             showSign={false}
             showValuesTooltip={false}
             useColors={false}
@@ -68,10 +68,10 @@ const Statusline: React.FC<Props> = ({ className }) => {
         <Tooltip>
           <TooltipTrigger asChild>
             <button
-              type="button"
               aria-label="Command palette"
-              onClick={openHotkeysDialog}
+              type="button"
               className="h-full px-2.5 inline-flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors border-l border-r border-border/60"
+              onClick={openHotkeysDialog}
             >
               <Command className="h-3.5 w-3.5" />
             </button>
@@ -85,10 +85,10 @@ const Statusline: React.FC<Props> = ({ className }) => {
         <Tooltip>
           <TooltipTrigger asChild>
             <button
-              type="button"
               aria-label="Currency converter"
-              onClick={openCurrencyConverter}
+              type="button"
               className="h-full px-2.5 inline-flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors border-r border-border/60"
+              onClick={openCurrencyConverter}
             >
               <ArrowLeftRight className="h-3.5 w-3.5" />
             </button>

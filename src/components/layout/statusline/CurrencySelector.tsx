@@ -39,9 +39,9 @@ const CurrencySelector: React.FC = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
+          title="Base currency"
           type="button"
           className="h-7 px-2 inline-flex items-center rounded font-mono text-2xs font-semibold tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors border border-transparent hover:border-border/40 select-none"
-          title="Base currency"
         >
           {baseCurrency}
         </button>

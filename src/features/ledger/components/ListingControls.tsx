@@ -33,7 +33,7 @@ interface Props {
   transferFilters: TransferFilters;
   showTransactions: boolean;
   showTransfers: boolean;
-  setFilter: (key: string, value: any) => void;
+  setFilter: (key: string, value: unknown) => void;
   setShowTransactions: (value: boolean) => void;
   setShowTransfers: (value: boolean) => void;
   timeframe: { after: Moment; before: Moment };
@@ -80,14 +80,14 @@ export const ListingControls: React.FC<Props> = ({
       const min = minStr === '' ? NaN : Number(minStr);
       const max = maxStr === '' ? NaN : Number(maxStr);
       if (!Number.isFinite(min) && !Number.isFinite(max)) {
-        setFilter('amountRange', [] as any);
+        setFilter('amountRange', []);
         return;
       }
-      setFilter('amountRange', [min, max] as any);
+      setFilter('amountRange', [min, max]);
     }, 350),
   ).current;
 
-  const debouncedSearch = useRef(debounce((value: string) => setFilter('searchTerm', value as any), SEARCH_DEBOUNCE_MS)).current;
+  const debouncedSearch = useRef(debounce((value: string) => setFilter('searchTerm', value), SEARCH_DEBOUNCE_MS)).current;
 
   useEffect(
     () => () => {
@@ -151,13 +151,13 @@ export const ListingControls: React.FC<Props> = ({
   );
 
   const toggleNestedCategories = useCallback(() => {
-    setFilter('withNestedCategories', !transactionFilters.withNestedCategories as any);
+    setFilter('withNestedCategories', !transactionFilters.withNestedCategories);
   }, [setFilter, transactionFilters.withNestedCategories]);
 
   const toggleDraftOnly = useCallback(() => {
     const next =
       transactionFilters.isDraft === undefined ? true : transactionFilters.isDraft === true ? false : undefined;
-    setFilter('isDraft', next as any);
+    setFilter('isDraft', next);
   }, [setFilter, transactionFilters.isDraft]);
 
   // ─ Accounts ──────────────────────────────────────────────────────────────
@@ -169,12 +169,12 @@ export const ListingControls: React.FC<Props> = ({
 
   // ─ Currency MultiSelect ───────────────────────────────────────────────────
   const selectedCurrencies: string[] = useMemo(
-    () => (transactionFilters as any).currencies ?? [],
+    () => transactionFilters.currencies ?? [],
     [transactionFilters],
   );
 
   const handleCurrencyChange = useCallback(
-    (values: string[]) => setFilter('currencies', values.length ? values : (undefined as any)),
+    (values: string[]) => setFilter('currencies', values.length ? values : undefined),
     [setFilter],
   );
 
@@ -314,7 +314,7 @@ export const ListingControls: React.FC<Props> = ({
             placeholder="Accounts"
             value={accountsValue}
             className="w-full"
-            onChange={(accounts) => setFilter('accounts', accounts as any)}
+            onChange={(accounts) => setFilter('accounts', accounts)}
           />
         </div>
 
@@ -329,9 +329,9 @@ export const ListingControls: React.FC<Props> = ({
             value={transactionFilters.categories as string[]}
             className={TYPEAHEAD_JOINED}
             onChange={(categories) => {
-              setFilter('categories', categories as any);
+              setFilter('categories', categories);
               if (categories?.length) {
-                setFilter('withNestedCategories', true as any);
+                setFilter('withNestedCategories', true);
                 setShowTransactions(true);
                 setShowTransfers(false);
               }

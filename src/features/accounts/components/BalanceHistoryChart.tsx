@@ -60,8 +60,14 @@ interface CandleState {
 
 // Rendered as a Nivo custom layer — gets xScale/yScale from Nivo's context.
 // Recreated via useMemo when candle or lineColor changes.
+interface NivoLayerProps {
+  xScale: (value: string) => number | undefined;
+  yScale: (value: number) => number | undefined;
+  innerHeight: number;
+}
+
 const buildCandleLayer = (candle: CandleState | null, lineColor: string) =>
-  function CandleIndicator({ xScale, yScale, innerHeight }: any) {
+  function CandleIndicator({ xScale, yScale, innerHeight }: NivoLayerProps) {
     if (!candle) return null;
 
     const sx: number | undefined = xScale(candle.x);
@@ -146,7 +152,7 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
 
   const { data, isLoading, isError } = useBalanceHistory(account.id, after, before, selected.interval);
 
-  const rawPoints = data?.data ?? [];
+  const rawPoints = useMemo(() => data?.data ?? [], [data?.data]);
   const lastBalance = rawPoints[rawPoints.length - 1]?.balance ?? 0;
   const lineColor = `hsl(var(${lastBalance >= 0 ? '--success' : '--destructive'}))`;
 

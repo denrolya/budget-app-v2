@@ -5,7 +5,7 @@ import type { Category } from '@/features/categories';
 import { type RawTransactionDTO, Transaction } from '@/features/transactions';
 
 import type { DebtDTO } from '../types';
-import Debt from '../models/Debt';
+import Debt, { type DebtRawData } from '../models/Debt';
 
 const byId = <T extends { id: number }>(items: T[]) => {
   const map = new Map<number, T>();
@@ -13,18 +13,18 @@ const byId = <T extends { id: number }>(items: T[]) => {
   return map;
 };
 
-const mapCompensation = (comp: any) =>
+const mapCompensation = (comp: Omit<RawTransactionDTO, 'compensations' | 'transfer' | 'debt'> & { account: Account; category: Category }) =>
   new Transaction({
-    id: comp.id!,
-    account: comp.account!,
-    amount: comp.amount!,
-    convertedValues: comp.convertedValues!,
-    note: comp.note!,
-    executedAt: moment(comp.executedAt)!,
-    category: comp.category!,
-    isDraft: comp.isDraft!,
-    compensations: comp.compensations,
-    type: comp.type!,
+    id: comp.id,
+    account: comp.account,
+    amount: comp.amount,
+    convertedValues: comp.convertedValues,
+    note: comp.note,
+    executedAt: moment(comp.executedAt),
+    category: comp.category,
+    isDraft: comp.isDraft,
+    compensations: undefined,
+    type: comp.type,
   });
 
 export const mapDebtDTOToModel = (dto: DebtDTO, deps: { accounts: Account[]; categories: Category[] }): Debt => {
@@ -50,5 +50,10 @@ export const mapDebtDTOToModel = (dto: DebtDTO, deps: { accounts: Account[]; cat
   return new Debt({
     ...dto,
     transactions,
-  } as any);
+    balance: Number(dto.balance ?? 0),
+    convertedValues: (dto.convertedValues as Record<string, number>) ?? {},
+    note: dto.note ?? '',
+    createdAt: dto.createdAt ?? null,
+    closedAt: dto.closedAt ?? null,
+  } as DebtRawData);
 };

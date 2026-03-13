@@ -20,6 +20,8 @@ import { LedgerView, useLedger } from '@/features/ledger';
 import ListingControls from '@/features/ledger/components/ListingControls';
 import { HeatmapPanel } from '@/features/transactions';
 import { transactionService } from '@/features/transactions/api/service';
+import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
+import type { Sorting } from '@/types/pagination';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { confirm } from '@/lib/confirmation';
 import { cn } from '@/lib/utils';
@@ -71,8 +73,8 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
       transactionService.fetchList({
         page: 1,
         perPage: 1,
-        filters: { accounts: [account.id], isDraft: true } as any,
-        sort: {} as any,
+        filters: new TransactionFilters({ accounts: [String(account.id)], isDraft: true }),
+        sort: {} as Sorting,
         omitTransferTransactions: false,
       }),
     enabled: account.type === AccountType.Bank && !!account.bankIntegration?.isActive,

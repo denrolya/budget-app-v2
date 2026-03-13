@@ -77,7 +77,7 @@ const calculateStatisticsValues = <T extends StatisticsType>(
 export const useValueByPeriod = <T extends StatisticsType>(
   { config, after, before }: ValueByPeriodParams & { config: { statType: T } },
 
-  _dependencies: any[] = [],
+  _dependencies: unknown[] = [],
   queryKey: string = 'value-by-period',
 ): UseValueByPeriodReturn<T> => {
   const { type, categories, timeframe, period, comparison, statType } = config;

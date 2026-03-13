@@ -38,8 +38,12 @@ export const LoginPage = () => {
       const { token } = response.data;
       login(token);
       navigate(from, { replace: true });
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed');
+    } catch (err: unknown) {
+      const message =
+        typeof err === 'object' && err !== null && 'response' in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      setError(message || 'Login failed');
       toast.error('Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);

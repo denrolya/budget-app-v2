@@ -174,8 +174,8 @@ const DebtsSunburstChart: React.FC<Props> = ({ debts, onHoverChange, onNavigate 
         motionConfig="gentle"
         padAngle={1.2}
         tooltip={tooltip}
-        onClick={handleClick as any}
-        onMouseEnter={handleMouseEnter as any}
+        onClick={handleClick as unknown as Parameters<typeof ResponsivePie>[0]['onClick']}
+        onMouseEnter={handleMouseEnter as unknown as Parameters<typeof ResponsivePie>[0]['onMouseEnter']}
         onMouseLeave={handleMouseLeave}
       />
     </div>

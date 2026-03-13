@@ -141,7 +141,7 @@ const DebtBalanceChart: React.FC<Props> = ({ currency, currentBalance, transacti
         <p className="text-muted-foreground mb-1">
           {moment(point.data.x as string, 'YYYY-MM-DD').format('D MMM YYYY')}
         </p>
-        <MoneyValue showSign useColors amount={balance} currency={currency as any} className="font-semibold text-sm" />
+        <MoneyValue showSign useColors amount={balance} currency={currency} className="font-semibold text-sm" />
       </div>
     );
   };

@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 
 import { queryKeys } from '@/features/accounts/api/keys';
 import { accountService } from '@/features/accounts/api/service';
-import Account from '@/features/accounts/models/Account';
+import Account, { type AccountRawData } from '@/features/accounts/models/Account';
 import { exchangeRatesQueryKey } from '@/services/api/exchangeRates.queries';
 
 import { type CreateAccountDTO, type UpdateAccountDTO } from '../types';
@@ -19,7 +19,7 @@ const sanitize = <T extends Record<string, unknown>>(obj: T): Partial<T> => {
   const out: Partial<T> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (value === undefined) continue;
-    out[key as keyof T] = value as any; // keep nulls (archivedAt)
+    out[key as keyof T] = value as T[keyof T]; // keep nulls (archivedAt)
   }
   return out;
 };
@@ -29,7 +29,7 @@ export const useMutations = () => {
 
   const rebuildAccountModel = (raw: unknown): Account => {
     const rates = qc.getQueryData<ExchangeRatesData>(exchangeRatesQueryKey)?.fixer;
-    return rates ? accountService.withConvertedValues(raw as any, rates) : new Account(raw as any);
+    return rates ? accountService.withConvertedValues(raw as unknown as AccountRawData, rates) : new Account(raw as unknown as AccountRawData);
   };
 
   const upsertCache = (next: Account) => {

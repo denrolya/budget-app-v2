@@ -33,7 +33,7 @@ export interface RawTransactionDTO {
     color: string | null;
   };
   isDraft: boolean;
-  debt: any;
+  debt: { id: number } | null | undefined;
   transfer:
     | {
         id: number;

@@ -115,6 +115,7 @@ const CategoryTree = forwardRef<CategoryTreeRef, Props>(
         setOpen: (id: number, open: boolean) => setNodeOpen(id, open),
         toggle: (id: number) => toggleNodeOpen(id),
       }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- setOpenById/setNodeOpen/toggleNodeOpen are recreated each render; adding them would cause an infinite loop
       [sortedRoot],
     );
 

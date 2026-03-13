@@ -193,7 +193,7 @@ const CategoriesPanel: React.FC<Props> = ({
   );
 
   const sunburstColors = useMemo(
-    () => ({ scheme: type === TransactionType.Expense ? 'red_grey' : 'greens' }) as any,
+    () => ({ scheme: type === TransactionType.Expense ? 'red_grey' : 'greens' } as Parameters<typeof ResponsiveSunburst>[0]['colors']),
     [type],
   );
 
@@ -208,30 +208,30 @@ const CategoriesPanel: React.FC<Props> = ({
         {hasSunburstData ? (
           <>
             <ResponsiveSunburst<SunburstDatum>
-              data={sunburstData}
-              id="id"
-              value="value"
-              margin={{ top: 6, right: 6, bottom: 6, left: 6 }}
-              cornerRadius={2}
-              borderWidth={1}
-              borderColor={{ theme: 'background' } as any}
-              colors={sunburstColors}
-              inheritColorFromParent
-              childColor={{ from: 'color', modifiers: [['brighter', 0.35]] } as any}
-              enableArcLabels={false}
-              innerRadius={0.5}
               animate
+              inheritColorFromParent
+              borderColor={{ theme: 'background' } as Parameters<typeof ResponsiveSunburst>[0]['borderColor']}
+              borderWidth={1}
+              childColor={{ from: 'color', modifiers: [['brighter', 0.35]] } as Parameters<typeof ResponsiveSunburst>[0]['childColor']}
+              colors={sunburstColors}
+              cornerRadius={2}
+              data={sunburstData}
+              enableArcLabels={false}
+              id="id"
+              innerRadius={0.5}
+              margin={{ top: 6, right: 6, bottom: 6, left: 6 }}
               motionConfig="gentle"
-              onMouseEnter={(node) =>
-                setHoveredArc({ name: (node.data as SunburstDatum).name, value: node.value })
-              }
-              onMouseLeave={() => setHoveredArc(null)}
+              value="value"
               onClick={(node) => {
                 const cat = currentCategories.find(
                   (c) => String(c.id) === String((node.data as SunburstDatum).id),
                 );
                 if (cat) handleCategoryStep(cat);
               }}
+              onMouseEnter={(node) =>
+                setHoveredArc({ name: (node.data as SunburstDatum).name, value: node.value })
+              }
+              onMouseLeave={() => setHoveredArc(null)}
             />
             {/* Center label */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

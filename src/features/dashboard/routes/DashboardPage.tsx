@@ -7,8 +7,7 @@ import {
   MoneyFlowCard as MoneyFlow,
 } from '@/features/statistics';
 
-const DashboardPage: React.FC = () => {
-  return (
+const DashboardPage: React.FC = () => (
     <section className="h-full w-full overflow-auto p-4">
       <DashboardKpiStrip />
 
@@ -19,6 +18,5 @@ const DashboardPage: React.FC = () => {
       </div>
     </section>
   );
-};
 
 export default DashboardPage;

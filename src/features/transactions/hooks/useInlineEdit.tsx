@@ -56,9 +56,9 @@ export const useInlineEdit = ({ isUpdating, onSave }: InlineEditConfig) => {
       const field = editingCell.field;
       switch (field) {
         case 'account':
-          return { account: (editValue as any) ?? original.account };
+          return { account: (editValue as unknown as Transaction['account']) ?? original.account };
         case 'category':
-          return { category: (editValue as any) ?? original.category };
+          return { category: (editValue as unknown as Transaction['category']) ?? original.category };
         case 'amount': {
           const n = typeof editValue === 'number' ? editValue : Number(editValue);
           if (!Number.isFinite(n)) return null;
