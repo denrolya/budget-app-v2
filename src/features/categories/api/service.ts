@@ -25,7 +25,6 @@ export const categoriesService = {
         name: payload.name,
         parent: payload.parent ?? null,
         isAffectingProfit: payload.isAffectingProfit ?? true,
-        isFixed: payload.isFixed ?? false,
       });
 
       return data;
@@ -42,7 +41,6 @@ export const categoriesService = {
         name: payload.name,
         parent: payload.parent ?? null,
         isAffectingProfit: payload.isAffectingProfit,
-        isFixed: payload.isFixed,
       });
 
       return data;

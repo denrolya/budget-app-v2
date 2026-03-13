@@ -2,23 +2,17 @@ import groupBy from 'lodash/groupBy';
 import sortBy from 'lodash/sortBy';
 import sumBy from 'lodash/sumBy';
 import toPairs from 'lodash/toPairs';
-import { Maximize2, Minimize2, ChevronDown, ChevronUp } from 'lucide-react';
 import moment, { type Moment } from 'moment';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import { MoneyValue } from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Badge, BadgeVariant } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { LedgerView, useLedger } from '@/features/ledger';
-import ListingControls from '@/features/ledger/components/ListingControls';
-import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useLedger } from '@/features/ledger';
+import LedgerActivityCard from '@/features/ledger/components/LedgerActivityCard';
 import { BACKEND_DATE_FORMAT, MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import type { DailyStatsResponse } from '@/features/accounts/api/service';
 import { useBaseCurrency } from '@/features/auth';
@@ -57,28 +51,14 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
     initialTimeframe: defaultRange,
   });
 
-  const [isHeatmapRangeActive, setIsHeatmapRangeActive] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [heatmapExpanded, setHeatmapExpanded] = useState(false);
-  const [heatmapMounted, setHeatmapMounted] = useState(false);
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-
-  useEffect(() => {
-    if (heatmapExpanded && !heatmapMounted) setHeatmapMounted(true);
-  }, [heatmapExpanded, heatmapMounted]);
-
   const handleHeatmapRangeSelect = useCallback(
     (after: moment.Moment, before: moment.Moment) => {
-      setIsHeatmapRangeActive(true);
       ledger.setTimeframe({ after, before });
-      if (isMobile) setMobileDrawerOpen(true);
     },
-    [isMobile, ledger],
+    [ledger],
   );
 
   const handleHeatmapRangeClear = useCallback(() => {
-    setIsHeatmapRangeActive(false);
-    setMobileDrawerOpen(false);
     ledger.setTimeframe(defaultRange);
   }, [ledger, defaultRange]);
 
@@ -90,12 +70,11 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
   );
 
   const handleHeatmapYearChange = useCallback(
-    (year: number) => {
+    (year: number, onRangeReset: () => void) => {
       const after = moment({ year }).startOf('year');
       const before = year === moment().year() ? moment().endOf('day') : moment({ year }).endOf('year');
       ledger.setTimeframe({ after, before });
-      setIsHeatmapRangeActive(false);
-      setMobileDrawerOpen(false);
+      onRangeReset();
     },
     [ledger],
   );
@@ -104,11 +83,6 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
     ledger.resetAll();
     ledger.setFilter('debts', [debt.id]);
   }, [ledger, debt.id]);
-
-  // Close fullscreen when tab changes away
-  useEffect(() => {
-    if (activeTab !== 'transactions') setIsFullscreen(false);
-  }, [activeTab]);
 
   const baseCurrency = useBaseCurrency();
 
@@ -176,18 +150,6 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
         .sort((a, b) => a.day.localeCompare(b.day)),
     };
   }, [transactions]);
-
-  const heatmapYear = ledger.timeframe.after.year();
-
-  const renderActivityContent = () => (
-    <LedgerView
-      disabledFilters={['debts']}
-      enableHotkeys={false}
-      ledger={ledger}
-      showControls={false}
-      onReset={handleLedgerReset}
-    />
-  );
 
   const historyEvents = useMemo(() => {
     const events: { id: string; date: Moment; action: string; details: string }[] = [];
@@ -316,110 +278,30 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
             <TabsTrigger value="history">Debt History</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="transactions" className="min-w-0">
-            <div
-              className={cn(
-                'min-w-0',
-                isFullscreen &&
-                  'fixed inset-0 z-50 bg-background p-3 animate-in fade-in-0 zoom-in-[0.98] duration-200 ease-out',
+          <TabsContent value="transactions" className="min-w-0 flex flex-col min-h-[400px]">
+            <LedgerActivityCard
+              disabledFilters={['debts']}
+              ledger={ledger}
+              onHeatmapRangeClear={handleHeatmapRangeClear}
+              onHeatmapRangeSelect={handleHeatmapRangeSelect}
+              onReset={handleLedgerReset}
+              heatmap={({ onRangeSelect, onRangeClear, onRangeReset, year }) => (
+                <div className="border-b overflow-x-auto">
+                  <TransactionHeatmapChart
+                    currency={baseCurrency}
+                    data={dailyStats}
+                    highlightDates={ledger.visibleDates}
+                    isLoading={ledger.transactionsState.isLoading && transactions.length === 0}
+                    selectable={true}
+                    year={year}
+                    onRangeClear={onRangeClear}
+                    onRangeSelect={onRangeSelect}
+                    onViewModeChange={handleHeatmapViewModeChange}
+                    onYearChange={(y) => handleHeatmapYearChange(y, onRangeReset)}
+                  />
+                </div>
               )}
-            >
-              <Card className={cn('min-w-0 overflow-hidden flex flex-col', isFullscreen && 'h-full')}>
-                <CardHeader className="p-2 md:p-3 shrink-0 border-b">
-                  <div className="flex items-center gap-2">
-                    <div className="hidden md:flex flex-1 min-w-0 overflow-x-auto">
-                      <ListingControls
-                        disabledFilters={['debts']}
-                        isReversedOrder={ledger.isReversedOrder}
-                        setFilter={ledger.setFilter}
-                        setIsReversedOrder={ledger.setIsReversedOrder}
-                        setShowTransactions={ledger.setShowTransactions}
-                        setShowTransfers={ledger.setShowTransfers}
-                        setTimeframe={ledger.setTimeframe}
-                        showTransactions={ledger.showTransactions}
-                        showTransfers={ledger.showTransfers}
-                        timeframe={ledger.timeframe}
-                        transactionFilters={ledger.transactionFilters}
-                        transferFilters={ledger.transferFilters}
-                      />
-                    </div>
-                    <div
-                      aria-label="Activity actions"
-                      role="toolbar"
-                      className="flex items-center gap-2 shrink-0 ml-auto"
-                    >
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            aria-label={isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}
-                            size="icon"
-                            type="button"
-                            variant="outline"
-                            onClick={() => setIsFullscreen((prev) => !prev)}
-                          >
-                            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}</TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            aria-label={heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}
-                            size="icon"
-                            type="button"
-                            variant="outline"
-                            onClick={() => setHeatmapExpanded((prev) => !prev)}
-                          >
-                            {heatmapExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</TooltipContent>
-                      </Tooltip>
-                      <FiltersToggleButton activeCount={ledger.activeFilterCount} onClick={ledger.toggleFilters} />
-                    </div>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="p-0 flex-1 min-h-0 flex flex-col overflow-hidden min-w-0">
-                  {/* Heatmap — accordion animation */}
-                  <div
-                    className={cn(
-                      'grid transition-[grid-template-rows] duration-300 ease-in-out shrink-0',
-                      heatmapExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-                    )}
-                  >
-                    <div className="overflow-hidden">
-                      {heatmapMounted && (
-                        <div className="border-b overflow-x-auto">
-                          <TransactionHeatmapChart
-                            currency={baseCurrency}
-                            data={dailyStats}
-                            highlightDates={ledger.visibleDates}
-                            isLoading={ledger.transactionsState.isLoading && transactions.length === 0}
-                            selectable={true}
-                            year={heatmapYear}
-                            onRangeClear={handleHeatmapRangeClear}
-                            onRangeSelect={handleHeatmapRangeSelect}
-                            onViewModeChange={handleHeatmapViewModeChange}
-                            onYearChange={handleHeatmapYearChange}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {!isMobile && (
-                    <div className="border-t flex-1 min-h-0 overflow-y-auto">{renderActivityContent()}</div>
-                  )}
-                  {isMobile && !isHeatmapRangeActive && (
-                    <div className={cn('border-t flex-1 min-h-0 overflow-y-auto', !heatmapExpanded && 'border-0')}>
-                      {renderActivityContent()}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+            />
           </TabsContent>
 
           <TabsContent value="history" className="min-w-0">
@@ -450,24 +332,6 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
         </Tabs>
       </div>
 
-      <Sheet
-        open={isMobile && mobileDrawerOpen}
-        onOpenChange={(v) => {
-          if (!v) handleHeatmapRangeClear();
-          setMobileDrawerOpen(v);
-        }}
-      >
-        <SheetContent side="bottom" className="h-[80dvh] flex flex-col p-0">
-          <SheetHeader className="px-4 pt-4 pb-2 shrink-0">
-            <SheetTitle className="text-sm font-medium">
-              {isHeatmapRangeActive
-                ? `${ledger.timeframe.after.format('D MMM')} – ${ledger.timeframe.before.format('D MMM YYYY')}`
-                : 'Transactions'}
-            </SheetTitle>
-          </SheetHeader>
-          <div className="flex-1 min-h-0 overflow-y-auto">{renderActivityContent()}</div>
-        </SheetContent>
-      </Sheet>
     </div>
   );
 };

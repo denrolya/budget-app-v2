@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FormType, useForm } from '@/contexts/Form';
 import type Category from '@/features/categories/models/Category';
-import CategoriesSunburst from '@/features/categories/components/CategoriesSunburst';
+import { CategoriesTimelineCard } from '@/features/statistics';
 import { useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/hooks/financeData';
 import { cn } from '@/lib/utils';
 
@@ -78,7 +78,7 @@ const CategoriesPage: React.FC = () => {
 
   return (
     <>
-      <PageWithSidebar contentScrollable={false}>
+      <PageWithSidebar>
         <PageWithSidebar.Sidebar>
           <div className={cn('flex h-full flex-col', { 'pointer-events-none opacity-60': isDeleting })}>
             {/* Search + compact toolbar */}
@@ -184,10 +184,9 @@ const CategoriesPage: React.FC = () => {
         <PageWithSidebar.Header title="Categories" />
 
         <PageWithSidebar.Content>
-          <CategoriesSunburst
-            categories={activeType === CategoryType.Income ? incomeCategoriesTree : expenseCategoriesTree}
-            height="100vh"
-          />
+          <div className="p-4">
+            <CategoriesTimelineCard />
+          </div>
         </PageWithSidebar.Content>
       </PageWithSidebar>
     </>

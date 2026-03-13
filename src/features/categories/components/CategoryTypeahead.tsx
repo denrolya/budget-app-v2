@@ -54,9 +54,9 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
         if (isFiltered) {
           return (
             <div className="flex flex-col">
-              <span className="whitespace-nowrap text-sm">{el.name}</span>
+              <span className="whitespace-nowrap text-xs">{el.name}</span>
               {depth > 0 && (
-                <span className="whitespace-nowrap text-xs text-muted-foreground">
+                <span className="whitespace-nowrap text-2xs font-mono text-muted-foreground">
                   {el.getFullPath().slice(0, -1).join(' › ')}
                 </span>
               )}
@@ -67,11 +67,11 @@ const CategoryTypeahead = forwardRef<HTMLInputElement, CategoryTypeaheadProps>(
           <div style={{ paddingLeft: Math.min(depth, 3) * 14 }} className="flex items-center">
             <div className="flex items-center gap-1.5">
               {depth > 0 && (
-                <span aria-hidden="true" className="shrink-0 text-muted-foreground/50 select-none">
+                <span aria-hidden="true" className="shrink-0 font-mono text-muted-foreground/50 select-none">
                   └
                 </span>
               )}
-              <span className="whitespace-nowrap">{el.name}</span>
+              <span className="whitespace-nowrap text-xs">{el.name}</span>
             </div>
           </div>
         );

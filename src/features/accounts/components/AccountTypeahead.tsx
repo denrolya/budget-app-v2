@@ -5,13 +5,14 @@ import MoneyValue from '@/components/common/MoneyValue';
 import { useAccountsWithDefaultOrder } from '@/hooks/financeData';
 import Typeahead, { type TypeaheadProps } from '@/components/ui/Typeahead';
 
+import AccountMarker from './AccountMarker';
 import AccountPill from '../components/Pill';
 import type Account from '../models/Account';
 
 
 type AccountTypeaheadProps = Omit<
   TypeaheadProps<Account, string>,
-  'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement'
+  'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement' | 'renderSelected'
 > & {
   className?: string;
 };
@@ -27,6 +28,13 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(
       }
       return map;
     }, [accounts]);
+
+    const renderSelected = useCallback((account: Account): ReactNode => (
+      <div className="flex items-center gap-1.5 min-w-0">
+        <AccountMarker account={account} size="sm" />
+        <span className="truncate">{account.displayName}</span>
+      </div>
+    ), []);
 
     const renderElement = useCallback((account: Account): ReactNode => {
       const isArchived = !!account.archivedAt;
@@ -95,6 +103,7 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(
         options={accounts}
         placeholder={multiple ? 'Select accounts…' : 'Select account…'}
         renderElement={(el) => renderElement(el)}
+        renderSelected={renderSelected}
         value={value}
         valueField="id"
         className={className}

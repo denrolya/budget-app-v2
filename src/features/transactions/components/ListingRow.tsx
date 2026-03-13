@@ -3,7 +3,6 @@ import moment from 'moment';
 import React, { useId, useMemo } from 'react';
 
 import CellPopover from '@/components/common/CellPopover';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   ContextMenu,
@@ -25,6 +24,7 @@ import { type useInlineEdit } from '../hooks/useInlineEdit';
 import type Transaction from '../models/Transaction';
 import { Type as TransactionType } from '../types';
 
+import CompensationPip from './CompensationPip';
 import TransactionValue from './TransactionValue';
 
 export type TransactionRowColumn =
@@ -165,18 +165,23 @@ const AccountCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' |
 
 const AmountCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
+  const isCompensated = tx.isExpense() && (tx.compensations?.length ?? 0) > 0;
+  const valueClassName = cn('font-semibold tracking-tight', { 'text-warning': isCompensated });
 
   return (
-    <CellPopover
-      disabled={disabled}
-      trigger={<TransactionValue revert transaction={tx} className="font-semibold tracking-tight" />}
-      contentClassName="w-40"
-      onCancel={cancelEdit}
-      onOpen={() => startEdit(tx, 'amount')}
-      onSave={() => void save(tx)}
-    >
-      <Input autoFocus type="number" value={String(editValue ?? '')} onChange={(e) => setEditValue(e.target.value)} />
-    </CellPopover>
+    <div className="relative">
+      <CellPopover
+        disabled={disabled}
+        trigger={<TransactionValue revert transaction={tx} className={valueClassName} />}
+        contentClassName="w-40"
+        onCancel={cancelEdit}
+        onOpen={() => startEdit(tx, 'amount')}
+        onSave={() => void save(tx)}
+      >
+        <Input autoFocus type="number" value={String(editValue ?? '')} onChange={(e) => setEditValue(e.target.value)} />
+      </CellPopover>
+      {isCompensated && <CompensationPip transaction={tx} />}
+    </div>
   );
 };
 
@@ -188,9 +193,9 @@ const CategoryCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' 
       disabled={disabled}
       saveOnEnter={false}
       trigger={
-        <Badge variant="outline" className="max-w-full px-1 py-0 whitespace-nowrap bg-background shadow-md truncate">
+        <span className="text-2xs font-mono text-muted-foreground truncate max-w-full whitespace-nowrap">
           {tx.category.name}
-        </Badge>
+        </span>
       }
       contentClassName="w-56"
       onCancel={cancelEdit}
@@ -309,6 +314,7 @@ export const ListingRow = ({
   const descId = useId();
 
   const disabled = false;
+  const isCompensated = transaction.isExpense() && (transaction.compensations?.length ?? 0) > 0;
 
   const normalizedColumns = useMemo(() => columns, [columns]);
 
@@ -381,7 +387,11 @@ export const ListingRow = ({
         <TableRow
           className={cn(
             'text-xs',
-            ctx.tx.isDraft ? 'bg-warning/20 hover:bg-warning/30' : 'hover:bg-muted/50',
+            {
+              'bg-warning/20 hover:bg-warning/30': ctx.tx.isDraft,
+              'bg-warning/5 hover:bg-warning/10': isCompensated && !ctx.tx.isDraft,
+              'hover:bg-muted/50': !ctx.tx.isDraft && !isCompensated,
+            },
             className,
           )}
         >

@@ -6,11 +6,8 @@ export default class Category {
   id: number;
   name: string;
   type: CategoryType;
-  color: string;
   createdAt: Moment;
-  icon: string;
   isAffectingProfit: boolean;
-  isFixed: boolean;
   tags: CategoryTagDTO[];
 
   parent: Category | null = null;
@@ -23,11 +20,8 @@ export default class Category {
     this.id = data.id;
     this.name = data.name;
     this.type = data.type;
-    this.color = data.color;
     this.createdAt = moment(data.createdAt);
-    this.icon = data.icon;
     this.isAffectingProfit = data.isAffectingProfit;
-    this.isFixed = data.isFixed;
     this.tags = data.tags;
   }
 

@@ -8,11 +8,8 @@ export interface CategoryDTO {
   parent: { id: number } | null;
   root: { id: number } | null;
   type: CategoryType;
-  color: string;
   createdAt: string;
-  icon: string;
   isAffectingProfit: boolean;
-  isFixed: boolean;
   tags: CategoryTagDTO[];
 }
 
@@ -20,7 +17,6 @@ export interface CategoryApiResponseDTO {
   '@context': string;
   '@id': string;
   '@type': string;
-  isFixed: boolean;
   name: string;
   parent: CategoryApiResponseDTO | null;
   isAffectingProfit: boolean;
@@ -53,7 +49,6 @@ export type CreateCategoryDTO = {
   name: string;
   parent?: CategoryId | null;
   isAffectingProfit?: boolean;
-  isFixed?: boolean;
 };
 
 export type UpdateCategoryDTO = {
@@ -61,45 +56,35 @@ export type UpdateCategoryDTO = {
   name?: string;
   parent?: CategoryId | null;
   isAffectingProfit?: boolean;
-  isFixed?: boolean;
 };
 
 /** ===== API DTOs (actual request payloads) ===== */
 export type ApiCreateCategoryPayload = {
   name: string;
   isAffectingProfit?: boolean;
-  isFixed?: boolean;
   parent?: Iri | null;
-  icon?: string | null;
-  color?: string | null;
   tags?: Array<{ name: string }> | [];
 };
 
 export type ApiUpdateCategoryPayload = {
   name?: string;
   isAffectingProfit?: boolean;
-  isFixed?: boolean;
   parent?: Iri | null;
-  icon?: string | null;
-  color?: string | null;
   tags?: Array<{ name: string }> | [];
 };
 
 export type CategoryApiDTO = {
   id: CategoryId;
   name: string;
-  type?: string; // API отдаёт type readOnly string
+  type?: string;
   isAffectingProfit?: boolean;
-  isFixed?: boolean;
 
   parent?: { id: CategoryId } | Iri | null;
   root?: { id: CategoryId } | Iri | null;
 
-  color?: string | null;
-  icon?: string | null;
   tags?: Array<{ name: string }> | [];
 
-  children?: Array<Iri> | CategoryApiDTO[]; // зависит от endpoint-а
+  children?: Array<Iri> | CategoryApiDTO[];
 };
 
 export type CategoriesApiResponse = HydraCollection<CategoryApiDTO> | CategoryApiDTO[];

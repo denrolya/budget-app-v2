@@ -1,4 +1,4 @@
-import { Check, ChevronsUpDown, X } from 'lucide-react';
+import { Check, ChevronDown, X } from 'lucide-react';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import React, {
   forwardRef,
@@ -35,8 +35,6 @@ const typeaheadInputClass =
 const typeaheadChipClass = 'whitespace-nowrap shadow-md bg-background text-xs py-0 px-1';
 
 const chevronButtonClass = 'ml-auto p-0 hover:bg-transparent h-4 w-4';
-
-const chevronIconClass = 'h-4 w-4';
 
 type Group<T> = { label: string; options: T[] };
 
@@ -84,6 +82,9 @@ export interface TypeaheadProps<T, V extends string | number>
 
   /** Extra classes applied to the dropdown panel. Use e.g. "min-w-full w-max" to let it grow beyond the trigger width. */
   dropdownClassName?: string;
+
+  /** Custom renderer for the selected value shown in the closed trigger. Falls back to labelField text. */
+  renderSelected?: (option: T) => React.ReactNode;
 }
 
 const TypeaheadInner = <T, V extends string | number>(
@@ -102,6 +103,7 @@ const TypeaheadInner = <T, V extends string | number>(
     filterFn,
     hideCheckmarkColumn = true,
     dropdownClassName,
+    renderSelected,
     disabled,
     onKeyDown,
     onFocus,
@@ -283,6 +285,11 @@ const TypeaheadInner = <T, V extends string | number>(
   const selectedSet = useMemo(() => new Set(selectedValues.map(String)), [selectedValues]);
   const showLabelOverlay = !multiple && inputValue === '' && inputHasSelection;
 
+  const firstSelected = selectedOptions[0];
+  const selectedDisplay = showLabelOverlay && firstSelected
+    ? (renderSelected?.(firstSelected) ?? getLabel(firstSelected))
+    : null;
+
   return (
     <PopoverPrimitive.Root
       open={open}
@@ -340,8 +347,8 @@ const TypeaheadInner = <T, V extends string | number>(
 
                 <div className="relative flex-1 min-w-0 flex items-center">
                   {showLabelOverlay && (
-                    <span className="absolute inset-0 flex items-center pointer-events-none truncate">
-                      {selectedOptions[0] ? getLabel(selectedOptions[0]) : null}
+                    <span className="absolute inset-0 flex items-center pointer-events-none min-w-0 overflow-hidden">
+                      {selectedDisplay}
                     </span>
                   )}
                   <input
@@ -383,7 +390,7 @@ const TypeaheadInner = <T, V extends string | number>(
               disabled={disabled}
               aria-label={open ? 'Close options' : 'Open options'}
             >
-              <ChevronsUpDown className={cn('opacity-50', chevronIconClass)} aria-hidden="true" />
+              <ChevronDown className={cn('h-3 w-3 opacity-40 transition-transform', { 'rotate-180': open })} aria-hidden="true" />
             </Button>
           </div>
         </PopoverPrimitive.Anchor>
@@ -404,7 +411,6 @@ const TypeaheadInner = <T, V extends string | number>(
               'z-50 bg-popover border border-input rounded-md shadow-md overflow-hidden max-w-[calc(100vw-1rem)]',
               'data-[state=open]:animate-in data-[state=closed]:animate-out',
               'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-              'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
               dropdownClassName,
             )}
           >
@@ -422,7 +428,7 @@ const TypeaheadInner = <T, V extends string | number>(
                   return (
                     <div key={group.label || groupIndex}>
                       {groupBy && group.label && (
-                        <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground capitalize">
+                        <div className="px-2 py-1 text-2xs font-mono uppercase tracking-widest text-muted-foreground">
                           {group.label}
                         </div>
                       )}
@@ -443,7 +449,7 @@ const TypeaheadInner = <T, V extends string | number>(
                             role="option"
                             aria-selected={isSelected}
                             className={cn(
-                              'flex items-center px-2 py-1.5 cursor-pointer min-w-0 text-sm',
+                              'flex items-center px-2 py-1 cursor-pointer min-w-0 text-xs',
                               isHighlighted
                                 ? 'bg-accent text-accent-foreground'
                                 : isSelected

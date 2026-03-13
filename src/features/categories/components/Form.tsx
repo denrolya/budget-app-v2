@@ -5,15 +5,14 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useForm as useFormContext } from '@/contexts/Form';
 import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
 import type Category from '@/features/categories/models/Category';
 import { useExpenseCategories, useIncomeCategories } from '@/hooks/financeData';
 import { useFormLogic } from '@/hooks/useFormLogic';
+import { cn } from '@/lib/utils';
 import { type Type as TransactionType } from '@/features/transactions';
 
 import { useMutations } from '../api';
@@ -24,7 +23,6 @@ const schema = z.object({
   type: z.enum(['expense', 'income']),
   parent: z.number().int().nullable(),
   isAffectingProfit: z.boolean(),
-  isFixed: z.boolean(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -80,7 +78,6 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
       type: data?.type ?? CategoryType.Expense,
       parent: normalizedParent,
       isAffectingProfit: data?.isAffectingProfit ?? true,
-      isFixed: data?.isFixed ?? false,
     };
   }, [data]);
 
@@ -93,6 +90,7 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
   const watchedType = form.watch('type');
   const watchedParent = form.watch('parent');
   const watchedName = form.watch('name');
+  const watchedProfit = form.watch('isAffectingProfit');
 
   const allCategories = watchedType === 'expense' ? expenseCategories : incomeCategories;
 
@@ -123,7 +121,6 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
             type: values.type as CategoryType,
             parent: values.parent,
             isAffectingProfit: values.isAffectingProfit,
-            isFixed: values.isFixed,
           };
           await update({ id: data.id, payload });
         } else {
@@ -132,7 +129,6 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
             type: values.type as CategoryType,
             parent: values.parent,
             isAffectingProfit: values.isAffectingProfit,
-            isFixed: values.isFixed,
           };
           await create(payload);
         }
@@ -148,160 +144,130 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
     },
   }));
 
+  const typeChipClass = (active: boolean) =>
+    cn('h-6 px-2 rounded border font-mono text-2xs uppercase tracking-wider transition-colors', {
+      'bg-muted text-foreground border-border': active,
+      'text-muted-foreground border-transparent hover:border-border': !active,
+    });
+
+  const flagChipClass = (active: boolean) =>
+    cn('h-6 px-2 rounded border font-mono text-2xs uppercase tracking-wider transition-colors cursor-pointer', {
+      'bg-muted text-foreground border-border': active,
+      'text-muted-foreground border-transparent hover:border-border': !active,
+    });
+
   return (
     <Form {...form}>
-      <form aria-label="Category form" className="space-y-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+      <form aria-label="Category form" className="flex flex-col gap-2">
+        {/* Command bar */}
+        <div className="flex items-center gap-1 px-1 py-0.5">
           <FormField
             control={form.control}
             name="type"
             render={({ field }) => (
-              <FormItem className="w-full sm:w-[11rem]">
-                <FormLabel>Type</FormLabel>
-                <FormControl>
-                  <ToggleGroup
-                    disabled={isLoading}
-                    type="single"
-                    value={field.value}
-                    className="inline-flex h-8 w-full gap-0 overflow-hidden rounded-md border"
-                    onValueChange={(value) => {
-                      if (value) field.onChange(value);
-                    }}
-                  >
-                    <ToggleGroupItem
-                      aria-label="Expense"
-                      value="expense"
-                      className="h-8 flex-1 rounded-none border-r px-3 text-xs"
-                    >
-                      Expense
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                      aria-label="Income"
-                      value="income"
-                      className="h-8 flex-1 rounded-none px-3 text-xs"
-                    >
-                      Income
-                    </ToggleGroupItem>
-                  </ToggleGroup>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <>
+                <button
+                  disabled={isLoading}
+                  type="button"
+                  className={typeChipClass(field.value === CategoryType.Expense)}
+                  onClick={() => field.onChange(CategoryType.Expense)}
+                >
+                  expense
+                </button>
+                <button
+                  disabled={isLoading}
+                  type="button"
+                  className={typeChipClass(field.value === CategoryType.Income)}
+                  onClick={() => field.onChange(CategoryType.Income)}
+                >
+                  income
+                </button>
+              </>
             )}
           />
 
+          <div className="mx-1 h-3.5 w-px bg-border" />
+
           <FormField
             control={form.control}
-            name="parent"
+            name="isAffectingProfit"
             render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Category</FormLabel>
-                <CategoryTypeahead
-                  disabled={field.disabled}
-                  multiple={false}
-                  name={field.name}
-                  type={form.watch('type') as TransactionType}
-                  value={field.value != null ? String(field.value) : null}
-                  onBlur={field.onBlur}
-                  onChange={(v) => field.onChange(v ? Number(v) : null)}
-                  ref={field.ref}
-                />
-                <FormMessage />
-              </FormItem>
+              <button
+                disabled={isLoading}
+                type="button"
+                className={flagChipClass(watchedProfit)}
+                onClick={() => field.onChange(!field.value)}
+              >
+                profit
+              </button>
             )}
           />
         </div>
 
-        <div className="grid gap-2.5">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    autoComplete="off"
-                    disabled={isLoading}
-                    placeholder="Category name"
-                    className="h-8 text-sm"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Parent typeahead */}
+        <FormField
+          control={form.control}
+          name="parent"
+          render={({ field }) => (
+            <FormItem>
+              <CategoryTypeahead
+                disabled={field.disabled}
+                multiple={false}
+                name={field.name}
+                type={form.watch('type') as TransactionType}
+                value={field.value != null ? String(field.value) : null}
+                onBlur={field.onBlur}
+                onChange={(v) => field.onChange(v ? Number(v) : null)}
+                ref={field.ref}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <div
-            aria-label="Category path preview"
-            role="navigation"
-            className="flex items-center gap-1 text-2xs text-muted-foreground bg-muted rounded px-2 py-1.5 min-h-7"
-          >
-            {breadcrumbPath.length === 0 ? (
-              <span className="italic">Root</span>
-            ) : (
-              breadcrumbPath.map((segment, i) => (
-                <span className="inline-flex items-center gap-1 min-w-0" key={i}>
-                  {i > 0 && <ChevronRight aria-hidden="true" className="size-3 text-muted-foreground/50 shrink-0" />}
-                  <span className="truncate">{segment}</span>
-                </span>
-              ))
-            )}
+        {/* Name */}
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  {...field}
+                  autoComplete="off"
+                  disabled={isLoading}
+                  placeholder="Category name"
+                  className="h-7 text-xs"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            {watchedName.trim() && (
-              <>
-                <ChevronRight aria-hidden="true" className="size-3 text-muted-foreground/50 shrink-0" />
-                <span className="text-foreground font-medium truncate">{watchedName.trim()}</span>
-              </>
-            )}
-          </div>
+        {/* Path preview */}
+        <div
+          aria-label="Category path preview"
+          role="navigation"
+          className="flex items-center gap-1 text-2xs text-muted-foreground bg-muted rounded px-2 py-1.5 min-h-7"
+        >
+          {breadcrumbPath.length === 0 ? (
+            <span className="italic">Root</span>
+          ) : (
+            breadcrumbPath.map((segment, i) => (
+              <span className="inline-flex items-center gap-1 min-w-0" key={i}>
+                {i > 0 && <ChevronRight aria-hidden="true" className="size-3 text-muted-foreground/50 shrink-0" />}
+                <span className="truncate">{segment}</span>
+              </span>
+            ))
+          )}
 
-          <div className="flex items-center gap-3 pt-1">
-            <FormField
-              control={form.control}
-              name="isAffectingProfit"
-              render={({ field }) => (
-                <FormItem className="flex items-center gap-2 space-y-0">
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      disabled={isLoading}
-                      id="affecting-profit"
-                      className="scale-75"
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormLabel
-                    htmlFor="affecting-profit"
-                    className="cursor-pointer select-none text-3xs text-muted-foreground"
-                  >
-                    Profit
-                  </FormLabel>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="isFixed"
-              render={({ field }) => (
-                <FormItem className="flex items-center gap-2 space-y-0">
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      disabled={isLoading}
-                      id="fixed"
-                      className="scale-75"
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormLabel htmlFor="fixed" className="cursor-pointer select-none text-3xs text-muted-foreground">
-                    Fixed
-                  </FormLabel>
-                </FormItem>
-              )}
-            />
-          </div>
+          {watchedName.trim() && (
+            <>
+              <ChevronRight aria-hidden="true" className="size-3 text-muted-foreground/50 shrink-0" />
+              <span className="text-foreground font-medium truncate">{watchedName.trim()}</span>
+            </>
+          )}
         </div>
       </form>
     </Form>

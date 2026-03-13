@@ -4,14 +4,13 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useForm as useFormContext } from '@/contexts/Form';
 import { useMutations } from '@/features/debts/api/mutations';
 import { useFormLogic } from '@/hooks/useFormLogic';
+import { cn } from '@/lib/utils';
 
 const schema = z.object({
   debtor: z.string().min(2, { message: 'Debtor must be at least 2 characters.' }),
@@ -30,6 +29,8 @@ export interface DebtFormRef {
 interface DebtFormProps {
   key: string;
 }
+
+const CURRENCY_CHIPS = [CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.UAH] as const;
 
 const toDatetimeLocal = (v: unknown): string => {
   if (!v) return '';
@@ -111,103 +112,150 @@ export const DebtForm = forwardRef<DebtFormRef, DebtFormProps>((_, ref) => {
     },
   }));
 
+  const watchedCurrency = form.watch('currency');
+  const watchedClosedAt = form.watch('closedAt');
+  const isClosed = !!watchedClosedAt?.trim();
+
+  const chipClass = (active: boolean) =>
+    cn('h-6 px-2 rounded border font-mono text-2xs uppercase tracking-wider transition-colors cursor-pointer', {
+      'bg-muted text-foreground border-border': active,
+      'text-muted-foreground border-transparent hover:border-border': !active,
+    });
+
   return (
     <Form {...form}>
-      <form aria-label="Debt form" className="flex flex-col gap-6">
-        {/* Row 1: Currency + Debtor */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-          <div className="flex-1 min-w-0">
-            <FormField
-              control={form.control}
-              name="currency"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>Currency</FormLabel>
-                  <Select value={field.value} onValueChange={(v) => field.onChange(v as CURRENCY_CODE)}>
-                    <FormControl>
-                      <SelectTrigger aria-label="Currency" className="w-full">
-                        <SelectValue placeholder="Select currency" />
-                      </SelectTrigger>
-                    </FormControl>
+      <form aria-label="Debt form" className="flex flex-col gap-2">
+        {/* Command bar */}
+        <div className="flex items-center gap-1 px-1 py-0.5">
+          {/* Open / Closed status chip */}
+          <FormField
+            control={form.control}
+            name="closedAt"
+            render={({ field }) => (
+              <>
+                <button
+                  type="button"
+                  className={chipClass(!isClosed)}
+                  onClick={() => field.onChange('')}
+                >
+                  open
+                </button>
+                <button
+                  type="button"
+                  className={chipClass(isClosed)}
+                  onClick={() => {
+                    if (!isClosed) {
+                      const now = new Date();
+                      const pad = (n: number) => String(n).padStart(2, '0');
+                      const local = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+                      field.onChange(local);
+                    }
+                  }}
+                >
+                  closed
+                </button>
+              </>
+            )}
+          />
 
-                    <SelectContent>
-                      {(Object.values(CURRENCY_CODE) as CURRENCY_CODE[]).map((code) => (
-                        <SelectItem value={code} key={code}>
-                          <span className="inline-flex items-center gap-2">
-                            <span aria-hidden="true">{CURRENCIES[code]?.symbol ?? ''}</span>
-                            <span>{code}</span>
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <div className="mx-1 h-3.5 w-px bg-border" />
 
-          <div className="flex-[2] min-w-0">
-            <FormField
-              control={form.control}
-              name="debtor"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>Debtor</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      aria-label="Debtor"
-                      autoComplete="name"
-                      placeholder="Enter debtor name"
-                      className="w-full"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          {/* Currency chips */}
+          <FormField
+            control={form.control}
+            name="currency"
+            render={({ field }) => (
+              <div className="flex items-center gap-1">
+                {CURRENCY_CHIPS.map((code) => (
+                  <button
+                    key={code}
+                    type="button"
+                    className={chipClass(watchedCurrency === code)}
+                    onClick={() => field.onChange(code)}
+                  >
+                    {CURRENCIES[code]?.symbol ?? code}
+                  </button>
+                ))}
+              </div>
+            )}
+          />
         </div>
 
-        {/* Row 2: Balance + ClosedAt */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-          <div className="flex-1 min-w-0">
-            <FormField
-              control={form.control}
-              name="balance"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>Balance</FormLabel>
-                  <FormControl>
-                    <Input
-                      aria-label="Balance"
-                      inputMode="decimal"
-                      type="number"
-                      value={Number.isFinite(field.value) ? field.value : 0}
-                      className="w-full"
-                      onChange={(e) => field.onChange(e.target.value === '' ? 0 : e.target.valueAsNumber)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+        {/* Row 1: Debtor · Balance */}
+        <div className="flex gap-2">
+          <FormField
+            control={form.control}
+            name="debtor"
+            render={({ field }) => (
+              <FormItem className="flex-[2] min-w-0">
+                <FormControl>
+                  <Input
+                    {...field}
+                    aria-label="Debtor"
+                    autoComplete="name"
+                    placeholder="Debtor"
+                    className="h-7 text-xs"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-          <div className="flex-1 min-w-0">
+          <FormField
+            control={form.control}
+            name="balance"
+            render={({ field }) => (
+              <FormItem className="flex-1 min-w-0">
+                <FormControl>
+                  <Input
+                    aria-label="Balance"
+                    inputMode="decimal"
+                    placeholder="Balance"
+                    type="number"
+                    value={Number.isFinite(field.value) ? field.value : 0}
+                    className="h-7 text-xs"
+                    onChange={(e) => field.onChange(e.target.value === '' ? 0 : e.target.valueAsNumber)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Row 2: Note · Closed At (conditional) */}
+        <div className="flex gap-2">
+          <FormField
+            control={form.control}
+            name="note"
+            render={({ field }) => (
+              <FormItem className="flex-1 min-w-0">
+                <FormControl>
+                  <Input
+                    {...field}
+                    aria-label="Note"
+                    placeholder="Note…"
+                    className="h-7 text-xs"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {isClosed && (
             <FormField
               control={form.control}
               name="closedAt"
               render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>Closed At</FormLabel>
+                <FormItem className="w-44 shrink-0">
                   <FormControl>
                     <Input
                       aria-label="Closed at"
                       type="datetime-local"
                       value={field.value ?? ''}
-                      className="w-full"
+                      className="h-7 text-xs"
                       onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
@@ -215,29 +263,7 @@ export const DebtForm = forwardRef<DebtFormRef, DebtFormProps>((_, ref) => {
                 </FormItem>
               )}
             />
-          </div>
-        </div>
-
-        {/* Row 3: Note (taller) */}
-        <div className="flex flex-col">
-          <FormField
-            control={form.control}
-            name="note"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Note</FormLabel>
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    aria-label="Note"
-                    placeholder="Add a note..."
-                    className="min-h-[9rem] resize-y w-full"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          )}
         </div>
       </form>
     </Form>

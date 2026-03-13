@@ -1,35 +1,27 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowDownCircle, ArrowUpCircle, X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import moment from 'moment';
-import { forwardRef, useImperativeHandle, useState, useEffect, useRef } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { toast } from 'sonner';
 import z from 'zod';
 
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
-import { useMutations } from '@/features/transactions/api/mutations';
+import { useForm as useFormContext } from '@/contexts/Form';
 import { AccountTypeahead } from '@/features/accounts';
 import { CategoryTypeahead } from '@/features/categories';
 import { DebtTypeahead } from '@/features/debts';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useForm as useFormContext } from '@/contexts/Form';
-import { useFormLogic } from '@/hooks/useFormLogic';
-import type Transaction from '@/features/transactions/models/Transaction';
 import { Type as TransactionType } from '@/features/transactions';
+import { useMutations } from '@/features/transactions/api/mutations';
+import type Transaction from '@/features/transactions/models/Transaction';
+import { useFormLogic } from '@/hooks/useFormLogic';
+import { cn } from '@/lib/utils';
 
-interface TransactionFormProps {
-  key: string;
-}
-
-interface TransactionFormRef {
-  submitForm: () => Promise<void>;
-}
+// ── Schema ────────────────────────────────────────────────────────────────────
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const formSchema = z.object({
@@ -53,25 +45,42 @@ export const formSchema = z.object({
     .optional(),
 });
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface TransactionFormProps {
+  key: string;
+}
+
+interface TransactionFormRef {
+  submitForm: () => Promise<void>;
+}
+
+type TransactionData = {
+  id?: number;
+  type?: TransactionType;
+  account?: { id?: number } | null;
+  amount?: number;
+  category?: { id?: number } | null;
+  executedAt?: string | null;
+  note?: string;
+  isDraft?: boolean;
+  debt?: { id?: number } | null;
+  compensations?: Transaction[];
+};
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line react-refresh/only-export-components
 export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormProps>((_, ref) => {
   const { create: createTransaction, update: updateTransaction } = useMutations();
   const {
     updateFormState,
     formState: { values: rawData },
   } = useFormContext();
-  type TransactionData = {
-    id?: number;
-    type?: TransactionType;
-    account?: { id?: number } | null;
-    amount?: number;
-    category?: { id?: number } | null;
-    executedAt?: string | null;
-    note?: string;
-    isDraft?: boolean;
-    debt?: { id?: number } | null;
-    compensations?: Transaction[];
-  };
+
   const data = rawData as TransactionData | null | undefined;
+  const [showDebt, setShowDebt] = useState(!!data?.debt?.id);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -95,10 +104,9 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
     },
     mode: 'onChange',
   });
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: 'compensations',
-  });
+
+  const { fields, append, remove } = useFieldArray({ control: form.control, name: 'compensations' });
+
   const { formRef } = useFormLogic({
     form,
     setFormState: updateFormState,
@@ -118,158 +126,104 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
       }
     },
   });
+
   useImperativeHandle(ref, () => formRef.current!);
 
-  const [noteHeight, setNoteHeight] = useState('auto');
-  const noteRef = useRef<HTMLTextAreaElement>(null);
-  const noteValue = form.watch('note');
+  useHotkeys('meta+enter,ctrl+enter', (e) => { e.preventDefault(); void formRef.current?.submitForm(); }, {
+    enableOnFormTags: true,
+  });
 
-  useEffect(() => {
-    if (noteRef.current) {
-      noteRef.current.style.height = 'auto';
-      noteRef.current.style.height = `${noteRef.current.scrollHeight}px`;
-    }
-  }, [noteValue]);
+  // ── Derived class strings (computed before return to avoid JSX ternaries) ──
+
+  const transactionType = form.watch('type');
+  const isDraft = form.watch('isDraft');
+  const isExpense = transactionType === TransactionType.Expense;
+  const typeLabel = isExpense ? 'EXPENSE' : 'INCOME';
+
+  const typeChipClass = cn(
+    'text-2xs font-mono font-semibold uppercase tracking-widest px-1.5 py-0.5 rounded border cursor-pointer select-none transition-colors',
+    {
+      'bg-destructive/10 text-destructive border-destructive/20': isExpense,
+      'bg-success/10 text-success border-success/20': !isExpense,
+    },
+  );
+
+  const draftChipClass = cn(
+    'text-2xs font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border cursor-pointer select-none transition-colors',
+    {
+      'bg-warning/10 text-warning border-warning/20': isDraft,
+      'text-muted-foreground border-transparent hover:border-border': !isDraft,
+    },
+  );
+
+  const debtChipClass = cn(
+    'text-2xs font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border cursor-pointer select-none transition-colors',
+    {
+      'bg-muted text-foreground border-border': showDebt,
+      'text-muted-foreground border-transparent hover:border-border': !showDebt,
+    },
+  );
 
   return (
     <Form {...form}>
-      <form className="space-y-2">
-        <FormField
-          control={form.control}
-          name="isDraft"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-              <FormControl>
-                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel>Draft</FormLabel>
-                <p className="text-sm text-muted-foreground">This transaction will be saved as a draft.</p>
-              </div>
-            </FormItem>
-          )}
-        />
+      <form className="space-y-1.5">
 
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Transaction Type</FormLabel>
-              <FormControl>
-                <div className="flex space-x-2">
-                  <Button
-                    type="button"
-                    variant={field.value === TransactionType.Expense ? 'default' : 'outline'}
-                    className={cn('w-full justify-start space-x-2', {
-                      'bg-primary text-primary-foreground': field.value === TransactionType.Expense,
-                    })}
-                    onClick={() => field.onChange(TransactionType.Expense)}
-                  >
-                    <ArrowUpCircle className="h-4 w-4" />
-                    <span>Expense</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={field.value === TransactionType.Income ? 'default' : 'outline'}
-                    className={cn('w-full justify-start space-x-2', {
-                      'bg-primary text-primary-foreground': field.value === TransactionType.Income,
-                    })}
-                    onClick={() => field.onChange(TransactionType.Income)}
-                  >
-                    <ArrowDownCircle className="h-4 w-4" />
-                    <span>Income</span>
-                  </Button>
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="debt"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Debt</FormLabel>
-              <DebtTypeahead
-                disabled={field.disabled}
-                multiple={false}
-                name={field.name}
-                value={field.value != null ? String(field.value) : null}
-                className={cn('w-full justify-between', {
-                  'text-muted-foreground': !field.value,
-                })}
-                onBlur={field.onBlur}
-                onChange={(v) => field.onChange(v ? Number(v) : undefined)}
-                ref={field.ref}
-              />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Category</FormLabel>
-              <CategoryTypeahead
-                autoFocus
-                disabled={field.disabled}
-                multiple={false}
-                name={field.name}
-                type={form.watch('type')}
-                value={field.value != null ? String(field.value) : null}
-                className={cn('w-full justify-between', {
-                  'text-muted-foreground': !field.value,
-                })}
-                onBlur={field.onBlur}
-                onChange={(v) => field.onChange(v ? Number(v) : undefined)}
-                ref={field.ref}
-              />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="flex space-x-4">
+        {/* ── Command bar ───────────────────────────────────────────────── */}
+        <div className="flex items-center justify-between h-9 px-2 mb-1 rounded-md bg-muted/30 border">
           <FormField
             control={form.control}
-            name="amount"
+            name="type"
             render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel>Amount</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="Enter amount"
-                    type="number"
-                    value={field.value ?? ''}
-                    onChange={(e) => {
-                      field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <button
+                tabIndex={-1}
+                type="button"
+                className={typeChipClass}
+                onClick={() => field.onChange(isExpense ? TransactionType.Income : TransactionType.Expense)}
+              >
+                {typeLabel}
+              </button>
             )}
           />
+          <div className="flex items-center gap-2">
+            <FormField
+              control={form.control}
+              name="isDraft"
+              render={({ field }) => (
+                <button
+                  tabIndex={-1}
+                  type="button"
+                  className={draftChipClass}
+                  onClick={() => field.onChange(!field.value)}
+                >
+                  [d] draft
+                </button>
+              )}
+            />
+            <button
+              tabIndex={-1}
+              type="button"
+              className={debtChipClass}
+              onClick={() => setShowDebt((v) => !v)}
+            >
+              [debt]
+            </button>
+            <span className="text-[9px] text-muted-foreground font-mono select-none">⌘↵</span>
+          </div>
+        </div>
 
+        {/* ── Optional debt row ─────────────────────────────────────────── */}
+        {showDebt && (
           <FormField
             control={form.control}
-            name="account"
+            name="debt"
             render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormLabel>Account</FormLabel>
-                <AccountTypeahead
+              <FormItem>
+                <DebtTypeahead
                   disabled={field.disabled}
                   multiple={false}
                   name={field.name}
                   value={field.value != null ? String(field.value) : null}
-                  className={cn('w-full justify-between', {
+                  className={cn('w-full h-7 text-xs py-0.5 px-2 justify-between', {
                     'text-muted-foreground': !field.value,
                   })}
                   onBlur={field.onBlur}
@@ -280,130 +234,202 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               </FormItem>
             )}
           />
+        )}
+
+        {/* ── Row 1: Category · Account · Amount ───────────────────────── */}
+        <div className="flex gap-1.5">
+          <FormField
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+              <FormItem className="flex-[2] min-w-0">
+                <CategoryTypeahead
+                  autoFocus
+                  disabled={field.disabled}
+                  multiple={false}
+                  name={field.name}
+                  type={transactionType}
+                  value={field.value != null ? String(field.value) : null}
+                  className={cn('w-full h-7 text-xs py-0.5 px-2 justify-between', {
+                    'text-muted-foreground': !field.value,
+                  })}
+                  onBlur={field.onBlur}
+                  onChange={(v) => field.onChange(v ? Number(v) : undefined)}
+                  ref={field.ref}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="account"
+            render={({ field }) => (
+              <FormItem className="flex-[2] min-w-0">
+                <AccountTypeahead
+                  disabled={field.disabled}
+                  multiple={false}
+                  name={field.name}
+                  value={field.value != null ? String(field.value) : null}
+                  className={cn('w-full h-7 text-xs py-0.5 px-2 justify-between', {
+                    'text-muted-foreground': !field.value,
+                  })}
+                  onBlur={field.onBlur}
+                  onChange={(v) => field.onChange(v ? Number(v) : undefined)}
+                  ref={field.ref}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem className="flex-1 min-w-0">
+                <FormControl>
+                  <Input
+                    {...field}
+                    className="h-7 text-xs font-mono"
+                    min="0"
+                    placeholder="0.00"
+                    step="any"
+                    type="number"
+                    value={field.value ?? ''}
+                    onChange={(e) => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
-        <FormField
-          control={form.control}
-          name="executedAt"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Date & Time</FormLabel>
-              <FormControl>
-                <Input type="datetime-local" className="w-full" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* ── Row 2: Note · Date ────────────────────────────────────────── */}
+        <div className="flex gap-1.5">
+          <FormField
+            control={form.control}
+            name="note"
+            render={({ field }) => (
+              <FormItem className="flex-1 min-w-0">
+                <FormControl>
+                  <Input
+                    {...field}
+                    className="h-7 text-xs"
+                    placeholder="Note…"
+                    type="text"
+                    value={field.value ?? ''}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="note"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Note</FormLabel>
-              <FormControl>
-                <Textarea
-                  {...field}
-                  placeholder="Add a note..."
-                  style={{ height: noteHeight }}
-                  className="min-h-[2.5rem] resize-none overflow-hidden"
-                  onChange={(e) => {
-                    field.onChange(e);
-                    setNoteHeight(`${e.target.scrollHeight}px`);
-                  }}
-                  ref={noteRef}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="executedAt"
+            render={({ field }) => (
+              <FormItem className="shrink-0">
+                <FormControl>
+                  <Input {...field} className="h-7 text-xs font-mono w-44" type="datetime-local" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-        {form.watch('type') === TransactionType.Expense && (
-          <div>
-            <Label>Compensations</Label>
+        {/* ── Compensations (expense only) ──────────────────────────────── */}
+        {isExpense && (
+          <div className="border-t pt-2 space-y-1">
             {fields.map((field, index) => (
-              <div className="mt-2 p-2 border border-border rounded-md space-y-2" key={field.id}>
+              <div className="flex items-start gap-1.5" key={field.id}>
                 <FormField control={form.control} name={`compensations.${index}.id`} render={() => <></>} />
-                <div className="flex items-center gap-2">
-                  <FormField
-                    control={form.control}
-                    name={`compensations.${index}.amount`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Amount"
-                            type="number"
-                            className="w-full"
-                            onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`compensations.${index}.account`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <AccountTypeahead
-                          disabled={field.disabled}
-                          multiple={false}
-                          name={field.name}
-                          value={field.value != null ? String(field.value) : null}
-                          className={cn('w-full justify-between', {
-                            'text-muted-foreground': !field.value,
-                          })}
-                          onBlur={field.onBlur}
-                          onChange={(v) => field.onChange(v ? Number(v) : undefined)}
-                          ref={field.ref}
+
+                <FormField
+                  control={form.control}
+                  name={`compensations.${index}.account`}
+                  render={({ field: f }) => (
+                    <FormItem className="flex-[2] min-w-0">
+                      <AccountTypeahead
+                        disabled={f.disabled}
+                        multiple={false}
+                        name={f.name}
+                        value={f.value != null ? String(f.value) : null}
+                        className={cn('w-full h-7 text-xs py-0.5 px-2 justify-between', {
+                          'text-muted-foreground': !f.value,
+                        })}
+                        onBlur={f.onBlur}
+                        onChange={(v) => f.onChange(v ? Number(v) : undefined)}
+                        ref={f.ref}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`compensations.${index}.amount`}
+                  render={({ field: f }) => (
+                    <FormItem className="flex-1 min-w-0">
+                      <FormControl>
+                        <Input
+                          {...f}
+                          className="h-7 text-xs font-mono"
+                          placeholder="0.00"
+                          type="number"
+                          onChange={(e) => f.onChange(e.target.valueAsNumber)}
                         />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <FormField
-                    control={form.control}
-                    name={`compensations.${index}.executedAt`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <Input type="datetime-local" {...field} className="w-full" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="button" variant="destructive" className="p-2 h-9 w-9" onClick={() => remove(index)}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`compensations.${index}.executedAt`}
+                  render={({ field: f }) => (
+                    <FormItem className="shrink-0">
+                      <FormControl>
+                        <Input {...f} className="h-7 text-xs font-mono w-40" type="datetime-local" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  tabIndex={-1}
+                  type="button"
+                  variant="ghost"
+                  className="h-7 w-7 shrink-0 p-0 text-muted-foreground hover:text-destructive"
+                  onClick={() => remove(index)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
               </div>
             ))}
-            <Button
+
+            <button
+              tabIndex={-1}
               type="button"
-              className="mt-2 w-full"
-              onClick={() =>
-                append({
-                  account: -1,
-                  amount: 0,
-                  executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT),
-                })
-              }
+              className="flex items-center gap-1 text-2xs font-mono text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => append({ account: -1, amount: 0, executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT) })}
             >
-              Add Compensation
-            </Button>
+              <Plus className="h-3 w-3" />
+              ADD COMP
+            </button>
           </div>
         )}
       </form>
     </Form>
   );
 });
+
+TransactionForm.displayName = 'TransactionForm';
 
 export default TransactionForm;

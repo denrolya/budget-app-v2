@@ -1,30 +1,26 @@
 import { useQuery } from '@tanstack/react-query';
-import { ChevronDown, ChevronUp, FileText, Maximize2, Minimize2, Star, StarOff } from 'lucide-react';
+import { ChevronDown, ChevronUp, FileText, Star, StarOff } from 'lucide-react';
 import moment from 'moment';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import AccountDraftBadge from '@/features/accounts/components/AccountDraftBadge';
 import BalanceHistoryChart from '@/features/accounts/components/BalanceHistoryChart';
 import AccountPill from '@/features/accounts/components/Pill';
 import type Account from '@/features/accounts/models/Account';
 import { Type as AccountType, type UpdateAccountDTO } from '@/features/accounts/types';
-import { LedgerView, useLedger } from '@/features/ledger';
-import ListingControls from '@/features/ledger/components/ListingControls';
+import { useLedger } from '@/features/ledger';
+import LedgerActivityCard from '@/features/ledger/components/LedgerActivityCard';
 import { HeatmapPanel } from '@/features/transactions';
 import { transactionService } from '@/features/transactions/api/service';
 import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
 import type { Sorting } from '@/types/pagination';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { confirm } from '@/lib/confirmation';
-import { cn } from '@/lib/utils';
 
 interface Props {
   account: Account;
@@ -32,8 +28,6 @@ interface Props {
 }
 
 const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
-  const isMobile = useIsMobile();
-
   // Keep initial range bounded to avoid very large first-load payloads.
   const defaultRange = useMemo(
     () => ({
@@ -43,18 +37,6 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
     [],
   );
 
-  const [isHeatmapRangeActive, setIsHeatmapRangeActive] = useState(false);
-
-  // Defer heavy heatmap query and rendering until user expands it.
-  const [heatmapExpanded, setHeatmapExpanded] = useState(false);
-  const [heatmapMounted, setHeatmapMounted] = useState(false);
-  useEffect(() => {
-    if (heatmapExpanded && !heatmapMounted) setHeatmapMounted(true);
-  }, [heatmapExpanded, heatmapMounted]);
-  // Open a sheet on mobile when a heatmap range is selected
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  // Activity card fullscreen overlay
-  const [isFullscreen, setIsFullscreen] = useState(false);
   // Bank integration details collapsed by default
   const [bankDetailsOpen, setBankDetailsOpen] = useState(false);
 
@@ -84,16 +66,12 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
 
   const handleHeatmapRangeSelect = useCallback(
     (after: moment.Moment, before: moment.Moment) => {
-      setIsHeatmapRangeActive(true);
       ledger.setTimeframe({ after, before });
-      if (isMobile) setMobileDrawerOpen(true);
     },
-    [isMobile, ledger],
+    [ledger],
   );
 
   const handleHeatmapRangeClear = useCallback(() => {
-    setIsHeatmapRangeActive(false);
-    setMobileDrawerOpen(false);
     ledger.setTimeframe(defaultRange);
   }, [ledger, defaultRange]);
 
@@ -117,16 +95,6 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
     account.isDisplayedOnSidebar = !account.isDisplayedOnSidebar;
     onAccountUpdate(account, { isDisplayedOnSidebar: account.isDisplayedOnSidebar });
   };
-
-  const renderActivityContent = () => (
-    <LedgerView
-      disabledFilters={['accounts']}
-      enableHotkeys={false}
-      ledger={ledger}
-      showControls={false}
-      onReset={handleLedgerReset}
-    />
-  );
 
   return (
     <div className="h-full flex flex-col min-h-0">
@@ -255,118 +223,25 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
         </div>
       )}
 
-      {/* Activity card: heatmap + ledger merged, fills remaining height */}
-      <div
-        className={cn(
-          'flex-1 min-h-0',
-          isFullscreen &&
-            'fixed inset-0 z-50 bg-background p-3 animate-in fade-in-0 zoom-in-[0.98] duration-200 ease-out',
+      {/* Activity card: heatmap + ledger — generic LedgerActivityCard */}
+      <LedgerActivityCard
+        disabledFilters={['accounts']}
+        ledger={ledger}
+        heatmap={({ onRangeSelect, onRangeClear }) => (
+          <HeatmapPanel
+            currency={account.currency}
+            filters={{ accounts: [account.id] }}
+            highlightDates={ledger.visibleDates}
+            year={ledger.timeframe.after.year()}
+            onRangeClear={onRangeClear}
+            onRangeSelect={onRangeSelect}
+          />
         )}
-      >
-        <Card className="h-full flex flex-col overflow-hidden animate-in fade-in-0 slide-in-from-bottom-4 duration-500 ease-out">
-          <CardHeader className="p-2 md:p-3 shrink-0 border-b">
-            <div className="flex items-center gap-2">
-              <div className="hidden md:flex flex-1 min-w-0 overflow-x-auto">
-                <ListingControls
-                  disabledFilters={['accounts']}
-                  isReversedOrder={ledger.isReversedOrder}
-                  setFilter={ledger.setFilter}
-                  setIsReversedOrder={ledger.setIsReversedOrder}
-                  setShowTransactions={ledger.setShowTransactions}
-                  setShowTransfers={ledger.setShowTransfers}
-                  setTimeframe={ledger.setTimeframe}
-                  showTransactions={ledger.showTransactions}
-                  showTransfers={ledger.showTransfers}
-                  timeframe={ledger.timeframe}
-                  transactionFilters={ledger.transactionFilters}
-                  transferFilters={ledger.transferFilters}
-                />
-              </div>
-              <div aria-label="Activity actions" role="toolbar" className="flex items-center gap-2 shrink-0 ml-auto">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      aria-label={isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}
-                      size="icon"
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsFullscreen((prev) => !prev)}
-                    >
-                      {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>{isFullscreen ? 'Exit fullscreen' : 'Expand fullscreen'}</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      aria-label={heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}
-                      size="icon"
-                      type="button"
-                      variant="outline"
-                      onClick={() => setHeatmapExpanded((prev) => !prev)}
-                    >
-                      {heatmapExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>{heatmapExpanded ? 'Collapse heatmap' : 'Expand heatmap'}</TooltipContent>
-                </Tooltip>
-                <FiltersToggleButton activeCount={ledger.activeFilterCount} onClick={ledger.toggleFilters} />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0 flex-1 min-h-0 flex flex-col overflow-hidden">
-            {/* CSS grid-rows accordion animation for heatmap */}
-            <div
-              className={cn(
-                'grid transition-[grid-template-rows] duration-300 ease-in-out shrink-0',
-                heatmapExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-              )}
-            >
-              <div className="overflow-hidden">
-                {heatmapMounted && (
-                  <HeatmapPanel
-                    currency={account.currency}
-                    filters={{ accounts: [account.id] }}
-                    highlightDates={ledger.visibleDates}
-                    year={ledger.timeframe.after.year()}
-                    onRangeClear={handleHeatmapRangeClear}
-                    onRangeSelect={handleHeatmapRangeSelect}
-                  />
-                )}
-              </div>
-            </div>
-            {/* On desktop: show transactions inline */}
-            {!isMobile && <div className="border-t flex-1 min-h-0 overflow-y-auto">{renderActivityContent()}</div>}
-            {/* On mobile: show transactions inline when no range selected; otherwise open drawer */}
-            {isMobile && !isHeatmapRangeActive && (
-              <div className={cn('border-t flex-1 min-h-0 overflow-y-auto', !heatmapExpanded && 'border-0')}>
-                {renderActivityContent()}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Mobile drawer: transactions for selected heatmap range */}
-      <Sheet
-        open={isMobile && mobileDrawerOpen}
-        onOpenChange={(v) => {
-          if (!v) handleHeatmapRangeClear();
-          setMobileDrawerOpen(v);
-        }}
-      >
-        <SheetContent side="bottom" className="h-[80dvh] flex flex-col p-0">
-          <SheetHeader className="px-4 pt-4 pb-2 shrink-0">
-            <SheetTitle className="text-sm font-medium">
-              {isHeatmapRangeActive
-                ? `${ledger.timeframe.after.format('D MMM')} – ${ledger.timeframe.before.format('D MMM YYYY')}`
-                : 'Transactions'}
-            </SheetTitle>
-          </SheetHeader>
-          <div className="flex-1 min-h-0 overflow-y-auto">{renderActivityContent()}</div>
-        </SheetContent>
-      </Sheet>
+        className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 ease-out"
+        onHeatmapRangeClear={handleHeatmapRangeClear}
+        onHeatmapRangeSelect={handleHeatmapRangeSelect}
+        onReset={handleLedgerReset}
+      />
     </div>
   );
 };
