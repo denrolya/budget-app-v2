@@ -307,20 +307,8 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
           />
         </div>
 
-        {/* ── Row 2: Note · Date ────────────────────────────────────────── */}
+        {/* ── Row 2: Date · Note ────────────────────────────────────────── */}
         <div className="flex gap-1.5">
-          <FormField
-            control={form.control}
-            name="note"
-            render={({ field }) => (
-              <FormItem className="flex-1 min-w-0">
-                <FormControl>
-                  <Input {...field} placeholder="Note…" type="text" value={field.value ?? ''} className="h-7 text-xs" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
           <FormField
             control={form.control}
             name="executedAt"
@@ -330,6 +318,18 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                   <Input {...field} type="datetime-local" className="h-7 text-xs font-mono w-44" />
                 </FormControl>
                 <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="note"
+            render={({ field }) => (
+              <FormItem className="flex-1 min-w-0">
+                <FormControl>
+                  <Input {...field} placeholder="Note…" type="text" value={field.value ?? ''} className="h-7 text-xs" />
+                </FormControl>
               </FormItem>
             )}
           />

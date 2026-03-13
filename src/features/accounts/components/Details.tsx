@@ -17,6 +17,7 @@ import { Type as AccountType, type UpdateAccountDTO } from '@/features/accounts/
 import { useLedger } from '@/features/ledger';
 import LedgerActivityCard from '@/features/ledger/components/LedgerActivityCard';
 import { HeatmapPanel } from '@/features/transactions';
+import { queryKeys as transactionQueryKeys } from '@/features/transactions/api/keys';
 import { transactionService } from '@/features/transactions/api/service';
 import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
 import type { Sorting } from '@/types/pagination';
@@ -42,7 +43,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
 
   const ledger = useLedger({
     updateUrl: false,
-    omitTransfers: true,
+    omitTransfers: false,
     initialShowEmptyDays: false,
     initialFilters: { accounts: [account.id] },
     initialTimeframe: defaultRange,
@@ -50,7 +51,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
 
   // Draft count for bank accounts
   const draftCountQuery = useQuery({
-    queryKey: ['account-drafts', account.id],
+    queryKey: [...transactionQueryKeys.all, 'draft-count', account.id],
     queryFn: () =>
       transactionService.fetchList({
         page: 1,
@@ -97,14 +98,15 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
   };
 
   return (
-    <div className="h-full flex flex-col min-h-0">
+    <div className="h-full flex flex-col min-h-0 p-4">
       {/* Hero card: account info + embedded balance history chart */}
       <Card className="mb-4 overflow-hidden shrink-0 animate-in fade-in-0 slide-in-from-top-3 duration-500 ease-out">
-        <CardHeader className="pb-1">
+        <CardHeader className="pt-3 pb-1 px-4">
           <CardTitle className="flex items-center gap-2 flex-wrap">
             <AccountPill showName account={account} tooltip={false} variant="inline" />
             <MoneyValue
               badge
+              revert
               showSign
               amount={account.balance}
               currency={account.currency}

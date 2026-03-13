@@ -279,7 +279,6 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
               setCurrentCategory={setCurrentCategory}
               showMonthlyAverage={showMonthlyAverage}
               timeframe={timeframe}
-              type={type}
               onOpenTransactions={openTransactions}
             />
           )}

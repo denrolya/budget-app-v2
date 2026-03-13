@@ -165,6 +165,16 @@ const ActionsCell: React.FC<{
   onEdit?: () => void;
 }> = ({ transfer, onView, onDelete, onEdit }) => (
   <div className="flex justify-end gap-2 shrink-0">
+    <Button
+      aria-label={`View transfer #${transfer.id} details`}
+      size="icon"
+      variant="ghost"
+      className="h-8 w-8 p-0"
+      onClick={onView}
+    >
+      <Eye className="h-4 w-4" />
+    </Button>
+
     {onEdit && (
       <Button
         aria-label={`Edit transfer #${transfer.id}`}
@@ -176,16 +186,6 @@ const ActionsCell: React.FC<{
         <Pencil className="h-4 w-4" />
       </Button>
     )}
-
-    <Button
-      aria-label={`View transfer #${transfer.id} details`}
-      size="icon"
-      variant="ghost"
-      className="h-8 w-8 p-0"
-      onClick={onView}
-    >
-      <Eye className="h-4 w-4" />
-    </Button>
 
     <Button
       aria-label={`Remove transfer #${transfer.id}`}
@@ -245,12 +245,12 @@ export const ListingRow: React.FC<Props> = ({
             </div>
           </TableCell>
 
-          <TableCell className={cellClassName(compact)}>
-            <NoteCell note={transfer.note} />
-          </TableCell>
-
           <TableCell className={cellClassName(compact, 'whitespace-nowrap tabular-nums')}>
             {transfer.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}
+          </TableCell>
+
+          <TableCell className={cellClassName(compact)}>
+            <NoteCell note={transfer.note} />
           </TableCell>
 
           <TableCell className={cellClassName(compact, 'text-right')}>

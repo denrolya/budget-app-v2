@@ -1,9 +1,9 @@
-import { ResponsiveSunburst } from '@nivo/sunburst';
+import type { PieSvgProps } from '@nivo/pie';
 import sortBy from 'lodash/sortBy';
 import moment, { type Moment } from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
-import { Type as TransactionType } from '@/features/transactions';
+import MoneyValue from '@/components/common/MoneyValue';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,12 +12,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import MoneyValue from '@/components/common/MoneyValue';
+import { CHART_COLORS } from '@/constants/recharts';
 
 import CardSkeleton from './CardSkeleton';
+import PieBlock from './Chart';
 import DistributionList from './DistributionList';
+import DonutTooltip from './DonutTooltip';
 import type { DrawerListingTarget } from './TransactionsDrawer';
-import type { ProcessedCategory } from './types';
+import type { Datum, ProcessedCategory } from './types';
 import { processCategoryTree } from './utils';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -29,15 +31,7 @@ type CategoryApiNode = {
   children?: CategoryApiNode[];
 };
 
-type SunburstDatum = {
-  id: string;
-  name: string;
-  value?: number;
-  children?: SunburstDatum[];
-};
-
 type Props = {
-  type: TransactionType;
   timeframe: { after: Moment; before: Moment };
   showMonthlyAverage: boolean;
 
@@ -55,7 +49,6 @@ type Props = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const CategoriesPanel: React.FC<Props> = ({
-  type,
   timeframe,
   showMonthlyAverage,
   currentCategory,
@@ -66,8 +59,6 @@ const CategoriesPanel: React.FC<Props> = ({
   categoryRaw,
   onOpenTransactions,
 }) => {
-  const [hoveredArc, setHoveredArc] = useState<{ name: string; value: number } | null>(null);
-
   const calcMonthlyAverage = useCallback(
     (value: number) => {
       const now = moment();
@@ -93,7 +84,7 @@ const CategoriesPanel: React.FC<Props> = ({
     return showMonthlyAverage ? calcMonthlyAverage(raw) : raw;
   }, [currentCategory, totalRoot, showMonthlyAverage, calcMonthlyAverage]);
 
-  // Sorted descending list for the distribution rows
+  // Sorted descending list — used for both pie and distribution rows
   const chartData = useMemo(() => {
     const list = currentCategories.map((c) => ({
       id: c.id,
@@ -103,28 +94,27 @@ const CategoriesPanel: React.FC<Props> = ({
     return sortBy(list, 'value').reverse();
   }, [currentCategories, showMonthlyAverage, calcMonthlyAverage]);
 
+  // Pie data — same shape as Datum
+  const pieData = useMemo<Datum[]>(
+    () => chartData.map((c) => ({ id: String(c.id), label: c.label, value: c.value })),
+    [chartData],
+  );
+
+  // Color map: assign CHART_COLORS by index in sorted order
+  const colorMap = useMemo(() => {
+    const map = new Map<string, string>();
+    pieData.forEach((d, i) => {
+      map.set(String(d.id), CHART_COLORS[i % CHART_COLORS.length]);
+    });
+    return map;
+  }, [pieData]);
+
+  const pieColors = useMemo<PieSvgProps<Datum>['colors']>(
+    () => (d) => colorMap.get(String((d as { id: string | number }).id)) ?? CHART_COLORS[0],
+    [colorMap],
+  );
+
   const categoriesById = useMemo(() => new Map(currentCategories.map((c) => [String(c.id), c])), [currentCategories]);
-
-  // Sunburst data — always reflects the current drill level
-  const sunburstData = useMemo((): SunburstDatum => {
-    const toNode = (cat: ProcessedCategory): SunburstDatum => {
-      if (cat.children && cat.children.length > 0) {
-        return {
-          id: String(cat.id),
-          name: cat.name,
-          children: cat.children.map(toNode),
-        };
-      }
-      const value = showMonthlyAverage ? calcMonthlyAverage(cat.value) : cat.value;
-      return { id: String(cat.id), name: cat.name, value };
-    };
-
-    return {
-      id: 'root',
-      name: currentCategory?.name ?? 'All',
-      children: currentCategories.map(toNode),
-    };
-  }, [currentCategories, currentCategory, showMonthlyAverage, calcMonthlyAverage]);
 
   const breadcrumbs = useMemo(
     () =>
@@ -169,6 +159,14 @@ const CategoriesPanel: React.FC<Props> = ({
     [currentCategory, totalRoot, root, setCategoryStack, setCurrentCategory],
   );
 
+  const tooltip = useCallback(
+    ({ datum }: { datum: { data: Datum; value: number } }) => {
+      const percent = scopeTotal > 0 ? (datum.value / scopeTotal) * 100 : 0;
+      return <DonutTooltip label={String(datum.data.label)} percent={percent} value={datum.value} />;
+    },
+    [scopeTotal],
+  );
+
   const listItems = useMemo(
     () =>
       chartData.map((r) => ({
@@ -189,68 +187,34 @@ const CategoriesPanel: React.FC<Props> = ({
     [categoriesById, onOpenTransactions],
   );
 
-  const sunburstColors = useMemo(
-    () =>
-      ({ scheme: type === TransactionType.Expense ? 'red_grey' : 'greens' }) as Parameters<
-        typeof ResponsiveSunburst
-      >[0]['colors'],
-    [type],
-  );
-
   if (isLoading) return <CardSkeleton />;
 
-  const hasSunburstData = currentCategories.length > 0;
+  const hasData = currentCategories.length > 0;
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      {/* Sunburst chart */}
+      {/* Pie donut chart */}
       <div className="shrink-0 h-[180px] relative">
-        {hasSunburstData ? (
+        {hasData ? (
           <>
-            <ResponsiveSunburst<SunburstDatum>
+            <PieBlock
               animate
-              inheritColorFromParent
-              borderColor={{ theme: 'background' } as Parameters<typeof ResponsiveSunburst>[0]['borderColor']}
-              borderWidth={1}
-              childColor={
-                { from: 'color', modifiers: [['brighter', 0.35]] } as Parameters<
-                  typeof ResponsiveSunburst
-                >[0]['childColor']
-              }
-              colors={sunburstColors}
-              cornerRadius={2}
-              data={sunburstData}
-              enableArcLabels={false}
-              id="id"
-              margin={{ top: 6, right: 6, bottom: 6, left: 6 }}
-              motionConfig="gentle"
-              value="value"
+              colors={pieColors}
+              data={pieData}
+              tooltip={tooltip}
               onClick={(node) => {
-                const cat = currentCategories.find((c) => String(c.id) === String((node.data as SunburstDatum).id));
+                const cat = categoriesById.get(String(node.data.id));
                 if (cat) handleCategoryStep(cat);
               }}
-              onMouseEnter={(node) => setHoveredArc({ name: (node.data as SunburstDatum).name, value: node.value })}
-              onMouseLeave={() => setHoveredArc(null)}
             />
             {/* Center label */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="text-center max-w-[88px]">
-                {hoveredArc ? (
-                  <>
-                    <p className="text-[9px] text-muted-foreground leading-none mb-0.5 truncate">{hoveredArc.name}</p>
-                    <MoneyValue
-                      amount={hoveredArc.value}
-                      useColors={false}
-                      className="text-xs font-bold font-mono tabular-nums leading-none"
-                    />
-                  </>
-                ) : (
-                  <MoneyValue
-                    amount={scopeTotal}
-                    useColors={false}
-                    className="text-sm font-bold font-mono tabular-nums leading-none"
-                  />
-                )}
+                <MoneyValue
+                  amount={scopeTotal}
+                  useColors={false}
+                  className="text-sm font-bold font-mono tabular-nums leading-none"
+                />
               </div>
             </div>
           </>

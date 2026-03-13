@@ -9,7 +9,6 @@ import { MoneyValue } from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
 import { Badge, BadgeVariant } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLedger } from '@/features/ledger';
 import LedgerActivityCard from '@/features/ledger/components/LedgerActivityCard';
@@ -196,10 +195,11 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
   const statusBadgeLabel = debt.isClosed() ? 'Closed' : 'Open';
 
   return (
-    <div className="h-full min-w-0 flex flex-col">
-      <div className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden p-4">
+    <div className="h-full min-w-0 flex flex-col overflow-hidden">
+      {/* Hero card — shrink-0 so Tabs fill remaining height */}
+      <div className="shrink-0 min-w-0 overflow-x-hidden p-4 pb-0">
         <Card className="mb-4 min-w-0">
-          <CardHeader>
+          <CardHeader className="pt-3 pb-2 px-4">
             <CardTitle className="flex items-start justify-between gap-3 min-w-0">
               <span title={debt.debtor} className="min-w-0 truncate">
                 {debt.debtor}
@@ -221,8 +221,8 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
           )}
 
           {(totalTransactionsCount > 0 || debt.note) && (
-            <CardContent className="min-w-0 pt-0 pb-3">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground border-t pt-3">
+            <CardContent className="min-w-0 px-4 pt-0 pb-3">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground border-t pt-2">
                 <span>
                   Opened: <RelativeDatetimeDisplay date={debt.createdAt} />
                 </span>
@@ -271,66 +271,65 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
             </CardContent>
           )}
         </Card>
-
-        <Tabs value={activeTab} className="min-w-0" onValueChange={setActiveTab}>
-          <TabsList className={isMobile ? 'grid w-full grid-cols-2' : ''}>
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
-            <TabsTrigger value="history">Debt History</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="transactions" className="min-w-0 flex flex-col min-h-[400px]">
-            <LedgerActivityCard
-              disabledFilters={['debts']}
-              ledger={ledger}
-              heatmap={({ onRangeSelect, onRangeClear, onRangeReset, year }) => (
-                <div className="border-b overflow-x-auto">
-                  <TransactionHeatmapChart
-                    currency={baseCurrency}
-                    data={dailyStats}
-                    highlightDates={ledger.visibleDates}
-                    isLoading={ledger.transactionsState.isLoading && transactions.length === 0}
-                    selectable={true}
-                    year={year}
-                    onRangeClear={onRangeClear}
-                    onRangeSelect={onRangeSelect}
-                    onViewModeChange={handleHeatmapViewModeChange}
-                    onYearChange={(y) => handleHeatmapYearChange(y, onRangeReset)}
-                  />
-                </div>
-              )}
-              onHeatmapRangeClear={handleHeatmapRangeClear}
-              onHeatmapRangeSelect={handleHeatmapRangeSelect}
-              onReset={handleLedgerReset}
-            />
-          </TabsContent>
-
-          <TabsContent value="history" className="min-w-0">
-            <Card className="min-w-0">
-              <CardHeader>
-                <CardTitle>Debt History</CardTitle>
-                <CardDescription>Timeline of actions and related transactions</CardDescription>
-              </CardHeader>
-              <CardContent className="min-w-0">
-                <ScrollArea className="h-[300px] w-full">
-                  <ul className="space-y-4">
-                    {historyEvents.map((event) => (
-                      <li className="flex items-start justify-between gap-3 min-w-0" key={event.id}>
-                        <div className="min-w-0">
-                          <p className="font-medium break-words">{event.action}</p>
-                          <p className="text-sm text-muted-foreground break-words">{event.details}</p>
-                        </div>
-                        <Badge variant="secondary" className="shrink-0">
-                          {event.date.format(MOMENT_DATE_VIEW_FORMAT)}
-                        </Badge>
-                      </li>
-                    ))}
-                  </ul>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
       </div>
+
+      {/* Tabs — flex-1 so LedgerActivityCard fills remaining height */}
+      <Tabs value={activeTab} className="flex-1 min-h-0 flex flex-col min-w-0 px-4 pb-4" onValueChange={setActiveTab}>
+        <TabsList className={isMobile ? 'grid w-full grid-cols-2' : ''}>
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="history">Debt History</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="transactions" className="flex-1 min-h-0 overflow-hidden min-w-0">
+          <LedgerActivityCard
+            disabledFilters={['debts']}
+            ledger={ledger}
+            heatmap={({ onRangeSelect, onRangeClear, onRangeReset, year }) => (
+              <div className="border-b overflow-x-auto">
+                <TransactionHeatmapChart
+                  currency={baseCurrency}
+                  data={dailyStats}
+                  highlightDates={ledger.visibleDates}
+                  isLoading={ledger.transactionsState.isLoading && transactions.length === 0}
+                  selectable={true}
+                  year={year}
+                  onRangeClear={onRangeClear}
+                  onRangeSelect={onRangeSelect}
+                  onViewModeChange={handleHeatmapViewModeChange}
+                  onYearChange={(y) => handleHeatmapYearChange(y, onRangeReset)}
+                />
+              </div>
+            )}
+            onHeatmapRangeClear={handleHeatmapRangeClear}
+            onHeatmapRangeSelect={handleHeatmapRangeSelect}
+            onReset={handleLedgerReset}
+          />
+        </TabsContent>
+
+        <TabsContent value="history" className="min-w-0 overflow-y-auto">
+          <Card className="min-w-0">
+            <CardHeader>
+              <CardTitle>Debt History</CardTitle>
+              <CardDescription>Timeline of actions and related transactions</CardDescription>
+            </CardHeader>
+            <CardContent className="min-w-0">
+              <ul className="space-y-4">
+                {historyEvents.map((event) => (
+                  <li className="flex items-start justify-between gap-3 min-w-0" key={event.id}>
+                    <div className="min-w-0">
+                      <p className="font-medium break-words">{event.action}</p>
+                      <p className="text-sm text-muted-foreground break-words">{event.details}</p>
+                    </div>
+                    <Badge variant="secondary" className="shrink-0">
+                      {event.date.format(MOMENT_DATE_VIEW_FORMAT)}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

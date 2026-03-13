@@ -182,7 +182,7 @@ const AccountsIndexPage: React.FC = () => {
                                 size="sm"
                                 tooltip={false}
                                 variant="inline"
-                                className="min-w-0 truncate"
+                                className="flex-1 min-w-0 truncate"
                               />
                               <MoneyValue
                                 amount={acc.balance}

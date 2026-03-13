@@ -23,7 +23,7 @@ const PRESETS = [
 
 type PresetLabel = (typeof PRESETS)[number]['label'];
 
-const CHART_HEIGHT = 180;
+const CHART_HEIGHT = 120;
 const GRADIENT_ID = 'debtBalanceGradient';
 
 const nivoTheme = {
@@ -202,7 +202,7 @@ const DebtBalanceChart: React.FC<Props> = ({ currency, currentBalance, transacti
             fill={[{ match: '*', id: GRADIENT_ID }]}
             isInteractive={true}
             lineWidth={1.5}
-            margin={{ top: 40, right: 0, bottom: 22, left: 0 }}
+            margin={{ top: 16, right: 0, bottom: 20, left: 0 }}
             sliceTooltip={SliceTooltip}
             theme={nivoTheme}
             xScale={{ type: 'point' }}

@@ -197,20 +197,20 @@ export const BulkCreateTableForm: React.FC = () => {
 
         {/* ── Table ────────────────────────────────────────────────────────── */}
         <div className="flex-1 overflow-y-auto overflow-x-auto">
-          <Table className="min-w-[860px] table-fixed">
+            <Table className="min-w-[860px] table-fixed">
             <colgroup>
               <col className="w-20" />
-              <col className="w-24" />
+              <col className="w-[160px]" />
               <col className="w-[200px]" />
               <col className="w-[170px]" />
-              <col />
               <col className="w-[190px]" />
+              <col />
               <col className="w-8" />
             </colgroup>
 
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                {(['#', 'AMT', 'CATEGORY', 'ACCOUNT', 'NOTE', 'DATE', ''] as const).map((h, i) => (
+                {(['#', 'AMT', 'CATEGORY', 'ACCOUNT', 'DATE', 'NOTE', ''] as const).map((h, i) => (
                   <TableHead
                     className="h-7 px-1.5 py-0 text-2xs font-mono uppercase tracking-widest text-muted-foreground/60"
                     key={`th-${i}`}
@@ -223,7 +223,6 @@ export const BulkCreateTableForm: React.FC = () => {
 
             <TableBody>
               {fields.map((row, index) => {
-                const isLastRow = index === fields.length - 1;
                 const type = form.watch(`transactions.${index}.type`);
                 const isExpense = type === TransactionType.Expense;
                 const nextType = isExpense ? TransactionType.Income : TransactionType.Expense;
@@ -296,6 +295,7 @@ export const BulkCreateTableForm: React.FC = () => {
                             <FormControl>
                               <Input
                                 {...field}
+                                autoFocus
                                 id={`txn-amount-${index}`}
                                 min="0.01"
                                 placeholder="0.00"
@@ -363,6 +363,25 @@ export const BulkCreateTableForm: React.FC = () => {
                         )}
                       />
                     </TableCell>
+                    
+                    {/* ── Date ─────────────────────────────────────────────── */}
+                    <TableCell className={cell}>
+                      <FormField
+                        control={form.control}
+                        name={`transactions.${index}.executedAt`}
+                        render={({ field }) => (
+                          <FormItem className="space-y-0">
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type="datetime-local"
+                                className={cn(inputBase, 'font-mono')}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
 
                     {/* ── Note ─────────────────────────────────────────────── */}
                     <TableCell className={cell}>
@@ -377,31 +396,6 @@ export const BulkCreateTableForm: React.FC = () => {
                                 placeholder="Note…"
                                 value={field.value ?? ''}
                                 className={cn(inputBase, 'w-full')}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-
-                    {/* ── Date ─────────────────────────────────────────────── */}
-                    <TableCell className={cell}>
-                      <FormField
-                        control={form.control}
-                        name={`transactions.${index}.executedAt`}
-                        render={({ field }) => (
-                          <FormItem className="space-y-0">
-                            <FormControl>
-                              <Input
-                                {...field}
-                                type="datetime-local"
-                                className={cn(inputBase, 'font-mono')}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Tab' && !e.shiftKey && isLastRow) {
-                                    e.preventDefault();
-                                    addRow();
-                                  }
-                                }}
                               />
                             </FormControl>
                           </FormItem>

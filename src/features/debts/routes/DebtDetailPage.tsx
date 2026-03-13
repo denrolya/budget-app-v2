@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 
 import { confirm } from '@/lib/confirmation';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FormType, useForm } from '@/contexts/Form';
 
@@ -157,11 +156,7 @@ const DebtDetailPage: React.FC = () => {
       />
 
       <div className="flex-1 min-h-0 overflow-hidden">
-        <ScrollArea className="h-full">
-          <div className="min-h-full min-w-0 flex flex-col">
-            <DebtDetails debt={debt} key={debtIdNum ?? debt.id} />
-          </div>
-        </ScrollArea>
+        <DebtDetails debt={debt} key={debtIdNum ?? debt.id} />
       </div>
     </div>
   );

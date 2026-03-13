@@ -1,11 +1,10 @@
 import { Archive, ArchiveRestore, Check, ChevronLeft, Edit, Plus, X } from 'lucide-react';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import { confirm } from '@/lib/confirmation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FormType, useForm } from '@/contexts/Form';
 
@@ -28,12 +27,12 @@ const InlineName: React.FC<InlineNameProps> = ({ account, onSave }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Sync displayed value if account name changes externally (not during active edit)
-  React.useEffect(() => {
+  useEffect(() => {
     if (!editing) setValue(account.name);
   }, [account.name, editing]);
 
   // Auto-select text after React commits the input to the DOM
-  React.useEffect(() => {
+  useEffect(() => {
     if (editing) inputRef.current?.select();
   }, [editing]);
 
@@ -236,11 +235,7 @@ const AccountDetailPage: React.FC = () => {
       />
 
       <div className="flex-1 min-h-0 overflow-hidden">
-        <ScrollArea className="h-full">
-          <div className="min-h-full min-w-0 flex flex-col p-4">
-            <AccountDetails account={account} key={account.id} onAccountUpdate={onAccountUpdate} />
-          </div>
-        </ScrollArea>
+        <AccountDetails account={account} key={account.id} onAccountUpdate={onAccountUpdate} />
       </div>
     </div>
   );

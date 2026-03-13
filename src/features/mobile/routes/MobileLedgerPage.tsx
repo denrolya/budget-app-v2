@@ -1,13 +1,18 @@
 import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
+import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import MoneyValue from '@/components/common/MoneyValue';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { FILTER_PRESETS } from '@/constants/datetime';
 import AccountMarker from '@/features/accounts/components/AccountMarker';
 import { useLedger } from '@/features/ledger';
 import { Transaction } from '@/features/transactions';
+import { TransactionValue } from '@/features/transactions/components/TransactionValue';
 import { useActiveAccountsWithDefaultOrder } from '@/hooks/financeData';
+import { formatRange } from '@/lib/datetime/formatShortDate';
 import { cn } from '@/lib/utils';
-import { formatMoney } from '@/lib/formatMoney';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -17,20 +22,99 @@ const PRESETS = [
   { label: '90d', days: 90 },
 ] as const;
 
+// ─── Transaction detail drawer ──────────────────────────────────────────────
+
+const TransactionDetailDrawer: React.FC<{
+  tx: Transaction | null;
+  open: boolean;
+  onClose: () => void;
+}> = ({ tx, open, onClose }) => (
+  <Drawer open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
+    <DrawerContent style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}>
+      <DrawerHeader className="pb-4">
+        <DrawerTitle className="font-mono text-sm">Transaction</DrawerTitle>
+      </DrawerHeader>
+      {tx && (
+        <dl className="space-y-3 text-sm px-4 pb-4">
+          <div className="flex justify-between items-center">
+            <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Type</dt>
+            <dd>
+              <span
+                className={cn(
+                  'inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-semibold uppercase tracking-wider border',
+                  tx.isIncome()
+                    ? 'bg-success/10 text-success border-success/20'
+                    : 'bg-destructive/10 text-destructive border-destructive/20',
+                )}
+              >
+                {tx.type}
+              </span>
+            </dd>
+          </div>
+          <div className="flex justify-between items-center">
+            <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Amount</dt>
+            <dd>
+              <TransactionValue
+                alwaysShowConversion
+                revert
+                showSign
+                transaction={tx}
+                className="font-mono text-base tabular-nums font-semibold"
+              />
+            </dd>
+          </div>
+          <div className="flex justify-between items-center">
+            <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Account</dt>
+            <dd className="flex items-center gap-1.5 text-sm">
+              <AccountMarker account={tx.account} size="sm" />
+              {tx.account.name}
+            </dd>
+          </div>
+          <div className="flex justify-between items-center">
+            <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Date</dt>
+            <dd className="font-mono text-sm tabular-nums">{tx.executedAt.format('D MMM YYYY HH:mm')}</dd>
+          </div>
+          <div className="flex justify-between items-start">
+            <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Category</dt>
+            <dd className="text-right">
+              <p className="text-sm">{tx.category.name}</p>
+              <p className="font-mono text-2xs text-muted-foreground">{tx.category.getFullPath().join(' › ')}</p>
+            </dd>
+          </div>
+          {tx.debt?.debtor && (
+            <div className="flex justify-between items-center">
+              <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Debtor</dt>
+              <dd className="text-sm">{tx.debt.debtor}</dd>
+            </div>
+          )}
+          {tx.note?.trim() && (
+            <div className="flex justify-between items-start gap-4">
+              <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground shrink-0">Note</dt>
+              <dd className="text-sm text-right break-words">{tx.note.trim()}</dd>
+            </div>
+          )}
+        </dl>
+      )}
+    </DrawerContent>
+  </Drawer>
+);
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const MobileLedgerPage: React.FC = () => {
   const accounts = useActiveAccountsWithDefaultOrder();
-  const [activeDays, setActiveDays] = useState(30);
-  const [activeAccountId, setActiveAccountId] = useState<number | null>(null);
+  const location = useLocation();
+  const locationAccountId = (location.state as { accountId?: number } | null)?.accountId ?? null;
+
+  const [activeDays, setActiveDays] = useState<number | null>(30);
+  const [activeAccountId, setActiveAccountId] = useState<number | null>(locationAccountId);
+  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
 
   const defaultRange = useMemo(
     () => ({
-      after: moment().subtract(activeDays, 'days').startOf('day'),
+      after: moment().subtract(30, 'days').startOf('day'),
       before: moment().endOf('day'),
     }),
-    // intentionally omit activeDays — only used as mount value; updates go via setTimeframe
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
@@ -39,7 +123,16 @@ const MobileLedgerPage: React.FC = () => {
     omitTransfers: true,
     initialShowEmptyDays: false,
     initialTimeframe: defaultRange,
+    initialFilters: locationAccountId ? { accounts: [locationAccountId] } : undefined,
   });
+
+  // Apply account filter from navigation state on mount
+  useEffect(() => {
+    if (locationAccountId) {
+      ledger.setFilter('accounts', [locationAccountId]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handlePreset = useCallback(
     (days: number) => {
@@ -48,6 +141,16 @@ const MobileLedgerPage: React.FC = () => {
         after: moment().subtract(days, 'days').startOf('day'),
         before: moment().endOf('day'),
       });
+    },
+    [ledger],
+  );
+
+  const handleCustomRange = useCallback(
+    (range: { after?: moment.Moment | null; before?: moment.Moment | null }) => {
+      const after = range.after ? moment(range.after).startOf('day') : ledger.timeframe.after;
+      const before = range.before ? moment(range.before).endOf('day') : ledger.timeframe.before;
+      setActiveDays(null);
+      ledger.setTimeframe({ after, before });
     },
     [ledger],
   );
@@ -64,16 +167,85 @@ const MobileLedgerPage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Control bar */}
-      <div className="shrink-0 border-b border-border bg-background">
+      {/* Transaction list */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        {ledger.isLoading && <p className="font-mono text-xs text-muted-foreground text-center py-10">loading…</p>}
+
+        {!ledger.isLoading && ledger.groupedItems.length === 0 && (
+          <p className="font-mono text-xs text-muted-foreground text-center py-10">no transactions</p>
+        )}
+
+        {ledger.groupedItems.map(([date, items, txValue]) => (
+          <div key={date.format('YYYY-MM-DD')}>
+            {/* Day header — sticky */}
+            <div className="sticky top-0 flex items-center justify-between px-3 py-1.5 bg-muted/60 backdrop-blur-sm border-y border-border/40 z-10">
+              <span className="font-mono text-xs text-muted-foreground">{date.format('D MMM YYYY')}</span>
+              <MoneyValue
+                showSign
+                useColors
+                amount={txValue}
+                showValuesTooltip={false}
+                className="font-mono text-xs tabular-nums"
+              />
+            </div>
+
+            {/* Rows */}
+            {items.map((item) => {
+              if (!(item instanceof Transaction)) return null;
+
+              return (
+                <button
+                  type="button"
+                  className="w-full flex items-center gap-2.5 px-3 py-3 border-b border-border/30 last:border-0 hover:bg-muted/30 active:bg-muted/50 transition-colors text-left"
+                  key={item.id}
+                  onClick={() => setSelectedTx(item)}
+                >
+                  <AccountMarker account={item.account} size="sm" />
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm truncate">{item.category.name}</p>
+                    {item.note?.trim() && (
+                      <p className="font-mono text-xs text-muted-foreground truncate">{item.note}</p>
+                    )}
+                  </div>
+
+                  <TransactionValue
+                    alwaysShowConversion
+                    revert
+                    showSign
+                    transaction={item}
+                    showValuesTooltip={false}
+                    className="font-mono text-sm tabular-nums shrink-0"
+                  />
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      {/* Controls bar — bottom, thumb zone */}
+      <div className="shrink-0 border-t border-border bg-background">
         {/* Period row */}
-        <div className="flex items-center gap-1 px-3 pt-2.5 pb-1.5">
-          <span className="font-mono text-2xs uppercase tracking-widest text-muted-foreground mr-1">period</span>
+        <div className="flex items-center gap-1 px-3 pt-2 pb-1.5">
+          <DaterangePickerWithPresets
+            after={ledger.timeframe.after}
+            before={ledger.timeframe.before}
+            presets={FILTER_PRESETS}
+            onChange={handleCustomRange}
+          >
+            <button
+              type="button"
+              className="font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground mr-1 transition-colors"
+            >
+              {activeDays === null ? formatRange(ledger.timeframe) : 'period'}
+            </button>
+          </DaterangePickerWithPresets>
           {PRESETS.map(({ label, days }) => (
             <button
               type="button"
               className={cn(
-                'h-6 px-2 rounded border font-mono text-2xs uppercase tracking-wider transition-colors',
+                'h-7 px-2.5 rounded border font-mono text-xs uppercase tracking-wider transition-colors',
                 activeDays === days
                   ? 'bg-muted text-foreground border-border'
                   : 'text-muted-foreground border-transparent hover:border-border',
@@ -84,15 +256,17 @@ const MobileLedgerPage: React.FC = () => {
               {label}
             </button>
           ))}
-          <span className="ml-auto font-mono text-2xs text-muted-foreground tabular-nums">{totalItems} tx</span>
+          <span className="ml-auto font-mono text-xs text-muted-foreground tabular-nums">{totalItems} tx</span>
         </div>
 
         {/* Account chips — horizontally scrollable */}
-        <div className="flex items-center gap-1 px-3 pb-2.5 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div
+          className="flex items-center gap-1 px-3 pb-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        >
           <button
             type="button"
             className={cn(
-              'h-6 px-2 rounded border font-mono text-2xs shrink-0 transition-colors',
+              'h-7 px-2.5 rounded border font-mono text-xs shrink-0 transition-colors',
               !activeAccountId
                 ? 'bg-muted text-foreground border-border'
                 : 'text-muted-foreground border-transparent hover:border-border',
@@ -106,7 +280,7 @@ const MobileLedgerPage: React.FC = () => {
             <button
               type="button"
               className={cn(
-                'h-6 px-2 rounded border font-mono text-2xs shrink-0 flex items-center gap-1.5 transition-colors',
+                'h-7 px-2.5 rounded border font-mono text-xs shrink-0 flex items-center gap-1.5 transition-colors',
                 activeAccountId === account.id
                   ? 'bg-muted text-foreground border-border'
                   : 'text-muted-foreground border-transparent hover:border-border',
@@ -121,62 +295,12 @@ const MobileLedgerPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Transaction list */}
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        {ledger.isLoading && <p className="font-mono text-2xs text-muted-foreground text-center py-10">loading…</p>}
-
-        {!ledger.isLoading && ledger.groupedItems.length === 0 && (
-          <p className="font-mono text-2xs text-muted-foreground text-center py-10">no transactions</p>
-        )}
-
-        {ledger.groupedItems.map(([date, items, txValue]) => (
-          <div key={date.format('YYYY-MM-DD')}>
-            {/* Day header — sticky */}
-            <div className="sticky top-0 flex items-center justify-between px-3 py-1 bg-muted/60 backdrop-blur-sm border-y border-border/40 z-10">
-              <span className="font-mono text-2xs text-muted-foreground">{date.format('D MMM YYYY')}</span>
-              <MoneyValue
-                showSign
-                useColors
-                amount={txValue}
-                showValuesTooltip={false}
-                className="font-mono text-2xs tabular-nums"
-              />
-            </div>
-
-            {/* Rows */}
-            {items.map((item) => {
-              if (!(item instanceof Transaction)) return null;
-              const isExpense = item.isExpense();
-
-              return (
-                <div
-                  className="flex items-center gap-2.5 px-3 py-2.5 border-b border-border/30 last:border-0"
-                  key={item.id}
-                >
-                  <AccountMarker account={item.account} size="sm" />
-
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs truncate">{item.category.name}</p>
-                    {item.note?.trim() && (
-                      <p className="font-mono text-2xs text-muted-foreground truncate">{item.note}</p>
-                    )}
-                  </div>
-
-                  <span
-                    className={cn(
-                      'font-mono text-xs tabular-nums shrink-0',
-                      isExpense ? 'text-destructive' : 'text-success',
-                    )}
-                  >
-                    {isExpense ? '−' : '+'}
-                    {formatMoney(Math.abs(item.amount), item.account.currency)}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        ))}
-      </div>
+      {/* Transaction detail drawer */}
+      <TransactionDetailDrawer
+        open={!!selectedTx}
+        tx={selectedTx}
+        onClose={() => setSelectedTx(null)}
+      />
     </div>
   );
 };

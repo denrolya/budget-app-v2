@@ -6,6 +6,7 @@ import RequiredDataGate from '@/components/common/RequiredDataGate';
 import Layout from '@/components/layout/LayoutTerminal'; // TUI layout — revert: change to '@/components/layout/Layout'
 import { LoginPage, LogoutRoute } from '@/features/auth';
 import MobileShell from '@/features/mobile/layout/MobileShell';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const AccountsManagementPage = lazy(() =>
   import('@/features/accounts').then(({ AccountsManagementPage: C }) => ({ default: C })),
@@ -66,6 +67,13 @@ const AppShell: React.FC = () => (
   </RequiredDataGate>
 );
 
+// Redirect mobile browsers to the mobile shell automatically.
+const DesktopShell: React.FC = () => {
+  const isMobile = useIsMobile();
+  if (isMobile) return <Navigate replace to="/m/balances" />;
+  return <AppShell />;
+};
+
 const Routing: React.FC = () => (
   <Routes>
     {/* Public */}
@@ -75,7 +83,7 @@ const Routing: React.FC = () => (
     {/* Protected */}
     <Route element={<RequireAuth />}>
       <Route element={<MobileApp />} path="/m/*" />
-      <Route element={<AppShell />} path="/*" />
+      <Route element={<DesktopShell />} path="/*" />
     </Route>
 
     {/* Fallback */}

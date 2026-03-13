@@ -319,7 +319,7 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
           />
         </div>
 
-        {/* Row 2: Amount · Rate · Receives */}
+        {/* Row 2: Amount · Rate (with direction toggle prepend) · Receives */}
         <div className="grid grid-cols-3 gap-2">
           <FormField
             control={control}
@@ -354,32 +354,30 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
 
           <FormItem>
             <div className="relative">
+              <Button
+                aria-label="Toggle rate view"
+                aria-pressed={rateMode === 'fromPerTo'}
+                size="icon"
+                type="button"
+                variant="ghost"
+                className="absolute left-0 top-0 h-7 w-7 z-10"
+                onClick={() => setRateMode((m) => (m === 'toPerFrom' ? 'fromPerTo' : 'toPerFrom'))}
+              >
+                <ArrowLeftRight className="h-3 w-3" />
+              </Button>
               <Input
                 aria-label={`Exchange rate (${pairLabel})`}
                 inputMode="decimal"
                 placeholder="Rate"
                 type="text"
                 value={rateText}
-                className="h-7 text-xs pr-16"
+                className="h-7 text-xs pl-8 pr-10"
                 onBlur={normalizeRateOnBlur}
                 onChange={(e) => setRateText(e.target.value)}
               />
-              <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
-                <span className="text-2xs font-mono text-muted-foreground pointer-events-none whitespace-nowrap">
-                  {pairLabel}
-                </span>
-                <Button
-                  aria-label="Toggle rate view"
-                  aria-pressed={rateMode === 'fromPerTo'}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-                  className="h-5 w-5 shrink-0"
-                  onClick={() => setRateMode((m) => (m === 'toPerFrom' ? 'fromPerTo' : 'toPerFrom'))}
-                >
-                  <ArrowLeftRight className="h-3 w-3" />
-                </Button>
-              </div>
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-2xs font-mono text-muted-foreground pointer-events-none whitespace-nowrap">
+                {pairLabel}
+              </span>
             </div>
           </FormItem>
 
@@ -470,15 +468,15 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
           </div>
         )}
 
-        {/* Row 3: Note · Date */}
+        {/* Row 3: Date · Note */}
         <div className="flex gap-2">
           <FormField
             control={control}
-            name="note"
+            name="executedAt"
             render={({ field }) => (
-              <FormItem className="flex-1 min-w-0">
+              <FormItem className="w-44 shrink-0">
                 <FormControl>
-                  <Input {...field} aria-label="Note" placeholder="Note…" className="h-7 text-xs" />
+                  <Input {...field} aria-label="Executed at" type="datetime-local" className="h-7 text-xs" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -487,11 +485,11 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
 
           <FormField
             control={control}
-            name="executedAt"
+            name="note"
             render={({ field }) => (
-              <FormItem className="w-44 shrink-0">
+              <FormItem className="flex-1 min-w-0">
                 <FormControl>
-                  <Input {...field} aria-label="Executed at" type="datetime-local" className="h-7 text-xs" />
+                  <Input {...field} aria-label="Note" placeholder="Note…" className="h-7 text-xs" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

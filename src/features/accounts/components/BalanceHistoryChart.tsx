@@ -20,7 +20,7 @@ const PRESETS = [
 
 type PresetLabel = (typeof PRESETS)[number]['label'];
 
-const CHART_HEIGHT = 190;
+const CHART_HEIGHT = 120;
 
 const GRADIENT_ID = 'balanceGradient';
 
@@ -275,7 +275,7 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
             fill={[{ match: '*', id: GRADIENT_ID }]}
             isInteractive={true}
             lineWidth={2}
-            margin={{ top: 40, right: 0, bottom: 22, left: 0 }}
+            margin={{ top: 16, right: 0, bottom: 20, left: 0 }}
             sliceTooltip={sliceTooltip}
             theme={nivoTheme}
             xScale={{ type: 'point' }}

@@ -348,7 +348,7 @@ const TypeaheadInner = <T, V extends string | number>(
 
                 <div className="relative flex-1 min-w-0 flex items-center">
                   {showLabelOverlay && (
-                    <span className="absolute inset-0 flex items-center pointer-events-none min-w-0 overflow-hidden">
+                    <span className="absolute inset-0 flex items-center pointer-events-none min-w-0 overflow-hidden whitespace-nowrap">
                       {selectedDisplay}
                     </span>
                   )}

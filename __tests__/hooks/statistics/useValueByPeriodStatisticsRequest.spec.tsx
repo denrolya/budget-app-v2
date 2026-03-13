@@ -4,13 +4,17 @@ import moment from 'moment';
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { UseStatisticsParams, ValueByPeriodDataDTO } from '@/types/valueByPeriodStatistics';
+import type { UseStatisticsParams, ValueByPeriodDataDTO } from '@/types/valueByPeriodStatistics';
 import { axiosFetcher } from '@/services/api';
 import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
 import { Type as TransactionType } from '@/features/transactions';
 
 vi.mock('@/services/api', () => ({
   axiosFetcher: vi.fn(),
+}));
+
+vi.mock('@/features/auth', () => ({
+  useBaseCurrency: () => 'EUR',
 }));
 
 const mockAxiosFetcher = axiosFetcher as unknown as vi.Mock;

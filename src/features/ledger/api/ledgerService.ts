@@ -67,12 +67,18 @@ export const ledgerService = {
   },
 };
 
-/** Discriminator: item is a non-transfer Transaction DTO when it has a `type` field */
+/** Discriminator: item is a non-transfer Transaction DTO when it has a `type` field of expense/income */
 export const isTransactionDTO = (item: LedgerItemDTO): item is RawTransactionDTO =>
   'type' in item && ((item as RawTransactionDTO).type === 'income' || (item as RawTransactionDTO).type === 'expense');
 
-/** Discriminator: item is a Transfer DTO when it has 'from' and 'to' */
-export const isTransferDTO = (item: LedgerItemDTO): item is TransferDTO => 'from' in item && 'to' in item;
+/**
+ * Discriminator: item is a Transfer DTO.
+ * Transfers have a `transactions` array and no top-level `type` field.
+ * We avoid relying on `from`/`to` since those Account relations may be
+ * omitted by JMS Serializer when no Account properties match the active group.
+ */
+export const isTransferDTO = (item: LedgerItemDTO): item is TransferDTO =>
+  'transactions' in item && Array.isArray((item as TransferDTO).transactions) && !('type' in item);
 
 /** Build a stable query-key string from ledger params for TanStack Query */
 export const buildLedgerQueryKey = (params: LedgerQueryParams): string => {

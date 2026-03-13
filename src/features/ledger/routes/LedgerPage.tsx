@@ -1,7 +1,8 @@
-import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
+import { CalendarIcon, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
 import type moment from 'moment';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 
+import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
 import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
 import { usePageHeaderTitle } from '@/components/layout/header/PageHeaderContext';
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { HeatmapPanel } from '@/features/transactions';
+import { type Timeframe } from '@/types/global';
 import { cn } from '@/lib/utils';
 
 import ListingControls from '../components/ListingControls';
@@ -34,6 +36,21 @@ export const LedgerPage: React.FC = () => {
   }, []);
 
   const ledger = useLedger({ updateUrl: true, onTimeframeChange: handleListingTimeframeChange });
+
+  const handleMobileTimeframeChange = useCallback(
+    (range: Timeframe) => {
+      ledger.setTimeframe({
+        after: range.after ? range.after.clone().startOf('day') : ledger.timeframe.after,
+        before: range.before ? range.before.clone().endOf('day') : ledger.timeframe.before,
+      });
+    },
+    [ledger],
+  );
+
+  const mobileDateLabel = useMemo(
+    () => `${ledger.timeframe.after.format('DD MMM')} – ${ledger.timeframe.before.format('DD MMM')}`,
+    [ledger.timeframe.after, ledger.timeframe.before],
+  );
 
   const handleHeatmapRangeSelect = useCallback(
     (after: moment.Moment, before: moment.Moment) => {
@@ -105,6 +122,41 @@ export const LedgerPage: React.FC = () => {
                 <TooltipContent>{isHeatmapVisible ? 'Hide heatmap' : 'Show heatmap'}</TooltipContent>
               </Tooltip>
 
+              <FiltersToggleButton
+                activeCount={ledger.activeFilterCount}
+                aria-label="Toggle filters"
+                className="h-7 w-7"
+                onClick={ledger.toggleFilters}
+              />
+            </div>
+          </div>
+
+          {/* Mobile controls bar — visible on small screens only */}
+          <div className="shrink-0 flex md:hidden items-center justify-between gap-2 border-b bg-card px-3 py-1.5">
+            <DaterangePickerWithPresets
+              after={ledger.timeframe.after}
+              before={ledger.timeframe.before}
+              onChange={handleMobileTimeframeChange}
+            >
+              <Button size="sm" type="button" variant="outline" className="h-7 px-2 text-xs gap-1.5">
+                <CalendarIcon aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+                <span className="max-w-28 truncate">{mobileDateLabel}</span>
+              </Button>
+            </DaterangePickerWithPresets>
+
+            <div className="flex items-center gap-1.5">
+              {ledger.activeFilterCount > 0 && (
+                <Button
+                  aria-label="Reset filters"
+                  size="icon"
+                  type="button"
+                  variant="outline"
+                  className="h-7 w-7"
+                  onClick={ledger.resetAll}
+                >
+                  <RotateCcw aria-hidden="true" className="h-4 w-4" />
+                </Button>
+              )}
               <FiltersToggleButton
                 activeCount={ledger.activeFilterCount}
                 aria-label="Toggle filters"

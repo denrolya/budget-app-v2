@@ -118,8 +118,8 @@ const TableListing: React.FC<Props> = ({
       { key: 'account' },
       { key: 'amount' },
       { key: 'category' },
-      { key: 'note', className: 'text-muted-foreground' },
       { key: 'executedAt' },
+      { key: 'note', className: 'text-muted-foreground' },
       { key: 'actions', className: 'text-right' },
     ],
     [],
@@ -134,8 +134,8 @@ const TableListing: React.FC<Props> = ({
           <col className="w-[220px]" />
           <col className="w-40" />
           <col className="w-32" />
-          <col />
           <col className="w-20" />
+          <col />
           <col className="w-24" />
         </colgroup>
         <TableHeader className="sr-only">
@@ -145,8 +145,8 @@ const TableListing: React.FC<Props> = ({
             <TableHead>Account</TableHead>
             <TableHead>Amount</TableHead>
             <TableHead>Category</TableHead>
-            <TableHead>Note</TableHead>
             <TableHead>Time</TableHead>
+            <TableHead>Note</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>

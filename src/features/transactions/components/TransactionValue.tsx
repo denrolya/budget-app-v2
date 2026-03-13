@@ -15,6 +15,7 @@ interface Props extends React.ComponentPropsWithoutRef<'span'> {
   showValuesTooltip?: boolean;
   revert?: boolean;
   showSign?: boolean;
+  alwaysShowConversion?: boolean;
 }
 
 export const TransactionValue: React.FC<Props> = ({
@@ -25,6 +26,7 @@ export const TransactionValue: React.FC<Props> = ({
   showValuesTooltip = true,
   revert = false,
   showSign = false,
+  alwaysShowConversion = false,
 }) => {
   const baseCurrencyCode = useBaseCurrency();
   const baseCurrency = CURRENCIES[baseCurrencyCode];
@@ -52,6 +54,8 @@ export const TransactionValue: React.FC<Props> = ({
   const hasConversion =
     baseValue !== undefined && currency !== baseCurrencyCode && Math.abs(amount) !== Math.abs(baseValue);
 
+  const secondaryClass = alwaysShowConversion ? 'text-[95%] opacity-75 inline ml-0.5' : 'text-[95%] opacity-75 hidden md:inline ml-0.5';
+
   let content;
 
   if (hasConversion) {
@@ -59,14 +63,14 @@ export const TransactionValue: React.FC<Props> = ({
       content = (
         <>
           <span>{originalFormatted}</span>
-          <span className="text-[95%] opacity-75 hidden md:inline ml-0.5">| {baseFormatted}</span>
+          <span className={secondaryClass}>| {baseFormatted}</span>
         </>
       );
     } else {
       content = (
         <>
           <span>{baseFormatted}</span>
-          <span className="text-[95%] opacity-75 hidden md:inline ml-0.5">| {originalFormatted}</span>
+          <span className={secondaryClass}>| {originalFormatted}</span>
         </>
       );
     }
