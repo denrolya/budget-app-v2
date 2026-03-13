@@ -164,11 +164,15 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
   );
 
   const handleApply = async () => {
+    // Root categories get getCumulative (full envelope = total historical spend for the group).
+    // Children get their own average (sub-allocation within the root envelope).
+    // BudgetTable shows the root's own line directly when it exists (envelope model).
     const lines = suggestions.map((s) => ({
       categoryId: s.categoryId,
       plannedAmount: Math.round(s.suggested),
       plannedCurrency: displayCurrency,
     }));
+
     const results = await batchCreate(lines);
     setOpen(false);
     toast.success(`Added ${results.length} budget lines from history`);
@@ -178,7 +182,7 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
     if (groups.length === 0)
       return <p className="text-muted-foreground text-center py-4 text-xs">No suggestions</p>;
 
-    const amtCls = type === 'expense' ? 'text-red-500' : 'text-emerald-600';
+    const amtCls = type === 'expense' ? 'text-destructive' : 'text-success';
 
     const FreqBadge = ({ activeMonths }: { activeMonths: number | null }) => {
       if (activeMonths === null) return null;
@@ -290,13 +294,13 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
                 {totalExpense > 0 && (
                   <div className="flex items-center gap-1.5">
                     <span className="text-muted-foreground text-xs">Expenses</span>
-                    <span className="font-semibold text-red-500">{fmtAmt(totalExpense, displayCurrency)}</span>
+                    <span className="font-semibold text-destructive">{fmtAmt(totalExpense, displayCurrency)}</span>
                   </div>
                 )}
                 {totalIncome > 0 && (
                   <div className="flex items-center gap-1.5">
                     <span className="text-muted-foreground text-xs">Income</span>
-                    <span className="font-semibold text-emerald-600">{fmtAmt(totalIncome, displayCurrency)}</span>
+                    <span className="font-semibold text-success">{fmtAmt(totalIncome, displayCurrency)}</span>
                   </div>
                 )}
                 <span className="ml-auto text-xs text-muted-foreground">

@@ -1,23 +1,36 @@
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { BarChart2, Calendar as CalendarIcon, LineChart, Plus, X } from 'lucide-react';
 import moment, { type Moment } from 'moment';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
+import { CATEGORIES_TIMELINE_PRESETS } from '@/constants/datetime';
+import { CHART_COLORS } from '@/constants/recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CategoryTypeahead } from '@/features/categories';
+import Chart from '@/features/statistics/components/CategoriesTimeline/Chart';
+import ConfigurationMenu from '@/features/statistics/components/CategoriesTimeline/ConfigurationMenu';
+import TransactionsDrawer from '@/features/statistics/components/CategoriesTimeline/TransactionsDrawer';
+import { useExpenseCategories, useIncomeCategories } from '@/hooks/financeData';
 import { useTimelineStatistics } from '@/hooks/statistics/useTimelineStatisticsRequest';
 import { type UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
-import { cn } from '@/lib/utils';
-import { type Timeframe } from '@/types/global';
 import { formatRange } from '@/lib/datetime/formatShortDate';
-import TransactionsDrawer from '@/features/statistics/components/CategoriesTimeline/TransactionsDrawer';
-import ConfigurationMenu from '@/features/statistics/components/CategoriesTimeline/ConfigurationMenu';
-import Chart from '@/features/statistics/components/CategoriesTimeline/Chart';
+import { cn } from '@/lib/utils';
+import { type ISO8601Period, type Timeframe } from '@/types/global';
 
-type TransactionsTimeframe = {
-  after: Moment;
-  before: Moment;
-} | null;
+const PERIOD_OPTIONS: { value: ISO8601Period; short: string }[] = [
+  { value: 'P1D', short: 'D' },
+  { value: 'P1W', short: 'W' },
+  { value: 'P1M', short: 'M' },
+  { value: 'P3M', short: '3M' },
+  { value: 'P1Y', short: 'Y' },
+];
+
+// Default category IDs — replace with user preference once that feature exists
+const DEFAULT_CATEGORY_IDS = [1, 6, 73, 147];
+
+type TransactionsTimeframe = { after: Moment; before: Moment } | null;
 
 interface ChartEvent {
   activeLabel?: string;
@@ -30,15 +43,24 @@ interface Props extends React.ComponentPropsWithoutRef<'div'> {
 
 export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, className }) => {
   const [chartType, setChartType] = useState<'line' | 'bar'>('line');
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([1, 6, 73, 147]);
+  const [selectedCategories, setSelectedCategories] = useState<number[]>(DEFAULT_CATEGORY_IDS);
   const [debouncedCategories, setDebouncedCategories] = useState<number[]>(selectedCategories);
-  const [showExpenseReference, setShowExpenseReference] = useState<boolean>(false);
-  const [showIncomeReference, setShowIncomeReference] = useState<boolean>(false);
-  const [showComparisonInTooltip, setShowComparisonInTooltip] = useState<boolean>(true);
-  const [useSeparateAxisForTotals, setUseSeparateAxisForTotals] = useState<boolean>(true);
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [showExpenseReference, setShowExpenseReference] = useState(false);
+  const [showIncomeReference, setShowIncomeReference] = useState(false);
+  const [showComparisonInTooltip, setShowComparisonInTooltip] = useState(true);
+  const [useSeparateAxisForTotals, setUseSeparateAxisForTotals] = useState(true);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedTimeframeForTransactions, setSelectedTimeframeForTransactions] = useState<TransactionsTimeframe>(null);
-  const [fetchTransactionsFromSubcategories, setFetchTransactionsFromSubcategories] = useState<boolean>(false);
+  const [fetchTransactionsFromSubcategories, setFetchTransactionsFromSubcategories] = useState(false);
+
+  // Category name lookup for chip display
+  const expenseCategories = useExpenseCategories();
+  const incomeCategories = useIncomeCategories();
+  const categoryMap = useMemo(() => {
+    const map = new Map<number, string>();
+    [...expenseCategories, ...incomeCategories].forEach((cat) => map.set(cat.id, cat.name));
+    return map;
+  }, [expenseCategories, incomeCategories]);
 
   const fallback = useTimeframeControl({
     defaultPeriod: 'P1M',
@@ -83,13 +105,15 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
     debouncedSetCategories(selectedCategories);
   }, [selectedCategories, debouncedSetCategories]);
 
+  const removeCategory = useCallback(
+    (id: number) => setSelectedCategories((prev) => prev.filter((c) => c !== id)),
+    [],
+  );
+
   const onChartClick = (chartEvent: ChartEvent) => {
-    if (!chartEvent.activeLabel) {
-      return;
-    }
+    if (!chartEvent.activeLabel) return;
 
     const clickedDate = moment(chartEvent.activeLabel);
-
     let startDate: Moment;
     let endDate: Moment;
 
@@ -98,33 +122,24 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
         startDate = clickedDate.clone().startOf('day');
         endDate = clickedDate.clone().endOf('day');
         break;
-
       case 'P1W':
         startDate = clickedDate.clone().startOf('isoWeek');
         endDate = clickedDate.clone().endOf('isoWeek');
         break;
-
       case 'P1M':
       case 'P3M':
         startDate = clickedDate.clone().startOf('month');
         endDate = clickedDate.clone().endOf('month');
         break;
-
       case 'P1Y':
         startDate = clickedDate.clone().startOf('year');
         endDate = clickedDate.clone().endOf('year');
         break;
-
       default:
-        console.error('Unsupported period:', period);
         return;
     }
 
-    setSelectedTimeframeForTransactions({
-      after: startDate,
-      before: endDate,
-    });
-
+    setSelectedTimeframeForTransactions({ after: startDate, before: endDate });
     setIsDrawerOpen(true);
   };
 
@@ -135,56 +150,137 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
         before: range.before ? range.before.endOf('day') : timeframe.before,
       });
     },
-    [setTimeframe],
+    [setTimeframe, timeframe.after, timeframe.before],
   );
 
   return (
     <>
-      <Card
-        className={cn(
-          'w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25',
-          className,
-        )}
-      >
-        <CardHeader className="p-4 pb-0 space-y-0.2">
-          <div className="flex justify-between items-start">
-            <CardTitle className="tracking-tight text-lg font-bold mb-2">Categories Timeline</CardTitle>
-            <ConfigurationMenu
-              chartType={chartType}
-              fetchTransactionsFromSubcategories={fetchTransactionsFromSubcategories}
-              selectedCategories={selectedCategories}
-              selectedPeriod={period}
-              setChartType={setChartType}
-              setFetchTransactionsFromSubcategories={setFetchTransactionsFromSubcategories}
-              setSelectedCategories={setSelectedCategories}
-              setSelectedPeriod={setPeriod}
-              setShowComparisonInTooltip={setShowComparisonInTooltip}
-              setShowExpenseReference={setShowExpenseReference}
-              setShowIncomeReference={setShowIncomeReference}
-              setUseSeparateAxisForTotals={setUseSeparateAxisForTotals}
-              showComparisonInTooltip={showComparisonInTooltip}
-              showExpenseReference={showExpenseReference}
-              showIncomeReference={showIncomeReference}
-              useSeparateAxisForTotals={useSeparateAxisForTotals}
-            />
+      <Card className={cn('w-full', className)}>
+        <CardHeader className="p-4 pb-3">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-2xs font-semibold uppercase tracking-widest text-muted-foreground leading-none">
+              Categories Timeline
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              {!controlledTimeframe?.timeframe?.after && (
+                <DaterangePickerWithPresets
+                  after={timeframe.after}
+                  before={timeframe.before}
+                  onChange={handleTimeframeChange}
+                  presets={CATEGORIES_TIMELINE_PRESETS}
+                >
+                  <button className="inline-flex items-center gap-1 text-2xs text-muted-foreground hover:text-foreground border border-border rounded px-2 py-0.5 leading-none cursor-pointer">
+                    <CalendarIcon className="h-2.5 w-2.5" />
+                    {formatRange(timeframe)}
+                  </button>
+                </DaterangePickerWithPresets>
+              )}
+              <ConfigurationMenu
+                fetchTransactionsFromSubcategories={fetchTransactionsFromSubcategories}
+                setFetchTransactionsFromSubcategories={setFetchTransactionsFromSubcategories}
+                setShowComparisonInTooltip={setShowComparisonInTooltip}
+                setShowExpenseReference={setShowExpenseReference}
+                setShowIncomeReference={setShowIncomeReference}
+                setUseSeparateAxisForTotals={setUseSeparateAxisForTotals}
+                showComparisonInTooltip={showComparisonInTooltip}
+                showExpenseReference={showExpenseReference}
+                showIncomeReference={showIncomeReference}
+                useSeparateAxisForTotals={useSeparateAxisForTotals}
+              />
+            </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
-          {!controlledTimeframe?.timeframe?.after && (
-            <DaterangePickerWithPresets
-              after={timeframe.after}
-              before={timeframe.before}
-              onChange={handleTimeframeChange}
+
+        {/* ── Inline toolbar ── */}
+        <div className="flex items-center gap-2 px-4 pb-3 flex-wrap">
+          {/* Period segmented control */}
+          <div className="flex items-center gap-0.5 bg-muted rounded-md p-0.5">
+            {PERIOD_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setPeriod(opt.value)}
+                className={cn(
+                  'h-5 px-2 text-2xs font-medium rounded-sm transition-colors',
+                  period === opt.value
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {opt.short}
+              </button>
+            ))}
+          </div>
+
+          <div className="h-4 w-px bg-border" />
+
+          {/* Chart type */}
+          <div className="flex items-center gap-0.5">
+            <button
+              onClick={() => setChartType('bar')}
+              className={cn(
+                'h-6 w-6 flex items-center justify-center rounded-sm transition-colors',
+                chartType === 'bar' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground',
+              )}
             >
-              <span className="cursor-pointer hover:underline inline-flex flex-row px-4">
-                <span className="text-xs flex items-center">
-                  <CalendarIcon className="inline h-3 w-3 mr-1" />
-                  {formatRange(timeframe)}
+              <BarChart2 className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => setChartType('line')}
+              className={cn(
+                'h-6 w-6 flex items-center justify-center rounded-sm transition-colors',
+                chartType === 'line' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              <LineChart className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          <div className="h-4 w-px bg-border" />
+
+          {/* Category chips */}
+          <div className="flex items-center gap-1 flex-wrap">
+            {selectedCategories.map((id, index) => {
+              const name = categoryMap.get(id);
+              const chipColor = CHART_COLORS[index % CHART_COLORS.length];
+              return (
+                <span
+                  key={id}
+                  className="inline-flex items-center gap-1 h-5 px-1.5 text-2xs font-medium rounded-sm border border-border text-foreground"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full flex-none" style={{ backgroundColor: chipColor }} />
+                  {name ?? `#${id}`}
+                  <button
+                    onClick={() => removeCategory(id)}
+                    className="text-muted-foreground hover:text-foreground leading-none"
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
                 </span>
-              </span>
-            </DaterangePickerWithPresets>
-          )}
-          <div className="flex-grow overflow-hidden flex flex-col mt-2">
+              );
+            })}
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="h-5 w-5 flex items-center justify-center text-muted-foreground hover:text-foreground border border-dashed border-border rounded-sm">
+                  <Plus className="h-3 w-3" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-2">
+                <CategoryTypeahead
+                  multiple
+                  value={selectedCategories.map(String)}
+                  className="h-9 w-full"
+                  onChange={(categories) =>
+                    setSelectedCategories((categories as string[] | null)?.map(Number) ?? [])
+                  }
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        <CardContent className="p-0">
+          <div className="flex-grow overflow-hidden flex flex-col">
             <div className="flex-grow overflow-x-auto overflow-y-hidden h-[390px]">
               {isLoading && <Skeleton className="h-full w-full" />}
               {!isLoading && !error && data && (

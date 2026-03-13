@@ -1,51 +1,57 @@
 @mixin theme {
-  --background: 255 8% 9%;
-  --foreground: 0 0% 98%;
-  --card: 255 8% 10.5%;
-  --card-foreground: 0 0% 98%;
-  --popover: 258 10% 9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 240 5.9% 10%;
-  --secondary: 240 3.7% 25%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 20%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 50% 50%;
-  --destructive-foreground: 43 20% 90%;
+  --background: 220 20% 7%;
+  --foreground: 210 15% 93%;
+  --card: 220 18% 10%;
+  --card-foreground: 210 15% 93%;
+  --popover: 220 18% 11%;
+  --popover-foreground: 210 15% 93%;
 
-  --success: 142 35% 45%;
-  --success-foreground: 43 20% 90%;
+  --primary: 0 0% 96%;
+  --primary-foreground: 220 20% 7%;
 
-  --warning: 43 50% 45%;
-  --warning-foreground: 0 0% 90%;
+  --secondary: 220 15% 20%;
+  --secondary-foreground: 210 15% 90%;
 
-  --info: 210 25% 50%;
-  --info-foreground: 43 20% 90%;
+  --muted: 220 15% 15%;
+  --muted-foreground: 220 10% 55%;
 
-  --border: 255 6% 18%;
-  --input: 240 3.7% 15.9%;
-  --ring: 240 4.9% 60%;
+  --accent: 220 15% 14%;
+  --accent-foreground: 210 15% 93%;
+
+  --destructive: 4 80% 55%;
+  --destructive-foreground: 0 0% 98%;
+
+  --success: 142 65% 42%;
+  --success-foreground: 0 0% 98%;
+
+  --warning: 38 90% 52%;
+  --warning-foreground: 220 20% 7%;
+
+  --info: 210 80% 58%;
+  --info-foreground: 0 0% 98%;
+
+  --border: 220 15% 20%;
+  --input: 220 15% 14%;
+  --ring: 220 15% 50%;
   --radius: 0.5rem;
 
-  --chart-1: 12 35% 40%;
-  --chart-2: 173 25% 30%;
-  --chart-3: 197 15% 18%;
-  --chart-4: 43 40% 40%;
-  --chart-5: 27 45% 40%;
-  --chart-6: 230 25% 40%;
-  --chart-7: 291 25% 40%;
-  --chart-8: 150 30% 30%;
-  --chart-9: 52 45% 45%;
-  --chart-10: 324 35% 30%;
+  /* Trading terminal chart palette — saturated, distinct, readable on dark */
+  --chart-1: 213 90% 60%;   /* electric blue  */
+  --chart-2: 142 65% 45%;   /* terminal green */
+  --chart-3: 28 90% 58%;    /* orange         */
+  --chart-4: 262 75% 65%;   /* violet         */
+  --chart-5: 185 80% 48%;   /* cyan           */
+  --chart-6: 52 90% 58%;    /* yellow         */
+  --chart-7: 340 80% 60%;   /* rose           */
+  --chart-8: 168 65% 42%;   /* teal           */
+  --chart-9: 43 90% 55%;    /* amber          */
+  --chart-10: 250 65% 62%;  /* lavender       */
 
-  --chart-text-color: 43 10% 75%;
-  --chart-crosshair-color: 262 45% 50%;
-  --chart-tooltip-background: 0 0% 12%;
-  --chart-tooltip-text-color: 43 20% 90%;
+  --chart-text-color: 220 10% 55%;
+  --chart-crosshair-color: 213 50% 60%;
+  --chart-tooltip-background: 220 20% 12%;
+  --chart-tooltip-text-color: 210 15% 90%;
 
-  --sidebar-background: 255 8% 10.5%;
-  --sidebar-foreground: 0 0% 98%;
+  --sidebar-background: 220 20% 8%;
+  --sidebar-foreground: 210 15% 93%;
 }

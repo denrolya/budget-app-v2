@@ -20,8 +20,7 @@ export const useMutations = (opts?: { invalidateKey?: string | readonly unknown[
         queryKey: Array.isArray(invalidateKey) ? invalidateKey : [invalidateKey],
       }),
       qc.invalidateQueries({ queryKey: accountKeys.all }),
-      qc.invalidateQueries({ queryKey: ['ledger_transactions'] }),
-      qc.invalidateQueries({ queryKey: ['ledger_transfers'] }),
+      qc.invalidateQueries({ queryKey: ['ledger'] }),
     ]);
   };
 

@@ -135,8 +135,7 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
           };
           await create(payload);
         }
-      } catch (error) {
-        console.error('Category form submission failed:', error);
+      } catch {
         toast.error('Failed to submit category');
       }
     },

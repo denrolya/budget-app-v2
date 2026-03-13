@@ -75,7 +75,7 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({
               {totalExpense && totalExpense.value !== 0 && (
                 <div className="flex items-center">
                   <span className="min-w-[30px] text-right">{expensePercentage.toFixed(0)}%</span>
-                  <div className="ml-1 w-8 bg-gray-200 rounded-full h-1 overflow-hidden">
+                  <div className="ml-1 w-8 bg-muted rounded-full h-1 overflow-hidden">
                     <div
                       style={{ width: `${Math.min(expensePercentage, 100)}%` }}
                       className="bg-destructive rounded-full h-1"
@@ -86,7 +86,7 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({
               {totalIncome && totalIncome.value !== 0 && (
                 <div className="flex items-center mt-0.5">
                   <span className="min-w-[30px] text-right">{incomePercentage.toFixed(0)}%</span>
-                  <div className="ml-1 w-8 bg-gray-200 rounded-full h-1 overflow-hidden">
+                  <div className="ml-1 w-8 bg-muted rounded-full h-1 overflow-hidden">
                     <div
                       style={{ width: `${Math.min(incomePercentage, 100)}%` }}
                       className="bg-success rounded-full h-1"
@@ -137,7 +137,7 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({
                   <span className="font-medium">Ratio:</span>
                   <div className="flex items-center">
                     <span className="mr-1">{(totalComparison * 100).toFixed(0)}%</span>
-                    <div className="w-12 bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                    <div className="w-12 bg-muted rounded-full h-1.5 overflow-hidden">
                       <div
                         style={{ width: `${Math.min(totalComparison * 100, 100)}%` }}
                         className={cn('rounded-full h-1.5', getComparisonColor(totalComparison))}

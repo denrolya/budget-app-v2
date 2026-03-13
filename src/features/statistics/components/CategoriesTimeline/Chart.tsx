@@ -17,30 +17,16 @@ import {
 
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { BACKEND_DATE_FORMAT, MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
-import { CHART_STYLES } from '@/constants/recharts';
+import { CHART_COLORS, CHART_STYLES } from '@/constants/recharts';
 import { useCategories } from '@/hooks/financeData';
-import { useTheme } from '@/contexts/theme';
 import { type ISO8601Period } from '@/types/global';
 import { cn } from '@/lib/utils';
 import ChartTooltip from '@/features/statistics/components/CategoriesTimeline/ChartTooltip';
 
-const colors = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
-  'hsl(var(--chart-6))',
-  'hsl(var(--chart-7))',
-  'hsl(var(--chart-8))',
-  'hsl(var(--chart-9))',
-  'hsl(var(--chart-10))',
-];
-
 const getColor = (category: string, index: number) => {
   if (category === 'Total Expense') return 'hsl(var(--destructive) / 0.7)';
   if (category === 'Total Income') return 'hsl(var(--success) / 0.7)';
-  return colors[index % colors.length];
+  return CHART_COLORS[index % CHART_COLORS.length];
 };
 
 interface CategoryData {
@@ -71,7 +57,6 @@ export const CategoryTimelineChart: React.FC<Props> = ({
 }) => {
   const [hiddenSeries, setHiddenSeries] = useState<string[]>([]);
   const { list: allCategories } = useCategories();
-  const { theme } = useTheme();
 
   const getCategoryDepth = (categoryName: string) => {
     const category = allCategories.find((cat) => cat.name === categoryName);
@@ -162,10 +147,10 @@ export const CategoryTimelineChart: React.FC<Props> = ({
         >
           <defs>
             <linearGradient id="fadeGradient" x1="0" x2="1" y1="0" y2="0">
-              <stop offset="0%" stopColor="rgba(255,255,255,0)" />
-              <stop offset="10%" stopColor="rgba(255,255,255,1)" />
-              <stop offset="90%" stopColor="rgba(255,255,255,1)" />
-              <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+              <stop offset="0%" style={{ stopColor: 'hsl(var(--card) / 0)' }} />
+              <stop offset="10%" style={{ stopColor: 'hsl(var(--card))' }} />
+              <stop offset="90%" style={{ stopColor: 'hsl(var(--card))' }} />
+              <stop offset="100%" style={{ stopColor: 'hsl(var(--card) / 0)' }} />
             </linearGradient>
           </defs>
           <CartesianGrid {...CHART_STYLES.cartesianGrid} />
@@ -173,6 +158,7 @@ export const CategoryTimelineChart: React.FC<Props> = ({
           <YAxis yAxisId="regular" {...CHART_STYLES.yAxis} />
           {useSeparateAxisForTotals && <YAxis orientation="right" yAxisId="total" {...CHART_STYLES.yAxis} />}
           <Tooltip
+            cursor={false}
             content={(props) => (
               <ChartTooltip
                 active={props.active}
@@ -206,7 +192,7 @@ export const CategoryTimelineChart: React.FC<Props> = ({
                 r: 6,
                 fill: getColor(category, index),
                 strokeWidth: 2,
-                stroke: theme === 'dark' ? '#000' : '#fff',
+                stroke: 'hsl(var(--card))',
               }}
               className={cn({
                 'recharts-line fade-line': chartType === 'line',
@@ -232,7 +218,7 @@ export const CategoryTimelineChart: React.FC<Props> = ({
                       r: 6,
                       fill: getColor(category, regularCategories.length + index),
                       strokeWidth: 2,
-                      stroke: theme === 'dark' ? '#000' : '#fff',
+                      stroke: 'hsl(var(--card))',
                     }
                   : undefined
               }

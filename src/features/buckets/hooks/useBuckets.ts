@@ -46,15 +46,13 @@ const loadConfig = (): BucketsConfig => {
   } catch {
     return DEFAULT_CONFIG;
   }
-}
+};
 
 const persist = (config: BucketsConfig): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-}
+};
 
-const sumAllocated = (accountId: number, allocationMap: AllocationMap): number => {
-  return (allocationMap[accountId] ?? []).reduce((s, sh) => s + sh.amount, 0);
-}
+const sumAllocated = (accountId: number, allocationMap: AllocationMap): number => (allocationMap[accountId] ?? []).reduce((s, sh) => s + sh.amount, 0);
 
 export const useBuckets = () => {
   const [config, setConfig] = useState<BucketsConfig>(loadConfig);
@@ -311,6 +309,6 @@ export const useBuckets = () => {
     exportConfig,
     importConfig,
   };
-}
+};
 
 export type { Account };

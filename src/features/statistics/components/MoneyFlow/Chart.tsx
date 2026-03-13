@@ -137,7 +137,7 @@ const MoneyFlowChart: React.FC<Props> = ({
                 <Line
                   dataKey={dataKeys.revenue}
                   dot={false}
-                  stroke={'hsl(var(--secondary))'}
+                  stroke={'hsl(var(--primary))'}
                   strokeDasharray={isCurrentTimeframe ? undefined : '15 8'}
                   strokeOpacity={isCurrentTimeframe ? 1 : 0.45}
                   strokeWidth={isCurrentTimeframe ? 3 : 1}
@@ -257,8 +257,8 @@ const MoneyFlowChart: React.FC<Props> = ({
               <stop offset="100%" stopColor="hsl(var(--destructive) / 0.5)" />
             </linearGradient>
             <linearGradient id="revenueGradient" x1="0" x2="0" y1="1" y2="0">
-              <stop offset="0%" stopColor="hsl(var(--secondary) / 0.7)" />
-              <stop offset="100%" stopColor="hsl(var(--secondary) / 0.5)" />
+              <stop offset="0%" stopColor="hsl(var(--primary) /0.7)" />
+              <stop offset="100%" stopColor="hsl(var(--primary) /0.5)" />
             </linearGradient>
             <linearGradient id="incomeGradientPrevious" x1="0" x2="0" y1="1" y2="0">
               <stop offset="0%" stopColor="hsl(var(--success) / 0.2)" />
@@ -269,8 +269,8 @@ const MoneyFlowChart: React.FC<Props> = ({
               <stop offset="100%" stopColor="hsl(var(--destructive) / 0.1)" />
             </linearGradient>
             <linearGradient id="revenueGradientPrevious" x1="0" x2="0" y1="1" y2="0">
-              <stop offset="0%" stopColor="hsl(var(--secondary) / 0.2)" />
-              <stop offset="100%" stopColor="hsl(var(--secondary) / 0.1)" />
+              <stop offset="0%" stopColor="hsl(var(--primary) /0.2)" />
+              <stop offset="100%" stopColor="hsl(var(--primary) /0.1)" />
             </linearGradient>
           </defs>
           <XAxis

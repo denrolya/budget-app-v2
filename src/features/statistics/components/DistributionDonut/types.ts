@@ -9,6 +9,7 @@ export type Item = {
   amount?: number;
   currency?: string | null;
   color?: string | null; // accounts only
+  hasChildren?: boolean; // categories: has drillable subcategories
 };
 
 export type ProcessedCategory = {

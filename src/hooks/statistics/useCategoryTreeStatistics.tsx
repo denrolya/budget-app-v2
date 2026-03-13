@@ -6,6 +6,7 @@ import { useBaseCurrency } from '@/features/auth';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { useCategories } from '@/hooks/financeData';
 import { Category } from '@/features/categories';
+import type { CategoryDTO } from '@/features/categories/types';
 import { axiosFetcher } from '@/services/api';
 import { type Type as TransactionType } from '@/features/transactions';
 import { generateQueryParamsString } from '@/lib/url/generateQueryParamsString';
@@ -52,7 +53,7 @@ export const useCategoryTreeStatistics = (
     const categoryList = (categories as unknown as Record<string, Category[]>)[type as string];
     const category =
       categoryList?.find((c: Category) => c.id === node.id) ||
-      new Category(node as unknown as import('@/features/categories/types').CategoryDTO);
+      new Category(node as unknown as CategoryDTO);
     return {
       ...category,
       total: node.total,

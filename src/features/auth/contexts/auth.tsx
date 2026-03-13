@@ -39,8 +39,7 @@ const isTokenValid = (token: string | null): boolean => {
     }
 
     return true;
-  } catch (error) {
-    console.error('Error validating token:', error);
+  } catch {
     return false;
   }
 };
@@ -59,7 +58,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       storage.setItem('token', token);
       setIsLoading(false);
     } else {
-      console.error('Invalid token provided');
       toast.error('Invalid authentication token');
       logout();
     }
@@ -89,9 +87,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       const newToken = response.data.token;
       login(newToken);
       return newToken;
-    } catch (error) {
+    } catch {
       toast.error('Failed to refresh token');
-      console.error('Failed to refresh token:', error);
       logout();
       throw new Error('Failed to refresh token');
     }

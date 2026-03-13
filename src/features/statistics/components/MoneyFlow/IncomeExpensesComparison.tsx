@@ -73,6 +73,10 @@ const IncomeExpensesComparison: React.FC<Props> = ({
 
   return (
     <div className="grid grid-cols-4 gap-2">
+      <div className="text-2xs text-muted-foreground" />
+      <div className="text-2xs text-muted-foreground text-right">Now</div>
+      <div className="text-2xs text-muted-foreground text-right">Prev</div>
+      <div className="text-2xs text-muted-foreground text-right">Δ</div>
       {dataToRender.map(({ label, current, previous, change, changePercent }) => (
         <React.Fragment key={label}>
           <div className="text-xs">{label}</div>

@@ -66,16 +66,16 @@ const computeHealthScore = (
   let gradeColor: string;
   if (score >= 90) {
     grade = 'A';
-    gradeColor = 'text-green-600 dark:text-green-400';
+    gradeColor = 'text-success';
   } else if (score >= 75) {
     grade = 'B';
-    gradeColor = 'text-green-600 dark:text-green-400';
+    gradeColor = 'text-success/75';
   } else if (score >= 60) {
     grade = 'C';
-    gradeColor = 'text-yellow-600 dark:text-yellow-400';
+    gradeColor = 'text-warning';
   } else if (score >= 45) {
     grade = 'D';
-    gradeColor = 'text-orange-600 dark:text-orange-400';
+    gradeColor = 'text-warning/75';
   } else {
     grade = 'F';
     gradeColor = 'text-destructive';
@@ -156,14 +156,14 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
     stats.percentUsed > 100
       ? 'text-destructive'
       : stats.percentUsed > 80
-        ? 'text-yellow-600 dark:text-yellow-400'
+        ? 'text-warning'
         : undefined;
 
   const pctBarColor =
-    stats.percentUsed > 100 ? 'bg-destructive' : stats.percentUsed > 80 ? 'bg-yellow-500' : 'bg-primary';
+    stats.percentUsed > 100 ? 'bg-destructive' : stats.percentUsed > 80 ? 'bg-warning' : 'bg-primary';
 
-  const remainingColor = stats.remaining < 0 ? 'text-destructive' : 'text-green-600 dark:text-green-400';
-  const savingsColor = stats.netSavings >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive';
+  const remainingColor = stats.remaining < 0 ? 'text-destructive' : 'text-success';
+  const savingsColor = stats.netSavings >= 0 ? 'text-success' : 'text-destructive';
 
   const { score, grade, gradeColor } = computeHealthScore(
     stats.percentUsed,
@@ -176,9 +176,9 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
   const gradeBarColor =
     gradeColor === 'text-destructive'
       ? 'bg-destructive'
-      : gradeColor.includes('yellow') || gradeColor.includes('orange')
-        ? 'bg-yellow-500'
-        : 'bg-green-500';
+      : gradeColor.includes('warning')
+        ? 'bg-warning'
+        : 'bg-success';
 
   const daysPct = stats.daysTotal > 0 ? (stats.daysElapsed / stats.daysTotal) * 100 : 0;
 
@@ -212,7 +212,7 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
       <div className="px-4 py-2.5 space-y-1.5">
         <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Income</div>
         <div className="flex items-baseline gap-1 min-w-0">
-          <span className="font-semibold tabular-nums text-green-600 dark:text-green-400 truncate">
+          <span className="font-semibold tabular-nums text-success truncate">
             {fmtAmt(stats.totalActualIncome, displayCurrency)}
           </span>
           {stats.totalPlannedIncome > 0 && (
@@ -222,7 +222,7 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
           )}
         </div>
         {stats.totalPlannedIncome > 0 && (
-          <MiniBar colorClass="bg-green-500" max={stats.totalPlannedIncome} value={stats.totalActualIncome} />
+          <MiniBar colorClass="bg-success" max={stats.totalPlannedIncome} value={stats.totalActualIncome} />
         )}
         <div className={cn('text-2xs font-medium tabular-nums truncate', savingsColor)}>
           {stats.netSavings >= 0 ? '+' : '-'}
@@ -253,11 +253,11 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
                 </ul>
                 <p className="font-medium mt-1">Grade thresholds:</p>
                 <ul className="space-y-0.5 pl-1">
-                  <li><span className="text-green-500 font-bold">A</span> ≥ 90 — excellent</li>
-                  <li><span className="text-green-500 font-bold">B</span> ≥ 75 — good</li>
-                  <li><span className="text-yellow-500 font-bold">C</span> ≥ 60 — fair</li>
-                  <li><span className="text-orange-500 font-bold">D</span> ≥ 45 — needs work</li>
-                  <li><span className="text-red-500 font-bold">F</span> &lt; 45 — critical</li>
+                  <li><span className="text-success font-bold">A</span> ≥ 90 — excellent</li>
+                  <li><span className="text-success/75 font-bold">B</span> ≥ 75 — good</li>
+                  <li><span className="text-warning font-bold">C</span> ≥ 60 — fair</li>
+                  <li><span className="text-warning/75 font-bold">D</span> ≥ 45 — needs work</li>
+                  <li><span className="text-destructive font-bold">F</span> &lt; 45 — critical</li>
                 </ul>
               </TooltipContent>
             </Tooltip>

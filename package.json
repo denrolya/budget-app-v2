@@ -47,10 +47,8 @@
     "@nivo/calendar": "^0.87.0",
     "@nivo/core": "^0.87.0",
     "@nivo/funnel": "^0.87.0",
-    "@nivo/heatmap": "^0.88.0",
     "@nivo/line": "^0.87.0",
     "@nivo/pie": "^0.88.0",
-    "@nivo/radial-bar": "^0.87.0",
     "@nivo/sunburst": "^0.87.0",
     "@nivo/tree": "^0.87.0",
     "@nivo/treemap": "^0.87.0",
@@ -100,7 +98,7 @@
     "qs": "^6.15.0",
     "react": "^18.3.1",
     "react-d3-tree": "^3.6.6",
-    "react-day-picker": "^8.10.1",
+    "react-day-picker": "^9.14.0",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.71.2",
     "react-hotkeys-hook": "^4.6.2",
@@ -166,7 +164,7 @@
     "workbox-precaching": "^7.4.0"
   },
   "overrides": {
-    "eslint": "^9.9.0"
+    "eslint": "^9.39.4"
   },
   "engines": {
     "node": ">=20.0.0"

@@ -4,22 +4,26 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import MoneyValue from '@/components/common/MoneyValue';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DISTRIBUTION_PRESETS } from '@/constants/datetime';
 import { processCategoryTree } from '@/features/statistics/components/DistributionDonut/utils';
 import { Type as TransactionType } from '@/features/transactions';
 import { useAccountDistribution } from '@/hooks/statistics/useAccountDistributionStatistics';
 import { useCategoryTreeStatistics } from '@/hooks/statistics/useCategoryTreeStatistics';
 import { type UseTimeframeControl, useTimeframeControl } from '@/hooks/useTimeframeControl';
-import { formatShortDate } from '@/lib/datetime/formatShortDate';
+import { formatRange } from '@/lib/datetime/formatShortDate';
+import { cn } from '@/lib/utils';
 import { type Timeframe } from '@/types/global';
 
 import AccountsCurrenciesPanel from './AccountCurrenciesPanel';
 import CategoriesPanel from './CategoriesPanel';
-import ConfigurationMenu from './ConfigurationMenu';
 import TransactionsDrawer, { type DrawerListingTarget } from './TransactionsDrawer';
 import type { ProcessedCategory, TabKey } from './types';
+
+const TABS: { value: TabKey; label: string }[] = [
+  { value: 'accounts', label: 'Accs' },
+  { value: 'currencies', label: 'FX' },
+  { value: 'categories', label: 'Cats' },
+];
 
 interface Props extends React.ComponentPropsWithoutRef<'div'> {
   controlledTimeframe?: UseTimeframeControl;
@@ -32,7 +36,6 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
   const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null);
   const [currentCategory, setCurrentCategory] = useState<ProcessedCategory | null>(null);
   const [categoryStack, setCategoryStack] = useState<ProcessedCategory[]>([]);
-
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTarget, setDrawerTarget] = useState<DrawerListingTarget | null>(null);
 
@@ -61,12 +64,16 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
     [setTimeframe, timeframe.after, timeframe.before],
   );
 
-  const onTabChange = useCallback((v: string) => {
-    const next = v as TabKey;
-    setTab(next);
-
+  const handleTypeChange = useCallback((next: TransactionType) => {
+    setType(next);
+    setCurrentCategory(null);
+    setCategoryStack([]);
     setSelectedCurrency(null);
+  }, []);
 
+  const onTabChange = useCallback((next: TabKey) => {
+    setTab(next);
+    setSelectedCurrency(null);
     if (next !== 'categories') {
       setCurrentCategory(null);
       setCategoryStack([]);
@@ -91,7 +98,9 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
 
   const isLoading = tab === 'categories' ? isLoadingCategories : isLoadingAccounts;
 
-  const footerTotal = useMemo(() => {
+  const isMultiMonth = timeframe.before.diff(timeframe.after, 'months') > 0;
+
+  const toolbarTotal = useMemo(() => {
     const now = moment();
     const months = moment(timeframe.before).isAfter(now)
       ? now.diff(moment(timeframe.after), 'months')
@@ -106,100 +115,140 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
         const sum = (accountStats ?? []).reduce((acc: number, s: any) => acc + (s?.value ?? 0), 0);
         return applyMonthly(sum);
       }
-
       const sum = (accountStats ?? []).reduce((acc: number, s: any) => {
         const code = s?.account?.currency ?? '—';
-        if (code !== selectedCurrency) return acc;
-        return acc + (s?.value ?? 0);
+        return code !== selectedCurrency ? acc : acc + (s?.value ?? 0);
       }, 0);
-
       return applyMonthly(sum);
     }
 
     const root = processCategoryTree((categoryRaw ?? []) as unknown as Parameters<typeof processCategoryTree>[0]);
     const totalRoot = root.reduce((sum, c) => sum + c.value, 0);
-    const raw = currentCategory ? currentCategory.value : totalRoot;
-    return applyMonthly(raw);
-  }, [
-    tab,
-    totalAccountsRaw,
-    accountStats,
-    selectedCurrency,
-    showMonthlyAverage,
-    timeframe.after,
-    timeframe.before,
-    categoryRaw,
-    currentCategory,
-  ]);
+    return applyMonthly(currentCategory ? currentCategory.value : totalRoot);
+  }, [tab, totalAccountsRaw, accountStats, selectedCurrency, showMonthlyAverage, timeframe.after, timeframe.before, categoryRaw, currentCategory]);
 
   return (
     <>
-      <Card
-        className={`flex flex-col h-full w-full transition-all duration-300 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 ${className ?? ''}`}
-      >
-        <CardHeader className="p-4 pb-0 space-y-0.2">
-          <div className="flex justify-between items-start">
-            <CardTitle className="tracking-tight text-lg font-bold mb-2">
-              {type === TransactionType.Expense ? 'Expenses' : 'Income'}
-            </CardTitle>
-
-            <div className="flex items-center">
-              <ConfigurationMenu
-                setShowMonthlyAverage={setShowMonthlyAverage}
-                setType={setType}
-                showMonthlyAverage={showMonthlyAverage}
-                timeframe={timeframe}
-                type={type}
-              />
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="p-4 pt-0 flex-1 min-h-0">
-          {!isControlled ? (
-            <DaterangePickerWithPresets
-              after={timeframe.after}
-              before={timeframe.before}
-              onChange={handleTimeframeChange}
-            >
-              <span className="cursor-pointer hover:underline inline-flex flex-row mb-2">
-                <span className="text-xs flex items-center">
-                  <CalendarIcon className="inline h-3 w-3 mr-1" />
-                  {formatShortDate(timeframe.after)} - {formatShortDate(timeframe.before)}
-                </span>
-              </span>
-            </DaterangePickerWithPresets>
-          ) : null}
-
-          <div className="flex items-center justify-between gap-3 mb-2">
-            <Tabs value={tab} onValueChange={onTabChange}>
-              <TabsList aria-label="Distribution scope" className="h-9">
-                <TabsTrigger value="accounts" className="text-xs sm:text-sm">
-                  Accounts
-                </TabsTrigger>
-                <TabsTrigger value="currencies" className="text-xs sm:text-sm">
-                  Currencies
-                </TabsTrigger>
-                <TabsTrigger value="categories" className="text-xs sm:text-sm">
-                  Categories
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            {tab === 'currencies' ? (
-              <Button
-                aria-label="Back to all currencies"
-                disabled={!selectedCurrency}
-                size="sm"
-                variant="ghost"
-                className="h-9 px-2 text-xs text-muted-foreground hover:text-foreground"
-                onClick={() => setSelectedCurrency(null)}
+      <div className={cn('flex flex-col h-full w-full border rounded-lg overflow-hidden bg-card', className)}>
+        {/* Single dense toolbar */}
+        <div className="shrink-0 flex items-center gap-1 px-2 border-b h-8 bg-card">
+          {/* Tab segmented control */}
+          <div className="flex items-center gap-0.5 bg-muted rounded p-0.5">
+            {TABS.map((t) => (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => onTabChange(t.value)}
+                className={cn(
+                  'h-5 px-1.5 text-2xs font-medium rounded-sm transition-colors',
+                  tab === t.value
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
               >
-                {selectedCurrency ? 'Back' : ' '}
-              </Button>
-            ) : null}
+                {t.label}
+              </button>
+            ))}
           </div>
 
+          <div className="h-4 w-px bg-border mx-0.5" />
+
+          {/* Transaction type */}
+          <button
+            type="button"
+            onClick={() => handleTypeChange(TransactionType.Expense)}
+            className={cn(
+              'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
+              type === TransactionType.Expense
+                ? 'border-destructive/40 bg-destructive/10 text-destructive'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
+            )}
+          >
+            Exp
+          </button>
+          <button
+            type="button"
+            onClick={() => handleTypeChange(TransactionType.Income)}
+            className={cn(
+              'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
+              type === TransactionType.Income
+                ? 'border-success/40 bg-success/10 text-success'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
+            )}
+          >
+            Inc
+          </button>
+
+          {/* Monthly average toggle */}
+          {isMultiMonth && (
+            <>
+              <div className="h-4 w-px bg-border mx-0.5" />
+              <button
+                type="button"
+                onClick={() => setShowMonthlyAverage(!showMonthlyAverage)}
+                className={cn(
+                  'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
+                  showMonthlyAverage
+                    ? 'border-primary/40 bg-primary/10 text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground',
+                )}
+              >
+                /mo
+              </button>
+            </>
+          )}
+
+          {/* Currency back breadcrumb */}
+          {tab === 'currencies' && selectedCurrency && (
+            <>
+              <div className="h-4 w-px bg-border mx-0.5" />
+              <button
+                type="button"
+                onClick={() => setSelectedCurrency(null)}
+                className="h-5 px-1.5 text-2xs font-medium rounded-sm border border-border text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ← {selectedCurrency}
+              </button>
+            </>
+          )}
+
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* Date picker (uncontrolled only) */}
+          {!isControlled && (
+            <>
+              <DaterangePickerWithPresets
+                after={timeframe.after}
+                before={timeframe.before}
+                onChange={handleTimeframeChange}
+                presets={DISTRIBUTION_PRESETS}
+              >
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-2xs text-muted-foreground hover:text-foreground rounded px-1.5 py-0.5 leading-none cursor-pointer transition-colors"
+                >
+                  <CalendarIcon className="h-2.5 w-2.5" />
+                  {formatRange(timeframe)}
+                </button>
+              </DaterangePickerWithPresets>
+              <div className="h-4 w-px bg-border mx-0.5" />
+            </>
+          )}
+
+          {/* Pinned total */}
+          <MoneyValue
+            amount={toolbarTotal}
+            useColors={false}
+            className="text-2xs font-semibold font-mono tabular-nums text-foreground pr-0.5"
+          />
+          {showMonthlyAverage && (
+            <span className="text-[9px] text-muted-foreground leading-none">/mo</span>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-h-0 overflow-hidden">
           {tab !== 'categories' ? (
             <AccountsCurrenciesPanel
               accountStats={accountStats ?? []}
@@ -226,15 +275,8 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
               onOpenTransactions={openTransactions}
             />
           )}
-        </CardContent>
-
-        <CardFooter className="p-4 border-t">
-          <div className="w-full flex items-center justify-between min-h-[48px]">
-            <span className="text-sm font-medium">Total</span>
-            <MoneyValue amount={footerTotal} useColors={false} className="text-lg font-semibold" />
-          </div>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
 
       <TransactionsDrawer open={drawerOpen} target={drawerTarget} timeframe={timeframe} onOpenChange={setDrawerOpen} />
     </>

@@ -1,4 +1,6 @@
 import { format } from 'date-fns';
+
+import { DATE_FNS_DATE_FORMAT } from '@/constants/datetime';
 import { AlertTriangle, Building2, CalendarIcon, CreditCard, Loader2, RefreshCw, Unplug, Webhook } from 'lucide-react';
 import moment from 'moment';
 import React, { useState } from 'react';
@@ -53,8 +55,8 @@ const BankSheet: React.FC<Props> = ({ account, onAccountUpdate }) => {
   const handleSync = () => {
     if (!integration) return;
     sync.mutate({
-      from: syncFrom ? format(syncFrom, 'yyyy-MM-dd') : undefined,
-      to: syncTo ? format(syncTo, 'yyyy-MM-dd') : undefined,
+      from: syncFrom ? format(syncFrom, DATE_FNS_DATE_FORMAT) : undefined,
+      to: syncTo ? format(syncTo, DATE_FNS_DATE_FORMAT) : undefined,
     });
   };
 
@@ -79,8 +81,8 @@ const BankSheet: React.FC<Props> = ({ account, onAccountUpdate }) => {
   const isWebhookOnly = integration?.syncMethod === SyncMethod.Webhook;
 
   let statusColor = 'bg-muted-foreground/40';
-  if (isConnected) statusColor = 'bg-yellow-500';
-  if (isActive) statusColor = 'bg-green-500';
+  if (isConnected) statusColor = 'bg-warning';
+  if (isActive) statusColor = 'bg-success';
 
   const providerRaw = integration
     ? typeof integration.provider === 'string'
@@ -220,7 +222,7 @@ const BankSheet: React.FC<Props> = ({ account, onAccountUpdate }) => {
 
         {/* Inactive webhook warning */}
         {isWebhookOnly && !isActive && (
-          <div className="flex items-start gap-2 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2.5 text-xs text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-400">
+          <div className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning/10 px-3 py-2.5 text-xs text-warning">
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             <span>
               Webhook is not active — incoming transactions will not be imported. Click{' '}
@@ -259,7 +261,7 @@ const BankSheet: React.FC<Props> = ({ account, onAccountUpdate }) => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent align="start" className="w-auto p-0">
-                    <Calendar initialFocus mode="single" selected={syncFrom} onSelect={setSyncFrom} />
+                    <Calendar autoFocus mode="single" selected={syncFrom} onSelect={setSyncFrom} />
                   </PopoverContent>
                 </Popover>
               </div>
@@ -280,7 +282,7 @@ const BankSheet: React.FC<Props> = ({ account, onAccountUpdate }) => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent align="end" className="w-auto p-0">
-                    <Calendar initialFocus mode="single" selected={syncTo} onSelect={setSyncTo} />
+                    <Calendar autoFocus mode="single" selected={syncTo} onSelect={setSyncTo} />
                   </PopoverContent>
                 </Popover>
               </div>

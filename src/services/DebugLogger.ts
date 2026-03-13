@@ -32,6 +32,7 @@ class DebugLogger {
     const formattedMessage = this.formatMessage(message);
     const logMessage = `[${level}] ${timestamp} ${componentInfo}:`;
 
+    /* eslint-disable no-console */
     switch (level) {
       case 'INFO':
         console.log('%c' + logMessage, 'color: cyan; font-weight: bold;', formattedMessage);
@@ -43,6 +44,7 @@ class DebugLogger {
         console.error('%c' + logMessage, 'color: red; font-weight: bold;', formattedMessage);
         break;
     }
+    /* eslint-enable no-console */
   }
 
   public info(message: unknown, component?: string): void {

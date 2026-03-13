@@ -1,135 +1,167 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-import { InfoIcon } from 'lucide-react';
 import React from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
 import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
-import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import type Transfer from '@/features/transfers/models/Transfer';
 import { AccountPill } from '@/features/accounts';
 import { TransactionListItem } from '@/features/transactions';
 import RateDisplay from '@/features/transfers/components/RateDisplay';
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 interface TransferDetailsProps {
   transfer: Transfer;
 }
 
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+/**
+ * Terminal-style key/value row. Label is fixed-width monospace uppercase,
+ * value slot is the right-hand side content.
+ */
+const DataRow: React.FC<{ label: string; children: React.ReactNode; className?: string }> = ({
+  label,
+  children,
+  className,
+}) => (
+  <div className={cn('flex items-start gap-3 py-0.5', className)}>
+    <span className="w-20 shrink-0 font-mono text-3xs uppercase tracking-widest text-muted-foreground leading-5 select-none">
+      {label}
+    </span>
+    <div className="flex-1 min-w-0">{children}</div>
+  </div>
+);
+
+/**
+ * Section divider with an optional label, terminal-style dashed rule.
+ */
+const SectionDivider: React.FC<{ label?: string }> = ({ label }) => (
+  <div className="flex items-center gap-2 my-3">
+    <span className="font-mono text-3xs uppercase tracking-widest text-muted-foreground/50 select-none whitespace-nowrap">
+      {label ?? ''}
+    </span>
+    <div className="flex-1 border-t border-dashed border-border/40" />
+  </div>
+);
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
-  const calculateFeePercentage = () => {
-    if (transfer.hasFee()) {
-      const feeAmount = transfer.feeExpense.amount;
-      const transferAmount = transfer.amount;
-      const feePercentage = (feeAmount / transferAmount) * 100;
-      return feePercentage.toFixed(2);
-    }
-    return null;
-  };
+  const feePercentage = transfer.hasFee() && transfer.feeExpense
+    ? ((transfer.feeExpense.amount / transfer.amount) * 100).toFixed(2)
+    : null;
+
+  const senderTotal =
+    transfer.feeExpense?.account.id === transfer.fromExpense.account.id
+      ? -(transfer.fromExpense.amount + transfer.feeExpense!.amount)
+      : -transfer.fromExpense.amount;
+
+  const recipientTotal =
+    transfer.feeExpense?.account.id === transfer.toIncome.account.id
+      ? transfer.feeExpense!.amount + transfer.toIncome.amount
+      : transfer.toIncome.amount;
+
+  const senderCurrency = transfer.fromExpense.account.currency;
+  const recipientCurrency =
+    transfer.feeExpense?.account.id === transfer.toIncome.account.id
+      ? transfer.feeExpense!.account.currency
+      : transfer.toIncome.account.currency;
 
   return (
-    <div className="w-full border-t">
-      <div className="flex flex-col space-y-4 py-4">
-        <div className="flex flex-col space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="tracking-tight font-normal">Amount</span>
-            <MoneyValue
-              amount={transfer.amount}
-              currency={transfer.fromExpense.account.currency}
-              useColors={false}
-              className="text-xs font-mono text-muted-foreground"
-            />
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="tracking-tight font-normal">From</span>
-            <AccountPill account={transfer.fromExpense.account} size="sm" variant="inline" />
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="tracking-tight font-normal">To</span>
-            <AccountPill account={transfer.toIncome.account} size="sm" variant="inline" />
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="tracking-tight font-normal">Rate</span>
-            <RateDisplay
-              useSymbol
-              transfer={transfer}
-              className="text-xs font-mono tracking-tighter text-muted-foreground"
-            />
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="tracking-tight font-normal">Date</span>
-            <RelativeDatetimeDisplay
-              date={transfer.executedAt}
-              showDayBadge={false}
-              showRelative={false}
-              variant="default"
-              className="text-xs font-mono tracking-tighter text-muted-foreground"
-            />
-          </div>
-        </div>
-        <Separator />
-        <section>
-          <h3 className="tracking-tight text-lg font-semibold mb-2">Related Transactions</h3>
-          <div className="flex flex-col gap-2">
-            <div className="flex justify-between items-center">
-              <span className="tracking-tight font-normal">Sender</span>
-              <span className="text-xs font-mono">
-                {transfer?.feeExpense?.account.id === transfer.fromExpense.account.id ? (
-                  <MoneyValue
-                    showSign
-                    amount={-(transfer.fromExpense.amount + transfer.feeExpense.amount)}
-                    currency={transfer.fromExpense.account.currency}
-                  />
-                ) : (
-                  <MoneyValue amount={-transfer.fromExpense.amount} currency={transfer.fromExpense.account.currency} />
-                )}
-              </span>
-            </div>
-            <TransactionListItem transaction={transfer.fromExpense} />
-          </div>
+    <div className="font-mono text-xs">
+      {/* ── Core transfer data ────────────────────────────────────────────────── */}
 
-          <div className="flex flex-col gap-2 mt-3">
-            <div className="flex justify-between items-center">
-              <span className="tracking-tight font-normal">Recipient</span>
-              <span className="text-xs font-mono">
-                {transfer?.feeExpense?.account.id === transfer.toIncome.account.id ? (
-                  <MoneyValue
-                    showSign
-                    amount={transfer.feeExpense.amount + transfer.toIncome.amount}
-                    currency={transfer.feeExpense.account.currency}
-                  />
-                ) : (
-                  <MoneyValue amount={transfer.toIncome.amount} currency={transfer.toIncome.account.currency} />
+      <DataRow label="Amount">
+        <MoneyValue
+          amount={transfer.amount}
+          currency={transfer.fromExpense.account.currency}
+          useColors={false}
+          className="font-mono text-sm font-semibold"
+        />
+      </DataRow>
+
+      <DataRow label="From">
+        <AccountPill account={transfer.fromExpense.account} size="sm" variant="inline" />
+      </DataRow>
+
+      <DataRow label="To">
+        <AccountPill account={transfer.toIncome.account} size="sm" variant="inline" />
+      </DataRow>
+
+      <DataRow label="Rate">
+        <RateDisplay
+          useSymbol
+          transfer={transfer}
+          className="font-mono text-xs tracking-tighter text-muted-foreground"
+        />
+      </DataRow>
+
+      <DataRow label="Date">
+        <RelativeDatetimeDisplay
+          date={transfer.executedAt}
+          showDayBadge={false}
+          showRelative={false}
+          variant="default"
+          className="font-mono text-xs text-muted-foreground"
+        />
+      </DataRow>
+
+      {/* ── Related transactions ──────────────────────────────────────────────── */}
+      <SectionDivider label="Related Transactions" />
+
+      {/* Sender */}
+      <div className="space-y-1 mb-3">
+        <div className="flex items-center justify-between">
+          <span className="text-3xs uppercase tracking-widest text-muted-foreground">Sender</span>
+          <MoneyValue
+            showSign
+            amount={senderTotal}
+            currency={senderCurrency}
+            className="font-mono text-xs"
+          />
+        </div>
+        <TransactionListItem flat transaction={transfer.fromExpense} />
+      </div>
+
+      {/* Recipient */}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between">
+          <span className="text-3xs uppercase tracking-widest text-muted-foreground">Recipient</span>
+          <MoneyValue
+            showSign
+            amount={recipientTotal}
+            currency={recipientCurrency}
+            className="font-mono text-xs"
+          />
+        </div>
+        <TransactionListItem flat transaction={transfer.toIncome} />
+      </div>
+
+      {/* ── Fee ───────────────────────────────────────────────────────────────── */}
+      {transfer.hasFee() && transfer.feeExpense && (
+        <>
+          <SectionDivider label="Fee" />
+
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-3xs uppercase tracking-widest text-muted-foreground">Transfer Fee</span>
+              <div className="flex items-center gap-2">
+                <MoneyValue
+                  showSign
+                  amount={-transfer.feeExpense.amount}
+                  currency={transfer.feeExpense.account.currency}
+                  className="font-mono text-xs font-medium"
+                />
+                {feePercentage && (
+                  <span className="text-3xs text-destructive/75 font-mono">({feePercentage}%)</span>
                 )}
-              </span>
-            </div>
-            <TransactionListItem transaction={transfer.toIncome} />
-          </div>
-        </section>
-        {transfer.hasFee() && (
-          <>
-            <Separator />
-            <div className="flex flex-col space-y-2">
-              <h3 className="font-semibold">Fees</h3>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Transfer Fee</span>
-                <span className="font-medium font-mono">
-                  <MoneyValue
-                    showSign
-                    amount={-transfer.feeExpense.amount}
-                    currency={transfer.feeExpense.account.currency}
-                  />
-                  <span className="text-sm text-destructive opacity-75 ml-2">({calculateFeePercentage()}%)</span>
-                </span>
               </div>
             </div>
-            <TransactionListItem transaction={transfer.feeExpense} />
-          </>
-        )}
-      </div>
-      <div className="flex items-center space-x-2">
-        <InfoIcon className="h-4 w-4 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">Transfer completed successfully</p>
-      </div>
+            <TransactionListItem flat transaction={transfer.feeExpense} />
+          </div>
+        </>
+      )}
     </div>
   );
 };

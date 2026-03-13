@@ -67,24 +67,38 @@ const BudgetCategoryBarChart: React.FC<Props> = ({ budget, analytics, displayCur
           if (!item) continue;
           for (const [currency, cv] of Object.entries(item.convertedValues)) {
             const rate = currency === displayCurrency ? 1 : getExchangeRate(currency, displayCurrency, rates);
-            if (rate !== null) actual += cv.expense * rate;
+            if (rate !== null) actual += (cv.expense ?? 0) * rate;
           }
         }
 
-        let planned = 0;
-        for (const id of ids) {
-          const line = linesMap.get(id);
-          if (!line) continue;
-          const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
-          if (rate !== null) planned += line.plannedAmount * rate;
+        // Envelope model: own line = total cap; no own line = sum descendants.
+        let planned: number | null = null;
+        const ownLine = linesMap.get(cat.id);
+        if (ownLine) {
+          const rate = getExchangeRate(ownLine.plannedCurrency, displayCurrency, rates);
+          if (rate !== null) planned = ownLine.plannedAmount * rate;
+        } else {
+          let total = 0;
+          let hasAny = false;
+          for (const id of ids.slice(1)) {
+            const line = linesMap.get(id);
+            if (!line) continue;
+            const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
+            if (rate !== null) {
+              total += line.plannedAmount * rate;
+              hasAny = true;
+            }
+          }
+          if (hasAny) planned = total;
         }
 
-        if (planned === 0 && actual === 0) return null;
+        const safeActual = Number.isFinite(actual) ? actual : 0;
+        if ((planned === null || planned === 0) && safeActual === 0) return null;
 
         return {
           category: cat.name,
-          Planned: Math.round(planned),
-          Actual: Math.round(actual),
+          Planned: Math.round(planned ?? 0),
+          Actual: Math.round(safeActual),
         };
       })
       .filter(Boolean) as BarDatum[];

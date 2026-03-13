@@ -183,6 +183,12 @@ const BudgetCategoryRow: React.FC<Props> = ({
 
   const pct = hasPlanned && plannedInDisplayCurrency! > 0 ? (actualValue / plannedInDisplayCurrency!) * 100 : null;
 
+  const remainingColorClass = (() => {
+    if (remaining !== null && remaining < 0) return 'text-destructive';
+    if (isExpenseSection && pct !== null && pct > 80) return 'text-warning';
+    return 'text-success';
+  })();
+
   const startEdit = () => {
     setEditAmount(line ? String(line.plannedAmount) : '');
     setEditCurrency(line ? line.plannedCurrency : displayCurrency);
@@ -280,7 +286,7 @@ const BudgetCategoryRow: React.FC<Props> = ({
               className="p-1 rounded hover:bg-muted"
               onClick={commitEdit}
             >
-              <Check className="h-3.5 w-3.5 text-green-600" />
+              <Check className="h-3.5 w-3.5 text-success" />
             </button>
             <button aria-label="Cancel" type="button" className="p-1 rounded hover:bg-muted" onClick={cancelEdit}>
               <X className="h-3.5 w-3.5 text-muted-foreground" />
@@ -325,24 +331,11 @@ const BudgetCategoryRow: React.FC<Props> = ({
       <td className="py-1.5 px-4 text-right tabular-nums">
         {remaining !== null ? (
           <div className="flex flex-col items-end gap-0.5">
-            <span className={remaining < 0 ? 'text-destructive' : 'text-green-600 dark:text-green-400'}>
+            <span className={cn(remainingColorClass, 'whitespace-nowrap')}>
               {remaining < 0 ? '-' : ''}
               {fmtAmt(remaining, displayCurrency)}
               {pct !== null && (
-                <span
-                  className={cn(
-                    'ml-1 text-xs',
-                    isExpenseSection
-                      ? pct > 100
-                        ? 'text-destructive'
-                        : pct > 80
-                          ? 'text-yellow-600 dark:text-yellow-400'
-                          : 'opacity-60'
-                      : pct > 100
-                        ? 'text-green-600 dark:text-green-400'
-                        : 'opacity-60',
-                  )}
-                >
+                <span className={cn('ml-1 text-xs', remainingColorClass, 'opacity-70')}>
                   {pct.toFixed(0)}%
                 </span>
               )}
@@ -357,10 +350,10 @@ const BudgetCategoryRow: React.FC<Props> = ({
                       ? pct > 100
                         ? 'bg-destructive'
                         : pct > 80
-                          ? 'bg-yellow-500'
-                          : 'bg-green-500'
+                          ? 'bg-warning'
+                          : 'bg-success'
                       : pct >= 100
-                        ? 'bg-green-500'
+                        ? 'bg-success'
                         : 'bg-muted-foreground/40',
                   )}
                 />

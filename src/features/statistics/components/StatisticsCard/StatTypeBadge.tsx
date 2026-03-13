@@ -17,7 +17,7 @@ const getStatTypeInfo = (statType: StatType): StatTypeInfo => {
     case 'sum':
       return { icon: DollarSignIcon, label: 'Total', color: 'bg-blue-100 text-blue-800' };
     case 'daily':
-      return { icon: CalendarIcon, label: 'Daily', color: 'bg-green-100 text-green-800' };
+      return { icon: CalendarIcon, label: 'Daily', color: 'bg-success/15 text-success' };
     case 'avg':
       return { icon: TrendingUpIcon, label: 'Average', color: 'bg-purple-100 text-purple-800' };
     case 'min-max':

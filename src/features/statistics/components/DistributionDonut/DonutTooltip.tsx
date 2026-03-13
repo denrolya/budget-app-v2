@@ -8,15 +8,17 @@ interface Props {
 }
 
 const DonutTooltip: React.FC<Props> = ({ label, value, percent, extra }) => (
-  <div className="bg-popover text-popover-foreground p-2 rounded shadow-md max-w-[280px]">
-    <div className="font-semibold leading-5 truncate">{label}</div>
-    <div className="mt-1 flex items-baseline gap-2">
-      <MoneyValue amount={value} useColors={false} />
+  <div className="bg-card text-card-foreground border border-border rounded-md shadow-sm p-2 max-w-[240px]">
+    <p className="text-2xs font-semibold uppercase tracking-widest text-muted-foreground leading-none mb-1.5 truncate">
+      {label}
+    </p>
+    <div className="flex items-baseline gap-2">
+      <MoneyValue amount={value} useColors={false} className="font-mono text-sm font-semibold" />
       <span className="text-xs text-muted-foreground">
         {Number.isFinite(percent) ? `${percent.toFixed(0)}%` : '0%'}
       </span>
     </div>
-    {extra ? <div className="mt-1">{extra}</div> : null}
+    {extra ? <div className="mt-1.5">{extra}</div> : null}
   </div>
 );
 

@@ -1,6 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import moment from 'moment';
+
+import { MOMENT_DATETIME_DISPLAY_FORMAT } from '@/constants/datetime';
+import type { Moment } from 'moment';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -20,6 +23,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useForm as useFormContext } from '@/contexts/Form';
+import type Account from '@/features/accounts/models/Account';
 import type Category from '@/features/categories/models/Category';
 import { useAccountsWithDefaultOrder, useCategories } from '@/hooks/financeData';
 import { useFormLogic } from '@/hooks/useFormLogic';
@@ -207,13 +211,13 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
           category: Number.parseInt(
             values.category,
             10,
-          ) as unknown as import('@/features/categories/models/Category').default,
+          ) as unknown as Category,
           account: Number.parseInt(
             values.account,
             10,
-          ) as unknown as import('@/features/accounts/models/Account').default,
+          ) as unknown as Account,
           isDraft: values.isDraft,
-          executedAt: values.executedAt as unknown as import('moment').Moment,
+          executedAt: values.executedAt as unknown as Moment,
         });
 
         submitForm(values);
@@ -334,7 +338,7 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
             <span>{watch('isDraft') ? 'Yes' : 'No'}</span>
 
             <Label>Executed At:</Label>
-            <span>{moment(watch('executedAt')).format('YYYY-MM-DD HH:mm:ss')}</span>
+            <span>{moment(watch('executedAt')).format(MOMENT_DATETIME_DISPLAY_FORMAT)}</span>
           </div>
 
           <DrawerFooter>

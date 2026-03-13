@@ -99,8 +99,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
         } else {
           await createTransaction(values as unknown as Partial<Transaction>);
         }
-      } catch (error) {
-        console.error('Form submission failed:', error);
+      } catch {
         toast.error('Failed to submit transaction. Issue requires investigation.');
       }
     },

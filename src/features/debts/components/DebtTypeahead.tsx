@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 import MoneyValue from '@/components/common/MoneyValue';
 import type Debt from '@/features/debts/models/Debt';
 import { useDebts } from '@/hooks/financeData';
-
 import Typeahead, { type TypeaheadProps } from '@/components/ui/Typeahead';
 
 type DebtTypeaheadProps = Omit<

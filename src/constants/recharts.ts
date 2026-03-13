@@ -1,3 +1,17 @@
+/** Shared chart series colors — matches CSS var(--chart-1) through --chart-10) */
+export const CHART_COLORS = [
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))',
+  'hsl(var(--chart-6))',
+  'hsl(var(--chart-7))',
+  'hsl(var(--chart-8))',
+  'hsl(var(--chart-9))',
+  'hsl(var(--chart-10))',
+];
+
 export const CHART_STYLES = {
   container: {
     width: '100%',
@@ -54,14 +68,14 @@ export const CHART_STYLES = {
       { offset: '100%', stopColor: 'hsl(var(--destructive) / 0.2)' },
     ],
     revenue: [
-      { offset: '0%', stopColor: 'hsl(var(--secondary) / 0.2)' },
-      { offset: '50%', stopColor: 'hsl(var(--secondary) / 0.6)' },
-      { offset: '100%', stopColor: 'hsl(var(--secondary))' },
+      { offset: '0%', stopColor: 'hsl(var(--primary) / 0.2)' },
+      { offset: '50%', stopColor: 'hsl(var(--primary) / 0.6)' },
+      { offset: '100%', stopColor: 'hsl(var(--primary))' },
     ],
   },
   colors: {
     income: 'hsl(var(--success))',
     expenses: 'hsl(var(--destructive))',
-    revenue: 'hsl(var(--secondary))',
+    revenue: 'hsl(var(--primary))',
   },
 };

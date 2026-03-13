@@ -3,7 +3,6 @@ import { forwardRef, type ReactNode, useCallback, useMemo } from 'react';
 import type Category from '@/features/categories/models/Category';
 import { Type as TransactionType } from '@/features/transactions';
 import { useExpenseCategories, useIncomeCategories } from '@/hooks/financeData';
-
 import Typeahead, { type TypeaheadProps } from '@/components/ui/Typeahead';
 
 type CategoryTypeaheadProps = Omit<

@@ -115,8 +115,7 @@ const warn = (detail: string): HealthResult => ({ status: 'warn', detail });
 const fail = (detail: string): HealthResult => ({ status: 'fail', detail });
 const na = (detail: string): HealthResult => ({ status: 'na', detail });
 
-export const useHealthRules = (ctx: HealthContext) => {
-  return useMemo(() => {
+export const useHealthRules = (ctx: HealthContext) => useMemo(() => {
     const rules = RULES.map((rule) => ({ ...rule, result: rule.evaluate(ctx) }));
     const evaluable = rules.filter((r) => r.result.status !== 'na');
     const score =
@@ -136,7 +135,6 @@ export const useHealthRules = (ctx: HealthContext) => {
 
     return { rules, score, grade };
   }, [ctx]);
-}
 
 export type RuleWithResult = ReturnType<typeof useHealthRules>['rules'][number];
 export type HealthSummary = ReturnType<typeof useHealthRules>;
@@ -144,15 +142,15 @@ export type HealthSummary = ReturnType<typeof useHealthRules>;
 export const statusColor = (status: RuleStatus): string => {
   switch (status) {
     case 'pass':
-      return 'text-green-500';
+      return 'text-success';
     case 'warn':
-      return 'text-yellow-500';
+      return 'text-warning';
     case 'fail':
-      return 'text-red-500';
+      return 'text-destructive';
     default:
       return 'text-muted-foreground';
   }
-}
+};
 
 export const statusIcon = (status: RuleStatus): string => {
   switch (status) {
@@ -165,4 +163,4 @@ export const statusIcon = (status: RuleStatus): string => {
     default:
       return '—';
   }
-}
+};

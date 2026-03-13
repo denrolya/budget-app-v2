@@ -1,8 +1,6 @@
-import { BarChart, LineChart, Move3D, Percent, SettingsIcon, Tags, TrendingDown, TrendingUp } from 'lucide-react';
+import { Move3D, Percent, SettingsIcon, Tags, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
 
-import { useIsMobile } from '@/hooks/use-mobile';
-import { CategoryTypeahead } from '@/features/categories';
 import { Button } from '@/components/ui/button';
 import {
   Drawer,
@@ -15,23 +13,9 @@ import {
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
-import { type ISO8601Period } from '@/types/global';
+import { useIsMobile } from '@/hooks/use-mobile';
 
-const periodOptions: { value: ISO8601Period; label: string }[] = [
-  { value: 'P1D', label: 'Daily' },
-  { value: 'P1W', label: 'Weekly' },
-  { value: 'P1M', label: 'Monthly' },
-  { value: 'P3M', label: 'Quarterly' },
-  { value: 'P1Y', label: 'Yearly' },
-];
-
-interface UnifiedChartMenuProps {
-  chartType: 'bar' | 'line';
-  setChartType: (value: 'bar' | 'line') => void;
-  selectedPeriod: ISO8601Period;
-  setSelectedPeriod: (value: ISO8601Period) => void;
-  selectedCategories: number[];
-  setSelectedCategories: (categories: number[]) => void;
+interface Props {
   showExpenseReference: boolean;
   setShowExpenseReference: (value: boolean) => void;
   showIncomeReference: boolean;
@@ -44,146 +28,71 @@ interface UnifiedChartMenuProps {
   setUseSeparateAxisForTotals: (value: boolean) => void;
 }
 
-export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
-  chartType,
-  setChartType,
-  selectedPeriod,
-  setSelectedPeriod,
-  selectedCategories,
-  setSelectedCategories,
-  showExpenseReference,
-  setShowExpenseReference,
-  showIncomeReference,
-  setShowIncomeReference,
-  showComparisonInTooltip,
-  setShowComparisonInTooltip,
-  fetchTransactionsFromSubcategories,
-  setFetchTransactionsFromSubcategories,
-  useSeparateAxisForTotals,
-  setUseSeparateAxisForTotals,
-}) => {
+const SwitchRow: React.FC<{
+  id: string;
+  icon: React.ElementType;
+  label: string;
+  checked: boolean;
+  onCheckedChange: () => void;
+}> = ({ id, icon: Icon, label, checked, onCheckedChange }) => (
+  <div className="flex items-center justify-between">
+    <Label htmlFor={id} className="flex items-center gap-2 text-xs cursor-pointer">
+      <Icon className="h-3 w-3 text-muted-foreground" />
+      {label}
+    </Label>
+    <Switch checked={checked} id={id} className="scale-75" onCheckedChange={onCheckedChange} />
+  </div>
+);
+
+const ConfigurationMenu: React.FC<Props> = (props) => {
   const isMobile = useIsMobile();
 
   const MenuContent = () => (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label>Period</Label>
-        <div className="flex flex-wrap gap-2">
-          {periodOptions.map((option) => (
-            <Button
-              variant={selectedPeriod === option.value ? 'default' : 'outline'}
-              key={option.value}
-              onClick={() => setSelectedPeriod(option.value)}
-            >
-              {option.label[0]}
-            </Button>
-          ))}
+    <div className="space-y-3">
+      <div>
+        <Label className="text-2xs font-semibold uppercase tracking-widest text-muted-foreground">References</Label>
+        <div className="mt-1.5 space-y-2">
+          <SwitchRow
+            checked={props.showExpenseReference}
+            icon={TrendingDown}
+            id="expense-ref"
+            label="Total Expense Line"
+            onCheckedChange={() => props.setShowExpenseReference(!props.showExpenseReference)}
+          />
+          <SwitchRow
+            checked={props.showIncomeReference}
+            icon={TrendingUp}
+            id="income-ref"
+            label="Total Income Line"
+            onCheckedChange={() => props.setShowIncomeReference(!props.showIncomeReference)}
+          />
         </div>
       </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="categories">Categories</Label>
-        </div>
-
-        <CategoryTypeahead
-          multiple
-          id="categories"
-          value={selectedCategories.map(String)}
-          className="h-9 w-full"
-          onChange={(categories) => setSelectedCategories((categories as string[] | null)?.map(Number) ?? [])}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Chart Type</Label>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant={chartType === 'line' ? 'default' : 'outline'}
-            className="flex items-center px-2 py-1 space-x-1"
-            onClick={() => setChartType('line')}
-          >
-            <LineChart className="h-4 w-4" />
-            Line
-          </Button>
-          <Button
-            variant={chartType === 'bar' ? 'default' : 'outline'}
-            className="flex items-center px-2 py-1 space-x-1"
-            onClick={() => setChartType('bar')}
-          >
-            <BarChart className="h-4 w-4" />
-            Bar
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-xs font-medium">Display Options</Label>
-        <div className="flex items-center justify-between">
-          <Label htmlFor="show-total-expense" className="flex items-center space-x-2 text-xs cursor-pointer">
-            <TrendingDown className="h-3 w-3" />
-            <span>Show Total Expense</span>
-          </Label>
-          <Switch
-            checked={showExpenseReference}
-            id="show-total-expense"
-            className="scale-75"
-            onCheckedChange={() => setShowExpenseReference(!showExpenseReference)}
+      <div>
+        <Label className="text-2xs font-semibold uppercase tracking-widest text-muted-foreground">Display</Label>
+        <div className="mt-1.5 space-y-2">
+          <SwitchRow
+            checked={props.showComparisonInTooltip}
+            icon={Percent}
+            id="comparison-tooltip"
+            label="Comparison in Tooltip"
+            onCheckedChange={() => props.setShowComparisonInTooltip(!props.showComparisonInTooltip)}
           />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <Label htmlFor="show-total-income" className="flex items-center space-x-2 text-xs cursor-pointer">
-            <TrendingUp className="h-3 w-3" />
-            <span>Show Income Reference</span>
-          </Label>
-          <Switch
-            checked={showIncomeReference}
-            id="show-total-income"
-            className="scale-75"
-            onCheckedChange={() => setShowIncomeReference(!showIncomeReference)}
+          <SwitchRow
+            checked={props.useSeparateAxisForTotals}
+            icon={Move3D}
+            id="separate-axis"
+            label="Separate Y Axis for Totals"
+            onCheckedChange={() => props.setUseSeparateAxisForTotals(!props.useSeparateAxisForTotals)}
           />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <Label htmlFor="show-comparison-in-tooltip" className="flex items-center space-x-2 text-xs cursor-pointer">
-            <Percent className="h-3 w-3" />
-            <span>Show Comparison In Tooltip</span>
-          </Label>
-          <Switch
-            checked={showComparisonInTooltip}
-            id="show-comparison-in-tooltip"
-            className="scale-75"
-            onCheckedChange={() => setShowComparisonInTooltip(!showComparisonInTooltip)}
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <Label
-            htmlFor="fetch-transactions-from-subcategories"
-            className="flex items-center space-x-2 text-xs cursor-pointer"
-          >
-            <Tags className="h-3 w-3" />
-            <span>Fetch Transactions From Subcategories</span>
-          </Label>
-          <Switch
-            checked={fetchTransactionsFromSubcategories}
-            id="fetch-transactions-from-subcategories"
-            className="scale-75"
-            onCheckedChange={() => setFetchTransactionsFromSubcategories(!fetchTransactionsFromSubcategories)}
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <Label htmlFor="use-separate-axis-for-totals" className="flex items-center space-x-2 text-xs cursor-pointer">
-            <Move3D className="h-3 w-3" />
-            <span>Use separate Y Axis for Totals</span>
-          </Label>
-          <Switch
-            checked={useSeparateAxisForTotals}
-            id="use-separate-axis-for-totals"
-            className="scale-75"
-            onCheckedChange={() => setUseSeparateAxisForTotals(!useSeparateAxisForTotals)}
+          <SwitchRow
+            checked={props.fetchTransactionsFromSubcategories}
+            icon={Tags}
+            id="subcategories"
+            label="Include Subcategories"
+            onCheckedChange={() =>
+              props.setFetchTransactionsFromSubcategories(!props.fetchTransactionsFromSubcategories)
+            }
           />
         </div>
       </div>
@@ -195,11 +104,11 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
       <Popover>
         <PopoverTrigger asChild>
           <Button size="icon" variant="ghost" className="h-7 w-7 p-0">
-            <SettingsIcon className="h-4 w-4" />
-            <span className="sr-only">Open settings</span>
+            <SettingsIcon className="h-3.5 w-3.5" />
+            <span className="sr-only">Chart display options</span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="p-3 w-100">
+        <PopoverContent className="w-60 p-3">
           <MenuContent />
         </PopoverContent>
       </Popover>
@@ -210,13 +119,13 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
     <Drawer>
       <DrawerTrigger asChild>
         <Button size="icon" variant="ghost" className="h-7 w-7 p-0">
-          <SettingsIcon className="h-4 w-4" />
+          <SettingsIcon className="h-3.5 w-3.5" />
         </Button>
       </DrawerTrigger>
       <DrawerContent className="p-6">
         <DrawerHeader>
           <DrawerTitle>Chart Options</DrawerTitle>
-          <DrawerDescription className="sr-only">Categories Timeline configuration</DrawerDescription>
+          <DrawerDescription className="sr-only">Categories Timeline display settings</DrawerDescription>
         </DrawerHeader>
         <MenuContent />
       </DrawerContent>
@@ -224,4 +133,4 @@ export const UnifiedChartMenu: React.FC<UnifiedChartMenuProps> = ({
   );
 };
 
-export default UnifiedChartMenu;
+export default ConfigurationMenu;

@@ -5,7 +5,6 @@ import {
   Layers,
   LayoutDashboard,
   PiggyBank,
-  TestTube2,
   Wallet,
 } from 'lucide-react';
 
@@ -45,9 +44,5 @@ export const ROUTES = {
     icon: Layers,
     label: 'Buckets',
   },
-  SANDBOX_PAGE: {
-    path: '/sandbox',
-    icon: TestTube2,
-    label: 'Sandbox Page',
-  },
+
 };

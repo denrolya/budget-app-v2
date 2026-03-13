@@ -1,7 +1,8 @@
-import type Category from '@/features/categories/models/Category';
-import type { Type as TransactionType } from '@/features/transactions';
 import { ResponsiveSunburst } from '@nivo/sunburst';
 import React, { useMemo } from 'react';
+
+import type Category from '@/features/categories/models/Category';
+import type { Type as TransactionType } from '@/features/transactions';
 
 type SunburstNode = {
   name: string;

@@ -15,6 +15,10 @@ export interface LedgerQueryParams {
   debts?: number[];
   note?: string;
   isDraft?: boolean;
+  withNestedCategories?: boolean;
+  currencies?: string[];
+  amountGte?: number;
+  amountLte?: number;
   page?: number;
   perPage?: number;
 }
@@ -29,7 +33,7 @@ export interface LedgerResponse {
 
 const BASE_URL = '/api/v2/ledger';
 
-const appendArray = (query: URLSearchParams, key: string, values: number[]) => {
+const appendArray = (query: URLSearchParams, key: string, values: number[] | string[]) => {
   for (const v of values) query.append(key, String(v));
 };
 
@@ -46,7 +50,11 @@ const buildQueryParams = (params: LedgerQueryParams): URLSearchParams => {
   if (params.accounts?.length) appendArray(query, 'account[]', params.accounts);
   if (params.categories?.length) appendArray(query, 'category[]', params.categories);
   if (params.debts?.length) appendArray(query, 'debt[]', params.debts);
+  if (params.currencies?.length) appendArray(query, 'currencies[]', params.currencies);
   if (params.isDraft !== undefined) query.set('isDraft', params.isDraft ? '1' : '0');
+  if (params.withNestedCategories) query.set('withNestedCategories', '1');
+  if (params.amountGte !== undefined) query.set('amount[gte]', String(params.amountGte));
+  if (params.amountLte !== undefined) query.set('amount[lte]', String(params.amountLte));
 
   return query;
 };
@@ -63,7 +71,7 @@ export const ledgerService = {
 export const isTransactionDTO = (item: LedgerItemDTO): item is RawTransactionDTO =>
   'type' in item && ((item as RawTransactionDTO).type === 'income' || (item as RawTransactionDTO).type === 'expense');
 
-/** Discriminator: item is a Transfer DTO when it has `from` and `to` */
+/** Discriminator: item is a Transfer DTO when it has 'from' and 'to' */
 export const isTransferDTO = (item: LedgerItemDTO): item is TransferDTO => 'from' in item && 'to' in item;
 
 /** Build a stable query-key string from ledger params for TanStack Query */
@@ -78,6 +86,10 @@ export const buildLedgerQueryKey = (params: LedgerQueryParams): string => {
   if (params.accounts?.length) p.set('accounts', params.accounts.slice().sort().join(','));
   if (params.categories?.length) p.set('categories', params.categories.slice().sort().join(','));
   if (params.debts?.length) p.set('debts', params.debts.slice().sort().join(','));
+  if (params.currencies?.length) p.set('currencies', params.currencies.slice().sort().join(','));
   if (params.isDraft !== undefined) p.set('isDraft', String(params.isDraft));
+  if (params.withNestedCategories) p.set('withNestedCategories', '1');
+  if (params.amountGte !== undefined) p.set('amountGte', String(params.amountGte));
+  if (params.amountLte !== undefined) p.set('amountLte', String(params.amountLte));
   return p.toString();
 };

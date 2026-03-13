@@ -61,7 +61,7 @@ export const LoginForm: React.FC<Props> = ({ error, isLoading, onSubmit }) => {
             </FormItem>
           )}
         />
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && <p className="text-destructive text-sm">{error}</p>}
         <Button disabled={isLoading} type="submit" className="w-full">
           {isLoading && (
             <>

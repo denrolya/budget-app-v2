@@ -9,8 +9,6 @@ const PWAWrapper = ({ children }: { children: React.ReactNode }) => {
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {
-          console.log('Service Worker registered with scope:', registration.scope);
-
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             if (newWorker) {
@@ -23,8 +21,8 @@ const PWAWrapper = ({ children }: { children: React.ReactNode }) => {
             }
           });
         })
-        .catch((error: Error) => {
-          console.error('Service Worker registration failed:', error);
+        .catch(() => {
+          // intentionally silent
         });
     }
   }, []);

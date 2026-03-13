@@ -14,7 +14,7 @@ const PieBlock: React.FC<Props> = ({ data, colors, tooltip, onClick, animate = t
   if (!data.length) return null;
 
   return (
-    <div className="w-full h-56 sm:h-64 md:h-72 shrink-0">
+    <div className="w-full h-full">
       <ResponsivePie
         sortByValue
         activeOuterRadiusOffset={6}
@@ -26,7 +26,7 @@ const PieBlock: React.FC<Props> = ({ data, colors, tooltip, onClick, animate = t
         enableArcLabels={false}
         enableArcLinkLabels={false}
         innerRadius={0.6}
-        margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+        margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
         padAngle={0.7}
         tooltip={tooltip}
         valueFormat={(v) => (typeof v === 'number' ? v.toLocaleString() : String(v))}

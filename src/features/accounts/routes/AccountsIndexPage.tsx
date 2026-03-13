@@ -7,10 +7,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CURRENCIES } from '@/constants/currency';
 import { ACCOUNT_TYPES_ORDER, Type as AccountType } from '@/features/accounts';
+import { AccountPill } from '@/features/accounts/components/Pill';
 import { useBaseCurrency } from '@/features/auth';
 import { useActiveAccounts } from '@/hooks/financeData';
 
-import AccountsSunburstChart, { type HoveredSunburstNode } from '../components/AccountsSunburstChart';
+import AccountsAnalyticsPanel from '../components/analytics/AccountsAnalyticsPanel';
 import type Account from '../models/Account';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -28,17 +29,12 @@ const AccountsIndexPage: React.FC = () => {
   const accounts = useActiveAccounts();
   const baseCurrency = useBaseCurrency();
   const navigate = useNavigate();
-  const [hovered, setHovered] = useState<HoveredSunburstNode | null>(null);
   const [openTypes, setOpenTypes] = useState<Record<string, boolean>>({
     [AccountType.Bank]: true,
     [AccountType.Cash]: true,
     [AccountType.Internet]: true,
     [AccountType.Basic]: true,
   });
-
-  const handleHoverChange = useCallback((node: HoveredSunburstNode | null) => {
-    setHovered(node);
-  }, []);
 
   const toggleType = useCallback((type: string) => {
     setOpenTypes((prev) => ({ ...prev, [type]: !prev[type] }));
@@ -98,54 +94,6 @@ const AccountsIndexPage: React.FC = () => {
     return { walletTotal: total, typeGroups, currencyGroups };
   }, [accounts, baseCurrency]);
 
-  const centerInfo = useMemo(() => {
-    if (!hovered) {
-      return {
-        label: 'Total balance',
-        value: walletTotal,
-        currency: baseCurrency,
-        sub: `${accounts.length} account${accounts.length !== 1 ? 's' : ''}`,
-        color: null as string | null,
-      };
-    }
-
-    const node = hovered.data;
-    const isAccount = node.rawBalance !== undefined;
-
-    if (isAccount) {
-      return {
-        label: node.name,
-        value: Math.abs(node.rawBalance ?? 0),
-        currency: node.currency ?? baseCurrency,
-        sub:
-          node.convertedValue != null && node.currency !== baseCurrency
-            ? `≈ ${new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: baseCurrency,
-                maximumFractionDigits: 0,
-              }).format(Math.abs(node.convertedValue))}`
-            : `${hovered.percentage.toFixed(1)}% of wallet`,
-        color: hovered.color,
-      };
-    }
-
-    const currencyCode = node.currency ?? String(hovered.id);
-    const currencyInfo = CURRENCIES[currencyCode as keyof typeof CURRENCIES];
-    return {
-      label: currencyInfo ? `${currencyInfo.symbol} ${currencyCode}` : String(hovered.id),
-      value: hovered.value,
-      currency: baseCurrency,
-      sub: `${hovered.percentage.toFixed(1)}% of wallet`,
-      color: hovered.color,
-    };
-  }, [hovered, walletTotal, baseCurrency, accounts.length]);
-
-  const formatCenter = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: centerInfo.currency,
-    maximumFractionDigits: centerInfo.currency === 'BTC' || centerInfo.currency === 'ETH' ? 6 : 0,
-  });
-
   const walletFormatted = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: baseCurrency,
@@ -182,44 +130,16 @@ const AccountsIndexPage: React.FC = () => {
             )}
           </div>
 
-          {/* Chart + right panel */}
+          {/* Chart + left panel */}
           <CardContent className="flex flex-1 min-h-0 min-w-0 overflow-hidden p-0">
-            {/* Radial bar + center overlay */}
-            <div className="relative min-h-0 min-w-0 flex-[1_1_0%] basis-0 overflow-hidden">
-              <AccountsSunburstChart onHoverChange={handleHoverChange} />
-
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div className="flex flex-col items-center text-center px-8 py-5 rounded-full bg-background/80 backdrop-blur-sm max-w-[240px] transition-all duration-100">
-                  {centerInfo.color && (
-                    <span
-                      aria-hidden
-                      style={{ backgroundColor: centerInfo.color }}
-                      className="inline-block h-2.5 w-2.5 rounded-full mb-2 flex-none"
-                    />
-                  )}
-                  <p className="text-xs text-muted-foreground leading-tight mb-1.5 truncate w-full">
-                    {centerInfo.label}
-                  </p>
-                  <p className="text-3xl font-bold text-foreground leading-tight tabular-nums">
-                    {formatCenter.format(centerInfo.value)}
-                  </p>
-                  {centerInfo.sub && (
-                    <p className="text-xs text-muted-foreground mt-1.5 leading-tight">{centerInfo.sub}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div aria-hidden className="flex-none w-px bg-border self-stretch my-3" />
-
-            {/* Right panel — primary navigation by type */}
-            <div className="w-56 lg:w-64 shrink-0 flex flex-col min-h-0 min-w-0 overflow-hidden">
+            {/* Left panel — primary navigation by type */}
+            <div className="w-56 lg:w-64 shrink-0 flex flex-col min-h-0 min-w-0 overflow-hidden border-r">
               <ScrollArea className="flex-1">
                 <div className="pt-2 pb-3">
                   {typeGroups.map((group, groupIdx) => (
                     <div
                       style={{ animationDelay: `${100 + groupIdx * 60}ms` }}
-                      className="animate-in fade-in slide-in-from-right-4 duration-300 ease-out [animation-fill-mode:both]"
+                      className="animate-in fade-in slide-in-from-left-4 duration-300 ease-out [animation-fill-mode:both]"
                       key={group.type}
                     >
                       {/* Type group header */}
@@ -257,7 +177,7 @@ const AccountsIndexPage: React.FC = () => {
                               key={acc.id}
                               onClick={() => navigate(`/accounts/${acc.id}`)}
                             >
-                              <span className="truncate">{acc.name}</span>
+                              <AccountPill account={acc} variant="inline" size="sm" tooltip={false} className="min-w-0 truncate" />
                               <MoneyValue
                                 amount={acc.balance}
                                 currency={acc.currency as any}
@@ -280,7 +200,7 @@ const AccountsIndexPage: React.FC = () => {
                   style={{ animationDelay: '320ms' }}
                   className="flex-none border-t p-4 space-y-2 animate-in fade-in duration-300 ease-out [animation-fill-mode:both]"
                 >
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
+                  <p className="text-2xs font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
                     By currency
                   </p>
                   {currencyGroups.map(({ currency, symbol, color, percentage }) => (
@@ -306,6 +226,13 @@ const AccountsIndexPage: React.FC = () => {
                   ))}
                 </div>
               )}
+            </div>
+
+            <div aria-hidden className="flex-none w-px bg-border self-stretch my-3" />
+
+            {/* Analytics dashboard */}
+            <div className="min-h-0 min-w-0 flex-[1_1_0%] basis-0">
+              <AccountsAnalyticsPanel onNavigate={(id) => navigate(`/accounts/${id}`)} />
             </div>
           </CardContent>
         </Card>

@@ -11,7 +11,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { AccountPill } from '@/features/accounts';
@@ -64,22 +64,22 @@ const IdCell: React.FC<{
         aria-describedby={descId}
         aria-labelledby={titleId}
         side="right"
-        className="p-0 overflow-y-auto w-full sm:max-w-xl"
+        className="p-0 w-full sm:max-w-[380px] flex flex-col"
       >
-        <div className="h-full flex flex-col">
-          <SheetHeader className="p-6 pb-0">
-            <SheetTitle id={titleId} className="tracking-tight text-xl font-bold">
-              Transfer Details
-            </SheetTitle>
-            <SheetDescription id={descId} className="flex justify-between items-center">
-              <span>
-                ID: <code className="text-muted-foreground">#{transfer.id}</code>
-              </span>
-            </SheetDescription>
-          </SheetHeader>
+        {/* A11y labels */}
+        <SheetTitle id={titleId} className="sr-only">Transfer Details</SheetTitle>
+        <SheetDescription id={descId} className="sr-only">#{transfer.id}</SheetDescription>
 
-          <div className="flex-grow overflow-y-auto p-6">{renderDetails(transfer)}</div>
+        {/* Compact header strip */}
+        <div className="h-10 shrink-0 flex items-center gap-2.5 px-4 border-b">
+          <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border bg-muted/60 text-muted-foreground border-border">
+            Transfer
+          </span>
+          <code className="text-xs text-muted-foreground font-mono">#{transfer.id}</code>
         </div>
+
+        {/* Scrollable content */}
+        <div className="overflow-y-auto px-4 py-3">{renderDetails(transfer)}</div>
       </SheetContent>
     </Sheet>
   </div>

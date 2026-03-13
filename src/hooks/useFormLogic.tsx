@@ -63,13 +63,6 @@ export const useFormLogic = <T,>({ form, onSubmit, setFormState }: UseFormLogicP
 
 export const createFormSchema = <T extends z.ZodRawShape>(schema: T) => z.object(schema);
 
-export const defaultOnSubmit = async <T,>(values: T) => {
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log('Form submitted:', values);
-    // Perform your actual form submission logic here
-  } catch (error) {
-    console.error('Error submitting form:', error);
-    throw error; // Re-throw the error to be caught by the form renderer
-  }
+export const defaultOnSubmit = async <T,>(_values: T) => {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 };

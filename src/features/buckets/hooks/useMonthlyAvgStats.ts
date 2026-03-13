@@ -31,4 +31,4 @@ export const useMonthlyAvgStats = () => {
   }, [data]);
 
   return { avgExpense, avgIncome, isLoading };
-}
+};

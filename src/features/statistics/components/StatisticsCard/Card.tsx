@@ -1,25 +1,20 @@
 import { ResponsiveLine } from '@nivo/line';
 import isEqual from 'lodash/isEqual';
-import { SettingsIcon } from 'lucide-react';
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import ConfigContainer from '@/features/statistics/components/StatisticsCard/ConfigContainer';
 import GenericContent from '@/features/statistics/components/StatisticsCard/GenericContent';
 import MinMaxContent from '@/features/statistics/components/StatisticsCard/MinMaxContent';
 import PercentageIndicator from '@/features/statistics/components/StatisticsCard/PercentageIndicator';
 import StatTypeBadge from '@/features/statistics/components/StatisticsCard/StatTypeBadge';
 import { Type as TransactionType } from '@/features/transactions';
 import { useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { generateSlug } from '@/lib/url/generateSlug';
 import { type Interval, type StatisticsConfig, StatisticsType } from '@/types/statistics';
 import { type PercentageChange, type StatisticsData, type ValueByPeriodData } from '@/types/valueByPeriodStatistics';
 
 interface Props {
-  onChange: (newConfig: Partial<StatisticsConfig>) => void;
   config: StatisticsConfig;
   showPercentageIndicator?: boolean;
 }
@@ -53,7 +48,7 @@ const StatisticsCardSkeleton = () => (
   </Card>
 );
 
-export const StatisticsCard: React.FC<Props> = ({ showPercentageIndicator = false, config, onChange }) => {
+export const StatisticsCard: React.FC<Props> = ({ showPercentageIndicator = false, config }) => {
   const { title, type, categories, timeframe, period, comparison, statType } = config;
   const {
     currentData,
@@ -78,8 +73,6 @@ export const StatisticsCard: React.FC<Props> = ({ showPercentageIndicator = fals
   );
 
   const periodText = useMemo(() => getPeriodText(timeframe, period), [timeframe, period]);
-  const [open, setOpen] = useState(false);
-  const isMobile = useIsMobile();
 
   const chartData = useMemo(() => {
     if (statType !== StatisticsType.Avg || (!currentData && !comparisonData)) return null;
@@ -136,15 +129,7 @@ export const StatisticsCard: React.FC<Props> = ({ showPercentageIndicator = fals
             <h3 className="font-semibold text-sm text-primary truncate">{cardTitle}</h3>
             <p className="text-xs text-muted-foreground">{periodText}</p>
           </div>
-          <div className="flex items-center space-x-2 ml-2">
-            <StatTypeBadge type={statType} />
-            <ConfigContainer config={config} open={open} setOpen={setOpen} title={config.title} onChange={onChange}>
-              <Button size="icon" variant="ghost" className={!isMobile ? 'h-7 w-7 p-0' : 'h-8 w-8 p-0'}>
-                <SettingsIcon className="h-4 w-4" />
-                <span className="sr-only">Open settings</span>
-              </Button>
-            </ConfigContainer>
-          </div>
+          <StatTypeBadge type={statType} />
         </div>
         {error && <p className="text-destructive">Error loading data</p>}
         {!error && (

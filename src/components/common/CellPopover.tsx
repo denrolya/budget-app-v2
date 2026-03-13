@@ -71,11 +71,16 @@ const CellPopover: React.FC<CellPopoverProps> = ({
       }}
     >
       <PopoverTrigger asChild>
+        {/*
+         * -mx-2 px-2: extend into the <td>'s default px-2 so the hover
+         * highlight fills the full cell width, not just the content box.
+         * py-1.5: gives a comfortable vertical hit-target in compact rows.
+         */}
         <button
           disabled={disabled}
           type="button"
           className={cn(
-            'w-full min-w-0 text-left rounded',
+            'block w-full min-w-0 -mx-2 px-2 py-1.5 text-left',
             disabled ? 'opacity-60 cursor-default' : 'cursor-pointer hover:bg-muted/50',
           )}
         >

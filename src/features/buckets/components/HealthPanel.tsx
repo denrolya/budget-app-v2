@@ -19,11 +19,11 @@ interface Props {
 }
 
 const GRADE_COLOR: Record<string, string> = {
-  A: 'text-green-500',
-  B: 'text-emerald-500',
-  C: 'text-yellow-500',
-  D: 'text-orange-500',
-  F: 'text-red-500',
+  A: 'text-success',
+  B: 'text-success/75',
+  C: 'text-warning',
+  D: 'text-warning/75',
+  F: 'text-destructive',
 };
 
 const HealthPanel: React.FC<Props> = ({
@@ -54,11 +54,11 @@ const HealthPanel: React.FC<Props> = ({
               <p>Scored across 10 personal finance rules. Each rule is: ✅ pass (+10), ⚠️ warn (+5), or ❌ fail (+0). N/A rules are excluded.</p>
               <p className="font-medium mt-1">Grade thresholds:</p>
               <ul className="space-y-0.5 pl-1">
-                <li><span className="text-green-500 font-bold">A</span> ≥ 90 — excellent</li>
-                <li><span className="text-emerald-500 font-bold">B</span> ≥ 75 — good</li>
-                <li><span className="text-yellow-500 font-bold">C</span> ≥ 60 — fair</li>
-                <li><span className="text-orange-500 font-bold">D</span> ≥ 45 — needs work</li>
-                <li><span className="text-red-500 font-bold">F</span> &lt; 45 — critical</li>
+                <li><span className="text-success font-bold">A</span> ≥ 90 — excellent</li>
+                <li><span className="text-success/75 font-bold">B</span> ≥ 75 — good</li>
+                <li><span className="text-warning font-bold">C</span> ≥ 60 — fair</li>
+                <li><span className="text-warning/75 font-bold">D</span> ≥ 45 — needs work</li>
+                <li><span className="text-destructive font-bold">F</span> &lt; 45 — critical</li>
               </ul>
               <p className="text-muted-foreground">Rules cover: emergency fund, savings rate, liquid reserves, diversification, currency strength, and more.</p>
             </TooltipContent>
@@ -70,9 +70,9 @@ const HealthPanel: React.FC<Props> = ({
           <div
             style={{ width: `${health.score}%` }}
             className={cn('h-full rounded-full transition-all duration-500', {
-              'bg-green-500': health.score >= 75,
-              'bg-yellow-500': health.score >= 45 && health.score < 75,
-              'bg-red-500': health.score < 45,
+              'bg-success': health.score >= 75,
+              'bg-warning': health.score >= 45 && health.score < 75,
+              'bg-destructive': health.score < 45,
             })}
           />
         </div>

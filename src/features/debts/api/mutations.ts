@@ -18,8 +18,7 @@ export const useMutations = () => {
       await invalidateAll();
       toast.success('Debt created');
     },
-    onError: (e) => {
-      console.error('Debt create failed:', e);
+    onError: () => {
       toast.error('Failed to create debt. Issue requires investigation.');
     },
     retry: 2,
@@ -31,8 +30,7 @@ export const useMutations = () => {
       toast.success('Debt updated successfully');
       await Promise.all([invalidateAll(), qc.invalidateQueries({ queryKey: queryKeys.transactions(id) })]);
     },
-    onError: (e) => {
-      console.error('Debt update failed:', e);
+    onError: () => {
       toast.error('Failed to update debt. Issue requires investigation.');
     },
     retry: 2,
@@ -44,8 +42,7 @@ export const useMutations = () => {
       toast.success('Debt removed');
       await invalidateAll();
     },
-    onError: (e) => {
-      console.error('Debt delete failed:', e);
+    onError: () => {
       toast.error('Failed to delete debt. Issue requires investigation.');
     },
     retry: 1,

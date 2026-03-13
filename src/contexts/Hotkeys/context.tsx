@@ -1,9 +1,6 @@
 import React, { createContext, useCallback, useMemo, useReducer, useRef, useState } from 'react';
 import { useHotkeys as useReactHotkeysHook } from 'react-hotkeys-hook';
-import { useLocation, useNavigate } from 'react-router-dom';
-
 import { CommandPalette } from '@/components/common/CommandPalette';
-import { ROUTES } from '@/constants/routes';
 import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import type { Hotkey, HotkeyCategory, HotkeysContextType } from '@/types/hotkeys';
 
@@ -11,7 +8,13 @@ export const HotkeysContext = createContext<HotkeysContextType | null>(null);
 
 export const navigationHotkeys: Hotkey[] = [
   { windows: '⇧⇧', mac: '⇧⇧', description: 'Open/Close Commands' },
-  { windows: 'L', mac: 'L', description: 'Open Daily Ledger page' },
+  { windows: '1', mac: '1', description: 'Go to Ledger' },
+  { windows: '2', mac: '2', description: 'Go to Accounts' },
+  { windows: '3', mac: '3', description: 'Go to Debts' },
+  { windows: '4', mac: '4', description: 'Go to Budget' },
+  { windows: '5', mac: '5', description: 'Go to Buckets' },
+  { windows: '6', mac: '6', description: 'Go to Categories' },
+  { windows: '7', mac: '7', description: 'Go to Dashboard' },
 ];
 
 export const globalHotkeys: Hotkey[] = [
@@ -64,8 +67,6 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
   const [currentPage, setCurrentPage] = useState<string>('Global');
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 
-  const navigate = useNavigate();
-  const location = useLocation();
   const { openForm } = useFormContext();
 
   const toggleHotkeysDialog = useCallback(() => setIsDialogOpen((prev) => !prev), []);
@@ -162,17 +163,6 @@ export const HotkeysProvider: React.FC<React.PropsWithChildren> = ({ children })
     },
     { preventDefault: false, keydown: true },
     [toggleHotkeysDialog],
-  );
-
-  // Navigation
-  useReactHotkeysHook(
-    'l',
-    (event) => {
-      event.preventDefault();
-      if (location.pathname !== ROUTES.LEDGER.path) navigate(ROUTES.LEDGER.path);
-    },
-    { preventDefault: true },
-    [location.pathname, navigate],
   );
 
   const contextValue = useMemo<HotkeysContextType>(

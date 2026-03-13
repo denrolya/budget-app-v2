@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
+import { SEARCH_DEBOUNCE_MS } from '@/constants/ui';
 import { type TransactionFilters } from '@/features/transactions';
 import { type TransferFilters } from '@/features/transfers';
 import { cn } from '@/lib/utils';
@@ -86,7 +87,7 @@ export const ListingControls: React.FC<Props> = ({
     }, 350),
   ).current;
 
-  const debouncedSearch = useRef(debounce((value: string) => setFilter('searchTerm', value as any), 250)).current;
+  const debouncedSearch = useRef(debounce((value: string) => setFilter('searchTerm', value as any), SEARCH_DEBOUNCE_MS)).current;
 
   useEffect(
     () => () => {

@@ -29,7 +29,7 @@ const reducer = (state: State, action: Action): State => {
     case 'reset':
       return { phase: 'idle', progress: 0 };
   }
-}
+};
 
 const TopProgressBar: React.FC = () => {
   const queryCount = useIsFetching();

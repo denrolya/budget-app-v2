@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FormType, useForm } from '@/contexts/Form';
 import type Category from '@/features/categories/models/Category';
-import CategoriesSunburst from '@/features/sandbox/components/Sunburst.example';
+import CategoriesSunburst from '@/features/categories/components/CategoriesSunburst';
 import { useExpenseCategoriesTree, useIncomeCategoriesTree } from '@/hooks/financeData';
 import { cn } from '@/lib/utils';
 

@@ -136,7 +136,7 @@ const InlineStats: React.FC<InlineStatsProps> = ({ stats, viewMode, currency }) 
     : fmtAmt(stats.peakValue, currency);
 
   return (
-    <div className="flex items-center gap-2 ml-auto text-xs text-muted-foreground flex-wrap">
+    <div className="flex items-center gap-1.5 text-2xs text-muted-foreground flex-wrap">
       <Bullet />
       <span className="font-semibold tabular-nums text-foreground">{total}</span>
       <Bullet />
@@ -244,7 +244,7 @@ const HeatmapPanel: React.FC<HeatmapPanelProps> = ({
     <div className="w-full">
       {/* ── Compact header: year · toggle · inline stats ── */}
       {hasHeader && (
-        <div className="flex items-center flex-wrap gap-x-2 gap-y-1.5 px-4 pt-2 pb-1 min-h-9">
+        <div className="flex items-center flex-wrap gap-x-1.5 gap-y-1 px-3 py-1">
           {showYearPicker && <YearPicker year={effectiveYear} onChange={handleYearChange} />}
 
           {showToggle && (

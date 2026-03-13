@@ -1,5 +1,5 @@
 import moment, { type Moment } from 'moment';
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { type TooltipProps } from 'recharts';
 import { type NameType, type ValueType } from 'recharts/types/component/DefaultTooltipContent';
@@ -64,13 +64,13 @@ export const ChartTooltip: React.FC<Props> = ({
   label,
   data,
   period,
-  coordinate,
   currentTimeframe,
   previousTimeframe,
   comparisonMode = 'previousTimeframe',
 }) => {
   const [position, setPosition] = useState({ top: 0, left: 0 });
-  const { x = 0, y = 0 } = coordinate || {};
+  const activeRef = useRef(active);
+  activeRef.current = active;
 
   const dataPoint = useMemo(() => data.find((item) => item.timestamp === label), [data, label]);
 
@@ -91,19 +91,17 @@ export const ChartTooltip: React.FC<Props> = ({
   }, [dataPoint, data, label, comparisonMode]);
 
   useEffect(() => {
-    if (!active || !payload?.length || !dataPoint) return;
-
-    const tooltipSize = { width: 320, height: 200 };
-    const margin = 0;
-
-    const top = Math.min(y, window.innerHeight - tooltipSize.height - margin);
-    const left = Math.min(x, window.innerWidth - tooltipSize.width - margin);
-
-    setPosition({
-      top: Math.max(margin, top),
-      left: Math.max(margin, left),
-    });
-  }, [active, payload, dataPoint, x, y]);
+    const W = 320, H = 200, M = 12, OX = 16, OY = 8;
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!activeRef.current) return;
+      setPosition({
+        top: Math.max(M, Math.min(e.clientY + OY, window.innerHeight - H - M)),
+        left: Math.max(M, Math.min(e.clientX + OX, window.innerWidth - W - M)),
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   if (!active || !dataPoint) return null;
 

@@ -96,8 +96,7 @@ export const DebtForm = forwardRef<DebtFormRef, DebtFormProps>((_, ref) => {
         } else {
           await create(payload);
         }
-      } catch (error) {
-        console.error('Debt form submission failed:', error);
+      } catch {
         toast.error('Failed to submit debt');
       }
     },

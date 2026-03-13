@@ -2,11 +2,11 @@ import React, { useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
 import AccountDetailsHoverCard from '@/features/accounts/components/DetailsHoverCard';
+import AccountMarker from '@/features/accounts/components/AccountMarker';
 import { Badge } from '@/components/ui/badge';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { useAccounts } from '@/hooks/financeData';
 import type Account from '@/features/accounts/models/Account';
-import { type Type as AccountType } from '@/features/accounts';
 
 type PillVariant = 'pill' | 'inline';
 type Tone = 'subtle' | 'filled';
@@ -32,15 +32,6 @@ export interface AccountPillProps {
   className?: string;
 }
 
-type ShapeKind = 'circle' | 'square' | 'diamond' | 'hollow-square';
-
-const shapeKindByType: Record<AccountType, ShapeKind> = {
-  bank: 'square',
-  cash: 'circle',
-  internet: 'diamond',
-  basic: 'hollow-square',
-};
-
 const sizeMap = {
   sm: {
     badge: 'h-6 px-2',
@@ -58,38 +49,6 @@ const sizeMap = {
     marker: 'h-4 w-4',
   },
 } as const;
-
-const Marker = ({ account, size }: { account: Account; size: 'sm' | 'md' | 'lg' }) => {
-  const isArchived = account.isArchived();
-  const color = isArchived ? 'hsl(var(--muted-foreground))' : account.color;
-
-  const shape = shapeKindByType[account.type];
-  const isHollow = shape === 'hollow-square';
-
-  const integration = account.bankIntegration;
-  const integrationRingColor = integration
-    ? integration.isActive
-      ? 'hsl(var(--success))'
-      : 'hsl(var(--warning))'
-    : null;
-
-  const outerShadow = integrationRingColor ? `, 0 0 0 2px ${integrationRingColor}` : '';
-
-  return (
-    <span
-      aria-hidden="true"
-      style={{
-        clipPath: shape === 'diamond' ? 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' : undefined,
-        backgroundColor: isHollow ? 'transparent' : color,
-        boxShadow: `inset 0 0 0 1px ${color}${outerShadow}`,
-      }}
-      className={cn('inline-block shrink-0 flex-none align-middle', sizeMap[size].marker, {
-        'rounded-full': shape === 'circle',
-        'rounded-[0.2rem]': shape !== 'diamond' && shape !== 'circle',
-      })}
-    />
-  );
-};
 
 const getContrastColor = (hex: string): 'black' | 'white' => {
   const c = hex.replace('#', '');
@@ -140,7 +99,7 @@ export const AccountPill: React.FC<AccountPillProps> = ({
 
   const content = (
     <>
-      {effectiveShowMarker && <Marker account={resolvedAccount} size={size} />}
+      {effectiveShowMarker && <AccountMarker account={resolvedAccount} size={size} />}
       {nameNode}
     </>
   );

@@ -3,7 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import RequireAuth from '@/components/common/RequireAuth';
 import RequiredDataGate from '@/components/common/RequiredDataGate';
-import Layout from '@/components/layout/Layout';
+import Layout from '@/components/layout/LayoutTerminal'; // TUI layout — revert: change to '@/components/layout/Layout'
 import { LoginPage, LogoutRoute } from '@/features/auth';
 
 const AccountsManagementPage = lazy(() =>
@@ -19,7 +19,6 @@ const DebtsManagementPage = lazy(() =>
   import('@/features/debts').then(({ DebtsManagementPage: C }) => ({ default: C })),
 );
 const BucketsPage = lazy(() => import('@/features/buckets').then(({ BucketsPage: C }) => ({ default: C })));
-const SandboxPage = lazy(() => import('@/features/sandbox').then(({ SandboxPage: C }) => ({ default: C })));
 
 const AppShell: React.FC = () => (
   <RequiredDataGate>
@@ -33,7 +32,7 @@ const AppShell: React.FC = () => (
           <Route element={<AccountsManagementPage />} path="/accounts/*" />
           <Route element={<DebtsManagementPage />} path="/debts/*" />
           <Route element={<BucketsPage />} path="/buckets" />
-          <Route element={<SandboxPage />} path="/sandbox" />
+
           <Route element={<BudgetingPage />} path="/budget/*" />
           <Route element={<CategoriesManagementPage />} path="/categories" />
 

@@ -20,6 +20,7 @@ import { AccountTypeahead } from '@/features/accounts';
 import { CategoryTypeahead } from '@/features/categories';
 import { cn } from '@/lib/utils';
 
+import type Transaction from '../models/Transaction';
 import { useMutations } from '../api/mutations';
 import { Type as TransactionType } from '../types';
 
@@ -106,13 +107,12 @@ export const BulkCreateTableForm: React.FC = () => {
         await bulkCreate(
           data.transactions.map((t) => ({
             ...t,
-          })) as unknown as import('@/features/transactions/models/Transaction').default[],
+          })) as unknown as Transaction[],
         );
         toast.success(`${data.transactions.length} transaction(s) created successfully!`);
         submitForm(data);
         closeForm();
-      } catch (e) {
-        console.error(e);
+      } catch {
         toast.error('Failed to submit transactions. Please review data and try again.');
       } finally {
         setIsSubmitting(false);

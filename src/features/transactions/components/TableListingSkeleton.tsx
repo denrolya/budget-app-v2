@@ -5,7 +5,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { cn } from '@/lib/utils';
 
 type ListingRowSkeletonProps = {
-  compact?: boolean;
   className?: string;
 };
 
@@ -17,45 +16,43 @@ type TableListingSkeletonProps = ListingRowSkeletonProps & {
 const DEFAULT_ROWS_PER_GROUP = 3;
 const DEFAULT_GROUPS = 2;
 
-const cellPad = (compact?: boolean) => (compact ? 'p-0' : undefined);
-
-export const ListingRowSkeleton: React.FC<ListingRowSkeletonProps> = ({ compact = true, className }) => (
+export const ListingRowSkeleton: React.FC<ListingRowSkeletonProps> = ({ className }) => (
   <TableRow aria-hidden="true" className={cn('text-xs hover:bg-transparent', className)}>
     {/* gutter */}
-    <TableCell className={cn('w-4', cellPad(compact))} />
+    <TableCell className="w-4 p-0" />
 
     {/* id */}
-    <TableCell className={cn('pl-4', cellPad(compact))}>
+    <TableCell className="pl-4 p-0">
       <Skeleton className="h-4 w-14" />
     </TableCell>
 
     {/* account */}
-    <TableCell className={cn(cellPad(compact))}>
+    <TableCell className="p-0">
       <Skeleton className="h-6 w-28 rounded-full" />
     </TableCell>
 
     {/* amount */}
-    <TableCell className={cn(cellPad(compact))}>
+    <TableCell className="p-0">
       <Skeleton className="h-6 w-24" />
     </TableCell>
 
     {/* category */}
-    <TableCell className={cn(cellPad(compact))}>
+    <TableCell className="p-0">
       <Skeleton className="h-6 w-24" />
     </TableCell>
 
     {/* note */}
-    <TableCell className={cn(cellPad(compact))}>
+    <TableCell className="p-0">
       <Skeleton className="h-4 w-40 sm:w-56" />
     </TableCell>
 
     {/* time */}
-    <TableCell className={cn('whitespace-nowrap', cellPad(compact))}>
+    <TableCell className="whitespace-nowrap p-0">
       <Skeleton className="h-4 w-14" />
     </TableCell>
 
     {/* actions */}
-    <TableCell className={cn('text-right', cellPad(compact))}>
+    <TableCell className="text-right p-0">
       <div className="flex justify-end gap-2">
         <Skeleton className="h-8 w-8 rounded-full" />
         <Skeleton className="h-8 w-8 rounded-full" />
@@ -67,9 +64,9 @@ export const ListingRowSkeleton: React.FC<ListingRowSkeletonProps> = ({ compact 
 
 ListingRowSkeleton.displayName = 'TransactionListingRowSkeleton';
 
-const GroupHeaderSkeleton: React.FC<{ compact?: boolean }> = ({ compact = true }) => (
+const GroupHeaderSkeleton: React.FC = () => (
   <TableRow aria-hidden="true">
-    <TableCell colSpan={8} className={cn('bg-muted/40 px-4', compact ? 'py-0' : undefined)}>
+    <TableCell colSpan={8} className="bg-muted/40 px-4 py-0">
       <div className="flex items-center justify-between gap-3">
         <Skeleton className="h-6 w-32" />
         <Skeleton className="h-6 w-32" />
@@ -81,7 +78,6 @@ const GroupHeaderSkeleton: React.FC<{ compact?: boolean }> = ({ compact = true }
 GroupHeaderSkeleton.displayName = 'TransactionListingGroupHeaderSkeleton';
 
 export const TransactionsTableListingSkeleton: React.FC<TableListingSkeletonProps> = ({
-  compact = true,
   className,
   rowsPerGroup = DEFAULT_ROWS_PER_GROUP,
   groups = DEFAULT_GROUPS,
@@ -115,9 +111,9 @@ export const TransactionsTableListingSkeleton: React.FC<TableListingSkeletonProp
       <TableBody aria-busy="true">
         {Array.from({ length: groups }).map((_, groupIndex) => (
           <React.Fragment key={groupIndex}>
-            <GroupHeaderSkeleton compact={compact} />
+            <GroupHeaderSkeleton />
             {Array.from({ length: rowsPerGroup }).map((__, rowIndex) => (
-              <ListingRowSkeleton compact={compact} className={className} key={`${groupIndex}-${rowIndex}`} />
+              <ListingRowSkeleton className={className} key={`${groupIndex}-${rowIndex}`} />
             ))}
           </React.Fragment>
         ))}

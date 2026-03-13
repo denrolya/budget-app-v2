@@ -14,7 +14,7 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { MOMENT_DATETIME_FORM_FORMAT, MOMENT_TIME_VIEW_FORMAT } from '@/constants/datetime';
 import { AccountPill, AccountTypeahead } from '@/features/accounts';
@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 
 import { type useInlineEdit } from '../hooks/useInlineEdit';
 import type Transaction from '../models/Transaction';
+import { Type as TransactionType } from '../types';
 
 import TransactionValue from './TransactionValue';
 
@@ -100,33 +101,36 @@ const IdCell = ({
         aria-describedby={descId}
         aria-labelledby={titleId}
         side="right"
-        className="p-0 overflow-y-auto w-full sm:max-w-xl"
+        className="p-0 w-full sm:max-w-[380px] flex flex-col"
       >
-        <div className="h-full flex flex-col">
-          <SheetHeader className="p-6 pb-0">
-            <SheetTitle id={titleId} className="tracking-tight text-xl font-bold">
-              Transaction Details
-            </SheetTitle>
-            <SheetDescription id={descId} className="flex justify-between items-center">
-              <span>
-                ID: <code className="text-muted-foreground">#{tx.id}</code>
-              </span>
-            </SheetDescription>
-          </SheetHeader>
-          <div className="flex-grow overflow-y-auto p-6">{renderDetails(tx)}</div>
+        {/* A11y labels */}
+        <SheetTitle id={titleId} className="sr-only">Transaction Details</SheetTitle>
+        <SheetDescription id={descId} className="sr-only">#{tx.id}</SheetDescription>
+
+        {/* Compact header strip */}
+        <div className="h-10 shrink-0 flex items-center gap-2.5 px-4 border-b">
+          <span
+            className={cn(
+              'text-[10px] font-mono font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border',
+              tx.type === TransactionType.Income
+                ? 'bg-success/10 text-success border-success/20'
+                : 'bg-destructive/10 text-destructive border-destructive/20',
+            )}
+          >
+            {tx.type}
+          </span>
+          <code className="text-xs text-muted-foreground font-mono">#{tx.id}</code>
+          {tx.isDraft && (
+            <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border bg-warning/10 text-warning-foreground border-warning/20">
+              draft
+            </span>
+          )}
         </div>
+
+        {/* Scrollable content */}
+        <div className="overflow-y-auto px-4 py-3">{renderDetails(tx)}</div>
       </SheetContent>
     </Sheet>
-
-    {tx.isDraft && onToggleDraft ? (
-      <Badge
-        variant="outline"
-        className="shrink-0 bg-warning text-warning-foreground border-warning cursor-pointer hover:bg-warning/80"
-        onClick={() => onToggleDraft(tx)}
-      >
-        Draft
-      </Badge>
-    ) : null}
   </div>
 );
 

@@ -16,7 +16,44 @@
   .font-numeric {
     @apply lining-nums tabular-nums slashed-zero leading-none whitespace-nowrap antialiased tracking-tighter font-mono;
   }
+
+  /* Hide scrollbar cross-browser while keeping scroll functionality */
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    &::-webkit-scrollbar { display: none; }
+  }
 }
+
+/* ─── Terminal Layout: Accounts ticker ───────────────────────────────────────
+   Content is duplicated in JSX so the loop is seamless.
+   Hover pauses. */
+@keyframes ticker-loop {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.ticker-track {
+  animation: ticker-loop 50s linear infinite;
+  will-change: transform;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  white-space: nowrap;
+  &:hover { animation-play-state: paused; }
+}
+
+/* ─── Terminal Layout: Exchange rate flash ─────────────────────────────────── */
+@keyframes rate-flash-up {
+  0%, 100% { background-color: transparent; }
+  40%      { background-color: hsl(var(--success) / 0.18); }
+}
+@keyframes rate-flash-down {
+  0%, 100% { background-color: transparent; }
+  40%      { background-color: hsl(var(--destructive) / 0.18); }
+}
+.rate-flash-up   { animation: rate-flash-up   0.8s ease-out; }
+.rate-flash-down { animation: rate-flash-down 0.8s ease-out; }
 
 @layer base {
   :root {

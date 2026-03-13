@@ -91,49 +91,15 @@ const DebtsIndexPage: React.FC = () => {
             )}
           </div>
 
-          {/* Chart + right panel */}
+          {/* Chart + left panel */}
           <CardContent className="flex flex-1 min-h-0 min-w-0 overflow-hidden p-0">
-            {/* Sunburst + center overlay */}
-            <div className="relative min-h-0 min-w-0 flex-[1_1_0%] basis-0 overflow-hidden">
-              <DebtsSunburstChart debts={debts} onHoverChange={handleHoverChange} />
-
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div className="flex flex-col items-center text-center px-8 py-5 rounded-full bg-background/80 backdrop-blur-sm max-w-[240px] transition-all duration-100">
-                  {centerInfo.color && (
-                    <span
-                      aria-hidden
-                      style={{ backgroundColor: centerInfo.color }}
-                      className="inline-block h-2.5 w-2.5 rounded-full mb-2 flex-none"
-                    />
-                  )}
-                  <p className="text-xs text-muted-foreground leading-tight mb-1.5 truncate w-full">
-                    {centerInfo.label}
-                  </p>
-                  <p className="text-3xl font-bold text-foreground leading-tight">
-                    <MoneyValue
-                      amount={centerInfo.amount}
-                      currency={(centerInfo as any).currency}
-                      useColors={false}
-                      values={{}}
-                      className="text-3xl font-bold"
-                    />
-                  </p>
-                  {centerInfo.sub && (
-                    <p className="text-xs text-muted-foreground mt-1.5 leading-tight">{centerInfo.sub}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div aria-hidden className="flex-none w-px bg-border self-stretch my-3" />
-
-            {/* Right panel */}
-            <div className="w-56 lg:w-64 shrink-0 flex flex-col min-h-0 min-w-0 overflow-hidden">
+            {/* Left panel */}
+            <div className="w-56 lg:w-64 shrink-0 flex flex-col min-h-0 min-w-0 overflow-hidden border-r">
               <ScrollArea className="flex-1">
                 <div className="space-y-5 p-4 pb-3">
                   {/* Open debts */}
                   {open.length > 0 && (
-                    <div className="animate-in fade-in slide-in-from-right-4 duration-300 ease-out [animation-fill-mode:both]">
+                    <div className="animate-in fade-in slide-in-from-left-4 duration-300 ease-out [animation-fill-mode:both]">
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-2">
                           <span aria-hidden className="h-2.5 w-2.5 rounded-sm flex-none bg-[hsl(var(--chart-1))]" />
@@ -179,7 +145,7 @@ const DebtsIndexPage: React.FC = () => {
                   {closed.length > 0 && (
                     <div
                       style={{ animationDelay: `${open.length > 0 ? 120 : 0}ms` }}
-                      className="animate-in fade-in slide-in-from-right-4 duration-300 ease-out [animation-fill-mode:both]"
+                      className="animate-in fade-in slide-in-from-left-4 duration-300 ease-out [animation-fill-mode:both]"
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-2">
@@ -226,7 +192,7 @@ const DebtsIndexPage: React.FC = () => {
                 </div>
               </ScrollArea>
 
-              {/* Summary footer — mirrors account-type bar section */}
+              {/* Summary footer */}
               <div
                 style={{ animationDelay: '280ms' }}
                 className="flex-none border-t p-4 space-y-2.5 animate-in fade-in duration-300 ease-out [animation-fill-mode:both]"
@@ -253,6 +219,44 @@ const DebtsIndexPage: React.FC = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            <div aria-hidden className="flex-none w-px bg-border self-stretch my-3" />
+
+            {/* Sunburst + center overlay */}
+            <div className="relative min-h-0 min-w-0 flex-[1_1_0%] basis-0">
+              <DebtsSunburstChart
+                debts={debts}
+                onHoverChange={handleHoverChange}
+                onNavigate={(id) => navigate(`/debts/${id}`)}
+              />
+
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="flex flex-col items-center text-center px-8 py-5 rounded-full bg-background/80 backdrop-blur-sm max-w-[240px] transition-all duration-100">
+                  {centerInfo.color && (
+                    <span
+                      aria-hidden
+                      style={{ backgroundColor: centerInfo.color }}
+                      className="inline-block h-2.5 w-2.5 rounded-full mb-2 flex-none"
+                    />
+                  )}
+                  <p className="text-xs text-muted-foreground leading-tight mb-1.5 truncate w-full">
+                    {centerInfo.label}
+                  </p>
+                  <p className="text-3xl font-bold text-foreground leading-tight">
+                    <MoneyValue
+                      amount={centerInfo.amount}
+                      currency={(centerInfo as any).currency}
+                      useColors={false}
+                      values={{}}
+                      className="text-3xl font-bold"
+                    />
+                  </p>
+                  {centerInfo.sub && (
+                    <p className="text-xs text-muted-foreground mt-1.5 leading-tight">{centerInfo.sub}</p>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>

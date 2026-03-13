@@ -110,8 +110,7 @@ const DebtDetailPage: React.FC = () => {
         await update({ id: debt.id, payload: { closedAt: new Date().toISOString() } });
         toast.success('Debt closed');
       }
-    } catch (e) {
-      console.error(e);
+    } catch {
       toast.error('Failed to update debt status.');
     }
   };
@@ -132,8 +131,7 @@ const DebtDetailPage: React.FC = () => {
       await remove({ id: debt.id });
       toast.success('Debt deleted');
       navigate('/debts');
-    } catch (e) {
-      console.error(e);
+    } catch {
       toast.error('Failed to delete debt.');
     }
   };

@@ -8,7 +8,6 @@ import {
   CalendarIcon,
   FileText,
   Layers,
-  Minimize2,
   Search,
 } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -25,6 +24,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { FILTER_PRESETS } from '@/constants/datetime';
+import { SEARCH_DEBOUNCE_MS } from '@/constants/ui';
 import { type TransactionFilters } from '@/features/transactions';
 import { Type as TransactionType } from '@/features/transactions';
 import { type TransferFilters } from '@/features/transfers';
@@ -43,8 +43,6 @@ interface ListFiltersContentProps {
   setShowTransfers: (value: boolean) => void;
   timeframe: Timeframe;
   setTimeframe: (timeframe: Timeframe) => void;
-  isCompactTable: boolean;
-  setIsCompactTable: (v: boolean) => void;
   showEmptyDays: boolean;
   setShowEmptyDays: (v: boolean) => void;
   disabledFilters?: string[];
@@ -73,8 +71,6 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
   setShowTransfers,
   timeframe,
   setTimeframe,
-  isCompactTable,
-  setIsCompactTable,
   showEmptyDays,
   setShowEmptyDays,
   disabledFilters = [],
@@ -95,7 +91,7 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
     }, 350),
   ).current;
 
-  const debouncedSearch = useRef(debounce((value: string) => setFilter('searchTerm', value as any), 250)).current;
+  const debouncedSearch = useRef(debounce((value: string) => setFilter('searchTerm', value as any), SEARCH_DEBOUNCE_MS)).current;
 
   useEffect(
     () => () => {
@@ -424,22 +420,6 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
       <div>
         <SectionLabel>Display</SectionLabel>
         <div className="flex gap-1.5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                aria-pressed={isCompactTable}
-                size="sm"
-                type="button"
-                variant={isCompactTable ? 'secondary' : 'outline'}
-                className={cn('flex-1 h-8 gap-1.5', isCompactTable && 'border-primary/40')}
-                onClick={() => setIsCompactTable(!isCompactTable)}
-              >
-                <Minimize2 aria-hidden="true" className="h-3.5 w-3.5" />
-                <span className="text-xs">Compact</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Toggle compact rows</TooltipContent>
-          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button

@@ -33,6 +33,7 @@ api.interceptors.response.use(
     if (profilerLink) {
       const status = error.response?.status ?? '?';
       const url = error.config?.url ?? '';
+      // eslint-disable-next-line no-console
       console.error(`[API ${status}] ${url}\n  Symfony profiler: ${profilerLink}`);
     }
     return Promise.reject(error);

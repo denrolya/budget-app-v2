@@ -3,7 +3,9 @@ import sortBy from 'lodash/sortBy';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
+import type { CURRENCY_CODE } from '@/constants/currency';
 import { AccountPill } from '@/features/accounts';
+import type Account from '@/features/accounts/models/Account';
 import { CURRENCIES } from '@/constants/currency';
 import MoneyValue from '@/components/common/MoneyValue';
 
@@ -83,7 +85,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
       color: stat.account.color ?? null,
       account: stat.account,
     }));
-    return sortBy(items, 'value');
+    return sortBy(items, 'value').reverse();
   }, [accountStats, applyMonthly]);
 
   const currencyItemsAll: Item[] = useMemo(() => {
@@ -112,7 +114,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
         };
       });
 
-    return sortBy(list, 'value');
+    return sortBy(list, 'value').reverse();
   }, [accountStats, applyMonthly]);
 
   const totalAccounts = useMemo(() => applyMonthly(totalAccountsRaw ?? 0), [applyMonthly, totalAccountsRaw]);
@@ -178,9 +180,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
               <MoneyValue
                 amount={item.amount}
                 useColors={false}
-                currency={
-                  item.currency != null ? (item.currency as import('@/constants/currency').CURRENCY_CODE) : undefined
-                }
+                currency={item.currency != null ? (item.currency as CURRENCY_CODE) : undefined}
                 className="text-2xs leading-4 text-muted-foreground"
               />
             ) : null
@@ -208,9 +208,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
               <MoneyValue
                 amount={item.amount}
                 useColors={false}
-                currency={
-                  item.currency != null ? (item.currency as import('@/constants/currency').CURRENCY_CODE) : undefined
-                }
+                currency={item.currency != null ? (item.currency as CURRENCY_CODE) : undefined}
                 className="text-2xs leading-4 text-muted-foreground"
               />
             ) : null
@@ -237,9 +235,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
               <MoneyValue
                 amount={item.amount}
                 useColors={false}
-                currency={
-                  item.currency != null ? (item.currency as import('@/constants/currency').CURRENCY_CODE) : undefined
-                }
+                currency={item.currency != null ? (item.currency as CURRENCY_CODE) : undefined}
                 className="text-2xs leading-4 text-muted-foreground"
               />
             ) : null
@@ -268,92 +264,113 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
     [currenciesById, onOpenTransactions],
   );
 
+  const accountRenderLabel = useCallback(
+    ({ item }: { item: Item; percentage: number }) => (
+      <div className="min-w-0 [&_*]:min-w-0">
+        {'account' in item && item.account ? (
+          <AccountPill
+            account={item.account as unknown as Account}
+            tooltip={false}
+            variant="inline"
+            className="min-w-0 text-2xs"
+            size="sm"
+          />
+        ) : (
+          <span className="truncate text-2xs">{item.name}</span>
+        )}
+      </div>
+    ),
+    [],
+  );
+
   if (isLoading) return <CardSkeleton />;
 
+  // ── Accounts tab ─────────────────────────────────────────────────────────────
   if (tab === 'accounts') {
     return (
-      <div className="flex flex-col flex-1 min-h-0 min-w-0">
-        <Chart animate colors={accountsColors} data={accountsPieData} tooltip={accountsTooltip} />
+      <div className="flex flex-col h-full min-h-0">
+        <div className="shrink-0 h-[180px] relative">
+          <Chart animate colors={accountsColors} data={accountsPieData} tooltip={accountsTooltip} />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <MoneyValue
+              amount={totalAccounts}
+              useColors={false}
+              className="text-sm font-bold font-mono tabular-nums"
+            />
+          </div>
+        </div>
+        <div className="border-t shrink-0" />
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <DistributionList
+            ariaLabel="Accounts distribution list"
+            items={accountItemsAll}
+            total={totalAccounts}
+            renderLabel={accountRenderLabel}
+            onViewTransactions={openAccountTransactions}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // ── Currencies tab (no selection) ─────────────────────────────────────────────
+  if (tab === 'currencies' && !selectedCurrency) {
+    return (
+      <div className="flex flex-col h-full min-h-0">
+        <div className="shrink-0 h-[180px] relative">
+          <Chart
+            animate
+            colors={currenciesColors}
+            data={currenciesPieData}
+            tooltip={currenciesTooltip}
+            onClick={(node) => onCurrencySelect(String(node.data.id))}
+          />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <MoneyValue
+              amount={currenciesGrandTotal}
+              useColors={false}
+              className="text-sm font-bold font-mono tabular-nums"
+            />
+          </div>
+        </div>
+        <div className="border-t shrink-0" />
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <DistributionList
+            ariaLabel="Currencies distribution list"
+            getDotColor={(item) => CURRENCY_COLORS[String(item.id)] ?? DEFAULT_COLOR}
+            items={currencyItemsAll}
+            total={currenciesGrandTotal}
+            onRowClick={onCurrencySelect}
+            onViewTransactions={openCurrencyTransactions}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // ── Currencies tab (currency selected — show accounts in that currency) ────────
+  return (
+    <div className="flex flex-col h-full min-h-0">
+      <div className="shrink-0 h-[180px] relative">
+        <Chart animate colors={accountsColors} data={accountsInCurrencyPieData} tooltip={accountsInCurrencyTooltip} />
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <MoneyValue
+            amount={currencyTotal}
+            useColors={false}
+            className="text-sm font-bold font-mono tabular-nums"
+          />
+        </div>
+      </div>
+      <div className="border-t shrink-0" />
+      <div className="flex-1 min-h-0 overflow-hidden">
         <DistributionList
-          ariaLabel="Accounts distribution list"
-          items={accountItemsAll}
-          total={totalAccounts}
-          renderLabel={({ item, percentage }) => (
-            <div className="min-w-0 flex items-center gap-2 text-sm leading-5 [&_*]:text-sm [&_*]:leading-5">
-              {'account' in item && item.account ? (
-                <AccountPill
-                  account={item.account as unknown as import('@/features/accounts/models/Account').default}
-                  tooltip={false}
-                  variant="inline"
-                  className="min-w-0"
-                />
-              ) : (
-                <span className="truncate">{item.name}</span>
-              )}
-              {item.value > 0 ? (
-                <small className="text-xs text-muted-foreground shrink-0">({percentage.toFixed(0)}%)</small>
-              ) : null}
-            </div>
-          )}
+          ariaLabel={`Accounts in ${selectedCurrency ?? ''} distribution list`}
+          items={currencyAccounts}
+          total={currencyTotal}
+          renderLabel={accountRenderLabel}
           onViewTransactions={openAccountTransactions}
         />
       </div>
-    );
-  }
-
-  if (tab === 'currencies' && !selectedCurrency) {
-    return (
-      <div className="flex flex-col flex-1 min-h-0 min-w-0">
-        <Chart
-          animate
-          colors={currenciesColors}
-          data={currenciesPieData}
-          tooltip={currenciesTooltip}
-          onClick={(node) => onCurrencySelect(String(node.data.id))}
-        />
-        <DistributionList
-          ariaLabel="Currencies distribution list"
-          getDotColor={(item) => CURRENCY_COLORS[String(item.id)] ?? DEFAULT_COLOR}
-          items={currencyItemsAll}
-          total={currenciesGrandTotal}
-          renderTooltip={({ item }) => (
-            <>
-              <code className="font-mono text-xs">{String(item.id)}</code>: <span>{item.name}</span>
-            </>
-          )}
-          onRowClick={onCurrencySelect}
-          onViewTransactions={openCurrencyTransactions}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col flex-1 min-h-0 min-w-0">
-      <Chart animate colors={accountsColors} data={accountsInCurrencyPieData} tooltip={accountsInCurrencyTooltip} />
-      <DistributionList
-        ariaLabel={`Accounts in ${selectedCurrency ?? ''} distribution list`}
-        items={currencyAccounts}
-        total={currencyTotal}
-        renderLabel={({ item, percentage }) => (
-          <div className="min-w-0 flex items-center gap-2 text-sm leading-5 [&_*]:text-sm [&_*]:leading-5">
-            {'account' in item && item.account ? (
-              <AccountPill
-                account={item.account as unknown as import('@/features/accounts/models/Account').default}
-                tooltip={false}
-                variant="inline"
-                className="min-w-0"
-              />
-            ) : (
-              <span className="truncate">{item.name}</span>
-            )}
-            {item.value > 0 ? (
-              <small className="text-xs text-muted-foreground shrink-0">({percentage.toFixed(0)}%)</small>
-            ) : null}
-          </div>
-        )}
-        onViewTransactions={openAccountTransactions}
-      />
     </div>
   );
 };

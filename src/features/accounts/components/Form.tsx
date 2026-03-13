@@ -109,8 +109,7 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
         } else {
           await create(values as unknown as CreateAccountDTO);
         }
-      } catch (error) {
-        console.error('Account form submission failed:', error);
+      } catch {
         toast.error('Failed to submit account. Issue requires investigation.');
       }
     },

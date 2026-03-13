@@ -64,6 +64,8 @@ export const useSyncBankIntegration = (id: number) => {
         toast.success(`Sync complete — ${created} new transaction${created !== 1 ? 's' : ''} imported`);
       }
       qc.invalidateQueries({ queryKey: accountKeys.list() });
+      qc.invalidateQueries({ queryKey: ['ledger'] });
+      qc.invalidateQueries({ queryKey: ['transactions'] });
     },
     onError: () => {
       toast.error('Bank sync failed');

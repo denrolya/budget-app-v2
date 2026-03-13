@@ -17,6 +17,7 @@ export const useMutations = (opts?: { invalidateKey?: readonly unknown[] }) => {
     await Promise.all([
       qc.invalidateQueries({ queryKey: invalidateKey }),
       qc.invalidateQueries({ queryKey: accountQueryKeys.all }),
+      qc.invalidateQueries({ queryKey: ['ledger'] }),
     ]);
   };
 

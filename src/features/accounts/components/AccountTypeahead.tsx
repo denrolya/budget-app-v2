@@ -3,11 +3,11 @@ import { forwardRef, type ReactNode, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import MoneyValue from '@/components/common/MoneyValue';
 import { useAccountsWithDefaultOrder } from '@/hooks/financeData';
+import Typeahead, { type TypeaheadProps } from '@/components/ui/Typeahead';
 
 import AccountPill from '../components/Pill';
 import type Account from '../models/Account';
 
-import Typeahead, { type TypeaheadProps } from '@/components/ui/Typeahead';
 
 type AccountTypeaheadProps = Omit<
   TypeaheadProps<Account, string>,

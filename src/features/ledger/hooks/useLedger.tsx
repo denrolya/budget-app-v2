@@ -111,8 +111,6 @@ export type UseLedgerReturn = {
   setShowTransfers: (v: boolean) => void;
 
   // ─ Display state (UI preferences) ────────────────────────────────────────
-  isCompactTable: boolean;
-  setIsCompactTable: (v: boolean) => void;
   isReversedOrder: boolean;
   setIsReversedOrder: (v: boolean) => void;
   showEmptyDays: boolean;
@@ -201,7 +199,6 @@ export const useLedger = ({
   // ─ Display state ──────────────────────────────────────────────────────────
   const [showEmptyDays, setShowEmptyDays] = useState(initialShowEmptyDays);
   const [isReversedOrder, setIsReversedOrder] = useState(true);
-  const [isCompactTable, setIsCompactTable] = useState(true);
 
   // ─ Filters sheet ──────────────────────────────────────────────────────────
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -303,8 +300,6 @@ export const useLedger = ({
     setShowTransactions,
     showTransfers,
     setShowTransfers,
-    isCompactTable,
-    setIsCompactTable,
     isReversedOrder,
     setIsReversedOrder,
     showEmptyDays,

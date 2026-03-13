@@ -33,7 +33,7 @@ export const parseDragId = (
     };
   }
   return null;
-}
+};
 
 // ── Draggable entry in a bucket ──────────────────────────────────────────────
 
@@ -326,7 +326,7 @@ export const DroppableBucketZone: React.FC<BucketZoneProps> = ({
                     style={{ width: `${targetPct}%` }}
                     className={cn(
                       'h-full rounded-full transition-all duration-500',
-                      targetPct! >= 100 ? 'bg-green-500' : targetPct! >= 60 ? 'bg-yellow-500' : 'bg-destructive/70',
+                      targetPct! >= 100 ? 'bg-success' : targetPct! >= 60 ? 'bg-warning' : 'bg-destructive/70',
                     )}
                   />
                 </div>

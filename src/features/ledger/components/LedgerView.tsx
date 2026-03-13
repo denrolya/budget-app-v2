@@ -97,8 +97,6 @@ const LedgerView: React.FC<LedgerViewProps> = ({
     setShowTransactions,
     showTransfers,
     setShowTransfers,
-    isCompactTable,
-    setIsCompactTable,
     isReversedOrder,
     setIsReversedOrder,
     showEmptyDays,
@@ -180,7 +178,6 @@ const LedgerView: React.FC<LedgerViewProps> = ({
                 <TableListingSkeleton
                   after={timeframe.after}
                   before={timeframe.before}
-                  compact={isCompactTable}
                   showEmptyDays={showEmptyDays}
                 />
               )}
@@ -188,7 +185,6 @@ const LedgerView: React.FC<LedgerViewProps> = ({
                 <TableListing
                   after={timeframe.after}
                   before={timeframe.before}
-                  compact={isCompactTable}
                   groupedItems={groupedItems}
                   isLoading={isLoading}
                   isReversedOrder={isReversedOrder}
@@ -225,10 +221,8 @@ const LedgerView: React.FC<LedgerViewProps> = ({
       {showFiltersSheet && (
         <ListFiltersSheet
           disabledFilters={disabledFilters}
-          isCompactTable={isCompactTable}
           isOpen={isFiltersOpen}
           setFilter={setFilter}
-          setIsCompactTable={setIsCompactTable}
           setIsOpen={setIsFiltersOpen}
           setShowEmptyDays={setShowEmptyDays}
           setShowTransactions={setShowTransactions}

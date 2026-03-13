@@ -1,26 +1,28 @@
 import { CalendarIcon } from 'lucide-react';
 import moment, { type Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type DateRange } from 'react-day-picker';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { DASHBOARD_TIMEFRAME_OPTIONS, MOMENT_DATEPICKER_FORMAT } from '@/constants/datetime';
+import { DASHBOARD_TIMEFRAME_OPTIONS, MOMENT_DATEPICKER_FORMAT, type PresetOption } from '@/constants/datetime';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import type { Timeframe } from '@/types/global';
 
-type DraftRange = {
-  from?: Date;
-  to?: Date;
-};
+const YEAR_START = 2010;
+const YEARS = Array.from(
+  { length: new Date().getFullYear() - YEAR_START + 1 },
+  (_, i) => new Date().getFullYear() - i,
+);
 
 interface Props {
   id?: string;
   after: Moment;
   before: Moment;
   onChange: (timeframe: Timeframe) => void;
-  presets?: { label: string; range: Timeframe }[];
+  presets?: PresetOption[];
   children?: React.ReactNode;
   className?: string;
   debounceMs?: number;
@@ -39,11 +41,8 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
 
-  const committed = useMemo<DraftRange>(() => ({ from: after.toDate(), to: before.toDate() }), [after, before]);
-  const [draft, setDraft] = useState<DraftRange>(committed);
-
-  // Controlled display month — ensures prev/next navigation always works
-  // regardless of popover position, portals, or parent re-renders.
+  const committed = useMemo<DateRange>(() => ({ from: after.toDate(), to: before.toDate() }), [after, before]);
+  const [draft, setDraft] = useState<DateRange>(committed);
   const [displayMonth, setDisplayMonth] = useState<Date>(() => committed.from ?? after.toDate());
 
   const debounceRef = useRef<number | null>(null);
@@ -56,15 +55,11 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
   }, []);
 
   const scheduleCommit = useCallback(
-    (next: DraftRange) => {
+    (next: DateRange) => {
       clearDebounce();
-
       if (!next.from || !next.to) return;
-
       debounceRef.current = window.setTimeout(() => {
-        const nextAfter = moment(next.from).startOf('day');
-        const nextBefore = moment(next.to).endOf('day');
-        onChange({ after: nextAfter, before: nextBefore });
+        onChange({ after: moment(next.from).startOf('day'), before: moment(next.to!).endOf('day') });
       }, debounceMs);
     },
     [clearDebounce, debounceMs, onChange],
@@ -81,77 +76,35 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
   useEffect(() => () => clearDebounce(), [clearDebounce]);
 
   const displayLabel = useMemo(
-    () => `${after.format(MOMENT_DATEPICKER_FORMAT)} - ${before.format(MOMENT_DATEPICKER_FORMAT)}`,
+    () => `${after.format(MOMENT_DATEPICKER_FORMAT)} – ${before.format(MOMENT_DATEPICKER_FORMAT)}`,
     [after, before],
   );
 
-  const hint = useMemo(() => {
-    if (!draft.from) return 'Select start date';
-    if (draft.from && !draft.to) return 'Select end date';
-    return `${moment(draft.from).format(MOMENT_DATEPICKER_FORMAT)} - ${moment(draft.to!).format(MOMENT_DATEPICKER_FORMAT)}`;
-  }, [draft.from, draft.to]);
-
-  const startNewSelection = useCallback(
-    (day: Date) => {
-      const next: DraftRange = { from: day, to: undefined };
+  const onSelect = useCallback(
+    (range: DateRange | undefined) => {
+      const next: DateRange = { from: range?.from, to: range?.to };
       setDraft(next);
-      clearDebounce();
+      scheduleCommit(next);
     },
-    [clearDebounce],
-  );
-
-  const setEndOrSwap = useCallback(
-    (day: Date) => {
-      if (!draft.from) {
-        startNewSelection(day);
-        return;
-      }
-
-      const fromTime = draft.from.getTime();
-      const dayTime = day.getTime();
-
-      if (!draft.to) {
-        if (dayTime < fromTime) {
-          // clicked before start -> move start
-          startNewSelection(day);
-          return;
-        }
-
-        // set end
-        const next: DraftRange = { from: draft.from, to: day };
-        setDraft(next);
-        scheduleCommit(next);
-        return;
-      }
-
-      // range already complete -> start new selection
-      startNewSelection(day);
-    },
-    [draft.from, draft.to, scheduleCommit, startNewSelection],
-  );
-
-  const onDayClick = useCallback(
-    (day: Date) => {
-      setEndOrSwap(day);
-    },
-    [setEndOrSwap],
+    [scheduleCommit],
   );
 
   const applyPreset = useCallback(
     (range: Timeframe) => {
       clearDebounce();
-
       const from = range.after.clone().startOf('day').toDate();
       const to = range.before.clone().endOf('day').toDate();
-
-      const next: DraftRange = { from, to };
+      const next: DateRange = { from, to };
       setDraft(next);
       setDisplayMonth(from);
-
-      // presets should feel instant, not delayed
       onChange({ after: moment(from).startOf('day'), before: moment(to).endOf('day') });
     },
     [clearDebounce, onChange],
+  );
+
+  const jumpToYear = useCallback(
+    (year: number) => setDisplayMonth((prev) => new Date(year, prev.getMonth(), 1)),
+    [],
   );
 
   return (
@@ -167,36 +120,52 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
         )}
       </PopoverTrigger>
 
-      <PopoverContent align="start" className="w-auto p-0">
+      <PopoverContent align="start" className="w-auto p-0 flex overflow-hidden">
         <Calendar
-          initialFocus
+          autoFocus
           mode="range"
           month={displayMonth}
           numberOfMonths={isMobile ? 1 : 2}
-          selected={draft.from ? { from: draft.from, to: draft.to } : undefined}
-          onDayClick={onDayClick}
+          selected={draft}
+          onSelect={onSelect}
           onMonthChange={setDisplayMonth}
         />
 
-        <div className="p-3 space-y-3">
-          <div aria-live="polite" className="text-xs text-muted-foreground">
-            {hint}
+        {/* Sidebar: year jump + presets — height capped to calendar */}
+        <div className="border-l flex flex-col w-36 divide-y divide-border overflow-hidden max-h-[350px]">
+          <div className="p-2 shrink-0">
+            <p className="text-2xs font-medium uppercase tracking-widest text-muted-foreground mb-1.5">Year</p>
+            <div className="flex flex-col gap-0.5 max-h-28 overflow-y-auto">
+              {YEARS.map((year) => (
+                <button
+                  key={year}
+                  type="button"
+                  onClick={() => jumpToYear(year)}
+                  className={cn(
+                    'text-left px-1.5 py-0.5 rounded text-xs',
+                    displayMonth.getFullYear() === year
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm text-primary">Presets</h4>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
+          <div className="p-2 flex flex-col min-h-0 flex-1">
+            <p className="text-2xs font-medium uppercase tracking-widest text-muted-foreground mb-1.5 shrink-0">Presets</p>
+            <div className="flex flex-col gap-0.5 overflow-y-auto min-h-0 flex-1">
               {presets.map(({ label, range }) => (
-                <Button
-                  size="sm"
-                  type="button"
-                  variant="outline"
-                  className="w-full justify-start text-left text-xs"
+                <button
                   key={label}
+                  type="button"
                   onClick={() => applyPreset(range)}
+                  className="text-left px-1.5 py-0.5 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-muted"
                 >
                   {label}
-                </Button>
+                </button>
               ))}
             </div>
           </div>

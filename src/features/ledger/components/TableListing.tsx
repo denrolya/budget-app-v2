@@ -32,7 +32,6 @@ interface Props {
   before: Moment;
   showEmptyDays?: boolean;
   isReversedOrder?: boolean;
-  compact?: boolean;
 }
 
 const TableListing: React.FC<Props> = ({
@@ -41,7 +40,6 @@ const TableListing: React.FC<Props> = ({
   before,
   showEmptyDays = true,
   isReversedOrder = false,
-  compact = true,
 }) => {
   const { update: updateTransaction, delete: deleteTransaction, isUpdating } = useTransactionsMutations();
   const { delete: deleteTransfer } = useTransfersMutations();
@@ -50,13 +48,13 @@ const TableListing: React.FC<Props> = ({
   const [openSheetId, setOpenSheetId] = useState<number | null>(null);
 
   const dates = useMemo(() => {
-    const d: Moment[] = [];
+    const dayList: Moment[] = [];
     const current = after.clone();
     while (current.isSameOrBefore(before)) {
-      d.push(current.clone());
+      dayList.push(current.clone());
       current.add(1, 'day');
     }
-    return isReversedOrder ? d.reverse() : d;
+    return isReversedOrder ? dayList.reverse() : dayList;
   }, [after, before, isReversedOrder]);
 
   const inlineEdit = useInlineEdit({
@@ -108,8 +106,7 @@ const TableListing: React.FC<Props> = ({
         originalTransaction: transaction,
       });
       toast.success('Transaction unmarked as not draft');
-    } catch (error) {
-      console.error('Failed to unmark transaction as not draft:', error);
+    } catch {
       toast.error('Failed to unmark transaction as not draft. Please try again.');
     }
   };
@@ -128,7 +125,7 @@ const TableListing: React.FC<Props> = ({
   );
 
   return (
-    <div className="animate-in fade-in-0 duration-300 ease-out">
+    <div>
       <Table className="min-w-[860px] table-fixed">
         <colgroup>
           <col className="w-4" />
@@ -153,7 +150,7 @@ const TableListing: React.FC<Props> = ({
           </TableRow>
         </TableHeader>
 
-        {dates.map((date, dateIdx) => {
+        {dates.map((date) => {
           const found = groupedItems?.find((group) => group[0].isSame(date, 'day')) ?? ([null, [], 0, 0, 0, 0] as any);
 
           const [, items, transactionsValue, transfersValue, transactionsCount, transfersCount] = found as [
@@ -168,13 +165,8 @@ const TableListing: React.FC<Props> = ({
           if (!showEmptyDays && items.length === 0) return null;
 
           return (
-            <tbody
-              style={{ animationDelay: `${Math.min(dateIdx * 20, 200)}ms`, animationFillMode: 'both' }}
-              className="animate-in fade-in-0 slide-in-from-bottom-1 duration-200 ease-out"
-              key={date.format(BACKEND_DATE_FORMAT)}
-            >
+            <tbody key={date.format(BACKEND_DATE_FORMAT)}>
               <DateGroupHeaderRow
-                compact={compact}
                 left={
                   <div className="flex items-center space-x-4">
                     <RelativeDatetimeDisplay
@@ -221,13 +213,12 @@ const TableListing: React.FC<Props> = ({
 
                     return (
                       <TransferRow
-                        compact={compact}
-                        renderDetails={(t) => <TransferDetails transfer={t} />}
+                        renderDetails={(transferItem) => <TransferDetails transfer={transferItem} />}
                         sheetOpen={openSheetId === transfer.id}
                         transfer={transfer}
                         key={`transfer-${transfer.id}`}
-                        onDelete={(t) => handleDelete(t)}
-                        onEdit={(t) => openForm(FormType.Transfer, t)}
+                        onDelete={(transferItem) => handleDelete(transferItem)}
+                        onEdit={(transferItem) => openForm(FormType.Transfer, transferItem)}
                         onSheetOpenChange={(open) => setOpenSheetId(open ? transfer.id : null)}
                       />
                     );
@@ -238,15 +229,14 @@ const TableListing: React.FC<Props> = ({
                   return (
                     <TransactionRow
                       columns={transactionColumns as any}
-                      compact={compact}
                       inlineEdit={inlineEdit}
-                      renderDetails={(t) => <TransactionDetails transaction={t} />}
+                      renderDetails={(transactionItem) => <TransactionDetails transaction={transactionItem} />}
                       sheetOpen={openSheetId === transaction.id}
                       transaction={transaction}
                       className="text-xs"
-                      key={`tx-${transaction.id}`}
-                      onDelete={(t) => handleDelete(t)}
-                      onOpenForm={(t) => openForm(FormType.Transaction, t)}
+                      key={`transaction-${transaction.id}`}
+                      onDelete={(transactionItem) => handleDelete(transactionItem)}
+                      onOpenForm={(transactionItem) => openForm(FormType.Transaction, transactionItem)}
                       onSheetOpenChange={(open) => setOpenSheetId(open ? transaction.id : null)}
                       onToggleDraft={toggleDraft}
                     />

@@ -1,19 +1,13 @@
-import React, { useMemo } from 'react';
+import { ChevronRight } from 'lucide-react';
+import React from 'react';
 
+import type { CURRENCY_CODE } from '@/constants/currency';
 import MoneyValue from '@/components/common/MoneyValue';
-import { Button } from '@/components/ui/button';
-import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-import DistributionListRowMenu from './DistributionListRowMenu';
 import type { Item } from './types';
 
 type RenderLabelArgs = {
-  item: Item;
-  percentage: number;
-};
-
-type RenderTooltipArgs = {
   item: Item;
   percentage: number;
 };
@@ -26,14 +20,9 @@ type Props = {
   onRowClick?: (id: string) => void;
   onViewTransactions: (id: string) => void;
   renderLabel?: (args: RenderLabelArgs) => React.ReactNode;
-  renderTooltip?: (args: RenderTooltipArgs) => React.ReactNode;
 };
 
-const ROW_BASE = 'w-full flex items-center justify-between gap-3 rounded px-2 py-1 text-left transition-colors';
-const ROW_INTERACTIVE =
-  'hover:bg-muted/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
-
-const DistributionTable: React.FC<Props> = ({
+const DistributionList: React.FC<Props> = ({
   ariaLabel,
   items,
   total,
@@ -41,120 +30,96 @@ const DistributionTable: React.FC<Props> = ({
   onRowClick,
   onViewTransactions,
   renderLabel,
-  renderTooltip,
 }) => {
-  const rows = useMemo(() => [...items].reverse(), [items]);
-
-  const DefaultLabel = useMemo(
-    () =>
-      ({ item, percentage }: RenderLabelArgs) => (
-        <span className="truncate text-sm leading-5">
-          {item.name}
-          {item.value > 0 ? (
-            <small className="ml-1 text-xs text-muted-foreground">({percentage.toFixed(0)}%)</small>
-          ) : null}
-        </span>
-      ),
-    [],
-  );
-
-  const DefaultTooltip = useMemo(
-    () =>
-      ({ item }: RenderTooltipArgs) => <span className="truncate">{item.name}</span>,
-    [],
-  );
-
-  const LabelRenderer = renderLabel ?? DefaultLabel;
-  const TooltipRenderer = renderTooltip ?? DefaultTooltip;
-
-  const isClickable = Boolean(onRowClick);
-
   return (
-    <div className="flex-1 min-h-0">
-      <ScrollArea aria-label={ariaLabel} className="h-full min-h-0">
-        <div className="space-y-0.5 min-w-0">
-          {rows.map((item) => {
-            const dotColor = getDotColor?.(item) ?? null;
-            const percentage = total > 0 ? (item.value / total) * 100 : 0;
+    <ScrollArea aria-label={ariaLabel} className="h-full min-h-0">
+      <div className="py-1">
+        {items.map((item) => {
+          const rowKey = String(item.id);
+          const dotColor = getDotColor?.(item) ?? item.color ?? null;
+          const percentage = total > 0 ? (item.value / total) * 100 : 0;
+          const canDrill = item.hasChildren && !!onRowClick;
 
-            const left = (
-              <div className="min-w-0 flex items-center gap-2">
-                {dotColor && (
-                  <span
-                    aria-hidden="true"
-                    style={{ backgroundColor: dotColor }}
-                    className="h-2.5 w-2.5 rounded-full shrink-0"
+          const handleClick = () => {
+            if (onRowClick) {
+              onRowClick(rowKey);
+            } else {
+              onViewTransactions(rowKey);
+            }
+          };
+
+          return (
+            <button
+              key={rowKey}
+              type="button"
+              aria-label={`${item.name}: ${percentage.toFixed(0)}%`}
+              className="group w-full flex items-center gap-2 px-2 py-1 text-left rounded hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
+              onClick={handleClick}
+            >
+              {/* Color dot */}
+              {dotColor && (
+                <span
+                  aria-hidden="true"
+                  className="h-2 w-2 rounded-full shrink-0"
+                  style={{ backgroundColor: dotColor }}
+                />
+              )}
+
+              {/* Name */}
+              <span className="min-w-0 flex-[2] truncate text-2xs text-foreground">
+                {renderLabel ? renderLabel({ item, percentage }) : item.name}
+              </span>
+
+              {/* Progress bar */}
+              <div
+                aria-hidden="true"
+                className="flex-[3] h-1 bg-muted rounded-full overflow-hidden shrink-0"
+              >
+                <div
+                  className="h-full rounded-full transition-all duration-300"
+                  style={{
+                    width: `${Math.max(percentage, item.value > 0 ? 2 : 0)}%`,
+                    backgroundColor: dotColor ?? 'hsl(var(--primary))',
+                    opacity: 0.7,
+                  }}
+                />
+              </div>
+
+              {/* Value */}
+              <div className="shrink-0 flex flex-col items-end gap-0 min-w-[60px]">
+                <MoneyValue
+                  amount={item.value}
+                  useColors={false}
+                  className="text-2xs font-mono tabular-nums leading-none text-foreground"
+                />
+                {item.amount != null && item.amount !== item.value && (
+                  <MoneyValue
+                    amount={item.amount}
+                    useColors={false}
+                    currency={item.currency != null ? (item.currency as CURRENCY_CODE) : undefined}
+                    className="text-[9px] font-mono tabular-nums leading-none text-muted-foreground mt-0.5"
                   />
                 )}
-
-                <ResponsiveTooltip
-                  openDelay={120}
-                  content={TooltipRenderer({ item, percentage })}
-                  triggerClassName="min-w-0 flex-1"
-                >
-                  <div className="min-w-0 flex-1">{LabelRenderer({ item, percentage })}</div>
-                </ResponsiveTooltip>
               </div>
-            );
 
-            const right = (
-              <div className="flex items-center gap-2 shrink-0">
-                <div className="flex flex-col items-end gap-0.5 text-sm leading-5">
-                  <MoneyValue amount={item.value} useColors={false} className="text-sm leading-5" />
-                  {item.amount && (
-                    <MoneyValue
-                      amount={item.amount}
-                      useColors={false}
-                      currency={
-                        item.currency != null
-                          ? (item.currency as import('@/constants/currency').CURRENCY_CODE)
-                          : undefined
-                      }
-                      className="text-2xs leading-4 text-muted-foreground"
-                    />
-                  )}
-                </div>
-              </div>
-            );
+              {/* Percentage */}
+              <span className="shrink-0 text-[9px] font-mono tabular-nums text-muted-foreground w-7 text-right leading-none">
+                {percentage.toFixed(0)}%
+              </span>
 
-            const rowKey = String(item.id);
-
-            if (isClickable) {
-              return (
-                <DistributionListRowMenu
-                  item={item}
-                  key={rowKey}
-                  onSelect={() => onRowClick?.(rowKey)}
-                  onViewTransactions={() => onViewTransactions(rowKey)}
-                >
-                  <Button
-                    aria-label={`Select ${item.name}`}
-                    type="button"
-                    variant="ghost"
-                    className={`${ROW_BASE} ${ROW_INTERACTIVE} h-auto justify-between font-normal bg-transparent`}
-                    onClick={() => onRowClick?.(rowKey)}
-                    onContextMenu={(e) => e.stopPropagation()}
-                  >
-                    <div className="min-w-0 flex-1">{left}</div>
-                    {right}
-                  </Button>
-                </DistributionListRowMenu>
-              );
-            }
-
-            return (
-              <DistributionListRowMenu item={item} key={rowKey} onViewTransactions={() => onViewTransactions(rowKey)}>
-                <div className={`${ROW_BASE} ${ROW_INTERACTIVE}`} onContextMenu={(e) => e.stopPropagation()}>
-                  <div className="min-w-0 flex-1">{left}</div>
-                  {right}
-                </div>
-              </DistributionListRowMenu>
-            );
-          })}
-        </div>
-      </ScrollArea>
-    </div>
+              {/* Drill indicator */}
+              {canDrill && (
+                <ChevronRight
+                  aria-hidden="true"
+                  className="h-3 w-3 text-muted-foreground shrink-0 opacity-0 group-hover:opacity-60 transition-opacity"
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </ScrollArea>
   );
 };
 
-export default DistributionTable;
+export default DistributionList;

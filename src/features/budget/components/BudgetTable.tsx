@@ -100,8 +100,8 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
         for (const [currency, cv] of Object.entries(item.convertedValues)) {
           const rate = currency === displayCurrency ? 1 : getExchangeRate(currency, displayCurrency, rates);
           if (rate !== null) {
-            income += cv.income * rate;
-            expense += cv.expense * rate;
+            income += (cv.income ?? 0) * rate;
+            expense += (cv.expense ?? 0) * rate;
           }
         }
       }
@@ -112,10 +112,18 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
 
   const getPlannedRollup = useCallback(
     (cat: Category): number | null => {
-      const ids = getAllIds(cat);
+      const ownLine = linesMap.get(cat.id);
+      if (ownLine) {
+        // Envelope model: root has an explicit budget — show it directly.
+        // Children are sub-allocations within this envelope, not added on top.
+        const rate = getExchangeRate(ownLine.plannedCurrency, displayCurrency, rates);
+        return rate !== null ? ownLine.plannedAmount * rate : null;
+      }
+      // No direct line — roll up from descendants (bottom-up detailed budgeting).
+      const descendantIds = getAllIds(cat).slice(1);
       let total = 0;
       let hasAny = false;
-      for (const id of ids) {
+      for (const id of descendantIds) {
         const line = linesMap.get(id);
         if (!line) continue;
         const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
@@ -209,18 +217,13 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
   );
 
   const sectionTotals = (roots: Category[], isExpense: boolean) => {
-    const allIds = new Set(roots.flatMap(getAllIds));
     let totalPlanned = 0;
     let totalActual = 0;
 
-    for (const [catId, line] of linesMap) {
-      if (!allIds.has(catId)) continue;
-      const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
-      if (rate !== null) totalPlanned += line.plannedAmount * rate;
-    }
-
-    for (const cat of roots) {
-      const act = getActual(cat);
+    for (const root of roots) {
+      const planned = getPlannedRollup(root);
+      if (planned !== null) totalPlanned += planned;
+      const act = getActual(root);
       totalActual += isExpense ? act.expense : act.income;
     }
 
@@ -241,7 +244,7 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
         <td className="py-2 px-2 text-right tabular-nums">{planned > 0 ? fmtAmt(planned, displayCurrency) : '—'}</td>
         <td className="py-2 px-2 text-right tabular-nums">{actual > 0 ? fmtAmt(actual, displayCurrency) : '—'}</td>
         <td
-          className={`py-2 px-4 text-right tabular-nums ${remaining < 0 ? 'text-destructive' : 'text-green-600 dark:text-green-400'}`}
+          className={`py-2 px-4 text-right tabular-nums ${remaining < 0 ? 'text-destructive' : 'text-success'}`}
         >
           {planned > 0 ? (
             <>
@@ -276,7 +279,7 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
     <>
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {/* ── Expenses ────────────────────────────────────────────────── */}
-        <div className="overflow-x-auto">
+        <div className="relative z-0 overflow-x-auto">
           <div className="mb-2 px-1">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Expenses</span>
           </div>
@@ -295,7 +298,7 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
         </div>
 
         {/* ── Income ──────────────────────────────────────────────────── */}
-        <div className="overflow-x-auto">
+        <div className="relative z-0 overflow-x-auto">
           <div className="mb-2 px-1">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Income</span>
           </div>
