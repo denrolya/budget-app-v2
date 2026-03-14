@@ -29,9 +29,10 @@ const CurrencyRow: React.FC<CurrencyRowProps> = ({ label, value, onChange }) => 
           type="button"
           className={cn(
             'h-8 px-3 rounded border font-mono text-xs shrink-0 transition-colors flex items-center gap-1.5',
-            value === c
-              ? 'bg-muted text-foreground border-border'
-              : 'text-muted-foreground border-transparent hover:border-border',
+            {
+              'bg-muted text-foreground border-border': value === c,
+              'text-muted-foreground border-transparent hover:border-border': value !== c,
+            },
           )}
           key={c}
           onClick={() => onChange(c)}
@@ -86,16 +87,13 @@ const MobileConverterPage: React.FC = () => {
   };
 
   // All rates relative to `from` currency
-  const relativeRates = useMemo(
-    () => {
-      const fromRate = sourceRates[from] ?? 1;
-      return ALL_CURRENCIES.filter((c) => c !== from).map((c) => {
-        const raw = sourceRates[c];
-        return { currency: c, rate: raw != null ? raw / fromRate : null };
-      });
-    },
-    [from, sourceRates],
-  );
+  const relativeRates = useMemo(() => {
+    const fromRate = sourceRates[from] ?? 1;
+    return ALL_CURRENCIES.filter((c) => c !== from).map((c) => {
+      const raw = sourceRates[c];
+      return { currency: c, rate: raw != null ? raw / fromRate : null };
+    });
+  }, [from, sourceRates]);
 
   return (
     <div className="pb-6">
@@ -125,14 +123,17 @@ const MobileConverterPage: React.FC = () => {
         <div>
           <CurrencyRow label="from" value={from} onChange={setFrom} />
           <input
-            ref={inputRef}
             aria-label="Amount"
             inputMode="decimal"
             placeholder="0"
-            type="number"
+            type="text"
             value={amount}
             className="mt-2 w-full h-12 rounded-md border border-border bg-background font-mono text-xl px-3 tabular-nums text-right text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value.replace(',', '.');
+              if (v === '' || /^\d*\.?\d*$/.test(v)) setAmount(v);
+            }}
+            ref={inputRef}
           />
         </div>
 
@@ -184,10 +185,7 @@ const MobileConverterPage: React.FC = () => {
 
           if (rate == null) {
             return (
-              <div
-                className="flex items-center justify-between px-3 py-3 border-b border-border/30"
-                key={currency}
-              >
+              <div className="flex items-center justify-between px-3 py-3 border-b border-border/30" key={currency}>
                 <div className="flex items-center gap-2.5">
                   <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground w-8">
                     {currency}
@@ -205,9 +203,7 @@ const MobileConverterPage: React.FC = () => {
               key={currency}
             >
               <div className="flex items-center gap-2.5">
-                <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground w-8">
-                  {currency}
-                </span>
+                <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground w-8">{currency}</span>
                 <span className="text-sm text-muted-foreground">{curr.name}</span>
               </div>
               <p className="font-mono text-sm tabular-nums">

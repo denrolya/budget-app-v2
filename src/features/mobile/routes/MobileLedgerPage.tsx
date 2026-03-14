@@ -110,6 +110,7 @@ const MobileLedgerPage: React.FC = () => {
   const ledger = useLedger({
     updateUrl: false,
     omitTransfers: true,
+    initialPerPage: 500,
     initialShowEmptyDays: false,
     initialTimeframe: defaultRange,
     initialFilters: locationAccountId ? { accounts: [locationAccountId] } : undefined,

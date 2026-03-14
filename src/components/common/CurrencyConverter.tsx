@@ -87,9 +87,9 @@ export const CurrencyConverter: React.FC<Props> = ({
   const convertedAmount = (amount * getExchangeRate(fromCurrency, toCurrency)).toFixed(2);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(',', '.');
     if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      setAmount(Number(value));
+      setAmount(value === '' ? 0 : Number(value));
     }
   };
 
@@ -116,6 +116,7 @@ export const CurrencyConverter: React.FC<Props> = ({
           <div className="relative">
             <Input
               autoFocus
+              inputMode="decimal"
               type="text"
               value={amount}
               className="pr-20 text-2xl font-semibold h-16 rounded-xl"
