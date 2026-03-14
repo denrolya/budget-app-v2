@@ -57,11 +57,11 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
   const handleTimeframeChange = useCallback(
     (range: Timeframe) => {
       setTimeframe({
-        after: range.after ? moment(range.after).startOf('day') : timeframe.after,
-        before: range.before ? moment(range.before).endOf('day') : timeframe.before,
+        after: moment(range.after).startOf('day'),
+        before: moment(range.before).endOf('day'),
       });
     },
-    [setTimeframe, timeframe.after, timeframe.before],
+    [setTimeframe],
   );
 
   const handleTypeChange = useCallback((next: TransactionType) => {

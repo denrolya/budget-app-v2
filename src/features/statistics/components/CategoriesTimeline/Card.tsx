@@ -143,11 +143,11 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
   const handleTimeframeChange = useCallback(
     (range: Timeframe) => {
       setTimeframe({
-        after: range.after ? range.after.startOf('day') : timeframe.after,
-        before: range.before ? range.before.endOf('day') : timeframe.before,
+        after: range.after.clone().startOf('day'),
+        before: range.before.clone().endOf('day'),
       });
     },
-    [setTimeframe, timeframe.after, timeframe.before],
+    [setTimeframe],
   );
 
   return (
