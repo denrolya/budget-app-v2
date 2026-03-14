@@ -2,25 +2,15 @@ import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
+import MobileDateNavigation from '@/components/common/MobileDateNavigation';
 import MoneyValue from '@/components/common/MoneyValue';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
-import { FILTER_PRESETS } from '@/constants/datetime';
 import AccountMarker from '@/features/accounts/components/AccountMarker';
 import { useLedger } from '@/features/ledger';
 import { Transaction } from '@/features/transactions';
 import { TransactionValue } from '@/features/transactions/components/TransactionValue';
 import { useActiveAccountsWithDefaultOrder } from '@/hooks/financeData';
-import { formatRange } from '@/lib/datetime/formatShortDate';
 import { cn } from '@/lib/utils';
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const PRESETS = [
-  { label: '7d', days: 7 },
-  { label: '30d', days: 30 },
-  { label: '90d', days: 90 },
-] as const;
 
 // ─── Transaction detail drawer ──────────────────────────────────────────────
 
@@ -106,7 +96,6 @@ const MobileLedgerPage: React.FC = () => {
   const location = useLocation();
   const locationAccountId = (location.state as { accountId?: number } | null)?.accountId ?? null;
 
-  const [activeDays, setActiveDays] = useState<number | null>(30);
   const [activeAccountId, setActiveAccountId] = useState<number | null>(locationAccountId);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
 
@@ -134,22 +123,10 @@ const MobileLedgerPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handlePreset = useCallback(
-    (days: number) => {
-      setActiveDays(days);
-      ledger.setTimeframe({
-        after: moment().subtract(days, 'days').startOf('day'),
-        before: moment().endOf('day'),
-      });
-    },
-    [ledger],
-  );
-
   const handleCustomRange = useCallback(
     (range: { after?: moment.Moment | null; before?: moment.Moment | null }) => {
       const after = range.after ? moment(range.after).startOf('day') : ledger.timeframe.after;
       const before = range.before ? moment(range.before).endOf('day') : ledger.timeframe.before;
-      setActiveDays(null);
       ledger.setTimeframe({ after, before });
     },
     [ledger],
@@ -213,8 +190,8 @@ const MobileLedgerPage: React.FC = () => {
                     alwaysShowConversion
                     revert
                     showSign
-                    transaction={item}
                     showValuesTooltip={false}
+                    transaction={item}
                     className="font-mono text-sm tabular-nums shrink-0"
                   />
                 </button>
@@ -228,35 +205,13 @@ const MobileLedgerPage: React.FC = () => {
       <div className="shrink-0 border-t border-border bg-background">
         {/* Period row */}
         <div className="flex items-center gap-1 px-3 pt-2 pb-1.5">
-          <DaterangePickerWithPresets
+          <MobileDateNavigation
             after={ledger.timeframe.after}
             before={ledger.timeframe.before}
-            presets={FILTER_PRESETS}
+            className="flex-1"
             onChange={handleCustomRange}
-          >
-            <button
-              type="button"
-              className="font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground mr-1 transition-colors"
-            >
-              {activeDays === null ? formatRange(ledger.timeframe) : 'period'}
-            </button>
-          </DaterangePickerWithPresets>
-          {PRESETS.map(({ label, days }) => (
-            <button
-              type="button"
-              className={cn(
-                'h-7 px-2.5 rounded border font-mono text-xs uppercase tracking-wider transition-colors',
-                activeDays === days
-                  ? 'bg-muted text-foreground border-border'
-                  : 'text-muted-foreground border-transparent hover:border-border',
-              )}
-              key={label}
-              onClick={() => handlePreset(days)}
-            >
-              {label}
-            </button>
-          ))}
-          <span className="ml-auto font-mono text-xs text-muted-foreground tabular-nums">{totalItems} tx</span>
+          />
+          <span className="shrink-0 font-mono text-xs text-muted-foreground tabular-nums">{totalItems} tx</span>
         </div>
 
         {/* Account chips — horizontally scrollable */}

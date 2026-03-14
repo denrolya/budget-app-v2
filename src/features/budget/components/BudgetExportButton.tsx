@@ -41,10 +41,8 @@ const BudgetExportButton: React.FC<Props> = ({ budget, analytics, displayCurrenc
       for (const id of getAllIds(cat)) {
         const item = analyticsMap.get(id);
         if (!item) continue;
-        for (const [cur, cv] of Object.entries(item.convertedValues)) {
-          const rate = cur === displayCurrency ? 1 : getExchangeRate(cur, displayCurrency, rates);
-          if (rate !== null) total += (isExpense ? cv.expense : cv.income) * rate;
-        }
+        const cv = item.convertedValues[displayCurrency];
+        if (cv) total += isExpense ? cv.expense : cv.income;
       }
       return total;
     };

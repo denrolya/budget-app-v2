@@ -226,7 +226,7 @@ const BudgetDetailRoute: React.FC = () => {
                 Expense distribution
               </p>
               <div className="rounded-lg border bg-card p-3">
-                <BudgetDistributionChart analytics={analytics} displayCurrency={displayCurrency} rates={rates} />
+                <BudgetDistributionChart analytics={analytics} displayCurrency={displayCurrency} />
               </div>
             </div>
           </div>

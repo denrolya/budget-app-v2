@@ -10,15 +10,23 @@ import type Account from '../models/Account';
 
 import AccountMarker from './AccountMarker';
 
+type AccountTypeaheadSize = 'sm' | 'default';
+
 type AccountTypeaheadProps = Omit<
   TypeaheadProps<Account, string>,
-  'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement' | 'renderSelected'
+  'options' | 'valueField' | 'labelField' | 'groupBy' | 'renderElement' | 'renderSelected' | 'size'
 > & {
   className?: string;
+  size?: AccountTypeaheadSize;
+};
+
+const SIZE_CLASSES: Record<AccountTypeaheadSize, string> = {
+  sm: 'h-7 text-xs',
+  default: '',
 };
 
 const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(
-  ({ multiple = false, value, onChange, className, ...props }, ref) => {
+  ({ multiple = false, value, onChange, className, size = 'default', ...props }, ref) => {
     const accounts = useAccountsWithDefaultOrder();
 
     const searchIndex = useMemo(() => {
@@ -109,7 +117,7 @@ const AccountTypeahead = forwardRef<HTMLInputElement, AccountTypeaheadProps>(
         renderSelected={renderSelected}
         value={value}
         valueField="id"
-        className={className}
+        className={cn(SIZE_CLASSES[size], className)}
         dropdownClassName="min-w-[var(--radix-popover-trigger-width)] w-max max-w-sm"
         onChange={onChange}
         ref={ref}

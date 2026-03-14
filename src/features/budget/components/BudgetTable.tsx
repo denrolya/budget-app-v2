@@ -2,6 +2,7 @@ import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+import { cn } from '@/lib/utils';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
@@ -9,7 +10,7 @@ import { TransactionsDrawer, type DrawerListingTarget } from '@/features/statist
 import type { ConvertedValues } from '@/features/transactions';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 
-import { useUpsertBudgetLine, useUpdateBudgetLineNote } from '../api';
+import { useDeleteBudgetLine, useUpsertBudgetLine, useUpdateBudgetLineNote } from '../api';
 import type { BudgetAnalyticsItem, BudgetDTO, BudgetLineDTO, CategoryDailyStatsItem } from '../api/types';
 
 import BudgetCategoryRow from './BudgetCategoryRow';
@@ -47,6 +48,7 @@ const fmtAmt = (n: number, currency: string) => {
 const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurrency, rates, dailyStats }) => {
   const { data: catData } = useCategoryList();
   const { mutate: upsertLine, isPending: isSaving } = useUpsertBudgetLine(budgetId);
+  const { mutate: deleteLine } = useDeleteBudgetLine(budgetId);
   const { mutate: updateNote } = useUpdateBudgetLineNote(budgetId);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -97,12 +99,10 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
       for (const id of ids) {
         const item = analyticsMap.get(id);
         if (!item) continue;
-        for (const [currency, cv] of Object.entries(item.convertedValues)) {
-          const rate = currency === displayCurrency ? 1 : getExchangeRate(currency, displayCurrency, rates);
-          if (rate !== null) {
-            income += (cv.income ?? 0) * rate;
-            expense += (cv.expense ?? 0) * rate;
-          }
+        const cv = item.convertedValues[displayCurrency];
+        if (cv) {
+          income += cv.income ?? 0;
+          expense += cv.expense ?? 0;
         }
       }
       return { income, expense };
@@ -158,6 +158,16 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
     [upsertLine],
   );
 
+  const handleDelete = useCallback(
+    (lineId: number) => {
+      deleteLine(lineId, {
+        onSuccess: () => toast.success('Budget line removed'),
+        onError: () => toast.error('Failed to remove budget line'),
+      });
+    },
+    [deleteLine],
+  );
+
   const handleNoteUpdate = useCallback(
     (lineId: number, note: string | null) => {
       updateNote(
@@ -190,10 +200,10 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
         isSaving={isSaving}
         line={linesMap.get(cat.id) ?? null}
         plannedInDisplayCurrency={getPlannedRollup(cat)}
-        rates={rates}
         sparklineData={dailyStatsMap.get(cat.id)?.days}
         key={cat.id}
         onCategoryClick={handleCategoryClick}
+        onDelete={handleDelete}
         onNoteUpdate={handleNoteUpdate}
         onSave={handleSave}
         onToggle={() => toggle(cat.id)}
@@ -238,12 +248,15 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
   }) => {
     const remaining = isExpense ? planned - actual : actual - planned;
     const pct = planned > 0 ? (actual / planned) * 100 : 0;
+    const remainingColor = isExpense
+      ? remaining < 0 ? 'text-destructive' : 'text-success'
+      : pct < 80 ? 'text-destructive' : pct < 100 ? 'text-warning' : 'text-success';
     return (
       <tr className="bg-muted/40 font-semibold text-sm border-t-2">
         <td className="py-2 pl-4 pr-2 text-left">{label} Total</td>
         <td className="py-2 px-2 text-right tabular-nums">{planned > 0 ? fmtAmt(planned, displayCurrency) : '—'}</td>
         <td className="py-2 px-2 text-right tabular-nums">{actual > 0 ? fmtAmt(actual, displayCurrency) : '—'}</td>
-        <td className={`py-2 px-4 text-right tabular-nums ${remaining < 0 ? 'text-destructive' : 'text-success'}`}>
+        <td className={cn('py-2 px-4 text-right tabular-nums', remainingColor)}>
           {planned > 0 ? (
             <>
               {fmtAmt(remaining, displayCurrency)}

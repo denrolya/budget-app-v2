@@ -286,8 +286,9 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
                   disabled={field.disabled}
                   multiple={false}
                   name={field.name}
+                  size="sm"
                   value={field.value != null ? String(field.value) : null}
-                  className={cn('h-7 text-xs w-full justify-between', { 'text-muted-foreground': !field.value })}
+                  className={cn('w-full', { 'text-muted-foreground': !field.value })}
                   onBlur={field.onBlur}
                   onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                   ref={field.ref}
@@ -307,8 +308,9 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
                   disabled={field.disabled}
                   multiple={false}
                   name={field.name}
+                  size="sm"
                   value={field.value != null ? String(field.value) : null}
-                  className={cn('h-7 text-xs w-full justify-between', { 'text-muted-foreground': !field.value })}
+                  className={cn('w-full', { 'text-muted-foreground': !field.value })}
                   onBlur={field.onBlur}
                   onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                   ref={field.ref}
@@ -433,8 +435,9 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
                     disabled={field.disabled}
                     multiple={false}
                     name={field.name}
+                    size="sm"
                     value={field.value != null ? String(field.value) : null}
-                    className={cn('h-7 text-xs w-full justify-between', { 'text-muted-foreground': !field.value })}
+                    className={cn('w-full', { 'text-muted-foreground': !field.value })}
                     onBlur={field.onBlur}
                     onChange={(v) => field.onChange(v ? Number(v) : undefined)}
                     ref={field.ref}

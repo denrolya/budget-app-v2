@@ -1,4 +1,4 @@
-import { ChevronRight, Check, X, StickyNote } from 'lucide-react';
+import { ChevronRight, Check, X, Trash2, StickyNote } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 
 import { Input } from '@/components/ui/input';
@@ -7,8 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
-import { getExchangeRate } from '@/lib/getExchangeRates';
-import type { ConvertedValues } from '@/features/transactions';
 import { type Category } from '@/features/categories';
 
 import type { BudgetLineDTO, CategoryDayStats } from '../api/types';
@@ -32,8 +30,8 @@ interface Props {
   onNoteUpdate: (lineId: number, note: string | null) => void;
   isSaving: boolean;
   onCategoryClick?: (categoryId: number, categoryName: string) => void;
+  onDelete?: (lineId: number) => void;
   sparklineData?: CategoryDayStats[];
-  rates: ConvertedValues | null;
 }
 
 const fmtAmt = (n: number, currency: string) => {
@@ -42,17 +40,11 @@ const fmtAmt = (n: number, currency: string) => {
 };
 
 // Tiny SVG sparkline showing daily expense trend
-const Sparkline: React.FC<{ data: CategoryDayStats[]; currency: DisplayCurrency; rates: ConvertedValues | null }> = ({
-  data,
-  currency,
-  rates,
-}) => {
+const Sparkline: React.FC<{ data: CategoryDayStats[]; currency: DisplayCurrency }> = ({ data, currency }) => {
   const values = data.map((d) => {
     let total = 0;
-    for (const [cur, cv] of Object.entries(d.convertedValues)) {
-      const rate = cur === currency ? 1 : getExchangeRate(cur, currency, rates);
-      if (rate !== null) total += cv.expense * rate;
-    }
+    const cv = d.convertedValues[currency];
+    if (cv) total += cv.expense;
     return total;
   });
 
@@ -164,8 +156,8 @@ const BudgetCategoryRow: React.FC<Props> = ({
   onNoteUpdate,
   isSaving,
   onCategoryClick,
+  onDelete,
   sparklineData,
-  rates,
 }) => {
   const [editing, setEditing] = useState(false);
   const [editAmount, setEditAmount] = useState('');
@@ -184,8 +176,14 @@ const BudgetCategoryRow: React.FC<Props> = ({
   const pct = hasPlanned && plannedInDisplayCurrency! > 0 ? (actualValue / plannedInDisplayCurrency!) * 100 : null;
 
   const remainingColorClass = (() => {
-    if (remaining !== null && remaining < 0) return 'text-destructive';
-    if (isExpenseSection && pct !== null && pct > 80) return 'text-warning';
+    if (isExpenseSection) {
+      if (remaining !== null && remaining < 0) return 'text-destructive';
+      if (pct !== null && pct > 80) return 'text-warning';
+      return 'text-success';
+    }
+    // Income: red only if significantly under target
+    if (pct !== null && pct < 80) return 'text-destructive';
+    if (pct !== null && pct < 100) return 'text-warning';
     return 'text-success';
   })();
 
@@ -291,6 +289,16 @@ const BudgetCategoryRow: React.FC<Props> = ({
             <button aria-label="Cancel" type="button" className="p-1 rounded hover:bg-muted" onClick={cancelEdit}>
               <X className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
+            {line && onDelete && (
+              <button
+                aria-label="Remove planned amount"
+                type="button"
+                className="p-1 rounded hover:bg-muted"
+                onClick={() => { onDelete(line.id); cancelEdit(); }}
+              >
+                <Trash2 className="h-3.5 w-3.5 text-destructive" />
+              </button>
+            )}
           </div>
         ) : (
           <button
@@ -319,7 +327,7 @@ const BudgetCategoryRow: React.FC<Props> = ({
           <div className="flex flex-col items-end gap-0.5">
             <span>{fmtAmt(actualValue, displayCurrency)}</span>
             {sparklineData && sparklineData.length >= 2 && (
-              <Sparkline currency={displayCurrency} data={sparklineData} rates={rates} />
+              <Sparkline currency={displayCurrency} data={sparklineData} />
             )}
           </div>
         ) : (

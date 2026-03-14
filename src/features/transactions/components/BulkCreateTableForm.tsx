@@ -351,8 +351,9 @@ export const BulkCreateTableForm: React.FC = () => {
                               disabled={field.disabled}
                               multiple={false}
                               name={field.name}
+                              size="sm"
                               value={field.value != null ? String(field.value) : null}
-                              className={cn(typeaheadBase, 'w-full', {
+                              className={cn('w-full', {
                                 'text-muted-foreground': !field.value,
                               })}
                               onBlur={field.onBlur}

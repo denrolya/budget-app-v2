@@ -65,10 +65,8 @@ const BudgetCategoryBarChart: React.FC<Props> = ({ budget, analytics, displayCur
         for (const id of ids) {
           const item = analyticsMap.get(id);
           if (!item) continue;
-          for (const [currency, cv] of Object.entries(item.convertedValues)) {
-            const rate = currency === displayCurrency ? 1 : getExchangeRate(currency, displayCurrency, rates);
-            if (rate !== null) actual += (cv.expense ?? 0) * rate;
-          }
+          const cv = item.convertedValues[displayCurrency];
+          if (cv) actual += cv.expense ?? 0;
         }
 
         // Envelope model: own line = total cap; no own line = sum descendants.

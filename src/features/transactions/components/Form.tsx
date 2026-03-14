@@ -223,7 +223,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                   multiple={false}
                   name={field.name}
                   value={field.value != null ? String(field.value) : null}
-                  className={cn('w-full h-7 text-xs py-0.5 px-2 justify-between', {
+                  className={cn('w-full h-7 text-xs', {
                     'text-muted-foreground': !field.value,
                   })}
                   onBlur={field.onBlur}
@@ -250,7 +250,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                   name={field.name}
                   type={transactionType}
                   value={field.value != null ? String(field.value) : null}
-                  className={cn('w-full h-7 text-xs py-0.5 px-2 justify-between', {
+                  className={cn('w-full h-7 text-xs', {
                     'text-muted-foreground': !field.value,
                   })}
                   onBlur={field.onBlur}
@@ -271,8 +271,9 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                   disabled={field.disabled}
                   multiple={false}
                   name={field.name}
+                  size="sm"
                   value={field.value != null ? String(field.value) : null}
-                  className={cn('w-full h-7 text-xs py-0.5 px-2 justify-between', {
+                  className={cn('w-full', {
                     'text-muted-foreground': !field.value,
                   })}
                   onBlur={field.onBlur}
@@ -351,8 +352,9 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                         disabled={f.disabled}
                         multiple={false}
                         name={f.name}
+                        size="sm"
                         value={f.value != null ? String(f.value) : null}
-                        className={cn('w-full h-7 text-xs py-0.5 px-2 justify-between', {
+                        className={cn('w-full', {
                           'text-muted-foreground': !f.value,
                         })}
                         onBlur={f.onBlur}

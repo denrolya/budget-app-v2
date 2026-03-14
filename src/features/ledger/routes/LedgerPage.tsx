@@ -1,9 +1,9 @@
-import { CalendarIcon, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
+import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
 import type moment from 'moment';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
-import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import FiltersToggleButton from '@/components/common/FiltersToggleButton';
+import MobileDateNavigation from '@/components/common/MobileDateNavigation';
 import FullHeightPageContent from '@/components/layout/FullHeightPageContent';
 import { usePageHeaderTitle } from '@/components/layout/header/PageHeaderContext';
 import { Button } from '@/components/ui/button';
@@ -45,11 +45,6 @@ export const LedgerPage: React.FC = () => {
       });
     },
     [ledger],
-  );
-
-  const mobileDateLabel = useMemo(
-    () => `${ledger.timeframe.after.format('DD MMM')} – ${ledger.timeframe.before.format('DD MMM')}`,
-    [ledger.timeframe.after, ledger.timeframe.before],
   );
 
   const handleHeatmapRangeSelect = useCallback(
@@ -133,18 +128,13 @@ export const LedgerPage: React.FC = () => {
 
           {/* Mobile controls bar — visible on small screens only */}
           <div className="shrink-0 flex md:hidden items-center justify-between gap-2 border-b bg-card px-3 py-1.5">
-            <DaterangePickerWithPresets
+            <MobileDateNavigation
               after={ledger.timeframe.after}
               before={ledger.timeframe.before}
               onChange={handleMobileTimeframeChange}
-            >
-              <Button size="sm" type="button" variant="outline" className="h-7 px-2 text-xs gap-1.5">
-                <CalendarIcon aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
-                <span className="max-w-28 truncate">{mobileDateLabel}</span>
-              </Button>
-            </DaterangePickerWithPresets>
+            />
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 shrink-0">
               {ledger.activeFilterCount > 0 && (
                 <Button
                   aria-label="Reset filters"

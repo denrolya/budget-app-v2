@@ -315,8 +315,9 @@ export const ListingControls: React.FC<Props> = ({
             multiple
             disabled={disabledFilters.includes('accounts')}
             placeholder="Accounts"
+            size="sm"
             value={accountsValue}
-            className="h-7 text-xs w-full"
+            className="w-full"
             onChange={(accounts) => setFilter('accounts', accounts)}
           />
         </div>

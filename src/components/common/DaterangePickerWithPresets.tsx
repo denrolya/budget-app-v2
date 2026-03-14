@@ -43,6 +43,8 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
   const [displayMonth, setDisplayMonth] = useState<Date>(() => committed.from ?? after.toDate());
 
   const debounceRef = useRef<number | null>(null);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   const clearDebounce = useCallback(() => {
     if (debounceRef.current != null) {
@@ -56,14 +58,17 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
       clearDebounce();
       if (!next.from || !next.to) return;
       debounceRef.current = window.setTimeout(() => {
-        onChange({ after: moment(next.from).startOf('day'), before: moment(next.to!).endOf('day') });
+        onChangeRef.current({ after: moment(next.from).startOf('day'), before: moment(next.to!).endOf('day') });
       }, debounceMs);
     },
-    [clearDebounce, debounceMs, onChange],
+    [clearDebounce, debounceMs],
   );
 
+  const prevOpenRef = useRef(false);
   useEffect(() => {
-    if (isOpen) {
+    const justOpened = isOpen && !prevOpenRef.current;
+    prevOpenRef.current = isOpen;
+    if (justOpened) {
       setDraft(committed);
       setDisplayMonth(committed.from ?? after.toDate());
       clearDebounce();
@@ -94,9 +99,9 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
       const next: DateRange = { from, to };
       setDraft(next);
       setDisplayMonth(from);
-      onChange({ after: moment(from).startOf('day'), before: moment(to).endOf('day') });
+      onChangeRef.current({ after: moment(from).startOf('day'), before: moment(to).endOf('day') });
     },
-    [clearDebounce, onChange],
+    [clearDebounce],
   );
 
   const jumpToYear = useCallback((year: number) => setDisplayMonth((prev) => new Date(year, prev.getMonth(), 1)), []);

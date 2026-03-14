@@ -45,6 +45,14 @@ export const useBatchCreateBudgetLines = (budgetId: number) => {
   });
 };
 
+export const useDeleteBudgetLine = (budgetId: number) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (lineId: number) => budgetService.deleteLine(budgetId, lineId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.detail(budgetId) }),
+  });
+};
+
 export const useUpdateBudgetLineNote = (budgetId: number) => {
   const qc = useQueryClient();
   return useMutation({

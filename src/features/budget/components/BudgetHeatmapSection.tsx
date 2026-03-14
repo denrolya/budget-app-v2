@@ -44,26 +44,38 @@ const BudgetHeatmapSection: React.FC<Props> = ({ budget, analytics, displayCurre
       (catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income) ?? []).flatMap(getAllIds),
     );
 
-    let totalPlannedExpense = 0;
-    let totalPlannedIncome = 0;
-    for (const line of budget.lines ?? []) {
-      const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
-      if (rate === null) continue;
-      const converted = line.plannedAmount * rate;
-      if (expenseIds.has(line.categoryId)) totalPlannedExpense += converted;
-      else if (incomeIds.has(line.categoryId)) totalPlannedIncome += converted;
-    }
+    const linesMap = new Map((budget.lines ?? []).map((l) => [l.categoryId, l]));
+    const plannedRollup = (cat: Category): number => {
+      const own = linesMap.get(cat.id);
+      if (own) {
+        const rate = getExchangeRate(own.plannedCurrency, displayCurrency, rates);
+        return rate !== null ? own.plannedAmount * rate : 0;
+      }
+      return getAllIds(cat)
+        .slice(1)
+        .reduce((sum, id) => {
+          const line = linesMap.get(id);
+          if (!line) return sum;
+          const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
+          return rate !== null ? sum + line.plannedAmount * rate : sum;
+        }, 0);
+    };
+
+    const expenseRoots = catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense) ?? [];
+    const incomeRoots = catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income) ?? [];
+    const totalPlannedExpense = expenseRoots.reduce((sum, root) => sum + plannedRollup(root), 0);
+    const totalPlannedIncome = incomeRoots.reduce((sum, root) => sum + plannedRollup(root), 0);
 
     let totalActualExpense = 0;
     let totalActualIncome = 0;
     for (const item of analytics) {
-      for (const [currency, cv] of Object.entries(item.convertedValues)) {
-        const rate = currency === displayCurrency ? 1 : getExchangeRate(currency, displayCurrency, rates);
-        if (rate !== null) {
-          totalActualExpense += cv.expense * rate;
-          totalActualIncome += cv.income * rate;
-        }
-      }
+      const isExpense = expenseIds.has(item.categoryId);
+      const isIncome = incomeIds.has(item.categoryId);
+      if (!isExpense && !isIncome) continue;
+      const cv = item.convertedValues[displayCurrency];
+      if (!cv) continue;
+      if (isExpense) totalActualExpense += cv.expense;
+      if (isIncome) totalActualIncome += cv.income;
     }
 
     const start = moment(budget.startDate);

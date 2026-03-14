@@ -2,8 +2,6 @@ import React, { useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
-import { getExchangeRate } from '@/lib/getExchangeRates';
-import type { ConvertedValues } from '@/features/transactions';
 import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 
 import type { BudgetAnalyticsItem } from '../api/types';
@@ -13,7 +11,6 @@ import type { DisplayCurrency } from './BudgetDisplayCurrency';
 interface Props {
   analytics: BudgetAnalyticsItem[];
   displayCurrency: DisplayCurrency;
-  rates: ConvertedValues | null;
 }
 
 const PALETTE = [
@@ -40,7 +37,7 @@ const fmtAmt = (n: number, currency: string) => {
   return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 };
 
-const BudgetDistributionChart: React.FC<Props> = ({ analytics, displayCurrency, rates }) => {
+const BudgetDistributionChart: React.FC<Props> = ({ analytics, displayCurrency }) => {
   const { data: catData } = useCategoryList();
 
   const chartData = useMemo(() => {
@@ -58,17 +55,15 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, displayCurrency, 
         for (const id of ids) {
           const item = analyticsMap.get(id);
           if (!item) continue;
-          for (const [currency, cv] of Object.entries(item.convertedValues)) {
-            const rate = currency === displayCurrency ? 1 : getExchangeRate(currency, displayCurrency, rates);
-            if (rate !== null) total += cv.expense * rate;
-          }
+          const cv = item.convertedValues[displayCurrency];
+          if (cv) total += cv.expense;
         }
         if (total <= 0) return null;
         return { name: cat.name, value: Math.round(total) };
       })
       .filter(Boolean)
       .sort((a, b) => b!.value - a!.value) as { name: string; value: number }[];
-  }, [catData, analytics, displayCurrency, rates]);
+  }, [catData, analytics, displayCurrency]);
 
   if (chartData.length === 0) {
     return <div className="flex items-center justify-center h-40 text-sm text-muted-foreground">No spending data</div>;

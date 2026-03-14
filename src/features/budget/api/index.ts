@@ -2,6 +2,7 @@ export { useListBudgets, useBudget, useBudgetAnalytics, useCategoryDailyStats, u
 export {
   useCreateBudget,
   useDeleteBudget,
+  useDeleteBudgetLine,
   useUpsertBudgetLine,
   useUpdateBudgetLineNote,
   useBatchCreateBudgetLines,

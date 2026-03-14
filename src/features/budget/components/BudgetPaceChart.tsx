@@ -63,10 +63,8 @@ const BudgetPaceChart: React.FC<Props> = ({ budget, analytics: _analytics, displ
     const dailyMap = new Map<string, number>();
     for (const d of dailyStatsData?.data ?? []) {
       let dayExpense = 0;
-      for (const [currency, cv] of Object.entries(d.convertedValues)) {
-        const rate = currency === displayCurrency ? 1 : getExchangeRate(currency, displayCurrency, rates);
-        if (rate !== null) dayExpense += cv.expense * rate;
-      }
+      const cv = d.convertedValues[displayCurrency];
+      if (cv) dayExpense += cv.expense;
       if (dayExpense > 0) dailyMap.set(d.day, dayExpense);
     }
 
