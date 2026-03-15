@@ -21,9 +21,9 @@ const SPARKLINE_BEFORE = moment().endOf('day');
 
 const AccountSparkline: React.FC<{ account: Account }> = ({ account }) => {
   const { data } = useBalanceHistory(account.id, SPARKLINE_AFTER, SPARKLINE_BEFORE, 'P1D');
-  const points = data?.data ?? [];
 
   const path = useMemo(() => {
+    const points = data?.data ?? [];
     if (points.length < 2) return null;
     const balances = points.map((p) => p.balance);
     const min = Math.min(...balances);
@@ -38,7 +38,7 @@ const AccountSparkline: React.FC<{ account: Account }> = ({ account }) => {
         return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
       })
       .join(' ');
-  }, [points]);
+  }, [data]);
 
   if (!path) return null;
 

@@ -260,7 +260,7 @@ const BankSheet: React.FC<Props> = ({ account, onAccountUpdate }) => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent align="start" className="w-auto p-0">
-                    <Calendar autoFocus mode="single" selected={syncFrom} onSelect={setSyncFrom} />
+                    <Calendar mode="single" selected={syncFrom} onSelect={setSyncFrom} />
                   </PopoverContent>
                 </Popover>
               </div>
@@ -281,7 +281,7 @@ const BankSheet: React.FC<Props> = ({ account, onAccountUpdate }) => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent align="end" className="w-auto p-0">
-                    <Calendar autoFocus mode="single" selected={syncTo} onSelect={setSyncTo} />
+                    <Calendar mode="single" selected={syncTo} onSelect={setSyncTo} />
                   </PopoverContent>
                 </Popover>
               </div>

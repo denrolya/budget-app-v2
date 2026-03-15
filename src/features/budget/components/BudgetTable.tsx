@@ -107,7 +107,7 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
       }
       return { income, expense };
     },
-    [analyticsMap, displayCurrency, rates],
+    [analyticsMap, displayCurrency],
   );
 
   const getPlannedRollup = useCallback(

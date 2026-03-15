@@ -143,12 +143,12 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
 
   const handleTimeframeChange = useCallback(
     (range: Timeframe) => {
-      setTimeframe((current) => ({
-        after: range.after ? range.after.clone().startOf('day') : current.after,
-        before: range.before ? range.before.clone().endOf('day') : current.before,
-      }));
+      setTimeframe({
+        after: range.after ? range.after.clone().startOf('day') : timeframe.after,
+        before: range.before ? range.before.clone().endOf('day') : timeframe.before,
+      });
     },
-    [setTimeframe],
+    [setTimeframe, timeframe],
   );
 
   const dateLabel = useMemo(
