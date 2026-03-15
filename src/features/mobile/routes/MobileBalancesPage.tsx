@@ -66,8 +66,8 @@ const AccountRow: React.FC<AccountRowProps> = ({ account, dimmed, onClick }) => 
 
   return (
     <button
-      type="button"
       disabled={dimmed}
+      type="button"
       className={cn(
         'w-full flex items-center gap-2.5 px-3 py-3 border-b border-border/40 last:border-0 text-left',
         'hover:bg-muted/30 active:bg-muted/50 transition-colors',

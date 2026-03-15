@@ -197,7 +197,7 @@ export const BulkCreateTableForm: React.FC = () => {
 
         {/* ── Table ────────────────────────────────────────────────────────── */}
         <div className="flex-1 overflow-y-auto overflow-x-auto">
-            <Table className="min-w-[860px] table-fixed">
+          <Table className="min-w-[860px] table-fixed">
             <colgroup>
               <col className="w-20" />
               <col className="w-[160px]" />
@@ -364,7 +364,7 @@ export const BulkCreateTableForm: React.FC = () => {
                         )}
                       />
                     </TableCell>
-                    
+
                     {/* ── Date ─────────────────────────────────────────────── */}
                     <TableCell className={cell}>
                       <FormField
@@ -373,11 +373,7 @@ export const BulkCreateTableForm: React.FC = () => {
                         render={({ field }) => (
                           <FormItem className="space-y-0">
                             <FormControl>
-                              <Input
-                                {...field}
-                                type="datetime-local"
-                                className={cn(inputBase, 'font-mono')}
-                              />
+                              <Input {...field} type="datetime-local" className={cn(inputBase, 'font-mono')} />
                             </FormControl>
                           </FormItem>
                         )}

@@ -294,7 +294,10 @@ const BudgetCategoryRow: React.FC<Props> = ({
                 aria-label="Remove planned amount"
                 type="button"
                 className="p-1 rounded hover:bg-muted"
-                onClick={() => { onDelete(line.id); cancelEdit(); }}
+                onClick={() => {
+                  onDelete(line.id);
+                  cancelEdit();
+                }}
               >
                 <Trash2 className="h-3.5 w-3.5 text-destructive" />
               </button>

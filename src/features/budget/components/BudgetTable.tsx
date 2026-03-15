@@ -249,8 +249,14 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
     const remaining = isExpense ? planned - actual : actual - planned;
     const pct = planned > 0 ? (actual / planned) * 100 : 0;
     const remainingColor = isExpense
-      ? remaining < 0 ? 'text-destructive' : 'text-success'
-      : pct < 80 ? 'text-destructive' : pct < 100 ? 'text-warning' : 'text-success';
+      ? remaining < 0
+        ? 'text-destructive'
+        : 'text-success'
+      : pct < 80
+        ? 'text-destructive'
+        : pct < 100
+          ? 'text-warning'
+          : 'text-success';
     return (
       <tr className="bg-muted/40 font-semibold text-sm border-t-2">
         <td className="py-2 pl-4 pr-2 text-left">{label} Total</td>

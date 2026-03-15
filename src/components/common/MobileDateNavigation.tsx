@@ -20,8 +20,14 @@ const MobileDateNavigation: React.FC<Props> = ({ after, before, onChange, classN
   const shift = useCallback(
     (direction: -1 | 1) => {
       onChange({
-        after: after.clone().add(direction * rangeDays, 'days').startOf('day'),
-        before: before.clone().add(direction * rangeDays, 'days').endOf('day'),
+        after: after
+          .clone()
+          .add(direction * rangeDays, 'days')
+          .startOf('day'),
+        before: before
+          .clone()
+          .add(direction * rangeDays, 'days')
+          .endOf('day'),
       });
     },
     [after, before, rangeDays, onChange],

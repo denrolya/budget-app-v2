@@ -54,7 +54,9 @@ export const TransactionValue: React.FC<Props> = ({
   const hasConversion =
     baseValue !== undefined && currency !== baseCurrencyCode && Math.abs(amount) !== Math.abs(baseValue);
 
-  const secondaryClass = alwaysShowConversion ? 'text-[95%] opacity-75 inline ml-0.5' : 'text-[95%] opacity-75 hidden md:inline ml-0.5';
+  const secondaryClass = alwaysShowConversion
+    ? 'text-[95%] opacity-75 inline ml-0.5'
+    : 'text-[95%] opacity-75 hidden md:inline ml-0.5';
 
   let content;
 

@@ -25,8 +25,8 @@ const MobileShell: React.FC = () => {
     <FormProvider>
       <TooltipProvider>
         <div
-          className="flex flex-col h-[100dvh] bg-background overflow-hidden"
           style={{ paddingTop: 'env(safe-area-inset-top)' }}
+          className="flex flex-col h-[100dvh] bg-background overflow-hidden"
         >
           {/* Header — tmux-style title bar */}
           <header className="shrink-0 border-b border-border bg-background">
@@ -49,8 +49,8 @@ const MobileShell: React.FC = () => {
           {/* Bottom tab bar — safe-area aware */}
           <nav
             aria-label="Mobile navigation"
-            className="shrink-0 border-t border-border bg-background"
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+            className="shrink-0 border-t border-border bg-background"
           >
             <ul className="flex h-12">
               {NAV_ITEMS.map(({ path, label, Icon }) => {

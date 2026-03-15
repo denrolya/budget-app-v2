@@ -19,7 +19,12 @@ const TransactionDetailDrawer: React.FC<{
   open: boolean;
   onClose: () => void;
 }> = ({ tx, open, onClose }) => (
-  <Drawer open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
+  <Drawer
+    open={open}
+    onOpenChange={(v) => {
+      if (!v) onClose();
+    }}
+  >
     <DrawerContent style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}>
       <DrawerHeader className="pb-4">
         <DrawerTitle className="font-mono text-sm">Transaction</DrawerTitle>
@@ -216,9 +221,7 @@ const MobileLedgerPage: React.FC = () => {
         </div>
 
         {/* Account chips — horizontally scrollable */}
-        <div
-          className="flex items-center gap-1 px-3 pb-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-        >
+        <div className="flex items-center gap-1 px-3 pb-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <button
             type="button"
             className={cn(
@@ -252,11 +255,7 @@ const MobileLedgerPage: React.FC = () => {
       </div>
 
       {/* Transaction detail drawer */}
-      <TransactionDetailDrawer
-        open={!!selectedTx}
-        tx={selectedTx}
-        onClose={() => setSelectedTx(null)}
-      />
+      <TransactionDetailDrawer open={!!selectedTx} tx={selectedTx} onClose={() => setSelectedTx(null)} />
     </div>
   );
 };
