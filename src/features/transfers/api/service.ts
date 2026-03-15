@@ -75,7 +75,7 @@ export const transferService = {
 
     return {
       items: result['hydra:member'],
-      totalItems: result['hydra:totalItems'],
+      totalItems: result['hydra:totalItems'] ?? 0,
     };
   },
 
