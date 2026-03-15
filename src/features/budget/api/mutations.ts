@@ -18,9 +18,7 @@ export const useDeleteBudget = () => {
     mutationFn: (id: number) => budgetService.remove(id),
     onSuccess: (_, id) => {
       // Immediately remove from list cache so BudgetIndex doesn't redirect to the deleted budget
-      qc.setQueryData<{ data: BudgetDTO[] }>(queryKeys.all(), (old) =>
-        old ? { ...old, data: old.data.filter((b) => b.id !== id) } : old,
-      );
+      qc.setQueryData<BudgetDTO[]>(queryKeys.all(), (old) => (old ? old.filter((b) => b.id !== id) : old));
       qc.invalidateQueries({ queryKey: queryKeys.all() });
     },
   });

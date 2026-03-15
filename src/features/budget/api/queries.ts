@@ -2,18 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 
 import { budgetService } from './service';
 import { queryKeys } from './keys';
-import type {
-  BudgetAnalyticsResponse,
-  BudgetDTO,
-  BudgetHistoryAveragesResponse,
-  CategoryDailyStatsResponse,
-} from './types';
+import type { BudgetAnalyticsResponse, BudgetHistoryAveragesResponse, CategoryDailyStatsResponse } from './types';
 
 export const useListBudgets = () =>
   useQuery({
     queryKey: queryKeys.all(),
     queryFn: () => budgetService.list(),
-    select: (res) => res.data,
     staleTime: 1000 * 60 * 5,
   });
 

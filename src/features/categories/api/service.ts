@@ -1,11 +1,11 @@
 import type { AxiosError } from 'axios';
 
-import { api, axiosFetcher } from '@/services/api';
+import { fetchCollection } from '@/lib/api';
+import { api } from '@/services/api';
 
 import type { CategoryApiResponseDTO, CreateCategoryDTO, UpdateCategoryDTO } from '../types';
 
 const API_BASE = '/api/categories';
-const ENDPOINT = '/api/v2/category';
 
 type ApiErrorPayload = {
   message?: string;
@@ -17,7 +17,7 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 };
 
 export const categoriesService = {
-  fetchList: async (): Promise<CategoryApiResponseDTO[]> => axiosFetcher(ENDPOINT),
+  fetchList: async (): Promise<CategoryApiResponseDTO[]> => fetchCollection<CategoryApiResponseDTO>(API_BASE),
 
   create: async (payload: CreateCategoryDTO): Promise<CategoryApiResponseDTO> => {
     try {

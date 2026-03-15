@@ -1,10 +1,5 @@
 import { type RawTransactionDTO } from '@/features/transactions';
 
-export interface HydraCollection<T> {
-  'hydra:member': T[];
-  'hydra:totalItems': number;
-}
-
 export interface TransferAccountRefDTO {
   '@id': string;
   '@type': string;

@@ -1,3 +1,4 @@
+import { fetchCollection } from '@/lib/api';
 import { api } from '@/services/api';
 
 import type {
@@ -11,59 +12,59 @@ import type {
   BudgetLineDTO,
 } from './types';
 
-const BASE = '/api/v2/budget';
+const BUDGET_API = '/api/budgets'; // API Platform — CRUD
+const BUDGET_V2 = '/api/v2/budget'; // Legacy controller — analytics only
 
 export const budgetService = {
-  async list(): Promise<{ data: BudgetDTO[] }> {
-    const { data } = await api.get<{ data: BudgetDTO[] }>(BASE);
-    return data;
+  async list(): Promise<BudgetDTO[]> {
+    return fetchCollection<BudgetDTO>(BUDGET_API);
   },
 
   async get(id: number): Promise<BudgetDTO> {
-    const { data } = await api.get<BudgetDTO>(`${BASE}/${id}`);
+    const { data } = await api.get<BudgetDTO>(`${BUDGET_API}/${id}`);
     return data;
   },
 
   async create(payload: CreateBudgetDTO): Promise<BudgetDTO> {
-    const { data } = await api.post<BudgetDTO>(BASE, payload);
+    const { data } = await api.post<BudgetDTO>(BUDGET_API, payload);
     return data;
   },
 
   async update(id: number, payload: UpdateBudgetDTO): Promise<BudgetDTO> {
-    const { data } = await api.put<BudgetDTO>(`${BASE}/${id}`, payload);
+    const { data } = await api.put<BudgetDTO>(`${BUDGET_API}/${id}`, payload);
     return data;
   },
 
   async remove(id: number): Promise<void> {
-    await api.delete(`${BASE}/${id}`);
+    await api.delete(`${BUDGET_API}/${id}`);
   },
 
   async createLine(budgetId: number, payload: UpsertBudgetLineDTO): Promise<BudgetLineDTO> {
-    const { data } = await api.post<BudgetLineDTO>(`${BASE}/${budgetId}/line`, payload);
+    const { data } = await api.post<BudgetLineDTO>(`${BUDGET_API}/${budgetId}/lines`, payload);
     return data;
   },
 
   async updateLine(budgetId: number, lineId: number, payload: Partial<UpsertBudgetLineDTO>): Promise<BudgetLineDTO> {
-    const { data } = await api.put<BudgetLineDTO>(`${BASE}/${budgetId}/line/${lineId}`, payload);
+    const { data } = await api.put<BudgetLineDTO>(`${BUDGET_API}/${budgetId}/lines/${lineId}`, payload);
     return data;
   },
 
   async deleteLine(budgetId: number, lineId: number): Promise<void> {
-    await api.delete(`${BASE}/${budgetId}/line/${lineId}`);
+    await api.delete(`${BUDGET_API}/${budgetId}/lines/${lineId}`);
   },
 
   async analytics(budgetId: number): Promise<BudgetAnalyticsResponse> {
-    const { data } = await api.get<BudgetAnalyticsResponse>(`${BASE}/${budgetId}/analytics`);
+    const { data } = await api.get<BudgetAnalyticsResponse>(`${BUDGET_V2}/${budgetId}/analytics`);
     return data;
   },
 
   async analyticsDailyStats(budgetId: number): Promise<CategoryDailyStatsResponse> {
-    const { data } = await api.get<CategoryDailyStatsResponse>(`${BASE}/${budgetId}/analytics/daily`);
+    const { data } = await api.get<CategoryDailyStatsResponse>(`${BUDGET_V2}/${budgetId}/analytics/daily`);
     return data;
   },
 
   async historyAverages(budgetId: number, months = 6): Promise<BudgetHistoryAveragesResponse> {
-    const { data } = await api.get<BudgetHistoryAveragesResponse>(`${BASE}/${budgetId}/history-averages`, {
+    const { data } = await api.get<BudgetHistoryAveragesResponse>(`${BUDGET_V2}/${budgetId}/history-averages`, {
       params: { months },
     });
     return data;

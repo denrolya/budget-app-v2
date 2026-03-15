@@ -1,3 +1,5 @@
+import type { HydraCollection } from '@/types/api';
+
 export interface CategoryTagDTO {
   name: string;
 }
@@ -34,14 +36,6 @@ export type CategoryId = number;
 
 /** API Platform relations are IRIs, not numeric IDs */
 export type Iri = string;
-
-/** Hydra wrapper (API Platform often returns this) */
-export type HydraCollection<T> = {
-  'hydra:member': T[];
-  'hydra:totalItems'?: number;
-  'hydra:view'?: unknown;
-  'hydra:search'?: unknown;
-};
 
 /** ===== UI DTOs (used by components/hooks) ===== */
 export type CreateCategoryDTO = {

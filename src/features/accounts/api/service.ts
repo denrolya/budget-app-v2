@@ -1,6 +1,7 @@
 import Account, { type AccountRawData } from '@/features/accounts/models/Account';
 import type { ConvertedValues } from '@/features/transactions';
-import { api, axiosFetcher } from '@/services/api';
+import { fetchCollection } from '@/lib/api';
+import { api } from '@/services/api';
 
 import { type CreateAccountDTO, type UpdateAccountDTO, Type as AccountType } from '../types';
 
@@ -24,7 +25,7 @@ const withConvertedValues = (raw: AccountRawData, rates: ExchangeRates): Account
 
 export const accountService = {
   async fetchList(rates: ExchangeRates): Promise<Account[]> {
-    const rawAccounts: AccountRawData[] = await axiosFetcher(BASE_URL_V2);
+    const rawAccounts = await fetchCollection<AccountRawData>(BASE_URL_V1);
     return rawAccounts.map((raw) => withConvertedValues(raw, rates));
   },
 

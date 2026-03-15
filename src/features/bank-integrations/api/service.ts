@@ -1,3 +1,4 @@
+import { fetchCollection } from '@/lib/api';
 import { api } from '@/services/api';
 
 import type { BankAccountData, BankIntegrationRaw, CreateBankIntegrationDTO, UpdateBankIntegrationDTO } from '../types';
@@ -6,8 +7,7 @@ const BASE_URL = '/api/bank-integrations';
 
 export const bankIntegrationService = {
   async fetchList(): Promise<BankIntegrationRaw[]> {
-    const { data } = await api.get<{ 'hydra:member': BankIntegrationRaw[] }>(BASE_URL);
-    return data['hydra:member'];
+    return fetchCollection<BankIntegrationRaw>(BASE_URL);
   },
 
   async fetchOne(id: number): Promise<BankIntegrationRaw> {
