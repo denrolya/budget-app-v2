@@ -52,7 +52,6 @@ export const useMutations = () => {
         cardNumber: dto.cardNumber || undefined,
         iban: dto.iban || undefined,
         bankName: dto.bankName || undefined,
-        providerName: dto.providerName || undefined,
         isDisplayedOnSidebar: dto.isDisplayedOnSidebar,
       });
 

@@ -58,5 +58,3 @@ export const useMutations = () => {
     isRemoving: remove.isPending,
   };
 };
-
-export default useMutations;

@@ -44,13 +44,7 @@ const getPeriodDuration = (period: ISO8601Period): moment.Duration => {
 };
 
 /**
- * TODO: When setting timeframe using setTimeframe(externally) previousTimeframe is not updated
- * @param defaultPreset
- * @param defaultTimeframe
- * @param defaultPeriod
- * @param presets
- * @param enablePreviousTimeframe
- * @param enablePeriod
+ * Known limitation: setting timeframe via setTimeframe() externally does not update previousTimeframe.
  */
 export const useTimeframeControl = ({
   defaultPreset,

@@ -14,7 +14,6 @@ export type CreateAccountDTO = {
   cardNumber?: string;
   iban?: string;
   bankName?: string;
-  providerName?: string;
 
   isDisplayedOnSidebar?: boolean;
 };

@@ -30,5 +30,3 @@ export const debtService = {
     await api.delete(`${BASE}/${id}`);
   },
 };
-
-export default debtService;

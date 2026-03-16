@@ -22,7 +22,6 @@ const formSchema = z.object({
   cardNumber: z.string().optional(),
   iban: z.string().optional(),
   bankName: z.string().optional(),
-  providerName: z.string().optional(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -78,7 +77,6 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
       cardNumber: data?.cardNumber || '',
       iban: data?.iban || '',
       bankName: data?.bankName || '',
-      providerName: data?.providerName || '',
     }),
     [data],
   );
@@ -245,21 +243,6 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
           </div>
         )}
 
-        {/* Internet fields */}
-        {watchedType === AccountType.Internet && (
-          <FormField
-            control={form.control}
-            name="providerName"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input {...field} placeholder="Provider (e.g. Wise, PayPal)" className="h-7 text-xs" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
       </form>
     </Form>
   );
