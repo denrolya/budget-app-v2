@@ -16,8 +16,6 @@ export type CreateAccountDTO = {
   bankName?: string;
   providerName?: string;
 
-  color?: string;
-  icon?: string;
   isDisplayedOnSidebar?: boolean;
 };
 

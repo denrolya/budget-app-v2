@@ -1,9 +1,5 @@
 import type { HydraCollection } from '@/types/api';
 
-export interface CategoryTagDTO {
-  name: string;
-}
-
 export interface CategoryDTO {
   id: number;
   name: string;
@@ -12,7 +8,6 @@ export interface CategoryDTO {
   type: CategoryType;
   createdAt: string;
   isAffectingProfit: boolean;
-  tags: CategoryTagDTO[];
 }
 
 export interface CategoryApiResponseDTO {
@@ -57,14 +52,12 @@ export type ApiCreateCategoryPayload = {
   name: string;
   isAffectingProfit?: boolean;
   parent?: Iri | null;
-  tags?: Array<{ name: string }> | [];
 };
 
 export type ApiUpdateCategoryPayload = {
   name?: string;
   isAffectingProfit?: boolean;
   parent?: Iri | null;
-  tags?: Array<{ name: string }> | [];
 };
 
 export type CategoryApiDTO = {
@@ -75,8 +68,6 @@ export type CategoryApiDTO = {
 
   parent?: { id: CategoryId } | Iri | null;
   root?: { id: CategoryId } | Iri | null;
-
-  tags?: Array<{ name: string }> | [];
 
   children?: Array<Iri> | CategoryApiDTO[];
 };

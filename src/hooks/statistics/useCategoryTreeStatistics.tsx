@@ -19,9 +19,6 @@ interface CategoryNode {
   name: string;
   children: CategoryNode[];
   isAffectingProfit: boolean;
-  icon: string | null;
-  color: string | null;
-  tags: string[];
   value: number;
   total: number;
   type: TransactionType;

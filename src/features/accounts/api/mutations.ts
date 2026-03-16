@@ -53,8 +53,6 @@ export const useMutations = () => {
         iban: dto.iban || undefined,
         bankName: dto.bankName || undefined,
         providerName: dto.providerName || undefined,
-        color: dto.color,
-        icon: dto.icon,
         isDisplayedOnSidebar: dto.isDisplayedOnSidebar,
       });
 

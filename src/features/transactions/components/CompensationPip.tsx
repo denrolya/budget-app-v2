@@ -18,12 +18,12 @@ const CompensationPip: React.FC<Props> = ({ transaction }) => {
   const baseCurrencyCode = useBaseCurrency();
   const baseCurrency = CURRENCIES[baseCurrencyCode];
 
-  const expenseBase = transaction.convertedValues?.[baseCurrencyCode] ?? 0;
+  const expenseGross = transaction.convertedValues?.[baseCurrencyCode] ?? 0;
   const compensationsTotal = (transaction.compensations ?? []).reduce(
     (sum, c) => sum + (c.convertedValues?.[baseCurrencyCode] ?? 0),
     0,
   );
-  const net = expenseBase + compensationsTotal;
+  const net = compensationsTotal - expenseGross;
   const netFormatted = `${baseCurrency.symbol} ${formatMoney(Math.abs(net), baseCurrencyCode)}`;
 
   return (

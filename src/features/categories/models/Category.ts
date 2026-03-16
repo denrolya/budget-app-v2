@@ -1,6 +1,6 @@
 import moment, { type Moment } from 'moment';
 
-import type { CategoryDTO, CategoryTagDTO, CategoryType } from '../types';
+import type { CategoryDTO, CategoryType } from '../types';
 
 export default class Category {
   id: number;
@@ -8,7 +8,6 @@ export default class Category {
   type: CategoryType;
   createdAt: Moment;
   isAffectingProfit: boolean;
-  tags: CategoryTagDTO[];
 
   parent: Category | null = null;
   root: Category | null = null;
@@ -22,7 +21,6 @@ export default class Category {
     this.type = data.type;
     this.createdAt = moment(data.createdAt);
     this.isAffectingProfit = data.isAffectingProfit;
-    this.tags = data.tags;
   }
 
   addChild(child: Category): void {
