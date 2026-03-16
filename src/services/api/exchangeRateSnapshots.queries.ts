@@ -16,8 +16,8 @@ export type ExchangeRateSnapshot = {
 };
 
 export type ExchangeRateSnapshotsData = {
-  from: string;
-  to: string;
+  after: string;
+  before: string;
   snapshots: ExchangeRateSnapshot[];
 };
 
@@ -66,16 +66,16 @@ export const getRateFromSnapshot = (
 
 /**
  * Fetches Fixer-sourced exchange rate snapshots for a date range.
- * Pass `from`/`to` as 'YYYY-MM-DD' strings.
+ * Pass `after`/`before` as 'YYYY-MM-DD' strings.
  * The same hook serves both the header trend (30-day window)
  * and the sparklines in the Exchange Rates sheet.
  */
-export const useFixerExchangeRates = (before: string, after: string) =>
+export const useFixerExchangeRates = (after: string, before: string) =>
   useQuery<ExchangeRateSnapshotsData, Error>({
-    queryKey: ['fixer', 'snapshots', before, after],
-    queryFn: () => axiosFetcher(`/api/v2/exchange-rates/snapshots?from=${before}&to=${after}`),
+    queryKey: ['fixer', 'snapshots', after, before],
+    queryFn: () => axiosFetcher(`/api/v2/exchange-rates/snapshots?after=${after}&before=${before}`),
     staleTime: 1000 * 60 * 60 * 6, // 6 h — snapshots rarely change
     gcTime: 1000 * 60 * 60 * 24, // 24 h
     retry: 2,
-    enabled: !!before && !!after,
+    enabled: !!after && !!before,
   });

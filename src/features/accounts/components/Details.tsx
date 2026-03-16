@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, FileText, Star, StarOff } from 'lucide-react';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -17,10 +16,6 @@ import { Type as AccountType, type UpdateAccountDTO } from '@/features/accounts/
 import { useLedger } from '@/features/ledger';
 import LedgerActivityCard from '@/features/ledger/components/LedgerActivityCard';
 import { HeatmapPanel } from '@/features/transactions';
-import { queryKeys as transactionQueryKeys } from '@/features/transactions/api/keys';
-import { transactionService } from '@/features/transactions/api/service';
-import { TransactionFilters } from '@/features/transactions/models/TransactionFilters';
-import type { Sorting } from '@/types/pagination';
 import { confirm } from '@/lib/confirmation';
 
 interface Props {
@@ -49,21 +44,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
     initialTimeframe: defaultRange,
   });
 
-  // Draft count for bank accounts
-  const draftCountQuery = useQuery({
-    queryKey: [...transactionQueryKeys.all, 'draft-count', account.id],
-    queryFn: () =>
-      transactionService.fetchList({
-        page: 1,
-        perPage: 1,
-        filters: new TransactionFilters({ accounts: [String(account.id)], isDraft: true }),
-        sort: {} as Sorting,
-        omitTransferTransactions: false,
-      }),
-    enabled: account.type === AccountType.Bank && !!account.bankIntegration?.isActive,
-    staleTime: 1000 * 30,
-  });
-  const draftCount = draftCountQuery.data?.totalItems ?? 0;
+  const draftCount = account.draftCount;
 
   const handleHeatmapRangeSelect = useCallback(
     (after: moment.Moment, before: moment.Moment) => {

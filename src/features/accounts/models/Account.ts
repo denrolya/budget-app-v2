@@ -18,6 +18,7 @@ export interface AccountRawData {
   isDisplayedOnSidebar: boolean;
   externalAccountId?: string | null;
   bankIntegration?: BankIntegrationRaw | null;
+  draftCount?: number;
 }
 
 export default class Account {
@@ -34,6 +35,7 @@ export default class Account {
   isDisplayedOnSidebar: boolean;
   externalAccountId?: string | null;
   bankIntegration?: BankIntegrationRaw | null;
+  draftCount: number;
 
   constructor(data: AccountRawData) {
     this.id = data.id;
@@ -49,6 +51,7 @@ export default class Account {
     this.isDisplayedOnSidebar = data.isDisplayedOnSidebar;
     this.externalAccountId = data.externalAccountId ?? null;
     this.bankIntegration = data.bankIntegration ?? null;
+    this.draftCount = data.draftCount ?? 0;
   }
 
   isPositive() {

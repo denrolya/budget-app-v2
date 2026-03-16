@@ -20,15 +20,15 @@ const PAIRS = [
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const RateTickers: React.FC = () => {
-  const { fromDate, toDate } = useMemo(
+  const { afterDate, beforeDate } = useMemo(
     () => ({
-      fromDate: moment().subtract(30, 'days').format('YYYY-MM-DD'),
-      toDate: moment().format('YYYY-MM-DD'),
+      afterDate: moment().subtract(30, 'days').format('YYYY-MM-DD'),
+      beforeDate: moment().format('YYYY-MM-DD'),
     }),
     [],
   );
 
-  const { data } = useFixerExchangeRates(fromDate, toDate);
+  const { data } = useFixerExchangeRates(afterDate, beforeDate);
   const snapshots = useMemo(() => data?.snapshots ?? [], [data?.snapshots]);
 
   const pairData = useMemo(() => {

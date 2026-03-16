@@ -265,7 +265,7 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
               {historyData && (
                 <>
                   {' '}
-                  ({moment(historyData.from).format('MMM YYYY')} – {moment(historyData.to).format('MMM YYYY')})
+                  ({moment(historyData.after).format('MMM YYYY')} – {moment(historyData.before).format('MMM YYYY')})
                 </>
               )}
               . Recent months are weighted higher. Categories active in fewer than 2 months are excluded as one-offs.

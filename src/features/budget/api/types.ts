@@ -58,8 +58,8 @@ export interface BudgetAnalyticsResponse {
 export interface BudgetHistoryAveragesResponse {
   data: BudgetHistoryItem[];
   months: number;
-  from: string;
-  to: string;
+  after: string;
+  before: string;
 }
 
 export interface CategoryDayStats {

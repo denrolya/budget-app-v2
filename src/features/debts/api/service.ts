@@ -10,7 +10,7 @@ export const debtService = {
     const withClosed = opts?.withClosed;
 
     const { data } = await api.get(LIST_ENDPOINT, {
-      params: typeof withClosed === 'boolean' ? { withClosed } : undefined,
+      params: withClosed ? { withClosed: true } : undefined,
     });
 
     return data as DebtDTO[];

@@ -209,15 +209,15 @@ export const ExchangeRatesPresets: React.FC = () => {
 
   const [days, setDays] = useState<DayRange>(30);
 
-  const { fromDate, toDate } = useMemo(
+  const { afterDate, beforeDate } = useMemo(
     () => ({
-      fromDate: moment().subtract(days, 'days').format('YYYY-MM-DD'),
-      toDate: moment().format('YYYY-MM-DD'),
+      afterDate: moment().subtract(days, 'days').format('YYYY-MM-DD'),
+      beforeDate: moment().format('YYYY-MM-DD'),
     }),
     [days],
   );
 
-  const { data: snapshotsData, isLoading: isLoadingSnapshots } = useFixerExchangeRates(fromDate, toDate);
+  const { data: snapshotsData, isLoading: isLoadingSnapshots } = useFixerExchangeRates(afterDate, beforeDate);
 
   const snapshots = snapshotsData?.snapshots ?? [];
 
