@@ -71,6 +71,9 @@ export const useMoneyFlow = ({ period, timeframe, previousTimeframe }: UseMoneyF
         previousIncome: previousItem.income,
         previousExpenses: previousItem.expense,
         previousRevenue: previousItem.income - previousItem.expense,
+        projectedIncome: null,
+        projectedExpenses: null,
+        projectedRevenue: null,
       };
     });
   }, [currentDataBackend, previousDataBackend, period, timeframe, previousTimeframe]);
@@ -159,5 +162,9 @@ export const useMoneyFlow = ({ period, timeframe, previousTimeframe }: UseMoneyF
     expensesChangePercent,
     previousAvgPeriodIncome,
     previousAvgPeriodExpenses,
+    projectedTotalIncome: 0,
+    projectedTotalExpenses: 0,
+    projectedTotalRevenue: 0,
+    hasProjection: false,
   };
 };

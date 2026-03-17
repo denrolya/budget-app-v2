@@ -1,5 +1,5 @@
 import { ChevronLeft, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import React, { type ReactNode, useCallback, useContext, useId, useMemo, useRef, useState } from 'react';
+import React, { type ReactNode, useCallback, useContext, useId, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -41,7 +41,7 @@ type PageWithSidebarProps = React.ComponentPropsWithoutRef<'div'> & {
 
 type PageWithSidebarComponent = React.FC<PageWithSidebarProps> & {
   Header: React.FC<
-    React.ComponentPropsWithoutRef<'header'> & {
+    Omit<React.ComponentPropsWithoutRef<'header'>, 'title'> & {
       title?: ReactNode;
       onBack?: () => void;
       overrideContent?: boolean;
@@ -178,7 +178,7 @@ const PageWithSidebar: PageWithSidebarComponent = ({
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 const Header: React.FC<
-  React.ComponentPropsWithoutRef<'header'> & {
+  Omit<React.ComponentPropsWithoutRef<'header'>, 'title'> & {
     title?: ReactNode;
     onBack?: () => void;
     overrideContent?: boolean;
