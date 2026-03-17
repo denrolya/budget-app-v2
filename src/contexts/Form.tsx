@@ -100,7 +100,16 @@ export const useFormManager = (): FormContextType => {
       addFormSubmitListener,
       removeFormSubmitListener,
     }),
-    [formState, openForm, closeForm, submitForm, updateFormState, resetForm, addFormSubmitListener, removeFormSubmitListener],
+    [
+      formState,
+      openForm,
+      closeForm,
+      submitForm,
+      updateFormState,
+      resetForm,
+      addFormSubmitListener,
+      removeFormSubmitListener,
+    ],
   );
 };
 

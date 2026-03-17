@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import CellPopover from '@/components/common/CellPopover';
 import { Input } from '@/components/ui/input';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
-import { AccountPill } from '@/features/accounts';
+import AccountMarker from '@/features/accounts/components/AccountMarker';
 import { cn } from '@/lib/utils';
 
 import { type Bucket, type BucketEntry, type UnassignedEntry } from '../models/types';
@@ -71,7 +71,7 @@ export const DraggableBucketEntry: React.FC<DraggableBucketEntryProps> = ({
     <div
       style={style}
       className={cn(
-        'flex items-center gap-1.5 rounded-md border bg-background px-1.5 py-1 select-none transition-opacity',
+        'flex items-center gap-1 rounded border bg-background px-1 py-0.5 select-none transition-opacity',
         isDragging && 'opacity-40',
       )}
       ref={setNodeRef}
@@ -81,20 +81,25 @@ export const DraggableBucketEntry: React.FC<DraggableBucketEntryProps> = ({
         <GripVertical className="h-3 w-3" />
       </span>
 
-      <Link className="flex-1 min-w-0" to="/accounts" onPointerDown={(e) => e.stopPropagation()}>
-        <AccountPill account={entry.account} size="sm" tooltip={false} variant="inline" />
+      <Link
+        to="/accounts"
+        className="flex items-center gap-1 flex-1 min-w-0 overflow-hidden"
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <AccountMarker account={entry.account} size="sm" />
+        <span className="text-xs truncate leading-none">{entry.account.name}</span>
       </Link>
 
       <div onPointerDown={(e) => e.stopPropagation()}>
         <CellPopover
           trigger={
             <div className="text-right">
-              <div className="text-xs font-semibold tabular-nums">
+              <div className="text-xs font-semibold tabular-nums leading-tight">
                 {sym}
                 {entry.amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}
               </div>
               {entry.account.currency !== baseCurrency && (
-                <div className="text-2xs text-muted-foreground tabular-nums">
+                <div className="text-2xs text-muted-foreground tabular-nums leading-tight">
                   ≈{baseSym}
                   {entry.allocatedBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 </div>
@@ -170,7 +175,7 @@ export const DraggableUnassignedItem: React.FC<DraggableUnassignedItemProps> = (
     <div
       style={style}
       className={cn(
-        'flex items-center gap-1.5 rounded-md border bg-background px-1.5 py-1 select-none transition-opacity cursor-grab',
+        'flex items-center gap-1 rounded border bg-background px-1 py-0.5 select-none transition-opacity cursor-grab',
         isDragging && 'opacity-40',
       )}
       ref={setNodeRef}
@@ -178,8 +183,13 @@ export const DraggableUnassignedItem: React.FC<DraggableUnassignedItemProps> = (
       {...listeners}
     >
       <GripVertical className="h-3 w-3 text-muted-foreground/40 shrink-0" />
-      <Link className="flex-1 min-w-0" to="/accounts" onPointerDown={(e) => e.stopPropagation()}>
-        <AccountPill account={entry.account} size="sm" tooltip={false} variant="inline" />
+      <Link
+        to="/accounts"
+        className="flex items-center gap-1 flex-1 min-w-0 overflow-hidden"
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <AccountMarker account={entry.account} size="sm" />
+        <span className="text-xs truncate leading-none">{entry.account.name}</span>
       </Link>
       {entry.isPartial && <span className="shrink-0 text-2xs text-warning">partial</span>}
       <span className="shrink-0 tabular-nums text-xs text-muted-foreground">
@@ -209,10 +219,10 @@ interface OverlayItemProps {
 export const DragOverlayItem: React.FC<OverlayItemProps> = ({ label, baseCurrency, balance, pctLabel }) => {
   const baseSym = CURRENCIES[baseCurrency as CURRENCY_CODE]?.symbol ?? baseCurrency;
   return (
-    <div className="flex items-center gap-2 rounded-md border bg-background shadow-lg px-2 py-2 text-sm cursor-grabbing opacity-90 select-none">
-      <GripVertical className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+    <div className="flex items-center gap-2 rounded-md border bg-background shadow-lg px-2 py-1.5 text-xs cursor-grabbing opacity-90 select-none">
+      <GripVertical className="h-3 w-3 text-muted-foreground/40 shrink-0" />
       <span className="font-medium">{label}</span>
-      {pctLabel && <span className="text-[10px] text-amber-500">{pctLabel}</span>}
+      {pctLabel && <span className="text-2xs text-warning">{pctLabel}</span>}
       <span className="text-muted-foreground tabular-nums">
         {baseSym}
         {balance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
@@ -254,34 +264,33 @@ export const DroppableBucketZone: React.FC<BucketZoneProps> = ({
   return (
     <div
       className={cn(
-        'rounded-lg border transition-colors',
+        'rounded-md border transition-colors',
         isOver ? 'border-primary bg-primary/5' : 'border-border bg-card',
       )}
       ref={setNodeRef}
     >
       {/* Bucket header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-border/60">
-        <div className="flex items-center gap-2">
-          <span className="text-base leading-none">{bucket.emoji}</span>
-          <span className="text-sm font-semibold">{bucket.name}</span>
+      <div className="flex items-center justify-between px-2 py-1 border-b border-border/60">
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm leading-none">{bucket.emoji}</span>
+          <span className="text-xs font-semibold">{bucket.name}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {/* Target edit button */}
           <div onPointerDown={(e) => e.stopPropagation()}>
             <CellPopover
               trigger={
-                <button
+                <span
                   aria-label="Set target"
-                  type="button"
                   className={cn(
-                    'p-1 rounded transition-colors',
+                    'p-0.5 rounded transition-colors',
                     target
                       ? 'text-primary/70 hover:text-primary'
                       : 'text-muted-foreground/30 hover:text-muted-foreground',
                   )}
                 >
                   <Target className="h-3 w-3" />
-                </button>
+                </span>
               }
               contentClassName="w-52"
               onCancel={() => setTargetEditValue(target ? String(Math.round(target)) : '')}
@@ -325,11 +334,11 @@ export const DroppableBucketZone: React.FC<BucketZoneProps> = ({
 
           {bucketTotal > 0 && (
             <div className="text-right">
-              <div className="text-sm font-semibold tabular-nums">
+              <div className="text-xs font-semibold tabular-nums leading-tight">
                 {baseSym}
                 {bucketTotal.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 {target && (
-                  <span className="text-[10px] font-normal text-muted-foreground ml-1">
+                  <span className="text-2xs font-normal text-muted-foreground ml-1">
                     / {baseSym}
                     {target.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                   </span>
@@ -346,7 +355,7 @@ export const DroppableBucketZone: React.FC<BucketZoneProps> = ({
                   />
                 </div>
               ) : (
-                <div className="text-[10px] text-muted-foreground">{pct.toFixed(1)}% of portfolio</div>
+                <div className="text-2xs text-muted-foreground">{pct.toFixed(1)}%</div>
               )}
             </div>
           )}
@@ -354,21 +363,23 @@ export const DroppableBucketZone: React.FC<BucketZoneProps> = ({
       </div>
 
       {/* Entries */}
-      <div className="p-1.5 space-y-1 min-h-[44px]">
-        {[...entries].sort((a, b) => b.allocatedBalance - a.allocatedBalance).map((entry) => (
-          <DraggableBucketEntry
-            baseCurrency={baseCurrency}
-            bucketId={bucket.id}
-            entry={entry}
-            key={entry.account.id}
-            onRemove={() => onRemove(entry.account.id)}
-            onUpdateAmount={(amount) => onUpdateAmount(entry.account.id, amount)}
-          />
-        ))}
+      <div className="p-1 space-y-0.5 min-h-[36px]">
+        {[...entries]
+          .sort((a, b) => b.allocatedBalance - a.allocatedBalance)
+          .map((entry) => (
+            <DraggableBucketEntry
+              baseCurrency={baseCurrency}
+              bucketId={bucket.id}
+              entry={entry}
+              key={entry.account.id}
+              onRemove={() => onRemove(entry.account.id)}
+              onUpdateAmount={(amount) => onUpdateAmount(entry.account.id, amount)}
+            />
+          ))}
         {entries.length === 0 && (
           <div
             className={cn(
-              'flex items-center justify-center h-9 rounded text-xs text-muted-foreground border border-dashed transition-colors',
+              'flex items-center justify-center h-7 rounded text-2xs text-muted-foreground border border-dashed transition-colors',
               isOver ? 'border-primary text-primary' : 'border-border',
             )}
           >
@@ -396,15 +407,15 @@ export const DroppableUnassignedZone: React.FC<UnassignedZoneProps> = ({ entries
   return (
     <div
       className={cn(
-        'rounded-lg border transition-colors',
+        'rounded-md border transition-colors',
         isOver ? 'border-primary bg-primary/5' : 'border-dashed border-muted-foreground/30',
       )}
       ref={setNodeRef}
     >
-      <div className="px-3 py-2 border-b border-border/40">
-        <span className="text-sm font-semibold text-muted-foreground">📦 Unassigned</span>
+      <div className="px-2 py-1 border-b border-border/40">
+        <span className="text-xs font-semibold text-muted-foreground">📦 Unassigned</span>
       </div>
-      <div className="p-1.5 space-y-1">
+      <div className="p-1 space-y-0.5">
         {entries.map((entry) => (
           <DraggableUnassignedItem baseCurrency={baseCurrency} entry={entry} key={entry.account.id} />
         ))}

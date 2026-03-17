@@ -125,11 +125,7 @@ const PageWithSidebar: PageWithSidebarComponent = ({
 
   return (
     <CollapsibleContext.Provider value={ctxValue}>
-      <div
-        aria-label={ariaLabel}
-        className={cn('flex h-full min-h-0 overflow-hidden min-w-0', className)}
-        {...props}
-      >
+      <div aria-label={ariaLabel} className={cn('flex h-full min-h-0 overflow-hidden min-w-0', className)} {...props}>
         {/* Desktop sidebar */}
         {!isMobile && (
           <div
@@ -141,7 +137,9 @@ const PageWithSidebar: PageWithSidebarComponent = ({
               sidebarWidthClass,
             )}
           >
-            {sidebarScrollable ? renderScrollable(sidebar) : (
+            {sidebarScrollable ? (
+              renderScrollable(sidebar)
+            ) : (
               <div className="h-full min-h-0 min-w-0 overflow-x-hidden">{sidebar}</div>
             )}
             {/* Resize handle — invisible, widens the grab area to cover the border */}
@@ -162,10 +160,14 @@ const PageWithSidebar: PageWithSidebarComponent = ({
 
           <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
             {isMobile ? (
-              contentScrollable ? renderScrollable(mobileBody) : (
+              contentScrollable ? (
+                renderScrollable(mobileBody)
+              ) : (
                 <div className="h-full min-h-0 min-w-0 overflow-hidden">{mobileBody}</div>
               )
-            ) : contentScrollable ? renderScrollable(content) : (
+            ) : contentScrollable ? (
+              renderScrollable(content)
+            ) : (
               <div className="h-full min-h-0 min-w-0 overflow-hidden">{content}</div>
             )}
           </div>
@@ -237,7 +239,14 @@ const Header: React.FC<
             </Button>
           )}
           {onBack && (
-            <Button aria-label={backAriaLabel} size="icon" type="button" variant="ghost" className="h-7 w-7" onClick={onBack}>
+            <Button
+              aria-label={backAriaLabel}
+              size="icon"
+              type="button"
+              variant="ghost"
+              className="h-7 w-7"
+              onClick={onBack}
+            >
               <ChevronLeft aria-hidden="true" className="h-3.5 w-3.5" />
             </Button>
           )}

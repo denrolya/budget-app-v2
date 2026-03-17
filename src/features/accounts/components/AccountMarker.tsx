@@ -1,8 +1,9 @@
 import React from 'react';
 
-import { type Type as AccountType } from '../types';
 import { cn } from '@/lib/utils';
 import type Account from '@/features/accounts/models/Account';
+
+import { type Type as AccountType } from '../types';
 
 type ShapeKind = 'circle' | 'square' | 'diamond' | 'hollow-square';
 

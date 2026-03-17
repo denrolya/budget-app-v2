@@ -249,7 +249,13 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button aria-label="Fill from history" size="icon" variant="ghost" className="h-7 w-7" onClick={() => setOpen(true)}>
+          <Button
+            aria-label="Fill from history"
+            size="icon"
+            variant="ghost"
+            className="h-7 w-7"
+            onClick={() => setOpen(true)}
+          >
             <History className="h-3.5 w-3.5" />
           </Button>
         </TooltipTrigger>

@@ -1,4 +1,5 @@
-import React, { lazy, Suspense, useMemo } from 'react';
+import { ChevronRight } from 'lucide-react';
+import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { Navigate, Route, Routes, useMatch, useNavigate } from 'react-router-dom';
 
 import MoneyValue from '@/components/common/MoneyValue';
@@ -44,14 +45,21 @@ const DebtsSidebar: React.FC<{ selectedId: string | null }> = ({ selectedId }) =
     return { open: openList, closed: closedList, currencyGroups: currencies };
   }, [debts, baseCurrency]);
 
+  const [openGroupOpen, setOpenGroupOpen] = useState(true);
+  const [closedGroupOpen, setClosedGroupOpen] = useState(false);
+
   const renderDebtList = (items: typeof debts) =>
     items.map((debt) => {
       const isActive = String(debt.id) === selectedId;
+      const displayAmount = debt.convertedValues?.[baseCurrency] ?? debt.balance;
+      const displayCurrency = (
+        debt.convertedValues?.[baseCurrency] !== undefined ? baseCurrency : debt.currency
+      ) as keyof typeof CURRENCIES;
       return (
         <button
           type="button"
           className={cn(
-            'w-full flex items-center justify-between text-xs gap-2 rounded px-1.5 py-1 transition-colors cursor-pointer text-left',
+            'w-full flex items-center overflow-hidden text-xs gap-1.5 rounded px-1.5 py-1 transition-colors cursor-pointer text-left',
             {
               'bg-muted text-foreground font-medium': isActive,
               'text-muted-foreground hover:text-foreground hover:bg-muted': !isActive,
@@ -60,45 +68,63 @@ const DebtsSidebar: React.FC<{ selectedId: string | null }> = ({ selectedId }) =
           key={debt.id}
           onClick={() => navigate(`/debts/${debt.id}`)}
         >
-          <span className="truncate">{debt.debtor}</span>
+          <span className="truncate min-w-0 flex-1">{debt.debtor}</span>
           <MoneyValue
-            amount={debt.balance}
-            currency={debt.currency}
+            amount={displayAmount}
+            currency={displayCurrency}
             showValuesTooltip={false}
             useColors={false}
-            values={debt.convertedValues}
             className="text-xs tabular-nums shrink-0"
           />
         </button>
       );
     });
 
+  const renderGroup = (
+    label: string,
+    items: typeof debts,
+    dotClass: string,
+    expanded: boolean,
+    onToggle: () => void,
+  ) => (
+    <div>
+      <button
+        type="button"
+        className="w-full flex items-center gap-1.5 mb-0.5 py-0.5 text-left hover:text-foreground transition-colors"
+        onClick={onToggle}
+      >
+        <ChevronRight
+          className={cn('h-3 w-3 text-muted-foreground/60 shrink-0 transition-transform duration-200', {
+            'rotate-90': expanded,
+          })}
+        />
+        <span aria-hidden className={cn('h-2 w-2 rounded-sm flex-none', dotClass)} />
+        <span className="text-xs font-semibold text-foreground">{label}</span>
+        <span className="text-2xs text-muted-foreground tabular-nums">{items.length}</span>
+      </button>
+      <div
+        className={cn('grid transition-[grid-template-rows] duration-200 ease-in-out', {
+          'grid-rows-[1fr]': expanded,
+          'grid-rows-[0fr]': !expanded,
+        })}
+      >
+        <div className="overflow-hidden">
+          <div className="space-y-0.5 pl-[18px] pb-1">{renderDebtList(items)}</div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex flex-col h-full min-h-0">
       <ScrollArea className="flex-1 min-h-0">
-        <div className="p-4 pb-3 space-y-4">
-          {open.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <span aria-hidden className="h-2.5 w-2.5 rounded-sm flex-none bg-[hsl(var(--chart-1))]" />
-                <span className="text-xs font-semibold text-foreground">Open</span>
-                <span className="text-2xs text-muted-foreground tabular-nums">{open.length}</span>
-              </div>
-              <div className="space-y-0.5 pl-[18px]">{renderDebtList(open)}</div>
-            </div>
-          )}
-
-          {closed.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <span aria-hidden className="h-2.5 w-2.5 rounded-sm flex-none bg-muted-foreground/40" />
-                <span className="text-xs font-semibold text-foreground">Closed</span>
-                <span className="text-2xs text-muted-foreground tabular-nums">{closed.length}</span>
-              </div>
-              <div className="space-y-0.5 pl-[18px]">{renderDebtList(closed)}</div>
-            </div>
-          )}
-
+        <div className="p-3 space-y-1 overflow-hidden">
+          {open.length > 0 &&
+            renderGroup('Open', open, 'bg-[hsl(var(--chart-1))]', openGroupOpen, () => setOpenGroupOpen((v) => !v))}
+          {closed.length > 0 &&
+            renderGroup('Closed', closed, 'bg-muted-foreground/40', closedGroupOpen, () =>
+              setClosedGroupOpen((v) => !v),
+            )}
           {debts.length === 0 && <p className="text-sm text-muted-foreground">No debts recorded yet.</p>}
         </div>
       </ScrollArea>

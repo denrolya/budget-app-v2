@@ -108,7 +108,7 @@ const BucketsPage: React.FC = () => {
 
   const filteredEntriesByBucket = useMemo(() => {
     if (!hideZeroBalance) return entriesByBucket;
-    const filtered: Record<string, typeof entriesByBucket[string]> = {};
+    const filtered: Record<string, (typeof entriesByBucket)[string]> = {};
     for (const [id, entries] of Object.entries(entriesByBucket)) {
       filtered[id] = entries.filter((e) => e.allocatedBalance > 0);
     }
@@ -149,7 +149,11 @@ const BucketsPage: React.FC = () => {
     if (parsed.type === 'unallocated') {
       const entry = unassignedEntries.find((e) => e.account.id === parsed.accountId);
       if (!entry) return null;
-      return { label: entry.account.name, balance: entry.unallocatedBalance, pctLabel: entry.isPartial ? 'partial' : undefined };
+      return {
+        label: entry.account.name,
+        balance: entry.unallocatedBalance,
+        pctLabel: entry.isPartial ? 'partial' : undefined,
+      };
     }
     const entry = (entriesByBucket[parsed.bucketId] ?? []).find((e) => e.account.id === parsed.accountId);
     if (!entry) return null;
@@ -165,8 +169,12 @@ const BucketsPage: React.FC = () => {
   const assignPanel = (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
       <ScrollArea className="flex-1 min-h-0">
-        <div className="p-2 space-y-2">
-          <DroppableUnassignedZone baseCurrency={baseCurrency} entries={filteredUnassigned} totalBalance={totalBalance} />
+        <div className="p-1.5 space-y-1.5">
+          <DroppableUnassignedZone
+            baseCurrency={baseCurrency}
+            entries={filteredUnassigned}
+            totalBalance={totalBalance}
+          />
           {buckets.map((bucket) => (
             <DroppableBucketZone
               baseCurrency={baseCurrency}
@@ -281,7 +289,9 @@ const BucketsPage: React.FC = () => {
               <Card className="h-full flex flex-col overflow-hidden">
                 <CardHeader className="flex-none py-2 px-3">
                   <CardTitle className="text-sm">Assign Accounts</CardTitle>
-                  <p className="text-[11px] text-muted-foreground">Drag accounts to buckets or tap the amount to edit.</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Drag accounts to buckets or tap the amount to edit.
+                  </p>
                 </CardHeader>
                 {assignPanel}
               </Card>
@@ -326,13 +336,9 @@ const BucketsPage: React.FC = () => {
 
   return (
     <PageWithSidebar collapsible resizable contentScrollable={false} sidebarWidth="w-72">
-      <PageWithSidebar.Header title="Buckets">
-        {vizToolbar}
-      </PageWithSidebar.Header>
+      <PageWithSidebar.Header title="Buckets">{vizToolbar}</PageWithSidebar.Header>
 
-      <PageWithSidebar.Sidebar ariaLabel="Assign accounts sidebar">
-        {assignPanel}
-      </PageWithSidebar.Sidebar>
+      <PageWithSidebar.Sidebar ariaLabel="Assign accounts sidebar">{assignPanel}</PageWithSidebar.Sidebar>
 
       <PageWithSidebar.Content className="min-h-0 h-full">
         <div className="h-full flex flex-col p-3 md:p-4 gap-3 animate-in fade-in slide-in-from-bottom-4 duration-[350ms] ease-out">

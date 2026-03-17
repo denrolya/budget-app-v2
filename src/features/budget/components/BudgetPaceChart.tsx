@@ -98,7 +98,7 @@ const BudgetPaceChart: React.FC<Props> = ({ budget, analytics: _analytics, displ
     return <div className="h-48 flex items-center justify-center text-sm text-muted-foreground">Loading…</div>;
   }
 
-  if (totalPlanned === 0 && actualData.every((d) => d.y === 0)) {
+  if ((totalPlanned === 0 && actualData.every((d) => d.y === 0)) || paceData.length < 2) {
     return (
       <div className="h-48 flex items-center justify-center text-sm text-muted-foreground">No data to display</div>
     );

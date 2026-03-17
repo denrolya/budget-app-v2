@@ -231,7 +231,9 @@ const useCategoryTree = (
         if (rate !== null) planned = line.plannedAmount * rate;
       }
 
-      const childNodes = sortCategoryTree(cat.children).map(buildNode).filter((n): n is TreeNode => n !== null);
+      const childNodes = sortCategoryTree(cat.children)
+        .map(buildNode)
+        .filter((n): n is TreeNode => n !== null);
 
       const hasBudgetOrSpending = planned !== null || actual > 0 || childNodes.length > 0;
       if (!hasBudgetOrSpending) return null;
@@ -263,10 +265,7 @@ const useCategoryTree = (
 
 // ─── Collapsible animated tree row ──────────────────────────────────────────
 
-const CollapsibleChildren: React.FC<{ expanded: boolean; children: React.ReactNode }> = ({
-  expanded,
-  children,
-}) => {
+const CollapsibleChildren: React.FC<{ expanded: boolean; children: React.ReactNode }> = ({ expanded, children }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState<number | 'auto'>(expanded ? 'auto' : 0);
   const prevExpanded = useRef(expanded);
@@ -325,14 +324,15 @@ const TreeRow: React.FC<{ depth: number; displayCurrency: string; node: TreeNode
 
   const toggle = useCallback(() => setExpanded((v) => !v), []);
 
-  const actualLabel = node.planned !== null ? (
-    <>
-      {fmtAmt(node.actual, displayCurrency)}
-      <span className="text-muted-foreground"> / {fmtAmt(node.planned, displayCurrency)}</span>
-    </>
-  ) : (
-    <span className="text-muted-foreground">{fmtAmt(node.actual, displayCurrency)}</span>
-  );
+  const actualLabel =
+    node.planned !== null ? (
+      <>
+        {fmtAmt(node.actual, displayCurrency)}
+        <span className="text-muted-foreground"> / {fmtAmt(node.planned, displayCurrency)}</span>
+      </>
+    ) : (
+      <span className="text-muted-foreground">{fmtAmt(node.actual, displayCurrency)}</span>
+    );
 
   return (
     <div>
@@ -553,13 +553,10 @@ const MobileBudgetPage: React.FC = () => {
           {(['expense', 'income'] as const).map((tab) => (
             <button
               type="button"
-              className={cn(
-                'flex-1 py-2 font-mono text-xs uppercase tracking-wider text-center transition-colors',
-                {
-                  'text-foreground border-b-2 border-primary font-medium': activeTab === tab,
-                  'text-muted-foreground': activeTab !== tab,
-                },
-              )}
+              className={cn('flex-1 py-2 font-mono text-xs uppercase tracking-wider text-center transition-colors', {
+                'text-foreground border-b-2 border-primary font-medium': activeTab === tab,
+                'text-muted-foreground': activeTab !== tab,
+              })}
               key={tab}
               onClick={() => setActiveTab(tab)}
             >

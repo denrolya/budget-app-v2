@@ -128,9 +128,7 @@ export const sortCategoryTree = (cats: Category[]): Category[] =>
       if (aFolder !== bFolder) return aFolder ? -1 : 1;
       return a.name.localeCompare(b.name);
     })
-    .map((cat) =>
-      cat.children.length > 0 ? ({ ...cat, children: sortCategoryTree(cat.children) } as Category) : cat,
-    );
+    .map((cat) => (cat.children.length > 0 ? ({ ...cat, children: sortCategoryTree(cat.children) } as Category) : cat));
 
 export const useSortedExpenseCategoriesTree = (): Category[] => {
   const tree = useExpenseCategoriesTree();
