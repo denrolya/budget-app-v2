@@ -101,8 +101,8 @@ const BudgetExportButton: React.FC<Props> = ({ budget, analytics, displayCurrenc
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button aria-label="Export CSV" size="icon" variant="outline" onClick={handleExport}>
-          <Download className="h-4 w-4" />
+        <Button aria-label="Export CSV" size="icon" variant="ghost" className="h-7 w-7" onClick={handleExport}>
+          <Download className="h-3.5 w-3.5" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>Export CSV</TooltipContent>

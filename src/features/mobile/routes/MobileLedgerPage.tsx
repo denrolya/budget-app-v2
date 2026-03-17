@@ -33,7 +33,7 @@ const TransactionDetailDrawer: React.FC<{
         <dl className="space-y-3 text-sm px-4 pb-4">
           <div className="flex justify-between items-center">
             <dt className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Type</dt>
-            <dd>
+            <dd className="flex items-center gap-1.5">
               <span
                 className={cn(
                   'inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-semibold uppercase tracking-wider border',
@@ -44,6 +44,11 @@ const TransactionDetailDrawer: React.FC<{
               >
                 {tx.type}
               </span>
+              {tx.isDraft && (
+                <span className="text-2xs font-mono font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border bg-warning/10 text-warning-foreground border-warning/20">
+                  draft
+                </span>
+              )}
             </dd>
           </div>
           <div className="flex justify-between items-center">
@@ -179,7 +184,13 @@ const MobileLedgerPage: React.FC = () => {
               return (
                 <button
                   type="button"
-                  className="w-full flex items-center gap-2.5 px-3 py-3 border-b border-border/30 last:border-0 hover:bg-muted/30 active:bg-muted/50 transition-colors text-left"
+                  className={cn(
+                    'w-full flex items-center gap-2.5 px-3 py-3 border-b border-border/30 last:border-0 transition-colors text-left',
+                    {
+                      'bg-warning/20 active:bg-warning/30': item.isDraft,
+                      'hover:bg-muted/30 active:bg-muted/50': !item.isDraft,
+                    },
+                  )}
                   key={item.id}
                   onClick={() => setSelectedTx(item)}
                 >

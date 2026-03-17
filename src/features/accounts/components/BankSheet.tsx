@@ -332,12 +332,12 @@ const BankSheet: React.FC<Props> = ({ account, onAccountUpdate }) => {
           <Button
             aria-label="Bank connection"
             size="icon"
-            variant="outline"
-            className="relative"
+            variant="ghost"
+            className="h-7 w-7 relative"
             onClick={() => setOpen(true)}
           >
             <span className="sr-only">Manage bank connection</span>
-            <Building2 aria-hidden="true" className="h-4 w-4" />
+            <Building2 aria-hidden="true" className="h-3.5 w-3.5" />
             <span
               className={cn('absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full border border-background', statusColor)}
             />

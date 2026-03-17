@@ -1,8 +1,9 @@
-import { Archive, ArchiveRestore, ChevronLeft, Download, Edit, Plus, Trash2 } from 'lucide-react';
+import { Archive, ArchiveRestore, Download, Edit, Plus, Trash2 } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
+import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { confirm } from '@/lib/confirmation';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -10,79 +11,6 @@ import { FormType, useForm } from '@/contexts/Form';
 
 import { useList as useDebtsQuery, useMutations as useDebtMutations } from '../api';
 import DebtDetails from '../components/Details';
-
-const DebtDetailsHeader: React.FC<{
-  isClosed: boolean;
-  onBack: () => void;
-  onDelete: () => Promise<void>;
-  onEdit: () => void;
-  onAddTransaction: () => void;
-  onExport: () => void;
-  onToggleClosed: () => Promise<void>;
-}> = ({ isClosed, onBack, onDelete, onEdit, onAddTransaction, onExport, onToggleClosed }) => (
-  <div className="flex items-center gap-2 px-4 h-12 border-b bg-background shrink-0">
-    <Button aria-label="Back to debts" size="icon" variant="ghost" onClick={onBack}>
-      <ChevronLeft aria-hidden="true" className="h-5 w-5" />
-    </Button>
-
-    <span className="flex-1 text-sm font-semibold truncate">Debt Details</span>
-
-    <div className="flex items-center gap-1">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button aria-label="Add Transaction" size="icon" variant="outline" onClick={onAddTransaction}>
-            <Plus aria-hidden="true" className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Add new account transaction</TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button aria-label="Export" size="icon" variant="outline" onClick={onExport}>
-            <Download aria-hidden="true" className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Export debt details</TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            aria-label={isClosed ? 'Reopen debt' : 'Close debt'}
-            size="icon"
-            variant="outline"
-            onClick={onToggleClosed}
-          >
-            {isClosed ? (
-              <ArchiveRestore aria-hidden="true" className="h-4 w-4" />
-            ) : (
-              <Archive aria-hidden="true" className="h-4 w-4" />
-            )}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>{isClosed ? 'Reopen debt' : 'Close debt'}</TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button aria-label="Edit debt" size="icon" variant="outline" onClick={onEdit}>
-            <Edit aria-hidden="true" className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Edit debt details</TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button aria-label="Delete debt" size="icon" variant="destructive" onClick={onDelete}>
-            <Trash2 aria-hidden="true" className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Delete debt</TooltipContent>
-      </Tooltip>
-    </div>
-  </div>
-);
 
 const DebtDetailPage: React.FC = () => {
   const { openForm } = useForm();
@@ -143,17 +71,78 @@ const DebtDetailPage: React.FC = () => {
   if (!data) return null;
   if (!debt) return <Navigate replace to="/debts" />;
 
+  const isClosed = Boolean(debt.closedAt);
+
   return (
     <div className="h-full flex flex-col min-h-0">
-      <DebtDetailsHeader
-        isClosed={Boolean(debt.closedAt)}
-        onAddTransaction={() => openForm(FormType.Transaction, { debt })}
-        onBack={() => navigate('/debts')}
-        onDelete={onDelete}
-        onEdit={() => openForm(FormType.Debt, debt)}
-        onExport={onExport}
-        onToggleClosed={onToggleClosed}
-      />
+      <PageWithSidebar.Header title={debt.debtor} className="px-4 py-2" onBack={() => navigate('/debts')}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              aria-label="Add Transaction"
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7"
+              onClick={() => openForm(FormType.Transaction, { debt })}
+            >
+              <Plus aria-hidden="true" className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Add new account transaction</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button aria-label="Export" size="icon" variant="ghost" className="h-7 w-7" onClick={onExport}>
+              <Download aria-hidden="true" className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Export debt details</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              aria-label={isClosed ? 'Reopen debt' : 'Close debt'}
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7"
+              onClick={onToggleClosed}
+            >
+              {isClosed ? (
+                <ArchiveRestore aria-hidden="true" className="h-3.5 w-3.5" />
+              ) : (
+                <Archive aria-hidden="true" className="h-3.5 w-3.5" />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{isClosed ? 'Reopen debt' : 'Close debt'}</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              aria-label="Edit debt"
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7"
+              onClick={() => openForm(FormType.Debt, debt)}
+            >
+              <Edit aria-hidden="true" className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Edit debt details</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button aria-label="Delete debt" size="icon" variant="destructive" className="h-7 w-7" onClick={onDelete}>
+              <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Delete debt</TooltipContent>
+        </Tooltip>
+      </PageWithSidebar.Header>
 
       <div className="flex-1 min-h-0 overflow-hidden">
         <DebtDetails debt={debt} key={debtIdNum ?? debt.id} />

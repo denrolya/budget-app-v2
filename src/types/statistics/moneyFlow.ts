@@ -11,6 +11,9 @@ export interface TransformedData {
   previousIncome: number;
   previousExpenses: number;
   previousRevenue: number;
+  projectedIncome: number | null;
+  projectedExpenses: number | null;
+  projectedRevenue: number | null;
 }
 
 export interface UseMoneyFlowParams {
@@ -38,4 +41,8 @@ export interface UseMoneyFlowReturn {
   expensesChangePercent: number;
   previousAvgPeriodIncome: number;
   previousAvgPeriodExpenses: number;
+  projectedTotalIncome: number;
+  projectedTotalExpenses: number;
+  projectedTotalRevenue: number;
+  hasProjection: boolean;
 }

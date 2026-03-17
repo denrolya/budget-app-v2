@@ -8,9 +8,7 @@ import { LoginPage, LogoutRoute } from '@/features/auth';
 import MobileShell from '@/features/mobile/layout/MobileShell';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const AccountsManagementPage = lazy(() =>
-  import('@/features/accounts').then(({ AccountsManagementPage: C }) => ({ default: C })),
-);
+const AccountsManagementPage = lazy(() => import('@/features/accounts/routes/ManagementPage'));
 const BudgetingPage = lazy(() => import('@/features/budget').then(({ BudgetingPage: C }) => ({ default: C })));
 const CategoriesManagementPage = lazy(() =>
   import('@/features/categories').then(({ CategoriesManagementPage: C }) => ({ default: C })),
@@ -26,6 +24,7 @@ const MobileBalancesPage = lazy(() => import('@/features/mobile/routes/MobileBal
 const MobileLedgerPage = lazy(() => import('@/features/mobile/routes/MobileLedgerPage'));
 const MobileRatesPage = lazy(() => import('@/features/mobile/routes/MobileRatesPage'));
 const MobileConverterPage = lazy(() => import('@/features/mobile/routes/MobileConverterPage'));
+const MobileBudgetPage = lazy(() => import('@/features/mobile/routes/MobileBudgetPage'));
 
 const MobileApp: React.FC = () => (
   <RequiredDataGate>
@@ -37,6 +36,7 @@ const MobileApp: React.FC = () => (
           <Route element={<MobileLedgerPage />} path="ledger" />
           <Route element={<MobileRatesPage />} path="rates" />
           <Route element={<MobileConverterPage />} path="convert" />
+          <Route element={<MobileBudgetPage />} path="budget" />
           <Route element={<Navigate replace to="/m/balances" />} path="*" />
         </Route>
       </Routes>

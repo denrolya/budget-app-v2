@@ -12,6 +12,7 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import { cn } from '@/lib/utils';
+import { sortCategoryTree } from '@/hooks/financeData';
 
 import type Category from '../models/Category';
 
@@ -51,13 +52,7 @@ const ICON_COL_W = 20;
 const ICON_CENTER = ICON_COL_W / 2;
 const RAIL_OFFSET = 10;
 
-const sortChildren = (children: Category[]) =>
-  [...children].sort((a, b) => {
-    const aFolder = a.children.length > 0;
-    const bFolder = b.children.length > 0;
-    if (aFolder !== bFolder) return aFolder ? -1 : 1;
-    return a.name.localeCompare(b.name);
-  });
+const sortChildren = (children: Category[]) => sortCategoryTree(children);
 
 const TreeNode: React.FC<Props> = ({
   category,

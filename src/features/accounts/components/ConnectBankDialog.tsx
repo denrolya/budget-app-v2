@@ -1,6 +1,8 @@
 import { AlertCircle, Building2, Loader2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
+import { cn } from '@/lib/utils';
+
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -61,7 +63,15 @@ const ConnectBankDialog: React.FC<Props> = ({ open, onOpenChange, account }) => 
   const createIntegration = useCreateBankIntegration();
   const registerWebhook = useRegisterWebhook(selectedIntegrationId ?? 0);
 
-  const activeIntegrations = integrations.data?.filter((i) => i.isActive) ?? [];
+  const allActiveIntegrations = integrations.data?.filter((i) => i.isActive) ?? [];
+  // Deduplicate by provider — keep the highest-ID (most recent) per provider
+  const activeIntegrations = Object.values(
+    allActiveIntegrations.reduce<Record<string, (typeof allActiveIntegrations)[number]>>((acc, i) => {
+      if (!acc[i.provider] || i.id > acc[i.provider].id) acc[i.provider] = i;
+      return acc;
+    }, {}),
+  );
+  const activeProviders = new Set(activeIntegrations.map((i) => i.provider));
 
   // Determine starting step when dialog opens
   useEffect(() => {
@@ -137,24 +147,36 @@ const ConnectBankDialog: React.FC<Props> = ({ open, onOpenChange, account }) => 
         <div className="flex flex-col gap-1.5">
           <Label>Provider</Label>
           <div className="flex flex-col gap-2">
-            {Object.values(BankProvider).map((provider) => (
-              <button
-                type="button"
-                className={`flex flex-col items-start rounded-lg border px-4 py-3 text-left transition-colors hover:border-primary/60 hover:bg-muted/50 ${
-                  selectedProvider === provider ? 'border-primary bg-primary/5' : 'border-border bg-transparent'
-                }`}
-                key={provider}
-                onClick={() => {
-                  setSelectedProvider(provider);
-                  if (provider !== BankProvider.Wise) {
-                    setSelectedSyncMethod(SyncMethod.Webhook);
-                  }
-                }}
-              >
-                <span className="font-medium text-sm">{PROVIDER_LABELS[provider]}</span>
-                <span className="text-xs text-muted-foreground mt-0.5">{PROVIDER_DESCRIPTIONS[provider]}</span>
-              </button>
-            ))}
+            {Object.values(BankProvider).map((provider) => {
+              const alreadyExists = activeProviders.has(provider);
+              return (
+                <button
+                  disabled={alreadyExists}
+                  type="button"
+                  className={cn(
+                    'flex flex-col items-start rounded-lg border px-4 py-3 text-left transition-colors',
+                    alreadyExists
+                      ? 'cursor-not-allowed border-border opacity-50'
+                      : 'hover:border-primary/60 hover:bg-muted/50',
+                    { 'border-primary bg-primary/5': selectedProvider === provider && !alreadyExists },
+                    { 'border-border bg-transparent': selectedProvider !== provider || alreadyExists },
+                  )}
+                  key={provider}
+                  onClick={() => {
+                    if (alreadyExists) return;
+                    setSelectedProvider(provider);
+                    if (provider !== BankProvider.Wise) {
+                      setSelectedSyncMethod(SyncMethod.Webhook);
+                    }
+                  }}
+                >
+                  <span className="font-medium text-sm">{PROVIDER_LABELS[provider]}</span>
+                  <span className="text-xs text-muted-foreground mt-0.5">
+                    {alreadyExists ? 'Already configured' : PROVIDER_DESCRIPTIONS[provider]}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 

@@ -34,12 +34,13 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
   // Fetch transactions for this debt directly (list API doesn't embed them in the Debt model)
   const { data: transactions = [] } = useDebtTransactions(debt.id);
 
+  // Show all transactions since the debt was created
   const defaultRange = useMemo(
     () => ({
-      after: moment().subtract(90, 'days').startOf('day'),
+      after: debt.createdAt.clone().startOf('day'),
       before: moment().endOf('day'),
     }),
-    [],
+    [debt.createdAt],
   );
 
   const ledger = useLedger({
@@ -280,7 +281,7 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
           <TabsTrigger value="history">Debt History</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="transactions" className="flex-1 min-h-0 overflow-hidden min-w-0">
+        <TabsContent value="transactions" className="flex-1 min-h-0 overflow-hidden min-w-0 flex flex-col">
           <LedgerActivityCard
             disabledFilters={['debts']}
             ledger={ledger}

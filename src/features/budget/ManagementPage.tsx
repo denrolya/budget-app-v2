@@ -31,7 +31,7 @@ const ManagementPage: React.FC = () => {
   const selectedId = budgetMatch?.params?.budgetId ?? null;
 
   return (
-    <PageWithSidebar contentScrollable={false} sidebarWidth="w-64">
+    <PageWithSidebar collapsible resizable contentScrollable={false} sidebarWidth="w-64">
       <PageWithSidebar.Sidebar ariaLabel="Budget sidebar">
         <BudgetSidebar selectedId={selectedId} />
       </PageWithSidebar.Sidebar>
@@ -131,10 +131,11 @@ const BudgetDetailRoute: React.FC = () => {
               aria-label="Previous budget"
               disabled={!prevId}
               size="icon"
-              variant="outline"
+              variant="ghost"
+              className="h-7 w-7"
               onClick={() => prevId && navigate(`/budget/${prevId}`)}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3.5 w-3.5" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Previous budget</TooltipContent>
@@ -145,10 +146,11 @@ const BudgetDetailRoute: React.FC = () => {
               aria-label="Next budget"
               disabled={!nextId}
               size="icon"
-              variant="outline"
+              variant="ghost"
+              className="h-7 w-7"
               onClick={() => nextId && navigate(`/budget/${nextId}`)}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3.5 w-3.5" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Next budget</TooltipContent>
@@ -171,13 +173,14 @@ const BudgetDetailRoute: React.FC = () => {
               aria-label="Refresh analytics"
               disabled={budgetLoading || analyticsLoading}
               size="icon"
-              variant="outline"
+              variant="ghost"
+              className="h-7 w-7"
               onClick={() => {
                 refetchBudget();
                 refetchAnalytics();
               }}
             >
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className="h-3.5 w-3.5" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Refresh</TooltipContent>

@@ -1,4 +1,4 @@
-import { ArrowLeftRight, BarChart2, Wallet } from 'lucide-react';
+import { ArrowLeftRight, BarChart2, PiggyBank, Wallet } from 'lucide-react';
 import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 const NAV_ITEMS = [
   { path: '/m/balances', label: 'Balances', Icon: Wallet },
   { path: '/m/ledger', label: 'Ledger', Icon: BarChart2 },
+  { path: '/m/budget', label: 'Budget', Icon: PiggyBank },
   { path: '/m/convert', label: 'Rates', Icon: ArrowLeftRight },
 ] as const;
 

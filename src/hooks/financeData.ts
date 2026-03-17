@@ -119,6 +119,29 @@ export const useExpenseCategoriesTree = (): Category[] => {
   return useMemo(() => tree.filter(({ type }) => (type as string) === (TransactionType.Expense as string)), [tree]);
 };
 
+/** Sort categories: folders (with children) first, then alphabetically. Recurses into children. */
+export const sortCategoryTree = (cats: Category[]): Category[] =>
+  [...cats]
+    .sort((a, b) => {
+      const aFolder = a.children.length > 0;
+      const bFolder = b.children.length > 0;
+      if (aFolder !== bFolder) return aFolder ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    })
+    .map((cat) =>
+      cat.children.length > 0 ? ({ ...cat, children: sortCategoryTree(cat.children) } as Category) : cat,
+    );
+
+export const useSortedExpenseCategoriesTree = (): Category[] => {
+  const tree = useExpenseCategoriesTree();
+  return useMemo(() => sortCategoryTree(tree), [tree]);
+};
+
+export const useSortedIncomeCategoriesTree = (): Category[] => {
+  const tree = useIncomeCategoriesTree();
+  return useMemo(() => sortCategoryTree(tree), [tree]);
+};
+
 export const useDebts = (): Debt[] => {
   const q = useDebtsQuery();
   return q.data ?? [];

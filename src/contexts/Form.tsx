@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export enum FormType {
@@ -44,7 +44,9 @@ const initialFormState: FormState = {
 // eslint-disable-next-line react-refresh/only-export-components
 export const useFormManager = (): FormContextType => {
   const [formState, setFormState] = useState<FormState>(initialFormState);
-  const [listeners, setListeners] = useState<FormEventListener[]>([]);
+  const listenersRef = useRef<FormEventListener[]>([]);
+  const formStateRef = useRef(formState);
+  formStateRef.current = formState;
 
   const openForm = useCallback((type: FormType, initialValues: unknown = null) => {
     setFormState({
@@ -60,14 +62,11 @@ export const useFormManager = (): FormContextType => {
     setFormState(initialFormState);
   }, []);
 
-  const submitForm = useCallback(
-    <T,>(response: T) => {
-      if (formState.type) {
-        listeners.forEach((listener) => listener(formState.type!, response));
-      }
-    },
-    [formState.type, listeners],
-  );
+  const submitForm = useCallback(<T,>(response: T) => {
+    if (formStateRef.current.type) {
+      listenersRef.current.forEach((listener) => listener(formStateRef.current.type!, response));
+    }
+  }, []);
 
   const resetForm = useCallback(() => {
     setFormState((prev) => ({
@@ -83,23 +82,26 @@ export const useFormManager = (): FormContextType => {
   }, []);
 
   const addFormSubmitListener = useCallback(<T,>(listener: FormEventListener<T>) => {
-    setListeners((prev) => [...prev, listener as FormEventListener]);
+    listenersRef.current = [...listenersRef.current, listener as FormEventListener];
   }, []);
 
   const removeFormSubmitListener = useCallback(<T,>(listener: FormEventListener<T>) => {
-    setListeners((prev) => prev.filter((l) => l !== listener));
+    listenersRef.current = listenersRef.current.filter((l) => l !== listener);
   }, []);
 
-  return {
-    formState,
-    openForm,
-    closeForm,
-    submitForm,
-    updateFormState,
-    resetForm,
-    addFormSubmitListener,
-    removeFormSubmitListener,
-  };
+  return useMemo(
+    () => ({
+      formState,
+      openForm,
+      closeForm,
+      submitForm,
+      updateFormState,
+      resetForm,
+      addFormSubmitListener,
+      removeFormSubmitListener,
+    }),
+    [formState, openForm, closeForm, submitForm, updateFormState, resetForm, addFormSubmitListener, removeFormSubmitListener],
+  );
 };
 
 export const FormProvider = ({ children }: { children: React.ReactNode }) => {
@@ -121,17 +123,19 @@ export const useForm = () => {
 export const useFormSubmitListener = <T,>(formTypes: FormType[], callback: (response: T) => void) => {
   const { addFormSubmitListener, removeFormSubmitListener } = useForm();
 
-  // Memoize formTypes and callback
-  const memoizedFormTypes = useMemo(() => formTypes, [formTypes]);
-  // const memoizedCallback = useCallback(callback, [/* actual dependencies */]);
+  // Stabilize formTypes by serializing — callers pass inline arrays
+  const typesKey = formTypes.join(',');
+  const callbackRef = useRef(callback);
+  callbackRef.current = callback;
 
   useEffect(() => {
+    const types = typesKey.split(',') as FormType[];
     const listener: FormEventListener<T> = (formType, response) => {
-      if (memoizedFormTypes.includes(formType)) {
-        callback(response);
+      if (types.includes(formType)) {
+        callbackRef.current(response);
       }
     };
     addFormSubmitListener(listener);
     return () => removeFormSubmitListener(listener);
-  }, [memoizedFormTypes, callback, addFormSubmitListener, removeFormSubmitListener]);
+  }, [typesKey, addFormSubmitListener, removeFormSubmitListener]);
 };

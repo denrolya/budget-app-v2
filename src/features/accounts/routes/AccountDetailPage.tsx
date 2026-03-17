@@ -1,7 +1,8 @@
-import { Archive, ArchiveRestore, Check, ChevronLeft, Edit, Plus, X } from 'lucide-react';
+import { Archive, ArchiveRestore, Check, Edit, Plus, X } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
+import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { confirm } from '@/lib/confirmation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,12 +27,10 @@ const InlineName: React.FC<InlineNameProps> = ({ account, onSave }) => {
   const [value, setValue] = useState(account.name);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sync displayed value if account name changes externally (not during active edit)
   useEffect(() => {
     if (!editing) setValue(account.name);
   }, [account.name, editing]);
 
-  // Auto-select text after React commits the input to the DOM
   useEffect(() => {
     if (editing) inputRef.current?.select();
   }, [editing]);
@@ -101,85 +100,6 @@ const InlineName: React.FC<InlineNameProps> = ({ account, onSave }) => {
   );
 };
 
-// ─── Header ───────────────────────────────────────────────────────────────────
-
-interface AccountDetailsHeaderProps {
-  account: Account;
-  isArchiving: boolean;
-  onBack: () => void;
-  onAccountUpdate: (account: Account, diff: UpdateAccountDTO) => Promise<void>;
-  onAddTransaction: () => void;
-  onToggleArchive: () => Promise<void>;
-  onEdit: () => void;
-}
-
-const AccountDetailsHeader: React.FC<AccountDetailsHeaderProps> = ({
-  account,
-  isArchiving,
-  onBack,
-  onAccountUpdate,
-  onAddTransaction,
-  onToggleArchive,
-  onEdit,
-}) => {
-  const ArchiveIcon = account.isArchived() ? ArchiveRestore : Archive;
-  const archiveLabel = account.isArchived() ? 'Unarchive account' : 'Archive account';
-
-  const handleNameSave = useCallback(
-    async (name: string) => {
-      await onAccountUpdate(account, { name });
-    },
-    [account, onAccountUpdate],
-  );
-
-  return (
-    <div className="flex items-center gap-2 px-4 h-12 border-b bg-background shrink-0">
-      <Button aria-label="Back to accounts" size="icon" variant="ghost" onClick={onBack}>
-        <ChevronLeft aria-hidden="true" className="h-5 w-5" />
-      </Button>
-
-      <InlineName account={account} onSave={handleNameSave} />
-
-      <div className="flex items-center gap-1">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button aria-label="Add Transaction" size="icon" variant="outline" onClick={onAddTransaction}>
-              <Plus aria-hidden="true" className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Add new account transaction</TooltipContent>
-        </Tooltip>
-
-        {account.type === AccountType.Bank && <BankSheet account={account} onAccountUpdate={onAccountUpdate} />}
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button aria-label="Edit account details" size="icon" variant="outline" onClick={onEdit}>
-              <Edit aria-hidden="true" className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Edit account details</TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              aria-label={archiveLabel}
-              disabled={isArchiving}
-              size="icon"
-              variant="outline"
-              onClick={onToggleArchive}
-            >
-              <ArchiveIcon aria-hidden="true" className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{archiveLabel}</TooltipContent>
-        </Tooltip>
-      </div>
-    </div>
-  );
-};
-
 // ─── Route component ──────────────────────────────────────────────────────────
 
 const AccountDetailPage: React.FC = () => {
@@ -218,21 +138,76 @@ const AccountDetailPage: React.FC = () => {
     await archive({ id: account.id, archivedAt: account.isArchived() ? null : new Date().toISOString() });
   }, [account, archive]);
 
+  const handleNameSave = useCallback(
+    async (name: string) => {
+      if (!account) return;
+      await update({ id: account.id, diff: { name } });
+    },
+    [account, update],
+  );
+
   if (!accountId) return <Navigate replace to="/accounts" />;
   if (!data) return null;
   if (!account) return <Navigate replace to="/accounts" />;
 
+  const ArchiveIcon = account.isArchived() ? ArchiveRestore : Archive;
+  const archiveLabel = account.isArchived() ? 'Unarchive account' : 'Archive account';
+
   return (
     <div className="h-full flex flex-col min-h-0">
-      <AccountDetailsHeader
-        account={account}
-        isArchiving={isArchiving}
-        onAccountUpdate={onAccountUpdate}
-        onAddTransaction={() => openForm(FormType.Transaction, { account })}
+      <PageWithSidebar.Header
+        title={<InlineName account={account} onSave={handleNameSave} />}
+        className="px-4 py-2"
         onBack={() => navigate('/accounts')}
-        onEdit={() => openForm(FormType.Account, account)}
-        onToggleArchive={onToggleArchive}
-      />
+      >
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              aria-label="Add Transaction"
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7"
+              onClick={() => openForm(FormType.Transaction, { account })}
+            >
+              <Plus aria-hidden="true" className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Add new account transaction</TooltipContent>
+        </Tooltip>
+
+        {account.type === AccountType.Bank && <BankSheet account={account} onAccountUpdate={onAccountUpdate} />}
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              aria-label="Edit account details"
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7"
+              onClick={() => openForm(FormType.Account, account)}
+            >
+              <Edit aria-hidden="true" className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Edit account details</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              aria-label={archiveLabel}
+              disabled={isArchiving}
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7"
+              onClick={onToggleArchive}
+            >
+              <ArchiveIcon aria-hidden="true" className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{archiveLabel}</TooltipContent>
+        </Tooltip>
+      </PageWithSidebar.Header>
 
       <div className="flex-1 min-h-0 overflow-hidden">
         <AccountDetails account={account} key={account.id} onAccountUpdate={onAccountUpdate} />

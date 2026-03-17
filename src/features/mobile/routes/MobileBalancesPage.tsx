@@ -100,14 +100,14 @@ const AccountRow: React.FC<AccountRowProps> = ({ account, dimmed, onClick }) => 
   );
 };
 
-const CurrencyGroup: React.FC<{ currency: string; accounts: Account[]; onAccountClick: (id: number) => void }> = ({
-  currency,
+const AccountGroup: React.FC<{ label: string; accounts: Account[]; onAccountClick: (id: number) => void }> = ({
+  label,
   accounts,
   onAccountClick,
 }) => (
   <div className="mb-2">
     <div className="px-3 py-1 flex items-center gap-2">
-      <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">{currency}</span>
+      <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">{label}</span>
       <span className="flex-1 h-px bg-border/50" />
     </div>
     {accounts.map((a) => (
@@ -132,10 +132,12 @@ const MobileBalancesPage: React.FC = () => {
     [debts, baseCurrency],
   );
 
-  const grouped = useMemo(
-    () => Object.entries(groupBy(activeAccounts, 'currency')).sort(([a], [b]) => a.localeCompare(b)),
-    [activeAccounts],
-  );
+  const grouped = useMemo(() => {
+    const converted = (a: Account) => a.convertedValues?.[baseCurrency] ?? 0;
+    return Object.entries(groupBy(activeAccounts, 'type'))
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([type, accs]) => [type, [...accs].sort((a, b) => converted(b) - converted(a))] as [string, Account[]]);
+  }, [activeAccounts, baseCurrency]);
 
   const handleAccountClick = (accountId: number) => {
     navigate('/m/ledger', { state: { accountId } });
@@ -163,8 +165,8 @@ const MobileBalancesPage: React.FC = () => {
 
       {/* Active accounts by currency */}
       <div className="mt-3">
-        {grouped.map(([currency, accounts]) => (
-          <CurrencyGroup accounts={accounts} currency={currency} key={currency} onAccountClick={handleAccountClick} />
+        {grouped.map(([type, accounts]) => (
+          <AccountGroup accounts={accounts} label={type} key={type} onAccountClick={handleAccountClick} />
         ))}
       </div>
 
