@@ -36,7 +36,7 @@ export interface FetchResponse {
   totalValue: number;
 }
 
-const BASE_URL = '/api/v2/transaction';
+const BASE_URL = '/api/v2/transactions';
 
 type SortDirection = 'asc' | 'desc';
 

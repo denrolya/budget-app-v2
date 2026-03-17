@@ -8,7 +8,7 @@ import { type CreateAccountDTO, type UpdateAccountDTO, Type as AccountType } fro
 type ExchangeRates = Record<string, number>;
 
 const BASE_URL_V1 = '/api/accounts';
-const BASE_URL_V2 = '/api/v2/account';
+const BASE_URL_V2 = '/api/v2/accounts';
 
 const withConvertedValues = (raw: AccountRawData, rates: ExchangeRates): Account => {
   const convertedValues: ConvertedValues = (() => {

@@ -3,7 +3,7 @@ import { api } from '@/services/api';
 import { type DebtDTO, type DebtWriteDTO } from '../types';
 
 const BASE = '/api/debts';
-const LIST_ENDPOINT = '/api/v2/debt';
+const LIST_ENDPOINT = '/api/v2/debts';
 
 export const debtService = {
   async fetchList(opts?: { withClosed?: boolean }): Promise<DebtDTO[]> {

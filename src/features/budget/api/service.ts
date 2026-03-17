@@ -13,7 +13,7 @@ import type {
 } from './types';
 
 const BUDGET_API = '/api/budgets'; // API Platform — CRUD
-const BUDGET_V2 = '/api/v2/budget'; // Legacy controller — analytics only
+const BUDGET_V2 = '/api/v2/budgets'; // Legacy controller — analytics only
 
 export const budgetService = {
   async list(): Promise<BudgetDTO[]> {

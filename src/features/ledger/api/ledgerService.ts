@@ -31,7 +31,7 @@ export interface LedgerResponse {
   totalValue: number;
 }
 
-const BASE_URL = '/api/v2/ledger';
+const BASE_URL = '/api/v2/ledgers';
 
 const appendArray = (query: URLSearchParams, key: string, values: number[] | string[]) => {
   for (const v of values) query.append(key, String(v));
