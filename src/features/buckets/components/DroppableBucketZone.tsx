@@ -1,10 +1,12 @@
 import { useDroppable, useDraggable } from '@dnd-kit/core';
 import { GripVertical, Target, X } from 'lucide-react';
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import CellPopover from '@/components/common/CellPopover';
 import { Input } from '@/components/ui/input';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
+import { AccountPill } from '@/features/accounts';
 import { cn } from '@/lib/utils';
 
 import { type Bucket, type BucketEntry, type UnassignedEntry } from '../models/types';
@@ -69,28 +71,30 @@ export const DraggableBucketEntry: React.FC<DraggableBucketEntryProps> = ({
     <div
       style={style}
       className={cn(
-        'flex items-center gap-2 rounded-md border bg-background px-2 py-2 select-none transition-opacity',
+        'flex items-center gap-1.5 rounded-md border bg-background px-1.5 py-1 select-none transition-opacity',
         isDragging && 'opacity-40',
       )}
       ref={setNodeRef}
       {...attributes}
     >
       <span {...listeners} className="text-muted-foreground/40 hover:text-muted-foreground cursor-grab shrink-0">
-        <GripVertical className="h-3.5 w-3.5" />
+        <GripVertical className="h-3 w-3" />
       </span>
 
-      <span className="flex-1 truncate text-sm font-medium">{entry.account.name}</span>
+      <Link className="flex-1 min-w-0" to="/accounts" onPointerDown={(e) => e.stopPropagation()}>
+        <AccountPill account={entry.account} size="sm" tooltip={false} variant="inline" />
+      </Link>
 
       <div onPointerDown={(e) => e.stopPropagation()}>
         <CellPopover
           trigger={
             <div className="text-right">
-              <div className="text-sm font-semibold tabular-nums">
+              <div className="text-xs font-semibold tabular-nums">
                 {sym}
                 {entry.amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}
               </div>
               {entry.account.currency !== baseCurrency && (
-                <div className="text-[10px] text-muted-foreground tabular-nums">
+                <div className="text-2xs text-muted-foreground tabular-nums">
                   ≈{baseSym}
                   {entry.allocatedBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 </div>
@@ -136,11 +140,11 @@ export const DraggableBucketEntry: React.FC<DraggableBucketEntryProps> = ({
       <button
         aria-label={`Remove ${entry.account.name} from bucket`}
         type="button"
-        className="ml-0.5 shrink-0 text-muted-foreground/40 hover:text-destructive"
+        className="shrink-0 text-muted-foreground/40 hover:text-destructive"
         onClick={onRemove}
         onPointerDown={(e) => e.stopPropagation()}
       >
-        <X className="h-3.5 w-3.5" />
+        <X className="h-3 w-3" />
       </button>
     </div>
   );
@@ -166,17 +170,19 @@ export const DraggableUnassignedItem: React.FC<DraggableUnassignedItemProps> = (
     <div
       style={style}
       className={cn(
-        'flex items-center gap-2 rounded-md border bg-background px-2 py-2 select-none transition-opacity cursor-grab',
+        'flex items-center gap-1.5 rounded-md border bg-background px-1.5 py-1 select-none transition-opacity cursor-grab',
         isDragging && 'opacity-40',
       )}
       ref={setNodeRef}
       {...attributes}
       {...listeners}
     >
-      <GripVertical className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
-      <span className="flex-1 truncate text-sm font-medium">{entry.account.name}</span>
-      {entry.isPartial && <span className="shrink-0 text-[10px] text-amber-500">partial</span>}
-      <span className="shrink-0 tabular-nums text-sm text-muted-foreground">
+      <GripVertical className="h-3 w-3 text-muted-foreground/40 shrink-0" />
+      <Link className="flex-1 min-w-0" to="/accounts" onPointerDown={(e) => e.stopPropagation()}>
+        <AccountPill account={entry.account} size="sm" tooltip={false} variant="inline" />
+      </Link>
+      {entry.isPartial && <span className="shrink-0 text-2xs text-warning">partial</span>}
+      <span className="shrink-0 tabular-nums text-xs text-muted-foreground">
         {baseSym}
         {entry.unallocatedBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
         {entry.account.currency !== baseCurrency && (
@@ -348,8 +354,8 @@ export const DroppableBucketZone: React.FC<BucketZoneProps> = ({
       </div>
 
       {/* Entries */}
-      <div className="p-2 space-y-1.5 min-h-[52px]">
-        {entries.map((entry) => (
+      <div className="p-1.5 space-y-1 min-h-[44px]">
+        {[...entries].sort((a, b) => b.allocatedBalance - a.allocatedBalance).map((entry) => (
           <DraggableBucketEntry
             baseCurrency={baseCurrency}
             bucketId={bucket.id}
@@ -398,7 +404,7 @@ export const DroppableUnassignedZone: React.FC<UnassignedZoneProps> = ({ entries
       <div className="px-3 py-2 border-b border-border/40">
         <span className="text-sm font-semibold text-muted-foreground">📦 Unassigned</span>
       </div>
-      <div className="p-2 space-y-1.5">
+      <div className="p-1.5 space-y-1">
         {entries.map((entry) => (
           <DraggableUnassignedItem baseCurrency={baseCurrency} entry={entry} key={entry.account.id} />
         ))}

@@ -5,9 +5,9 @@ import { type HealthContext, type HealthResult, type HealthRule, type RuleStatus
 const RULES: HealthRule[] = [
   {
     id: 'emergency-fund',
-    title: 'Emergency Fund ≥ 6 months expenses',
+    title: 'Emergency Reserve ≥ 6 months expenses',
     evaluate: ({ bucketBalances, monthlyExpenses }): HealthResult => {
-      const balance = bucketBalances['emergency'] ?? 0;
+      const balance = bucketBalances['reserve'] ?? 0;
       if (!monthlyExpenses) return na('Set monthly expenses below');
       const months = balance / monthlyExpenses;
       if (months >= 6) return pass(`${months.toFixed(1)} months covered`);
@@ -17,14 +17,14 @@ const RULES: HealthRule[] = [
   },
   {
     id: 'investments-after-emergency',
-    title: 'Investments only after НЗ ≥ 3 months',
+    title: 'Investments only after Emergency Reserve ≥ 3 months',
     evaluate: ({ bucketBalances, monthlyExpenses }): HealthResult => {
       const invBalance = bucketBalances['investments'] ?? 0;
       if (invBalance <= 0) return pass('No investments yet');
       if (!monthlyExpenses) return na('Set monthly expenses below');
-      const efMonths = (bucketBalances['emergency'] ?? 0) / monthlyExpenses;
-      if (efMonths >= 3) return pass(`НЗ = ${efMonths.toFixed(1)} months ✓`);
-      return warn(`НЗ = ${efMonths.toFixed(1)} months — build НЗ first`);
+      const efMonths = (bucketBalances['reserve'] ?? 0) / monthlyExpenses;
+      if (efMonths >= 3) return pass(`Reserve = ${efMonths.toFixed(1)} months ✓`);
+      return warn(`Reserve = ${efMonths.toFixed(1)} months — build reserve first`);
     },
   },
   {
@@ -48,7 +48,7 @@ const RULES: HealthRule[] = [
     id: 'liquid-reserves',
     title: '1–2 months expenses immediately accessible',
     evaluate: ({ bucketBalances, monthlyExpenses }): HealthResult => {
-      const liquid = (bucketBalances['expenses'] ?? 0) + (bucketBalances['buffer'] ?? 0);
+      const liquid = bucketBalances['operational'] ?? 0;
       if (!monthlyExpenses) return na('Set monthly expenses below');
       const months = liquid / monthlyExpenses;
       if (months >= 1) return pass(`${months.toFixed(1)} months liquid`);
@@ -68,15 +68,15 @@ const RULES: HealthRule[] = [
     },
   },
   {
-    id: 'investments-not-expenses',
-    title: 'Investment accounts not in expenses bucket',
+    id: 'investments-not-operational',
+    title: 'Investment accounts not in operational bucket',
     evaluate: ({ entriesByBucket }): HealthResult => {
       const invIds = new Set((entriesByBucket['investments'] ?? []).map((e) => e.account.id));
-      const expIds = new Set((entriesByBucket['expenses'] ?? []).map((e) => e.account.id));
-      const overlap = [...invIds].filter((id) => expIds.has(id));
+      const opIds = new Set((entriesByBucket['operational'] ?? []).map((e) => e.account.id));
+      const overlap = [...invIds].filter((id) => opIds.has(id));
       if (overlap.length > 0) return fail(`${overlap.length} account(s) in both`);
       if (invIds.size === 0) return pass('No investment accounts');
-      if (expIds.size === 0) return warn('No expense accounts defined');
+      if (opIds.size === 0) return warn('No operational accounts defined');
       return pass('Investment accounts separate');
     },
   },

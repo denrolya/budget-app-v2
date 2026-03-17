@@ -7,11 +7,12 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { Download, LayoutGrid, PieChart, Upload } from 'lucide-react';
+import { Download, Eye, EyeOff, LayoutGrid, PieChart, Upload } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -96,6 +97,24 @@ const BucketsPage: React.FC = () => {
   );
 
   const health = useHealthRules(healthCtx);
+
+  // ── Zero-balance filter ────────────────────────────────────────────────────
+
+  const [hideZeroBalance, setHideZeroBalance] = useState(false);
+
+  const filteredUnassigned = useMemo(
+    () => (hideZeroBalance ? unassignedEntries.filter((e) => e.unallocatedBalance > 0) : unassignedEntries),
+    [unassignedEntries, hideZeroBalance],
+  );
+
+  const filteredEntriesByBucket = useMemo(() => {
+    if (!hideZeroBalance) return entriesByBucket;
+    const filtered: Record<string, typeof entriesByBucket[string]> = {};
+    for (const [id, entries] of Object.entries(entriesByBucket)) {
+      filtered[id] = entries.filter((e) => e.allocatedBalance > 0);
+    }
+    return filtered;
+  }, [entriesByBucket, hideZeroBalance]);
 
   // ── Drag & drop ─────────────────────────────────────────────────────────────
 
@@ -234,14 +253,14 @@ const BucketsPage: React.FC = () => {
         <div className="p-3 space-y-2.5">
           <DroppableUnassignedZone
             baseCurrency={baseCurrency}
-            entries={unassignedEntries}
+            entries={filteredUnassigned}
             totalBalance={totalBalance}
           />
           {buckets.map((bucket) => (
             <DroppableBucketZone
               baseCurrency={baseCurrency}
               bucket={bucket}
-              entries={entriesByBucket[bucket.id] ?? []}
+              entries={filteredEntriesByBucket[bucket.id] ?? []}
               totalBalance={totalBalance}
               key={bucket.id}
               onRemove={(accountId) => removeAllocation(accountId, bucket.id)}
@@ -319,39 +338,57 @@ const BucketsPage: React.FC = () => {
             </TabsContent>
           </Tabs>
         ) : (
-          /* ── Desktop: two-column + health row ────────────────────────── */
+          /* ── Desktop: resizable two-column + health row ─────────────── */
           <>
-            <div className="flex-1 min-h-0 flex gap-3">
+            <ResizablePanelGroup className="flex-1 min-h-0 gap-3" orientation="horizontal">
               {/* Left: visualization */}
-              <Card className="flex-1 min-h-0 min-w-0 overflow-hidden flex flex-col">
-                <CardHeader className="flex-none py-3 px-4">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">Buckets</CardTitle>
-                    {vizToolbar}
-                  </div>
-                </CardHeader>
-                <CardContent className="flex-1 min-h-0 p-0">
-                  <BucketsVisualization
-                    baseCurrency={baseCurrency}
-                    buckets={buckets}
-                    entriesByBucket={entriesByBucket}
-                    unassignedEntries={unassignedEntries}
-                    visualization={config.visualization}
-                  />
-                </CardContent>
-              </Card>
+              <ResizablePanel defaultSize={65} minSize={40}>
+                <Card className="h-full min-w-0 overflow-hidden flex flex-col">
+                  <CardHeader className="flex-none py-3 px-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base">Buckets</CardTitle>
+                      {vizToolbar}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-1 min-h-0 p-0">
+                    <BucketsVisualization
+                      baseCurrency={baseCurrency}
+                      buckets={buckets}
+                      entriesByBucket={entriesByBucket}
+                      unassignedEntries={unassignedEntries}
+                      visualization={config.visualization}
+                    />
+                  </CardContent>
+                </Card>
+              </ResizablePanel>
+
+              <ResizableHandle withHandle />
 
               {/* Right: assign */}
-              <Card className="w-80 shrink-0 flex flex-col min-h-0 overflow-hidden">
-                <CardHeader className="flex-none py-3 px-4">
-                  <CardTitle className="text-base">Assign Accounts</CardTitle>
-                  <p className="text-[11px] text-muted-foreground">
-                    Drag accounts to buckets. Click the amount to edit or split across multiple buckets.
-                  </p>
-                </CardHeader>
-                {assignPanel}
-              </Card>
-            </div>
+              <ResizablePanel defaultSize={35} minSize={20}>
+                <Card className="h-full flex flex-col min-h-0 overflow-hidden">
+                  <CardHeader className="flex-none py-3 px-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base">Assign Accounts</CardTitle>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            onClick={() => setHideZeroBalance((v) => !v)}
+                          >
+                            {hideZeroBalance ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{hideZeroBalance ? 'Show zero-balance accounts' : 'Hide zero-balance accounts'}</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </CardHeader>
+                  {assignPanel}
+                </Card>
+              </ResizablePanel>
+            </ResizablePanelGroup>
 
             {/* Bottom: health */}
             <HealthPanel
