@@ -1,5 +1,5 @@
 import { Folder, FolderOpen, FolderPlus, GripVertical, Pencil, Trash2 } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,6 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import { cn } from '@/lib/utils';
-import { sortCategoryTree } from '@/hooks/financeData';
 
 import type Category from '../models/Category';
 
@@ -52,7 +51,7 @@ const ICON_COL_W = 20;
 const ICON_CENTER = ICON_COL_W / 2;
 const RAIL_OFFSET = 10;
 
-const sortChildren = (children: Category[]) => sortCategoryTree(children);
+// Children come pre-sorted from buildCategoriesData
 
 const TreeNode: React.FC<Props> = ({
   category,
@@ -95,7 +94,7 @@ const TreeNode: React.FC<Props> = ({
   const showClosedFolder = hasChildren && !isOpen;
   const showLeafDot = !hasChildren;
 
-  const childrenSorted = useMemo(() => sortChildren(category.children), [category.children]);
+  const childrenSorted = category.children;
 
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
 

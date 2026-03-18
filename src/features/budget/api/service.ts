@@ -7,6 +7,7 @@ import type {
   BudgetHistoryAveragesResponse,
   BudgetInsightsResponse,
   BudgetLineDTO,
+  BudgetSummariesResponse,
   CategoryDailyStatsResponse,
   CreateBudgetDTO,
   UpdateBudgetDTO,
@@ -71,8 +72,15 @@ export const budgetService = {
     return data;
   },
 
-  async insights(budgetId: number): Promise<BudgetInsightsResponse> {
-    const { data } = await api.get<BudgetInsightsResponse>(`${BUDGET_V2}/${budgetId}/insights`);
+  async insights(budgetId: number, currency: string): Promise<BudgetInsightsResponse> {
+    const { data } = await api.get<BudgetInsightsResponse>(`${BUDGET_V2}/${budgetId}/insights`, {
+      params: { currency },
+    });
+    return data;
+  },
+
+  async summaries(): Promise<BudgetSummariesResponse> {
+    const { data } = await api.get<BudgetSummariesResponse>(`${BUDGET_V2}/summaries`);
     return data;
   },
 };

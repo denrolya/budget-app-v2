@@ -1,15 +1,12 @@
 import { Info } from 'lucide-react';
-import moment from 'moment';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { cn } from '@/lib/utils';
-import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
-import { getExchangeRate } from '@/lib/getExchangeRates';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { ConvertedValues } from '@/features/transactions';
-import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 
 import type { BudgetDTO, BudgetAnalyticsItem } from '../api/types';
+import useBudgetTotals, { computeHealthScore, fmtBudgetAmt } from '../hooks/useBudgetTotals';
 
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
@@ -19,70 +16,6 @@ interface Props {
   displayCurrency: DisplayCurrency;
   rates: ConvertedValues | null;
 }
-
-const fmtAmt = (amount: number, currency: string) => {
-  const sym = CURRENCIES[currency as CURRENCY_CODE]?.symbol ?? currency;
-  return `${sym}${Math.abs(amount).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-};
-
-const getAllIds = (cat: Category): number[] => {
-  const ids: number[] = [cat.id];
-  for (const child of cat.children) ids.push(...getAllIds(child));
-  return ids;
-};
-
-const computeHealthScore = (
-  percentUsed: number,
-  daysElapsed: number,
-  daysTotal: number,
-  totalPlannedIncome: number,
-  totalActualIncome: number,
-): { score: number; grade: string; gradeColor: string } => {
-  let score = 100;
-
-  if (percentUsed > 100) {
-    score -= Math.min(40, (percentUsed - 100) * 0.5);
-  } else if (percentUsed > 80) {
-    score -= 10;
-  }
-
-  if (daysTotal > 0 && daysElapsed > 0 && daysElapsed < daysTotal) {
-    const expectedPct = (daysElapsed / daysTotal) * 100;
-    if (percentUsed > expectedPct + 10) {
-      score -= Math.min(20, (percentUsed - expectedPct - 10) * 0.3);
-    }
-  }
-
-  if (totalPlannedIncome > 0) {
-    const incomePct = (totalActualIncome / totalPlannedIncome) * 100;
-    if (incomePct < 90) {
-      score -= Math.min(15, (90 - incomePct) * 0.2);
-    }
-  }
-
-  score = Math.max(0, Math.round(score));
-
-  let grade: string;
-  let gradeColor: string;
-  if (score >= 90) {
-    grade = 'A';
-    gradeColor = 'text-success';
-  } else if (score >= 75) {
-    grade = 'B';
-    gradeColor = 'text-success/75';
-  } else if (score >= 60) {
-    grade = 'C';
-    gradeColor = 'text-warning';
-  } else if (score >= 45) {
-    grade = 'D';
-    gradeColor = 'text-warning/75';
-  } else {
-    grade = 'F';
-    gradeColor = 'text-destructive';
-  }
-
-  return { score, grade, gradeColor };
-};
 
 const MiniBar: React.FC<{ value: number; max?: number; colorClass: string }> = ({ value, max = 100, colorClass }) => (
   <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden min-w-0">
@@ -94,81 +27,10 @@ const MiniBar: React.FC<{ value: number; max?: number; colorClass: string }> = (
 );
 
 const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrency, rates }) => {
-  const { data: catData } = useCategoryList();
-
-  const stats = useMemo(() => {
-    const expenseIds = new Set(
-      (catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense) ?? []).flatMap(getAllIds),
-    );
-    const incomeIds = new Set(
-      (catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income) ?? []).flatMap(getAllIds),
-    );
-
-    const linesMap = new Map((budget.lines ?? []).map((l) => [l.categoryId, l]));
-    const plannedRollup = (cat: Category): number => {
-      const own = linesMap.get(cat.id);
-      if (own) {
-        const rate = getExchangeRate(own.plannedCurrency, displayCurrency, rates);
-        return rate !== null ? own.plannedAmount * rate : 0;
-      }
-      return getAllIds(cat)
-        .slice(1)
-        .reduce((sum, id) => {
-          const line = linesMap.get(id);
-          if (!line) return sum;
-          const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
-          return rate !== null ? sum + line.plannedAmount * rate : sum;
-        }, 0);
-    };
-
-    const expenseRoots = catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense) ?? [];
-    const incomeRoots = catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income) ?? [];
-    const totalPlannedExpense = expenseRoots.reduce((sum, root) => sum + plannedRollup(root), 0);
-    const totalPlannedIncome = incomeRoots.reduce((sum, root) => sum + plannedRollup(root), 0);
-
-    let totalActualExpense = 0;
-    let totalActualIncome = 0;
-    for (const item of analytics) {
-      const isExpense = expenseIds.has(item.categoryId);
-      const isIncome = incomeIds.has(item.categoryId);
-      if (!isExpense && !isIncome) continue;
-
-      const cv = item.convertedValues[displayCurrency];
-      if (!cv) continue;
-      if (isExpense) totalActualExpense += cv.expense;
-      if (isIncome) totalActualIncome += cv.income;
-    }
-
-    const remaining = totalPlannedExpense - totalActualExpense;
-    const percentUsed = totalPlannedExpense > 0 ? (totalActualExpense / totalPlannedExpense) * 100 : 0;
-    const netSavings = totalActualIncome - totalActualExpense;
-
-    const start = moment(budget.startDate);
-    const end = moment(budget.endDate);
-    const today = moment();
-
-    const daysTotal = end.diff(start, 'days') + 1;
-    const daysElapsed = Math.max(0, Math.min(today.diff(start, 'days') + 1, daysTotal));
-    const daysLeft = Math.max(0, end.diff(today, 'days'));
-
-    return {
-      totalPlannedExpense,
-      totalPlannedIncome,
-      totalActualExpense,
-      totalActualIncome,
-      remaining,
-      percentUsed,
-      netSavings,
-      daysTotal,
-      daysElapsed,
-      daysLeft,
-    };
-  }, [budget, analytics, displayCurrency, rates, catData]);
+  const stats = useBudgetTotals(budget, analytics, displayCurrency, rates);
 
   const pctColor = stats.percentUsed > 100 ? 'text-destructive' : stats.percentUsed > 80 ? 'text-warning' : undefined;
-
   const pctBarColor = stats.percentUsed > 100 ? 'bg-destructive' : stats.percentUsed > 80 ? 'bg-warning' : 'bg-primary';
-
   const remainingColor = stats.remaining < 0 ? 'text-destructive' : 'text-success';
   const savingsColor = stats.netSavings >= 0 ? 'text-success' : 'text-destructive';
 
@@ -192,10 +54,10 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
         <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Expenses</div>
         <div className="flex items-baseline gap-1 min-w-0">
           <span className={cn('font-semibold tabular-nums truncate', pctColor)}>
-            {fmtAmt(stats.totalActualExpense, displayCurrency)}
+            {fmtBudgetAmt(stats.totalActualExpense, displayCurrency)}
           </span>
           <span className="text-2xs text-muted-foreground shrink-0">
-            / {fmtAmt(stats.totalPlannedExpense, displayCurrency)}
+            / {fmtBudgetAmt(stats.totalPlannedExpense, displayCurrency)}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -206,8 +68,8 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
         </div>
         <div className={cn('text-2xs font-medium tabular-nums truncate', remainingColor)}>
           {stats.remaining < 0
-            ? `${fmtAmt(Math.abs(stats.remaining), displayCurrency)} over`
-            : `${fmtAmt(stats.remaining, displayCurrency)} left`}
+            ? `${fmtBudgetAmt(Math.abs(stats.remaining), displayCurrency)} over`
+            : `${fmtBudgetAmt(stats.remaining, displayCurrency)} left`}
         </div>
       </div>
 
@@ -216,11 +78,11 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
         <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Income</div>
         <div className="flex items-baseline gap-1 min-w-0">
           <span className="font-semibold tabular-nums text-success truncate">
-            {fmtAmt(stats.totalActualIncome, displayCurrency)}
+            {fmtBudgetAmt(stats.totalActualIncome, displayCurrency)}
           </span>
           {stats.totalPlannedIncome > 0 && (
             <span className="text-2xs text-muted-foreground shrink-0">
-              / {fmtAmt(stats.totalPlannedIncome, displayCurrency)}
+              / {fmtBudgetAmt(stats.totalPlannedIncome, displayCurrency)}
             </span>
           )}
         </div>
@@ -229,7 +91,7 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
         )}
         <div className={cn('text-2xs font-medium tabular-nums truncate', savingsColor)}>
           {stats.netSavings >= 0 ? '+' : '-'}
-          {fmtAmt(Math.abs(stats.netSavings), displayCurrency)} net
+          {fmtBudgetAmt(Math.abs(stats.netSavings), displayCurrency)} net
         </div>
       </div>
 
@@ -252,8 +114,8 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
                 <p className="font-semibold text-sm">Budget Health Score</p>
                 <p>Starts at 100 and deducts points for:</p>
                 <ul className="space-y-0.5 pl-1">
-                  <li>Spending &gt;100% of budget: up to −40</li>
-                  <li>Spending &gt;80% of budget: −10</li>
+                  <li>Overspend: −2 per % over budget (up to −50)</li>
+                  <li>Approaching limit (&gt;85%): mild penalty</li>
                   <li>Pace ahead of schedule: up to −20</li>
                   <li>Income below 90% of planned: up to −15</li>
                 </ul>

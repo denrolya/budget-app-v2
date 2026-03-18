@@ -1,5 +1,6 @@
+import { TrendingDown, TrendingUp } from 'lucide-react';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { DatePicker } from '@/components/ui/date-picker';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
+import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
 
 import { useCreateBudget } from '../api';
 import type { BudgetDTO, BudgetPeriodType, CreateBudgetDTO } from '../api/types';
@@ -35,6 +38,112 @@ const MONTHS = [
   'November',
   'December',
 ];
+
+const fmtAmt = (n: number, currency: string) => {
+  const sym = CURRENCIES[currency as CURRENCY_CODE]?.symbol ?? currency;
+  return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+};
+
+// ── Prediction preview panel ────────────────────────────────────────────────
+
+const PredictionPreview: React.FC<{ periodType: BudgetPeriodType; month: number; year: number }> = ({
+  periodType,
+  month,
+  year,
+}) => {
+  const lookbackMonths = periodType === 'monthly' ? 6 : 12;
+  const after = useMemo(
+    () =>
+      moment()
+        .subtract(lookbackMonths - 1, 'months')
+        .startOf('month'),
+    [lookbackMonths],
+  );
+  const before = useMemo(() => moment().endOf('month'), []);
+
+  const { data, isLoading } = useValueByPeriodStatisticsRequest({
+    after,
+    before,
+    period: 'P1M',
+    queryKey: `budget-create-preview-${lookbackMonths}`,
+  });
+
+  const stats = useMemo(() => {
+    if (!data || data.length === 0) return null;
+
+    const nonZeroExpense = data.filter((d) => d.expense > 0);
+    const nonZeroIncome = data.filter((d) => d.income > 0);
+
+    const avgExpense =
+      nonZeroExpense.length > 0
+        ? Math.round(nonZeroExpense.reduce((s, d) => s + d.expense, 0) / nonZeroExpense.length)
+        : 0;
+    const avgIncome =
+      nonZeroIncome.length > 0 ? Math.round(nonZeroIncome.reduce((s, d) => s + d.income, 0) / nonZeroIncome.length) : 0;
+
+    // Simple trend: compare last 3 months vs prior 3 months
+    const recentData = data.slice(-3);
+    const olderData = data.slice(-6, -3);
+
+    let trendPercent = 0;
+    if (olderData.length >= 2 && recentData.length >= 2) {
+      const olderAvg = olderData.reduce((s, d) => s + d.expense, 0) / olderData.length;
+      const recentAvg = recentData.reduce((s, d) => s + d.expense, 0) / recentData.length;
+      if (olderAvg > 0) {
+        trendPercent = Math.round(((recentAvg - olderAvg) / olderAvg) * 100);
+      }
+    }
+
+    // Scale to budget period
+    const budgetDays =
+      periodType === 'yearly' ? (moment({ year }).isLeapYear() ? 366 : 365) : moment({ year, month }).daysInMonth();
+    const scaleFactor = budgetDays / 30;
+
+    return {
+      expense: Math.round(avgExpense * scaleFactor),
+      income: Math.round(avgIncome * scaleFactor),
+      savings: Math.round((avgIncome - avgExpense) * scaleFactor),
+      trendPercent,
+    };
+  }, [data, periodType, month, year]);
+
+  if (isLoading || !stats) return null;
+
+  const TrendIcon = stats.trendPercent > 0 ? TrendingUp : TrendingDown;
+  const hasTrend = Math.abs(stats.trendPercent) >= 10;
+
+  return (
+    <div className="rounded-md bg-muted/50 px-3 py-2 space-y-1.5">
+      <p className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">
+        Estimate based on {lookbackMonths}mo history
+      </p>
+      <div className="flex items-center gap-4 text-sm">
+        <div>
+          <span className="text-2xs text-muted-foreground mr-1">Expenses</span>
+          <span className="font-medium text-destructive tabular-nums">{fmtAmt(stats.expense, 'EUR')}</span>
+        </div>
+        <div>
+          <span className="text-2xs text-muted-foreground mr-1">Income</span>
+          <span className="font-medium text-success tabular-nums">{fmtAmt(stats.income, 'EUR')}</span>
+        </div>
+        <div>
+          <span className="text-2xs text-muted-foreground mr-1">Savings</span>
+          <span className={`font-medium tabular-nums ${stats.savings >= 0 ? 'text-success' : 'text-destructive'}`}>
+            {fmtAmt(stats.savings, 'EUR')}
+          </span>
+        </div>
+      </div>
+      {hasTrend && (
+        <p
+          className={`text-2xs inline-flex items-center gap-0.5 ${stats.trendPercent > 0 ? 'text-destructive' : 'text-success'}`}
+        >
+          <TrendIcon className="h-2.5 w-2.5" />
+          Expenses trending {stats.trendPercent > 0 ? 'up' : 'down'} {Math.abs(stats.trendPercent)}%
+        </p>
+      )}
+    </div>
+  );
+};
 
 const BudgetCreateDialog: React.FC<Props> = ({ open, onOpenChange, budgets, onCreated }) => {
   const now = new Date();
@@ -197,6 +306,11 @@ const BudgetCreateDialog: React.FC<Props> = ({ open, onOpenChange, budgets, onCr
               onChange={(e) => setName(e.target.value)}
             />
           </div>
+
+          {/* Prediction preview */}
+          {periodType !== 'custom' && (
+            <PredictionPreview month={month} periodType={periodType} year={periodType === 'yearly' ? yearOnly : year} />
+          )}
 
           {/* Copy from */}
           {budgets.length > 0 && (

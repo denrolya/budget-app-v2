@@ -1,30 +1,76 @@
+import { ResponsiveBar } from '@nivo/bar';
 import React, { useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
+import { getExchangeRate } from '@/lib/getExchangeRates';
+import type { ConvertedValues } from '@/features/transactions';
 
-import type { BudgetAnalyticsItem } from '../api/types';
+import type { BudgetAnalyticsItem, BudgetDTO } from '../api/types';
 
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
 interface Props {
   analytics: BudgetAnalyticsItem[];
+  budget: BudgetDTO;
   displayCurrency: DisplayCurrency;
+  rates: ConvertedValues | null;
 }
 
-const PALETTE = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
-  'hsl(220 70% 50%)',
-  'hsl(160 60% 45%)',
-  'hsl(30 80% 55%)',
-  'hsl(280 65% 55%)',
-  'hsl(60 75% 45%)',
+// 15 hand-picked maximally-distinct hues for dark backgrounds.
+// Hash assigns a preferred slot; collision resolution guarantees no two categories share a color.
+const CATEGORY_PALETTE = [
+  'hsl(210 70% 55%)', // blue
+  'hsl(150 60% 48%)', // teal
+  'hsl(35 80% 55%)', // orange
+  'hsl(280 60% 58%)', // purple
+  'hsl(55 75% 50%)', // yellow
+  'hsl(340 65% 55%)', // rose
+  'hsl(180 55% 48%)', // cyan
+  'hsl(100 55% 48%)', // green
+  'hsl(15 75% 55%)', // red-orange
+  'hsl(250 60% 62%)', // indigo
+  'hsl(75 60% 45%)', // lime
+  'hsl(320 55% 55%)', // magenta
+  'hsl(195 65% 50%)', // sky
+  'hsl(120 45% 55%)', // emerald
+  'hsl(0 65% 55%)', // red
 ];
+
+const hashStr = (s: string): number => {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+  return h;
+};
+
+// Assign colors: hash picks preferred slot, linear probe on collision. No duplicates.
+const assignCategoryColors = (names: string[]): Map<string, string> => {
+  const len = CATEGORY_PALETTE.length;
+  const used = new Set<number>();
+  const result = new Map<string, string>();
+
+  for (const name of names) {
+    let idx = hashStr(name) % len;
+    while (used.has(idx)) idx = (idx + 1) % len;
+    used.add(idx);
+    result.set(name, CATEGORY_PALETTE[idx]);
+  }
+  return result;
+};
+
+const nivoTheme = {
+  background: 'transparent',
+  text: { fill: 'hsl(var(--muted-foreground))', fontSize: 11 },
+  grid: { line: { stroke: 'hsl(var(--border))', strokeWidth: 1 } },
+  axis: {
+    ticks: {
+      line: { stroke: 'transparent' },
+      text: { fill: 'hsl(var(--muted-foreground))', fontSize: 10 },
+    },
+    domain: { line: { stroke: 'transparent' } },
+  },
+};
 
 const getAllIds = (cat: Category): number[] => {
   const ids: number[] = [cat.id];
@@ -37,88 +83,191 @@ const fmtAmt = (n: number, currency: string) => {
   return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 };
 
-const BudgetDistributionChart: React.FC<Props> = ({ analytics, displayCurrency }) => {
+interface BarDatum {
+  [key: string]: string | number;
+  category: string;
+  Planned: number;
+  Actual: number;
+  color: string;
+}
+
+const BudgetDistributionChart: React.FC<Props> = ({ analytics, budget, displayCurrency, rates }) => {
   const { data: catData } = useCategoryList();
 
-  const chartData = useMemo(() => {
-    if (!catData) return [];
+  const { chartData, totalActual } = useMemo(() => {
+    if (!catData) return { chartData: [], totalActual: 0 };
 
     const analyticsMap = new Map<number, BudgetAnalyticsItem>();
     analytics.forEach((item) => analyticsMap.set(item.categoryId, item));
 
+    const linesMap = new Map((budget.lines ?? []).map((l) => [l.categoryId, l]));
     const expenseRoots = catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense);
 
-    return expenseRoots
-      .map((cat) => {
-        const ids = getAllIds(cat);
-        let total = 0;
-        for (const id of ids) {
-          const item = analyticsMap.get(id);
-          if (!item) continue;
-          const cv = item.convertedValues[displayCurrency];
-          if (cv) total += cv.expense;
+    // First pass: compute values
+    const rawRows: { name: string; actual: number; planned: number }[] = [];
+
+    for (const cat of expenseRoots) {
+      const ids = getAllIds(cat);
+      let actual = 0;
+      for (const id of ids) {
+        const item = analyticsMap.get(id);
+        if (!item) continue;
+        const cv = item.convertedValues[displayCurrency];
+        if (cv) actual += cv.expense;
+      }
+
+      // Envelope model for planned
+      let planned = 0;
+      const ownLine = linesMap.get(cat.id);
+      if (ownLine) {
+        const rate = getExchangeRate(ownLine.plannedCurrency, displayCurrency, rates);
+        if (rate !== null) planned = ownLine.plannedAmount * rate;
+      } else {
+        for (const id of ids.slice(1)) {
+          const line = linesMap.get(id);
+          if (!line) continue;
+          const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
+          if (rate !== null) planned += line.plannedAmount * rate;
         }
-        if (total <= 0) return null;
-        return { name: cat.name, value: Math.round(total) };
-      })
-      .filter(Boolean)
-      .sort((a, b) => b!.value - a!.value) as { name: string; value: number }[];
-  }, [catData, analytics, displayCurrency]);
+      }
+
+      if (actual <= 0 && planned <= 0) continue;
+      rawRows.push({ name: cat.name, actual: Math.round(actual), planned: Math.round(planned) });
+    }
+
+    // Second pass: assign collision-free colors
+    const colorMap = assignCategoryColors(rawRows.map((r) => r.name));
+    const rows: BarDatum[] = rawRows.map((r) => ({
+      category: r.name,
+      Actual: r.actual,
+      Planned: r.planned,
+      color: colorMap.get(r.name) ?? CATEGORY_PALETTE[0],
+    }));
+
+    // Reverse for Nivo horizontal bar (renders bottom-to-top)
+    rows.reverse();
+
+    const totalActual = rows.reduce((s, r) => s + r.Actual, 0);
+
+    return { chartData: rows, totalActual };
+  }, [catData, analytics, budget, displayCurrency, rates]);
 
   if (chartData.length === 0) {
     return <div className="flex items-center justify-center h-40 text-sm text-muted-foreground">No spending data</div>;
   }
 
-  const total = chartData.reduce((s, d) => s + d.value, 0);
-  const maxValue = chartData[0]?.value ?? 1;
+  const sym = CURRENCIES[displayCurrency as CURRENCY_CODE]?.symbol ?? displayCurrency;
+  const fmtY = (v: number) => {
+    const abs = Math.abs(v);
+    return abs >= 1000 ? `${sym}${(abs / 1000).toFixed(0)}k` : `${sym}${abs}`;
+  };
+
+  // Distribution bar uses original order (not reversed)
+  const distData = [...chartData].reverse();
 
   return (
-    <div className="space-y-2.5">
-      {/* Stacked proportional bar */}
-      <div className="flex h-2 rounded-full overflow-hidden gap-px">
-        {chartData.map((item, idx) => (
-          <div
-            title={`${item.name}: ${((item.value / total) * 100).toFixed(1)}%`}
-            style={{
-              width: `${(item.value / total) * 100}%`,
-              backgroundColor: PALETTE[idx % PALETTE.length],
-            }}
-            key={item.name}
-          />
-        ))}
+    <div>
+      {/* Stacked distribution bar */}
+      <div className="flex h-2 rounded-full overflow-hidden gap-px mb-3">
+        {distData
+          .filter((d) => d.Actual > 0)
+          .map((item) => (
+            <div
+              title={`${item.category}: ${fmtAmt(item.Actual, displayCurrency)} (${totalActual > 0 ? Math.round((item.Actual / totalActual) * 100) : 0}%)`}
+              style={{
+                width: `${totalActual > 0 ? (item.Actual / totalActual) * 100 : 0}%`,
+                backgroundColor: item.color,
+              }}
+              key={item.category}
+            />
+          ))}
       </div>
 
-      {/* Ranked list */}
-      <div className="space-y-1.5 pt-1">
-        {chartData.map((item, idx) => {
-          const pct = total > 0 ? (item.value / total) * 100 : 0;
-          const color = PALETTE[idx % PALETTE.length];
-          return (
-            <div className="flex items-center gap-2.5" key={item.name}>
-              <span aria-hidden style={{ backgroundColor: color }} className="h-2 w-2 rounded-sm shrink-0" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-0.5">
-                  <span className="text-xs font-medium truncate">{item.name}</span>
-                  <span className="text-xs text-muted-foreground tabular-nums shrink-0 ml-2">{pct.toFixed(0)}%</span>
-                </div>
-                <div className="h-1 rounded-full bg-muted overflow-hidden">
-                  <div
-                    style={{ width: `${(item.value / maxValue) * 100}%`, backgroundColor: color, opacity: 0.7 }}
-                    className={cn('h-full rounded-full transition-all duration-500')}
-                  />
+      {/* Nivo grouped bar chart */}
+      <div style={{ height: Math.max(140, chartData.length * 40) }}>
+        <ResponsiveBar
+          borderColor="hsl(var(--muted-foreground) / 0.2)"
+          borderRadius={2}
+          borderWidth={1}
+          data={chartData}
+          groupMode="grouped"
+          indexBy="category"
+          keys={['Planned', 'Actual']}
+          labelSkipWidth={48}
+          labelTextColor="hsl(var(--foreground))"
+          layout="horizontal"
+          margin={{ top: 0, right: 56, bottom: 24, left: 128 }}
+          padding={0.28}
+          theme={nivoTheme}
+          axisBottom={{
+            tickSize: 0,
+            tickPadding: 4,
+            format: fmtY,
+          }}
+          axisLeft={{
+            tickSize: 0,
+            tickPadding: 4,
+            renderTick: (tick) => {
+              const datum = chartData.find((d) => d.category === tick.value);
+              return (
+                <g transform={`translate(${tick.x},${tick.y})`}>
+                  <circle cx={-120} cy={0} fill={datum?.color ?? 'currentColor'} r={3.5} />
+                  <text
+                    dominantBaseline="central"
+                    fill="hsl(var(--muted-foreground))"
+                    fontSize={11}
+                    textAnchor="start"
+                    x={-112}
+                  >
+                    {String(tick.value)}
+                  </text>
+                </g>
+              );
+            },
+          }}
+          colors={(bar) => {
+            if (bar.id === 'Planned') return 'hsl(var(--muted-foreground) / 0.12)';
+            return 'hsl(var(--chart-1))';
+          }}
+          label={(d) => {
+            const abs = Math.abs(d.value as number);
+            return abs >= 1000 ? `${sym}${(abs / 1000).toFixed(abs >= 10000 ? 0 : 1)}k` : `${sym}${abs}`;
+          }}
+          tooltip={({ indexValue, data: d }) => {
+            const datum = d as BarDatum;
+            const remaining = datum.Planned > 0 ? datum.Planned - datum.Actual : null;
+            const isOver = remaining !== null && remaining < 0;
+            return (
+              <div className="rounded-md border bg-background px-3 py-2 shadow-md text-sm min-w-[160px]">
+                <p className="font-medium text-xs mb-1">{indexValue}</p>
+                <div className="space-y-0.5">
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-muted-foreground text-xs">Planned</span>
+                    <span className="tabular-nums text-xs">{fmtAmt(datum.Planned, displayCurrency)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-muted-foreground text-xs">Actual</span>
+                    <span className="tabular-nums text-xs font-semibold">{fmtAmt(datum.Actual, displayCurrency)}</span>
+                  </div>
+                  {remaining !== null && (
+                    <div className="flex items-center justify-between gap-4 border-t pt-0.5 mt-0.5">
+                      <span className="text-muted-foreground text-xs">Remaining</span>
+                      <span
+                        className={cn(
+                          'tabular-nums text-xs font-semibold',
+                          isOver ? 'text-destructive' : 'text-success',
+                        )}
+                      >
+                        {isOver ? '+' : ''}
+                        {fmtAmt(remaining, displayCurrency)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
-              <span className="text-xs font-semibold tabular-nums shrink-0 w-20 text-right">
-                {fmtAmt(item.value, displayCurrency)}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="pt-1 border-t text-right">
-        <span className="text-xs text-muted-foreground">Total </span>
-        <span className="text-xs font-semibold tabular-nums">{fmtAmt(total, displayCurrency)}</span>
+            );
+          }}
+        />
       </div>
     </div>
   );

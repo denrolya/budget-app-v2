@@ -7,6 +7,7 @@ import type {
   BudgetDTO,
   BudgetHistoryAveragesResponse,
   BudgetInsightsResponse,
+  BudgetSummariesResponse,
   CategoryDailyStatsResponse,
 } from './types';
 
@@ -49,10 +50,17 @@ export const useHistoryAverages = (id: number | null, months = 6) =>
     staleTime: 1000 * 60 * 10,
   });
 
-export const useBudgetInsights = (id: number | null) =>
+export const useBudgetInsights = (id: number | null, currency = 'EUR') =>
   useQuery<BudgetInsightsResponse>({
-    queryKey: queryKeys.insights(id!),
-    queryFn: () => budgetService.insights(id!),
+    queryKey: queryKeys.insights(id!, currency),
+    queryFn: () => budgetService.insights(id!, currency),
     enabled: id !== null,
     staleTime: 1000 * 60 * 10,
+  });
+
+export const useBudgetSummaries = () =>
+  useQuery<BudgetSummariesResponse>({
+    queryKey: queryKeys.summaries(),
+    queryFn: () => budgetService.summaries(),
+    staleTime: 1000 * 60 * 5,
   });

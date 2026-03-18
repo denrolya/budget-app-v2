@@ -3,6 +3,7 @@ export {
   useBudget,
   useBudgetAnalytics,
   useBudgetInsights,
+  useBudgetSummaries,
   useCategoryDailyStats,
   useHistoryAverages,
 } from './queries';
@@ -22,6 +23,7 @@ export type {
   BudgetCurrencyValues,
   BudgetHistoryAveragesResponse,
   BudgetInsightsResponse,
+  BudgetSummaryItem,
   CategoryDailyStatsItem,
   CategoryDayStats,
   CategoryDailyStatsResponse,

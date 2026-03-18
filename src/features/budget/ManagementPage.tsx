@@ -8,18 +8,16 @@ import { MOMENT_DATE_VIEW_FORMAT_2 } from '@/constants/datetime';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
 
 import { useBudget, useBudgetAnalytics, useBudgetInsights, useCategoryDailyStats, useListBudgets } from './api';
 import BudgetAlertsSection from './components/BudgetAlertsSection';
-import BudgetCategoryBarChart from './components/BudgetCategoryBarChart';
 import BudgetDisplayCurrency, { type DisplayCurrency } from './components/BudgetDisplayCurrency';
 import BudgetDistributionChart from './components/BudgetDistributionChart';
 import BudgetExportButton from './components/BudgetExportButton';
 import BudgetFillFromHistoryButton from './components/BudgetFillFromHistoryButton';
 import BudgetHeatmapSection from './components/BudgetHeatmapSection';
-import BudgetInsightsSection from './components/BudgetInsightsSection';
 import BudgetPaceChart from './components/BudgetPaceChart';
 import BudgetSidebar from './components/BudgetSidebar';
 import BudgetSummaryCards from './components/BudgetSummaryCards';
@@ -32,19 +30,21 @@ const ManagementPage: React.FC = () => {
   const selectedId = budgetMatch?.params?.budgetId ?? null;
 
   return (
-    <PageWithSidebar collapsible resizable contentScrollable={false} sidebarWidth="w-64">
-      <PageWithSidebar.Sidebar ariaLabel="Budget sidebar">
-        <BudgetSidebar selectedId={selectedId} />
-      </PageWithSidebar.Sidebar>
+    <TooltipProvider delayDuration={0}>
+      <PageWithSidebar collapsible resizable contentScrollable={false} sidebarWidth="w-64">
+        <PageWithSidebar.Sidebar ariaLabel="Budget sidebar">
+          <BudgetSidebar selectedId={selectedId} />
+        </PageWithSidebar.Sidebar>
 
-      <PageWithSidebar.Content className="min-h-0 h-full">
-        <Routes>
-          <Route index element={<BudgetIndex />} />
-          <Route element={<BudgetDetailRoute />} path=":budgetId" />
-          <Route element={<Navigate replace to="/budget" />} path="*" />
-        </Routes>
-      </PageWithSidebar.Content>
-    </PageWithSidebar>
+        <PageWithSidebar.Content className="min-h-0 h-full">
+          <Routes>
+            <Route index element={<BudgetIndex />} />
+            <Route element={<BudgetDetailRoute />} path=":budgetId" />
+            <Route element={<Navigate replace to="/budget" />} path="*" />
+          </Routes>
+        </PageWithSidebar.Content>
+      </PageWithSidebar>
+    </TooltipProvider>
   );
 };
 
@@ -82,7 +82,7 @@ const BudgetDetailRoute: React.FC = () => {
   const { data: budget, isLoading: budgetLoading, refetch: refetchBudget } = useBudget(id);
   const { data: analyticsData, isLoading: analyticsLoading, refetch: refetchAnalytics } = useBudgetAnalytics(id);
   const { data: dailyStatsData } = useCategoryDailyStats(id);
-  const { data: insightsData } = useBudgetInsights(id);
+  const { data: insightsData } = useBudgetInsights(id, displayCurrency);
   const { data: allBudgets } = useListBudgets();
   const { data: ratesData } = useExchangeRatesQuery();
 
@@ -166,6 +166,7 @@ const BudgetDetailRoute: React.FC = () => {
           displayCurrency={displayCurrency}
           rates={rates}
           seasonal={insightsData?.seasonal}
+          trends={insightsData?.trends}
         />
 
         <BudgetExportButton analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
@@ -194,39 +195,21 @@ const BudgetDetailRoute: React.FC = () => {
       <ScrollArea className="flex-1 min-h-0">
         <div className="p-4 space-y-6 pb-8">
           {/* Alerts */}
-          <BudgetAlertsSection analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
+          <BudgetAlertsSection
+            analytics={analytics}
+            budget={budget}
+            displayCurrency={displayCurrency}
+            outliers={insightsData?.outliers}
+            rates={rates}
+          />
 
-          {/* Insights */}
-          {insightsData && (
-            <BudgetInsightsSection
-              budgetStartDate={budget.startDate}
-              displayCurrency={displayCurrency}
-              insights={insightsData}
-            />
-          )}
-
-          {/* Spending heatmap */}
-          <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
-              Spending heatmap
-            </p>
-            <div className="rounded-lg border bg-card p-3">
-              <BudgetHeatmapSection
-                analytics={analytics}
-                budget={budget}
-                displayCurrency={displayCurrency}
-                rates={rates}
-              />
-            </div>
-          </div>
-
-          {/* Charts row */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <div className="space-y-1">
+          {/* Pace chart + Heatmap row */}
+          <div className="grid grid-cols-1 xl:grid-cols-[1fr_2fr] gap-4 items-stretch">
+            <div className="flex flex-col gap-1">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
                 Expense progress
               </p>
-              <div className="rounded-lg border bg-card p-3">
+              <div className="rounded-lg border bg-card p-2 flex-1">
                 <BudgetPaceChart
                   analytics={analytics}
                   budget={budget}
@@ -236,23 +219,28 @@ const BudgetDetailRoute: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-1">
+            <div className="flex flex-col gap-1">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
-                Expense distribution
+                Spending heatmap
               </p>
-              <div className="rounded-lg border bg-card p-3">
-                <BudgetDistributionChart analytics={analytics} displayCurrency={displayCurrency} />
+              <div className="rounded-lg border bg-card p-3 flex-1">
+                <BudgetHeatmapSection
+                  analytics={analytics}
+                  budget={budget}
+                  displayCurrency={displayCurrency}
+                  rates={rates}
+                />
               </div>
             </div>
           </div>
 
-          {/* Bar chart */}
+          {/* Expense breakdown (distribution + planned vs actual merged) */}
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
-              Planned vs actual by category
+              Expense breakdown
             </p>
             <div className="rounded-lg border bg-card p-3">
-              <BudgetCategoryBarChart
+              <BudgetDistributionChart
                 analytics={analytics}
                 budget={budget}
                 displayCurrency={displayCurrency}
@@ -274,6 +262,7 @@ const BudgetDetailRoute: React.FC = () => {
                 dailyStats={dailyStats}
                 displayCurrency={displayCurrency}
                 rates={rates}
+                seasonal={insightsData?.seasonal}
                 trends={insightsData?.trends}
               />
             </div>

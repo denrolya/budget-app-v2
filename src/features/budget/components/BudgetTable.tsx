@@ -17,6 +17,7 @@ import type {
   BudgetLineDTO,
   CategoryDailyStatsItem,
   CategoryTrendItem,
+  SeasonalItem,
 } from '../api/types';
 
 import BudgetCategoryRow from './BudgetCategoryRow';
@@ -30,15 +31,8 @@ interface Props {
   rates: ConvertedValues | null;
   dailyStats?: CategoryDailyStatsItem[];
   trends?: CategoryTrendItem[];
+  seasonal?: SeasonalItem[];
 }
-
-const sortCats = (cats: Category[]): Category[] =>
-  [...cats].sort((a, b) => {
-    const aHas = a.children.some((c) => c.isAffectingProfit);
-    const bHas = b.children.some((c) => c.isAffectingProfit);
-    if (aHas !== bHas) return aHas ? -1 : 1;
-    return a.name.localeCompare(b.name);
-  });
 
 /** Collect all descendant IDs including self */
 const getAllIds = (cat: Category): number[] => {
@@ -52,7 +46,16 @@ const fmtAmt = (n: number, currency: string) => {
   return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 };
 
-const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurrency, rates, dailyStats, trends }) => {
+const BudgetTable: React.FC<Props> = ({
+  budgetId,
+  budget,
+  analytics,
+  displayCurrency,
+  rates,
+  dailyStats,
+  trends,
+  seasonal,
+}) => {
   const { data: catData } = useCategoryList();
   const { mutate: upsertLine, isPending: isSaving } = useUpsertBudgetLine(budgetId);
   const { mutate: deleteLine } = useDeleteBudgetLine(budgetId);
@@ -103,6 +106,17 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
     (trends ?? []).forEach((item) => map.set(item.categoryId, item));
     return map;
   }, [trends]);
+
+  const seasonalMap = useMemo(() => {
+    const map = new Map<number, SeasonalItem>();
+    (seasonal ?? []).forEach((item) => {
+      map.set(item.categoryId, item);
+      for (const child of item.children ?? []) {
+        map.set(child.categoryId, child);
+      }
+    });
+    return map;
+  }, [seasonal]);
 
   const getActual = useCallback(
     (cat: Category) => {
@@ -213,6 +227,7 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
         isSaving={isSaving}
         line={linesMap.get(cat.id) ?? null}
         plannedInDisplayCurrency={getPlannedRollup(cat)}
+        seasonal={seasonalMap.get(cat.id)}
         sparklineData={dailyStatsMap.get(cat.id)?.days}
         trend={trendsMap.get(cat.id)}
         key={cat.id}
@@ -225,7 +240,7 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
     ];
 
     if (isExpanded && hasChildren) {
-      for (const child of sortCats(cat.children)) {
+      for (const child of cat.children) {
         rows.push(...renderCategory(child, depth + 1, isExpenseSection));
       }
     }
@@ -233,12 +248,8 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
     return rows;
   };
 
-  const expenseRoots = sortCats(
-    catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense) ?? [],
-  );
-  const incomeRoots = sortCats(
-    catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income) ?? [],
-  );
+  const expenseRoots = catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense) ?? [];
+  const incomeRoots = catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income) ?? [];
 
   const sectionTotals = (roots: Category[], isExpense: boolean) => {
     let totalPlanned = 0;

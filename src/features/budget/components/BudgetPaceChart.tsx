@@ -39,32 +39,62 @@ const getAllIds = (cat: Category): number[] => {
   return ids;
 };
 
-const BudgetPaceChart: React.FC<Props> = ({ budget, analytics: _analytics, displayCurrency, rates }) => {
+const BudgetPaceChart: React.FC<Props> = ({ budget, analytics, displayCurrency, rates }) => {
   const after = useMemo(() => moment(budget.startDate), [budget.startDate]);
   const before = useMemo(() => moment(budget.endDate), [budget.endDate]);
 
-  const { data: dailyStatsData, isLoading } = useGlobalDailyStats({}, after, before);
+  const { data: dailyStatsData, isLoading } = useGlobalDailyStats({ affectingProfit: true }, after, before);
   const { data: catData } = useCategoryList();
 
-  const { paceData, actualData, totalPlanned } = useMemo(() => {
-    // Only count expense lines for budget pace
-    const expenseIds = new Set(
-      (catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense) ?? []).flatMap(getAllIds),
-    );
+  // Total actual expense from analytics (same source as distribution chart)
+  const totalActualExpense = useMemo(() => {
+    if (!catData) return 0;
+    const analyticsMap = new Map(analytics.map((a) => [a.categoryId, a]));
+    const expenseRoots = catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense);
+    let total = 0;
+    for (const cat of expenseRoots) {
+      for (const id of getAllIds(cat)) {
+        const item = analyticsMap.get(id);
+        if (!item) continue;
+        const cv = item.convertedValues[displayCurrency];
+        if (cv) total += cv.expense;
+      }
+    }
+    return total;
+  }, [analytics, catData, displayCurrency]);
 
+  const { paceData, actualData, totalPlanned } = useMemo(() => {
+    if (!catData) return { paceData: [], actualData: [], totalPlanned: 0 };
+
+    const expenseRoots = catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense);
+    const linesMap = new Map((budget.lines ?? []).map((l) => [l.categoryId, l]));
+
+    // Envelope model for planned: if root has a line, use it (children are sub-allocations).
+    // If not, sum children's lines.
     let totalPlanned = 0;
-    for (const line of budget.lines ?? []) {
-      if (!expenseIds.has(line.categoryId)) continue;
-      const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
-      if (rate !== null) totalPlanned += line.plannedAmount * rate;
+    for (const root of expenseRoots) {
+      const ownLine = linesMap.get(root.id);
+      if (ownLine) {
+        const rate = getExchangeRate(ownLine.plannedCurrency, displayCurrency, rates);
+        if (rate !== null) totalPlanned += ownLine.plannedAmount * rate;
+      } else {
+        for (const id of getAllIds(root).slice(1)) {
+          const line = linesMap.get(id);
+          if (!line) continue;
+          const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
+          if (rate !== null) totalPlanned += line.plannedAmount * rate;
+        }
+      }
     }
 
     // Build day-by-day cumulative actual spending — convert all native currencies
     const dailyMap = new Map<string, number>();
     for (const d of dailyStatsData?.data ?? []) {
       let dayExpense = 0;
-      const cv = d.convertedValues[displayCurrency];
-      if (cv) dayExpense += cv.expense;
+      for (const [currency, cv] of Object.entries(d.convertedValues)) {
+        const rate = currency === displayCurrency ? 1 : getExchangeRate(currency, displayCurrency, rates);
+        if (rate !== null) dayExpense += cv.expense * rate;
+      }
       if (dayExpense > 0) dailyMap.set(d.day, dayExpense);
     }
 
@@ -127,98 +157,126 @@ const BudgetPaceChart: React.FC<Props> = ({ budget, analytics: _analytics, displ
   const lastPace = paceData[paceData.length - 1]?.y ?? 0;
   const actualColor = lastActual > lastPace ? 'hsl(var(--destructive))' : 'hsl(var(--primary))';
 
+  // Summary stats — use totalActualExpense from analytics for consistency with distribution chart
+  const spent = Math.round(totalActualExpense);
+  const daysElapsed = actualData.length;
+  const totalDaysInPeriod = moment(budget.endDate).diff(moment(budget.startDate), 'days') + 1;
+  const daysLeft = Math.max(0, totalDaysInPeriod - daysElapsed);
+  const dailyAvg = daysElapsed > 0 ? spent / daysElapsed : 0;
+  const projected = Math.round(dailyAvg * totalDaysInPeriod);
+  const usedPct = totalPlanned > 0 ? Math.round((spent / totalPlanned) * 100) : 0;
+  const isOverBudget = totalPlanned > 0 && projected > totalPlanned;
+
   return (
-    <div style={{ height: 220 }}>
-      <ResponsiveLine
-        areaBaselineValue={0}
-        areaOpacity={0.08}
-        colors={(d) => (d as { color?: string }).color ?? 'hsl(var(--primary))'}
-        enableArea={true}
-        enableCrosshair={false}
-        enableSlices="x"
-        lineWidth={2}
-        margin={{ top: 12, right: 104, bottom: 40, left: 64 }}
-        pointSize={0}
-        theme={nivoTheme}
-        xFormat="time:%b %d"
-        xScale={{ type: 'time', format: '%Y-%m-%d', useUTC: false, precision: 'day' }}
-        yScale={{ type: 'linear', min: 0, max: 'auto' }}
-        axisBottom={{
-          format: xTickFormat,
-          tickValues: xTickValues,
-          tickSize: 0,
-          tickPadding: 8,
-        }}
-        axisLeft={{
-          tickSize: 0,
-          tickPadding: 8,
-          format: fmtY,
-          tickValues: 5,
-        }}
-        data={[
-          {
-            id: 'Budget limit',
-            data: paceData,
-            color: 'hsl(var(--muted-foreground) / 0.6)',
-          },
-          {
-            id: 'Cumulative spend',
-            data: actualData,
-            color: actualColor,
-          },
-        ]}
-        legends={[
-          {
-            anchor: 'bottom-right',
-            direction: 'column',
-            justify: false,
-            translateX: 104,
-            translateY: 0,
-            itemsSpacing: 6,
-            itemWidth: 96,
-            itemHeight: 18,
-            itemTextColor: 'hsl(var(--muted-foreground))',
-            symbolSize: 10,
-            symbolShape: 'circle',
-          },
-        ]}
-        sliceTooltip={({ slice }) => {
-          const budgetPoint = slice.points.find((p) => p.serieId === 'Budget limit');
-          const actualPoint = slice.points.find((p) => p.serieId === 'Cumulative spend');
-          const budgetVal = Number(budgetPoint?.data.y ?? 0);
-          const actualVal = Number(actualPoint?.data.y ?? 0);
-          const over = actualVal > budgetVal && budgetVal > 0;
-          return (
-            <div className="rounded-md border bg-background px-3 py-2 shadow-md text-sm min-w-[170px]">
-              <p className="text-muted-foreground text-xs mb-1.5">{slice.points[0]?.data.xFormatted}</p>
-              <div className="space-y-0.5">
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground text-xs">Budget pace</span>
-                  <span className="tabular-nums text-xs font-medium">
-                    {sym}
-                    {budgetVal.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground text-xs">Actual spend</span>
-                  <span className={`tabular-nums text-xs font-semibold ${over ? 'text-destructive' : 'text-primary'}`}>
-                    {sym}
-                    {actualVal.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                  </span>
-                </div>
-                {budgetVal > 0 && (
-                  <div className="flex items-center justify-between gap-4 border-t pt-0.5 mt-0.5">
-                    <span className="text-muted-foreground text-xs">Used</span>
-                    <span className={`tabular-nums text-xs font-semibold ${over ? 'text-destructive' : ''}`}>
-                      {Math.round((actualVal / budgetVal) * 100)}%
+    <div>
+      <div style={{ height: 180 }}>
+        <ResponsiveLine
+          areaBaselineValue={0}
+          areaOpacity={0.08}
+          colors={(d) => (d as { color?: string }).color ?? 'hsl(var(--primary))'}
+          enableArea={true}
+          enableCrosshair={false}
+          enableSlices="x"
+          legends={[]}
+          lineWidth={2}
+          margin={{ top: 8, right: 12, bottom: 24, left: 48 }}
+          pointSize={0}
+          theme={nivoTheme}
+          xFormat="time:%b %d"
+          xScale={{ type: 'time', format: '%Y-%m-%d', useUTC: false, precision: 'day' }}
+          yScale={{ type: 'linear', min: 0, max: 'auto' }}
+          axisBottom={{
+            format: xTickFormat,
+            tickValues: xTickValues,
+            tickSize: 0,
+            tickPadding: 6,
+          }}
+          axisLeft={{
+            tickSize: 0,
+            tickPadding: 6,
+            format: fmtY,
+            tickValues: 4,
+          }}
+          data={[
+            {
+              id: 'Budget limit',
+              data: paceData,
+              color: 'hsl(var(--muted-foreground) / 0.4)',
+            },
+            {
+              id: 'Actual spend',
+              data: actualData,
+              color: actualColor,
+            },
+          ]}
+          sliceTooltip={({ slice }) => {
+            const budgetPoint = slice.points.find((p) => p.serieId === 'Budget limit');
+            const actualPoint = slice.points.find((p) => p.serieId === 'Actual spend');
+            const budgetVal = Number(budgetPoint?.data.y ?? 0);
+            const actualVal = Number(actualPoint?.data.y ?? 0);
+            const over = actualVal > budgetVal && budgetVal > 0;
+            return (
+              <div className="rounded-md border bg-background px-3 py-2 shadow-md text-sm min-w-[170px]">
+                <p className="text-muted-foreground text-xs mb-1.5">{slice.points[0]?.data.xFormatted}</p>
+                <div className="space-y-0.5">
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-muted-foreground text-xs">Budget pace</span>
+                    <span className="tabular-nums text-xs font-medium">
+                      {sym}
+                      {budgetVal.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                     </span>
                   </div>
-                )}
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-muted-foreground text-xs">Actual spend</span>
+                    <span
+                      className={`tabular-nums text-xs font-semibold ${over ? 'text-destructive' : 'text-primary'}`}
+                    >
+                      {sym}
+                      {actualVal.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                    </span>
+                  </div>
+                  {budgetVal > 0 && (
+                    <div className="flex items-center justify-between gap-4 border-t pt-0.5 mt-0.5">
+                      <span className="text-muted-foreground text-xs">Used</span>
+                      <span className={`tabular-nums text-xs font-semibold ${over ? 'text-destructive' : ''}`}>
+                        {Math.round((actualVal / budgetVal) * 100)}%
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        }}
-      />
+            );
+          }}
+        />
+      </div>
+
+      {/* Summary stats */}
+      <div className="flex flex-wrap items-center pt-1.5 border-t text-xs tabular-nums text-muted-foreground leading-tight divide-x divide-border [&>span]:px-2 first:[&>span]:pl-0">
+        <span>
+          <span className="font-medium text-foreground">
+            {sym}
+            {spent.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+          </span>
+          {totalPlanned > 0 && (
+            <>
+              {' '}
+              / {sym}
+              {totalPlanned.toLocaleString('en-US', { maximumFractionDigits: 0 })} ({usedPct}%)
+            </>
+          )}
+        </span>
+        <span>
+          {sym}
+          {Math.round(dailyAvg).toLocaleString('en-US')}/d
+        </span>
+        <span>{daysLeft}d left</span>
+        {totalPlanned > 0 && (
+          <span className={isOverBudget ? 'text-destructive font-medium' : 'font-medium text-foreground'}>
+            Proj {sym}
+            {projected.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+          </span>
+        )}
+      </div>
     </div>
   );
 };

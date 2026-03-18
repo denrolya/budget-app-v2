@@ -1,18 +1,19 @@
-import { ChevronRight, Check, X, Trash2, StickyNote, TrendingUp, TrendingDown } from 'lucide-react';
+import { ChevronRight, Check, X, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 
 import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { type Category } from '@/features/categories';
 
-import type { BudgetLineDTO, CategoryDayStats, CategoryTrendItem } from '../api/types';
+import type { BudgetLineDTO, CategoryDayStats, CategoryTrendItem, SeasonalItem } from '../api/types';
 
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 import { DISPLAY_CURRENCIES } from './BudgetDisplayCurrency';
+import BudgetNotePopover from './BudgetNotePopover';
+import BudgetSparkline from './BudgetSparkline';
 
 interface Props {
   category: Category;
@@ -31,6 +32,7 @@ interface Props {
   isSaving: boolean;
   onCategoryClick?: (categoryId: number, categoryName: string) => void;
   onDelete?: (lineId: number) => void;
+  seasonal?: SeasonalItem;
   sparklineData?: CategoryDayStats[];
   trend?: CategoryTrendItem;
 }
@@ -38,108 +40,6 @@ interface Props {
 const fmtAmt = (n: number, currency: string) => {
   const sym = CURRENCIES[currency as CURRENCY_CODE]?.symbol ?? currency;
   return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-};
-
-// Tiny SVG sparkline showing daily expense trend
-const Sparkline: React.FC<{ data: CategoryDayStats[]; currency: DisplayCurrency }> = ({ data, currency }) => {
-  const values = data.map((d) => {
-    let total = 0;
-    const cv = d.convertedValues[currency];
-    if (cv) total += cv.expense;
-    return total;
-  });
-
-  const max = Math.max(...values, 0.01);
-  const W = 56;
-  const H = 14;
-  if (values.length < 2) return null;
-
-  const pts = values.map((v, i) => `${(i / (values.length - 1)) * W},${H - (v / max) * (H - 1)}`).join(' ');
-
-  return (
-    <svg height={H} width={W} className="text-muted-foreground/50">
-      <polyline fill="none" points={pts} stroke="currentColor" strokeLinejoin="round" strokeWidth="1.2" />
-    </svg>
-  );
-};
-
-const NotePopover: React.FC<{
-  line: BudgetLineDTO;
-  onNoteUpdate: (lineId: number, note: string | null) => void;
-}> = ({ line, onNoteUpdate }) => {
-  const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState(line.note ?? '');
-
-  const save = () => {
-    onNoteUpdate(line.id, draft.trim() || null);
-    setOpen(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      setOpen(false);
-    }
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) save();
-  };
-
-  return (
-    <Popover
-      open={open}
-      onOpenChange={(v) => {
-        if (v) setDraft(line.note ?? '');
-        setOpen(v);
-      }}
-    >
-      <PopoverTrigger asChild>
-        <button
-          aria-label="Note"
-          title={line.note ? line.note : 'Add note'}
-          type="button"
-          className={cn(
-            'p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity',
-            line.note ? 'opacity-100 text-primary' : 'text-muted-foreground',
-          )}
-        >
-          <StickyNote className="h-3 w-3" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent side="right" className="w-64 p-3 space-y-2">
-        <p className="text-xs font-medium text-muted-foreground">{line ? 'Edit note' : 'Add note'}</p>
-        <Textarea
-          autoFocus
-          placeholder="Add a note for this budget line…"
-          value={draft}
-          className="text-xs min-h-[72px] resize-none"
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={handleKeyDown}
-        />
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            className="text-xs text-muted-foreground hover:text-foreground"
-            onClick={() => setOpen(false)}
-          >
-            Cancel
-          </button>
-          <button type="button" className="text-xs font-medium text-primary hover:underline" onClick={save}>
-            Save
-          </button>
-        </div>
-        {line.note && (
-          <button
-            type="button"
-            className="text-xs text-destructive hover:underline w-full text-left"
-            onClick={() => {
-              onNoteUpdate(line.id, null);
-              setOpen(false);
-            }}
-          >
-            Remove note
-          </button>
-        )}
-      </PopoverContent>
-    </Popover>
-  );
 };
 
 const BudgetCategoryRow: React.FC<Props> = ({
@@ -158,6 +58,7 @@ const BudgetCategoryRow: React.FC<Props> = ({
   isSaving,
   onCategoryClick,
   onDelete,
+  seasonal,
   sparklineData,
   trend,
 }) => {
@@ -244,7 +145,7 @@ const BudgetCategoryRow: React.FC<Props> = ({
           ) : (
             <span className="truncate">{category.name}</span>
           )}
-          {line && <NotePopover line={line} onNoteUpdate={onNoteUpdate} />}
+          {line && <BudgetNotePopover line={line} onNoteUpdate={onNoteUpdate} />}
           {line?.note && (
             <span title={line.note} className="text-xs text-muted-foreground italic truncate max-w-[80px]">
               {line.note}
@@ -329,36 +230,111 @@ const BudgetCategoryRow: React.FC<Props> = ({
       {/* Actual + sparkline + trend */}
       <td className="py-1.5 px-2 text-right tabular-nums">
         {actualValue > 0 ? (
-          <div className="flex flex-col items-end gap-0.5">
-            <span>{fmtAmt(actualValue, displayCurrency)}</span>
-            <div className="flex items-center gap-1.5">
-              {sparklineData && sparklineData.length >= 2 && (
-                <Sparkline currency={displayCurrency} data={sparklineData} />
-              )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex flex-col items-end gap-0.5 cursor-help">
+                <span>{fmtAmt(actualValue, displayCurrency)}</span>
+                <div className="flex items-center gap-1.5">
+                  {sparklineData && sparklineData.length >= 2 && (
+                    <BudgetSparkline currency={displayCurrency} data={sparklineData} />
+                  )}
+                  {trend && trend.direction !== 'stable' && (
+                    <span
+                      className={cn(
+                        'inline-flex items-center gap-0.5 text-2xs font-medium',
+                        isExpenseSection
+                          ? trend.direction === 'up'
+                            ? 'text-destructive'
+                            : 'text-success'
+                          : trend.direction === 'up'
+                            ? 'text-success'
+                            : 'text-destructive',
+                      )}
+                    >
+                      {trend.direction === 'up' ? (
+                        <TrendingUp className="h-2.5 w-2.5" />
+                      ) : (
+                        <TrendingDown className="h-2.5 w-2.5" />
+                      )}
+                      {Math.abs(trend.changePercent)}%
+                    </span>
+                  )}
+                  {seasonal && (
+                    <span
+                      className={cn(
+                        'text-2xs font-medium',
+                        seasonal.seasonalFactor > 1.0 ? 'text-warning/70' : 'text-success/70',
+                      )}
+                    >
+                      {seasonal.seasonalFactor}x
+                    </span>
+                  )}
+                </div>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              className="bg-background text-foreground border shadow-md text-xs p-3 tabular-nums max-w-[240px]"
+            >
               {trend && trend.direction !== 'stable' && (
-                <span
-                  title={`${trend.direction === 'up' ? 'Trending up' : 'Trending down'} ${Math.abs(trend.changePercent)}% over 6 months`}
-                  className={cn(
-                    'inline-flex items-center gap-0.5 text-2xs font-medium',
-                    isExpenseSection
-                      ? trend.direction === 'up'
-                        ? 'text-destructive'
-                        : 'text-success'
-                      : trend.direction === 'up'
-                        ? 'text-success'
-                        : 'text-destructive',
-                  )}
-                >
-                  {trend.direction === 'up' ? (
-                    <TrendingUp className="h-2.5 w-2.5" />
-                  ) : (
-                    <TrendingDown className="h-2.5 w-2.5" />
-                  )}
-                  {Math.abs(trend.changePercent)}%
-                </span>
+                <div className="space-y-1">
+                  <p className="text-muted-foreground text-2xs uppercase tracking-wider font-medium">
+                    Trend — last 3mo vs prior
+                  </p>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-muted-foreground">Prior</span>
+                    <span>{fmtAmt(trend.olderAverage, displayCurrency)}/mo</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-muted-foreground">Recent</span>
+                    <span>{fmtAmt(trend.recentAverage, displayCurrency)}/mo</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-muted-foreground">Change</span>
+                    <span
+                      className={cn(
+                        'font-semibold',
+                        isExpenseSection
+                          ? trend.direction === 'up'
+                            ? 'text-destructive'
+                            : 'text-success'
+                          : trend.direction === 'up'
+                            ? 'text-success'
+                            : 'text-destructive',
+                      )}
+                    >
+                      {trend.direction === 'up' ? '+' : ''}
+                      {trend.changePercent}%
+                    </span>
+                  </div>
+                </div>
               )}
-            </div>
-          </div>
+              {seasonal && (
+                <div className={cn('space-y-1', trend && trend.direction !== 'stable' && 'mt-2 pt-2 border-t')}>
+                  <p className="text-muted-foreground text-2xs uppercase tracking-wider font-medium">
+                    Seasonal — {seasonal.sampleYears}yr history
+                  </p>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-muted-foreground">This month avg</span>
+                    <span>{fmtAmt(seasonal.currentMonthHistoricalAverage, displayCurrency)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-muted-foreground">Overall avg</span>
+                    <span>{fmtAmt(seasonal.overallMonthlyAverage, displayCurrency)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-muted-foreground">Factor</span>
+                    <span
+                      className={cn('font-semibold', seasonal.seasonalFactor > 1.0 ? 'text-warning' : 'text-success')}
+                    >
+                      {seasonal.seasonalFactor}x
+                    </span>
+                  </div>
+                </div>
+              )}
+              {!trend && !seasonal && <p className="text-muted-foreground">No trend or seasonal data</p>}
+            </TooltipContent>
+          </Tooltip>
         ) : (
           <span className="text-muted-foreground/40">—</span>
         )}
@@ -371,9 +347,6 @@ const BudgetCategoryRow: React.FC<Props> = ({
             <span className={cn(remainingColorClass, 'whitespace-nowrap')}>
               {remaining < 0 ? '-' : ''}
               {fmtAmt(remaining, displayCurrency)}
-              {pct !== null && (
-                <span className={cn('ml-1 text-xs', remainingColorClass, 'opacity-70')}>{pct.toFixed(0)}%</span>
-              )}
             </span>
             {pct !== null && (
               <div className="w-16 h-1 rounded-full bg-muted overflow-hidden">

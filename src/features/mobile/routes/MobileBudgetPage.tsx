@@ -3,25 +3,20 @@ import moment from 'moment';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { cn } from '@/lib/utils';
-import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { useBaseCurrency } from '@/features/auth';
 import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 import { useBudget, useBudgetAnalytics, useBudgetInsights, useListBudgets } from '@/features/budget/api';
 import type { BudgetAnalyticsItem, BudgetDTO } from '@/features/budget/api/types';
 import type { DisplayCurrency } from '@/features/budget/components/BudgetDisplayCurrency';
 import { getExchangeRate } from '@/lib/getExchangeRates';
-import { sortCategoryTree } from '@/hooks/financeData';
 import type { ConvertedValues } from '@/features/transactions';
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
+import { computeHealthScore, fmtBudgetAmt } from '@/features/budget/hooks/useBudgetTotals';
+import useBudgetTotals from '@/features/budget/hooks/useBudgetTotals';
 
 import MobileBudgetInsights from '../components/MobileBudgetInsights';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
-
-const fmtAmt = (n: number, currency: string) => {
-  const sym = CURRENCIES[currency as CURRENCY_CODE]?.symbol ?? currency;
-  return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-};
 
 const getAllIds = (cat: Category): number[] => {
   const ids: number[] = [cat.id];
@@ -37,140 +32,6 @@ const MiniBar: React.FC<{ value: number; max?: number; colorClass: string }> = (
     />
   </div>
 );
-
-// ─── Health score ───────────────────────────────────────────────────────────────
-
-const computeHealthGrade = (
-  percentUsed: number,
-  daysElapsed: number,
-  daysTotal: number,
-  totalPlannedIncome: number,
-  totalActualIncome: number,
-): { score: number; grade: string; gradeColor: string } => {
-  let score = 100;
-
-  if (percentUsed > 100) {
-    score -= Math.min(40, (percentUsed - 100) * 0.5);
-  } else if (percentUsed > 80) {
-    score -= 10;
-  }
-
-  if (daysTotal > 0 && daysElapsed > 0 && daysElapsed < daysTotal) {
-    const expectedPct = (daysElapsed / daysTotal) * 100;
-    if (percentUsed > expectedPct + 10) {
-      score -= Math.min(20, (percentUsed - expectedPct - 10) * 0.3);
-    }
-  }
-
-  if (totalPlannedIncome > 0) {
-    const incomePct = (totalActualIncome / totalPlannedIncome) * 100;
-    if (incomePct < 90) {
-      score -= Math.min(15, (90 - incomePct) * 0.2);
-    }
-  }
-
-  score = Math.max(0, Math.round(score));
-
-  if (score >= 90) return { score, grade: 'A', gradeColor: 'text-success' };
-  if (score >= 75) return { score, grade: 'B', gradeColor: 'text-success/75' };
-  if (score >= 60) return { score, grade: 'C', gradeColor: 'text-warning' };
-  if (score >= 45) return { score, grade: 'D', gradeColor: 'text-warning/75' };
-  return { score, grade: 'F', gradeColor: 'text-destructive' };
-};
-
-// ─── Stats computation ──────────────────────────────────────────────────────────
-
-interface BudgetStats {
-  totalPlannedExpense: number;
-  totalPlannedIncome: number;
-  totalActualExpense: number;
-  totalActualIncome: number;
-  remaining: number;
-  percentUsed: number;
-  netSavings: number;
-  daysTotal: number;
-  daysElapsed: number;
-  daysLeft: number;
-}
-
-const useStats = (
-  budget: BudgetDTO | undefined,
-  analytics: BudgetAnalyticsItem[],
-  displayCurrency: DisplayCurrency,
-  rates: ConvertedValues | null,
-): BudgetStats | null => {
-  const { data: catData } = useCategoryList();
-
-  return useMemo(() => {
-    if (!budget || !catData) return null;
-
-    const expenseIds = new Set(
-      catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense).flatMap(getAllIds),
-    );
-    const incomeIds = new Set(
-      catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income).flatMap(getAllIds),
-    );
-
-    const linesMap = new Map((budget.lines ?? []).map((l) => [l.categoryId, l]));
-
-    const plannedRollup = (cat: Category): number => {
-      const own = linesMap.get(cat.id);
-      if (own) {
-        const rate = getExchangeRate(own.plannedCurrency, displayCurrency, rates);
-        return rate !== null ? own.plannedAmount * rate : 0;
-      }
-      return getAllIds(cat)
-        .slice(1)
-        .reduce((sum, id) => {
-          const line = linesMap.get(id);
-          if (!line) return sum;
-          const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
-          return rate !== null ? sum + line.plannedAmount * rate : sum;
-        }, 0);
-    };
-
-    const expenseRoots = catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense);
-    const incomeRoots = catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income);
-    const totalPlannedExpense = expenseRoots.reduce((sum, root) => sum + plannedRollup(root), 0);
-    const totalPlannedIncome = incomeRoots.reduce((sum, root) => sum + plannedRollup(root), 0);
-
-    let totalActualExpense = 0;
-    let totalActualIncome = 0;
-    for (const item of analytics) {
-      const isExpense = expenseIds.has(item.categoryId);
-      const isIncome = incomeIds.has(item.categoryId);
-      if (!isExpense && !isIncome) continue;
-      const cv = item.convertedValues[displayCurrency];
-      if (!cv) continue;
-      if (isExpense) totalActualExpense += cv.expense;
-      if (isIncome) totalActualIncome += cv.income;
-    }
-
-    const remaining = totalPlannedExpense - totalActualExpense;
-    const percentUsed = totalPlannedExpense > 0 ? (totalActualExpense / totalPlannedExpense) * 100 : 0;
-    const netSavings = totalActualIncome - totalActualExpense;
-
-    const start = moment(budget.startDate);
-    const end = moment(budget.endDate);
-    const today = moment();
-    const daysTotal = end.diff(start, 'days') + 1;
-    const daysElapsed = Math.max(0, Math.min(today.diff(start, 'days') + 1, daysTotal));
-    const daysLeft = Math.max(0, end.diff(today, 'days'));
-
-    return {
-      totalPlannedExpense,
-      totalPlannedIncome,
-      totalActualExpense,
-      totalActualIncome,
-      remaining,
-      percentUsed,
-      netSavings,
-      daysTotal,
-      daysElapsed,
-      daysLeft,
-    };
-  }, [budget, analytics, displayCurrency, rates, catData]);
-};
 
 // ─── Category tree with budget status ────────────────────────────────────────
 
@@ -233,9 +94,7 @@ const useCategoryTree = (
         if (rate !== null) planned = line.plannedAmount * rate;
       }
 
-      const childNodes = sortCategoryTree(cat.children)
-        .map(buildNode)
-        .filter((n): n is TreeNode => n !== null);
+      const childNodes = cat.children.map(buildNode).filter((n): n is TreeNode => n !== null);
 
       const hasBudgetOrSpending = planned !== null || actual > 0 || childNodes.length > 0;
       if (!hasBudgetOrSpending) return null;
@@ -260,7 +119,7 @@ const useCategoryTree = (
     };
 
     const targetType = isExpenseTab ? CategoryType.Expense : CategoryType.Income;
-    const roots = sortCategoryTree(catData.tree.filter((c) => c.isAffectingProfit && c.type === targetType));
+    const roots = catData.tree.filter((c) => c.isAffectingProfit && c.type === targetType);
     return roots.map(buildNode).filter((n): n is TreeNode => n !== null);
   }, [budget, analytics, displayCurrency, rates, catData, tab]);
 };
@@ -273,7 +132,6 @@ const CollapsibleChildren: React.FC<{ expanded: boolean; children: React.ReactNo
   const prevExpanded = useRef(expanded);
 
   React.useLayoutEffect(() => {
-    // Skip if no actual change
     if (prevExpanded.current === expanded) return;
     prevExpanded.current = expanded;
 
@@ -281,7 +139,6 @@ const CollapsibleChildren: React.FC<{ expanded: boolean; children: React.ReactNo
     if (!el) return;
 
     if (expanded) {
-      // Expanding: 0 → scrollHeight → auto
       const scrollH = el.scrollHeight;
       setHeight(0);
       requestAnimationFrame(() => {
@@ -293,11 +150,8 @@ const CollapsibleChildren: React.FC<{ expanded: boolean; children: React.ReactNo
         el.addEventListener('transitionend', onEnd);
       });
     } else {
-      // Collapsing: auto → scrollHeight (force reflow) → 0
       const scrollH = el.scrollHeight;
-      // Set explicit pixel height first so the browser has a concrete start value
       el.style.height = `${scrollH}px`;
-      // Force reflow so the browser registers the pixel value before transitioning
       void el.offsetHeight;
       setHeight(0);
     }
@@ -329,11 +183,11 @@ const TreeRow: React.FC<{ depth: number; displayCurrency: string; node: TreeNode
   const actualLabel =
     node.planned !== null ? (
       <>
-        {fmtAmt(node.actual, displayCurrency)}
-        <span className="text-muted-foreground"> / {fmtAmt(node.planned, displayCurrency)}</span>
+        {fmtBudgetAmt(node.actual, displayCurrency)}
+        <span className="text-muted-foreground"> / {fmtBudgetAmt(node.planned, displayCurrency)}</span>
       </>
     ) : (
-      <span className="text-muted-foreground">{fmtAmt(node.actual, displayCurrency)}</span>
+      <span className="text-muted-foreground">{fmtBudgetAmt(node.actual, displayCurrency)}</span>
     );
 
   return (
@@ -384,6 +238,17 @@ const TreeRow: React.FC<{ depth: number; displayCurrency: string; node: TreeNode
   );
 };
 
+// ─── Dummy budget for hook call when no budget selected ─────────────────────
+
+const EMPTY_BUDGET: BudgetDTO = {
+  id: 0,
+  name: null,
+  periodType: 'monthly',
+  startDate: moment().startOf('month').format('YYYY-MM-DD'),
+  endDate: moment().endOf('month').format('YYYY-MM-DD'),
+  lines: [],
+};
+
 // ─── Page ───────────────────────────────────────────────────────────────────────
 
 const MobileBudgetPage: React.FC = () => {
@@ -422,14 +287,15 @@ const MobileBudgetPage: React.FC = () => {
   const { data: insightsData } = useBudgetInsights(activeBudgetId);
   const analytics = analyticsData?.data ?? [];
 
-  const stats = useStats(budget, analytics, displayCurrency, rates);
+  // Shared hook — uses same scoring as desktop + sidebar
+  const stats = useBudgetTotals(budget ?? EMPTY_BUDGET, analytics, displayCurrency, rates);
   const treeNodes = useCategoryTree(budget, analytics, displayCurrency, rates, activeTab);
 
   if (budgetsLoading || budgetLoading) {
     return <p className="font-mono text-xs text-muted-foreground text-center py-10">loading...</p>;
   }
 
-  if (!budget || !stats) {
+  if (!budget) {
     return <p className="font-mono text-xs text-muted-foreground text-center py-10">no budgets</p>;
   }
 
@@ -445,7 +311,7 @@ const MobileBudgetPage: React.FC = () => {
   const remainingColor = stats.remaining < 0 ? 'text-destructive' : 'text-success';
   const savingsColor = stats.netSavings >= 0 ? 'text-success' : 'text-destructive';
 
-  const { grade, gradeColor, score } = computeHealthGrade(
+  const { grade, gradeColor, score } = computeHealthScore(
     stats.percentUsed,
     stats.daysElapsed,
     stats.daysTotal,
@@ -488,17 +354,17 @@ const MobileBudgetPage: React.FC = () => {
             <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Expenses</div>
             <div className="flex items-baseline gap-1 min-w-0">
               <span className={cn('font-semibold tabular-nums truncate', pctColor)}>
-                {fmtAmt(stats.totalActualExpense, displayCurrency)}
+                {fmtBudgetAmt(stats.totalActualExpense, displayCurrency)}
               </span>
               <span className="text-2xs text-muted-foreground shrink-0">
-                / {fmtAmt(stats.totalPlannedExpense, displayCurrency)}
+                / {fmtBudgetAmt(stats.totalPlannedExpense, displayCurrency)}
               </span>
             </div>
             <MiniBar colorClass={pctBarColor} value={stats.percentUsed} />
             <div className={cn('text-2xs font-medium tabular-nums', remainingColor)}>
               {stats.remaining < 0
-                ? `${fmtAmt(Math.abs(stats.remaining), displayCurrency)} over`
-                : `${fmtAmt(stats.remaining, displayCurrency)} left`}
+                ? `${fmtBudgetAmt(Math.abs(stats.remaining), displayCurrency)} over`
+                : `${fmtBudgetAmt(stats.remaining, displayCurrency)} left`}
             </div>
           </div>
 
@@ -506,11 +372,11 @@ const MobileBudgetPage: React.FC = () => {
             <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Income</div>
             <div className="flex items-baseline gap-1 min-w-0">
               <span className="font-semibold tabular-nums text-success truncate">
-                {fmtAmt(stats.totalActualIncome, displayCurrency)}
+                {fmtBudgetAmt(stats.totalActualIncome, displayCurrency)}
               </span>
               {stats.totalPlannedIncome > 0 && (
                 <span className="text-2xs text-muted-foreground shrink-0">
-                  / {fmtAmt(stats.totalPlannedIncome, displayCurrency)}
+                  / {fmtBudgetAmt(stats.totalPlannedIncome, displayCurrency)}
                 </span>
               )}
             </div>
@@ -519,7 +385,7 @@ const MobileBudgetPage: React.FC = () => {
             )}
             <div className={cn('text-2xs font-medium tabular-nums', savingsColor)}>
               {stats.netSavings >= 0 ? '+' : '-'}
-              {fmtAmt(Math.abs(stats.netSavings), displayCurrency)} net
+              {fmtBudgetAmt(Math.abs(stats.netSavings), displayCurrency)} net
             </div>
           </div>
         </div>
@@ -551,7 +417,7 @@ const MobileBudgetPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Insights */}
+        {/* Insights — outliers only */}
         {insightsData && (
           <MobileBudgetInsights
             budgetStartDate={budget.startDate}

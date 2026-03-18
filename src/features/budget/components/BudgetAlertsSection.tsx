@@ -1,4 +1,5 @@
-import { AlertTriangle, ChevronDown, ChevronUp, TrendingDown } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, TrendingDown, Zap } from 'lucide-react';
+import moment from 'moment';
 import React, { useMemo, useState } from 'react';
 
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
@@ -6,7 +7,7 @@ import { type Category, CategoryType, useList as useCategoryList } from '@/featu
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
 
-import type { BudgetAnalyticsItem, BudgetDTO } from '../api/types';
+import type { BudgetAnalyticsItem, BudgetDTO, OutlierItem } from '../api/types';
 
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
@@ -15,6 +16,7 @@ interface Props {
   analytics: BudgetAnalyticsItem[];
   displayCurrency: DisplayCurrency;
   rates: ConvertedValues | null;
+  outliers?: OutlierItem[];
 }
 
 const fmtAmt = (n: number, currency: string) => {
@@ -28,9 +30,12 @@ const getAllIds = (cat: Category): number[] => {
   return ids;
 };
 
-const BudgetAlertsSection: React.FC<Props> = ({ budget, analytics, displayCurrency, rates }) => {
+const BudgetAlertsSection: React.FC<Props> = ({ budget, analytics, displayCurrency, rates, outliers }) => {
   const { data: catData } = useCategoryList();
   const [unbudgetedOpen, setUnbudgetedOpen] = useState(false);
+  const [outliersOpen, setOutliersOpen] = useState(false);
+
+  const categoryMap = useMemo(() => new Map((catData?.list ?? []).map((c) => [c.id, c.name])), [catData]);
 
   const { overspent, unbudgeted } = useMemo(() => {
     if (!catData) return { overspent: [], unbudgeted: [] };
@@ -92,7 +97,8 @@ const BudgetAlertsSection: React.FC<Props> = ({ budget, analytics, displayCurren
     return { overspent: overspentList, unbudgeted: unbudgetedList };
   }, [budget, analytics, displayCurrency, rates, catData]);
 
-  if (overspent.length === 0 && unbudgeted.length === 0) return null;
+  const outlierItems = outliers ?? [];
+  if (overspent.length === 0 && unbudgeted.length === 0 && outlierItems.length === 0) return null;
 
   return (
     <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 space-y-2 text-sm">
@@ -145,6 +151,52 @@ const BudgetAlertsSection: React.FC<Props> = ({ budget, analytics, displayCurren
                     {fmtAmt(item.actual, displayCurrency)}
                   </span>
                 </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {outlierItems.length > 0 && (
+        <div className={overspent.length > 0 || unbudgeted.length > 0 ? 'border-t border-destructive/20 pt-2' : ''}>
+          <button
+            type="button"
+            className="w-full flex items-center justify-between gap-1.5 text-warning font-medium text-xs mb-1.5 hover:opacity-80 transition-opacity"
+            onClick={() => setOutliersOpen((o) => !o)}
+          >
+            <span className="flex items-center gap-1.5">
+              <Zap className="h-3.5 w-3.5" />
+              Unusual transactions ({outlierItems.length})
+            </span>
+            {outliersOpen ? (
+              <ChevronUp className="h-3.5 w-3.5 shrink-0" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5 shrink-0" />
+            )}
+          </button>
+          {outliersOpen && (
+            <div className="space-y-0.5">
+              {outlierItems.map((outlier) => (
+                <div className="flex items-center gap-2 text-xs py-0.5" key={outlier.transactionId}>
+                  <span className="text-muted-foreground truncate min-w-0">
+                    {categoryMap.get(outlier.categoryId) ?? 'Unknown'}
+                  </span>
+                  <span className="text-muted-foreground/60 truncate min-w-0">
+                    {outlier.note ?? moment(outlier.executedAt).format('MMM D')}
+                  </span>
+                  <span className="ml-auto text-destructive font-medium tabular-nums shrink-0">
+                    {fmtAmt(outlier.convertedAmount, displayCurrency)}
+                  </span>
+                  <span
+                    title={`${outlier.deviation}x above the category median of ${fmtAmt(outlier.median, displayCurrency)}`}
+                    className="text-warning/70 tabular-nums shrink-0 text-2xs"
+                  >
+                    {outlier.deviation}x
+                  </span>
+                  <span className="text-muted-foreground/50 tabular-nums shrink-0 text-2xs">
+                    {moment(outlier.executedAt).format('MMM D')}
+                  </span>
+                </div>
               ))}
             </div>
           )}

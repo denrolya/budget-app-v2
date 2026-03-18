@@ -1,17 +1,10 @@
 import { History, Loader2 } from 'lucide-react';
 import moment from 'moment';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { getExchangeRate } from '@/lib/getExchangeRates';
@@ -19,8 +12,9 @@ import type { ConvertedValues } from '@/features/transactions';
 import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 
 import { useBatchCreateBudgetLines, useHistoryAverages } from '../api';
-import type { BudgetDTO, SeasonalItem } from '../api/types';
+import type { BudgetDTO, CategoryTrendItem, SeasonalItem } from '../api/types';
 
+import BudgetAdjustmentTooltip from './BudgetAdjustmentTooltip';
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
 interface Props {
@@ -29,6 +23,7 @@ interface Props {
   rates: ConvertedValues | null;
   autoOpen?: boolean;
   seasonal?: SeasonalItem[];
+  trends?: CategoryTrendItem[];
 }
 
 // Monthly budgets: 6 months of history. Yearly/custom: 12 months for a fuller picture.
@@ -38,6 +33,8 @@ const fmtAmt = (n: number, currency: string) => {
   const sym = CURRENCIES[currency as CURRENCY_CODE]?.symbol ?? currency;
   return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 };
+
+const fmtPct = (n: number) => `${n > 0 ? '+' : ''}${n}%`;
 
 type SuggestionItem = { cat: Category; suggested: number; activeMonths: number | null };
 type GroupedSuggestion = { root: Category; items: SuggestionItem[] };
@@ -57,7 +54,37 @@ const getCumulative = (cat: Category, rawMonthly: Map<number, number>): number =
   return sum;
 };
 
-const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency, rates, autoOpen, seasonal }) => {
+// Max active months across cat and all its descendants (a parent with children
+// that have transactions every month should show 6/6, not 0/6)
+const getMaxActiveMonths = (cat: Category, activeMonthsMap: Map<number, number>): number | null => {
+  let max = activeMonthsMap.get(cat.id) ?? 0;
+  for (const child of cat.children) {
+    const childMax = getMaxActiveMonths(child, activeMonthsMap);
+    if (childMax !== null && childMax > max) max = childMax;
+  }
+  return max > 0 ? max : null;
+};
+
+// ── Column header ────────────────────────────────────────────────────────────
+
+const ColumnHeader: React.FC = () => (
+  <div className="flex items-center gap-1 text-2xs text-muted-foreground/60 border-b border-border/30 pb-1 mb-1.5 tabular-nums">
+    <span className="flex-1">CATEGORY</span>
+    <span className="w-[52px] text-right">TREND</span>
+    <span className="w-[40px] text-right">FREQ</span>
+    <span className="w-[72px] text-right">AMOUNT</span>
+    <span className="w-3" />
+  </div>
+);
+
+const BudgetFillFromHistoryButton: React.FC<Props> = ({
+  budget,
+  displayCurrency,
+  rates,
+  autoOpen,
+  seasonal,
+  trends,
+}) => {
   const [open, setOpen] = useState(autoOpen ?? false);
   const HISTORY_MONTHS = getHistoryMonths(budget.periodType);
 
@@ -73,12 +100,40 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
     return map;
   }, [seasonal]);
 
+  const trendsMap = useMemo(() => {
+    const map = new Map<number, CategoryTrendItem>();
+    if (!trends) return map;
+    for (const trend of trends) {
+      map.set(trend.categoryId, trend);
+      for (const child of trend.children ?? []) {
+        map.set(child.categoryId, child);
+      }
+    }
+    return map;
+  }, [trends]);
+
   const budgetMonth = moment(budget.startDate).format('MMM');
 
+  const getAdjustmentFactor = useCallback(
+    (categoryId: number): { trendFactor: number; seasonalFactor: number; total: number } => {
+      const trend = trendsMap.get(categoryId);
+      const season = seasonalMap.get(categoryId);
+      const trendFactor = trend ? 1 + trend.changePercent / 100 : 1;
+      const seasonalFactor = season ? season.seasonalFactor : 1;
+      return { trendFactor, seasonalFactor, total: trendFactor * seasonalFactor };
+    },
+    [trendsMap, seasonalMap],
+  );
+
+  const getAdjustedAmount = useCallback(
+    (categoryId: number, baseAmount: number): number => {
+      const { total } = getAdjustmentFactor(categoryId);
+      return Math.round(baseAmount * total);
+    },
+    [getAdjustmentFactor],
+  );
+
   // Per-category recency-weighted monthly prediction in displayCurrency.
-  // Backend returns predictedValues: the weighted monthly estimate per currency.
-  // Income categories use cv.income; expense categories use cv.expense.
-  // activeMonthsMap: categoryId → how many distinct calendar months had spending (for display only).
   const { rawMonthly, activeMonthsMap } = useMemo(() => {
     const raw = new Map<number, number>();
     const active = new Map<number, number>();
@@ -103,7 +158,6 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
   }, [historyData, categoryMap, displayCurrency, rates]);
 
   // Suggestions: only depth 0–1 categories, no existing line, cumulative value > 1.
-  // Each value is the rollup of the category + ALL descendants, scaled to budget period.
   const suggestions = useMemo(() => {
     if (!historyData || !catData) return [];
 
@@ -116,14 +170,12 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
       .map((cat) => ({
         categoryId: cat.id,
         suggested: getCumulative(cat, rawMonthly) * scaleFactor,
-        // activeMonths: only meaningful for this exact category's own transactions
-        activeMonths: activeMonthsMap.get(cat.id) ?? null,
+        activeMonths: getMaxActiveMonths(cat, activeMonthsMap),
       }))
       .filter((s) => s.suggested > 1);
   }, [historyData, catData, budget, rawMonthly, activeMonthsMap]);
 
-  // Group suggestions by root category, split by expense / income.
-  // Sort both groups and items by suggested amount descending.
+  // Group by root category, split expense / income
   const { expenseGroups, incomeGroups } = useMemo(() => {
     const expMap = new Map<number, GroupedSuggestion>();
     const incMap = new Map<number, GroupedSuggestion>();
@@ -140,78 +192,126 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
       map.get(root.id)!.items.push({ cat, suggested: s.suggested, activeMonths: s.activeMonths });
     }
 
-    const sortGroups = (m: Map<number, GroupedSuggestion>): GroupedSuggestion[] =>
-      [...m.values()]
-        .map((g) => ({ ...g, items: [...g.items].sort((a, b) => b.suggested - a.suggested) }))
-        .sort((a, b) => {
-          const sumA = a.items.reduce((s, i) => s + i.suggested, 0);
-          const sumB = b.items.reduce((s, i) => s + i.suggested, 0);
-          return sumB - sumA;
-        });
+    // Data arrives pre-sorted from buildCategoriesData — preserve that order
+    const sortGroups = (m: Map<number, GroupedSuggestion>): GroupedSuggestion[] => [...m.values()];
 
     return { expenseGroups: sortGroups(expMap), incomeGroups: sortGroups(incMap) };
   }, [suggestions, categoryMap]);
 
-  // Totals: use root item per group (which already includes sub-category rollup).
-  // Summing all suggestions would double-count children whose root is also in suggestions.
   const totalExpense = useMemo(
     () =>
       expenseGroups.reduce((sum, { root, items }) => {
         const rootItem = items.find((i) => i.cat.id === root.id);
-        return sum + (rootItem ? rootItem.suggested : items.reduce((s, i) => s + i.suggested, 0));
+        const base = rootItem ? rootItem.suggested : items.reduce((s, i) => s + i.suggested, 0);
+        const categoryId = rootItem ? root.id : (items[0]?.cat.id ?? root.id);
+        return sum + getAdjustedAmount(categoryId, base);
       }, 0),
-    [expenseGroups],
+    [expenseGroups, getAdjustedAmount],
   );
 
   const totalIncome = useMemo(
     () =>
       incomeGroups.reduce((sum, { root, items }) => {
         const rootItem = items.find((i) => i.cat.id === root.id);
-        return sum + (rootItem ? rootItem.suggested : items.reduce((s, i) => s + i.suggested, 0));
+        const base = rootItem ? rootItem.suggested : items.reduce((s, i) => s + i.suggested, 0);
+        const categoryId = rootItem ? root.id : (items[0]?.cat.id ?? root.id);
+        return sum + getAdjustedAmount(categoryId, base);
       }, 0),
-    [incomeGroups],
+    [incomeGroups, getAdjustedAmount],
   );
 
   const handleApply = async () => {
-    // Root categories get getCumulative (full envelope = total historical spend for the group).
-    // Children get their own average (sub-allocation within the root envelope).
-    // BudgetTable shows the root's own line directly when it exists (envelope model).
-    const lines = suggestions.map((s) => ({
-      categoryId: s.categoryId,
-      plannedAmount: Math.round(s.suggested),
-      plannedCurrency: displayCurrency,
-    }));
+    const lines = suggestions.map((s) => {
+      const { total } = getAdjustmentFactor(s.categoryId);
+      return {
+        categoryId: s.categoryId,
+        plannedAmount: Math.round(s.suggested * total),
+        plannedCurrency: displayCurrency,
+      };
+    });
 
     const results = await batchCreate(lines);
     setOpen(false);
     toast.success(`Added ${results.length} budget lines from history`);
   };
 
+  // ── Render category rows ───────────────────────────────────────────────────
+
   const renderGroups = (groups: GroupedSuggestion[], type: 'expense' | 'income') => {
     if (groups.length === 0) return <p className="text-muted-foreground text-center py-4 text-xs">No suggestions</p>;
 
     const amtCls = type === 'expense' ? 'text-destructive' : 'text-success';
 
-    const FreqBadge = ({ activeMonths }: { activeMonths: number | null }) => {
-      if (activeMonths === null) return null;
-      const cls =
-        activeMonths >= 5 ? 'text-muted-foreground/60' : activeMonths >= 3 ? 'text-amber-500' : 'text-orange-500';
-      return (
-        <span title="Months active out of 6" className={`text-xs tabular-nums shrink-0 ml-1.5 ${cls}`}>
-          {activeMonths}/{HISTORY_MONTHS}mo
-        </span>
-      );
-    };
+    const renderRow = (
+      name: string,
+      categoryId: number,
+      baseAmount: number,
+      activeMonths: number | null,
+      isRoot: boolean,
+    ) => {
+      const trend = trendsMap.get(categoryId);
+      const adjusted = getAdjustedAmount(categoryId, baseAmount);
+      const hasTrend = trend && trend.direction !== 'stable';
 
-    const SeasonalBadge = ({ categoryId }: { categoryId: number }) => {
-      const item = seasonalMap.get(categoryId);
-      if (!item) return null;
-      const isHigh = item.seasonalFactor > 1.0;
-      const cls = isHigh ? 'text-warning' : 'text-success';
       return (
-        <span title={`Historical seasonal factor for ${budgetMonth}`} className={`text-2xs font-medium shrink-0 ml-1 ${cls}`}>
-          {budgetMonth}: {item.seasonalFactor}x
-        </span>
+        <div className={`flex items-center gap-1 ${isRoot ? 'py-1' : 'py-0.5 pl-3'}`} key={categoryId}>
+          <span className={`truncate min-w-0 flex-1 text-sm ${isRoot ? 'font-medium' : 'text-muted-foreground'}`}>
+            {name}
+          </span>
+
+          {/* Trend: direction + % */}
+          <span className="w-[52px] text-right text-2xs tabular-nums shrink-0">
+            {hasTrend && (
+              <span
+                className={
+                  type === 'expense'
+                    ? trend.direction === 'up'
+                      ? 'text-destructive'
+                      : 'text-success'
+                    : trend.direction === 'up'
+                      ? 'text-success'
+                      : 'text-destructive'
+                }
+              >
+                {fmtPct(trend.changePercent)}
+              </span>
+            )}
+          </span>
+
+          {/* Frequency */}
+          <span className="w-[40px] text-right text-2xs tabular-nums shrink-0">
+            {activeMonths !== null && (
+              <span
+                className={
+                  activeMonths >= 5
+                    ? 'text-muted-foreground/60'
+                    : activeMonths >= 3
+                      ? 'text-warning/70'
+                      : 'text-warning'
+                }
+              >
+                {activeMonths}/{HISTORY_MONTHS}
+              </span>
+            )}
+          </span>
+
+          {/* Amount */}
+          <span className={`w-[72px] text-right font-medium tabular-nums shrink-0 text-sm ${amtCls}`}>
+            {fmtAmt(adjusted, displayCurrency)}
+          </span>
+
+          {/* Info icon */}
+          <span className="w-3 shrink-0">
+            <BudgetAdjustmentTooltip
+              baseAmount={baseAmount}
+              budgetMonth={budgetMonth}
+              displayCurrency={displayCurrency}
+              seasonal={seasonalMap.get(categoryId)}
+              seasonalFactor={getAdjustmentFactor(categoryId).seasonalFactor}
+              trendFactor={getAdjustmentFactor(categoryId).trendFactor}
+            />
+          </span>
+        </div>
       );
     };
 
@@ -221,53 +321,36 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
       const hasChildren = childItems.length > 0;
 
       return (
-        <div className="mb-3 last:mb-0" key={root.id}>
+        <div className="mb-2 last:mb-0" key={root.id}>
           {hasChildren ? (
-            /* Header row: root name on left, cumulative amount + badge on right.
-               No separate bold item row — eliminates the previous duplication. */
-            <div className="flex items-center py-1 border-b mb-1 gap-1">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex-1 min-w-0 truncate">
-                {root.name}
-              </span>
-              {rootItem && (
-                <>
-                  <SeasonalBadge categoryId={root.id} />
-                  <FreqBadge activeMonths={rootItem.activeMonths} />
-                  <span className={`font-semibold tabular-nums shrink-0 ml-1 text-sm ${amtCls}`}>
-                    {fmtAmt(rootItem.suggested, displayCurrency)}
-                  </span>
-                </>
-              )}
-            </div>
-          ) : (
-            /* Leaf root (no children) — simple item row */
-            rootItem && (
-              <div className="flex items-center py-1 gap-1">
-                <span className="text-sm font-medium text-foreground truncate flex-1 min-w-0">{root.name}</span>
-                <SeasonalBadge categoryId={root.id} />
-                <FreqBadge activeMonths={rootItem.activeMonths} />
-                <span className={`font-semibold tabular-nums shrink-0 ml-1 text-sm ${amtCls}`}>
-                  {fmtAmt(rootItem.suggested, displayCurrency)}
+            <>
+              {/* Group header */}
+              <div className="flex items-center py-1 border-b border-border/30 mb-0.5">
+                <span className="text-2xs font-semibold text-muted-foreground uppercase tracking-wider flex-1 min-w-0 truncate">
+                  {root.name}
                 </span>
+                {rootItem && (
+                  <span className={`font-semibold tabular-nums text-sm ${amtCls}`}>
+                    {fmtAmt(getAdjustedAmount(root.id, rootItem.suggested), displayCurrency)}
+                  </span>
+                )}
               </div>
-            )
+              {/* Child rows */}
+              {childItems.map(({ cat, suggested, activeMonths }) =>
+                renderRow(cat.name, cat.id, suggested, activeMonths, false),
+              )}
+            </>
+          ) : (
+            rootItem && renderRow(root.name, root.id, rootItem.suggested, rootItem.activeMonths, true)
           )}
-
-          {/* Depth-1 children */}
-          {childItems.map(({ cat, suggested, activeMonths }) => (
-            <div className="flex items-center py-0.5 pl-3 gap-1" key={cat.id}>
-              <span className="text-sm truncate text-muted-foreground flex-1 min-w-0">{cat.name}</span>
-              <SeasonalBadge categoryId={cat.id} />
-              <FreqBadge activeMonths={activeMonths} />
-              <span className={`font-medium tabular-nums shrink-0 ml-1 text-sm ${amtCls}`}>
-                {fmtAmt(suggested, displayCurrency)}
-              </span>
-            </div>
-          ))}
         </div>
       );
     });
   };
+
+  const periodLabel = historyData
+    ? `${moment(historyData.after).format('MMM YYYY')} – ${moment(historyData.before).format('MMM YYYY')}`
+    : `last ${HISTORY_MONTHS} months`;
 
   return (
     <>
@@ -287,29 +370,38 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
       </Tooltip>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>Fill from history</DialogTitle>
-            <DialogDescription>
-              Recency-weighted predictions from the last {HISTORY_MONTHS} months
-              {historyData && (
-                <>
-                  {' '}
-                  ({moment(historyData.after).format('MMM YYYY')} – {moment(historyData.before).format('MMM YYYY')})
-                </>
-              )}
-              . Recent months are weighted higher. Categories active in fewer than 2 months are excluded as one-offs.
-              Group totals include all sub-categories. Only categories without an existing line are shown.
-            </DialogDescription>
+            <DialogTitle>Fill budget from spending history</DialogTitle>
           </DialogHeader>
 
+          {/* How it works panel */}
+          <div className="rounded-md bg-muted/40 px-3 py-2 text-xs text-muted-foreground space-y-1">
+            <p>
+              <span className="font-medium text-foreground">Source:</span> {periodLabel} — recent months weighted
+              higher, one-off categories excluded.
+            </p>
+            <div className="flex flex-wrap gap-x-6 gap-y-0.5 text-2xs">
+              <span>
+                <span className="font-medium text-foreground">TREND</span> — spending change, last 3mo vs prior 3mo
+              </span>
+              <span>
+                <span className="font-medium text-foreground">FREQ</span> — months with activity out of {HISTORY_MONTHS}
+              </span>
+              <span>
+                <span className="font-medium text-foreground">AMOUNT</span> — predicted value (adjusted for trends and{' '}
+                {budgetMonth} seasonality)
+              </span>
+            </div>
+          </div>
+
           {historyLoading ? (
-            <div className="flex items-center justify-center py-8 text-muted-foreground">
+            <div className="flex items-center justify-center py-12 text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              Loading history…
+              Analyzing spending history…
             </div>
           ) : suggestions.length === 0 ? (
-            <p className="text-muted-foreground text-center py-6 text-xs">
+            <p className="text-muted-foreground text-center py-10 text-xs">
               No suggestions — all categories already have budget lines, or no historical spending found.
             </p>
           ) : (
@@ -319,34 +411,35 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
                 {totalExpense > 0 && (
                   <div className="flex items-center gap-1.5">
                     <span className="text-muted-foreground text-xs">Expenses</span>
-                    <span className="font-semibold text-destructive">{fmtAmt(totalExpense, displayCurrency)}</span>
+                    <span className="font-semibold text-destructive tabular-nums">
+                      {fmtAmt(totalExpense, displayCurrency)}
+                    </span>
                   </div>
                 )}
                 {totalIncome > 0 && (
                   <div className="flex items-center gap-1.5">
                     <span className="text-muted-foreground text-xs">Income</span>
-                    <span className="font-semibold text-success">{fmtAmt(totalIncome, displayCurrency)}</span>
+                    <span className="font-semibold text-success tabular-nums">
+                      {fmtAmt(totalIncome, displayCurrency)}
+                    </span>
                   </div>
                 )}
-                <span className="ml-auto text-xs text-muted-foreground">
-                  {suggestions.length} line{suggestions.length !== 1 ? 's' : ''} to add
+                <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+                  {suggestions.length} line{suggestions.length !== 1 ? 's' : ''}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-0 divide-x max-h-80 overflow-hidden">
+              {/* Category grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 sm:divide-x flex-1 min-h-0 overflow-hidden">
                 {/* Expenses */}
-                <div className="pr-4 overflow-y-auto">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                    Expenses
-                  </div>
+                <div className="pr-0 sm:pr-4 overflow-y-auto max-h-[40vh]">
+                  <ColumnHeader />
                   {renderGroups(expenseGroups, 'expense')}
                 </div>
 
                 {/* Income */}
-                <div className="pl-4 overflow-y-auto">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                    Income
-                  </div>
+                <div className="pl-0 sm:pl-4 pt-2 sm:pt-0 border-t sm:border-t-0 overflow-y-auto max-h-[40vh]">
+                  <ColumnHeader />
                   {renderGroups(incomeGroups, 'income')}
                 </div>
               </div>

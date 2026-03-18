@@ -97,6 +97,7 @@ export interface CategoryTrendItem {
   changePercent: number;
   recentAverage: number;
   olderAverage: number;
+  children?: CategoryTrendItem[];
 }
 
 export interface SeasonalItem {
@@ -105,10 +106,25 @@ export interface SeasonalItem {
   currentMonthHistoricalAverage: number;
   overallMonthlyAverage: number;
   sampleYears: number;
+  children?: SeasonalItem[];
 }
 
 export interface BudgetInsightsResponse {
   outliers: OutlierItem[];
   trends: CategoryTrendItem[];
   seasonal: SeasonalItem[];
+}
+
+// ── Budget Summaries (sidebar) ───────────────────────────────────────────────
+
+export interface BudgetSummaryItem {
+  budgetId: number;
+  actualExpense: Record<string, number>;
+  actualIncome: Record<string, number>;
+  plannedExpense: Record<string, number>;
+  plannedIncome: Record<string, number>;
+}
+
+export interface BudgetSummariesResponse {
+  data: BudgetSummaryItem[];
 }
