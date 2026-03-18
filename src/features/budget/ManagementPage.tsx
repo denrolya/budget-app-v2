@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
 
-import { useBudget, useBudgetAnalytics, useCategoryDailyStats, useListBudgets } from './api';
+import { useBudget, useBudgetAnalytics, useBudgetInsights, useCategoryDailyStats, useListBudgets } from './api';
 import BudgetAlertsSection from './components/BudgetAlertsSection';
 import BudgetCategoryBarChart from './components/BudgetCategoryBarChart';
 import BudgetDisplayCurrency, { type DisplayCurrency } from './components/BudgetDisplayCurrency';
@@ -19,6 +19,7 @@ import BudgetDistributionChart from './components/BudgetDistributionChart';
 import BudgetExportButton from './components/BudgetExportButton';
 import BudgetFillFromHistoryButton from './components/BudgetFillFromHistoryButton';
 import BudgetHeatmapSection from './components/BudgetHeatmapSection';
+import BudgetInsightsSection from './components/BudgetInsightsSection';
 import BudgetPaceChart from './components/BudgetPaceChart';
 import BudgetSidebar from './components/BudgetSidebar';
 import BudgetSummaryCards from './components/BudgetSummaryCards';
@@ -81,6 +82,7 @@ const BudgetDetailRoute: React.FC = () => {
   const { data: budget, isLoading: budgetLoading, refetch: refetchBudget } = useBudget(id);
   const { data: analyticsData, isLoading: analyticsLoading, refetch: refetchAnalytics } = useBudgetAnalytics(id);
   const { data: dailyStatsData } = useCategoryDailyStats(id);
+  const { data: insightsData } = useBudgetInsights(id);
   const { data: allBudgets } = useListBudgets();
   const { data: ratesData } = useExchangeRatesQuery();
 
@@ -163,6 +165,7 @@ const BudgetDetailRoute: React.FC = () => {
           budget={budget}
           displayCurrency={displayCurrency}
           rates={rates}
+          seasonal={insightsData?.seasonal}
         />
 
         <BudgetExportButton analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
@@ -192,6 +195,15 @@ const BudgetDetailRoute: React.FC = () => {
         <div className="p-4 space-y-6 pb-8">
           {/* Alerts */}
           <BudgetAlertsSection analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
+
+          {/* Insights */}
+          {insightsData && (
+            <BudgetInsightsSection
+              budgetStartDate={budget.startDate}
+              displayCurrency={displayCurrency}
+              insights={insightsData}
+            />
+          )}
 
           {/* Spending heatmap */}
           <div className="space-y-1">
@@ -262,6 +274,7 @@ const BudgetDetailRoute: React.FC = () => {
                 dailyStats={dailyStats}
                 displayCurrency={displayCurrency}
                 rates={rates}
+                trends={insightsData?.trends}
               />
             </div>
           </div>

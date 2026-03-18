@@ -6,6 +6,7 @@ import type {
   BudgetAnalyticsResponse,
   BudgetDTO,
   BudgetHistoryAveragesResponse,
+  BudgetInsightsResponse,
   CategoryDailyStatsResponse,
 } from './types';
 
@@ -44,6 +45,14 @@ export const useHistoryAverages = (id: number | null, months = 6) =>
   useQuery<BudgetHistoryAveragesResponse>({
     queryKey: queryKeys.historyAverages(id!, months),
     queryFn: () => budgetService.historyAverages(id!, months),
+    enabled: id !== null,
+    staleTime: 1000 * 60 * 10,
+  });
+
+export const useBudgetInsights = (id: number | null) =>
+  useQuery<BudgetInsightsResponse>({
+    queryKey: queryKeys.insights(id!),
+    queryFn: () => budgetService.insights(id!),
     enabled: id !== null,
     staleTime: 1000 * 60 * 10,
   });

@@ -75,3 +75,40 @@ export interface CategoryDailyStatsItem {
 export interface CategoryDailyStatsResponse {
   data: CategoryDailyStatsItem[];
 }
+
+// ── Budget Insights ──────────────────────────────────────────────────────────
+
+export interface OutlierItem {
+  transactionId: number;
+  categoryId: number;
+  note: string | null;
+  executedAt: string;
+  amount: number;
+  convertedAmount: number;
+  median: number;
+  deviation: number;
+}
+
+export type TrendDirection = 'up' | 'down' | 'stable';
+
+export interface CategoryTrendItem {
+  categoryId: number;
+  direction: TrendDirection;
+  changePercent: number;
+  recentAverage: number;
+  olderAverage: number;
+}
+
+export interface SeasonalItem {
+  categoryId: number;
+  seasonalFactor: number;
+  currentMonthHistoricalAverage: number;
+  overallMonthlyAverage: number;
+  sampleYears: number;
+}
+
+export interface BudgetInsightsResponse {
+  outliers: OutlierItem[];
+  trends: CategoryTrendItem[];
+  seasonal: SeasonalItem[];
+}

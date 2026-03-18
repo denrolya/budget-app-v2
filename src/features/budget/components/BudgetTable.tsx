@@ -11,7 +11,13 @@ import type { ConvertedValues } from '@/features/transactions';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 
 import { useDeleteBudgetLine, useUpsertBudgetLine, useUpdateBudgetLineNote } from '../api';
-import type { BudgetAnalyticsItem, BudgetDTO, BudgetLineDTO, CategoryDailyStatsItem } from '../api/types';
+import type {
+  BudgetAnalyticsItem,
+  BudgetDTO,
+  BudgetLineDTO,
+  CategoryDailyStatsItem,
+  CategoryTrendItem,
+} from '../api/types';
 
 import BudgetCategoryRow from './BudgetCategoryRow';
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
@@ -23,6 +29,7 @@ interface Props {
   displayCurrency: DisplayCurrency;
   rates: ConvertedValues | null;
   dailyStats?: CategoryDailyStatsItem[];
+  trends?: CategoryTrendItem[];
 }
 
 const sortCats = (cats: Category[]): Category[] =>
@@ -45,7 +52,7 @@ const fmtAmt = (n: number, currency: string) => {
   return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 };
 
-const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurrency, rates, dailyStats }) => {
+const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurrency, rates, dailyStats, trends }) => {
   const { data: catData } = useCategoryList();
   const { mutate: upsertLine, isPending: isSaving } = useUpsertBudgetLine(budgetId);
   const { mutate: deleteLine } = useDeleteBudgetLine(budgetId);
@@ -90,6 +97,12 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
     (dailyStats ?? []).forEach((item) => map.set(item.categoryId, item));
     return map;
   }, [dailyStats]);
+
+  const trendsMap = useMemo(() => {
+    const map = new Map<number, CategoryTrendItem>();
+    (trends ?? []).forEach((item) => map.set(item.categoryId, item));
+    return map;
+  }, [trends]);
 
   const getActual = useCallback(
     (cat: Category) => {
@@ -201,6 +214,7 @@ const BudgetTable: React.FC<Props> = ({ budgetId, budget, analytics, displayCurr
         line={linesMap.get(cat.id) ?? null}
         plannedInDisplayCurrency={getPlannedRollup(cat)}
         sparklineData={dailyStatsMap.get(cat.id)?.days}
+        trend={trendsMap.get(cat.id)}
         key={cat.id}
         onCategoryClick={handleCategoryClick}
         onDelete={handleDelete}

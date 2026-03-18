@@ -1,4 +1,11 @@
-export { useListBudgets, useBudget, useBudgetAnalytics, useCategoryDailyStats, useHistoryAverages } from './queries';
+export {
+  useListBudgets,
+  useBudget,
+  useBudgetAnalytics,
+  useBudgetInsights,
+  useCategoryDailyStats,
+  useHistoryAverages,
+} from './queries';
 export {
   useCreateBudget,
   useDeleteBudget,
@@ -14,10 +21,15 @@ export type {
   BudgetAnalyticsItem,
   BudgetCurrencyValues,
   BudgetHistoryAveragesResponse,
+  BudgetInsightsResponse,
   CategoryDailyStatsItem,
   CategoryDayStats,
   CategoryDailyStatsResponse,
+  CategoryTrendItem,
   CreateBudgetDTO,
+  OutlierItem,
+  SeasonalItem,
+  TrendDirection,
   UpdateBudgetDTO,
   UpsertBudgetLineDTO,
 } from './types';

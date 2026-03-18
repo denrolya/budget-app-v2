@@ -6,13 +6,15 @@ import { cn } from '@/lib/utils';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { useBaseCurrency } from '@/features/auth';
 import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
-import { useBudget, useBudgetAnalytics, useListBudgets } from '@/features/budget/api';
+import { useBudget, useBudgetAnalytics, useBudgetInsights, useListBudgets } from '@/features/budget/api';
 import type { BudgetAnalyticsItem, BudgetDTO } from '@/features/budget/api/types';
 import type { DisplayCurrency } from '@/features/budget/components/BudgetDisplayCurrency';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import { sortCategoryTree } from '@/hooks/financeData';
 import type { ConvertedValues } from '@/features/transactions';
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
+
+import MobileBudgetInsights from '../components/MobileBudgetInsights';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -417,6 +419,7 @@ const MobileBudgetPage: React.FC = () => {
 
   const { data: budget, isLoading: budgetLoading } = useBudget(activeBudgetId);
   const { data: analyticsData } = useBudgetAnalytics(activeBudgetId);
+  const { data: insightsData } = useBudgetInsights(activeBudgetId);
   const analytics = analyticsData?.data ?? [];
 
   const stats = useStats(budget, analytics, displayCurrency, rates);
@@ -547,6 +550,15 @@ const MobileBudgetPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Insights */}
+        {insightsData && (
+          <MobileBudgetInsights
+            budgetStartDate={budget.startDate}
+            displayCurrency={displayCurrency}
+            insights={insightsData}
+          />
+        )}
 
         {/* Expense / Income tab selector */}
         <div className="flex border-b border-border">

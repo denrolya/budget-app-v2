@@ -5,11 +5,12 @@ import type {
   BudgetAnalyticsResponse,
   BudgetDTO,
   BudgetHistoryAveragesResponse,
+  BudgetInsightsResponse,
+  BudgetLineDTO,
   CategoryDailyStatsResponse,
   CreateBudgetDTO,
   UpdateBudgetDTO,
   UpsertBudgetLineDTO,
-  BudgetLineDTO,
 } from './types';
 
 const BUDGET_API = '/api/budgets'; // API Platform — CRUD
@@ -67,6 +68,11 @@ export const budgetService = {
     const { data } = await api.get<BudgetHistoryAveragesResponse>(`${BUDGET_V2}/${budgetId}/history-averages`, {
       params: { months },
     });
+    return data;
+  },
+
+  async insights(budgetId: number): Promise<BudgetInsightsResponse> {
+    const { data } = await api.get<BudgetInsightsResponse>(`${BUDGET_V2}/${budgetId}/insights`);
     return data;
   },
 };

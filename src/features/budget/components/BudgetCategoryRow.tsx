@@ -1,4 +1,4 @@
-import { ChevronRight, Check, X, Trash2, StickyNote } from 'lucide-react';
+import { ChevronRight, Check, X, Trash2, StickyNote, TrendingUp, TrendingDown } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { type Category } from '@/features/categories';
 
-import type { BudgetLineDTO, CategoryDayStats } from '../api/types';
+import type { BudgetLineDTO, CategoryDayStats, CategoryTrendItem } from '../api/types';
 
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 import { DISPLAY_CURRENCIES } from './BudgetDisplayCurrency';
@@ -32,6 +32,7 @@ interface Props {
   onCategoryClick?: (categoryId: number, categoryName: string) => void;
   onDelete?: (lineId: number) => void;
   sparklineData?: CategoryDayStats[];
+  trend?: CategoryTrendItem;
 }
 
 const fmtAmt = (n: number, currency: string) => {
@@ -158,6 +159,7 @@ const BudgetCategoryRow: React.FC<Props> = ({
   onCategoryClick,
   onDelete,
   sparklineData,
+  trend,
 }) => {
   const [editing, setEditing] = useState(false);
   const [editAmount, setEditAmount] = useState('');
@@ -324,14 +326,38 @@ const BudgetCategoryRow: React.FC<Props> = ({
         )}
       </td>
 
-      {/* Actual + sparkline */}
+      {/* Actual + sparkline + trend */}
       <td className="py-1.5 px-2 text-right tabular-nums">
         {actualValue > 0 ? (
           <div className="flex flex-col items-end gap-0.5">
             <span>{fmtAmt(actualValue, displayCurrency)}</span>
-            {sparklineData && sparklineData.length >= 2 && (
-              <Sparkline currency={displayCurrency} data={sparklineData} />
-            )}
+            <div className="flex items-center gap-1.5">
+              {sparklineData && sparklineData.length >= 2 && (
+                <Sparkline currency={displayCurrency} data={sparklineData} />
+              )}
+              {trend && trend.direction !== 'stable' && (
+                <span
+                  title={`${trend.direction === 'up' ? 'Trending up' : 'Trending down'} ${Math.abs(trend.changePercent)}% over 6 months`}
+                  className={cn(
+                    'inline-flex items-center gap-0.5 text-2xs font-medium',
+                    isExpenseSection
+                      ? trend.direction === 'up'
+                        ? 'text-destructive'
+                        : 'text-success'
+                      : trend.direction === 'up'
+                        ? 'text-success'
+                        : 'text-destructive',
+                  )}
+                >
+                  {trend.direction === 'up' ? (
+                    <TrendingUp className="h-2.5 w-2.5" />
+                  ) : (
+                    <TrendingDown className="h-2.5 w-2.5" />
+                  )}
+                  {Math.abs(trend.changePercent)}%
+                </span>
+              )}
+            </div>
           </div>
         ) : (
           <span className="text-muted-foreground/40">—</span>

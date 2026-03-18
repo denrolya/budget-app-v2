@@ -19,7 +19,7 @@ import type { ConvertedValues } from '@/features/transactions';
 import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 
 import { useBatchCreateBudgetLines, useHistoryAverages } from '../api';
-import type { BudgetDTO } from '../api/types';
+import type { BudgetDTO, SeasonalItem } from '../api/types';
 
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
@@ -28,6 +28,7 @@ interface Props {
   displayCurrency: DisplayCurrency;
   rates: ConvertedValues | null;
   autoOpen?: boolean;
+  seasonal?: SeasonalItem[];
 }
 
 // Monthly budgets: 6 months of history. Yearly/custom: 12 months for a fuller picture.
@@ -56,7 +57,7 @@ const getCumulative = (cat: Category, rawMonthly: Map<number, number>): number =
   return sum;
 };
 
-const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency, rates, autoOpen }) => {
+const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency, rates, autoOpen, seasonal }) => {
   const [open, setOpen] = useState(autoOpen ?? false);
   const HISTORY_MONTHS = getHistoryMonths(budget.periodType);
 
@@ -65,6 +66,14 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
   const { data: catData } = useCategoryList();
 
   const categoryMap = useMemo(() => new Map((catData?.list ?? []).map((c) => [c.id, c])), [catData]);
+
+  const seasonalMap = useMemo(() => {
+    const map = new Map<number, SeasonalItem>();
+    (seasonal ?? []).forEach((item) => map.set(item.categoryId, item));
+    return map;
+  }, [seasonal]);
+
+  const budgetMonth = moment(budget.startDate).format('MMM');
 
   // Per-category recency-weighted monthly prediction in displayCurrency.
   // Backend returns predictedValues: the weighted monthly estimate per currency.
@@ -194,6 +203,18 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
       );
     };
 
+    const SeasonalBadge = ({ categoryId }: { categoryId: number }) => {
+      const item = seasonalMap.get(categoryId);
+      if (!item) return null;
+      const isHigh = item.seasonalFactor > 1.0;
+      const cls = isHigh ? 'text-warning' : 'text-success';
+      return (
+        <span title={`Historical seasonal factor for ${budgetMonth}`} className={`text-2xs font-medium shrink-0 ml-1 ${cls}`}>
+          {budgetMonth}: {item.seasonalFactor}x
+        </span>
+      );
+    };
+
     return groups.map(({ root, items }) => {
       const rootItem = items.find((i) => i.cat.id === root.id);
       const childItems = items.filter((i) => i.cat.id !== root.id);
@@ -210,6 +231,7 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
               </span>
               {rootItem && (
                 <>
+                  <SeasonalBadge categoryId={root.id} />
                   <FreqBadge activeMonths={rootItem.activeMonths} />
                   <span className={`font-semibold tabular-nums shrink-0 ml-1 text-sm ${amtCls}`}>
                     {fmtAmt(rootItem.suggested, displayCurrency)}
@@ -222,6 +244,7 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
             rootItem && (
               <div className="flex items-center py-1 gap-1">
                 <span className="text-sm font-medium text-foreground truncate flex-1 min-w-0">{root.name}</span>
+                <SeasonalBadge categoryId={root.id} />
                 <FreqBadge activeMonths={rootItem.activeMonths} />
                 <span className={`font-semibold tabular-nums shrink-0 ml-1 text-sm ${amtCls}`}>
                   {fmtAmt(rootItem.suggested, displayCurrency)}
@@ -234,6 +257,7 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({ budget, displayCurrency,
           {childItems.map(({ cat, suggested, activeMonths }) => (
             <div className="flex items-center py-0.5 pl-3 gap-1" key={cat.id}>
               <span className="text-sm truncate text-muted-foreground flex-1 min-w-0">{cat.name}</span>
+              <SeasonalBadge categoryId={cat.id} />
               <FreqBadge activeMonths={activeMonths} />
               <span className={`font-medium tabular-nums shrink-0 ml-1 text-sm ${amtCls}`}>
                 {fmtAmt(suggested, displayCurrency)}
