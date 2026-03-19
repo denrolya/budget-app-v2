@@ -2,13 +2,12 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { queryKeys as accountsQueryKeys, useList as useAccountsQuery } from '@/features/accounts';
 import { queryKeys as categoriesQueryKeys, useList as useCategoriesQuery } from '@/features/categories';
-import { queryKeys as debtsQueryKeys, useList as useDebtsQuery } from '@/features/debts';
 import { exchangeRatesQueryKey, useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
 
 export type InitStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export type InitEntry = {
-  key: 'rates' | 'accounts' | 'categories' | 'debts';
+  key: 'rates' | 'accounts' | 'categories';
   label: string;
   endpoint: string;
   status: InitStatus;
@@ -31,7 +30,6 @@ export const useRequiredData = () => {
   const rates = useExchangeRatesQuery();
   const accounts = useAccountsQuery();
   const categories = useCategoriesQuery();
-  const debts = useDebtsQuery();
 
   const categoriesDetail = (() => {
     if (!categories.isSuccess) return null;
@@ -65,24 +63,15 @@ export const useRequiredData = () => {
       detail: categoriesDetail,
       error: categories.error,
     },
-    {
-      key: 'debts',
-      label: 'Debts',
-      endpoint: '/api/debts',
-      status: resolveStatus(debts),
-      detail: debts.data ? `${debts.data.length} loaded` : null,
-      error: debts.error,
-    },
   ];
 
-  const isLoading = rates.isLoading || accounts.isPending || categories.isLoading || debts.isPending;
-  const hasError = rates.isError || accounts.isError || categories.isError || debts.isError;
+  const isLoading = rates.isLoading || accounts.isPending || categories.isLoading;
+  const hasError = rates.isError || accounts.isError || categories.isError;
 
   const retry = (key?: InitEntry['key']) => {
     if (!key || key === 'rates') void qc.invalidateQueries({ queryKey: exchangeRatesQueryKey });
     if (!key || key === 'accounts') void qc.invalidateQueries({ queryKey: accountsQueryKeys.all });
     if (!key || key === 'categories') void qc.invalidateQueries({ queryKey: categoriesQueryKeys.all });
-    if (!key || key === 'debts') void qc.invalidateQueries({ queryKey: debtsQueryKeys.all });
   };
 
   return { entries, isLoading, hasError, retry };

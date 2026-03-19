@@ -3,16 +3,59 @@ import React from 'react';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useBaseCurrency } from '@/features/auth';
-import { useTotalBalance, useTotalDebt } from '@/hooks/financeData';
+import { useIsDebtsLoading, useTotalBalance, useTotalDebt } from '@/hooks/financeData';
 
 export const TotalBalanceCard: React.FC = () => {
   const baseCurrency = useBaseCurrency();
   const totalDebt = useTotalDebt();
   const totalBalance = useTotalBalance();
+  const isDebtsLoading = useIsDebtsLoading();
 
   const netWorth = totalBalance + totalDebt;
+
+  const body = isDebtsLoading ? (
+    <div className="space-y-1.5">
+      <Skeleton className="h-7 w-32" />
+      <Skeleton className="h-4 w-24" />
+    </div>
+  ) : (
+    <>
+      <p aria-label={`Net worth: ${baseCurrency} ${netWorth}`} className="text-2xl font-bold">
+        <MoneyValue amount={netWorth} useColors={false} />
+      </p>
+      <div className="flex items-center justify-between text-sm">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center cursor-help">
+              <PiggyBank className="h-3 w-3 mr-1 text-muted-foreground" />
+              <span aria-label={`Total balance: ${baseCurrency} ${totalBalance}`}>
+                <MoneyValue amount={totalBalance} useColors={false} className="font-medium text-xs" />
+              </span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Total balance</p>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center cursor-help">
+              <Handshake className="h-3 w-3 mr-1 text-muted-foreground" />
+              <span aria-label={`Total debt: ${baseCurrency} ${totalDebt}`}>
+                <MoneyValue amount={totalDebt} useColors={false} className="font-medium text-xs" />
+              </span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Total debt</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </>
+  );
 
   return (
     <Card className="w-[300px] h-[140px] overflow-hidden transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 relative flex-none snap-center">
@@ -31,39 +74,7 @@ export const TotalBalanceCard: React.FC = () => {
           </div>
         </div>
         <div className="space-y-1">
-          <div className="flex-grow flex flex-col justify-center">
-            <p aria-label={`Net worth: ${baseCurrency} ${netWorth}`} className="text-2xl font-bold">
-              <MoneyValue amount={netWorth} useColors={false} />
-            </p>
-            <div className="flex items-center justify-between text-sm">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center cursor-help">
-                    <PiggyBank className="h-3 w-3 mr-1 text-muted-foreground" />
-                    <span aria-label={`Total balance: ${baseCurrency} ${totalBalance}`}>
-                      <MoneyValue amount={totalBalance} useColors={false} className="font-medium text-xs" />
-                    </span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Total balance</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center cursor-help">
-                    <Handshake className="h-3 w-3 mr-1 text-muted-foreground" />
-                    <span aria-label={`Total debt: ${baseCurrency} ${totalDebt}`}>
-                      <MoneyValue amount={totalDebt} useColors={false} className="font-medium text-xs" />
-                    </span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Total debt</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </div>
+          <div className="flex-grow flex flex-col justify-center">{body}</div>
         </div>
       </CardContent>
     </Card>

@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { type KpiStatTile, type KpiTileConfig, kpiConfig } from '@/constants/dashboard-config';
-import { useTotalBalance, useTotalDebt } from '@/hooks/financeData';
+import { useIsDebtsLoading, useTotalBalance, useTotalDebt } from '@/hooks/financeData';
 import { useValueByPeriod } from '@/hooks/statistics/useValueByPeriodStatistics';
 import { cn } from '@/lib/utils';
 import { type StatisticsConfig } from '@/types/statistics';
@@ -59,10 +59,11 @@ const PctChange: React.FC<{ pct: number; positiveIsGood: boolean }> = ({ pct, po
 const NetWorthTile: React.FC = () => {
   const totalBalance = useTotalBalance();
   const totalDebt = useTotalDebt();
+  const isDebtsLoading = useIsDebtsLoading();
   const netWorth = totalBalance + totalDebt;
 
   return (
-    <KpiTile isLoading={false} label="Net Worth">
+    <KpiTile isLoading={isDebtsLoading} label="Net Worth">
       <p className="text-2xl font-bold tracking-tight">
         <MoneyValue amount={netWorth} useColors={false} />
       </p>

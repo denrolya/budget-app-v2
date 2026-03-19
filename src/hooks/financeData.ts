@@ -124,6 +124,11 @@ export const useDebts = (): Debt[] => {
   return q.data ?? [];
 };
 
+export const useIsDebtsLoading = (): boolean => {
+  const q = useDebtsQuery();
+  return q.isLoading;
+};
+
 export const useTotalDebt = (): number => {
   const debts = useDebts();
   const baseCurrency = useBaseCurrency();
