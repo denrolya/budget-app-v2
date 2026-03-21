@@ -1,11 +1,10 @@
-import { Archive, ArchiveRestore, Check, Edit, Plus, X } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Archive, ArchiveRestore, Edit, FileText, Plus } from 'lucide-react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { confirm } from '@/lib/confirmation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FormType, useForm } from '@/contexts/Form';
 
@@ -14,91 +13,6 @@ import BankSheet from '../components/BankSheet';
 import AccountDetails from '../components/Details';
 import type Account from '../models/Account';
 import { Type as AccountType, type UpdateAccountDTO } from '../types';
-
-// ─── Inline name editor ──────────────────────────────────────────────────────
-
-interface InlineNameProps {
-  account: Account;
-  onSave: (name: string) => Promise<void>;
-}
-
-const InlineName: React.FC<InlineNameProps> = ({ account, onSave }) => {
-  const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(account.name);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!editing) setValue(account.name);
-  }, [account.name, editing]);
-
-  useEffect(() => {
-    if (editing) inputRef.current?.select();
-  }, [editing]);
-
-  const handleEdit = () => {
-    setValue(account.name);
-    setEditing(true);
-  };
-
-  const handleSave = async () => {
-    const trimmed = value.trim();
-    if (trimmed && trimmed !== account.name) {
-      await onSave(trimmed);
-    }
-    setEditing(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') void handleSave();
-    if (e.key === 'Escape') {
-      setValue(account.name);
-      setEditing(false);
-    }
-  };
-
-  if (editing) {
-    return (
-      <div className="flex-1 flex items-center gap-1 min-w-0">
-        <Input
-          value={value}
-          className="h-7 text-sm font-semibold px-1.5 py-0 flex-1 min-w-0"
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          ref={inputRef}
-        />
-        <Button aria-label="Save name" size="icon" variant="ghost" className="h-6 w-6" onClick={handleSave}>
-          <Check className="h-3.5 w-3.5" />
-        </Button>
-        <Button
-          aria-label="Cancel edit"
-          size="icon"
-          variant="ghost"
-          className="h-6 w-6"
-          onClick={() => {
-            setValue(account.name);
-            setEditing(false);
-          }}
-        >
-          <X className="h-3.5 w-3.5" />
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      className="flex-1 text-sm font-semibold truncate text-left hover:text-foreground/80 transition-colors group flex items-center gap-1 min-w-0"
-      onClick={handleEdit}
-    >
-      <span className="truncate">{account.name}</span>
-      <Edit
-        aria-hidden="true"
-        className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 shrink-0 transition-opacity"
-      />
-    </button>
-  );
-};
 
 // ─── Route component ──────────────────────────────────────────────────────────
 
@@ -138,17 +52,13 @@ const AccountDetailPage: React.FC = () => {
     await archive({ id: account.id, archivedAt: account.isArchived() ? null : new Date().toISOString() });
   }, [account, archive]);
 
-  const handleNameSave = useCallback(
-    async (name: string) => {
-      if (!account) return;
-      await update({ id: account.id, diff: { name } });
-    },
-    [account, update],
-  );
+  const reviewDraftsRef = useRef<(() => void) | null>(null);
 
   if (!accountId) return <Navigate replace to="/accounts" />;
   if (!data) return null;
   if (!account) return <Navigate replace to="/accounts" />;
+
+  const hasDrafts = account.type === AccountType.Bank && account.draftCount > 0;
 
   const ArchiveIcon = account.isArchived() ? ArchiveRestore : Archive;
   const archiveLabel = account.isArchived() ? 'Unarchive account' : 'Archive account';
@@ -156,10 +66,19 @@ const AccountDetailPage: React.FC = () => {
   return (
     <div className="h-full flex flex-col min-h-0">
       <PageWithSidebar.Header
-        title={<InlineName account={account} onSave={handleNameSave} />}
         className="px-4 py-2"
+        title={account.name}
         onBack={() => navigate('/accounts')}
       >
+        {hasDrafts && (
+          <div className="flex items-center gap-1.5 text-2xs text-warning mr-1">
+            <FileText className="h-3 w-3 shrink-0" />
+            <span><span className="font-medium">{account.draftCount}</span> pending</span>
+            <button className="underline underline-offset-2 hover:no-underline" type="button" onClick={() => reviewDraftsRef.current?.()}>
+              Review →
+            </button>
+          </div>
+        )}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -210,7 +129,12 @@ const AccountDetailPage: React.FC = () => {
       </PageWithSidebar.Header>
 
       <div className="flex-1 min-h-0 overflow-hidden">
-        <AccountDetails account={account} key={account.id} onAccountUpdate={onAccountUpdate} />
+        <AccountDetails
+          account={account}
+          key={account.id}
+          onAccountUpdate={onAccountUpdate}
+          onSetReviewDrafts={(fn) => { reviewDraftsRef.current = fn; }}
+        />
       </div>
     </div>
   );

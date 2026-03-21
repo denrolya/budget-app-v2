@@ -125,7 +125,11 @@ export const MoneyValue: React.FC<MoneyValueProps> = ({
 
   if (showValuesTooltip && values && Object.keys(values).length > 0) {
     displayedContent = (
-      <ConvertedValuesTooltip convertedValues={values} originalCurrency={currency || baseCurrency.code}>
+      <ConvertedValuesTooltip
+        convertedValues={values}
+        originalAmount={amount}
+        originalCurrency={currency || baseCurrency.code}
+      >
         {displayedContent}
       </ConvertedValuesTooltip>
     );

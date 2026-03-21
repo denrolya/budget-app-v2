@@ -18,7 +18,7 @@ const AccountDraftBadge: React.FC<Props> = ({ account }) => {
       <TooltipTrigger asChild>
         <span
           aria-label={`${count} pending draft transaction${count !== 1 ? 's' : ''}`}
-          className="inline-block w-2 h-2 rounded-full bg-warning shrink-0 ring-1 ring-background select-none"
+          className="inline-block w-2 h-2 rounded-full bg-warning shrink-0 ring-1 ring-background select-none cursor-help"
         />
       </TooltipTrigger>
       <TooltipContent>

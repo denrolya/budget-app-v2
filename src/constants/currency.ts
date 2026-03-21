@@ -19,6 +19,16 @@ interface Currency {
   type: 'fiat' | 'crypto';
 }
 
+/** Canonical display order for multi-currency tooltips and lists. */
+export const CURRENCY_DISPLAY_ORDER: CURRENCY_CODE[] = [
+  CURRENCY_CODE.EUR,
+  CURRENCY_CODE.USD,
+  CURRENCY_CODE.HUF,
+  CURRENCY_CODE.UAH,
+  CURRENCY_CODE.BTC,
+  CURRENCY_CODE.ETH,
+];
+
 export const CURRENCIES: Record<CURRENCY_CODE, Currency> = {
   EUR: {
     code: CURRENCY_CODE.EUR,

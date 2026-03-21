@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import ResponsiveTooltip from '@/components/ui/responsive-tooltip';
-import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
-import { formatMoney as formatMoneyValue } from '@/lib/formatMoney';
-import { cn } from '@/lib/utils';
+import { CURRENCY_DISPLAY_ORDER, type CURRENCY_CODE } from '@/constants/currency';
+import { formatMoneyWithSymbol } from '@/lib/formatMoney';
 
 interface ConvertedCurrenciesTooltipProps {
   originalCurrency: CURRENCY_CODE;
+  /** Native amount in originalCurrency — always shown first regardless of convertedValues keys. */
+  originalAmount: number;
   convertedValues: Record<string, number>;
   decimals?: number;
   children: React.ReactNode;
@@ -14,57 +15,51 @@ interface ConvertedCurrenciesTooltipProps {
 
 const ConvertedCurrenciesTooltip: React.FC<ConvertedCurrenciesTooltipProps> = ({
   originalCurrency,
+  originalAmount,
   convertedValues,
   decimals,
   children,
 }) => {
-  const formatMoney = (value: number, currency: CURRENCY_CODE) => {
-    const symbol = CURRENCIES[currency]?.symbol ?? currency;
-    return `${symbol} ${formatMoneyValue(value, currency, decimals)}`;
-  };
-
-  const entries = Object.entries(convertedValues);
-  const original = entries.find(([code]) => code === originalCurrency);
-  const conversions = entries.filter(([code]) => code !== originalCurrency);
+  const conversions = useMemo(
+    () =>
+      Object.entries(convertedValues)
+        .filter(([code]) => code !== originalCurrency)
+        .sort(([a], [b]) => {
+          const ai = CURRENCY_DISPLAY_ORDER.indexOf(a as CURRENCY_CODE);
+          const bi = CURRENCY_DISPLAY_ORDER.indexOf(b as CURRENCY_CODE);
+          return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+        }),
+    [convertedValues, originalCurrency],
+  );
 
   return (
     <ResponsiveTooltip
       desktopComponent="hovercard"
       content={
-        <div className="min-w-[160px] text-xs space-y-2">
-          {original && (
-            <div className="flex items-center justify-between gap-4 border-l-2 border-primary pl-2">
-              <span className="font-mono text-[10px] tracking-widest text-muted-foreground uppercase">
-                {original[0]}
-              </span>
-              <span className="font-semibold tabular-nums text-foreground">
-                {formatMoney(original[1], original[0] as CURRENCY_CODE)}
-              </span>
-            </div>
-          )}
-          {conversions.length > 0 && (
-            <div className="space-y-1 pt-0.5">
-              {original && <div className="h-px bg-border -mx-1" />}
-              {conversions.map(([code, val]) => (
-                <div className="flex items-center justify-between gap-4" key={code}>
-                  <span
-                    className={cn(
-                      'font-mono text-[10px] tracking-widest uppercase',
-                      code === originalCurrency ? 'text-foreground' : 'text-muted-foreground',
-                    )}
-                  >
-                    {code}
-                  </span>
-                  <span className="tabular-nums text-muted-foreground">
-                    ≈ {formatMoney(val, code as CURRENCY_CODE)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+        <div className="font-mono min-w-[148px]">
+          {/* Original currency — always first, always highlighted */}
+          <div className="flex items-center justify-between gap-5">
+            <span className="text-2xs tracking-widest text-muted-foreground">{originalCurrency}</span>
+            <span className="text-xs tabular-nums font-semibold text-foreground">
+              {formatMoneyWithSymbol(originalAmount, originalCurrency, decimals)}
+            </span>
+          </div>
+
+          {conversions.length > 0 && <div className="h-px bg-border my-1.5 -mx-2.5" />}
+
+          <div className="space-y-0.5">
+            {conversions.map(([code, val]) => (
+              <div className="flex items-center justify-between gap-5" key={code}>
+                <span className="text-2xs tracking-widest text-muted-foreground/60">{code}</span>
+                <span className="text-xs tabular-nums text-muted-foreground">
+                  ≈ {formatMoneyWithSymbol(val, code as CURRENCY_CODE, decimals)}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       }
-      contentClassName="p-3 rounded-lg"
+      contentClassName="px-2.5 py-2 rounded"
       triggerClassName="cursor-help"
     >
       {children}

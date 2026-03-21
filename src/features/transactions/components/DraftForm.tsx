@@ -7,6 +7,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
+import { capitalize } from '@/lib/capitalize';
 import { MOMENT_DATETIME_DISPLAY_FORMAT } from '@/constants/datetime';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -275,7 +276,7 @@ export const DraftForm: React.FC<Props> = forwardRef<TransactionFormRef, Props>(
 
             <CommandList>
               <CommandEmpty>No results found</CommandEmpty>
-              <CommandGroup heading={step.charAt(0).toUpperCase() + step.slice(1)}>
+              <CommandGroup heading={capitalize(step)}>
                 {getCommandItems.map((item) => (
                   <CommandItem value={item.value} key={item.value} onSelect={handleSelect}>
                     {item.label}

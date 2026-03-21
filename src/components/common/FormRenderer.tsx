@@ -2,6 +2,7 @@ import { Loader2 } from 'lucide-react';
 import React, { forwardRef, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
+import { capitalize } from '@/lib/capitalize';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AccountForm } from '@/features/accounts';
 import { logger } from '@/services/DebugLogger';
@@ -113,7 +114,7 @@ export const FormRenderer: React.FC = () => {
   }
 
   const isEditMode = !!(formState.values as Record<string, unknown>)?.id;
-  const title = `${isEditMode ? 'Edit' : 'New'} ${formState.type.charAt(0).toUpperCase() + formState.type.slice(1)}`;
+  const title = `${isEditMode ? 'Edit' : 'New'} ${capitalize(formState.type)}`;
 
   const content = (
     <FormContent
@@ -127,14 +128,14 @@ export const FormRenderer: React.FC = () => {
   );
 
   const footer = (
-    <div className="flex justify-end gap-1.5">
-      <Button disabled={isLoading || !formState.isValid} size="sm" type="submit" onClick={() => handleSubmit(false)}>
+    <div className="flex justify-end gap-2">
+      <Button disabled={isLoading || !formState.isValid} size="sm" type="submit" variant="outline" onClick={() => handleSubmit(false)}>
         {isEditMode ? 'Update' : 'Create'}
       </Button>
       <Button disabled={isLoading || !formState.isValid} size="sm" type="button" onClick={() => handleSubmit(true)}>
         {isLoading ? (
           <>
-            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
             {isEditMode ? 'Updating...' : 'Creating...'}
           </>
         ) : (

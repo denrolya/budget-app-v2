@@ -3,24 +3,27 @@ import { ResponsiveLine, type SliceTooltipProps } from '@nivo/line';
 import moment from 'moment';
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useBalanceHistory } from '@/features/accounts/api';
+import type { BalanceHistoryPoint } from '@/features/accounts/api/service';
 import type Account from '@/features/accounts/models/Account';
 
-interface Props {
-  account: Account;
-}
+const EMPTY_POINTS: BalanceHistoryPoint[] = [];
 
-const PRESETS = [
+export const PRESETS = [
   { label: '1M', months: 1, interval: 'P1D' },
   { label: '3M', months: 3, interval: 'P1D' }, // daily for smooth curve
   { label: '6M', months: 6, interval: 'P2D' }, // bi-daily → ~90 pts
   { label: '1Y', months: 12, interval: 'P1W' }, // weekly → ~52 pts
 ] as const;
 
-type PresetLabel = (typeof PRESETS)[number]['label'];
+export type PresetLabel = (typeof PRESETS)[number]['label'];
 
-const CHART_HEIGHT = 120;
+interface Props {
+  account: Account;
+  preset?: PresetLabel;
+}
+
+const CHART_HEIGHT = 140;
 
 const GRADIENT_ID = 'balanceGradient';
 
@@ -95,6 +98,33 @@ const buildCandleLayer = (candle: CandleState | null, lineColor: string) =>
     );
   };
 
+// ─── Inline x-axis layer (renders tick labels inside the chart, no bottom margin) ─
+
+const buildInlineAxisLayer = (ticks: string[], format: (v: string) => string) =>
+  function InlineAxisLayer({ xScale, innerHeight }: NivoLayerProps) {
+    return (
+      <g>
+        {ticks.map((v) => {
+          const x = xScale(v);
+          if (x == null) return null;
+          return (
+            <text
+              key={v}
+              dominantBaseline="auto"
+              fill="hsl(var(--muted-foreground))"
+              fontSize={11}
+              textAnchor="middle"
+              x={x}
+              y={innerHeight - 4}
+            >
+              {format(v)}
+            </text>
+          );
+        })}
+      </g>
+    );
+  };
+
 // ─── Tooltip ──────────────────────────────────────────────────────────────────
 
 interface PointTooltipProps extends SliceTooltipProps {
@@ -137,8 +167,7 @@ const PointTooltip: React.FC<PointTooltipProps> = ({ slice, onCandleChange, curr
 
 // ─── Chart ────────────────────────────────────────────────────────────────────
 
-const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
-  const [preset, setPreset] = useState<PresetLabel>('3M');
+const BalanceHistoryChart: React.FC<Props> = ({ account, preset = '3M' }) => {
   const [candle, setCandle] = useState<CandleState | null>(null);
   const selected = PRESETS.find((p) => p.label === preset)!;
 
@@ -152,7 +181,7 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
 
   const { data, isLoading, isError } = useBalanceHistory(account.id, after, before, selected.interval);
 
-  const rawPoints = useMemo(() => data?.data ?? [], [data?.data]);
+  const rawPoints = data?.data ?? EMPTY_POINTS;
   const lastBalance = rawPoints[rawPoints.length - 1]?.balance ?? 0;
   const lineColor = `hsl(var(${lastBalance >= 0 ? '--success' : '--destructive'}))`;
 
@@ -169,9 +198,10 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
     [rawPoints],
   );
 
-  // Show ~6 evenly-spaced tick labels regardless of data density
-  const tickValues = useMemo(() => {
-    if (rawPoints.length <= 14) return undefined;
+  // ~6 evenly-spaced tick labels, always an array (used by custom inline axis layer)
+  const tickValues = useMemo((): string[] => {
+    if (rawPoints.length === 0) return [];
+    if (rawPoints.length <= 6) return rawPoints.map((p) => moment.unix(p.timestamp).format('YYYY-MM-DD'));
     const step = Math.ceil(rawPoints.length / 6);
     return rawPoints
       .filter((_, i) => i === 0 || i === rawPoints.length - 1 || i % step === 0)
@@ -210,6 +240,9 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
   // Custom candle layer — rebuilt only when hover position or color changes
   const CandleLayer = useMemo(() => buildCandleLayer(candle, lineColor), [candle, lineColor]);
 
+  // Custom inline axis — rebuilt when ticks or format changes
+  const InlineAxisLayer = useMemo(() => buildInlineAxisLayer(tickValues, formatXTick), [tickValues, formatXTick]);
+
   const sliceTooltip = useCallback(
     (props: SliceTooltipProps) => (
       <PointTooltip
@@ -226,17 +259,6 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
 
   return (
     <div className="relative" onMouseLeave={() => setCandle(null)}>
-      {/* Preset toggle — pinned top-right inside the chart area */}
-      <div className="absolute top-2 right-3 z-10">
-        <ToggleGroup size="sm" type="single" value={preset} onValueChange={(v) => v && setPreset(v as PresetLabel)}>
-          {PRESETS.map((p) => (
-            <ToggleGroupItem value={p.label} className="text-xs px-2" key={p.label}>
-              {p.label}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </div>
-
       {isError && (
         <div style={{ height: CHART_HEIGHT }} className="flex items-center justify-center">
           <p className="text-sm text-destructive">Failed to load balance history.</p>
@@ -275,23 +297,19 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
             fill={[{ match: '*', id: GRADIENT_ID }]}
             isInteractive={true}
             lineWidth={2}
-            margin={{ top: 16, right: 0, bottom: 20, left: 0 }}
+            margin={{ top: 8, right: 0, bottom: 0, left: 0 }}
             sliceTooltip={sliceTooltip}
             theme={nivoTheme}
             xScale={{ type: 'point' }}
             yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false }}
-            axisBottom={{
-              tickValues,
-              format: formatXTick,
-              tickSize: 0,
-              tickPadding: 5,
-            }}
+            axisBottom={null}
             layers={[
               'grid',
               'axes',
               'areas',
               'lines',
               CandleLayer, // dot + wick indicator (replaces built-in 'crosshair')
+              InlineAxisLayer, // date labels rendered inside the chart area
               'slices',
               'mesh',
             ]}
@@ -302,4 +320,7 @@ const BalanceHistoryChart: React.FC<Props> = ({ account }) => {
   );
 };
 
-export default React.memo(BalanceHistoryChart, (prev, next) => prev.account.id === next.account.id);
+export default React.memo(
+  BalanceHistoryChart,
+  (prev, next) => prev.account.id === next.account.id && (prev.preset ?? '3M') === (next.preset ?? '3M'),
+);

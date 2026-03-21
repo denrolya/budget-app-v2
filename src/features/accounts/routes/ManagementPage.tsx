@@ -11,6 +11,7 @@ import { useActiveAccounts } from '@/hooks/financeData';
 import { resolveHslOrMuted } from '@/lib/resolveCssVar';
 import { cn } from '@/lib/utils';
 
+import AccountDraftBadge from '../components/AccountDraftBadge';
 import AccountMarker from '../components/AccountMarker';
 import { ACCOUNT_TYPES_ORDER } from '../constants';
 import type Account from '../models/Account';
@@ -136,6 +137,7 @@ const AccountsSidebar: React.FC<{ selectedId: string | null }> = ({ selectedId }
                         <span className="flex items-center gap-1.5 flex-1 min-w-0 overflow-hidden">
                           <AccountMarker account={acc} size="sm" />
                           <span className="truncate">{acc.name}</span>
+                          <AccountDraftBadge account={acc} />
                         </span>
                         <MoneyValue
                           amount={acc.convertedValues?.[baseCurrency] ?? acc.balance}

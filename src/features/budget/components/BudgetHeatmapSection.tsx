@@ -1,6 +1,7 @@
 import moment, { type Moment } from 'moment';
 import React, { useMemo, useState } from 'react';
 
+import { capitalize } from '@/lib/capitalize';
 import { cn } from '@/lib/utils';
 import { HeatmapPanel } from '@/features/transactions';
 import type { ConvertedValues } from '@/features/transactions';
@@ -91,7 +92,7 @@ const BudgetHeatmapSection: React.FC<Props> = ({ budget, analytics, displayCurre
             key={mode}
             onClick={() => setHeatmapMode(mode)}
           >
-            {mode.charAt(0).toUpperCase() + mode.slice(1)}
+            {capitalize(mode)}
           </button>
         ))}
       </div>
