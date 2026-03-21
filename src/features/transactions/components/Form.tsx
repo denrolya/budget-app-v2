@@ -292,7 +292,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
             control={form.control}
             name="amount"
             render={({ field }) => (
-              <FormItem className="flex-1 min-w-0">
+              <FormItem className="flex-[1.5] min-w-0">
                 <FormLabel className="sr-only">Amount</FormLabel>
                 <FormControl>
                   <Input

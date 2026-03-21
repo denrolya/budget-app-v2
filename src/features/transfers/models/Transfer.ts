@@ -40,7 +40,7 @@ export class Transfer {
   }
 
   totalFees(): number {
-    return this.feeExpenses.reduce((sum, tx) => sum + tx.amount, 0);
+    return this.feeExpenses.reduce((sum, transaction) => sum + transaction.amount, 0);
   }
 
   totalTransferAmount(): number {

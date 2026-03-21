@@ -92,10 +92,9 @@ export const useInlineEdit = ({ isUpdating, onSave }: InlineEditConfig) => {
 
   const keyHandler = useMemo(
     () => ({
-      onKeyDown: (e: React.KeyboardEvent, tx: Transaction) => {
+      onKeyDown: (e: React.KeyboardEvent, transaction: Transaction) => {
         if (e.key === 'Escape') cancelEdit();
-        // pick ONE behavior and standardize; I recommend Ctrl/⌘+Enter to save
-        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) void save(tx);
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) void save(transaction);
       },
     }),
     [cancelEdit, save],

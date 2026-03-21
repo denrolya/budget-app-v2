@@ -48,15 +48,15 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
 
   const stats = useMemo(() => {
     // All fees converted to sender currency for a single loss figure
-    const totalFeesInSenderCurr = transfer.feeExpenses.reduce((sum, tx) => {
-      const converted = tx.convertedValues?.[senderCurrency];
-      return sum + (converted ?? tx.amount);
+    const totalFeesInSenderCurr = transfer.feeExpenses.reduce((sum, fee) => {
+      const converted = fee.convertedValues?.[senderCurrency];
+      return sum + (converted ?? fee.amount);
     }, 0);
 
     // Recipient-side fees in recipient currency
     const recipientFees = transfer.feeExpenses
-      .filter((tx) => tx.account.id === transfer.toIncome.account.id)
-      .reduce((sum, tx) => sum + tx.amount, 0);
+      .filter((fee) => fee.account.id === transfer.toIncome.account.id)
+      .reduce((sum, fee) => sum + fee.amount, 0);
 
     const feePct = transfer.amount > 0 ? (totalFeesInSenderCurr / transfer.amount) * 100 : 0;
     const totalCost = transfer.amount + totalFeesInSenderCurr;
@@ -187,7 +187,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
 
           <div className="space-y-1">
             {transfer.feeExpenses.map((feeTx) => (
-              <TransactionListItem flat revertValue key={feeTx.id} transaction={feeTx} />
+              <TransactionListItem flat revertValue transaction={feeTx} key={feeTx.id} />
             ))}
           </div>
         </>

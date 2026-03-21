@@ -94,7 +94,7 @@ const FeeDot = () => (
 );
 
 const AccountsCell: React.FC<{ transfer: Transfer }> = ({ transfer }) => {
-  const feeAccountIds = new Set(transfer.feeExpenses.map((tx) => tx.account.id));
+  const feeAccountIds = new Set(transfer.feeExpenses.map((fee) => fee.account.id));
   const fromHasFee = feeAccountIds.has(transfer.fromExpense.account.id);
   const toHasFee = feeAccountIds.has(transfer.toIncome.account.id);
 

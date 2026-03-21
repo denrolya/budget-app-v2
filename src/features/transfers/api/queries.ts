@@ -95,7 +95,7 @@ export const useList = (options: UseTransfersListOptions = {}): UseTransfersList
           (item) =>
             new Transfer({
               ...item,
-              transactions: item.transactions?.map((tx) => createTransaction(tx)) ?? [],
+              transactions: item.transactions?.map((raw) => createTransaction(raw)) ?? [],
             }),
         ) ?? [];
 

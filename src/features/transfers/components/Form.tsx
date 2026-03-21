@@ -102,9 +102,9 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
 
   const initialFees =
     initialTransfer && initialTransfer.feeExpenses.length > 0
-      ? initialTransfer.feeExpenses.map((tx) => ({
-          amount: Math.abs(tx.amount),
-          account: tx.account.id,
+      ? initialTransfer.feeExpenses.map((fee) => ({
+          amount: Math.abs(fee.amount),
+          account: fee.account.id,
           included: false,
         }))
       : [{ ...EMPTY_FEE_ROW }];

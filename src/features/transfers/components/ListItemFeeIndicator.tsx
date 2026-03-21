@@ -19,19 +19,19 @@ export const FeeIndicator: React.FC<FeeIndicatorProps> = ({
   if (feeExpenses.length === 0) return null;
 
   // Convert all fees to sender currency via convertedValues
-  const totalFeesConverted = feeExpenses.reduce((sum, tx) => {
-    const converted = tx.convertedValues?.[senderCurrency];
-    return sum + (converted ?? tx.amount);
+  const totalFeesConverted = feeExpenses.reduce((sum, fee) => {
+    const converted = fee.convertedValues?.[senderCurrency];
+    return sum + (converted ?? fee.amount);
   }, 0);
 
   const totalPct = transferAmount > 0 ? ((totalFeesConverted / transferAmount) * 100).toFixed(2) : '0.00';
 
   const tooltipContent = (
     <div className="text-xs space-y-1">
-      {feeExpenses.map((tx) => (
-        <div className="flex items-center gap-1.5" key={tx.id}>
-          <MoneyValue amount={tx.amount} currency={tx.account.currency as CURRENCY_CODE} useColors={false} />
-          <span className="text-muted-foreground">({tx.account.name})</span>
+      {feeExpenses.map((fee) => (
+        <div className="flex items-center gap-1.5" key={fee.id}>
+          <MoneyValue amount={fee.amount} currency={fee.account.currency as CURRENCY_CODE} useColors={false} />
+          <span className="text-muted-foreground">({fee.account.name})</span>
         </div>
       ))}
       <div className="border-t pt-1 text-muted-foreground">

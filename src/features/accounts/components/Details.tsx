@@ -14,7 +14,7 @@ import AccountDraftBadge from '@/features/accounts/components/AccountDraftBadge'
 import AccountMarker from '@/features/accounts/components/AccountMarker';
 import BalanceHistoryChart, { PRESETS, type PresetLabel } from '@/features/accounts/components/BalanceHistoryChart';
 import type Account from '@/features/accounts/models/Account';
-import { Type as AccountType, type UpdateAccountDTO } from '@/features/accounts/types';
+import { type UpdateAccountDTO } from '@/features/accounts/types';
 import { useLedger } from '@/features/ledger';
 import LedgerActivityCard from '@/features/ledger/components/LedgerActivityCard';
 import { HeatmapPanel } from '@/features/transactions';

@@ -274,22 +274,24 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
               />
               {item.pct != null && (
                 <ResponsiveTooltip
+                  desktopComponent="hovercard"
+                  contentClassName="p-2 w-auto"
                   content={
                     <span className="flex items-center gap-1 font-mono text-xs">
-                      vs <MoneyValue amount={item.prevValue} className="tabular-nums" />
+                      vs <MoneyValue amount={item.prevValue} useColors className="tabular-nums" />
                     </span>
                   }
                 >
                   <span
-                    className={cn('flex items-center text-2xs font-mono cursor-help', {
+                    className={cn('flex items-center text-2xs font-mono font-semibold cursor-help', {
                       'text-success': item.pct >= 0,
                       'text-destructive': item.pct < 0,
                     })}
                   >
                     {item.pct >= 0 ? (
-                      <ArrowUpIcon className="h-2.5 w-2.5" />
+                      <ArrowUpIcon className="h-3 w-3" />
                     ) : (
-                      <ArrowDownIcon className="h-2.5 w-2.5" />
+                      <ArrowDownIcon className="h-3 w-3" />
                     )}
                     {Math.abs(item.pct).toFixed()}%
                   </span>

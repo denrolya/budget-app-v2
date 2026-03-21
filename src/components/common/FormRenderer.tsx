@@ -148,7 +148,7 @@ export const FormRenderer: React.FC = () => {
   if (!isMobile) {
     return (
       <Dialog open={formState.isOpen} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-visible gap-0">
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-visible gap-0">
           <DialogHeader className="pb-2">
             <DialogTitle className="text-base">{title}</DialogTitle>
             <DialogDescription className="sr-only">Form: {title}</DialogDescription>

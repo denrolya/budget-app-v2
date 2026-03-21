@@ -42,10 +42,10 @@ type Props = {
   transaction: Transaction;
   compact?: boolean;
   columns: TransactionRowColumn[];
-  renderDetails: (tx: Transaction) => React.ReactNode;
-  onOpenForm: (tx: Transaction) => void;
-  onDelete: (tx: Transaction) => void;
-  onToggleDraft?: (tx: Transaction) => void;
+  renderDetails: (transaction: Transaction) => React.ReactNode;
+  onOpenForm: (transaction: Transaction) => void;
+  onDelete: (transaction: Transaction) => void;
+  onToggleDraft?: (transaction: Transaction) => void;
   inlineEdit: ReturnType<typeof useInlineEdit>;
   sheetOpen?: boolean;
   onSheetOpenChange?: (open: boolean) => void;
@@ -53,17 +53,17 @@ type Props = {
 };
 
 type CellRendererArgs = {
-  tx: Transaction;
+  transaction: Transaction;
   disabled: boolean;
   inlineEdit: ReturnType<typeof useInlineEdit>;
-  onOpenForm: (tx: Transaction) => void;
-  onDelete: (tx: Transaction) => void;
-  onToggleDraft?: (tx: Transaction) => void;
+  onOpenForm: (transaction: Transaction) => void;
+  onDelete: (transaction: Transaction) => void;
+  onToggleDraft?: (transaction: Transaction) => void;
   sheetOpen?: boolean;
   onSheetOpenChange?: (open: boolean) => void;
   titleId: string;
   descId: string;
-  renderDetails: (tx: Transaction) => React.ReactNode;
+  renderDetails: (transaction: Transaction) => React.ReactNode;
 };
 
 const cellClassName = (compact: boolean, extra?: string) =>
@@ -72,7 +72,7 @@ const cellClassName = (compact: boolean, extra?: string) =>
 // ─── Cell renderers ───────────────────────────────────────────────────────────
 
 const IdCell = ({
-  tx,
+  transaction,
   onToggleDraft: _onToggleDraft,
   sheetOpen,
   onSheetOpenChange,
@@ -81,7 +81,7 @@ const IdCell = ({
   renderDetails,
 }: Pick<
   CellRendererArgs,
-  'tx' | 'onToggleDraft' | 'sheetOpen' | 'onSheetOpenChange' | 'titleId' | 'descId' | 'renderDetails'
+  'transaction' | 'onToggleDraft' | 'sheetOpen' | 'onSheetOpenChange' | 'titleId' | 'descId' | 'renderDetails'
 >) => (
   <div className="flex items-center min-w-0 gap-2">
     <Sheet open={sheetOpen} onOpenChange={onSheetOpenChange}>
@@ -89,12 +89,12 @@ const IdCell = ({
         <button
           aria-expanded={sheetOpen}
           aria-haspopup="dialog"
-          aria-label={`Open transaction #${tx.id} details`}
+          aria-label={`Open transaction #${transaction.id} details`}
           type="button"
           className="min-w-0 w-[74px] text-left"
         >
           <code className="block min-w-0 truncate cursor-context-menu tracking-tighter antialiased select-all text-muted-foreground">
-            #{tx.id}
+            #{transaction.id}
           </code>
         </button>
       </SheetTrigger>
@@ -110,7 +110,7 @@ const IdCell = ({
           Transaction Details
         </SheetTitle>
         <SheetDescription id={descId} className="sr-only">
-          #{tx.id}
+          #{transaction.id}
         </SheetDescription>
 
         {/* Compact header strip */}
@@ -118,15 +118,15 @@ const IdCell = ({
           <span
             className={cn(
               'text-[10px] font-mono font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border',
-              tx.type === TransactionType.Income
+              transaction.type === TransactionType.Income
                 ? 'bg-success/10 text-success border-success/20'
                 : 'bg-destructive/10 text-destructive border-destructive/20',
             )}
           >
-            {tx.type}
+            {transaction.type}
           </span>
-          <code className="text-xs text-muted-foreground font-mono">#{tx.id}</code>
-          {tx.isDraft && (
+          <code className="text-xs text-muted-foreground font-mono">#{transaction.id}</code>
+          {transaction.isDraft && (
             <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border bg-warning/10 text-warning-foreground border-warning/20">
               draft
             </span>
@@ -134,13 +134,13 @@ const IdCell = ({
         </div>
 
         {/* Scrollable content */}
-        <div className="overflow-y-auto px-4 py-3">{renderDetails(tx)}</div>
+        <div className="overflow-y-auto px-4 py-3">{renderDetails(transaction)}</div>
       </SheetContent>
     </Sheet>
   </div>
 );
 
-const AccountCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
+const AccountCell = ({ transaction, disabled, inlineEdit }: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
   const rawId = (editValue as { id?: number } | null)?.id ?? (editValue as number | null);
   const accountEditValue = rawId != null ? String(rawId) : null;
@@ -151,13 +151,13 @@ const AccountCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' |
       saveOnEnter={false}
       trigger={
         <div className="min-w-0 [&_*]:min-w-0">
-          <AccountPill account={tx.account} size="sm" variant="inline" className="min-w-0" />
+          <AccountPill account={transaction.account} size="sm" variant="inline" className="min-w-0" />
         </div>
       }
       contentClassName="w-56"
       onCancel={cancelEdit}
-      onOpen={() => startEdit(tx, 'account')}
-      onSave={() => void save(tx)}
+      onOpen={() => startEdit(transaction, 'account')}
+      onSave={() => void save(transaction)}
     >
       <AccountTypeahead
         autoFocus
@@ -169,50 +169,50 @@ const AccountCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' |
   );
 };
 
-const AmountCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
+const AmountCell = ({ transaction, disabled, inlineEdit }: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
-  const isCompensated = tx.isExpense() && (tx.compensations?.length ?? 0) > 0;
+  const isCompensated = transaction.isExpense() && (transaction.compensations?.length ?? 0) > 0;
   const valueClassName = cn('font-semibold tracking-tight', { 'text-warning': isCompensated });
 
   return (
     <div className="relative">
       <CellPopover
         disabled={disabled}
-        trigger={<TransactionValue revert transaction={tx} className={valueClassName} />}
+        trigger={<TransactionValue revert transaction={transaction} className={valueClassName} />}
         contentClassName="w-40"
         onCancel={cancelEdit}
-        onOpen={() => startEdit(tx, 'amount')}
-        onSave={() => void save(tx)}
+        onOpen={() => startEdit(transaction, 'amount')}
+        onSave={() => void save(transaction)}
       >
         <Input autoFocus type="number" value={String(editValue ?? '')} onChange={(e) => setEditValue(e.target.value)} />
       </CellPopover>
-      {isCompensated && <CompensationPip transaction={tx} />}
+      {isCompensated && <CompensationPip transaction={transaction} />}
     </div>
   );
 };
 
-const CategoryCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
+const CategoryCell = ({ transaction, disabled, inlineEdit }: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
   return (
     <CellPopover
       disabled={disabled}
       saveOnEnter={false}
-      triggerTitle={tx.category.name}
+      triggerTitle={transaction.category.name}
       trigger={
         <Badge variant="outline" className="text-2xs font-mono font-normal max-w-full overflow-hidden cursor-pointer">
-          <span className="truncate min-w-0">{tx.category.name}</span>
+          <span className="truncate min-w-0">{transaction.category.name}</span>
         </Badge>
       }
       contentClassName="w-56"
       onCancel={cancelEdit}
-      onOpen={() => startEdit(tx, 'category')}
-      onSave={() => void save(tx)}
+      onOpen={() => startEdit(transaction, 'category')}
+      onSave={() => void save(transaction)}
     >
       <CategoryTypeahead
         autoFocus
         multiple={false}
-        type={tx.type}
+        type={transaction.type}
         value={
           ((editValue as { id?: number } | null)?.id ?? editValue) != null
             ? String((editValue as { id?: number } | null)?.id ?? editValue)
@@ -224,17 +224,17 @@ const CategoryCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' 
   );
 };
 
-const NoteCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
+const NoteCell = ({ transaction, disabled, inlineEdit }: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
   return (
     <CellPopover
       disabled={disabled}
-      trigger={<span className="block min-w-0 truncate text-muted-foreground">{tx.note}</span>}
+      trigger={<span className="block min-w-0 truncate text-muted-foreground">{transaction.note}</span>}
       contentClassName="w-64"
       onCancel={cancelEdit}
-      onOpen={() => startEdit(tx, 'note')}
-      onSave={() => void save(tx)}
+      onOpen={() => startEdit(transaction, 'note')}
+      onSave={() => void save(transaction)}
     >
       <Input
         autoFocus
@@ -246,16 +246,16 @@ const NoteCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' | 'd
   );
 };
 
-const ExecutedAtCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx' | 'disabled' | 'inlineEdit'>) => {
+const ExecutedAtCell = ({ transaction, disabled, inlineEdit }: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
   return (
     <CellPopover
       disabled={disabled}
-      trigger={<span className="tabular-nums whitespace-nowrap">{tx.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}</span>}
+      trigger={<span className="tabular-nums whitespace-nowrap">{transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}</span>}
       onCancel={cancelEdit}
-      onOpen={() => startEdit(tx, 'executedAt')}
-      onSave={() => void save(tx)}
+      onOpen={() => startEdit(transaction, 'executedAt')}
+      onSave={() => void save(transaction)}
     >
       <Input
         autoFocus
@@ -268,22 +268,22 @@ const ExecutedAtCell = ({ tx, disabled, inlineEdit }: Pick<CellRendererArgs, 'tx
 };
 
 const ActionsCell = ({
-  tx,
+  transaction,
   onOpenForm,
   onDelete,
   onToggleDraft,
   onSheetOpenChange,
-}: Pick<CellRendererArgs, 'tx' | 'onOpenForm' | 'onDelete' | 'onToggleDraft' | 'onSheetOpenChange'>) => (
+}: Pick<CellRendererArgs, 'transaction' | 'onOpenForm' | 'onDelete' | 'onToggleDraft' | 'onSheetOpenChange'>) => (
   <div className="flex justify-end gap-2 shrink-0">
-    {tx.isDraft && onToggleDraft && (
+    {transaction.isDraft && onToggleDraft && (
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            aria-label={`Unmark transaction #${tx.id} as draft`}
+            aria-label={`Unmark transaction #${transaction.id} as draft`}
             size="icon"
             variant="ghost"
             className="h-8 w-8 p-0 text-warning hover:text-warning hover:bg-warning/10"
-            onClick={() => onToggleDraft(tx)}
+            onClick={() => onToggleDraft(transaction)}
           >
             <FileCheck className="h-4 w-4" />
           </Button>
@@ -293,7 +293,7 @@ const ActionsCell = ({
     )}
 
     <Button
-      aria-label={`View transaction #${tx.id} details`}
+      aria-label={`View transaction #${transaction.id} details`}
       size="icon"
       variant="ghost"
       className="h-8 w-8 p-0"
@@ -303,21 +303,21 @@ const ActionsCell = ({
     </Button>
 
     <Button
-      aria-label={`Edit transaction #${tx.id}`}
+      aria-label={`Edit transaction #${transaction.id}`}
       size="icon"
       variant="ghost"
       className="h-8 w-8 p-0"
-      onClick={() => onOpenForm(tx)}
+      onClick={() => onOpenForm(transaction)}
     >
       <Pencil className="h-4 w-4" />
     </Button>
 
     <Button
-      aria-label={`Remove transaction #${tx.id}`}
+      aria-label={`Remove transaction #${transaction.id}`}
       size="icon"
       variant="ghost"
       className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-      onClick={() => onDelete(tx)}
+      onClick={() => onDelete(transaction)}
     >
       <Trash2 className="h-4 w-4" />
     </Button>
@@ -347,7 +347,7 @@ export const ListingRow = ({
 
   const ctx = useMemo<CellRendererArgs>(
     () => ({
-      tx: transaction,
+      transaction,
       disabled,
       inlineEdit,
       onOpenForm,
@@ -382,19 +382,19 @@ export const ListingRow = ({
           renderDetails={ctx.renderDetails}
           sheetOpen={ctx.sheetOpen}
           titleId={ctx.titleId}
-          tx={ctx.tx}
+          transaction={ctx.transaction}
           onSheetOpenChange={ctx.onSheetOpenChange}
           onToggleDraft={ctx.onToggleDraft}
         />
       ),
-      account: <AccountCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />,
-      amount: <AmountCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />,
-      category: <CategoryCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />,
-      note: <NoteCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />,
-      executedAt: <ExecutedAtCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} tx={ctx.tx} />,
+      account: <AccountCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} transaction={ctx.transaction} />,
+      amount: <AmountCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} transaction={ctx.transaction} />,
+      category: <CategoryCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} transaction={ctx.transaction} />,
+      note: <NoteCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} transaction={ctx.transaction} />,
+      executedAt: <ExecutedAtCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} transaction={ctx.transaction} />,
       actions: (
         <ActionsCell
-          tx={ctx.tx}
+          transaction={ctx.transaction}
           onDelete={ctx.onDelete}
           onOpenForm={ctx.onOpenForm}
           onSheetOpenChange={ctx.onSheetOpenChange}
@@ -406,9 +406,9 @@ export const ListingRow = ({
   );
 
   const onView = useCallback(() => ctx.onSheetOpenChange?.(true), [ctx]);
-  const onEdit = useCallback(() => ctx.onOpenForm(ctx.tx), [ctx]);
-  const onRemove = useCallback(() => ctx.onDelete(ctx.tx), [ctx]);
-  const onUnmarkDraft = useCallback(() => ctx.onToggleDraft?.(ctx.tx), [ctx]);
+  const onEdit = useCallback(() => ctx.onOpenForm(ctx.transaction), [ctx]);
+  const onRemove = useCallback(() => ctx.onDelete(ctx.transaction), [ctx]);
+  const onUnmarkDraft = useCallback(() => ctx.onToggleDraft?.(ctx.transaction), [ctx]);
 
   return (
     <ContextMenu>
@@ -417,9 +417,9 @@ export const ListingRow = ({
           className={cn(
             'text-xs',
             {
-              'bg-warning/20 hover:bg-warning/30': ctx.tx.isDraft,
-              'bg-warning/5 hover:bg-warning/10': isCompensated && !ctx.tx.isDraft,
-              'hover:bg-muted/50': !ctx.tx.isDraft && !isCompensated,
+              'bg-warning/20 hover:bg-warning/30': ctx.transaction.isDraft,
+              'bg-warning/5 hover:bg-warning/10': isCompensated && !ctx.transaction.isDraft,
+              'hover:bg-muted/50': !ctx.transaction.isDraft && !isCompensated,
             },
             className,
           )}
@@ -436,8 +436,8 @@ export const ListingRow = ({
 
       <ContextMenuContent className="w-56">
         <ContextMenuLabel className="flex items-center justify-between">
-          <span className="truncate">Transaction #{ctx.tx.id}</span>
-          <span className="text-xs text-muted-foreground tabular-nums">{ctx.tx.executedAt.format('HH:mm')}</span>
+          <span className="truncate">Transaction #{ctx.transaction.id}</span>
+          <span className="text-xs text-muted-foreground tabular-nums">{ctx.transaction.executedAt.format('HH:mm')}</span>
         </ContextMenuLabel>
 
         <ContextMenuSeparator />
@@ -452,7 +452,7 @@ export const ListingRow = ({
           Edit
         </ContextMenuItem>
 
-        {ctx.tx.isDraft && ctx.onToggleDraft && (
+        {ctx.transaction.isDraft && ctx.onToggleDraft && (
           <>
             <ContextMenuSeparator />
             <ContextMenuItem onSelect={onUnmarkDraft}>

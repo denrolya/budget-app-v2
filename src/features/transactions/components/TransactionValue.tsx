@@ -102,7 +102,7 @@ export const TransactionValue: React.FC<Props> = ({
 
   if (showValuesTooltip && convertedValues && Object.keys(convertedValues).length > 0) {
     displayedContent = (
-      <ConvertedValuesTooltip convertedValues={convertedValues} originalCurrency={currency}>
+      <ConvertedValuesTooltip convertedValues={convertedValues} originalAmount={amount} originalCurrency={currency}>
         {displayedContent}
       </ConvertedValuesTooltip>
     );
