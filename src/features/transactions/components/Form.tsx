@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, X } from 'lucide-react';
-import moment from 'moment';
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -10,7 +9,7 @@ import z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
+import { nowDatetimeLocal, toDatetimeLocal } from '@/lib/datetime/toDatetimeLocal';
 import { useForm as useFormContext } from '@/contexts/Form';
 import { AccountTypeahead } from '@/features/accounts';
 import { CategoryTypeahead } from '@/features/categories';
@@ -87,8 +86,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
       account: data?.account?.id,
       amount: data?.amount,
       category: data?.category?.id,
-      executedAt:
-        moment(data?.executedAt).format(MOMENT_DATETIME_FORM_FORMAT) || moment().format(MOMENT_DATETIME_FORM_FORMAT),
+      executedAt: toDatetimeLocal(data?.executedAt) || nowDatetimeLocal(),
       note: data?.note,
       isDraft: data?.isDraft ?? false,
       debt: data?.debt?.id,
@@ -97,7 +95,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
           ...comp,
           account: comp?.account?.id,
           amount: comp.amount,
-          executedAt: moment(comp.executedAt).format(MOMENT_DATETIME_FORM_FORMAT),
+          executedAt: toDatetimeLocal(comp.executedAt),
         })) || [],
     },
     mode: 'onChange',
@@ -116,11 +114,13 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
             updates: values as unknown as Partial<Transaction>,
             originalTransaction: data as unknown as Transaction,
           });
+          toast.success('Transaction updated.');
         } else {
           await createTransaction(values as unknown as Partial<Transaction>);
+          toast.success('Transaction created.');
         }
       } catch {
-        toast.error('Failed to submit transaction. Issue requires investigation.');
+        toast.error('Failed to save transaction. Please try again.');
       }
     },
   });
@@ -242,8 +242,10 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
             name="category"
             render={({ field }) => (
               <FormItem className="flex-[2] min-w-0">
+                <FormLabel className="sr-only">Category</FormLabel>
                 <CategoryTypeahead
                   autoFocus
+                  aria-label="Category"
                   disabled={field.disabled}
                   multiple={false}
                   name={field.name}
@@ -266,7 +268,9 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
             name="account"
             render={({ field }) => (
               <FormItem className="flex-[2] min-w-0">
+                <FormLabel className="sr-only">Account</FormLabel>
                 <AccountTypeahead
+                  aria-label="Account"
                   disabled={field.disabled}
                   multiple={false}
                   name={field.name}
@@ -293,13 +297,17 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                 <FormControl>
                   <Input
                     {...field}
+                    inputMode="decimal"
                     min="0"
                     placeholder="0.00"
                     step="any"
                     type="number"
                     value={field.value ?? ''}
                     className="h-7 text-xs font-mono"
-                    onChange={(e) => field.onChange(e.target.value === '' ? undefined : e.target.valueAsNumber)}
+                    onChange={(e) => {
+                      const n = e.target.valueAsNumber;
+                      field.onChange(Number.isFinite(n) ? n : undefined);
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -350,7 +358,9 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                   name={`compensations.${index}.account`}
                   render={({ field: f }) => (
                     <FormItem className="flex-[2] min-w-0">
+                      <FormLabel className="sr-only">Compensation account</FormLabel>
                       <AccountTypeahead
+                        aria-label="Compensation account"
                         disabled={f.disabled}
                         multiple={false}
                         name={f.name}
@@ -377,10 +387,16 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                       <FormControl>
                         <Input
                           {...f}
+                          inputMode="decimal"
+                          min="0"
                           placeholder="0.00"
+                          step="any"
                           type="number"
                           className="h-7 text-xs font-mono"
-                          onChange={(e) => f.onChange(e.target.valueAsNumber)}
+                          onChange={(e) => {
+                            const n = e.target.valueAsNumber;
+                            f.onChange(Number.isFinite(n) ? n : undefined);
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -419,7 +435,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               type="button"
               className="flex items-center gap-1 text-2xs font-mono text-muted-foreground hover:text-foreground transition-colors"
               onClick={() =>
-                append({ account: -1, amount: 0, executedAt: moment().format(MOMENT_DATETIME_FORM_FORMAT) })
+                append({ account: -1, amount: 0, executedAt: nowDatetimeLocal() })
               }
             >
               <Plus className="h-3 w-3" />

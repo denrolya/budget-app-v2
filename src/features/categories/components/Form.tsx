@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useForm as useFormContext } from '@/contexts/Form';
 import CategoryTypeahead from '@/features/categories/components/CategoryTypeahead';
@@ -123,6 +123,7 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
             isAffectingProfit: values.isAffectingProfit,
           };
           await update({ id: data.id, payload });
+          toast.success('Category updated.');
         } else {
           const payload: CreateCategoryDTO = {
             name,
@@ -131,9 +132,10 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
             isAffectingProfit: values.isAffectingProfit,
           };
           await create(payload);
+          toast.success('Category created.');
         }
       } catch {
-        toast.error('Failed to submit category');
+        toast.error('Failed to save category. Please try again.');
       }
     },
   });
@@ -167,6 +169,8 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
             render={({ field }) => (
               <>
                 <button
+                  aria-label="Type: expense"
+                  aria-pressed={field.value === CategoryType.Expense}
                   disabled={isLoading}
                   type="button"
                   className={typeChipClass(field.value === CategoryType.Expense)}
@@ -175,6 +179,8 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
                   expense
                 </button>
                 <button
+                  aria-label="Type: income"
+                  aria-pressed={field.value === CategoryType.Income}
                   disabled={isLoading}
                   type="button"
                   className={typeChipClass(field.value === CategoryType.Income)}
@@ -193,6 +199,8 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
             name="isAffectingProfit"
             render={({ field }) => (
               <button
+                aria-label="Affects profit"
+                aria-pressed={watchedProfit}
                 disabled={isLoading}
                 type="button"
                 className={flagChipClass(watchedProfit)}
@@ -210,7 +218,9 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
           name="parent"
           render={({ field }) => (
             <FormItem>
+              <FormLabel className="sr-only">Parent category</FormLabel>
               <CategoryTypeahead
+                aria-label="Parent category"
                 disabled={field.disabled}
                 multiple={false}
                 name={field.name}
@@ -231,6 +241,7 @@ export const CategoryForm = forwardRef<CategoryFormRef, CategoryFormProps>((_, r
           name="name"
           render={({ field }) => (
             <FormItem>
+              <FormLabel className="sr-only">Category name</FormLabel>
               <FormControl>
                 <Input
                   {...field}

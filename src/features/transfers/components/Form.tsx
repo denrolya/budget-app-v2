@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeftRight, Plus, Trash2, X } from 'lucide-react';
-import moment from 'moment';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -10,7 +9,7 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
+import { nowDatetimeLocal, toDatetimeLocal } from '@/lib/datetime/toDatetimeLocal';
 import { useForm as useFormContext } from '@/contexts/Form';
 import { AccountTypeahead } from '@/features/accounts';
 import { useAccountsWithDefaultOrder } from '@/hooks/financeData';
@@ -116,9 +115,7 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
     amount: initialTransfer ? Math.abs(initialTransfer.fromExpense.amount) : 0,
     rate: initialTransfer?.rate ?? 0,
     fees: initialFees,
-    executedAt: initialTransfer
-      ? initialTransfer.executedAt.format(MOMENT_DATETIME_FORM_FORMAT)
-      : moment().format(MOMENT_DATETIME_FORM_FORMAT),
+    executedAt: initialTransfer ? toDatetimeLocal(initialTransfer.executedAt) : nowDatetimeLocal(),
     note: initialTransfer?.note || undefined,
   };
 
@@ -234,13 +231,15 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
 
         if (isEditMode) {
           await updateTransfer({ id: initialTransfer!.id, ...payload });
+          toast.success('Transfer updated.');
         } else {
           await createTransfer(payload);
+          toast.success('Transfer created.');
         }
 
         submitForm(values);
       } catch (error: unknown) {
-        toast.error('Failed to submit transfer. Please try again.', {
+        toast.error('Failed to save transfer. Please try again.', {
           description:
             typeof error === 'object' && error !== null && 'message' in error
               ? String((error as { message: unknown }).message)
@@ -363,7 +362,9 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
                       {...field}
                       aria-label={`Amount${fromCurrency ? ` in ${fromCurrency}` : ''}`}
                       inputMode="decimal"
+                      min="0"
                       placeholder="Amount"
+                      step="any"
                       type="number"
                       className="h-7 text-xs pr-10"
                       onChange={(e) => {
@@ -441,7 +442,9 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
                             {...f}
                             aria-label={`Fee ${index + 1} amount`}
                             inputMode="decimal"
+                            min="0"
                             placeholder="Fee"
+                            step="any"
                             type="number"
                             value={f.value ?? ''}
                             className="h-7 text-xs pr-10"

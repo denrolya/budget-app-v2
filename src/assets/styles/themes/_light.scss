@@ -1,12 +1,12 @@
 @mixin theme {
   --background: 220 20% 97%;
   --foreground: 220 25% 12%;
-  --card: 0 0% 100%;
+  --card: 220 15% 99%;
   --card-foreground: 220 25% 12%;
-  --popover: 0 0% 100%;
+  --popover: 220 15% 99%;
   --popover-foreground: 220 25% 12%;
 
-  --primary: 220 25% 12%;
+  --primary: 220 55% 28%;
   --primary-foreground: 0 0% 98%;
 
   --secondary: 220 15% 88%;
@@ -15,7 +15,7 @@
   --muted: 220 15% 93%;
   --muted-foreground: 220 10% 48%;
 
-  --accent: 220 15% 93%;
+  --accent: 220 20% 89%;
   --accent-foreground: 220 25% 12%;
 
   --destructive: 4 80% 50%;
@@ -32,24 +32,24 @@
 
   --border: 220 15% 86%;
   --input: 220 15% 90%;
-  --ring: 220 25% 12%;
+  --ring: 220 55% 45%;
   --radius: 0.5rem;
 
   /* Trading terminal chart palette — slightly deeper for readability on light */
   --chart-1: 213 85% 50%; /* electric blue  */
   --chart-2: 142 60% 36%; /* terminal green */
-  --chart-3: 28 85% 50%; /* orange         */
+  --chart-3: 28 85% 50%;  /* orange         */
   --chart-4: 262 70% 57%; /* violet         */
   --chart-5: 185 75% 38%; /* cyan           */
-  --chart-6: 43 85% 44%; /* yellow-gold    */
+  --chart-6: 52 80% 42%;  /* gold           */
   --chart-7: 340 75% 52%; /* rose           */
   --chart-8: 168 60% 34%; /* teal           */
-  --chart-9: 43 85% 46%; /* amber          */
+  --chart-9: 15 75% 48%;  /* burnt orange   */
   --chart-10: 250 60% 54%; /* lavender       */
 
   --chart-text-color: 220 10% 45%;
-  --chart-crosshair-color: 213 50% 50%;
-  --chart-tooltip-background: 0 0% 100%;
+  --chart-crosshair-color: 220 55% 45%;
+  --chart-tooltip-background: 220 15% 99%;
   --chart-tooltip-text-color: 220 25% 12%;
 
   /* Currency colors */
@@ -66,6 +66,6 @@
   --account-base-huf: 2 76% 56%;
   --account-base-btc: 33 100% 50%;
 
-  --sidebar-background: 220 20% 96%;
+  --sidebar-background: 220 20% 94%;
   --sidebar-foreground: 220 25% 20%;
 }

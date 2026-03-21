@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useForm as useFormContext } from '@/contexts/Form';
@@ -94,11 +94,13 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
       try {
         if (data?.id) {
           await update({ id: data.id as number, diff: values as UpdateAccountDTO });
+          toast.success('Account updated.');
         } else {
           await create(values as unknown as CreateAccountDTO);
+          toast.success('Account created.');
         }
       } catch {
-        toast.error('Failed to submit account. Issue requires investigation.');
+        toast.error('Failed to save account. Please try again.');
       }
     },
   });
@@ -133,7 +135,7 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
                 field.onChange(ACCOUNT_TYPE_CYCLE[(idx + 1) % ACCOUNT_TYPE_CYCLE.length]);
               };
               return (
-                <button type="button" className={chipClass(true)} onClick={cycleType}>
+                <button aria-label={`Account type: ${field.value}`} type="button" className={chipClass(true)} onClick={cycleType}>
                   {field.value}
                 </button>
               );
@@ -150,6 +152,8 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
               <div className="flex items-center gap-1">
                 {CURRENCY_CHIPS.map((code) => (
                   <button
+                    aria-label={`Currency: ${code}`}
+                    aria-pressed={watchedCurrency === code}
                     type="button"
                     className={chipClass(watchedCurrency === code)}
                     key={code}
@@ -170,6 +174,7 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
             name="name"
             render={({ field }) => (
               <FormItem className="flex-[2] min-w-0">
+                <FormLabel className="sr-only">Account name</FormLabel>
                 <FormControl>
                   <Input {...field} placeholder="Account name" className="h-7 text-xs" />
                 </FormControl>
@@ -183,14 +188,19 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
             name="balance"
             render={({ field }) => (
               <FormItem className="flex-1 min-w-0">
+                <FormLabel className="sr-only">Balance</FormLabel>
                 <FormControl>
                   <Input
                     inputMode="decimal"
                     placeholder="Balance"
+                    step="any"
                     type="number"
                     value={Number.isFinite(field.value) ? field.value : 0}
                     className="h-7 text-xs"
-                    onChange={(e) => field.onChange(e.target.value === '' ? 0 : e.target.valueAsNumber)}
+                    onChange={(e) => {
+                      const n = e.target.valueAsNumber;
+                      field.onChange(Number.isFinite(n) ? n : 0);
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -207,6 +217,7 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
               name="bankName"
               render={({ field }) => (
                 <FormItem className="flex-1 min-w-0">
+                  <FormLabel className="sr-only">Bank name</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Bank name" className="h-7 text-xs" />
                   </FormControl>
@@ -220,6 +231,7 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
               name="cardNumber"
               render={({ field }) => (
                 <FormItem className="flex-1 min-w-0">
+                  <FormLabel className="sr-only">Card number</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Card ····" className="h-7 text-xs font-mono" />
                   </FormControl>
@@ -233,6 +245,7 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
               name="iban"
               render={({ field }) => (
                 <FormItem className="flex-1 min-w-0">
+                  <FormLabel className="sr-only">IBAN</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="IBAN" className="h-7 text-xs font-mono" />
                   </FormControl>

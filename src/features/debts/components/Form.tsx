@@ -10,6 +10,7 @@ import { CURRENCIES, CURRENCY_CODE } from '@/constants/currency';
 import { useForm as useFormContext } from '@/contexts/Form';
 import { useMutations } from '@/features/debts/api/mutations';
 import { useFormLogic } from '@/hooks/useFormLogic';
+import { toDatetimeLocal } from '@/lib/datetime/toDatetimeLocal';
 import { cn } from '@/lib/utils';
 
 const schema = z.object({
@@ -32,11 +33,6 @@ interface DebtFormProps {
 
 const CURRENCY_CHIPS = [CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.UAH] as const;
 
-const toDatetimeLocal = (v: unknown): string => {
-  if (!v) return '';
-  const s = String(v);
-  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s) ? s : s.includes('T') ? s.slice(0, 16) : '';
-};
 
 const toNumber = (v: unknown): number => {
   const n = typeof v === 'number' ? v : Number(v);
@@ -97,11 +93,13 @@ export const DebtForm = forwardRef<DebtFormRef, DebtFormProps>((_, ref) => {
       try {
         if (data?.id) {
           await update({ id: data.id as number, payload });
+          toast.success('Debt updated.');
         } else {
           await create(payload);
+          toast.success('Debt created.');
         }
       } catch {
-        toast.error('Failed to submit debt');
+        toast.error('Failed to save debt. Please try again.');
       }
     },
   });
@@ -133,10 +131,12 @@ export const DebtForm = forwardRef<DebtFormRef, DebtFormProps>((_, ref) => {
             name="closedAt"
             render={({ field }) => (
               <>
-                <button type="button" className={chipClass(!isClosed)} onClick={() => field.onChange('')}>
+                <button aria-label="Status: open" aria-pressed={!isClosed} type="button" className={chipClass(!isClosed)} onClick={() => field.onChange('')}>
                   open
                 </button>
                 <button
+                  aria-label="Status: closed"
+                  aria-pressed={isClosed}
                   type="button"
                   className={chipClass(isClosed)}
                   onClick={() => {
@@ -164,6 +164,8 @@ export const DebtForm = forwardRef<DebtFormRef, DebtFormProps>((_, ref) => {
               <div className="flex items-center gap-1">
                 {CURRENCY_CHIPS.map((code) => (
                   <button
+                    aria-label={`Currency: ${code}`}
+                    aria-pressed={watchedCurrency === code}
                     type="button"
                     className={chipClass(watchedCurrency === code)}
                     key={code}
@@ -208,10 +210,14 @@ export const DebtForm = forwardRef<DebtFormRef, DebtFormProps>((_, ref) => {
                     aria-label="Balance"
                     inputMode="decimal"
                     placeholder="Balance"
+                    step="any"
                     type="number"
                     value={Number.isFinite(field.value) ? field.value : 0}
                     className="h-7 text-xs"
-                    onChange={(e) => field.onChange(e.target.value === '' ? 0 : e.target.valueAsNumber)}
+                    onChange={(e) => {
+                      const n = e.target.valueAsNumber;
+                      field.onChange(Number.isFinite(n) ? n : 0);
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
