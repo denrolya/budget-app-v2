@@ -252,7 +252,7 @@ export const useLedger = ({
       return;
     }
     onTimeframeChange?.(timeframe.after, timeframe.before);
-  }, [timeframe.after, timeframe.before]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [timeframe.after, timeframe.before]); // eslint-disable-line react-hooks/exhaustive-deps -- fire only on timeframe change; onTimeframeChange identity is unstable
 
   useEffect(() => {
     onActiveCountChange?.(transactionFilters.activeCount);

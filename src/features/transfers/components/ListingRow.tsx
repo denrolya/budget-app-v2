@@ -89,30 +89,27 @@ const IdCell: React.FC<{
   </div>
 );
 
+const FeeDot = () => (
+  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-warning rounded-full" />
+);
+
 const AccountsCell: React.FC<{ transfer: Transfer }> = ({ transfer }) => {
-  const fromRing = transfer.feeExpense?.account.id === transfer.fromExpense.account.id;
-  const toRing = transfer.feeExpense?.account.id === transfer.toIncome.account.id;
+  const feeAccountIds = new Set(transfer.feeExpenses.map((tx) => tx.account.id));
+  const fromHasFee = feeAccountIds.has(transfer.fromExpense.account.id);
+  const toHasFee = feeAccountIds.has(transfer.toIncome.account.id);
 
   return (
     <div className="flex items-center gap-2 min-w-0">
-      <div className="min-w-0 [&_*]:min-w-0">
-        <AccountPill
-          account={transfer.fromExpense.account}
-          size="sm"
-          variant={fromRing ? 'pill' : 'inline'}
-          className={cn('min-w-0', { 'ring-2 ring-destructive': fromRing })}
-        />
+      <div className="relative min-w-0 [&_*]:min-w-0">
+        <AccountPill account={transfer.fromExpense.account} size="sm" variant="inline" className="min-w-0" />
+        {fromHasFee && <FeeDot />}
       </div>
 
       <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
 
-      <div className="min-w-0 [&_*]:min-w-0">
-        <AccountPill
-          account={transfer.toIncome.account}
-          size="sm"
-          variant={toRing ? 'pill' : 'inline'}
-          className={cn('min-w-0', { 'ring-2 ring-destructive': toRing })}
-        />
+      <div className="relative min-w-0 [&_*]:min-w-0">
+        <AccountPill account={transfer.toIncome.account} size="sm" variant="inline" className="min-w-0" />
+        {toHasFee && <FeeDot />}
       </div>
     </div>
   );
@@ -140,12 +137,12 @@ const AmountCell: React.FC<{ transfer: Transfer }> = ({ transfer }) => (
       </div>
     </div>
 
-    {transfer.feeExpense ? (
+    {transfer.hasFee() ? (
       <div className="min-w-0 overflow-hidden whitespace-nowrap text-muted-foreground text-[11px] leading-4">
-        <span className="mr-1">Fee:</span>
+        <span className="mr-1">{transfer.feeExpenses.length > 1 ? 'Fees:' : 'Fee:'}</span>
         <MoneyValue
-          amount={-transfer.feeExpense.amount}
-          currency={transfer.feeExpense.account.currency}
+          amount={-transfer.totalFees()}
+          currency={transfer.fromExpense.account.currency}
           useColors={false}
           className="font-mono tabular-nums"
         />

@@ -7,6 +7,7 @@ import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CURRENCIES } from '@/constants/currency';
 import { useBaseCurrency } from '@/features/auth';
+import { resolveHslOrMuted } from '@/lib/resolveCssVar';
 import { cn } from '@/lib/utils';
 
 import { useList as useDebtsQuery } from '../api';
@@ -36,8 +37,7 @@ const DebtsSidebar: React.FC<{ selectedId: string | null }> = ({ selectedId }) =
     const currencies = Array.from(currencyMap.entries())
       .map(([currency, amount]) => {
         const symbol = CURRENCIES[currency as keyof typeof CURRENCIES]?.symbol ?? currency;
-        const color =
-          getComputedStyle(document.documentElement).getPropertyValue(`--account-bank-${currency}`).trim() || '#888';
+        const color = resolveHslOrMuted(`--account-bank-${currency}`);
         return { currency, symbol, color, amount, percentage: total > 0 ? (amount / total) * 100 : 0 };
       })
       .sort((a, b) => b.amount - a.amount);
@@ -99,7 +99,7 @@ const DebtsSidebar: React.FC<{ selectedId: string | null }> = ({ selectedId }) =
           })}
         />
         <span aria-hidden className={cn('h-2 w-2 rounded-sm flex-none', dotClass)} />
-        <span className="text-xs font-semibold text-foreground">{label}</span>
+        <h2 className="text-xs font-semibold text-foreground">{label}</h2>
         <span className="text-2xs text-muted-foreground tabular-nums">{items.length}</span>
       </button>
       <div
@@ -147,8 +147,8 @@ const DebtsSidebar: React.FC<{ selectedId: string | null }> = ({ selectedId }) =
               </div>
               <div className="h-1 bg-secondary rounded-full overflow-hidden">
                 <div
-                  style={{ width: `${percentage}%`, backgroundColor: color }}
-                  className="h-full rounded-full transition-[width] duration-500 ease-out"
+                  style={{ transform: `scaleX(${percentage / 100})`, backgroundColor: color }}
+                  className="h-full rounded-full origin-left transition-transform duration-500 ease-out"
                 />
               </div>
             </div>

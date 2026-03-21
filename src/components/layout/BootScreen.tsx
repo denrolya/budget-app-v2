@@ -47,7 +47,7 @@ const BootScreen: React.FC<BootScreenProps> = ({ entries }) => (
       <p className="text-2xs font-mono uppercase tracking-widest text-muted-foreground mb-5">system init</p>
       <div className="space-y-2">
         {entries.map((entry) => (
-          <BootLine key={entry.key} entry={entry} />
+          <BootLine entry={entry} key={entry.key} />
         ))}
       </div>
     </div>

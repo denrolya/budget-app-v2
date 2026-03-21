@@ -2,32 +2,54 @@ import React from 'react';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { type CURRENCY_CODE } from '@/constants/currency';
+import type { Transaction } from '@/features/transactions';
+import type { CURRENCY_CODE } from '@/constants/currency';
 
 interface FeeIndicatorProps {
-  feeAmount: number;
-  feeCurrency: CURRENCY_CODE;
+  feeExpenses: Transaction[];
   transferAmount: number;
+  senderCurrency: CURRENCY_CODE;
 }
 
-export const FeeIndicator: React.FC<FeeIndicatorProps> = ({ feeAmount, feeCurrency, transferAmount }) => {
-  const calculateFeePercentage = () => {
-    const feePercentage = (feeAmount / transferAmount) * 100;
-    return feePercentage.toFixed(2);
-  };
+export const FeeIndicator: React.FC<FeeIndicatorProps> = ({
+  feeExpenses,
+  transferAmount,
+  senderCurrency,
+}) => {
+  if (feeExpenses.length === 0) return null;
 
-  const feePercentage = calculateFeePercentage();
+  // Convert all fees to sender currency via convertedValues
+  const totalFeesConverted = feeExpenses.reduce((sum, tx) => {
+    const converted = tx.convertedValues?.[senderCurrency];
+    return sum + (converted ?? tx.amount);
+  }, 0);
+
+  const totalPct = transferAmount > 0 ? ((totalFeesConverted / transferAmount) * 100).toFixed(2) : '0.00';
 
   const tooltipContent = (
-    <p>
-      Fee: <MoneyValue amount={feeAmount} currency={feeCurrency} useColors={false} />
-      <br />({feePercentage}% of transfer amount)
-    </p>
+    <div className="text-xs space-y-1">
+      {feeExpenses.map((tx) => (
+        <div className="flex items-center gap-1.5" key={tx.id}>
+          <MoneyValue amount={tx.amount} currency={tx.account.currency as CURRENCY_CODE} useColors={false} />
+          <span className="text-muted-foreground">({tx.account.name})</span>
+        </div>
+      ))}
+      <div className="border-t pt-1 text-muted-foreground">
+        {totalPct}% of transfer
+      </div>
+    </div>
   );
 
   return (
     <ResponsiveTooltip openDelay={0} content={tooltipContent}>
-      <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
+      <div className="relative flex-shrink-0">
+        <div className="w-2 h-2 bg-warning rounded-full" />
+        {feeExpenses.length > 1 && (
+          <span className="absolute -top-1.5 -right-2 text-[8px] font-bold text-warning leading-none">
+            {feeExpenses.length}
+          </span>
+        )}
+      </div>
     </ResponsiveTooltip>
   );
 };

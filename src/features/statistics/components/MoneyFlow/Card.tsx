@@ -104,6 +104,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
 
         {/* Chart type */}
         <button
+          aria-label="Bar chart"
           type="button"
           className={cn(
             'h-5 w-5 flex items-center justify-center rounded-sm transition-colors',
@@ -114,6 +115,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
           <BarChart2 className="h-3 w-3" />
         </button>
         <button
+          aria-label="Line chart"
           type="button"
           className={cn(
             'h-5 w-5 flex items-center justify-center rounded-sm transition-colors',

@@ -6,6 +6,7 @@ export enum Theme {
   Light = 'light',
   System = 'system',
   TronDark = 'theme-tron-dark',
+  HackerDark = 'theme-hacker-dark',
 }
 
 interface ThemeProviderProps {
@@ -37,7 +38,7 @@ export const ThemeProvider = ({ children, defaultTheme = Theme.Light, storageKey
   useEffect(() => {
     const root = window.document.documentElement;
 
-    root.classList.remove(Theme.Light, Theme.Dark, Theme.TronDark);
+    root.classList.remove(Theme.Light, Theme.Dark, Theme.TronDark, Theme.HackerDark);
 
     if (theme === Theme.System) {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? Theme.Dark : Theme.Light;

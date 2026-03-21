@@ -127,14 +127,14 @@ export const FormRenderer: React.FC = () => {
   );
 
   const footer = (
-    <div className="flex justify-end space-x-2">
-      <Button disabled={isLoading || !formState.isValid} type="submit" onClick={() => handleSubmit(false)}>
+    <div className="flex justify-end gap-1.5">
+      <Button disabled={isLoading || !formState.isValid} size="sm" type="submit" onClick={() => handleSubmit(false)}>
         {isEditMode ? 'Update' : 'Create'}
       </Button>
-      <Button disabled={isLoading || !formState.isValid} type="button" onClick={() => handleSubmit(true)}>
+      <Button disabled={isLoading || !formState.isValid} size="sm" type="button" onClick={() => handleSubmit(true)}>
         {isLoading ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
             {isEditMode ? 'Updating...' : 'Creating...'}
           </>
         ) : (
@@ -147,13 +147,13 @@ export const FormRenderer: React.FC = () => {
   if (!isMobile) {
     return (
       <Dialog open={formState.isOpen} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-visible">
-          <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-visible gap-0">
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-base">{title}</DialogTitle>
             <DialogDescription className="sr-only">Form: {title}</DialogDescription>
           </DialogHeader>
-          <div className="max-h-[calc(90vh-11rem)] overflow-y-auto pr-1">{content}</div>
-          <DialogFooter className="border-t pt-2">{footer}</DialogFooter>
+          <div className="max-h-[calc(90vh-9rem)] overflow-y-auto pr-1">{content}</div>
+          <DialogFooter className="border-t pt-1.5 mt-2">{footer}</DialogFooter>
         </DialogContent>
       </Dialog>
     );
@@ -162,13 +162,13 @@ export const FormRenderer: React.FC = () => {
   return (
     <Drawer open={formState.isOpen} onOpenChange={handleOpenChange}>
       <DrawerContent>
-        <DrawerHeader className="text-left">
-          <DrawerTitle>{title}</DrawerTitle>
+        <DrawerHeader className="text-left pb-1">
+          <DrawerTitle className="text-base">{title}</DrawerTitle>
           <DrawerDescription className="sr-only">Form: {title}</DrawerDescription>
         </DrawerHeader>
-        <div className="px-4 pb-4 overflow-y-auto">
+        <div className="px-4 pb-3 overflow-y-auto">
           {content}
-          <Separator className="h-1" />
+          <Separator className="my-1.5" />
           {footer}
         </div>
       </DrawerContent>

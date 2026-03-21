@@ -244,7 +244,7 @@ const MoneyFlowChart: React.FC<Props> = ({
   };
 
   return (
-    <div className="w-full h-full min-w-[600px]">
+    <div aria-label="Income and expenses chart" role="img" className="w-full h-full min-w-[600px]">
       <ResponsiveContainer height={385} width="100%">
         <ComposedChart data={transformedData} margin={{ top: 0, right: 30, bottom: 0, left: -30 }} stackOffset="sign">
           <defs>

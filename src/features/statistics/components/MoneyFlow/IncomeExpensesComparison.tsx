@@ -2,6 +2,7 @@ import { ArrowDownIcon, ArrowRightIcon, ArrowUpIcon } from 'lucide-react';
 import React, { memo, useMemo } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
+import { cn } from '@/lib/utils';
 
 interface Props {
   currentIncome: number;
@@ -16,17 +17,16 @@ const calculateChange = (current: number, previous: number) => {
   return { value, percentage };
 };
 
-const ChangeIndicator: React.FC<{ change: number; isExpense?: boolean }> = ({ change, isExpense = false }) => {
-  const color = isExpense
-    ? change > 0
-      ? 'text-destructive'
-      : 'text-success'
-    : change > 0
-      ? 'text-success'
-      : 'text-destructive';
+const getChangeColor = (change: number, isExpense: boolean): string => {
+  if (change === 0) return 'text-muted-foreground';
+  const isPositive = change > 0;
+  return isExpense === isPositive ? 'text-destructive' : 'text-success';
+};
 
-  if (change > 0) return <ArrowUpIcon className={`h-3 w-3 ${color}`} />;
-  if (change < 0) return <ArrowDownIcon className={`h-3 w-3 ${color}`} />;
+const ChangeIndicator: React.FC<{ change: number; isExpense?: boolean }> = ({ change, isExpense = false }) => {
+  const color = getChangeColor(change, isExpense);
+  if (change > 0) return <ArrowUpIcon className={cn('h-3 w-3', color)} />;
+  if (change < 0) return <ArrowDownIcon className={cn('h-3 w-3', color)} />;
   return <ArrowRightIcon className="h-3 w-3 text-muted-foreground" />;
 };
 
@@ -88,17 +88,7 @@ const IncomeExpensesComparison: React.FC<Props> = ({
           </div>
           <div className="text-xs font-mono text-right flex items-center justify-end">
             <ChangeIndicator change={change} isExpense={label === 'Expenses'} />
-            <span
-              className={`ml-1 ${
-                label === 'Expenses'
-                  ? change > 0
-                    ? 'text-destructive'
-                    : 'text-success'
-                  : change > 0
-                    ? 'text-success'
-                    : 'text-destructive'
-              }`}
-            >
+            <span className={cn('ml-1', getChangeColor(change, label === 'Expenses'))}>
               {Math.abs(changePercent).toFixed(1)}%
             </span>
           </div>

@@ -10,35 +10,7 @@ import AccountMarker from '@/features/accounts/components/AccountMarker';
 import { cn } from '@/lib/utils';
 
 import { type Bucket, type BucketEntry, type UnassignedEntry } from '../models/types';
-
-// ── Drag ID helpers ─────────────────────────────────────────────────────────
-
-/** accountId dragged from unassigned zone */
-// eslint-disable-next-line react-refresh/only-export-components
-export const unallocatedDragId = (accountId: number) => `unallocated:${accountId}`;
-/** specific bucket allocation dragged */
-// eslint-disable-next-line react-refresh/only-export-components
-export const allocationDragId = (accountId: number, bucketId: string) => `allocation:${accountId}:${bucketId}`;
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const parseDragId = (
-  id: string,
-): { type: 'unallocated'; accountId: number } | { type: 'allocation'; accountId: number; bucketId: string } | null => {
-  if (id.startsWith('unallocated:')) {
-    return { type: 'unallocated', accountId: Number(id.slice(12)) };
-  }
-  if (id.startsWith('allocation:')) {
-    const rest = id.slice(11); // "accountId:bucketId"
-    const colon = rest.indexOf(':');
-    if (colon === -1) return null;
-    return {
-      type: 'allocation',
-      accountId: Number(rest.slice(0, colon)),
-      bucketId: rest.slice(colon + 1),
-    };
-  }
-  return null;
-};
+import { allocationDragId, unallocatedDragId } from '../lib/dragId';
 
 // ── Draggable entry in a bucket ──────────────────────────────────────────────
 

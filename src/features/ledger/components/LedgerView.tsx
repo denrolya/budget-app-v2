@@ -52,7 +52,7 @@ const ErrorBanner: React.FC<{ error: unknown }> = ({ error }) => {
 const EmptyActivityState: React.FC<{ onReset: () => void }> = ({ onReset }) => (
   <div className="flex h-full min-h-[280px] w-full items-center justify-center p-6">
     <div className="text-center max-w-md">
-      <h3 className="text-base font-semibold text-foreground">No activity found</h3>
+      <h2 className="text-base font-semibold text-foreground">No activity found</h2>
       <p className="mt-1.5 text-sm text-muted-foreground">
         There are no transactions or transfers for the selected range and filters.
       </p>

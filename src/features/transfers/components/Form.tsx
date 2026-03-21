@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeftRight, Trash2 } from 'lucide-react';
+import { ArrowLeftRight, Plus, Trash2, X } from 'lucide-react';
 import moment from 'moment';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { toast } from 'sonner';
 import * as z from 'zod';
@@ -21,40 +21,58 @@ import { cn } from '@/lib/utils';
 import Transfer from '../models/Transfer';
 import { useMutations } from '../api';
 
+const feeRowSchema = z.object({
+  amount: z.number().min(0, 'Fee must be non-negative').optional(),
+  account: z.number().int().positive().optional(),
+  included: z.boolean().default(false),
+});
+
 const formSchema = z
   .object({
     from: z.number().int().positive(),
     to: z.number().int().positive(),
     amount: z.number().min(0, 'Amount must be a positive number'),
     rate: z.number().min(0, 'Rate must be a positive number'),
-    fee: z.number().min(0, 'Fee must be non-negative').optional(),
-    feeAccount: z.number().int().positive().optional(),
+    fees: z.array(feeRowSchema),
     executedAt: z.string().min(1, 'Date is required'),
     note: z.string().optional(),
-    feeIncludedInAmount: z.boolean().default(false),
   })
   .superRefine((v, ctx) => {
-    if (v.feeAccount != null && v.fee == null) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Fee amount is required when fee account is selected',
-        path: ['fee'],
-      });
+    const filledAccounts = v.fees
+      .filter((f) => f.amount != null && f.amount > 0 && f.account != null)
+      .map((f) => f.account!);
+    const seen = new Set<number>();
+    for (const acc of filledAccounts) {
+      if (seen.has(acc)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Duplicate fee account — merge into one row',
+          path: ['fees'],
+        });
+        break;
+      }
+      seen.add(acc);
     }
 
-    if (v.feeIncludedInAmount && v.feeAccount != null && v.from != null && v.feeAccount !== v.from) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Fee can only be included when paid from the From account',
-        path: ['feeIncludedInAmount'],
-      });
+    // included only valid for fees from the sender account
+    for (const [i, f] of v.fees.entries()) {
+      if (f.included && f.account != null && f.account !== v.from) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Only fees from the From account can be included',
+          path: ['fees', i, 'included'],
+        });
+      }
     }
 
-    if (v.feeIncludedInAmount && v.fee != null && v.fee > v.amount) {
+    const includedTotal = v.fees
+      .filter((f) => f.included && f.amount != null && f.amount > 0)
+      .reduce((sum, f) => sum + (f.amount ?? 0), 0);
+    if (includedTotal > v.amount) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Fee cannot exceed Amount when included',
-        path: ['fee'],
+        message: 'Included fees cannot exceed Amount',
+        path: ['fees'],
       });
     }
   });
@@ -66,6 +84,12 @@ interface TransferFormRef {
   submitForm: () => Promise<void>;
 }
 
+const EMPTY_FEE_ROW = {
+  amount: undefined as number | undefined,
+  account: undefined as number | undefined,
+  included: false,
+};
+
 export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
   const accounts = useAccountsWithDefaultOrder();
   const { submitForm, updateFormState, formState, closeForm } = useFormContext();
@@ -76,20 +100,26 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
 
   const [rateMode, setRateMode] = useState<RateMode>('toPerFrom');
   const [rateText, setRateText] = useState('0');
-  const [showFee, setShowFee] = useState(false);
+
+  const initialFees =
+    initialTransfer && initialTransfer.feeExpenses.length > 0
+      ? initialTransfer.feeExpenses.map((tx) => ({
+          amount: Math.abs(tx.amount),
+          account: tx.account.id,
+          included: false,
+        }))
+      : [{ ...EMPTY_FEE_ROW }];
 
   const defaultValues = {
     from: initialTransfer?.fromExpense.account.id,
     to: initialTransfer?.toIncome.account.id,
     amount: initialTransfer ? Math.abs(initialTransfer.fromExpense.amount) : 0,
     rate: initialTransfer?.rate ?? 0,
-    fee: initialTransfer?.feeExpense ? Math.abs(initialTransfer.feeExpense.amount) : undefined,
-    feeAccount: initialTransfer?.feeExpense?.account.id,
+    fees: initialFees,
     executedAt: initialTransfer
       ? initialTransfer.executedAt.format(MOMENT_DATETIME_FORM_FORMAT)
       : moment().format(MOMENT_DATETIME_FORM_FORMAT),
     note: initialTransfer?.note || undefined,
-    feeIncludedInAmount: false as boolean,
   };
 
   const form = useForm<FormValues>({
@@ -100,59 +130,59 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
 
   const { control, setValue } = form;
 
-  const watched = useWatch({
-    control,
-    name: ['from', 'to', 'amount', 'rate', 'fee', 'feeAccount', 'feeIncludedInAmount'],
-  });
+  const { fields, append, remove, update: updateField } = useFieldArray({ control, name: 'fees' });
 
-  const from = watched[0];
-  const to = watched[1];
-  const amount = Number.isFinite(watched[2] as number) ? (watched[2] as number) : 0;
-  const rate = Number.isFinite(watched[3] as number) ? (watched[3] as number) : 0;
-  const fee = watched[4];
-  const feeAccount = watched[5];
-  const feeIncluded = !!watched[6];
+  const from = useWatch({ control, name: 'from' });
+  const to = useWatch({ control, name: 'to' });
+  const amount = useWatch({ control, name: 'amount' });
+  const rate = useWatch({ control, name: 'rate' });
+  const fees = useWatch({ control, name: 'fees' });
+
+  const safeAmount = Number.isFinite(amount) ? amount : 0;
+  const safeRate = Number.isFinite(rate) ? rate : 0;
 
   const fromCurrency = useMemo(() => {
     if (!Number.isFinite(from as number)) return undefined;
-    return accounts.find((a) => a.id === (from as number))?.currency;
+    return accounts.find((a) => a.id === from)?.currency;
   }, [from, accounts]);
 
   const toCurrency = useMemo(() => {
     if (!Number.isFinite(to as number)) return undefined;
-    return accounts.find((a) => a.id === (to as number))?.currency;
+    return accounts.find((a) => a.id === to)?.currency;
   }, [to, accounts]);
 
+  const filledFees = useMemo(
+    () => (fees ?? []).filter((f) => f.amount != null && f.amount > 0 && f.account != null),
+    [fees],
+  );
+
+  const includedSenderFees = useMemo(
+    () =>
+      filledFees
+        .filter((f) => f.included && f.account === from)
+        .reduce((sum, f) => sum + (f.amount ?? 0), 0),
+    [filledFees, from],
+  );
+
   const summary = useMemo(() => {
-    const feeNum = Number.isFinite(fee as number) ? (fee as number) : 0;
-    const feeFrom = feeAccount != null && from != null && feeAccount === from;
-    const netFrom = feeIncluded && feeFrom ? Math.max(amount - feeNum, 0) : amount;
-    const netTo = netFrom * rate;
-    const totalFrom = feeFrom ? (feeIncluded ? amount : amount + feeNum) : amount;
-    return { feeNum, feeFrom, netFrom, netTo, totalFrom };
-  }, [amount, rate, fee, feeAccount, feeIncluded, from]);
+    const netFrom = Math.max(safeAmount - includedSenderFees, 0);
+    const netTo = netFrom * safeRate;
+    return { netFrom, netTo };
+  }, [safeAmount, safeRate, includedSenderFees]);
 
-  const canIncludeFee = useMemo(() => {
-    const feeNum = Number.isFinite(fee as number) ? (fee as number) : 0;
-    return feeNum > 0 && feeAccount != null && from != null && feeAccount === from;
-  }, [fee, feeAccount, from]);
-
+  // Turn off "included" for any fee whose account changed away from sender
   useEffect(() => {
-    if (feeIncluded && !canIncludeFee) {
-      setValue('feeIncludedInAmount', false, { shouldDirty: true, shouldValidate: true });
+    for (const [i, f] of (fees ?? []).entries()) {
+      if (f.included && f.account != null && f.account !== from) {
+        setValue(`fees.${i}.included`, false, { shouldValidate: true });
+      }
     }
-  }, [feeIncluded, canIncludeFee, setValue]);
+  }, [fees, from, setValue]);
 
   useEffect(() => {
-    const displayed = rateMode === 'toPerFrom' ? rate : rate > 0 ? 1 / rate : 0;
+    const displayed = rateMode === 'toPerFrom' ? safeRate : safeRate > 0 ? 1 / safeRate : 0;
     setRateText(String(Number.isFinite(displayed) ? displayed : 0));
-  }, [rateMode, rate]);
-
-  // Show fee section if editing a transfer that has a fee
-  useEffect(() => {
-    if (isEditMode && initialTransfer?.feeExpense) setShowFee(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditMode]);
+  }, [rateMode, safeRate]);
 
   const normalizeRateOnBlur = () => {
     const raw = rateText.replace(',', '.').trim();
@@ -169,23 +199,35 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
     }
   };
 
+  const handleRemoveFee = (index: number) => {
+    if (fields.length === 1) {
+      updateField(0, { ...EMPTY_FEE_ROW });
+    } else {
+      remove(index);
+    }
+  };
+
   const { formRef } = useFormLogic({
     form,
     setFormState: updateFormState,
     onSubmit: async (values: FormValues) => {
       try {
-        const feeNum = Number.isFinite(values.fee as number) ? (values.fee as number) : 0;
-        const feeFrom = values.feeAccount != null && values.from != null && values.feeAccount === values.from;
-        const payloadAmount =
-          values.feeIncludedInAmount && feeFrom ? Math.max(values.amount - feeNum, 0) : values.amount;
+        const submitFees = values.fees
+          .filter((f) => f.amount != null && f.amount > 0 && f.account != null)
+          .map((f) => ({ amount: f.amount!, account: f.account! }));
+
+        const includedTotal = values.fees
+          .filter((f) => f.included && f.amount != null && f.amount > 0 && f.account === values.from)
+          .reduce((sum, f) => sum + (f.amount ?? 0), 0);
+
+        const payloadAmount = includedTotal > 0 ? Math.max(values.amount - includedTotal, 0) : values.amount;
 
         const payload = {
           from: values.from,
           to: values.to,
           amount: payloadAmount,
           rate: values.rate,
-          fee: values.fee ?? undefined,
-          feeAccount: values.feeAccount ?? undefined,
+          fees: submitFees,
           executedAt: values.executedAt,
           note: values.note || '',
         };
@@ -250,12 +292,6 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
       ? `${summary.netTo.toFixed(2)}${toCurrency ? ` ${toCurrency}` : ''}`
       : `0.00${toCurrency ? ` ${toCurrency}` : ''}`;
 
-  const chipClass = (active: boolean) =>
-    cn('h-6 px-2 rounded border font-mono text-2xs uppercase tracking-wider transition-colors cursor-pointer', {
-      'bg-muted text-foreground border-border': active,
-      'text-muted-foreground border-transparent hover:border-border': !active,
-    });
-
   return (
     <Form {...form}>
       <form aria-label="Transfer form" className="flex flex-col gap-2">
@@ -264,13 +300,6 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
           <span className="h-6 px-2 rounded border font-mono text-2xs uppercase tracking-wider bg-muted text-foreground border-border flex items-center">
             transfer
           </span>
-
-          <div className="mx-1 h-3.5 w-px bg-border" />
-
-          <button type="button" className={chipClass(showFee)} onClick={() => setShowFee((s) => !s)}>
-            fee
-          </button>
-
           <span className="ml-auto font-mono text-2xs text-muted-foreground select-none">⌘↵</span>
         </div>
 
@@ -321,7 +350,7 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
           />
         </div>
 
-        {/* Row 2: Amount · Rate (with direction toggle prepend) · Receives */}
+        {/* Row 2: Amount · Rate · Receives */}
         <div className="grid grid-cols-3 gap-2">
           <FormField
             control={control}
@@ -391,85 +420,115 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
           </div>
         </div>
 
-        {/* Fee row */}
-        {showFee && (
-          <div className="flex gap-2 items-center">
-            <FormField
-              control={control}
-              name="fee"
-              render={({ field }) => (
-                <FormItem className="flex-1 min-w-0">
-                  <FormControl>
-                    <div className="relative">
-                      <Input
-                        {...field}
-                        aria-label="Fee amount"
-                        inputMode="decimal"
-                        placeholder="Fee"
-                        type="number"
-                        className="h-7 text-xs pr-10"
-                        onChange={(e) => {
-                          const n = e.target.valueAsNumber;
-                          field.onChange(Number.isFinite(n) ? n : undefined);
-                        }}
-                      />
-                      {fromCurrency && (
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-2xs font-mono text-muted-foreground pointer-events-none">
-                          {fromCurrency}
-                        </span>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        {/* Fee rows — always visible, submitted only if filled */}
+        <div className="flex flex-col gap-1">
+          {fields.map((field, index) => {
+            const feeAccount = fees?.[index]?.account;
+            const feeCurrency = feeAccount != null ? accounts.find((a) => a.id === feeAccount)?.currency : undefined;
+            const isSenderFee = feeAccount != null && feeAccount === from;
+            const isIncluded = fees?.[index]?.included ?? false;
 
-            <FormField
-              control={control}
-              name="feeAccount"
-              render={({ field }) => (
-                <FormItem className="flex-[2] min-w-0">
-                  <AccountTypeahead
-                    aria-label="Fee account"
-                    disabled={field.disabled}
-                    multiple={false}
-                    name={field.name}
-                    size="sm"
-                    value={field.value != null ? String(field.value) : null}
-                    className={cn('w-full', { 'text-muted-foreground': !field.value })}
-                    onBlur={field.onBlur}
-                    onChange={(v) => field.onChange(v ? Number(v) : undefined)}
-                    ref={field.ref}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name="feeIncludedInAmount"
-              render={({ field }) => (
-                <button
-                  disabled={!canIncludeFee}
-                  type="button"
-                  className={cn(
-                    'h-7 px-2 rounded border font-mono text-2xs uppercase tracking-wider transition-colors shrink-0',
-                    {
-                      'bg-muted text-foreground border-border': field.value,
-                      'text-muted-foreground border-transparent hover:border-border': !field.value && canIncludeFee,
-                      'opacity-40 cursor-not-allowed border-transparent': !canIncludeFee,
-                    },
+            return (
+              <div className="flex gap-2 items-center" key={field.id}>
+                <FormField
+                  control={control}
+                  name={`fees.${index}.amount`}
+                  render={({ field: f }) => (
+                    <FormItem className="flex-1 min-w-0">
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            {...f}
+                            aria-label={`Fee ${index + 1} amount`}
+                            inputMode="decimal"
+                            placeholder="Fee"
+                            type="number"
+                            value={f.value ?? ''}
+                            className="h-7 text-xs pr-10"
+                            onChange={(e) => {
+                              const n = e.target.valueAsNumber;
+                              f.onChange(Number.isFinite(n) ? n : undefined);
+                            }}
+                          />
+                          {(feeCurrency ?? fromCurrency) && (
+                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-2xs font-mono text-muted-foreground pointer-events-none">
+                              {feeCurrency ?? fromCurrency}
+                            </span>
+                          )}
+                        </div>
+                      </FormControl>
+                    </FormItem>
                   )}
-                  onClick={() => field.onChange(!field.value)}
-                >
-                  incl
-                </button>
-              )}
+                />
+
+                <FormField
+                  control={control}
+                  name={`fees.${index}.account`}
+                  render={({ field: f }) => (
+                    <FormItem className="flex-[2] min-w-0">
+                      <AccountTypeahead
+                        aria-label={`Fee ${index + 1} account`}
+                        disabled={f.disabled}
+                        multiple={false}
+                        name={f.name}
+                        size="sm"
+                        value={f.value != null ? String(f.value) : null}
+                        className={cn('w-full', { 'text-muted-foreground': !f.value })}
+                        onBlur={f.onBlur}
+                        onChange={(v) => f.onChange(v ? Number(v) : undefined)}
+                        ref={f.ref}
+                      />
+                    </FormItem>
+                  )}
+                />
+
+                {/* incl chip — only for sender-account fees */}
+                {isSenderFee ? (
+                  <button
+                    type="button"
+                    className={cn(
+                      'h-7 px-2 rounded border font-mono text-2xs uppercase tracking-wider transition-colors shrink-0',
+                      {
+                        'bg-muted text-foreground border-border': isIncluded,
+                        'text-muted-foreground border-transparent hover:border-border': !isIncluded,
+                      },
+                    )}
+                    onClick={() => setValue(`fees.${index}.included`, !isIncluded, { shouldValidate: true })}
+                  >
+                    incl
+                  </button>
+                ) : (
+                  <button
+                    aria-label={`Remove fee ${index + 1}`}
+                    type="button"
+                    className="h-7 w-7 flex items-center justify-center rounded border border-transparent text-muted-foreground hover:text-destructive hover:border-border transition-colors shrink-0"
+                    onClick={() => handleRemoveFee(index)}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+
+          {/* Add fee + array-level errors */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="h-6 px-2 rounded border border-transparent font-mono text-2xs text-muted-foreground hover:border-border transition-colors flex items-center gap-1"
+              onClick={() => append({ ...EMPTY_FEE_ROW })}
+            >
+              <Plus className="h-3 w-3" />
+              add
+            </button>
+
+            <FormField
+              control={control}
+              name="fees"
+              render={() => <FormMessage />}
             />
           </div>
-        )}
+        </div>
 
         {/* Row 3: Date · Note */}
         <div className="flex gap-2">

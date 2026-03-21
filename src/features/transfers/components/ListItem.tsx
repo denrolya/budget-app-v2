@@ -31,10 +31,10 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
             <ArrowRightLeft className="h-3 w-3 flex-shrink-0" />
             <AccountPill account={transfer.toIncome.account} size="sm" className="flex-shrink-0" />
           </span>
-          {transfer.feeExpense && transfer.hasFee() && (
+          {transfer.hasFee() && (
             <FeeIndicator
-              feeAmount={transfer.feeExpense.amount}
-              feeCurrency={transfer.feeExpense.account.currency}
+              feeExpenses={transfer.feeExpenses}
+              senderCurrency={transfer.fromExpense.account.currency}
               transferAmount={transfer.amount}
             />
           )}
@@ -53,7 +53,9 @@ export const ListItem: React.FC<TransferItemProps> = ({ transfer }) => (
               </SheetTrigger>
               <SheetContent className="max-w-3xl" onOpenAutoFocus={(event) => event.preventDefault()}>
                 <SheetHeader>
-                  <SheetTitle className="tracking-tight text-xl font-bold">Transfer Details</SheetTitle>
+                  <SheetTitle className="tracking-tight text-xl font-bold">
+                    Transfer #{transfer.id}
+                  </SheetTitle>
                 </SheetHeader>
                 <TransferDetails transfer={transfer} />
               </SheetContent>

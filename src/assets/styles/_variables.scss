@@ -5,10 +5,5 @@ $transition-timing: ease;
   transition-duration: $transition-duration;
   transitionTiming: $transition-timing;
 }
-:root {
-  --account-base-EUR: #0077cc; // Default Blue
-  --account-base-USD: #4caf50; // Default Green
-  --account-base-UAH: #ffc107; // Default Amber
-  --account-base-HUF: #e53935; // Default Red
-  --account-base-BTC: #ff9800; // Default Orange
-}
+// Account base colors are now defined per-theme in themes/_light.scss, _dark.scss, _tron_dark.scss
+// as --account-base-eur, --account-base-usd, etc. (HSL values, theme-aware)

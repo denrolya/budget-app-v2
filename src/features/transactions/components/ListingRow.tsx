@@ -1,6 +1,6 @@
 import { Eye, FileCheck, Pencil, Trash2 } from 'lucide-react';
 import moment from 'moment';
-import React, { useId, useMemo } from 'react';
+import React, { useCallback, useId, useMemo } from 'react';
 
 import CellPopover from '@/components/common/CellPopover';
 import { Badge } from '@/components/ui/badge';
@@ -345,8 +345,6 @@ export const ListingRow = ({
   const disabled = false;
   const isCompensated = transaction.isExpense() && (transaction.compensations?.length ?? 0) > 0;
 
-  const normalizedColumns = useMemo(() => columns, [columns]);
-
   const ctx = useMemo<CellRendererArgs>(
     () => ({
       tx: transaction,
@@ -407,10 +405,10 @@ export const ListingRow = ({
     [ctx],
   );
 
-  const onView = useMemo(() => () => ctx.onSheetOpenChange?.(true), [ctx]);
-  const onEdit = useMemo(() => () => ctx.onOpenForm(ctx.tx), [ctx]);
-  const onRemove = useMemo(() => () => ctx.onDelete(ctx.tx), [ctx]);
-  const onUnmarkDraft = useMemo(() => () => ctx.onToggleDraft?.(ctx.tx), [ctx]);
+  const onView = useCallback(() => ctx.onSheetOpenChange?.(true), [ctx]);
+  const onEdit = useCallback(() => ctx.onOpenForm(ctx.tx), [ctx]);
+  const onRemove = useCallback(() => ctx.onDelete(ctx.tx), [ctx]);
+  const onUnmarkDraft = useCallback(() => ctx.onToggleDraft?.(ctx.tx), [ctx]);
 
   return (
     <ContextMenu>
@@ -428,7 +426,7 @@ export const ListingRow = ({
         >
           <TableCell className={cellClassName(compact, 'w-4')} />
 
-          {normalizedColumns.map((c, idx) => (
+          {columns.map((c, idx) => (
             <TableCell className={cellClassName(compact, c.className)} key={`${c.key}-${idx}`}>
               {cellsByKey[c.key]}
             </TableCell>

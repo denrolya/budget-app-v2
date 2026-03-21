@@ -52,6 +52,20 @@
   --chart-tooltip-background: 0 0% 100%;
   --chart-tooltip-text-color: 220 25% 12%;
 
+  /* Currency colors */
+  --currency-eur: 210 85% 55%;
+  --currency-usd: 142 60% 50%;
+  --currency-uah: 43 90% 55%;
+  --currency-huf: 262 70% 57%;
+  --currency-btc: 28 85% 55%;
+
+  /* Account base colors (used by _account_colors.scss modifiers) */
+  --account-base-eur: 205 100% 40%;
+  --account-base-usd: 122 44% 50%;
+  --account-base-uah: 45 100% 51%;
+  --account-base-huf: 2 76% 56%;
+  --account-base-btc: 33 100% 50%;
+
   --sidebar-background: 220 20% 96%;
   --sidebar-foreground: 220 25% 20%;
 }

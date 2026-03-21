@@ -206,9 +206,9 @@ const BudgetDetailRoute: React.FC = () => {
           {/* Pace chart + Heatmap row */}
           <div className="grid grid-cols-1 xl:grid-cols-[1fr_2fr] gap-4 items-stretch">
             <div className="flex flex-col gap-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
                 Expense progress
-              </p>
+              </h2>
               <div className="rounded-lg border bg-card p-2 flex-1">
                 <BudgetPaceChart
                   analytics={analytics}
@@ -220,9 +220,9 @@ const BudgetDetailRoute: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
                 Spending heatmap
-              </p>
+              </h2>
               <div className="rounded-lg border bg-card p-3 flex-1">
                 <BudgetHeatmapSection
                   analytics={analytics}
@@ -236,9 +236,9 @@ const BudgetDetailRoute: React.FC = () => {
 
           {/* Expense breakdown (distribution + planned vs actual merged) */}
           <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
               Expense breakdown
-            </p>
+            </h2>
             <div className="rounded-lg border bg-card p-3">
               <BudgetDistributionChart
                 analytics={analytics}
@@ -253,7 +253,7 @@ const BudgetDetailRoute: React.FC = () => {
 
           {/* Budget table */}
           <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">Budget lines</p>
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">Budget lines</h2>
             <div className="rounded-lg border bg-card overflow-hidden">
               <BudgetTable
                 analytics={analytics}

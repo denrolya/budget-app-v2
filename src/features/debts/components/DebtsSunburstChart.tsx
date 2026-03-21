@@ -2,6 +2,7 @@ import { ResponsivePie } from '@nivo/pie';
 import React, { useCallback, useMemo } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
+import { CHART_COLORS } from '@/constants/recharts';
 import { useBaseCurrency } from '@/features/auth';
 
 import type Debt from '../models/Debt';
@@ -29,21 +30,6 @@ interface Props {
   onNavigate?: (debtId: number) => void;
 }
 
-// ── Palette ───────────────────────────────────────────────────────────────────
-
-const PALETTE = [
-  '#6366f1',
-  '#f43f5e',
-  '#f59e0b',
-  '#10b981',
-  '#06b6d4',
-  '#a855f7',
-  '#f97316',
-  '#14b8a6',
-  '#ec4899',
-  '#84cc16',
-];
-
 // ── Datum type ────────────────────────────────────────────────────────────────
 
 type PieDatum = {
@@ -70,7 +56,7 @@ const DebtsSunburstChart: React.FC<Props> = ({ debts, onHoverChange, onNavigate 
       id: d.id.toString(),
       label: d.debtor,
       value: Math.max(Math.abs(d.convertedValues?.[baseCurrency] ?? d.balance), 0.001),
-      color: PALETTE[i % PALETTE.length],
+      color: CHART_COLORS[i % CHART_COLORS.length],
       debtId: d.id,
       currency: d.currency,
       rawBalance: d.balance,
@@ -160,7 +146,7 @@ const DebtsSunburstChart: React.FC<Props> = ({ debts, onHoverChange, onNavigate 
   }
 
   return (
-    <div style={{ cursor: onNavigate ? 'pointer' : 'default' }} className="h-full w-full">
+    <div aria-label="Debts distribution" role="img" style={{ cursor: onNavigate ? 'pointer' : 'default' }} className="h-full w-full">
       <ResponsivePie
         activeInnerRadiusOffset={6}
         activeOuterRadiusOffset={8}

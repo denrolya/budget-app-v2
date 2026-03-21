@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,8 +32,8 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({
   }
 
   const currentDate = moment(label);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const formattedDate = useMemo(() => {
+
+  const formatDate = (): string => {
     switch (selectedPeriod) {
       case 'P1D':
         return currentDate.format('MMM D, YYYY');
@@ -53,7 +53,8 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({
       default:
         return currentDate.format(MOMENT_DATE_VIEW_FORMAT);
     }
-  }, [currentDate, selectedPeriod]);
+  };
+  const formattedDate = formatDate();
 
   const totalExpense = payload.find((entry) => entry.name === 'Total Expense');
   const totalIncome = payload.find((entry) => entry.name === 'Total Income');

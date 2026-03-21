@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
-import RelativeDatetimeDisplay from '@/components/common/RelativeDatetimeDisplay';
+import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { cn } from '@/lib/utils';
+import { MOMENT_DATETIME_VIEW_FORMAT } from '@/constants/datetime';
+import { formatTransferExchangeRate } from '@/lib/formatTransferExchangeRate';
 import type Transfer from '@/features/transfers/models/Transfer';
 import { AccountPill } from '@/features/accounts';
 import { TransactionListItem } from '@/features/transactions';
@@ -16,10 +18,6 @@ interface TransferDetailsProps {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-/**
- * Terminal-style key/value row. Label is fixed-width monospace uppercase,
- * value slot is the right-hand side content.
- */
 const DataRow: React.FC<{ label: string; children: React.ReactNode; className?: string }> = ({
   label,
   children,
@@ -33,9 +31,6 @@ const DataRow: React.FC<{ label: string; children: React.ReactNode; className?: 
   </div>
 );
 
-/**
- * Section divider with an optional label, terminal-style dashed rule.
- */
 const SectionDivider: React.FC<{ label?: string }> = ({ label }) => (
   <div className="flex items-center gap-2 my-3">
     <span className="font-mono text-3xs uppercase tracking-widest text-muted-foreground/50 select-none whitespace-nowrap">
@@ -48,34 +43,48 @@ const SectionDivider: React.FC<{ label?: string }> = ({ label }) => (
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
-  const feePercentage =
-    transfer.hasFee() && transfer.feeExpense ? ((transfer.feeExpense.amount / transfer.amount) * 100).toFixed(2) : null;
-
-  const senderTotal =
-    transfer.feeExpense?.account.id === transfer.fromExpense.account.id
-      ? -(transfer.fromExpense.amount + transfer.feeExpense!.amount)
-      : -transfer.fromExpense.amount;
-
-  const recipientTotal =
-    transfer.feeExpense?.account.id === transfer.toIncome.account.id
-      ? transfer.feeExpense!.amount + transfer.toIncome.amount
-      : transfer.toIncome.amount;
-
   const senderCurrency = transfer.fromExpense.account.currency;
-  const recipientCurrency =
-    transfer.feeExpense?.account.id === transfer.toIncome.account.id
-      ? transfer.feeExpense!.account.currency
-      : transfer.toIncome.account.currency;
+  const recipientCurrency = transfer.toIncome.account.currency;
+
+  const stats = useMemo(() => {
+    // All fees converted to sender currency for a single loss figure
+    const totalFeesInSenderCurr = transfer.feeExpenses.reduce((sum, tx) => {
+      const converted = tx.convertedValues?.[senderCurrency];
+      return sum + (converted ?? tx.amount);
+    }, 0);
+
+    // Recipient-side fees in recipient currency
+    const recipientFees = transfer.feeExpenses
+      .filter((tx) => tx.account.id === transfer.toIncome.account.id)
+      .reduce((sum, tx) => sum + tx.amount, 0);
+
+    const feePct = transfer.amount > 0 ? (totalFeesInSenderCurr / transfer.amount) * 100 : 0;
+    const totalCost = transfer.amount + totalFeesInSenderCurr;
+    const netReceived = transfer.toIncome.amount - recipientFees;
+
+    // Effective rate: what you actually got per unit spent
+    const effectiveRate = totalCost > 0 ? netReceived / totalCost : transfer.rate;
+
+    return { totalFeesInSenderCurr, feePct, totalCost, netReceived, effectiveRate };
+  }, [transfer, senderCurrency]);
 
   return (
     <div className="font-mono text-xs">
       {/* ── Core transfer data ────────────────────────────────────────────────── */}
 
+      <DataRow label="Date">
+        <span className="font-mono text-xs text-muted-foreground">
+          {transfer.executedAt.format(MOMENT_DATETIME_VIEW_FORMAT)}
+        </span>
+      </DataRow>
+
       <DataRow label="Amount">
         <MoneyValue
+          revert
           amount={transfer.amount}
-          currency={transfer.fromExpense.account.currency}
+          currency={senderCurrency}
           useColors={false}
+          values={transfer.fromExpense.convertedValues}
           className="font-mono text-sm font-semibold"
         />
       </DataRow>
@@ -96,59 +105,94 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
         />
       </DataRow>
 
-      <DataRow label="Date">
-        <RelativeDatetimeDisplay
-          date={transfer.executedAt}
-          showDayBadge={false}
-          showRelative={false}
-          variant="default"
-          className="font-mono text-xs text-muted-foreground"
+      <SectionDivider label="Summary" />
+
+      <DataRow label="Sent">
+        <MoneyValue
+          revert
+          amount={transfer.amount}
+          currency={senderCurrency}
+          useColors={false}
+          values={transfer.fromExpense.convertedValues}
+          className="font-mono text-xs"
         />
       </DataRow>
 
-      {/* ── Related transactions ──────────────────────────────────────────────── */}
-      <SectionDivider label="Related Transactions" />
+      <DataRow label="Received">
+        <MoneyValue
+          revert
+          amount={stats.netReceived}
+          currency={recipientCurrency}
+          useColors={false}
+          values={transfer.toIncome.convertedValues}
+          className="font-mono text-xs"
+        />
+      </DataRow>
 
-      {/* Sender */}
-      <div className="space-y-1 mb-3">
-        <div className="flex items-center justify-between">
-          <span className="text-3xs uppercase tracking-widest text-muted-foreground">Sender</span>
-          <MoneyValue showSign amount={senderTotal} currency={senderCurrency} className="font-mono text-xs" />
-        </div>
-        <TransactionListItem flat transaction={transfer.fromExpense} />
-      </div>
-
-      {/* Recipient */}
-      <div className="space-y-1">
-        <div className="flex items-center justify-between">
-          <span className="text-3xs uppercase tracking-widest text-muted-foreground">Recipient</span>
-          <MoneyValue showSign amount={recipientTotal} currency={recipientCurrency} className="font-mono text-xs" />
-        </div>
-        <TransactionListItem flat transaction={transfer.toIncome} />
-      </div>
-
-      {/* ── Fee ───────────────────────────────────────────────────────────────── */}
-      {transfer.hasFee() && transfer.feeExpense && (
+      {transfer.hasFee() && (
         <>
-          <SectionDivider label="Fee" />
+          <DataRow label="Fees">
+            <span className="flex items-center gap-2">
+              <MoneyValue
+                amount={-stats.totalFeesInSenderCurr}
+                currency={senderCurrency}
+                useColors={false}
+                className="font-mono text-xs text-destructive"
+              />
+              <span className="text-3xs text-destructive/75 font-mono">
+                {stats.feePct.toFixed(2)}%
+              </span>
+            </span>
+          </DataRow>
+
+          <DataRow label="Total cost">
+            <MoneyValue
+              amount={stats.totalCost}
+              currency={senderCurrency}
+              useColors={false}
+              className="font-mono text-xs font-semibold"
+            />
+          </DataRow>
+
+          {senderCurrency !== recipientCurrency && (() => {
+            const [from, to] = formatTransferExchangeRate(
+              [senderCurrency, recipientCurrency],
+              stats.effectiveRate,
+            );
+            const fromLabel = CURRENCIES[from.currency as CURRENCY_CODE]?.symbol ?? from.currency;
+            const toLabel = CURRENCIES[to.currency as CURRENCY_CODE]?.symbol ?? to.currency;
+            return (
+              <DataRow label="Eff. rate">
+                <span className="font-mono text-xs text-muted-foreground">
+                  {from.amount} {fromLabel} = {to.amount} {toLabel}
+                </span>
+              </DataRow>
+            );
+          })()}
+        </>
+      )}
+
+      {/* ── Transactions ──────────────────────────────────────────────────────── */}
+      <SectionDivider label="Transactions" />
+
+      <div className="space-y-1">
+        <TransactionListItem flat revertValue transaction={transfer.fromExpense} />
+        <TransactionListItem flat revertValue transaction={transfer.toIncome} />
+      </div>
+
+      {/* ── Fees ──────────────────────────────────────────────────────────────── */}
+      {transfer.hasFee() && (
+        <>
+          <SectionDivider label={transfer.feeExpenses.length > 1 ? 'Fees' : 'Fee'} />
 
           <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-3xs uppercase tracking-widest text-muted-foreground">Transfer Fee</span>
-              <div className="flex items-center gap-2">
-                <MoneyValue
-                  showSign
-                  amount={-transfer.feeExpense.amount}
-                  currency={transfer.feeExpense.account.currency}
-                  className="font-mono text-xs font-medium"
-                />
-                {feePercentage && <span className="text-3xs text-destructive/75 font-mono">({feePercentage}%)</span>}
-              </div>
-            </div>
-            <TransactionListItem flat transaction={transfer.feeExpense} />
+            {transfer.feeExpenses.map((feeTx) => (
+              <TransactionListItem flat revertValue key={feeTx.id} transaction={feeTx} />
+            ))}
           </div>
         </>
       )}
+
     </div>
   );
 };

@@ -126,7 +126,7 @@ const BudgetAlertsSection: React.FC<Props> = ({ budget, analytics, displayCurren
         <div className={overspent.length > 0 ? 'border-t border-destructive/20 pt-2' : ''}>
           <button
             type="button"
-            className="w-full flex items-center justify-between gap-1.5 text-yellow-600 dark:text-yellow-400 font-medium text-xs mb-1.5 hover:opacity-80 transition-opacity"
+            className="w-full flex items-center justify-between gap-1.5 text-warning font-medium text-xs mb-1.5 hover:opacity-80 transition-opacity"
             onClick={() => setUnbudgetedOpen((o) => !o)}
           >
             <span className="flex items-center gap-1.5">
@@ -143,11 +143,11 @@ const BudgetAlertsSection: React.FC<Props> = ({ budget, analytics, displayCurren
             <div className="flex flex-wrap gap-2">
               {unbudgeted.map((item) => (
                 <span
-                  className="inline-flex items-center gap-1 rounded-md border border-yellow-400/30 bg-background px-2 py-0.5 text-xs"
+                  className="inline-flex items-center gap-1 rounded-md border border-warning/30 bg-background px-2 py-0.5 text-xs"
                   key={item.name}
                 >
                   <span className="text-muted-foreground">{item.name}</span>
-                  <span className="text-yellow-600 dark:text-yellow-400 font-medium">
+                  <span className="text-warning font-medium">
                     {fmtAmt(item.actual, displayCurrency)}
                   </span>
                 </span>

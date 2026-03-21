@@ -182,7 +182,7 @@ export const useTransactionsAndTransfersList = ({
 
   const transactionItems = useMemo(
     () => allItems.filter(isTransactionDTO).map((dto) => createTransaction(dto)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- allItems derived inline from query.data; keying on query.data avoids unnecessary model re-creation
     [query.data],
   );
 
@@ -198,7 +198,7 @@ export const useTransactionsAndTransfersList = ({
             transactions: dto.transactions.map((t) => createTransaction(t)),
           }),
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- allItems derived inline from query.data; keying on query.data avoids unnecessary model re-creation
     [query.data],
   );
 

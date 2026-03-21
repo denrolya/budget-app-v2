@@ -105,7 +105,7 @@ export const useAccountDistribution = (
 
   useEffect(() => {
     refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- spread of caller-provided DependencyList is intentional
   }, [refetch, ...dependencies]);
 
   return {

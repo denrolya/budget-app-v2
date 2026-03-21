@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { CURRENCIES } from '@/constants/currency';
 import { useBaseCurrency } from '@/features/auth';
 import { useActiveAccounts } from '@/hooks/financeData';
+import { resolveHslOrMuted } from '@/lib/resolveCssVar';
 import { cn } from '@/lib/utils';
 
 import AccountMarker from '../components/AccountMarker';
@@ -74,8 +75,7 @@ const AccountsSidebar: React.FC<{ selectedId: string | null }> = ({ selectedId }
       .map(([currency, accs]) => {
         const total = accs.reduce((s, acc) => s + Math.abs(acc.convertedValues?.[baseCurrency] ?? 0), 0);
         const symbol = CURRENCIES[currency as keyof typeof CURRENCIES]?.symbol ?? currency;
-        const color =
-          getComputedStyle(document.documentElement).getPropertyValue(`--account-bank-${currency}`).trim() || '#888';
+        const color = resolveHslOrMuted(`--account-bank-${currency}`);
         return {
           currency,
           symbol,
@@ -106,7 +106,7 @@ const AccountsSidebar: React.FC<{ selectedId: string | null }> = ({ selectedId }
                   ) : (
                     <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                   )}
-                  <span className="text-xs font-semibold text-foreground">{group.label}</span>
+                  <h2 className="text-xs font-semibold text-foreground">{group.label}</h2>
                 </div>
                 <MoneyValue
                   amount={group.total}
@@ -171,8 +171,8 @@ const AccountsSidebar: React.FC<{ selectedId: string | null }> = ({ selectedId }
               </div>
               <div className="h-1 bg-secondary rounded-full overflow-hidden">
                 <div
-                  style={{ width: `${percentage}%`, backgroundColor: color }}
-                  className="h-full rounded-full transition-[width] duration-500 ease-out"
+                  style={{ transform: `scaleX(${percentage / 100})`, backgroundColor: color }}
+                  className="h-full rounded-full origin-left transition-transform duration-500 ease-out"
                 />
               </div>
             </div>

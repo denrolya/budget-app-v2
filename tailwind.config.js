@@ -88,6 +88,13 @@ export default {
           9: 'hsl(var(--chart-9))',
           10: 'hsl(var(--chart-10))',
         },
+        currency: {
+          eur: 'hsl(var(--currency-eur))',
+          usd: 'hsl(var(--currency-usd))',
+          uah: 'hsl(var(--currency-uah))',
+          huf: 'hsl(var(--currency-huf))',
+          btc: 'hsl(var(--currency-btc))',
+        },
         sidebar: {
           DEFAULT: 'hsl(var(--sidebar-background))',
           foreground: 'hsl(var(--sidebar-foreground))',

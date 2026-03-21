@@ -9,6 +9,16 @@ import type { CreateTransferInput, UpdateTransferInput } from '../types';
 
 import { queryKeys } from './keys';
 
+const buildPayload = (input: CreateTransferInput) => ({
+  from: input.from,
+  to: input.to,
+  amount: input.amount,
+  rate: input.rate,
+  fees: input.fees,
+  executedAt: moment(input.executedAt).toISOString(),
+  note: input.note ?? '',
+});
+
 export const useMutations = (opts?: { invalidateKey?: readonly unknown[] }) => {
   const qc = useQueryClient();
   const invalidateKey = opts?.invalidateKey ?? queryKeys.all;
@@ -22,20 +32,8 @@ export const useMutations = (opts?: { invalidateKey?: readonly unknown[] }) => {
   };
 
   const createMutation = useMutation({
-    mutationFn: async (input: CreateTransferInput) => {
-      const payload = {
-        from: input.from,
-        to: input.to,
-        amount: String(input.amount),
-        rate: String(input.rate),
-        fee: input.fee != null ? String(input.fee) : undefined,
-        feeAccount: input.feeAccount,
-        executedAt: moment(input.executedAt).toISOString(),
-        note: input.note ?? '',
-      };
-
-      return api.post('/api/transfers', payload).then((r) => r.data);
-    },
+    mutationFn: async (input: CreateTransferInput) =>
+      api.post('/api/transfers', buildPayload(input)).then((r) => r.data),
     onSuccess: async () => {
       await invalidate();
       toast.success('Transfer created successfully');
@@ -61,19 +59,8 @@ export const useMutations = (opts?: { invalidateKey?: readonly unknown[] }) => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, ...input }: UpdateTransferInput) => {
-      const payload = {
-        from: input.from,
-        to: input.to,
-        amount: String(input.amount),
-        rate: String(input.rate),
-        fee: input.fee != null ? String(input.fee) : undefined,
-        feeAccount: input.feeAccount,
-        executedAt: moment(input.executedAt).toISOString(),
-        note: input.note ?? '',
-      };
-      return api.put(`/api/transfers/${id}`, payload).then((r) => r.data);
-    },
+    mutationFn: async ({ id, ...input }: UpdateTransferInput) =>
+      api.put(`/api/transfers/${id}`, buildPayload(input)).then((r) => r.data),
     onSuccess: async () => {
       await invalidate();
       toast.success('Transfer updated successfully');

@@ -89,7 +89,7 @@ const ConnectBankDialog: React.FC<Props> = ({ open, onOpenChange, account }) => 
         setSelectedIntegrationId(activeIntegrations.length === 1 ? activeIntegrations[0].id : null);
       }
     }
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps -- reset state on open/close; other deps are read but shouldn't trigger re-run
 
   // Once integrations load, set the correct step
   useEffect(() => {
@@ -98,7 +98,7 @@ const ConnectBankDialog: React.FC<Props> = ({ open, onOpenChange, account }) => 
       setStep('setup');
       setSelectedIntegrationId(null);
     }
-  }, [integrations.isSuccess, activeIntegrations.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [integrations.isSuccess, activeIntegrations.length]); // eslint-disable-line react-hooks/exhaustive-deps -- sync step with integration state; open/step read but shouldn't trigger
 
   // Reset external account when integration changes
   useEffect(() => {

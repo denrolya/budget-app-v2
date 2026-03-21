@@ -11,7 +11,7 @@ import MoneyValue from '@/components/common/MoneyValue';
 
 import CardSkeleton from './CardSkeleton';
 import Chart from './Chart';
-import { CURRENCY_COLORS, DEFAULT_COLOR } from './constants';
+import { getCurrencyColor, getDefaultColor } from './constants';
 import DistributionList from './DistributionList';
 import DonutTooltip from './DonutTooltip';
 import type { DrawerListingTarget } from './TransactionsDrawer';
@@ -140,12 +140,12 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
   );
 
   const accountsColors = useMemo<PieSvgProps<Datum>['colors']>(
-    () => (d) => accountsById.get(String((d as { id: string | number }).id))?.color ?? DEFAULT_COLOR,
+    () => (d) => accountsById.get(String((d as { id: string | number }).id))?.color ?? getDefaultColor(),
     [accountsById],
   );
 
   const currenciesColors = useMemo<PieSvgProps<Datum>['colors']>(
-    () => (d) => CURRENCY_COLORS[String((d as { id: string | number }).id)] ?? DEFAULT_COLOR,
+    () => (d) => getCurrencyColor(String((d as { id: string | number }).id)),
     [],
   );
 
@@ -333,7 +333,7 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
         <div className="flex-1 min-h-0 overflow-hidden">
           <DistributionList
             ariaLabel="Currencies distribution list"
-            getDotColor={(item) => CURRENCY_COLORS[String(item.id)] ?? DEFAULT_COLOR}
+            getDotColor={(item) => getCurrencyColor(String(item.id))}
             items={currencyItemsAll}
             total={currenciesGrandTotal}
             onRowClick={onCurrencySelect}

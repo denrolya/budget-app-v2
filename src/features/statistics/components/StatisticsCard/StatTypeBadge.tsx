@@ -15,13 +15,13 @@ interface StatTypeInfo {
 const getStatTypeInfo = (statType: StatType): StatTypeInfo => {
   switch (statType) {
     case 'sum':
-      return { icon: DollarSignIcon, label: 'Total', color: 'bg-blue-100 text-blue-800' };
+      return { icon: DollarSignIcon, label: 'Total', color: 'bg-info/15 text-info' };
     case 'daily':
       return { icon: CalendarIcon, label: 'Daily', color: 'bg-success/15 text-success' };
     case 'avg':
-      return { icon: TrendingUpIcon, label: 'Average', color: 'bg-purple-100 text-purple-800' };
+      return { icon: TrendingUpIcon, label: 'Average', color: 'bg-primary/15 text-primary' };
     case 'min-max':
-      return { icon: BarChartIcon, label: 'Range', color: 'bg-orange-100 text-orange-800' };
+      return { icon: BarChartIcon, label: 'Range', color: 'bg-warning/15 text-warning' };
   }
 };
 

@@ -2,25 +2,9 @@ import { ResponsiveLine, type SliceTooltipProps } from '@nivo/line';
 import moment from 'moment';
 import React from 'react';
 
-const CHART_HEIGHT = 52;
+import { resolveToRgb } from '@/lib/resolveCssVar';
 
-/**
- * Resolve a CSS custom-property to a concrete color string.
- * Needed because SVG stop-color doesn't support var() references.
- * Uses a temporary element so the browser's CSS engine does the conversion.
- */
-const resolveCssVar = (varName: string): string => {
-  if (typeof window === 'undefined') return '#888';
-  const raw = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-  if (!raw) return '#888';
-  // Ask the browser to parse hsl(raw) and give us back an rgb() string
-  const el = document.createElement('span');
-  el.style.color = `hsl(${raw})`;
-  document.documentElement.appendChild(el);
-  const resolved = getComputedStyle(el).color; // "rgb(R, G, B)"
-  el.remove();
-  return resolved || '#888';
-};
+const CHART_HEIGHT = 52;
 
 interface Props {
   /** Array of {x: 'YYYY-MM-DD', y: rate} points, sorted chronologically */
@@ -50,7 +34,7 @@ const RateSparkline: React.FC<Props> = ({ data, isLoading = false, maximumFracti
   const last = data[data.length - 1].y;
   const isUp = last >= first;
   // Resolve to a real rgb() color — both line and gradient use the same value
-  const lineColor = resolveCssVar(isUp ? '--success' : '--destructive');
+  const lineColor = resolveToRgb(isUp ? '--success' : '--destructive');
 
   const SliceTooltip = ({ slice }: SliceTooltipProps) => {
     const point = slice.points[0];

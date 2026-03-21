@@ -234,7 +234,7 @@ const TreeNode: React.FC<Props> = ({
 
                 {!category.isAffectingProfit && (
                   <div className={flagsClassName}>
-                    <span className="size-1.5 rounded-full bg-orange-400" />
+                    <span className="size-1.5 rounded-full bg-warning" />
                   </div>
                 )}
 

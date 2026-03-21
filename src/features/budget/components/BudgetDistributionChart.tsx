@@ -2,6 +2,7 @@ import { ResponsiveBar } from '@nivo/bar';
 import React, { useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
+import { CHART_COLORS } from '@/constants/recharts';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 import { getExchangeRate } from '@/lib/getExchangeRates';
@@ -18,25 +19,11 @@ interface Props {
   rates: ConvertedValues | null;
 }
 
-// 15 hand-picked maximally-distinct hues for dark backgrounds.
-// Hash assigns a preferred slot; collision resolution guarantees no two categories share a color.
-const CATEGORY_PALETTE = [
-  'hsl(210 70% 55%)', // blue
-  'hsl(150 60% 48%)', // teal
-  'hsl(35 80% 55%)', // orange
-  'hsl(280 60% 58%)', // purple
-  'hsl(55 75% 50%)', // yellow
-  'hsl(340 65% 55%)', // rose
-  'hsl(180 55% 48%)', // cyan
-  'hsl(100 55% 48%)', // green
-  'hsl(15 75% 55%)', // red-orange
-  'hsl(250 60% 62%)', // indigo
-  'hsl(75 60% 45%)', // lime
-  'hsl(320 55% 55%)', // magenta
-  'hsl(195 65% 50%)', // sky
-  'hsl(120 45% 55%)', // emerald
-  'hsl(0 65% 55%)', // red
-];
+/**
+ * Category chart palette: uses the 10 shared chart CSS vars (theme-aware),
+ * extended to 15 slots by cycling back through the first 5.
+ */
+const CATEGORY_PALETTE = [...CHART_COLORS, ...CHART_COLORS.slice(0, 5)];
 
 const hashStr = (s: string): number => {
   let h = 5381;
@@ -166,7 +153,7 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, budget, displayCu
   const distData = [...chartData].reverse();
 
   return (
-    <div>
+    <div aria-label="Budget distribution" role="img">
       {/* Stacked distribution bar */}
       <div className="flex h-2 rounded-full overflow-hidden gap-px mb-3">
         {distData

@@ -18,7 +18,7 @@ const UNASSIGNED: Bucket = {
   id: '__unassigned__',
   name: 'Unassigned',
   emoji: '📦',
-  color: '#94a3b8',
+  color: 'hsl(var(--muted-foreground))',
   isPreset: false,
 };
 
@@ -128,7 +128,7 @@ const BucketsVisualization: React.FC<Props> = ({
         leavesOnly
         borderColor={{ from: 'color', modifiers: [['darker', 0.3]] }}
         borderWidth={1}
-        colors={(node) => (node.data as unknown as TreemapLeafData).color ?? '#888'}
+        colors={(node) => (node.data as unknown as TreemapLeafData).color ?? 'hsl(var(--muted-foreground))'}
         data={treemapData as Parameters<typeof ResponsiveTreeMap>[0]['data']}
         identity="id"
         innerPadding={3}

@@ -59,9 +59,9 @@ const ErrorLine: React.FC<ErrorLineProps> = ({ entry, onRetry }) => {
       </div>
       {isError && (
         <Button
-          className="shrink-0 h-5 text-2xs px-2 font-mono"
           size="sm"
           variant="outline"
+          className="shrink-0 h-5 text-2xs px-2 font-mono"
           onClick={() => onRetry(entry.key)}
         >
           retry
@@ -80,14 +80,14 @@ const InitErrorScreen: React.FC<InitErrorScreenProps> = ({ entries, onRetry }) =
         <p className="text-2xs font-mono uppercase tracking-widest text-destructive mb-5">init failed</p>
         <div className="space-y-2 mb-6">
           {entries.map((entry) => (
-            <ErrorLine key={entry.key} entry={entry} onRetry={onRetry} />
+            <ErrorLine entry={entry} key={entry.key} onRetry={onRetry} />
           ))}
         </div>
         {failedKeys.length > 1 && (
           <Button
-            className="font-mono text-xs h-7"
             size="sm"
             variant="outline"
+            className="font-mono text-xs h-7"
             onClick={() => onRetry()}
           >
             retry all

@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 
 import { useBaseCurrency } from '@/features/auth';
 import { useActiveAccounts } from '@/hooks/financeData';
+import { resolveCssVar, resolveHslOrMuted } from '@/lib/resolveCssVar';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -20,13 +21,12 @@ const TYPE_LABELS: Record<string, string> = {
   basic: 'OTHER',
 };
 
-const resolveCssVar = (value: string): string => {
+const resolveAccountColor = (value: string): string => {
   if (typeof window === 'undefined' || !value.startsWith('var(')) return value;
-  const name = value
-    .replace(/^var\(/, '')
-    .replace(/\)$/, '')
-    .trim();
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888';
+  const raw = resolveCssVar(value);
+  if (!raw) return resolveHslOrMuted('--muted-foreground');
+  // Account colors from _account_colors.scss are hex; theme-defined HSL vars are space-separated components
+  return raw.startsWith('#') || raw.startsWith('rgb') ? raw : `hsl(${raw})`;
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -51,7 +51,7 @@ const AccountsTreemap: React.FC<Props> = ({ groupBy, onNavigate }) => {
     const children = Array.from(byGroup.entries()).map(([groupKey, accs]) => ({
       name: groupBy === 'type' ? (TYPE_LABELS[groupKey] ?? groupKey.toUpperCase()) : groupKey,
       children: accs.map((acc) => {
-        const color = resolveCssVar(acc.color);
+        const color = resolveAccountColor(acc.color);
         colorMap.set(acc.id.toString(), color);
         return {
           name: acc.id.toString(),
@@ -116,7 +116,7 @@ const AccountsTreemap: React.FC<Props> = ({ groupBy, onNavigate }) => {
               <div className="flex items-center gap-1.5 mb-1.5">
                 <span
                   aria-hidden
-                  style={{ backgroundColor: colorMap.get(node.id) ?? '#888' }}
+                  style={{ backgroundColor: colorMap.get(node.id) ?? 'hsl(var(--muted-foreground))' }}
                   className="inline-block h-1.5 w-1.5 rounded-full flex-none"
                 />
                 <span className="text-xs font-medium text-foreground truncate">{d.displayName}</span>

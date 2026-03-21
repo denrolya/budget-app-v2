@@ -1,4 +1,4 @@
-import { Bike, Check, Laptop, Moon, Sun } from 'lucide-react';
+import { Bike, Check, Laptop, Moon, Sun, Terminal } from 'lucide-react';
 import React from 'react';
 
 import {
@@ -14,6 +14,7 @@ import { Theme, useTheme } from '@/contexts/theme';
 
 const THEME_OPTIONS = [
   { value: Theme.TronDark, label: 'Tron Dark', Icon: Bike },
+  { value: Theme.HackerDark, label: 'Hacker', Icon: Terminal },
   { value: Theme.Light, label: 'Light', Icon: Sun },
   { value: Theme.Dark, label: 'Dark', Icon: Moon },
   { value: Theme.System, label: 'System', Icon: Laptop },

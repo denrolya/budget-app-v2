@@ -172,7 +172,7 @@ export const CategoryTimelineChart: React.FC<Props> = ({
           />
           <Legend
             formatter={(value) => (
-              <span className={`${hiddenSeries.includes(value) ? 'opacity-50' : ''}`}>
+              <span className={cn({ 'opacity-50': hiddenSeries.includes(value) })}>
                 {value} (<MoneyValue amount={totals[value] || 0} useColors={false} className="text-xs font-mono" />)
               </span>
             )}

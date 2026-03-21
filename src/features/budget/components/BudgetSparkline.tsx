@@ -24,7 +24,7 @@ const BudgetSparkline: React.FC<Props> = ({ data, currency }) => {
   const pts = values.map((v, i) => `${(i / (values.length - 1)) * W},${H - (v / max) * (H - 1)}`).join(' ');
 
   return (
-    <svg aria-label="Daily spending pattern" height={H} width={W} className="text-muted-foreground/50">
+    <svg aria-hidden="true" height={H} width={W} className="text-muted-foreground/50">
       <polyline fill="none" points={pts} stroke="currentColor" strokeLinejoin="round" strokeWidth="1.2" />
     </svg>
   );

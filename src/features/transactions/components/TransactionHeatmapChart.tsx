@@ -332,15 +332,17 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
                 }}
               />
             )}
-            {selectable && isDragging && <span className="text-xs text-muted-foreground">Release to select…</span>}
-            {selectable && selectedRange && !isDragging && (
-              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted rounded-md px-2 py-1">
-                {moment(selectedRange.start).format('D MMM')} – {moment(selectedRange.end).format('D MMM YYYY')}
-                <button className="hover:text-foreground transition-colors" onClick={handleClear}>
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
-            )}
+            <span aria-live="polite">
+              {selectable && isDragging && <span className="text-xs text-muted-foreground">Release to select…</span>}
+              {selectable && selectedRange && !isDragging && (
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted rounded-md px-2 py-1">
+                  {moment(selectedRange.start).format('D MMM')} – {moment(selectedRange.end).format('D MMM YYYY')}
+                  <button aria-label="Clear selection" className="hover:text-foreground transition-colors" onClick={handleClear}>
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+            </span>
           </div>
 
           {showToggle && (
@@ -379,7 +381,9 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
           onMouseUp={selectable ? commitDrag : undefined}
         >
           <svg
+            aria-label="Transaction activity heatmap"
             height={svgHeight}
+            role="img"
             style={{ minWidth: 300, display: 'block' }}
             viewBox={`0 0 ${svgWidth} ${svgHeight}`}
             width={svgWidth}

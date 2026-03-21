@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import z from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { MOMENT_DATETIME_FORM_FORMAT } from '@/constants/datetime';
 import { useForm as useFormContext } from '@/contexts/Form';
@@ -23,8 +23,7 @@ import { cn } from '@/lib/utils';
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const formSchema = z.object({
+const formSchema = z.object({
   type: z.nativeEnum(TransactionType),
   account: z.number().int().positive(),
   amount: z.number().min(0, 'Amount must be non-negative'),
@@ -290,6 +289,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
             name="amount"
             render={({ field }) => (
               <FormItem className="flex-1 min-w-0">
+                <FormLabel className="sr-only">Amount</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -315,6 +315,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
             name="executedAt"
             render={({ field }) => (
               <FormItem className="shrink-0">
+                <FormLabel className="sr-only">Date</FormLabel>
                 <FormControl>
                   <Input {...field} type="datetime-local" className="h-7 text-xs font-mono w-44" />
                 </FormControl>
@@ -328,6 +329,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
             name="note"
             render={({ field }) => (
               <FormItem className="flex-1 min-w-0">
+                <FormLabel className="sr-only">Note</FormLabel>
                 <FormControl>
                   <Input {...field} placeholder="Note…" type="text" value={field.value ?? ''} className="h-7 text-xs" />
                 </FormControl>
@@ -371,6 +373,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                   name={`compensations.${index}.amount`}
                   render={({ field: f }) => (
                     <FormItem className="flex-1 min-w-0">
+                      <FormLabel className="sr-only">Compensation amount</FormLabel>
                       <FormControl>
                         <Input
                           {...f}
@@ -390,6 +393,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
                   name={`compensations.${index}.executedAt`}
                   render={({ field: f }) => (
                     <FormItem className="shrink-0">
+                      <FormLabel className="sr-only">Compensation date</FormLabel>
                       <FormControl>
                         <Input {...f} type="datetime-local" className="h-7 text-xs font-mono w-40" />
                       </FormControl>

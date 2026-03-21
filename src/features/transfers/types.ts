@@ -19,7 +19,6 @@ export interface TransferDTO {
 
   amount: number | string;
   rate: number | string;
-  fee: number | string;
   note: string;
   executedAt: string;
 
@@ -35,8 +34,7 @@ export type CreateTransferInput = {
    */
   rate: number;
 
-  fee?: number;
-  feeAccount?: number;
+  fees: { amount: number; account: number }[];
 
   /**
    * Accepts either an ISO string or something moment can parse.

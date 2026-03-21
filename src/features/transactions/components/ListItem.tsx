@@ -20,9 +20,10 @@ interface TransactionItemProps {
   colorBorder?: boolean;
   isCompensationView?: boolean;
   flat?: boolean;
+  revertValue?: boolean;
 }
 
-export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBorder = false, flat = false }) => {
+export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBorder = false, flat = false, revertValue = false }) => {
   const truncateNote = (note: string, maxLength: number) => {
     if (note.length <= maxLength) return note;
     return `${note.substring(0, maxLength)}...`;
@@ -32,7 +33,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
   if (flat) {
     return (
       <div className="flex items-center gap-2 py-0.5 font-mono text-xs">
-        <TransactionValue transaction={transaction} className="shrink-0" />
+        <TransactionValue revert={revertValue} transaction={transaction} className="shrink-0" />
         <AccountPill account={transaction.account} size="sm" variant="inline" className="shrink-0" />
         <span className="shrink-0 text-3xs border border-border px-1 py-0 rounded text-muted-foreground bg-background">
           {transaction.category.name}

@@ -26,8 +26,8 @@ import {
   DragOverlayItem,
   DroppableBucketZone,
   DroppableUnassignedZone,
-  parseDragId,
 } from '../components/DroppableBucketZone';
+import { parseDragId } from '../lib/dragId';
 import HealthPanel from '../components/HealthPanel';
 
 const BucketsPage: React.FC = () => {
@@ -63,7 +63,7 @@ const BucketsPage: React.FC = () => {
     if (config.monthlyExpenses === null && avgExpense !== null) {
       setMonthlyExpenses(avgExpense);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-time default: only set when avgExpense loads, not when config changes
   }, [avgExpense]);
 
   // ── Health ───────────────────────────────────────────────────────────────────

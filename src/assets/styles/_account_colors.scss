@@ -24,18 +24,17 @@ $account-type-modifiers: (
   ),
 );
 
-:root {
+/// Generate --account-{type}-{currency} vars from a base color map.
+/// Call this mixin inside each theme selector (:root, .dark, .theme-tron-dark).
+@mixin generate($base-colors) {
   @each $type, $modifiers in $account-type-modifiers {
-    @each $currency, $base-color in ('EUR': #0077cc, 'USD': #4caf50, 'UAH': #ffc107, 'HUF': #e53935, 'BTC': #ff9800) {
-      // Replace scale-color and adjust-hue with modern functions
+    @each $currency, $base-color in $base-colors {
       $scaled-color: color.scale(
         $base-color,
         $lightness: map.get($modifiers, lightness),
         $saturation: map.get($modifiers, saturation)
       );
-
       $adjusted-color: color.adjust($scaled-color, $hue: map.get($modifiers, hue));
-
       --account-#{$type}-#{$currency}: #{$adjusted-color};
     }
   }

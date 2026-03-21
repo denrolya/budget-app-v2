@@ -132,7 +132,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate }) => {
             {account.isArchived() && (
               <>
                 <span className="text-border select-none">·</span>
-                <span className="text-orange-500">Archived {account.archivedAt?.format('D MMM YYYY')}</span>
+                <span className="text-warning">Archived {account.archivedAt?.format('D MMM YYYY')}</span>
               </>
             )}
           </div>

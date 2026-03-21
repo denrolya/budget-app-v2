@@ -73,11 +73,11 @@ const DistributionList: React.FC<Props> = ({
             <div aria-hidden="true" className="flex-[3] h-1 bg-muted rounded-full overflow-hidden shrink-0">
               <div
                 style={{
-                  width: `${Math.max(percentage, item.value > 0 ? 2 : 0)}%`,
+                  transform: `scaleX(${Math.max(percentage, item.value > 0 ? 2 : 0) / 100})`,
                   backgroundColor: dotColor ?? 'hsl(var(--primary))',
                   opacity: 0.7,
                 }}
-                className="h-full rounded-full transition-all duration-300"
+                className="h-full w-full rounded-full origin-left transition-transform duration-300"
               />
             </div>
 
@@ -117,4 +117,4 @@ const DistributionList: React.FC<Props> = ({
   </ScrollArea>
 );
 
-export default DistributionList;
+export default React.memo(DistributionList);
