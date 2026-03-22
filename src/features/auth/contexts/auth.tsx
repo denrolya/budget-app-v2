@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { type CURRENCY_CODE } from '@/constants/currency';
@@ -45,6 +46,7 @@ const isTokenValid = (token: string | null): boolean => {
 };
 
 export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+  const queryClient = useQueryClient();
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -68,7 +70,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     setToken(null);
     setUser(null);
     storage.removeItem('token');
-  }, []);
+    queryClient.clear();
+  }, [queryClient]);
 
   const updateCurrency = async (currency: CURRENCY_CODE) => {
     if (!user) return;
