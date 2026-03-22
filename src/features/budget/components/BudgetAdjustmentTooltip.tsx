@@ -1,8 +1,9 @@
 import { Info } from 'lucide-react';
 import React from 'react';
 
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
+import { cn } from '@/lib/utils';
 
 import type { SeasonalItem } from '../api/types';
 
@@ -36,17 +37,11 @@ const BudgetAdjustmentTooltip: React.FC<Props> = ({
   const adjusted = Math.round(baseAmount * total);
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          className="text-muted-foreground/30 hover:text-muted-foreground transition-colors shrink-0"
-        >
-          <Info className="h-3 w-3" />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="top" sideOffset={4} className="text-xs p-2.5 tabular-nums">
-        <table className="border-collapse">
+    <ResponsiveTooltip
+      desktopComponent="hovercard"
+      contentClassName="p-2.5 w-auto"
+      content={
+        <table className="border-collapse text-xs tabular-nums">
           <tbody>
             <tr>
               <td className="pr-3 text-muted-foreground">Weighted avg</td>
@@ -55,7 +50,7 @@ const BudgetAdjustmentTooltip: React.FC<Props> = ({
             {trendFactor !== 1 && (
               <tr>
                 <td className="pr-3 text-muted-foreground">Trend (last 3mo vs prior 3mo)</td>
-                <td className={`text-right ${trendFactor > 1 ? 'text-destructive' : 'text-success'}`}>
+                <td className={cn('text-right', trendFactor > 1 ? 'text-destructive' : 'text-success')}>
                   {fmtPct(Math.round((trendFactor - 1) * 100))}
                 </td>
               </tr>
@@ -65,7 +60,7 @@ const BudgetAdjustmentTooltip: React.FC<Props> = ({
                 <td className="pr-3 text-muted-foreground">
                   {budgetMonth} seasonal ({seasonal.sampleYears}yr history)
                 </td>
-                <td className={`text-right ${seasonalFactor > 1 ? 'text-warning' : 'text-success'}`}>
+                <td className={cn('text-right', seasonalFactor > 1 ? 'text-warning' : 'text-success')}>
                   {seasonalFactor}x
                 </td>
               </tr>
@@ -76,8 +71,15 @@ const BudgetAdjustmentTooltip: React.FC<Props> = ({
             </tr>
           </tbody>
         </table>
-      </TooltipContent>
-    </Tooltip>
+      }
+    >
+      <button
+        type="button"
+        className="text-muted-foreground/30 hover:text-muted-foreground transition-colors shrink-0"
+      >
+        <Info className="h-3 w-3" />
+      </button>
+    </ResponsiveTooltip>
   );
 };
 

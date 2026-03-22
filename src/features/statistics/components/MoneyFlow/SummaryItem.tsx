@@ -29,6 +29,8 @@ const SummaryItem: React.FC<Props> = ({
       <MoneyValue amount={value} showSign={showSign} useColors={colors} className="font-medium font-mono text-xs" />
       {comparisonValue != null && comparisonPercentage != null && (
         <ResponsiveTooltip
+          desktopComponent="hovercard"
+          contentClassName="p-2 w-auto"
           content={
             <span className="flex items-center text-xs">
               vs

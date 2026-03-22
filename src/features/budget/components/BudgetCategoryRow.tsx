@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react';
 
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { cn } from '@/lib/utils';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { type Category } from '@/features/categories';
@@ -230,111 +230,111 @@ const BudgetCategoryRow: React.FC<Props> = ({
       {/* Actual + sparkline + trend */}
       <td className="py-1.5 px-2 text-right tabular-nums">
         {actualValue > 0 ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex flex-col items-end gap-0.5 cursor-help">
-                <span>{fmtAmt(actualValue, displayCurrency)}</span>
-                <div className="flex items-center gap-1.5">
-                  {sparklineData && sparklineData.length >= 2 && (
-                    <BudgetSparkline currency={displayCurrency} data={sparklineData} />
-                  )}
-                  {trend && trend.direction !== 'stable' && (
-                    <span
-                      className={cn(
-                        'inline-flex items-center gap-0.5 text-2xs font-medium',
-                        isExpenseSection
-                          ? trend.direction === 'up'
-                            ? 'text-destructive'
-                            : 'text-success'
-                          : trend.direction === 'up'
-                            ? 'text-success'
-                            : 'text-destructive',
-                      )}
-                    >
-                      {trend.direction === 'up' ? (
-                        <TrendingUp className="h-2.5 w-2.5" />
-                      ) : (
-                        <TrendingDown className="h-2.5 w-2.5" />
-                      )}
-                      {Math.abs(trend.changePercent)}%
-                    </span>
-                  )}
-                  {seasonal && (
-                    <span
-                      className={cn(
-                        'text-2xs font-medium',
-                        seasonal.seasonalFactor > 1.0 ? 'text-warning/70' : 'text-success/70',
-                      )}
-                    >
-                      {seasonal.seasonalFactor}x
-                    </span>
-                  )}
-                </div>
+          <ResponsiveTooltip
+            desktopComponent="hovercard"
+            contentClassName="p-3 w-auto max-w-[240px]"
+            content={
+              <div className="text-xs tabular-nums">
+                {trend && trend.direction !== 'stable' && (
+                  <div className="space-y-1">
+                    <p className="text-muted-foreground text-2xs uppercase tracking-wider font-medium">
+                      Trend — last 3mo vs prior
+                    </p>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-muted-foreground">Prior</span>
+                      <span>{fmtAmt(trend.olderAverage, displayCurrency)}/mo</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-muted-foreground">Recent</span>
+                      <span>{fmtAmt(trend.recentAverage, displayCurrency)}/mo</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-muted-foreground">Change</span>
+                      <span
+                        className={cn(
+                          'font-semibold',
+                          isExpenseSection
+                            ? trend.direction === 'up'
+                              ? 'text-destructive'
+                              : 'text-success'
+                            : trend.direction === 'up'
+                              ? 'text-success'
+                              : 'text-destructive',
+                        )}
+                      >
+                        {trend.direction === 'up' ? '+' : ''}
+                        {trend.changePercent}%
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {seasonal && (
+                  <div className={cn('space-y-1', trend && trend.direction !== 'stable' && 'mt-2 pt-2 border-t')}>
+                    <p className="text-muted-foreground text-2xs uppercase tracking-wider font-medium">
+                      Seasonal — {seasonal.sampleYears}yr history
+                    </p>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-muted-foreground">This month avg</span>
+                      <span>{fmtAmt(seasonal.currentMonthHistoricalAverage, displayCurrency)}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-muted-foreground">Overall avg</span>
+                      <span>{fmtAmt(seasonal.overallMonthlyAverage, displayCurrency)}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-muted-foreground">Factor</span>
+                      <span
+                        className={cn('font-semibold', seasonal.seasonalFactor > 1.0 ? 'text-warning' : 'text-success')}
+                      >
+                        {seasonal.seasonalFactor}x
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {!trend && !seasonal && <p className="text-muted-foreground">No trend or seasonal data</p>}
               </div>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="bg-background text-foreground border shadow-md text-xs p-3 tabular-nums max-w-[240px]"
-            >
-              {trend && trend.direction !== 'stable' && (
-                <div className="space-y-1">
-                  <p className="text-muted-foreground text-2xs uppercase tracking-wider font-medium">
-                    Trend — last 3mo vs prior
-                  </p>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-muted-foreground">Prior</span>
-                    <span>{fmtAmt(trend.olderAverage, displayCurrency)}/mo</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-muted-foreground">Recent</span>
-                    <span>{fmtAmt(trend.recentAverage, displayCurrency)}/mo</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-muted-foreground">Change</span>
-                    <span
-                      className={cn(
-                        'font-semibold',
-                        isExpenseSection
-                          ? trend.direction === 'up'
-                            ? 'text-destructive'
-                            : 'text-success'
-                          : trend.direction === 'up'
-                            ? 'text-success'
-                            : 'text-destructive',
-                      )}
-                    >
-                      {trend.direction === 'up' ? '+' : ''}
-                      {trend.changePercent}%
-                    </span>
-                  </div>
-                </div>
-              )}
-              {seasonal && (
-                <div className={cn('space-y-1', trend && trend.direction !== 'stable' && 'mt-2 pt-2 border-t')}>
-                  <p className="text-muted-foreground text-2xs uppercase tracking-wider font-medium">
-                    Seasonal — {seasonal.sampleYears}yr history
-                  </p>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-muted-foreground">This month avg</span>
-                    <span>{fmtAmt(seasonal.currentMonthHistoricalAverage, displayCurrency)}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-muted-foreground">Overall avg</span>
-                    <span>{fmtAmt(seasonal.overallMonthlyAverage, displayCurrency)}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-muted-foreground">Factor</span>
-                    <span
-                      className={cn('font-semibold', seasonal.seasonalFactor > 1.0 ? 'text-warning' : 'text-success')}
-                    >
-                      {seasonal.seasonalFactor}x
-                    </span>
-                  </div>
-                </div>
-              )}
-              {!trend && !seasonal && <p className="text-muted-foreground">No trend or seasonal data</p>}
-            </TooltipContent>
-          </Tooltip>
+            }
+          >
+            <div className="flex flex-col items-end gap-0.5 cursor-help">
+              <span>{fmtAmt(actualValue, displayCurrency)}</span>
+              <div className="flex items-center gap-1.5">
+                {sparklineData && sparklineData.length >= 2 && (
+                  <BudgetSparkline currency={displayCurrency} data={sparklineData} />
+                )}
+                {trend && trend.direction !== 'stable' && (
+                  <span
+                    className={cn(
+                      'inline-flex items-center gap-0.5 text-2xs font-medium',
+                      isExpenseSection
+                        ? trend.direction === 'up'
+                          ? 'text-destructive'
+                          : 'text-success'
+                        : trend.direction === 'up'
+                          ? 'text-success'
+                          : 'text-destructive',
+                    )}
+                  >
+                    {trend.direction === 'up' ? (
+                      <TrendingUp className="h-2.5 w-2.5" />
+                    ) : (
+                      <TrendingDown className="h-2.5 w-2.5" />
+                    )}
+                    {Math.abs(trend.changePercent)}%
+                  </span>
+                )}
+                {seasonal && (
+                  <span
+                    className={cn(
+                      'text-2xs font-medium',
+                      seasonal.seasonalFactor > 1.0 ? 'text-warning/70' : 'text-success/70',
+                    )}
+                  >
+                    {seasonal.seasonalFactor}x
+                  </span>
+                )}
+              </div>
+            </div>
+          </ResponsiveTooltip>
         ) : (
           <span className="text-muted-foreground/40">—</span>
         )}
