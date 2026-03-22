@@ -10,6 +10,7 @@ import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
 
 import type { BudgetAnalyticsItem, BudgetDTO } from '../api/types';
+import { getAllDescendantIds } from '../utils';
 
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
@@ -20,25 +21,19 @@ interface Props {
   rates: ConvertedValues | null;
 }
 
-const getAllIds = (cat: Category): number[] => {
-  const ids: number[] = [cat.id];
-  for (const child of cat.children) ids.push(...getAllIds(child));
-  return ids;
-};
-
 const BudgetExportButton: React.FC<Props> = ({ budget, analytics, displayCurrency, rates }) => {
   const { data: catData } = useCategoryList();
 
   const handleExport = () => {
     if (!catData) return;
 
-    const sym = CURRENCIES[displayCurrency as CURRENCY_CODE]?.symbol ?? displayCurrency;
+    const currencySymbol = CURRENCIES[displayCurrency as CURRENCY_CODE]?.symbol ?? displayCurrency;
     const linesMap = new Map((budget.lines ?? []).map((l) => [l.categoryId, l]));
     const analyticsMap = new Map(analytics.map((a) => [a.categoryId, a]));
 
     const getActual = (cat: Category, isExpense: boolean): number => {
       let total = 0;
-      for (const id of getAllIds(cat)) {
+      for (const id of getAllDescendantIds(cat)) {
         const item = analyticsMap.get(id);
         if (!item) continue;
         const cv = item.convertedValues[displayCurrency];
@@ -52,7 +47,7 @@ const BudgetExportButton: React.FC<Props> = ({ budget, analytics, displayCurrenc
       [`Period: ${moment(budget.startDate).format('YYYY-MM-DD')} – ${moment(budget.endDate).format('YYYY-MM-DD')}`],
       [`Currency: ${displayCurrency}`],
       [],
-      ['Category', 'Type', `Planned (${sym})`, `Actual (${sym})`, `Remaining (${sym})`, '% Used'],
+      ['Category', 'Type', `Planned (${currencySymbol})`, `Actual (${currencySymbol})`, `Remaining (${currencySymbol})`, '% Used'],
     ];
 
     const addCat = (cat: Category, type: 'Expense' | 'Income', depth = 0) => {

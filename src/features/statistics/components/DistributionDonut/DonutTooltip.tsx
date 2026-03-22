@@ -18,7 +18,7 @@ const DonutTooltip: React.FC<Props> = ({ label, value, percent, extra }) => (
         {Number.isFinite(percent) ? `${percent.toFixed(0)}%` : '0%'}
       </span>
     </div>
-    {extra ? <div className="mt-1.5">{extra}</div> : null}
+    {extra && <div className="mt-1.5">{extra}</div>}
   </div>
 );
 

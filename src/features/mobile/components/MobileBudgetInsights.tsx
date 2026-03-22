@@ -4,7 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useList as useCategoryList } from '@/features/categories';
 import type { BudgetInsightsResponse } from '@/features/budget/api/types';
-import { fmtBudgetAmt } from '@/features/budget/hooks/useBudgetTotals';
+import { formatBudgetAmount } from '@/features/budget/utils';
 
 interface Props {
   budgetStartDate: string;
@@ -47,7 +47,7 @@ const MobileBudgetInsights: React.FC<Props> = ({ displayCurrency, insights }) =>
               </span>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className="text-destructive font-medium tabular-nums">
-                  {fmtBudgetAmt(item.convertedAmount, displayCurrency)}
+                  {formatBudgetAmount(item.convertedAmount, displayCurrency)}
                 </span>
                 <span className="text-warning text-2xs tabular-nums">{item.deviation}x</span>
               </div>

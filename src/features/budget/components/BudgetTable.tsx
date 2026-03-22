@@ -3,7 +3,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
-import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 import { TransactionsDrawer, type DrawerListingTarget } from '@/features/statistics';
@@ -19,6 +18,7 @@ import type {
   CategoryTrendItem,
   SeasonalItem,
 } from '../api/types';
+import { getAllDescendantIds, formatBudgetAmount } from '../utils';
 
 import BudgetCategoryRow from './BudgetCategoryRow';
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
@@ -34,17 +34,144 @@ interface Props {
   seasonal?: SeasonalItem[];
 }
 
-/** Collect all descendant IDs including self */
-const getAllIds = (cat: Category): number[] => {
-  const ids: number[] = [cat.id];
-  for (const child of cat.children) ids.push(...getAllIds(child));
-  return ids;
+// ── Section totals row ─────────────────────────────────────────────────────────
+
+interface SectionTotalsRowProps {
+  label: string;
+  planned: number;
+  actual: number;
+  isExpense: boolean;
+  displayCurrency: DisplayCurrency;
+}
+
+const SectionTotalsRow: React.FC<SectionTotalsRowProps> = ({ label, planned, actual, isExpense, displayCurrency }) => {
+  const remaining = isExpense ? planned - actual : actual - planned;
+  const pct = planned > 0 ? (actual / planned) * 100 : 0;
+
+  let remainingColor: string;
+  if (isExpense) {
+    remainingColor = remaining < 0 ? 'text-destructive' : 'text-success';
+  } else if (pct < 80) {
+    remainingColor = 'text-destructive';
+  } else if (pct < 100) {
+    remainingColor = 'text-warning';
+  } else {
+    remainingColor = 'text-success';
+  }
+
+  return (
+    <tr className="bg-muted/40 font-semibold text-sm border-t-2">
+      <td className="py-2 pl-4 pr-2 text-left">{label} Total</td>
+      <td className="py-2 px-2 text-right tabular-nums">{planned > 0 ? formatBudgetAmount(planned, displayCurrency) : '—'}</td>
+      <td className="py-2 px-2 text-right tabular-nums">{actual > 0 ? formatBudgetAmount(actual, displayCurrency) : '—'}</td>
+      <td className={cn('py-2 px-4 text-right tabular-nums', remainingColor)}>
+        {planned > 0 ? (
+          <>
+            {formatBudgetAmount(remaining, displayCurrency)}
+            <span className="ml-1 text-xs opacity-60">{pct.toFixed(0)}%</span>
+          </>
+        ) : (
+          '—'
+        )}
+      </td>
+    </tr>
+  );
 };
 
-const fmtAmt = (n: number, currency: string) => {
-  const sym = CURRENCIES[currency as CURRENCY_CODE]?.symbol ?? currency;
-  return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+// ── Category tree rows ─────────────────────────────────────────────────────────
+
+interface CategoryTreeRowsProps {
+  category: Category;
+  depth: number;
+  isExpenseSection: boolean;
+  expanded: Set<number>;
+  onToggle: (id: number) => void;
+  getActual: (cat: Category) => { income: number; expense: number };
+  getPlanned: (cat: Category) => number | null;
+  linesMap: Map<number, BudgetLineDTO>;
+  dailyStatsMap: Map<number, CategoryDailyStatsItem>;
+  trendsMap: Map<number, CategoryTrendItem>;
+  seasonalMap: Map<number, SeasonalItem>;
+  onCategoryClick: (id: number, name: string) => void;
+  onDelete: (lineId: number) => void;
+  onNoteUpdate: (lineId: number, note: string | null) => void;
+  onSave: (categoryId: number, lineId: number | null, amount: number, currency: string) => void;
+  isSaving: boolean;
+  displayCurrency: DisplayCurrency;
+  budgetId: number;
+}
+
+const CategoryTreeRows: React.FC<CategoryTreeRowsProps> = ({
+  category,
+  depth,
+  isExpenseSection,
+  expanded,
+  onToggle,
+  getActual,
+  getPlanned,
+  linesMap,
+  dailyStatsMap,
+  trendsMap,
+  seasonalMap,
+  onCategoryClick,
+  onDelete,
+  onNoteUpdate,
+  onSave,
+  isSaving,
+  displayCurrency,
+  budgetId,
+}) => {
+  if (!category.isAffectingProfit) return null;
+
+  const isExpanded = expanded.has(category.id);
+  const hasChildren = category.children.some((c) => c.isAffectingProfit);
+
+  const sharedProps = {
+    expanded, onToggle, getActual, getPlanned, linesMap, dailyStatsMap, trendsMap, seasonalMap,
+    onCategoryClick, onDelete, onNoteUpdate, onSave, isSaving, displayCurrency, budgetId,
+  };
+
+  return (
+    <>
+      <BudgetCategoryRow
+        actual={getActual(category)}
+        budgetId={budgetId}
+        category={category}
+        depth={depth}
+        displayCurrency={displayCurrency}
+        hasChildren={hasChildren}
+        isExpanded={isExpanded}
+        isExpenseSection={isExpenseSection}
+        isSaving={isSaving}
+        line={linesMap.get(category.id) ?? null}
+        plannedInDisplayCurrency={getPlanned(category)}
+        seasonal={seasonalMap.get(category.id)}
+        sparklineData={dailyStatsMap.get(category.id)?.days}
+        trend={trendsMap.get(category.id)}
+        onCategoryClick={onCategoryClick}
+        onDelete={onDelete}
+        onNoteUpdate={onNoteUpdate}
+        onSave={onSave}
+        onToggle={() => onToggle(category.id)}
+      />
+      {isExpanded &&
+        hasChildren &&
+        category.children
+          .filter((child) => child.isAffectingProfit)
+          .map((child) => (
+            <CategoryTreeRows
+              key={child.id}
+              {...sharedProps}
+              category={child}
+              depth={depth + 1}
+              isExpenseSection={isExpenseSection}
+            />
+          ))}
+    </>
+  );
 };
+
+// ── Main component ─────────────────────────────────────────────────────────────
 
 const BudgetTable: React.FC<Props> = ({
   budgetId,
@@ -120,7 +247,7 @@ const BudgetTable: React.FC<Props> = ({
 
   const getActual = useCallback(
     (cat: Category) => {
-      const ids = getAllIds(cat);
+      const ids = getAllDescendantIds(cat);
       let income = 0;
       let expense = 0;
       for (const id of ids) {
@@ -137,17 +264,14 @@ const BudgetTable: React.FC<Props> = ({
     [analyticsMap, displayCurrency],
   );
 
-  const getPlannedRollup = useCallback(
+  const getPlanned = useCallback(
     (cat: Category): number | null => {
       const ownLine = linesMap.get(cat.id);
       if (ownLine) {
-        // Envelope model: root has an explicit budget — show it directly.
-        // Children are sub-allocations within this envelope, not added on top.
         const rate = getExchangeRate(ownLine.plannedCurrency, displayCurrency, rates);
         return rate !== null ? ownLine.plannedAmount * rate : null;
       }
-      // No direct line — roll up from descendants (bottom-up detailed budgeting).
-      const descendantIds = getAllIds(cat).slice(1);
+      const descendantIds = getAllDescendantIds(cat).slice(1);
       let total = 0;
       let hasAny = false;
       for (const id of descendantIds) {
@@ -208,103 +332,31 @@ const BudgetTable: React.FC<Props> = ({
     [updateNote],
   );
 
-  const renderCategory = (cat: Category, depth: number, isExpenseSection: boolean): React.ReactNode[] => {
-    if (!cat.isAffectingProfit) return [];
+  if (!catData) return null;
 
-    const isExpanded = expanded.has(cat.id);
-    const hasChildren = cat.children.some((c) => c.isAffectingProfit);
+  const expenseRoots = catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense);
+  const incomeRoots = catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income);
 
-    const rows: React.ReactNode[] = [
-      <BudgetCategoryRow
-        actual={getActual(cat)}
-        budgetId={budgetId}
-        category={cat}
-        depth={depth}
-        displayCurrency={displayCurrency}
-        hasChildren={hasChildren}
-        isExpanded={isExpanded}
-        isExpenseSection={isExpenseSection}
-        isSaving={isSaving}
-        line={linesMap.get(cat.id) ?? null}
-        plannedInDisplayCurrency={getPlannedRollup(cat)}
-        seasonal={seasonalMap.get(cat.id)}
-        sparklineData={dailyStatsMap.get(cat.id)?.days}
-        trend={trendsMap.get(cat.id)}
-        key={cat.id}
-        onCategoryClick={handleCategoryClick}
-        onDelete={handleDelete}
-        onNoteUpdate={handleNoteUpdate}
-        onSave={handleSave}
-        onToggle={() => toggle(cat.id)}
-      />,
-    ];
-
-    if (isExpanded && hasChildren) {
-      for (const child of cat.children) {
-        rows.push(...renderCategory(child, depth + 1, isExpenseSection));
-      }
-    }
-
-    return rows;
-  };
-
-  const expenseRoots = catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense) ?? [];
-  const incomeRoots = catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income) ?? [];
-
-  const sectionTotals = (roots: Category[], isExpense: boolean) => {
+  const computeSectionTotals = (roots: Category[], isExpense: boolean) => {
     let totalPlanned = 0;
     let totalActual = 0;
-
     for (const root of roots) {
-      const planned = getPlannedRollup(root);
+      const planned = getPlanned(root);
       if (planned !== null) totalPlanned += planned;
-      const act = getActual(root);
-      totalActual += isExpense ? act.expense : act.income;
+      const actual = getActual(root);
+      totalActual += isExpense ? actual.expense : actual.income;
     }
-
     return { totalPlanned, totalActual };
   };
 
-  const SectionTotalsRow: React.FC<{ label: string; planned: number; actual: number; isExpense: boolean }> = ({
-    label,
-    planned,
-    actual,
-    isExpense,
-  }) => {
-    const remaining = isExpense ? planned - actual : actual - planned;
-    const pct = planned > 0 ? (actual / planned) * 100 : 0;
-    const remainingColor = isExpense
-      ? remaining < 0
-        ? 'text-destructive'
-        : 'text-success'
-      : pct < 80
-        ? 'text-destructive'
-        : pct < 100
-          ? 'text-warning'
-          : 'text-success';
-    return (
-      <tr className="bg-muted/40 font-semibold text-sm border-t-2">
-        <td className="py-2 pl-4 pr-2 text-left">{label} Total</td>
-        <td className="py-2 px-2 text-right tabular-nums">{planned > 0 ? fmtAmt(planned, displayCurrency) : '—'}</td>
-        <td className="py-2 px-2 text-right tabular-nums">{actual > 0 ? fmtAmt(actual, displayCurrency) : '—'}</td>
-        <td className={cn('py-2 px-4 text-right tabular-nums', remainingColor)}>
-          {planned > 0 ? (
-            <>
-              {fmtAmt(remaining, displayCurrency)}
-              <span className="ml-1 text-xs opacity-60">{pct.toFixed(0)}%</span>
-            </>
-          ) : (
-            '—'
-          )}
-        </td>
-      </tr>
-    );
+  const expTotals = computeSectionTotals(expenseRoots, true);
+  const incTotals = computeSectionTotals(incomeRoots, false);
+
+  const sharedRowProps = {
+    expanded, onToggle: toggle, getActual, getPlanned, linesMap, dailyStatsMap, trendsMap, seasonalMap,
+    onCategoryClick: handleCategoryClick, onDelete: handleDelete, onNoteUpdate: handleNoteUpdate,
+    onSave: handleSave, isSaving, displayCurrency, budgetId,
   };
-
-  if (!catData) return null;
-
-  const expTotals = sectionTotals(expenseRoots, true);
-  const incTotals = sectionTotals(incomeRoots, false);
 
   const tableHead = (
     <thead>
@@ -328,9 +380,12 @@ const BudgetTable: React.FC<Props> = ({
           <table className="w-full text-sm border-collapse">
             {tableHead}
             <tbody>
-              {expenseRoots.flatMap((cat) => renderCategory(cat, 0, true))}
+              {expenseRoots.map((cat) => (
+                <CategoryTreeRows key={cat.id} {...sharedRowProps} category={cat} depth={0} isExpenseSection={true} />
+              ))}
               <SectionTotalsRow
                 actual={expTotals.totalActual}
+                displayCurrency={displayCurrency}
                 isExpense={true}
                 label="Expense"
                 planned={expTotals.totalPlanned}
@@ -347,9 +402,12 @@ const BudgetTable: React.FC<Props> = ({
           <table className="w-full text-sm border-collapse">
             {tableHead}
             <tbody>
-              {incomeRoots.flatMap((cat) => renderCategory(cat, 0, false))}
+              {incomeRoots.map((cat) => (
+                <CategoryTreeRows key={cat.id} {...sharedRowProps} category={cat} depth={0} isExpenseSection={false} />
+              ))}
               <SectionTotalsRow
                 actual={incTotals.totalActual}
+                displayCurrency={displayCurrency}
                 isExpense={false}
                 label="Income"
                 planned={incTotals.totalPlanned}

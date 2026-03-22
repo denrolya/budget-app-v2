@@ -48,7 +48,7 @@ const AppShell: React.FC = () => (
     <Layout>
       <Suspense fallback={null}>
         <Routes>
-          <Route index element={<Navigate replace to="/ledger" />} />
+          <Route index element={<Navigate replace to="/budget" />} />
 
           <Route element={<DashboardPage />} path="/dashboard" />
           <Route element={<LedgerPage />} path="/ledger" />
@@ -59,7 +59,7 @@ const AppShell: React.FC = () => (
           <Route element={<BudgetingPage />} path="/budget/*" />
           <Route element={<CategoriesManagementPage />} path="/categories" />
 
-          <Route element={<Navigate replace to="/ledger" />} path="*" />
+          <Route element={<Navigate replace to="/budget" />} path="*" />
         </Routes>
       </Suspense>
     </Layout>
@@ -86,7 +86,7 @@ const Routing: React.FC = () => (
     </Route>
 
     {/* Fallback */}
-    <Route element={<Navigate replace to="/ledger" />} path="*" />
+    <Route element={<Navigate replace to="/budget" />} path="*" />
   </Routes>
 );
 

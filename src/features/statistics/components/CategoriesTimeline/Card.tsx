@@ -155,8 +155,8 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
       <div className="chart-enter h-full flex flex-col items-center justify-center gap-2">
         <span className="text-2xs font-mono text-muted-foreground/60">Failed to load chart data</span>
         <button
-          className="text-2xs font-mono text-muted-foreground hover:text-foreground border border-border/60 rounded px-2 py-0.5 transition-colors"
           type="button"
+          className="text-2xs font-mono text-muted-foreground hover:text-foreground border border-border/60 rounded px-2 py-0.5 transition-colors"
           onClick={refetch}
         >
           Retry
@@ -260,8 +260,8 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
                   <span className="max-w-[100px] truncate">{name ?? `#${id}`}</span>
                   <button
                     aria-label={`Remove ${name ?? `category ${id}`}`}
-                    className="h-4 w-4 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
                     type="button"
+                    className="h-4 w-4 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
                     onClick={() => removeCategory(id)}
                   >
                     <X className="h-2.5 w-2.5" />
@@ -274,8 +274,8 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
               <PopoverTrigger asChild>
                 <button
                   aria-label="Add category"
-                  className="h-5 w-5 flex items-center justify-center text-muted-foreground hover:text-foreground border border-dashed border-border rounded-sm transition-colors shrink-0"
                   type="button"
+                  className="h-5 w-5 flex items-center justify-center text-muted-foreground hover:text-foreground border border-dashed border-border rounded-sm transition-colors shrink-0"
                 >
                   <Plus className="h-3 w-3" />
                 </button>
@@ -331,7 +331,7 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
 
         {/* Chart content */}
         <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-          <div key={chartType} className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden">
+          <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden" key={chartType}>
             {chartContent}
           </div>
         </div>

@@ -34,6 +34,7 @@ type PageWithSidebarProps = React.ComponentPropsWithoutRef<'div'> & {
   sidebarScrollable?: boolean;
   contentScrollable?: boolean;
   collapsible?: boolean;
+  defaultCollapsed?: boolean;
   resizable?: boolean;
   children: ReactNode;
   ariaLabel?: string;
@@ -62,12 +63,13 @@ const PageWithSidebar: PageWithSidebarComponent = ({
   sidebarScrollable = false,
   contentScrollable = true,
   collapsible = false,
+  defaultCollapsed = false,
   resizable = false,
   ariaLabel = 'Page layout',
   ...props
 }) => {
   const isMobile = useIsMobile();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const toggle = useCallback(() => setCollapsed((v) => !v), []);
 
   // Resizable sidebar state

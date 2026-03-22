@@ -1,14 +1,14 @@
 import { ChevronRight, Check, X, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import { cn } from '@/lib/utils';
-import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { type Category } from '@/features/categories';
 
 import type { BudgetLineDTO, CategoryDayStats, CategoryTrendItem, SeasonalItem } from '../api/types';
+import { formatBudgetAmount } from '../utils';
 
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 import { DISPLAY_CURRENCIES } from './BudgetDisplayCurrency';
@@ -37,11 +37,6 @@ interface Props {
   trend?: CategoryTrendItem;
 }
 
-const fmtAmt = (n: number, currency: string) => {
-  const sym = CURRENCIES[currency as CURRENCY_CODE]?.symbol ?? currency;
-  return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-};
-
 const BudgetCategoryRow: React.FC<Props> = ({
   category,
   depth,
@@ -65,7 +60,6 @@ const BudgetCategoryRow: React.FC<Props> = ({
   const [editing, setEditing] = useState(false);
   const [editAmount, setEditAmount] = useState('');
   const [editCurrency, setEditCurrency] = useState<string>(displayCurrency);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const actualValue = isExpenseSection ? actual.expense : actual.income;
   const hasPlanned = plannedInDisplayCurrency !== null;
@@ -94,7 +88,6 @@ const BudgetCategoryRow: React.FC<Props> = ({
     setEditAmount(line ? String(line.plannedAmount) : '');
     setEditCurrency(line ? line.plannedCurrency : displayCurrency);
     setEditing(true);
-    setTimeout(() => inputRef.current?.focus(), 0);
   };
 
   const cancelEdit = () => setEditing(false);
@@ -159,6 +152,7 @@ const BudgetCategoryRow: React.FC<Props> = ({
         {editing ? (
           <div className="flex items-center gap-1 justify-end">
             <Input
+              autoFocus
               min="0"
               step="0.01"
               type="number"
@@ -166,7 +160,6 @@ const BudgetCategoryRow: React.FC<Props> = ({
               className="h-7 w-28 text-right text-xs"
               onChange={(e) => setEditAmount(e.target.value)}
               onKeyDown={handleKeyDown}
-              ref={inputRef}
             />
             <Select value={editCurrency} onValueChange={setEditCurrency}>
               <SelectTrigger className="h-7 w-20 text-xs">
@@ -215,7 +208,7 @@ const BudgetCategoryRow: React.FC<Props> = ({
           >
             {hasPlanned ? (
               <span>
-                {fmtAmt(plannedInDisplayCurrency!, displayCurrency)}
+                {formatBudgetAmount(plannedInDisplayCurrency!, displayCurrency)}
                 {line && line.plannedCurrency !== displayCurrency && (
                   <span className="text-xs text-muted-foreground ml-1">({line.plannedCurrency})</span>
                 )}
@@ -232,7 +225,6 @@ const BudgetCategoryRow: React.FC<Props> = ({
         {actualValue > 0 ? (
           <ResponsiveTooltip
             desktopComponent="hovercard"
-            contentClassName="p-3 w-auto max-w-[240px]"
             content={
               <div className="text-xs tabular-nums">
                 {trend && trend.direction !== 'stable' && (
@@ -242,11 +234,11 @@ const BudgetCategoryRow: React.FC<Props> = ({
                     </p>
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-muted-foreground">Prior</span>
-                      <span>{fmtAmt(trend.olderAverage, displayCurrency)}/mo</span>
+                      <span>{formatBudgetAmount(trend.olderAverage, displayCurrency)}/mo</span>
                     </div>
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-muted-foreground">Recent</span>
-                      <span>{fmtAmt(trend.recentAverage, displayCurrency)}/mo</span>
+                      <span>{formatBudgetAmount(trend.recentAverage, displayCurrency)}/mo</span>
                     </div>
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-muted-foreground">Change</span>
@@ -275,11 +267,11 @@ const BudgetCategoryRow: React.FC<Props> = ({
                     </p>
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-muted-foreground">This month avg</span>
-                      <span>{fmtAmt(seasonal.currentMonthHistoricalAverage, displayCurrency)}</span>
+                      <span>{formatBudgetAmount(seasonal.currentMonthHistoricalAverage, displayCurrency)}</span>
                     </div>
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-muted-foreground">Overall avg</span>
-                      <span>{fmtAmt(seasonal.overallMonthlyAverage, displayCurrency)}</span>
+                      <span>{formatBudgetAmount(seasonal.overallMonthlyAverage, displayCurrency)}</span>
                     </div>
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-muted-foreground">Factor</span>
@@ -294,9 +286,10 @@ const BudgetCategoryRow: React.FC<Props> = ({
                 {!trend && !seasonal && <p className="text-muted-foreground">No trend or seasonal data</p>}
               </div>
             }
+            contentClassName="p-3 w-auto max-w-[240px]"
           >
             <div className="flex flex-col items-end gap-0.5 cursor-help">
-              <span>{fmtAmt(actualValue, displayCurrency)}</span>
+              <span>{formatBudgetAmount(actualValue, displayCurrency)}</span>
               <div className="flex items-center gap-1.5">
                 {sparklineData && sparklineData.length >= 2 && (
                   <BudgetSparkline currency={displayCurrency} data={sparklineData} />
@@ -346,7 +339,7 @@ const BudgetCategoryRow: React.FC<Props> = ({
           <div className="flex flex-col items-end gap-0.5">
             <span className={cn(remainingColorClass, 'whitespace-nowrap')}>
               {remaining < 0 ? '-' : ''}
-              {fmtAmt(remaining, displayCurrency)}
+              {formatBudgetAmount(remaining, displayCurrency)}
             </span>
             {pct !== null && (
               <div className="w-16 h-1 rounded-full bg-muted overflow-hidden">

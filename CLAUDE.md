@@ -347,13 +347,16 @@ import type { AccountRawData } from '../types';
 ### DistributionDonut (`src/features/statistics/components/DistributionDonut/`)
 
 - Uses **Nivo**, not Recharts — do not import Recharts components here.
+- **Panel transition animation**: wrap panel content in `<div key={panelKey} className="chart-enter h-full">` where `panelKey = \`${tab}-${type}\`` — the `chart-enter` class (200ms opacity fade, defined in `_recharts.scss`) triggers on remount.
+- **Color mapping in CategoriesPanel**: categories use `CHART_COLORS[index]` from the sorted `pieData` array. Pass `getDotColor={(item) => colorMap.get(String(item.id)) ?? null}` to `DistributionList` so list row dots match the pie chart segments.
+- **CardSkeleton shape**: mirrors real layout — `h-[180px]` donut ring with hollow center (`absolute inset-0 m-[40px] rounded-full bg-card`) + 6 list rows with dot/name/bar/value/pct columns.
 
 ---
 
 ## Date Range Picker — Presets & API
 
 - **Component**: `src/components/common/DaterangePickerWithPresets.tsx`
-- Uses **react-day-picker v9** — `onSelect` (not `onDayClick`), `autoFocus` (not `initialFocus`), `DateRange` type from `react-day-picker`.
+- Uses **react-day-picker v8** (`v8.10.1`) — `onSelect` (not `onDayClick`), `initialFocus` (not `autoFocus` — that's v9 only), `DateRange` type from `react-day-picker`.
 - Preset constants by card:
   | Card | Constant |
   |---|---|
@@ -363,6 +366,20 @@ import type { AccountRawData } from '../types';
   | Dashboard / default | `DASHBOARD_TIMEFRAME_OPTIONS` |
   | Transaction filters | `FILTER_PRESETS` |
 - All preset constants live in `src/constants/datetime.ts`. Type: `PresetOption = { label: string; range: Timeframe }`.
+
+---
+
+## Layout — PageWithSidebar Header Height
+
+`PageWithSidebar.Header` default renders at: `py-2` (8px each) + content height. With `h-7` buttons = **44px** total.
+
+The budget detail header overrides with `className="px-4 pt-2 pb-0"` — the `pb-0` removes bottom padding so `subContent` (summary cards) sits flush below the title row, making the title row **36px**.
+
+Sidebar "header" sections (the top bar in each sidebar panel) must match the adjacent content header height:
+- When content header uses `pt-2 pb-0` (budget): sidebar should use `py-1` (4+4) + `h-7` content = **36px**
+- When content header uses default `py-2` with text-only title (categories): same `py-1` + `h-7` = 36px (the text title is 20px tall but `py-2`+20px = 36px, matching)
+
+**Sidebar header pattern**: `px-3 py-1 border-b shrink-0` wrapper with `h-7 w-7` icon buttons.
 
 ---
 

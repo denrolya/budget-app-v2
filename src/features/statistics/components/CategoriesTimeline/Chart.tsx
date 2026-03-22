@@ -188,6 +188,7 @@ export const CategoryTimelineChart: React.FC<Props> = ({
           />
           {regularCategories.map((category, index) => (
             <DataComponent
+              activeDot={chartType === 'line' ? { r: 6, fill: getColor(category, index), strokeWidth: 2, stroke: 'hsl(var(--card))' } : false}
               animationDuration={chartType === 'line' ? 400 : 300}
               animationEasing="ease-out"
               dataKey={category}
@@ -199,7 +200,6 @@ export const CategoryTimelineChart: React.FC<Props> = ({
               strokeWidth={getStrokeWidth(category)}
               type="monotone"
               yAxisId="regular"
-              activeDot={chartType === 'line' ? { r: 6, fill: getColor(category, index), strokeWidth: 2, stroke: 'hsl(var(--card))' } : false}
               className={cn({
                 'recharts-line': chartType === 'line',
                 'recharts-bar': chartType === 'bar',

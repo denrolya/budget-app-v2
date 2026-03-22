@@ -1,14 +1,19 @@
 import { ResponsiveBar } from '@nivo/bar';
-import React, { useMemo } from 'react';
+import moment from 'moment';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { cn } from '@/lib/utils';
 import { CHART_COLORS } from '@/constants/recharts';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
-import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { CategoryType, useList as useCategoryList } from '@/features/categories';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
+import { TransactionsDrawer, type DrawerListingTarget } from '@/features/statistics';
 
 import type { BudgetAnalyticsItem, BudgetDTO } from '../api/types';
+import { BUDGET_NIVO_THEME } from '../constants';
+import { getAllDescendantIds, formatBudgetAmount } from '../utils';
 
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
@@ -46,33 +51,11 @@ const assignCategoryColors = (names: string[]): Map<string, string> => {
   return result;
 };
 
-const nivoTheme = {
-  background: 'transparent',
-  text: { fill: 'hsl(var(--muted-foreground))', fontSize: 11 },
-  grid: { line: { stroke: 'hsl(var(--border))', strokeWidth: 1 } },
-  axis: {
-    ticks: {
-      line: { stroke: 'transparent' },
-      text: { fill: 'hsl(var(--muted-foreground))', fontSize: 10 },
-    },
-    domain: { line: { stroke: 'transparent' } },
-  },
-};
-
-const getAllIds = (cat: Category): number[] => {
-  const ids: number[] = [cat.id];
-  for (const child of cat.children) ids.push(...getAllIds(child));
-  return ids;
-};
-
-const fmtAmt = (n: number, currency: string) => {
-  const sym = CURRENCIES[currency as CURRENCY_CODE]?.symbol ?? currency;
-  return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-};
 
 interface BarDatum {
   [key: string]: string | number;
   category: string;
+  categoryId: number;
   Planned: number;
   Actual: number;
   color: string;
@@ -80,6 +63,25 @@ interface BarDatum {
 
 const BudgetDistributionChart: React.FC<Props> = ({ analytics, budget, displayCurrency, rates }) => {
   const { data: catData } = useCategoryList();
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerTarget, setDrawerTarget] = useState<DrawerListingTarget | null>(null);
+
+  const timeframe = useMemo(
+    () => ({
+      after: moment(budget.startDate).startOf('day'),
+      before: moment(budget.endDate).endOf('day'),
+    }),
+    [budget.startDate, budget.endDate],
+  );
+
+  const openDrawer = useCallback((categoryId: number, categoryName: string) => {
+    setDrawerTarget({
+      title: `${categoryName} spending`,
+      initialFilters: { categories: [categoryId], withNestedCategories: true },
+    });
+    setDrawerOpen(true);
+  }, []);
 
   const { chartData, totalActual } = useMemo(() => {
     if (!catData) return { chartData: [], totalActual: 0 };
@@ -91,10 +93,10 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, budget, displayCu
     const expenseRoots = catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense);
 
     // First pass: compute values
-    const rawRows: { name: string; actual: number; planned: number }[] = [];
+    const rawRows: { name: string; id: number; actual: number; planned: number }[] = [];
 
     for (const cat of expenseRoots) {
-      const ids = getAllIds(cat);
+      const ids = getAllDescendantIds(cat);
       let actual = 0;
       for (const id of ids) {
         const item = analyticsMap.get(id);
@@ -119,13 +121,14 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, budget, displayCu
       }
 
       if (actual <= 0 && planned <= 0) continue;
-      rawRows.push({ name: cat.name, actual: Math.round(actual), planned: Math.round(planned) });
+      rawRows.push({ name: cat.name, id: cat.id, actual: Math.round(actual), planned: Math.round(planned) });
     }
 
     // Second pass: assign collision-free colors
     const colorMap = assignCategoryColors(rawRows.map((r) => r.name));
     const rows: BarDatum[] = rawRows.map((r) => ({
       category: r.name,
+      categoryId: r.id,
       Actual: r.actual,
       Planned: r.planned,
       color: colorMap.get(r.name) ?? CATEGORY_PALETTE[0],
@@ -143,10 +146,10 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, budget, displayCu
     return <div className="flex items-center justify-center h-40 text-sm text-muted-foreground">No spending data</div>;
   }
 
-  const sym = CURRENCIES[displayCurrency as CURRENCY_CODE]?.symbol ?? displayCurrency;
-  const fmtY = (v: number) => {
-    const abs = Math.abs(v);
-    return abs >= 1000 ? `${sym}${(abs / 1000).toFixed(0)}k` : `${sym}${abs}`;
+  const currencySymbol = CURRENCIES[displayCurrency as CURRENCY_CODE]?.symbol ?? displayCurrency;
+  const formatAxisValue = (value: number) => {
+    const abs = Math.abs(value);
+    return abs >= 1000 ? `${currencySymbol}${(abs / 1000).toFixed(0)}k` : `${currencySymbol}${abs}`;
   };
 
   // Distribution bar uses original order (not reversed)
@@ -155,19 +158,31 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, budget, displayCu
   return (
     <div aria-label="Budget distribution" role="img">
       {/* Stacked distribution bar */}
-      <div className="flex h-2 rounded-full overflow-hidden gap-px mb-3">
+      <div className="flex h-2.5 rounded-full overflow-hidden gap-px mb-3">
         {distData
           .filter((d) => d.Actual > 0)
-          .map((item) => (
-            <div
-              title={`${item.category}: ${fmtAmt(item.Actual, displayCurrency)} (${totalActual > 0 ? Math.round((item.Actual / totalActual) * 100) : 0}%)`}
-              style={{
-                width: `${totalActual > 0 ? (item.Actual / totalActual) * 100 : 0}%`,
-                backgroundColor: item.color,
-              }}
-              key={item.category}
-            />
-          ))}
+          .map((item) => {
+            const pct = totalActual > 0 ? (item.Actual / totalActual) * 100 : 0;
+            return (
+              <Tooltip key={item.category}>
+                <TooltipTrigger asChild>
+                  <button
+                    aria-label={`${item.category}: ${formatBudgetAmount(item.Actual, displayCurrency)}`}
+                    style={{ width: `${pct}%`, backgroundColor: item.color }}
+                    type="button"
+                    className="h-full cursor-pointer focus-visible:outline-none focus-visible:opacity-80 transition-opacity hover:opacity-80"
+                    onClick={() => openDrawer(item.categoryId, item.category)}
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs space-y-0.5">
+                  <p className="font-medium">{item.category}</p>
+                  <p className="tabular-nums text-muted-foreground">
+                    {formatBudgetAmount(item.Actual, displayCurrency)} · {Math.round(pct)}%
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
       </div>
 
       {/* Nivo grouped bar chart */}
@@ -185,11 +200,11 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, budget, displayCu
           layout="horizontal"
           margin={{ top: 0, right: 56, bottom: 24, left: 128 }}
           padding={0.28}
-          theme={nivoTheme}
+          theme={BUDGET_NIVO_THEME}
           axisBottom={{
             tickSize: 0,
             tickPadding: 4,
-            format: fmtY,
+            format: formatAxisValue,
           }}
           axisLeft={{
             tickSize: 0,
@@ -218,7 +233,7 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, budget, displayCu
           }}
           label={(d) => {
             const abs = Math.abs(d.value as number);
-            return abs >= 1000 ? `${sym}${(abs / 1000).toFixed(abs >= 10000 ? 0 : 1)}k` : `${sym}${abs}`;
+            return abs >= 1000 ? `${currencySymbol}${(abs / 1000).toFixed(abs >= 10000 ? 0 : 1)}k` : `${currencySymbol}${abs}`;
           }}
           tooltip={({ indexValue, data: d }) => {
             const datum = d as BarDatum;
@@ -230,11 +245,11 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, budget, displayCu
                 <div className="space-y-0.5">
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-muted-foreground text-xs">Planned</span>
-                    <span className="tabular-nums text-xs">{fmtAmt(datum.Planned, displayCurrency)}</span>
+                    <span className="tabular-nums text-xs">{formatBudgetAmount(datum.Planned, displayCurrency)}</span>
                   </div>
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-muted-foreground text-xs">Actual</span>
-                    <span className="tabular-nums text-xs font-semibold">{fmtAmt(datum.Actual, displayCurrency)}</span>
+                    <span className="tabular-nums text-xs font-semibold">{formatBudgetAmount(datum.Actual, displayCurrency)}</span>
                   </div>
                   {remaining !== null && (
                     <div className="flex items-center justify-between gap-4 border-t pt-0.5 mt-0.5">
@@ -246,7 +261,7 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, budget, displayCu
                         )}
                       >
                         {isOver ? '+' : ''}
-                        {fmtAmt(remaining, displayCurrency)}
+                        {formatBudgetAmount(remaining, displayCurrency)}
                       </span>
                     </div>
                   )}
@@ -254,8 +269,16 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, budget, displayCu
               </div>
             );
           }}
+          onClick={(bar) => {
+            const datum = bar.data as BarDatum;
+            if (bar.id === 'Actual' && datum.Actual > 0) {
+              openDrawer(datum.categoryId, datum.category);
+            }
+          }}
         />
       </div>
+
+      <TransactionsDrawer open={drawerOpen} target={drawerTarget} timeframe={timeframe} onOpenChange={setDrawerOpen} />
     </div>
   );
 };

@@ -6,13 +6,14 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
+import { cn } from '@/lib/utils';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
 import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 
 import { useBatchCreateBudgetLines, useHistoryAverages } from '../api';
 import type { BudgetDTO, CategoryTrendItem, SeasonalItem } from '../api/types';
+import { formatBudgetAmount, formatPercent } from '../utils';
 
 import BudgetAdjustmentTooltip from './BudgetAdjustmentTooltip';
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
@@ -29,20 +30,13 @@ interface Props {
 // Monthly budgets: 6 months of history. Yearly/custom: 12 months for a fuller picture.
 const getHistoryMonths = (periodType: string) => (periodType === 'monthly' ? 6 : 12);
 
-const fmtAmt = (n: number, currency: string) => {
-  const sym = CURRENCIES[currency as CURRENCY_CODE]?.symbol ?? currency;
-  return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-};
-
-const fmtPct = (n: number) => `${n > 0 ? '+' : ''}${n}%`;
-
 type SuggestionItem = { cat: Category; suggested: number; activeMonths: number | null };
 type GroupedSuggestion = { root: Category; items: SuggestionItem[] };
 
 const findRoot = (cat: Category): Category => {
-  let c = cat;
-  while (c.parent) c = c.parent;
-  return c;
+  let current = cat;
+  while (current.parent) current = current.parent;
+  return current;
 };
 
 // Sum monthly average for cat and all its descendants
@@ -54,8 +48,7 @@ const getCumulative = (cat: Category, rawMonthly: Map<number, number>): number =
   return sum;
 };
 
-// Max active months across cat and all its descendants (a parent with children
-// that have transactions every month should show 6/6, not 0/6)
+// Max active months across cat and all its descendants
 const getMaxActiveMonths = (cat: Category, activeMonthsMap: Map<number, number>): number | null => {
   let max = activeMonthsMap.get(cat.id) ?? 0;
   for (const child of cat.children) {
@@ -76,6 +69,189 @@ const ColumnHeader: React.FC = () => (
     <span className="w-3" />
   </div>
 );
+
+// ── Shared props for suggestion display components ────────────────────────────
+
+interface SharedSuggestionProps {
+  historyMonths: number;
+  trendsMap: Map<number, CategoryTrendItem>;
+  getAdjustedAmount: (id: number, base: number) => number;
+  getAdjustmentFactor: (id: number) => { trendFactor: number; seasonalFactor: number; total: number };
+  seasonalMap: Map<number, SeasonalItem>;
+  budgetMonth: string;
+  displayCurrency: string;
+}
+
+interface SuggestionRowProps extends SharedSuggestionProps {
+  name: string;
+  categoryId: number;
+  baseAmount: number;
+  activeMonths: number | null;
+  isRoot: boolean;
+  type: 'expense' | 'income';
+}
+
+const SuggestionRow: React.FC<SuggestionRowProps> = ({
+  name,
+  categoryId,
+  baseAmount,
+  activeMonths,
+  isRoot,
+  type,
+  historyMonths,
+  trendsMap,
+  getAdjustedAmount,
+  getAdjustmentFactor,
+  seasonalMap,
+  budgetMonth,
+  displayCurrency,
+}) => {
+  const trend = trendsMap.get(categoryId);
+  const adjusted = getAdjustedAmount(categoryId, baseAmount);
+  const hasTrend = trend && trend.direction !== 'stable';
+  const amountColor = type === 'expense' ? 'text-destructive' : 'text-success';
+
+  let trendColor = '';
+  if (hasTrend && trend) {
+    if (type === 'expense') {
+      trendColor = trend.direction === 'up' ? 'text-destructive' : 'text-success';
+    } else {
+      trendColor = trend.direction === 'up' ? 'text-success' : 'text-destructive';
+    }
+  }
+
+  let frequencyColor = '';
+  if (activeMonths !== null) {
+    if (activeMonths >= 5) {
+      frequencyColor = 'text-muted-foreground/60';
+    } else if (activeMonths >= 3) {
+      frequencyColor = 'text-warning/70';
+    } else {
+      frequencyColor = 'text-warning';
+    }
+  }
+
+  return (
+    <div className={cn('flex items-center gap-1', { 'py-1': isRoot, 'py-0.5 pl-3': !isRoot })}>
+      <span className={cn('truncate min-w-0 flex-1 text-sm', { 'font-medium': isRoot, 'text-muted-foreground': !isRoot })}>
+        {name}
+      </span>
+
+      <span className="w-[52px] text-right text-2xs tabular-nums shrink-0">
+        {hasTrend && trend && <span className={trendColor}>{formatPercent(trend.changePercent)}</span>}
+      </span>
+
+      <span className="w-[40px] text-right text-2xs tabular-nums shrink-0">
+        {activeMonths !== null && (
+          <span className={frequencyColor}>
+            {activeMonths}/{historyMonths}
+          </span>
+        )}
+      </span>
+
+      <span className={cn('w-[72px] text-right font-medium tabular-nums shrink-0 text-sm', amountColor)}>
+        {formatBudgetAmount(adjusted, displayCurrency)}
+      </span>
+
+      <span className="w-3 shrink-0">
+        <BudgetAdjustmentTooltip
+          baseAmount={baseAmount}
+          budgetMonth={budgetMonth}
+          displayCurrency={displayCurrency}
+          seasonal={seasonalMap.get(categoryId)}
+          seasonalFactor={getAdjustmentFactor(categoryId).seasonalFactor}
+          trendFactor={getAdjustmentFactor(categoryId).trendFactor}
+        />
+      </span>
+    </div>
+  );
+};
+
+interface SuggestionGroupsProps extends SharedSuggestionProps {
+  groups: GroupedSuggestion[];
+  type: 'expense' | 'income';
+}
+
+const SuggestionGroups: React.FC<SuggestionGroupsProps> = ({
+  groups,
+  type,
+  historyMonths,
+  trendsMap,
+  getAdjustedAmount,
+  getAdjustmentFactor,
+  seasonalMap,
+  budgetMonth,
+  displayCurrency,
+}) => {
+  if (groups.length === 0) {
+    return <p className="text-muted-foreground text-center py-4 text-xs">No suggestions</p>;
+  }
+
+  const amountColor = type === 'expense' ? 'text-destructive' : 'text-success';
+  const sharedRowProps: SharedSuggestionProps = {
+    historyMonths,
+    trendsMap,
+    getAdjustedAmount,
+    getAdjustmentFactor,
+    seasonalMap,
+    budgetMonth,
+    displayCurrency,
+  };
+
+  return (
+    <>
+      {groups.map(({ root, items }) => {
+        const rootItem = items.find((item) => item.cat.id === root.id);
+        const childItems = items.filter((item) => item.cat.id !== root.id);
+        const hasChildren = childItems.length > 0;
+
+        if (!hasChildren) {
+          if (!rootItem) return null;
+          return (
+            <div className="mb-2 last:mb-0" key={root.id}>
+              <SuggestionRow
+                {...sharedRowProps}
+                isRoot
+                activeMonths={rootItem.activeMonths}
+                baseAmount={rootItem.suggested}
+                categoryId={root.id}
+                name={root.name}
+                type={type}
+              />
+            </div>
+          );
+        }
+
+        return (
+          <div className="mb-2 last:mb-0" key={root.id}>
+            <div className="flex items-center py-1 border-b border-border/30 mb-0.5">
+              <span className="text-2xs font-semibold text-muted-foreground uppercase tracking-wider flex-1 min-w-0 truncate">
+                {root.name}
+              </span>
+              {rootItem && (
+                <span className={cn('font-semibold tabular-nums text-sm', amountColor)}>
+                  {formatBudgetAmount(getAdjustedAmount(root.id, rootItem.suggested), displayCurrency)}
+                </span>
+              )}
+            </div>
+            {childItems.map(({ cat, suggested, activeMonths }) => (
+              <SuggestionRow
+                key={cat.id}
+                {...sharedRowProps}
+                activeMonths={activeMonths}
+                baseAmount={suggested}
+                categoryId={cat.id}
+                isRoot={false}
+                name={cat.name}
+                type={type}
+              />
+            ))}
+          </div>
+        );
+      })}
+    </>
+  );
+};
 
 const BudgetFillFromHistoryButton: React.FC<Props> = ({
   budget,
@@ -192,7 +368,6 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({
       map.get(root.id)!.items.push({ cat, suggested: s.suggested, activeMonths: s.activeMonths });
     }
 
-    // Data arrives pre-sorted from buildCategoriesData — preserve that order
     const sortGroups = (m: Map<number, GroupedSuggestion>): GroupedSuggestion[] => [...m.values()];
 
     return { expenseGroups: sortGroups(expMap), incomeGroups: sortGroups(incMap) };
@@ -235,122 +410,76 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({
     toast.success(`Added ${results.length} budget lines from history`);
   };
 
-  // ── Render category rows ───────────────────────────────────────────────────
-
-  const renderGroups = (groups: GroupedSuggestion[], type: 'expense' | 'income') => {
-    if (groups.length === 0) return <p className="text-muted-foreground text-center py-4 text-xs">No suggestions</p>;
-
-    const amtCls = type === 'expense' ? 'text-destructive' : 'text-success';
-
-    const renderRow = (
-      name: string,
-      categoryId: number,
-      baseAmount: number,
-      activeMonths: number | null,
-      isRoot: boolean,
-    ) => {
-      const trend = trendsMap.get(categoryId);
-      const adjusted = getAdjustedAmount(categoryId, baseAmount);
-      const hasTrend = trend && trend.direction !== 'stable';
-
-      return (
-        <div className={`flex items-center gap-1 ${isRoot ? 'py-1' : 'py-0.5 pl-3'}`} key={categoryId}>
-          <span className={`truncate min-w-0 flex-1 text-sm ${isRoot ? 'font-medium' : 'text-muted-foreground'}`}>
-            {name}
-          </span>
-
-          {/* Trend: direction + % */}
-          <span className="w-[52px] text-right text-2xs tabular-nums shrink-0">
-            {hasTrend && (
-              <span
-                className={
-                  type === 'expense'
-                    ? trend.direction === 'up'
-                      ? 'text-destructive'
-                      : 'text-success'
-                    : trend.direction === 'up'
-                      ? 'text-success'
-                      : 'text-destructive'
-                }
-              >
-                {fmtPct(trend.changePercent)}
-              </span>
-            )}
-          </span>
-
-          {/* Frequency */}
-          <span className="w-[40px] text-right text-2xs tabular-nums shrink-0">
-            {activeMonths !== null && (
-              <span
-                className={
-                  activeMonths >= 5
-                    ? 'text-muted-foreground/60'
-                    : activeMonths >= 3
-                      ? 'text-warning/70'
-                      : 'text-warning'
-                }
-              >
-                {activeMonths}/{HISTORY_MONTHS}
-              </span>
-            )}
-          </span>
-
-          {/* Amount */}
-          <span className={`w-[72px] text-right font-medium tabular-nums shrink-0 text-sm ${amtCls}`}>
-            {fmtAmt(adjusted, displayCurrency)}
-          </span>
-
-          {/* Info icon */}
-          <span className="w-3 shrink-0">
-            <BudgetAdjustmentTooltip
-              baseAmount={baseAmount}
-              budgetMonth={budgetMonth}
-              displayCurrency={displayCurrency}
-              seasonal={seasonalMap.get(categoryId)}
-              seasonalFactor={getAdjustmentFactor(categoryId).seasonalFactor}
-              trendFactor={getAdjustmentFactor(categoryId).trendFactor}
-            />
-          </span>
-        </div>
-      );
-    };
-
-    return groups.map(({ root, items }) => {
-      const rootItem = items.find((i) => i.cat.id === root.id);
-      const childItems = items.filter((i) => i.cat.id !== root.id);
-      const hasChildren = childItems.length > 0;
-
-      return (
-        <div className="mb-2 last:mb-0" key={root.id}>
-          {hasChildren ? (
-            <>
-              {/* Group header */}
-              <div className="flex items-center py-1 border-b border-border/30 mb-0.5">
-                <span className="text-2xs font-semibold text-muted-foreground uppercase tracking-wider flex-1 min-w-0 truncate">
-                  {root.name}
-                </span>
-                {rootItem && (
-                  <span className={`font-semibold tabular-nums text-sm ${amtCls}`}>
-                    {fmtAmt(getAdjustedAmount(root.id, rootItem.suggested), displayCurrency)}
-                  </span>
-                )}
-              </div>
-              {/* Child rows */}
-              {childItems.map(({ cat, suggested, activeMonths }) =>
-                renderRow(cat.name, cat.id, suggested, activeMonths, false),
-              )}
-            </>
-          ) : (
-            rootItem && renderRow(root.name, root.id, rootItem.suggested, rootItem.activeMonths, true)
-          )}
-        </div>
-      );
-    });
-  };
-
   const periodLabel = historyData
     ? `${moment(historyData.after).format('MMM YYYY')} – ${moment(historyData.before).format('MMM YYYY')}`
     : `last ${HISTORY_MONTHS} months`;
+
+  const sharedSuggestionProps: SharedSuggestionProps = {
+    historyMonths: HISTORY_MONTHS,
+    trendsMap,
+    getAdjustedAmount,
+    getAdjustmentFactor,
+    seasonalMap,
+    budgetMonth,
+    displayCurrency,
+  };
+
+  const applyLabel = suggestions.length > 0 ? `Apply (${suggestions.length})` : 'Apply';
+
+  let dialogBody: React.ReactNode;
+  if (historyLoading) {
+    dialogBody = (
+      <div className="flex items-center justify-center py-12 text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+        Analyzing spending history…
+      </div>
+    );
+  } else if (suggestions.length === 0) {
+    dialogBody = (
+      <p className="text-muted-foreground text-center py-10 text-xs">
+        No suggestions — all categories already have budget lines, or no historical spending found.
+      </p>
+    );
+  } else {
+    dialogBody = (
+      <>
+        {/* Summary bar */}
+        <div className="flex items-center gap-6 px-3 py-2 rounded-md bg-muted/50 text-sm">
+          {totalExpense > 0 && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-muted-foreground text-xs">Expenses</span>
+              <span className="font-semibold text-destructive tabular-nums">
+                {formatBudgetAmount(totalExpense, displayCurrency)}
+              </span>
+            </div>
+          )}
+          {totalIncome > 0 && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-muted-foreground text-xs">Income</span>
+              <span className="font-semibold text-success tabular-nums">
+                {formatBudgetAmount(totalIncome, displayCurrency)}
+              </span>
+            </div>
+          )}
+          <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+            {suggestions.length} {suggestions.length !== 1 ? 'lines' : 'line'}
+          </span>
+        </div>
+
+        {/* Category grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 sm:divide-x flex-1 min-h-0 overflow-hidden">
+          <div className="pr-0 sm:pr-4 overflow-y-auto max-h-[40vh]">
+            <ColumnHeader />
+            <SuggestionGroups {...sharedSuggestionProps} groups={expenseGroups} type="expense" />
+          </div>
+          <div className="pl-0 sm:pl-4 pt-2 sm:pt-0 border-t sm:border-t-0 overflow-y-auto max-h-[40vh]">
+            <ColumnHeader />
+            <SuggestionGroups {...sharedSuggestionProps} groups={incomeGroups} type="income" />
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -395,56 +524,7 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({
             </div>
           </div>
 
-          {historyLoading ? (
-            <div className="flex items-center justify-center py-12 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              Analyzing spending history…
-            </div>
-          ) : suggestions.length === 0 ? (
-            <p className="text-muted-foreground text-center py-10 text-xs">
-              No suggestions — all categories already have budget lines, or no historical spending found.
-            </p>
-          ) : (
-            <>
-              {/* Summary bar */}
-              <div className="flex items-center gap-6 px-3 py-2 rounded-md bg-muted/50 text-sm">
-                {totalExpense > 0 && (
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-muted-foreground text-xs">Expenses</span>
-                    <span className="font-semibold text-destructive tabular-nums">
-                      {fmtAmt(totalExpense, displayCurrency)}
-                    </span>
-                  </div>
-                )}
-                {totalIncome > 0 && (
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-muted-foreground text-xs">Income</span>
-                    <span className="font-semibold text-success tabular-nums">
-                      {fmtAmt(totalIncome, displayCurrency)}
-                    </span>
-                  </div>
-                )}
-                <span className="ml-auto text-xs text-muted-foreground tabular-nums">
-                  {suggestions.length} line{suggestions.length !== 1 ? 's' : ''}
-                </span>
-              </div>
-
-              {/* Category grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 sm:divide-x flex-1 min-h-0 overflow-hidden">
-                {/* Expenses */}
-                <div className="pr-0 sm:pr-4 overflow-y-auto max-h-[40vh]">
-                  <ColumnHeader />
-                  {renderGroups(expenseGroups, 'expense')}
-                </div>
-
-                {/* Income */}
-                <div className="pl-0 sm:pl-4 pt-2 sm:pt-0 border-t sm:border-t-0 overflow-y-auto max-h-[40vh]">
-                  <ColumnHeader />
-                  {renderGroups(incomeGroups, 'income')}
-                </div>
-              </div>
-            </>
-          )}
+          {dialogBody}
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
@@ -452,7 +532,7 @@ const BudgetFillFromHistoryButton: React.FC<Props> = ({
             </Button>
             <Button disabled={suggestions.length === 0 || isSaving || historyLoading} onClick={handleApply}>
               {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              Apply {suggestions.length > 0 ? `(${suggestions.length})` : ''}
+              {applyLabel}
             </Button>
           </DialogFooter>
         </DialogContent>

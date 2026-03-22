@@ -50,7 +50,7 @@ const BudgetNotePopover: React.FC<Props> = ({ line, onNoteUpdate }) => {
         </button>
       </PopoverTrigger>
       <PopoverContent side="right" className="w-64 p-3 space-y-2">
-        <p className="text-xs font-medium text-muted-foreground">{line ? 'Edit note' : 'Add note'}</p>
+        <p className="text-xs font-medium text-muted-foreground">{line.note ? 'Edit note' : 'Add note'}</p>
         <Textarea
           autoFocus
           placeholder="Add a note for this budget line…"

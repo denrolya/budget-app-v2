@@ -109,13 +109,13 @@ const buildInlineAxisLayer = (ticks: string[], format: (v: string) => string) =>
           if (x == null) return null;
           return (
             <text
-              key={v}
               dominantBaseline="auto"
               fill="hsl(var(--muted-foreground))"
               fontSize={11}
               textAnchor="middle"
               x={x}
               y={innerHeight - 4}
+              key={v}
             >
               {format(v)}
             </text>
@@ -282,6 +282,7 @@ const BalanceHistoryChart: React.FC<Props> = ({ account, preset = '3M' }) => {
           <ResponsiveLine
             animate={false}
             areaOpacity={1}
+            axisBottom={null}
             axisLeft={null}
             axisRight={null}
             axisTop={null}
@@ -302,7 +303,6 @@ const BalanceHistoryChart: React.FC<Props> = ({ account, preset = '3M' }) => {
             theme={nivoTheme}
             xScale={{ type: 'point' }}
             yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false }}
-            axisBottom={null}
             layers={[
               'grid',
               'axes',

@@ -208,7 +208,7 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
 
       {/* Calendar */}
       <Calendar
-        autoFocus
+        initialFocus
         defaultMonth={draft.from ?? after.toDate()}
         mode="range"
         numberOfMonths={numberOfMonths}

@@ -1,19 +1,13 @@
 import moment from 'moment';
 import { useMemo } from 'react';
 
-import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
 import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
 
 import type { BudgetDTO, BudgetAnalyticsItem } from '../api/types';
 import type { DisplayCurrency } from '../components/BudgetDisplayCurrency';
-
-const getAllIds = (category: Category): number[] => {
-  const ids: number[] = [category.id];
-  for (const child of category.children) ids.push(...getAllIds(child));
-  return ids;
-};
+import { getAllDescendantIds } from '../utils';
 
 const plannedRollup = (
   category: Category,
@@ -26,7 +20,7 @@ const plannedRollup = (
     const rate = getExchangeRate(own.plannedCurrency, displayCurrency, rates);
     return rate !== null ? own.plannedAmount * rate : 0;
   }
-  return getAllIds(category)
+  return getAllDescendantIds(category)
     .slice(1)
     .reduce((sum, id) => {
       const line = linesMap.get(id);
@@ -49,74 +43,6 @@ export interface BudgetTotals {
   daysLeft: number;
 }
 
-export interface HealthResult {
-  score: number;
-  grade: string;
-  gradeColor: string;
-}
-
-export const computeHealthScore = (
-  percentUsed: number,
-  daysElapsed: number,
-  daysTotal: number,
-  totalPlannedIncome: number,
-  totalActualIncome: number,
-): HealthResult => {
-  let score = 100;
-
-  // Overspend penalty: 2pts per % over budget (e.g. 106% → -12, 120% → -40)
-  if (percentUsed > 100) {
-    score -= Math.min(50, (percentUsed - 100) * 2);
-  } else if (percentUsed > 85) {
-    // Approaching limit: mild penalty
-    score -= Math.round((percentUsed - 85) * 0.5);
-  }
-
-  // Pace penalty: spending ahead of schedule (only for active budgets)
-  if (daysTotal > 0 && daysElapsed > 0 && daysElapsed < daysTotal) {
-    const expectedPct = (daysElapsed / daysTotal) * 100;
-    if (percentUsed > expectedPct + 5) {
-      score -= Math.min(20, (percentUsed - expectedPct - 5) * 0.5);
-    }
-  }
-
-  // Income shortfall penalty
-  if (totalPlannedIncome > 0) {
-    const incomePct = (totalActualIncome / totalPlannedIncome) * 100;
-    if (incomePct < 90) {
-      score -= Math.min(15, (90 - incomePct) * 0.3);
-    }
-  }
-
-  score = Math.max(0, Math.round(score));
-
-  let grade: string;
-  let gradeColor: string;
-  if (score >= 90) {
-    grade = 'A';
-    gradeColor = 'text-success';
-  } else if (score >= 75) {
-    grade = 'B';
-    gradeColor = 'text-success/75';
-  } else if (score >= 60) {
-    grade = 'C';
-    gradeColor = 'text-warning';
-  } else if (score >= 45) {
-    grade = 'D';
-    gradeColor = 'text-warning/75';
-  } else {
-    grade = 'F';
-    gradeColor = 'text-destructive';
-  }
-
-  return { score, grade, gradeColor };
-};
-
-export const fmtBudgetAmt = (amount: number, currency: string): string => {
-  const sym = CURRENCIES[currency as CURRENCY_CODE]?.symbol ?? currency;
-  return `${sym}${Math.abs(amount).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-};
-
 const useBudgetTotals = (
   budget: BudgetDTO,
   analytics: BudgetAnalyticsItem[],
@@ -127,10 +53,14 @@ const useBudgetTotals = (
 
   return useMemo(() => {
     const expenseIds = new Set(
-      (catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense) ?? []).flatMap(getAllIds),
+      (catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense) ?? []).flatMap(
+        getAllDescendantIds,
+      ),
     );
     const incomeIds = new Set(
-      (catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income) ?? []).flatMap(getAllIds),
+      (catData?.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income) ?? []).flatMap(
+        getAllDescendantIds,
+      ),
     );
 
     const linesMap = new Map((budget.lines ?? []).map((l) => [l.categoryId, l]));

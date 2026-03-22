@@ -294,7 +294,7 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
 
         {/* Content */}
         <div className="flex-1 min-h-0 overflow-hidden">
-          <div key={panelKey} className="chart-enter h-full">
+          <div className="chart-enter h-full" key={panelKey}>
             {panelContent}
           </div>
         </div>

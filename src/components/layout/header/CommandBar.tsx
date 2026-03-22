@@ -9,13 +9,12 @@ import RateTickers from '@/components/layout/statusline/RateTickers';
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const ALL_WINDOWS = [
-  { num: 1, label: 'DASH', path: ROUTES.DASHBOARD.path },
+  { num: 1, label: 'BUDGET', path: ROUTES.BUDGET_PAGE.path },
   { num: 2, label: 'LEDGER', path: ROUTES.LEDGER.path },
   { num: 3, label: 'ACCTS', path: ROUTES.ACCOUNT_LIST.path },
-  { num: 4, label: 'BUDGET', path: ROUTES.BUDGET_PAGE.path },
-  { num: 5, label: 'BKTS', path: ROUTES.BUCKETS_PAGE.path },
-  { num: 6, label: 'DEBTS', path: ROUTES.DEBT_LIST.path },
-  { num: 7, label: 'CATS', path: ROUTES.CATEGORIES_PAGE.path },
+  { num: 4, label: 'BKTS', path: ROUTES.BUCKETS_PAGE.path },
+  { num: 5, label: 'DEBTS', path: ROUTES.DEBT_LIST.path },
+  { num: 6, label: 'CATS', path: ROUTES.CATEGORIES_PAGE.path },
 ] as const;
 
 // ── Window Tab ────────────────────────────────────────────────────────────────

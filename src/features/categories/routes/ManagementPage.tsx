@@ -82,32 +82,32 @@ const CategoriesPage: React.FC = () => {
         <PageWithSidebar.Sidebar>
           <div className={cn('flex h-full flex-col', { 'pointer-events-none opacity-60': isDeleting })}>
             {/* Search + compact toolbar */}
-            <div className="border-b px-2 py-1.5">
+            <div className="border-b px-2 py-1">
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
                   <Search
                     aria-hidden="true"
-                    className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                    className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
                   />
                   <Input
                     aria-label="Search categories"
                     placeholder="Search…"
                     value={searchQuery}
-                    className="h-8 pl-8"
+                    className="h-7 pl-7 text-xs"
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
 
-                <div aria-label="Category actions" role="toolbar" className="flex items-center gap-1">
+                <div aria-label="Category actions" role="toolbar" className="flex items-center gap-0.5">
                   <Button
                     aria-label="Create new category"
                     size="icon"
                     type="button"
                     variant="ghost"
-                    className="h-9 w-9"
+                    className="h-7 w-7"
                     onClick={() => handleAddNew(null, activeType)}
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-3.5 w-3.5" />
                   </Button>
 
                   <Button
@@ -115,10 +115,10 @@ const CategoriesPage: React.FC = () => {
                     size="icon"
                     type="button"
                     variant="ghost"
-                    className="h-9 w-9"
+                    className="h-7 w-7"
                     onClick={() => activeTreeRef.current?.expandAll()}
                   >
-                    <UnfoldVertical className="h-4 w-4" />
+                    <UnfoldVertical className="h-3.5 w-3.5" />
                   </Button>
 
                   <Button
@@ -126,10 +126,10 @@ const CategoriesPage: React.FC = () => {
                     size="icon"
                     type="button"
                     variant="ghost"
-                    className="h-9 w-9"
+                    className="h-7 w-7"
                     onClick={() => activeTreeRef.current?.collapseAll()}
                   >
-                    <FoldVertical className="h-4 w-4" />
+                    <FoldVertical className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>

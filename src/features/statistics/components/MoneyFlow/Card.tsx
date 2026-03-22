@@ -84,8 +84,8 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
       <div className="w-full h-full flex flex-col items-center justify-center gap-2">
         <span className="text-xs font-mono text-muted-foreground/60">Failed to load chart data</span>
         <button
-          className="text-2xs font-mono text-muted-foreground hover:text-foreground border border-border/60 rounded px-2 py-0.5 transition-colors"
           type="button"
+          className="text-2xs font-mono text-muted-foreground hover:text-foreground border border-border/60 rounded px-2 py-0.5 transition-colors"
           onClick={refetchData}
         >
           Retry
@@ -275,7 +275,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
         {isLoading && <MoneyFlowSkeleton />}
         {!isLoading && (
-          <div key={chartType} className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden">
+          <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden" key={chartType}>
             {chartContent}
           </div>
         )}
@@ -309,12 +309,12 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
                 {item.pct != null && (
                   <ResponsiveTooltip
                     desktopComponent="hovercard"
-                    contentClassName="p-2 w-auto"
                     content={
                       <span className="flex items-center gap-1 font-mono text-xs">
-                        vs <MoneyValue amount={item.prevValue} useColors className="tabular-nums" />
+                        vs <MoneyValue useColors amount={item.prevValue} className="tabular-nums" />
                       </span>
                     }
+                    contentClassName="p-2 w-auto"
                   >
                     <span
                       className={cn('flex items-center text-2xs font-mono font-semibold cursor-help', {

@@ -1,5 +1,4 @@
 import type { PieSvgProps } from '@nivo/pie';
-import sortBy from 'lodash/sortBy';
 import moment, { type Moment } from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
@@ -84,15 +83,16 @@ const CategoriesPanel: React.FC<Props> = ({
     return showMonthlyAverage ? calcMonthlyAverage(raw) : raw;
   }, [currentCategory, totalRoot, showMonthlyAverage, calcMonthlyAverage]);
 
-  // Sorted descending list — used for both pie and distribution rows
-  const chartData = useMemo(() => {
-    const list = currentCategories.map((c) => ({
-      id: c.id,
-      label: c.name,
-      value: showMonthlyAverage ? calcMonthlyAverage(c.value) : c.value,
-    }));
-    return sortBy(list, 'value').reverse();
-  }, [currentCategories, showMonthlyAverage, calcMonthlyAverage]);
+  // Preserve API order — used for both pie and distribution rows
+  const chartData = useMemo(
+    () =>
+      currentCategories.map((c) => ({
+        id: c.id,
+        label: c.name,
+        value: showMonthlyAverage ? calcMonthlyAverage(c.value) : c.value,
+      })),
+    [currentCategories, showMonthlyAverage, calcMonthlyAverage],
+  );
 
   // Pie data — same shape as Datum
   const pieData = useMemo<Datum[]>(
@@ -191,39 +191,38 @@ const CategoriesPanel: React.FC<Props> = ({
 
   const hasData = currentCategories.length > 0;
 
+  const donutContent = hasData ? (
+    <>
+      <PieBlock
+        animate
+        colors={pieColors}
+        data={pieData}
+        tooltip={tooltip}
+        onClick={(node) => {
+          const cat = categoriesById.get(String(node.data.id));
+          if (cat) handleCategoryStep(cat);
+        }}
+      />
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="text-center max-w-[88px]">
+          <MoneyValue
+            amount={scopeTotal}
+            useColors={false}
+            className="text-sm font-bold font-mono tabular-nums leading-none"
+          />
+        </div>
+      </div>
+    </>
+  ) : (
+    <div className="flex items-center justify-center h-full">
+      <span className="text-2xs text-muted-foreground">No data</span>
+    </div>
+  );
+
   return (
     <div className="flex flex-col h-full min-h-0">
       {/* Pie donut chart */}
-      <div className="shrink-0 h-[180px] relative">
-        {hasData ? (
-          <>
-            <PieBlock
-              animate
-              colors={pieColors}
-              data={pieData}
-              tooltip={tooltip}
-              onClick={(node) => {
-                const cat = categoriesById.get(String(node.data.id));
-                if (cat) handleCategoryStep(cat);
-              }}
-            />
-            {/* Center label */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="text-center max-w-[88px]">
-                <MoneyValue
-                  amount={scopeTotal}
-                  useColors={false}
-                  className="text-sm font-bold font-mono tabular-nums leading-none"
-                />
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <span className="text-2xs text-muted-foreground">No data</span>
-          </div>
-        )}
-      </div>
+      <div className="shrink-0 h-[180px] relative">{donutContent}</div>
 
       {/* Breadcrumb + list */}
       <div className="border-t shrink-0" />
@@ -232,32 +231,36 @@ const CategoriesPanel: React.FC<Props> = ({
           <div className="shrink-0 px-2 pt-1 pb-0.5">
             <Breadcrumb>
               <BreadcrumbList className="flex-wrap gap-x-1 gap-y-0">
-                {breadcrumbs.map(({ id, name }, index) => (
-                  <React.Fragment key={id}>
-                    {index > 0 && <BreadcrumbSeparator className="text-muted-foreground/40" />}
-                    {index === breadcrumbs.length - 1 ? (
-                      <BreadcrumbPage className="text-2xs">{name}</BreadcrumbPage>
-                    ) : (
-                      <BreadcrumbItem>
-                        <BreadcrumbLink
-                          aria-label={`Go to ${name}`}
-                          role="button"
-                          tabIndex={0}
-                          className="text-2xs cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-sm"
-                          onClick={() => handleBreadcrumbClick(index)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              handleBreadcrumbClick(index);
-                            }
-                          }}
-                        >
-                          {name}
-                        </BreadcrumbLink>
-                      </BreadcrumbItem>
-                    )}
-                  </React.Fragment>
-                ))}
+                {breadcrumbs.map(({ id, name }, index) => {
+                  const isLast = index === breadcrumbs.length - 1;
+                  const crumbNode = isLast ? (
+                    <BreadcrumbPage className="text-2xs">{name}</BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbItem>
+                      <BreadcrumbLink
+                        aria-label={`Go to ${name}`}
+                        role="button"
+                        tabIndex={0}
+                        className="text-2xs cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-sm"
+                        onClick={() => handleBreadcrumbClick(index)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleBreadcrumbClick(index);
+                          }
+                        }}
+                      >
+                        {name}
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                  );
+                  return (
+                    <React.Fragment key={id}>
+                      {index > 0 && <BreadcrumbSeparator className="text-muted-foreground/40" />}
+                      {crumbNode}
+                    </React.Fragment>
+                  );
+                })}
               </BreadcrumbList>
             </Breadcrumb>
           </div>
@@ -266,6 +269,7 @@ const CategoriesPanel: React.FC<Props> = ({
         <div className="flex-1 min-h-0 overflow-hidden">
           <DistributionList
             ariaLabel="Categories distribution list"
+            getDotColor={(item) => colorMap.get(String(item.id)) ?? null}
             items={listItems}
             total={scopeTotal}
             onRowClick={(id) => {

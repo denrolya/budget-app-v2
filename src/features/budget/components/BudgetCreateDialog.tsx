@@ -9,11 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
+import { cn } from '@/lib/utils';
 import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
 
 import { useCreateBudget } from '../api';
 import type { BudgetDTO, BudgetPeriodType, CreateBudgetDTO } from '../api/types';
+import { formatBudgetAmount } from '../utils';
 
 interface Props {
   open: boolean;
@@ -38,11 +39,6 @@ const MONTHS = [
   'November',
   'December',
 ];
-
-const fmtAmt = (n: number, currency: string) => {
-  const sym = CURRENCIES[currency as CURRENCY_CODE]?.symbol ?? currency;
-  return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-};
 
 // ── Prediction preview panel ────────────────────────────────────────────────
 
@@ -120,23 +116,22 @@ const PredictionPreview: React.FC<{ periodType: BudgetPeriodType; month: number;
       <div className="flex items-center gap-4 text-sm">
         <div>
           <span className="text-2xs text-muted-foreground mr-1">Expenses</span>
-          <span className="font-medium text-destructive tabular-nums">{fmtAmt(stats.expense, 'EUR')}</span>
+          <span className="font-medium text-destructive tabular-nums">{formatBudgetAmount(stats.expense, 'EUR')}</span>
         </div>
         <div>
           <span className="text-2xs text-muted-foreground mr-1">Income</span>
-          <span className="font-medium text-success tabular-nums">{fmtAmt(stats.income, 'EUR')}</span>
+          <span className="font-medium text-success tabular-nums">{formatBudgetAmount(stats.income, 'EUR')}</span>
         </div>
         <div>
           <span className="text-2xs text-muted-foreground mr-1">Savings</span>
-          <span className={`font-medium tabular-nums ${stats.savings >= 0 ? 'text-success' : 'text-destructive'}`}>
-            {fmtAmt(stats.savings, 'EUR')}
+          <span className={cn('font-medium tabular-nums', { 'text-success': stats.savings >= 0, 'text-destructive': stats.savings < 0 })}>
+            {formatBudgetAmount(stats.savings, 'EUR')}
           </span>
         </div>
       </div>
       {hasTrend && (
-        <p
-          className={`text-2xs inline-flex items-center gap-0.5 ${stats.trendPercent > 0 ? 'text-destructive' : 'text-success'}`}
-        >
+        <p className={cn('text-2xs inline-flex items-center gap-0.5', { 'text-destructive': stats.trendPercent > 0, 'text-success': stats.trendPercent <= 0 })}>
+
           <TrendIcon className="h-2.5 w-2.5" />
           Expenses trending {stats.trendPercent > 0 ? 'up' : 'down'} {Math.abs(stats.trendPercent)}%
         </p>

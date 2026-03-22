@@ -59,20 +59,20 @@ const InlineName: React.FC<InlineNameProps> = ({ account, onSave }) => {
     return (
       <div className="flex items-center gap-1 min-w-0 flex-1">
         <Input
-          ref={inputRef}
-          className="h-6 text-sm font-semibold px-1.5 py-0 flex-1 min-w-0"
           value={value}
+          className="h-6 text-sm font-semibold px-1.5 py-0 flex-1 min-w-0"
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
+          ref={inputRef}
         />
-        <Button aria-label="Save name" className="h-6 w-6" size="icon" variant="ghost" onClick={handleSave}>
+        <Button aria-label="Save name" size="icon" variant="ghost" className="h-6 w-6" onClick={handleSave}>
           <Check className="h-3 w-3" />
         </Button>
         <Button
           aria-label="Cancel edit"
-          className="h-6 w-6"
           size="icon"
           variant="ghost"
+          className="h-6 w-6"
           onClick={() => { setValue(account.name); setEditing(false); }}
         >
           <X className="h-3 w-3" />
@@ -83,8 +83,8 @@ const InlineName: React.FC<InlineNameProps> = ({ account, onSave }) => {
 
   return (
     <button
-      className="group flex items-center gap-1 min-w-0 text-left"
       type="button"
+      className="group flex items-center gap-1 min-w-0 text-left"
       onClick={() => { setValue(account.name); setEditing(true); }}
     >
       <span className="truncate text-sm font-semibold">{account.name}</span>
@@ -191,10 +191,10 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate, onSetReviewD
               <TooltipTrigger asChild>
                 <Button
                   aria-label={account.isDisplayedOnSidebar ? 'Hide from sidebar' : 'Show in sidebar'}
-                  className="ml-auto h-7 w-7 shrink-0"
                   size="icon"
                   type="button"
                   variant="ghost"
+                  className="ml-auto h-7 w-7 shrink-0"
                   onClick={toggleSidebarVisibility}
                 >
                   {account.isDisplayedOnSidebar ? (
@@ -207,14 +207,14 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate, onSetReviewD
               <TooltipContent>{account.isDisplayedOnSidebar ? 'Pinned to sidebar' : 'Pin to sidebar'}</TooltipContent>
             </Tooltip>
             <ToggleGroup
-              className="gap-0.5"
               size="sm"
               type="single"
               value={preset}
+              className="gap-0.5"
               onValueChange={(v) => { if (v) setPreset(v as PresetLabel); }}
             >
               {PRESETS.map((p) => (
-                <ToggleGroupItem key={p.label} className="h-6 px-2 text-2xs" value={p.label}>
+                <ToggleGroupItem value={p.label} className="h-6 px-2 text-2xs" key={p.label}>
                   {p.label}
                 </ToggleGroupItem>
               ))}
@@ -236,7 +236,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate, onSetReviewD
               <>
                 <span className="select-none text-border">·</span>
                 <span className="font-medium text-foreground/80">{capitalize(bi.provider)}</span>
-                <Badge className="pointer-events-none px-1.5 py-0 text-2xs" variant={bi.isActive ? 'default' : 'destructive'}>
+                <Badge variant={bi.isActive ? 'default' : 'destructive'} className="pointer-events-none px-1.5 py-0 text-2xs">
                   {bi.isActive ? 'Active' : 'Inactive'}
                 </Badge>
                 {bi.syncMethod && (
@@ -260,7 +260,6 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate, onSetReviewD
 
       {/* Activity card */}
       <LedgerActivityCard
-        className="flex-1 min-h-0 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 ease-out"
         disabledFilters={['accounts']}
         ledger={ledger}
         heatmap={({ onRangeSelect, onRangeClear }) => (
@@ -273,6 +272,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate, onSetReviewD
             onRangeSelect={onRangeSelect}
           />
         )}
+        className="flex-1 min-h-0 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 ease-out"
         onHeatmapRangeClear={handleHeatmapRangeClear}
         onHeatmapRangeSelect={handleHeatmapRangeSelect}
         onReset={handleLedgerReset}

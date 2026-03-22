@@ -5,6 +5,8 @@ import { Navigate, Route, Routes, useLocation, useMatch, useNavigate, useParams 
 
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { MOMENT_DATE_VIEW_FORMAT_2 } from '@/constants/datetime';
+import { DistributionDonutCard } from '@/features/statistics';
+import MoneyFlowCard from '@/features/statistics/components/MoneyFlow/Card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -12,7 +14,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
 
 import { useBudget, useBudgetAnalytics, useBudgetInsights, useCategoryDailyStats, useListBudgets } from './api';
-import BudgetAlertsSection from './components/BudgetAlertsSection';
+import BudgetAccountDistribution from './components/BudgetAccountDistribution';
+import BudgetSignalsPanel from './components/BudgetSignalsPanel';
 import BudgetDisplayCurrency, { type DisplayCurrency } from './components/BudgetDisplayCurrency';
 import BudgetDistributionChart from './components/BudgetDistributionChart';
 import BudgetExportButton from './components/BudgetExportButton';
@@ -31,7 +34,7 @@ const ManagementPage: React.FC = () => {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <PageWithSidebar collapsible resizable contentScrollable={false} sidebarWidth="w-64">
+      <PageWithSidebar collapsible defaultCollapsed resizable contentScrollable={false} sidebarWidth="w-64">
         <PageWithSidebar.Sidebar ariaLabel="Budget sidebar">
           <BudgetSidebar selectedId={selectedId} />
         </PageWithSidebar.Sidebar>
@@ -200,13 +203,14 @@ const BudgetDetailRoute: React.FC = () => {
       {/* Scrollable content */}
       <ScrollArea className="flex-1 min-h-0">
         <div className="p-4 space-y-6 pb-8">
-          {/* Alerts */}
-          <BudgetAlertsSection
+          {/* Signals */}
+          <BudgetSignalsPanel
             analytics={analytics}
             budget={budget}
             displayCurrency={displayCurrency}
             outliers={insightsData?.outliers}
             rates={rates}
+            trends={insightsData?.trends}
           />
 
           {/* Pace chart + Heatmap row */}
@@ -253,6 +257,25 @@ const BudgetDetailRoute: React.FC = () => {
                 rates={rates}
               />
             </div>
+          </div>
+
+          <Separator />
+
+          {/* Cash flow */}
+          <div className="space-y-1">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">Cash flow</h2>
+            <MoneyFlowCard />
+          </div>
+
+          {/* Account distribution */}
+          <BudgetAccountDistribution budget={budget} />
+
+          <Separator />
+
+          {/* Distribution */}
+          <div className="space-y-1">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">Distribution</h2>
+            <DistributionDonutCard className="min-h-[500px]" />
           </div>
 
           <Separator />

@@ -6,7 +6,8 @@ import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
 import type { ConvertedValues } from '@/features/transactions';
 
 import type { BudgetDTO, BudgetAnalyticsItem } from '../api/types';
-import useBudgetTotals, { computeHealthScore, fmtBudgetAmt } from '../hooks/useBudgetTotals';
+import useBudgetTotals from '../hooks/useBudgetTotals';
+import { computeHealthScore, formatBudgetAmount } from '../utils';
 
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
@@ -34,16 +35,23 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
   const remainingColor = stats.remaining < 0 ? 'text-destructive' : 'text-success';
   const savingsColor = stats.netSavings >= 0 ? 'text-success' : 'text-destructive';
 
-  const { score, grade, gradeColor } = computeHealthScore(
+  const healthResult = computeHealthScore(
     stats.percentUsed,
     stats.daysElapsed,
     stats.daysTotal,
     stats.totalPlannedIncome,
     stats.totalActualIncome,
   );
+  const { score, grade, gradeColor, factors } = healthResult;
 
-  const gradeBarColor =
-    gradeColor === 'text-destructive' ? 'bg-destructive' : gradeColor.includes('warning') ? 'bg-warning' : 'bg-success';
+  let gradeBarColor: string;
+  if (gradeColor === 'text-destructive') {
+    gradeBarColor = 'bg-destructive';
+  } else if (gradeColor.includes('warning')) {
+    gradeBarColor = 'bg-warning';
+  } else {
+    gradeBarColor = 'bg-success';
+  }
 
   const daysPct = stats.daysTotal > 0 ? (stats.daysElapsed / stats.daysTotal) * 100 : 0;
 
@@ -54,10 +62,10 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
         <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Expenses</div>
         <div className="flex items-baseline gap-1 min-w-0">
           <span className={cn('font-semibold tabular-nums truncate', pctColor)}>
-            {fmtBudgetAmt(stats.totalActualExpense, displayCurrency)}
+            {formatBudgetAmount(stats.totalActualExpense, displayCurrency)}
           </span>
           <span className="text-2xs text-muted-foreground shrink-0">
-            / {fmtBudgetAmt(stats.totalPlannedExpense, displayCurrency)}
+            / {formatBudgetAmount(stats.totalPlannedExpense, displayCurrency)}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -68,8 +76,8 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
         </div>
         <div className={cn('text-2xs font-medium tabular-nums truncate', remainingColor)}>
           {stats.remaining < 0
-            ? `${fmtBudgetAmt(Math.abs(stats.remaining), displayCurrency)} over`
-            : `${fmtBudgetAmt(stats.remaining, displayCurrency)} left`}
+            ? `${formatBudgetAmount(Math.abs(stats.remaining), displayCurrency)} over`
+            : `${formatBudgetAmount(stats.remaining, displayCurrency)} left`}
         </div>
       </div>
 
@@ -78,11 +86,11 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
         <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Income</div>
         <div className="flex items-baseline gap-1 min-w-0">
           <span className="font-semibold tabular-nums text-success truncate">
-            {fmtBudgetAmt(stats.totalActualIncome, displayCurrency)}
+            {formatBudgetAmount(stats.totalActualIncome, displayCurrency)}
           </span>
           {stats.totalPlannedIncome > 0 && (
             <span className="text-2xs text-muted-foreground shrink-0">
-              / {fmtBudgetAmt(stats.totalPlannedIncome, displayCurrency)}
+              / {formatBudgetAmount(stats.totalPlannedIncome, displayCurrency)}
             </span>
           )}
         </div>
@@ -91,7 +99,7 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
         )}
         <div className={cn('text-2xs font-medium tabular-nums truncate', savingsColor)}>
           {stats.netSavings >= 0 ? '+' : '-'}
-          {fmtBudgetAmt(Math.abs(stats.netSavings), displayCurrency)} net
+          {formatBudgetAmount(Math.abs(stats.netSavings), displayCurrency)} net
         </div>
       </div>
 
@@ -103,7 +111,6 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
             <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Health</div>
             <ResponsiveTooltip
               desktopComponent="hovercard"
-              contentClassName="p-3 w-auto max-w-xs"
               content={
                 <div className="text-xs space-y-1.5">
                   <p className="font-semibold text-sm">Budget Health Score</p>
@@ -114,6 +121,24 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
                     <li>Pace ahead of schedule: up to −20</li>
                     <li>Income below 90% of planned: up to −15</li>
                   </ul>
+                  {(factors.overspendPenalty > 0 || factors.pacePenalty > 0 || factors.incomePenalty > 0) && (
+                    <div className="border-t pt-1.5 space-y-0.5">
+                      <p className="font-medium">Active penalties:</p>
+                      {factors.overspendPenalty > 0 && (
+                        <p className={cn(gradeColor)}>Overspend: −{factors.overspendPenalty} pts</p>
+                      )}
+                      {factors.pacePenalty > 0 && (
+                        <p className={cn(gradeColor)}>
+                          Pace {factors.paceAhead}% ahead: −{factors.pacePenalty} pts
+                        </p>
+                      )}
+                      {factors.incomePenalty > 0 && (
+                        <p className={cn(gradeColor)}>
+                          Income at {factors.incomePct}%: −{factors.incomePenalty} pts
+                        </p>
+                      )}
+                    </div>
+                  )}
                   <p className="font-medium mt-1">Grade thresholds:</p>
                   <ul className="space-y-0.5 pl-1">
                     <li>
@@ -134,8 +159,10 @@ const BudgetSummaryCards: React.FC<Props> = ({ budget, analytics, displayCurrenc
                   </ul>
                 </div>
               }
+              contentClassName="p-3 w-auto max-w-xs"
             >
               <button
+                aria-label="Budget health score explanation"
                 type="button"
                 className="text-muted-foreground/40 hover:text-muted-foreground transition-colors"
               >

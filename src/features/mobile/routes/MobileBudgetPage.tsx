@@ -11,7 +11,7 @@ import type { DisplayCurrency } from '@/features/budget/components/BudgetDisplay
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import type { ConvertedValues } from '@/features/transactions';
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
-import { computeHealthScore, fmtBudgetAmt } from '@/features/budget/hooks/useBudgetTotals';
+import { computeHealthScore, formatBudgetAmount } from '@/features/budget/utils';
 import useBudgetTotals from '@/features/budget/hooks/useBudgetTotals';
 
 import MobileBudgetInsights from '../components/MobileBudgetInsights';
@@ -188,11 +188,11 @@ const TreeRow = React.memo<{ depth: number; displayCurrency: string; node: TreeN
   const actualLabel =
     node.planned !== null ? (
       <>
-        {fmtBudgetAmt(node.actual, displayCurrency)}
-        <span className="text-muted-foreground"> / {fmtBudgetAmt(node.planned, displayCurrency)}</span>
+        {formatBudgetAmount(node.actual, displayCurrency)}
+        <span className="text-muted-foreground"> / {formatBudgetAmount(node.planned, displayCurrency)}</span>
       </>
     ) : (
-      <span className="text-muted-foreground">{fmtBudgetAmt(node.actual, displayCurrency)}</span>
+      <span className="text-muted-foreground">{formatBudgetAmount(node.actual, displayCurrency)}</span>
     );
 
   return (
@@ -363,17 +363,17 @@ const MobileBudgetPage: React.FC = () => {
             <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Expenses</div>
             <div className="flex items-baseline gap-1 min-w-0">
               <span className={cn('font-semibold tabular-nums truncate', pctColor)}>
-                {fmtBudgetAmt(stats.totalActualExpense, displayCurrency)}
+                {formatBudgetAmount(stats.totalActualExpense, displayCurrency)}
               </span>
               <span className="text-2xs text-muted-foreground shrink-0">
-                / {fmtBudgetAmt(stats.totalPlannedExpense, displayCurrency)}
+                / {formatBudgetAmount(stats.totalPlannedExpense, displayCurrency)}
               </span>
             </div>
             <MiniBar colorClass={pctBarColor} value={stats.percentUsed} />
             <div className={cn('text-2xs font-medium tabular-nums', remainingColor)}>
               {stats.remaining < 0
-                ? `${fmtBudgetAmt(Math.abs(stats.remaining), displayCurrency)} over`
-                : `${fmtBudgetAmt(stats.remaining, displayCurrency)} left`}
+                ? `${formatBudgetAmount(Math.abs(stats.remaining), displayCurrency)} over`
+                : `${formatBudgetAmount(stats.remaining, displayCurrency)} left`}
             </div>
           </div>
 
@@ -381,11 +381,11 @@ const MobileBudgetPage: React.FC = () => {
             <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Income</div>
             <div className="flex items-baseline gap-1 min-w-0">
               <span className="font-semibold tabular-nums text-success truncate">
-                {fmtBudgetAmt(stats.totalActualIncome, displayCurrency)}
+                {formatBudgetAmount(stats.totalActualIncome, displayCurrency)}
               </span>
               {stats.totalPlannedIncome > 0 && (
                 <span className="text-2xs text-muted-foreground shrink-0">
-                  / {fmtBudgetAmt(stats.totalPlannedIncome, displayCurrency)}
+                  / {formatBudgetAmount(stats.totalPlannedIncome, displayCurrency)}
                 </span>
               )}
             </div>
@@ -394,7 +394,7 @@ const MobileBudgetPage: React.FC = () => {
             )}
             <div className={cn('text-2xs font-medium tabular-nums', savingsColor)}>
               {stats.netSavings >= 0 ? '+' : '-'}
-              {fmtBudgetAmt(Math.abs(stats.netSavings), displayCurrency)} net
+              {formatBudgetAmount(Math.abs(stats.netSavings), displayCurrency)} net
             </div>
           </div>
         </div>

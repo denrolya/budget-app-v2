@@ -2,10 +2,10 @@ import { Info } from 'lucide-react';
 import React from 'react';
 
 import { ResponsiveTooltip } from '@/components/ui/responsive-tooltip';
-import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
 import { cn } from '@/lib/utils';
 
 import type { SeasonalItem } from '../api/types';
+import { formatBudgetAmount, formatPercent } from '../utils';
 
 interface Props {
   baseAmount: number;
@@ -15,13 +15,6 @@ interface Props {
   budgetMonth: string;
   seasonal: SeasonalItem | undefined;
 }
-
-const fmtAmt = (n: number, currency: string) => {
-  const sym = CURRENCIES[currency as CURRENCY_CODE]?.symbol ?? currency;
-  return `${sym}${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-};
-
-const fmtPct = (n: number) => `${n > 0 ? '+' : ''}${n}%`;
 
 const BudgetAdjustmentTooltip: React.FC<Props> = ({
   baseAmount,
@@ -39,19 +32,18 @@ const BudgetAdjustmentTooltip: React.FC<Props> = ({
   return (
     <ResponsiveTooltip
       desktopComponent="hovercard"
-      contentClassName="p-2.5 w-auto"
       content={
         <table className="border-collapse text-xs tabular-nums">
           <tbody>
             <tr>
               <td className="pr-3 text-muted-foreground">Weighted avg</td>
-              <td className="text-right">{fmtAmt(baseAmount, displayCurrency)}/mo</td>
+              <td className="text-right">{formatBudgetAmount(baseAmount, displayCurrency)}/mo</td>
             </tr>
             {trendFactor !== 1 && (
               <tr>
                 <td className="pr-3 text-muted-foreground">Trend (last 3mo vs prior 3mo)</td>
                 <td className={cn('text-right', trendFactor > 1 ? 'text-destructive' : 'text-success')}>
-                  {fmtPct(Math.round((trendFactor - 1) * 100))}
+                  {formatPercent(Math.round((trendFactor - 1) * 100))}
                 </td>
               </tr>
             )}
@@ -67,11 +59,12 @@ const BudgetAdjustmentTooltip: React.FC<Props> = ({
             )}
             <tr className="border-t border-border/40">
               <td className="pr-3 pt-1 font-medium">Prediction</td>
-              <td className="text-right pt-1 font-medium">{fmtAmt(adjusted, displayCurrency)}</td>
+              <td className="text-right pt-1 font-medium">{formatBudgetAmount(adjusted, displayCurrency)}</td>
             </tr>
           </tbody>
         </table>
       }
+      contentClassName="p-2.5 w-auto"
     >
       <button
         type="button"

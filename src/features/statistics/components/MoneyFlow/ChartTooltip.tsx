@@ -39,6 +39,23 @@ const periodMapping: Record<ISO8601Period, moment.unitOfTime.DurationConstructor
   P1Y: 'year',
 };
 
+const getDataPointRange = (date: moment.Moment, period: ISO8601Period): PeriodRange => {
+  switch (period) {
+    case 'P1D':
+      return { after: date.clone().startOf('day'), before: date.clone().endOf('day') };
+    case 'P1W':
+      return { after: date.clone().startOf('isoWeek'), before: date.clone().endOf('isoWeek') };
+    case 'P1M':
+      return { after: date.clone().startOf('month'), before: date.clone().endOf('month') };
+    case 'P3M':
+      return { after: date.clone().startOf('month'), before: date.clone().add(2, 'months').endOf('month') };
+    case 'P1Y':
+      return { after: date.clone().startOf('year'), before: date.clone().endOf('year') };
+    default:
+      return { after: date.clone(), before: date.clone() };
+  }
+};
+
 const formatDateRange = (range: PeriodRange, period: ISO8601Period): string => {
   const { after, before } = range;
 
@@ -109,7 +126,9 @@ export const ChartTooltip: React.FC<Props> = ({
 
   if (!active || !dataPoint) return null;
 
-  const formattedCurrentDate = formatDateRange(currentTimeframe, period);
+  const currentRange = getDataPointRange(dataPoint.date, period);
+  const formattedCurrentDate = formatDateRange(currentRange, period);
+
   const formattedComparisonDate =
     comparisonMode === 'previousPeriod'
       ? formatDateRange(
@@ -119,7 +138,13 @@ export const ChartTooltip: React.FC<Props> = ({
           },
           period,
         )
-      : formatDateRange(previousTimeframe, period);
+      : formatDateRange(
+          getDataPointRange(
+            dataPoint.date.clone().subtract(currentTimeframe.after.diff(previousTimeframe.after, 'ms'), 'ms'),
+            period,
+          ),
+          period,
+        );
 
   return createPortal(
     <Card

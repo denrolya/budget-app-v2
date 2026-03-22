@@ -7,7 +7,8 @@ import { HeatmapPanel } from '@/features/transactions';
 import type { ConvertedValues } from '@/features/transactions';
 
 import type { BudgetDTO, BudgetAnalyticsItem } from '../api/types';
-import useBudgetTotals, { fmtBudgetAmt } from '../hooks/useBudgetTotals';
+import useBudgetTotals from '../hooks/useBudgetTotals';
+import { formatBudgetAmount } from '../utils';
 
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
@@ -34,25 +35,27 @@ const BudgetHeatmapSection: React.FC<Props> = ({ budget, analytics, displayCurre
   const expectedByNow = (daysElapsed / totals.daysTotal) * totals.totalPlannedExpense;
   const paceOffset = totals.totalActualExpense - expectedByNow;
 
-  const expensePaceLabel =
-    totals.totalPlannedExpense === 0
-      ? null
-      : paceOffset > 0
-        ? { text: `${fmtBudgetAmt(paceOffset, displayCurrency)} over pace`, color: 'text-destructive' }
-        : paceOffset < -1
-          ? { text: `${fmtBudgetAmt(Math.abs(paceOffset), displayCurrency)} under pace`, color: 'text-success' }
-          : { text: 'On pace', color: 'text-muted-foreground' };
+  let expensePaceLabel: { text: string; color: string } | null;
+  if (totals.totalPlannedExpense === 0) {
+    expensePaceLabel = null;
+  } else if (paceOffset > 0) {
+    expensePaceLabel = { text: `${formatBudgetAmount(paceOffset, displayCurrency)} over pace`, color: 'text-destructive' };
+  } else if (paceOffset < -1) {
+    expensePaceLabel = { text: `${formatBudgetAmount(Math.abs(paceOffset), displayCurrency)} under pace`, color: 'text-success' };
+  } else {
+    expensePaceLabel = { text: 'On pace', color: 'text-muted-foreground' };
+  }
 
   const statRows: { label: string; value: string; valueClass?: string }[] =
     heatmapMode === 'expense'
       ? [
           {
             label: 'Budget / day',
-            value: dailyBudget > 0 ? fmtBudgetAmt(dailyBudget, displayCurrency) : '—',
+            value: dailyBudget > 0 ? formatBudgetAmount(dailyBudget, displayCurrency) : '—',
           },
           {
             label: 'Avg spend / day',
-            value: fmtBudgetAmt(dailyAvg, displayCurrency),
+            value: formatBudgetAmount(dailyAvg, displayCurrency),
             valueClass:
               totals.totalPlannedExpense > 0
                 ? dailyAvg > dailyBudget
@@ -67,11 +70,11 @@ const BudgetHeatmapSection: React.FC<Props> = ({ budget, analytics, displayCurre
       : [
           {
             label: 'Planned income',
-            value: totals.totalPlannedIncome > 0 ? fmtBudgetAmt(totals.totalPlannedIncome, displayCurrency) : '—',
+            value: totals.totalPlannedIncome > 0 ? formatBudgetAmount(totals.totalPlannedIncome, displayCurrency) : '—',
           },
           {
             label: 'Actual income',
-            value: fmtBudgetAmt(totals.totalActualIncome, displayCurrency),
+            value: formatBudgetAmount(totals.totalActualIncome, displayCurrency),
             valueClass: 'text-success',
           },
         ];
@@ -82,6 +85,7 @@ const BudgetHeatmapSection: React.FC<Props> = ({ budget, analytics, displayCurre
       <div className="flex items-center gap-2 mb-1.5">
         {(['expense', 'income'] as HeatmapMode[]).map((mode) => (
           <button
+            aria-pressed={heatmapMode === mode}
             type="button"
             className={cn(
               'text-xs px-2.5 py-0.5 rounded border transition-colors',

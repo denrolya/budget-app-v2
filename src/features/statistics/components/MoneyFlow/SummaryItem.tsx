@@ -30,7 +30,6 @@ const SummaryItem: React.FC<Props> = ({
       {comparisonValue != null && comparisonPercentage != null && (
         <ResponsiveTooltip
           desktopComponent="hovercard"
-          contentClassName="p-2 w-auto"
           content={
             <span className="flex items-center text-xs">
               vs
@@ -42,6 +41,7 @@ const SummaryItem: React.FC<Props> = ({
               />
             </span>
           }
+          contentClassName="p-2 w-auto"
         >
           <div
             className={cn('ml-2 text-xs flex items-center font-mono cursor-help', {

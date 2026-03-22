@@ -12,6 +12,7 @@ interface Props {
 
 const BudgetDisplayCurrency: React.FC<Props> = ({ value, onChange }) => (
   <ToggleGroup
+    aria-label="Display currency"
     type="single"
     value={value}
     onValueChange={(v) => {

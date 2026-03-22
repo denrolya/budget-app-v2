@@ -66,15 +66,15 @@ const AccountDetailPage: React.FC = () => {
   return (
     <div className="h-full flex flex-col min-h-0">
       <PageWithSidebar.Header
-        className="px-4 py-2"
         title={account.name}
+        className="px-4 py-2"
         onBack={() => navigate('/accounts')}
       >
         {hasDrafts && (
           <div className="flex items-center gap-1.5 text-2xs text-warning mr-1">
             <FileText className="h-3 w-3 shrink-0" />
             <span><span className="font-medium">{account.draftCount}</span> pending</span>
-            <button className="underline underline-offset-2 hover:no-underline" type="button" onClick={() => reviewDraftsRef.current?.()}>
+            <button type="button" className="underline underline-offset-2 hover:no-underline" onClick={() => reviewDraftsRef.current?.()}>
               Review →
             </button>
           </div>

@@ -116,7 +116,7 @@ export const CurrencyConverter: React.FC<Props> = ({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-1">
             {rateSources.map((source) => (
-              <button key={source} className={chip(rateSource === source)} type="button" onClick={() => setRateSource(source)}>
+              <button type="button" className={chip(rateSource === source)} key={source} onClick={() => setRateSource(source)}>
                 {source}
               </button>
             ))}
@@ -138,7 +138,7 @@ export const CurrencyConverter: React.FC<Props> = ({
           />
           <div className="flex flex-wrap gap-1">
             {availableCurrencies.map((c) => (
-              <button key={c} className={chip(c === fromCurrency, c === toCurrency)} type="button" onClick={() => handleFromSelect(c)}>
+              <button type="button" className={chip(c === fromCurrency, c === toCurrency)} key={c} onClick={() => handleFromSelect(c)}>
                 {c}
               </button>
             ))}
@@ -149,8 +149,8 @@ export const CurrencyConverter: React.FC<Props> = ({
         <div className="flex justify-center py-2">
           <button
             aria-label="Swap currencies"
-            className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             type="button"
+            className="flex h-6 w-6 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             onClick={swapCurrencies}
           >
             <ArrowUpDown className="h-3 w-3" />
@@ -167,7 +167,7 @@ export const CurrencyConverter: React.FC<Props> = ({
           />
           <div className="flex flex-wrap gap-1">
             {availableCurrencies.map((c) => (
-              <button key={c} className={chip(c === toCurrency, c === fromCurrency)} type="button" onClick={() => handleToSelect(c)}>
+              <button type="button" className={chip(c === toCurrency, c === fromCurrency)} key={c} onClick={() => handleToSelect(c)}>
                 {c}
               </button>
             ))}
@@ -182,7 +182,7 @@ export const CurrencyConverter: React.FC<Props> = ({
         {/* Preset chips */}
         <div className="mt-2 flex flex-wrap gap-1">
           {presetAmounts.map((preset) => (
-            <button key={preset} className={chip(amount === preset)} type="button" onClick={() => setAmount(preset)}>
+            <button type="button" className={chip(amount === preset)} key={preset} onClick={() => setAmount(preset)}>
               {preset >= 1000 ? `${preset / 1000}k` : preset}
             </button>
           ))}

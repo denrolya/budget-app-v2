@@ -14,7 +14,7 @@ import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
 
 import { useListBudgets, useDeleteBudget, useBudgetSummaries } from '../api';
 import type { BudgetDTO, BudgetPeriodType, BudgetSummaryItem } from '../api/types';
-import { computeHealthScore, fmtBudgetAmt } from '../hooks/useBudgetTotals';
+import { computeHealthScore, formatBudgetAmount } from '../utils';
 
 import BudgetCreateDialog from './BudgetCreateDialog';
 
@@ -39,11 +39,8 @@ const PERIOD_LABELS: Record<BudgetPeriodType, string> = {
 
 const PERIOD_ORDER: BudgetPeriodType[] = ['monthly', 'yearly', 'custom'];
 
-// Actuals from the backend are already available in every currency (convertedValues).
-// Just pick the base currency value — no need to sum/convert across currencies (that would double-count).
 const pickCurrency = (amounts: Record<string, number>, currency: string): number => amounts[currency] ?? 0;
 
-// Planned amounts are in their native currency — need conversion to base currency.
 const convertPlanned = (amounts: Record<string, number>, rates: ConvertedValues | null): number => {
   let total = 0;
   for (const [currency, amount] of Object.entries(amounts)) {
@@ -115,6 +112,182 @@ const computeSidebarMetrics = (
   };
 };
 
+// ── Sidebar item ───────────────────────────────────────────────────────────────
+
+interface BudgetSidebarItemProps {
+  budget: BudgetDTO;
+  selectedId: string | null;
+  rates: ConvertedValues | null;
+  summaryMap: Map<number, BudgetSummaryItem>;
+  onNavigate: (id: number) => void;
+  onDelete: (event: React.MouseEvent, budget: BudgetDTO) => void;
+}
+
+const BudgetSidebarItem: React.FC<BudgetSidebarItemProps> = ({
+  budget,
+  selectedId,
+  rates,
+  summaryMap,
+  onNavigate,
+  onDelete,
+}) => {
+  const isSelected = String(budget.id) === selectedId;
+  const summary = summaryMap.get(budget.id);
+  const metrics = summary ? computeSidebarMetrics(budget, summary, rates) : null;
+
+  const barPct = metrics ? Math.min(metrics.percentUsed, 100) : 0;
+
+  let barColor: string;
+  if (metrics && metrics.percentUsed > 100) {
+    barColor = 'bg-destructive';
+  } else if (metrics && metrics.percentUsed > 80) {
+    barColor = 'bg-warning';
+  } else {
+    barColor = 'bg-primary';
+  }
+
+  const isCompleted = metrics?.isCompleted ?? moment().isAfter(moment(budget.endDate), 'day');
+  const isUpcoming = moment().isBefore(moment(budget.startDate), 'day');
+
+  let statusLabel: string;
+  if (isCompleted) {
+    statusLabel = 'Completed';
+  } else if (isUpcoming) {
+    statusLabel = `Upcoming · in ${moment(budget.startDate).diff(moment(), 'days')}d`;
+  } else {
+    statusLabel = `Active · ${metrics?.daysLeft ?? 0}d left`;
+  }
+
+  let pctColor: string;
+  if (metrics && metrics.percentUsed > 100) {
+    pctColor = 'text-destructive';
+  } else if (metrics && metrics.percentUsed > 80) {
+    pctColor = 'text-warning';
+  } else {
+    pctColor = '';
+  }
+
+  const remainingColor = metrics && metrics.remaining < 0 ? 'text-destructive' : 'text-success';
+
+  const tooltipContent = metrics ? (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-muted-foreground">Expenses</span>
+        <span>
+          <span className={cn('font-medium', pctColor)}>
+            {formatBudgetAmount(metrics.totalActualExpense, BASE_CURRENCY)}
+          </span>
+          {metrics.totalPlannedExpense > 0 && (
+            <span className="text-muted-foreground">
+              {' '}
+              / {formatBudgetAmount(metrics.totalPlannedExpense, BASE_CURRENCY)}
+            </span>
+          )}
+        </span>
+      </div>
+      {(metrics.totalActualIncome > 0 || metrics.totalPlannedIncome > 0) && (
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-muted-foreground">Income</span>
+          <span>
+            <span className="font-medium text-success">{formatBudgetAmount(metrics.totalActualIncome, BASE_CURRENCY)}</span>
+            {metrics.totalPlannedIncome > 0 && (
+              <span className="text-muted-foreground">
+                {' '}
+                / {formatBudgetAmount(metrics.totalPlannedIncome, BASE_CURRENCY)}
+              </span>
+            )}
+          </span>
+        </div>
+      )}
+      <div className="border-t border-border/40 my-1" />
+      {metrics.totalPlannedExpense > 0 && (
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-muted-foreground">Remaining</span>
+          <span className={cn('font-medium', remainingColor)}>
+            {metrics.remaining < 0 ? '-' : ''}
+            {formatBudgetAmount(Math.abs(metrics.remaining), BASE_CURRENCY)}
+          </span>
+        </div>
+      )}
+      {metrics.totalActualIncome > 0 && (
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-muted-foreground">Savings</span>
+          <span className={cn('font-medium', metrics.netSavings >= 0 ? 'text-success' : 'text-destructive')}>
+            {metrics.netSavings >= 0 ? '+' : '-'}
+            {formatBudgetAmount(Math.abs(metrics.netSavings), BASE_CURRENCY)}
+          </span>
+        </div>
+      )}
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-muted-foreground">Score</span>
+        <span className={cn('font-bold', metrics.gradeColor)}>
+          {metrics.grade} ({metrics.score})
+        </span>
+      </div>
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-muted-foreground">Status</span>
+        <span className={cn({ 'text-muted-foreground': isCompleted || isUpcoming })}>{statusLabel}</span>
+      </div>
+    </div>
+  ) : null;
+
+  const rowContent = (
+    <div
+      className={cn(
+        'group relative hover:bg-accent transition-colors',
+        isSelected && 'bg-accent',
+        isCompleted && !isSelected && 'opacity-60',
+      )}
+    >
+      <button
+        type="button"
+        className="w-full text-left px-3 py-1.5 min-w-0"
+        onClick={() => onNavigate(budget.id)}
+      >
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className={cn('text-sm truncate flex-1', isSelected && 'font-medium')}>
+            {formatBudgetLabel(budget)}
+          </span>
+          {metrics && (
+            <span className={cn('text-xs font-bold tabular-nums shrink-0 leading-none', metrics.gradeColor)}>
+              {metrics.grade}
+            </span>
+          )}
+        </div>
+        {metrics && metrics.totalPlannedExpense > 0 && (
+          <div className="h-1 rounded-full bg-muted overflow-hidden mt-1">
+            <div style={{ width: `${barPct}%` }} className={cn('h-full rounded-full transition-all', barColor)} />
+          </div>
+        )}
+      </button>
+      <button
+        aria-label="Delete budget"
+        type="button"
+        className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1 rounded bg-accent text-muted-foreground hover:text-destructive transition-all"
+        onClick={(event) => onDelete(event, budget)}
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+
+  if (!tooltipContent) return rowContent;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{rowContent}</TooltipTrigger>
+      <TooltipContent
+        side="right"
+        className="bg-background text-foreground border shadow-md text-xs p-3 tabular-nums min-w-[200px]"
+      >
+        {tooltipContent}
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
+// ── Main sidebar ───────────────────────────────────────────────────────────────
+
 const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
   const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -124,7 +297,7 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
   const { data: summariesData } = useBudgetSummaries();
   const { data: ratesData } = useExchangeRatesQuery();
 
-  const budgets = data ?? [];
+  const budgets = useMemo(() => data ?? [], [data]);
   const rates = ratesData?.fixer ?? null;
 
   const visibleBudgets = useMemo(
@@ -175,156 +348,10 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
     });
   };
 
-  const renderBudgetItem = (budget: BudgetDTO) => {
-    const isSelected = String(budget.id) === selectedId;
-    const summary = summaryMap.get(budget.id);
-    const metrics = summary ? computeSidebarMetrics(budget, summary, rates) : null;
-
-    const barPct = metrics ? Math.min(metrics.percentUsed, 100) : 0;
-    const barColor =
-      metrics && metrics.percentUsed > 100
-        ? 'bg-destructive'
-        : metrics && metrics.percentUsed > 80
-          ? 'bg-warning'
-          : 'bg-primary';
-
-    const isCompleted = metrics?.isCompleted ?? moment().isAfter(moment(budget.endDate), 'day');
-    const isUpcoming = moment().isBefore(moment(budget.startDate), 'day');
-    const statusLabel = isCompleted
-      ? 'Completed'
-      : isUpcoming
-        ? `Upcoming · in ${moment(budget.startDate).diff(moment(), 'days')}d`
-        : `Active · ${metrics?.daysLeft ?? 0}d left`;
-    const pctColor =
-      metrics && metrics.percentUsed > 100
-        ? 'text-destructive'
-        : metrics && metrics.percentUsed > 80
-          ? 'text-warning'
-          : '';
-    const remainingColor = metrics && metrics.remaining < 0 ? 'text-destructive' : 'text-success';
-
-    const tooltipContent = metrics ? (
-      <div className="space-y-1">
-        <div className="flex items-center justify-between gap-4">
-          <span className="text-muted-foreground">Expenses</span>
-          <span>
-            <span className={cn('font-medium', pctColor)}>
-              {fmtBudgetAmt(metrics.totalActualExpense, BASE_CURRENCY)}
-            </span>
-            {metrics.totalPlannedExpense > 0 && (
-              <span className="text-muted-foreground">
-                {' '}
-                / {fmtBudgetAmt(metrics.totalPlannedExpense, BASE_CURRENCY)}
-              </span>
-            )}
-          </span>
-        </div>
-        {(metrics.totalActualIncome > 0 || metrics.totalPlannedIncome > 0) && (
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-muted-foreground">Income</span>
-            <span>
-              <span className="font-medium text-success">{fmtBudgetAmt(metrics.totalActualIncome, BASE_CURRENCY)}</span>
-              {metrics.totalPlannedIncome > 0 && (
-                <span className="text-muted-foreground">
-                  {' '}
-                  / {fmtBudgetAmt(metrics.totalPlannedIncome, BASE_CURRENCY)}
-                </span>
-              )}
-            </span>
-          </div>
-        )}
-        <div className="border-t border-border/40 my-1" />
-        {metrics.totalPlannedExpense > 0 && (
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-muted-foreground">Remaining</span>
-            <span className={cn('font-medium', remainingColor)}>
-              {metrics.remaining < 0 ? '-' : ''}
-              {fmtBudgetAmt(Math.abs(metrics.remaining), BASE_CURRENCY)}
-            </span>
-          </div>
-        )}
-        {metrics.totalActualIncome > 0 && (
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-muted-foreground">Savings</span>
-            <span className={cn('font-medium', metrics.netSavings >= 0 ? 'text-success' : 'text-destructive')}>
-              {metrics.netSavings >= 0 ? '+' : '-'}
-              {fmtBudgetAmt(Math.abs(metrics.netSavings), BASE_CURRENCY)}
-            </span>
-          </div>
-        )}
-        <div className="flex items-center justify-between gap-4">
-          <span className="text-muted-foreground">Score</span>
-          <span className={cn('font-bold', metrics.gradeColor)}>
-            {metrics.grade} ({metrics.score})
-          </span>
-        </div>
-        <div className="flex items-center justify-between gap-4">
-          <span className="text-muted-foreground">Status</span>
-          <span className={cn({ 'text-muted-foreground': isCompleted || isUpcoming })}>{statusLabel}</span>
-        </div>
-      </div>
-    ) : null;
-
-    const rowContent = (
-      <div
-        className={cn(
-          'group relative hover:bg-accent transition-colors',
-          isSelected && 'bg-accent',
-          isCompleted && !isSelected && 'opacity-60',
-        )}
-        key={budget.id}
-      >
-        <button
-          type="button"
-          className="w-full text-left px-3 py-1.5 min-w-0"
-          onClick={() => navigate(`/budget/${budget.id}`)}
-        >
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className={cn('text-sm truncate flex-1', isSelected && 'font-medium')}>
-              {formatBudgetLabel(budget)}
-            </span>
-            {metrics && (
-              <span className={cn('text-xs font-bold tabular-nums shrink-0 leading-none', metrics.gradeColor)}>
-                {metrics.grade}
-              </span>
-            )}
-          </div>
-          {metrics && metrics.totalPlannedExpense > 0 && (
-            <div className="h-1 rounded-full bg-muted overflow-hidden mt-1">
-              <div style={{ width: `${barPct}%` }} className={cn('h-full rounded-full transition-all', barColor)} />
-            </div>
-          )}
-        </button>
-        <button
-          aria-label="Delete budget"
-          type="button"
-          className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1 rounded bg-accent text-muted-foreground hover:text-destructive transition-all"
-          onClick={(event) => handleDelete(event, budget)}
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
-      </div>
-    );
-
-    if (!tooltipContent) return <React.Fragment key={budget.id}>{rowContent}</React.Fragment>;
-
-    return (
-      <Tooltip key={budget.id}>
-        <TooltipTrigger asChild>{rowContent}</TooltipTrigger>
-        <TooltipContent
-          side="right"
-          className="bg-background text-foreground border shadow-md text-xs p-3 tabular-nums min-w-[200px]"
-        >
-          {tooltipContent}
-        </TooltipContent>
-      </Tooltip>
-    );
-  };
-
   return (
     <>
       <div className="flex flex-col h-full min-h-0">
-        <div className="flex items-center justify-between px-3 py-2 border-b shrink-0">
+        <div className="flex items-center justify-between px-3 py-1 border-b shrink-0">
           <span className="text-sm font-semibold">Budgets</span>
           <div className="flex items-center gap-0.5">
             {hasHiddenBudgets && (
@@ -371,7 +398,17 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
                   <p className="px-3 py-1 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
                     {PERIOD_LABELS[periodType]}
                   </p>
-                  {items.map(renderBudgetItem)}
+                  {items.map((budget) => (
+                    <BudgetSidebarItem
+                      budget={budget}
+                      rates={rates}
+                      selectedId={selectedId}
+                      summaryMap={summaryMap}
+                      key={budget.id}
+                      onDelete={handleDelete}
+                      onNavigate={(id) => navigate(`/budget/${id}`)}
+                    />
+                  ))}
                 </div>
               );
             })}
@@ -388,9 +425,9 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
               <div className="px-3 py-6 text-center">
                 <p className="text-xs text-muted-foreground">All budgets completed.</p>
                 <Button
-                  className="mt-1.5 text-xs h-7"
                   size="sm"
                   variant="ghost"
+                  className="mt-1.5 text-xs h-7"
                   onClick={() => setHideCompleted(false)}
                 >
                   Show all
