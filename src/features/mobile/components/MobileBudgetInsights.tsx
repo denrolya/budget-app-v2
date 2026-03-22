@@ -24,9 +24,10 @@ const MobileBudgetInsights: React.FC<Props> = ({ displayCurrency, insights }) =>
     <div className="border-b border-border/40">
       <div className="px-3 py-2">
         <button
+          aria-expanded={expanded}
           type="button"
           className={cn(
-            'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-2xs font-medium shrink-0 transition-colors',
+            'inline-flex items-center gap-1 rounded-md border px-2 py-1.5 text-2xs font-medium shrink-0 transition-colors',
             expanded ? 'bg-warning/10 border-warning/30 text-warning' : 'border-border text-muted-foreground',
           )}
           onClick={() => setExpanded((v) => !v)}
@@ -52,6 +53,9 @@ const MobileBudgetInsights: React.FC<Props> = ({ displayCurrency, insights }) =>
               </div>
             </div>
           ))}
+          {outliers.length > 5 && (
+            <p className="font-mono text-2xs text-muted-foreground">+{outliers.length - 5} more</p>
+          )}
         </div>
       )}
     </div>

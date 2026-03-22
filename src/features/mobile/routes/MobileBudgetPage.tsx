@@ -143,7 +143,12 @@ const CollapsibleChildren: React.FC<{ expanded: boolean; children: React.ReactNo
       setHeight(0);
       requestAnimationFrame(() => {
         setHeight(scrollH);
+        const timer = setTimeout(() => {
+          setHeight('auto');
+          el.removeEventListener('transitionend', onEnd);
+        }, 250);
         const onEnd = () => {
+          clearTimeout(timer);
           setHeight('auto');
           el.removeEventListener('transitionend', onEnd);
         };
@@ -193,9 +198,11 @@ const TreeRow = React.memo<{ depth: number; displayCurrency: string; node: TreeN
   return (
     <div>
       <button
+        aria-expanded={hasChildren ? expanded : undefined}
+        disabled={!hasChildren}
         style={{ paddingLeft: `${paddingLeft}px` }}
         type="button"
-        className="w-full flex items-center gap-1.5 py-2 pr-3 text-left active:bg-muted/40 transition-colors"
+        className="w-full flex items-center gap-1.5 py-2 pr-3 text-left active:bg-muted/40 transition-colors disabled:cursor-default"
         onClick={hasChildren ? toggle : undefined}
       >
         {hasChildren ? (
@@ -330,18 +337,20 @@ const MobileBudgetPage: React.FC = () => {
         {/* Period selector */}
         <div className="flex items-center justify-between px-3 py-2 border-b border-border/40">
           <button
+            aria-label="Previous budget period"
             disabled={!nav.prevId}
             type="button"
-            className="p-1.5 rounded hover:bg-muted disabled:opacity-30"
+            className="h-9 w-9 flex items-center justify-center rounded hover:bg-muted disabled:opacity-50 disabled:pointer-events-none"
             onClick={() => nav.prevId && setSelectedBudgetId(nav.prevId)}
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <span className="font-mono text-sm font-medium">{periodLabel}</span>
           <button
+            aria-label="Next budget period"
             disabled={!nav.nextId}
             type="button"
-            className="p-1.5 rounded hover:bg-muted disabled:opacity-30"
+            className="h-9 w-9 flex items-center justify-center rounded hover:bg-muted disabled:opacity-50 disabled:pointer-events-none"
             onClick={() => nav.nextId && setSelectedBudgetId(nav.nextId)}
           >
             <ChevronRight className="h-4 w-4" />

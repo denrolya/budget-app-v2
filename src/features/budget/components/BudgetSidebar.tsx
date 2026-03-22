@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { Plus, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, Plus, Trash2 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -118,6 +118,7 @@ const computeSidebarMetrics = (
 const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
   const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [hideCompleted, setHideCompleted] = useState(true);
   const { data } = useListBudgets();
   const { mutate: deleteBudget } = useDeleteBudget();
   const { data: summariesData } = useBudgetSummaries();
@@ -125,6 +126,16 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
 
   const budgets = data ?? [];
   const rates = ratesData?.fixer ?? null;
+
+  const visibleBudgets = useMemo(
+    () =>
+      hideCompleted
+        ? budgets.filter((b) => !moment().isAfter(moment(b.endDate), 'day') || String(b.id) === selectedId)
+        : budgets,
+    [budgets, hideCompleted, selectedId],
+  );
+
+  const hasHiddenBudgets = budgets.length > visibleBudgets.length;
 
   const summaryMap = useMemo(() => {
     const map = new Map<number, BudgetSummaryItem>();
@@ -136,7 +147,7 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
 
   const grouped = PERIOD_ORDER.reduce<Record<BudgetPeriodType, BudgetDTO[]>>(
     (acc, periodType) => {
-      acc[periodType] = budgets
+      acc[periodType] = visibleBudgets
         .filter((budget) => budget.periodType === periodType)
         .sort((a, b) => b.startDate.localeCompare(a.startDate));
       return acc;
@@ -177,7 +188,13 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
           ? 'bg-warning'
           : 'bg-primary';
 
-    const isCompleted = metrics?.isCompleted ?? moment(budget.endDate).isBefore(moment(), 'day');
+    const isCompleted = metrics?.isCompleted ?? moment().isAfter(moment(budget.endDate), 'day');
+    const isUpcoming = moment().isBefore(moment(budget.startDate), 'day');
+    const statusLabel = isCompleted
+      ? 'Completed'
+      : isUpcoming
+        ? `Upcoming · in ${moment(budget.startDate).diff(moment(), 'days')}d`
+        : `Active · ${metrics?.daysLeft ?? 0}d left`;
     const pctColor =
       metrics && metrics.percentUsed > 100
         ? 'text-destructive'
@@ -243,9 +260,7 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
         </div>
         <div className="flex items-center justify-between gap-4">
           <span className="text-muted-foreground">Status</span>
-          <span className={isCompleted ? 'text-muted-foreground' : ''}>
-            {isCompleted ? 'Completed' : `Active · ${metrics.daysLeft}d left`}
-          </span>
+          <span className={cn({ 'text-muted-foreground': isCompleted || isUpcoming })}>{statusLabel}</span>
         </div>
       </div>
     ) : null;
@@ -309,17 +324,41 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
   return (
     <>
       <div className="flex flex-col h-full min-h-0">
-        <div className="flex items-center justify-between px-3 py-3 border-b shrink-0">
+        <div className="flex items-center justify-between px-3 py-2 border-b shrink-0">
           <span className="text-sm font-semibold">Budgets</span>
-          <Button
-            aria-label="New budget"
-            size="icon"
-            variant="ghost"
-            className="h-7 w-7"
-            onClick={() => setDialogOpen(true)}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-0.5">
+            {hasHiddenBudgets && (
+              <Button
+                aria-label="Show completed budgets"
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7 text-muted-foreground"
+                onClick={() => setHideCompleted(false)}
+              >
+                <Eye className="h-3.5 w-3.5" />
+              </Button>
+            )}
+            {!hideCompleted && (
+              <Button
+                aria-label="Hide completed budgets"
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7 text-muted-foreground"
+                onClick={() => setHideCompleted(true)}
+              >
+                <EyeOff className="h-3.5 w-3.5" />
+              </Button>
+            )}
+            <Button
+              aria-label="New budget"
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7"
+              onClick={() => setDialogOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         <ScrollArea className="flex-1">
@@ -329,7 +368,7 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
               if (items.length === 0) return null;
               return (
                 <div className="mb-2" key={periodType}>
-                  <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <p className="px-3 py-1 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
                     {PERIOD_LABELS[periodType]}
                   </p>
                   {items.map(renderBudgetItem)}
@@ -342,6 +381,19 @@ const BudgetSidebar: React.FC<Props> = ({ selectedId }) => {
                 <p className="text-sm text-muted-foreground">No budgets yet.</p>
                 <Button size="sm" variant="outline" className="mt-2" onClick={() => setDialogOpen(true)}>
                   Create first budget
+                </Button>
+              </div>
+            )}
+            {budgets.length > 0 && visibleBudgets.length === 0 && (
+              <div className="px-3 py-6 text-center">
+                <p className="text-xs text-muted-foreground">All budgets completed.</p>
+                <Button
+                  className="mt-1.5 text-xs h-7"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setHideCompleted(false)}
+                >
+                  Show all
                 </Button>
               </div>
             )}

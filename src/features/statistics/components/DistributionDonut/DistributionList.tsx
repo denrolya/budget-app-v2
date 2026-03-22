@@ -49,7 +49,7 @@ const DistributionList: React.FC<Props> = ({
 
         return (
           <button
-            aria-label={`${item.name}: ${percentage.toFixed(0)}%`}
+            aria-label={canDrill ? `Drill into ${item.name}` : `View ${item.name} transactions (${percentage.toFixed(0)}%)`}
             type="button"
             className="group w-full flex items-center gap-2 px-2 py-1 text-left rounded hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
             key={rowKey}
@@ -93,13 +93,13 @@ const DistributionList: React.FC<Props> = ({
                   amount={item.amount}
                   currency={item.currency != null ? (item.currency as CURRENCY_CODE) : undefined}
                   useColors={false}
-                  className="text-[9px] font-mono tabular-nums leading-none text-muted-foreground mt-0.5"
+                  className="text-2xs font-mono tabular-nums leading-none text-muted-foreground mt-0.5"
                 />
               )}
             </div>
 
             {/* Percentage */}
-            <span className="shrink-0 text-[9px] font-mono tabular-nums text-muted-foreground w-7 text-right leading-none">
+            <span className="shrink-0 text-2xs font-mono tabular-nums text-muted-foreground w-7 text-right leading-none">
               {percentage.toFixed(0)}%
             </span>
 

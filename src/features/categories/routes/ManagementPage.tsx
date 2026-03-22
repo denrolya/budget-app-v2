@@ -82,7 +82,7 @@ const CategoriesPage: React.FC = () => {
         <PageWithSidebar.Sidebar>
           <div className={cn('flex h-full flex-col', { 'pointer-events-none opacity-60': isDeleting })}>
             {/* Search + compact toolbar */}
-            <div className="border-b p-2">
+            <div className="border-b px-2 py-1.5">
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
                   <Search
@@ -93,7 +93,7 @@ const CategoriesPage: React.FC = () => {
                     aria-label="Search categories"
                     placeholder="Search…"
                     value={searchQuery}
-                    className="h-9 pl-8"
+                    className="h-8 pl-8"
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>

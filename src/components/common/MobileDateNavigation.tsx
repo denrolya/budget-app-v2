@@ -65,7 +65,7 @@ const MobileDateNavigation: React.FC<Props> = ({ after, before, onChange, classN
           size="icon"
           type="button"
           variant="ghost"
-          className="h-7 w-7 shrink-0"
+          className="h-9 w-9 shrink-0"
           onClick={() => shift(-1)}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -75,7 +75,7 @@ const MobileDateNavigation: React.FC<Props> = ({ after, before, onChange, classN
           aria-label="From date"
           type="date"
           value={toInputValue(after)}
-          className="h-7 rounded-md border bg-background px-1.5 text-xs tabular-nums w-[7.5rem]"
+          className="h-9 rounded-md border bg-background px-1.5 text-xs tabular-nums w-[7.5rem]"
           onChange={handleFromChange}
         />
 
@@ -85,7 +85,7 @@ const MobileDateNavigation: React.FC<Props> = ({ after, before, onChange, classN
           aria-label="To date"
           type="date"
           value={toInputValue(before)}
-          className="h-7 rounded-md border bg-background px-1.5 text-xs tabular-nums w-[7.5rem]"
+          className="h-9 rounded-md border bg-background px-1.5 text-xs tabular-nums w-[7.5rem]"
           onChange={handleToChange}
         />
 
@@ -94,7 +94,7 @@ const MobileDateNavigation: React.FC<Props> = ({ after, before, onChange, classN
           size="icon"
           type="button"
           variant="ghost"
-          className="h-7 w-7 shrink-0"
+          className="h-9 w-9 shrink-0"
           onClick={() => shift(1)}
         >
           <ChevronRight className="h-4 w-4" />

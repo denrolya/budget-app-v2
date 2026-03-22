@@ -28,7 +28,7 @@ const CurrencyRow: React.FC<CurrencyRowProps> = ({ label, value, onChange }) => 
         <button
           type="button"
           className={cn(
-            'h-8 px-3 rounded border font-mono text-xs shrink-0 transition-colors flex items-center gap-1.5',
+            'h-9 px-3 rounded border font-mono text-xs shrink-0 transition-colors flex items-center gap-1.5',
             {
               'bg-muted text-foreground border-border': value === c,
               'text-muted-foreground border-transparent hover:border-border': value !== c,
@@ -104,7 +104,7 @@ const MobileConverterPage: React.FC = () => {
           <button
             type="button"
             className={cn(
-              'h-7 px-2.5 rounded border font-mono text-xs uppercase tracking-wider transition-colors',
+              'h-9 px-2.5 rounded border font-mono text-xs uppercase tracking-wider transition-colors',
               source === s
                 ? 'bg-muted text-foreground border-border'
                 : 'text-muted-foreground border-transparent hover:border-border',
@@ -143,7 +143,7 @@ const MobileConverterPage: React.FC = () => {
           <button
             aria-label="Swap currencies"
             type="button"
-            className="h-8 w-8 flex items-center justify-center rounded border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="h-9 w-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             onClick={handleSwap}
           >
             <ArrowLeftRight aria-hidden="true" className="h-4 w-4" />

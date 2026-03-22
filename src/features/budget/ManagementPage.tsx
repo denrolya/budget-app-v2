@@ -55,7 +55,13 @@ const BudgetIndex: React.FC = () => {
   const budgets = data ?? [];
 
   if (budgets.length > 0) {
-    return <Navigate replace to={`/budget/${budgets[0].id}`} />;
+    const now = moment();
+    const activeBudget = budgets.find(
+      (b) => now.isSameOrAfter(moment(b.startDate), 'day') && now.isSameOrBefore(moment(b.endDate), 'day'),
+    );
+    const target =
+      activeBudget ?? [...budgets].sort((a, b) => b.startDate.localeCompare(a.startDate))[0];
+    return <Navigate replace to={`/budget/${target.id}`} />;
   }
 
   return (

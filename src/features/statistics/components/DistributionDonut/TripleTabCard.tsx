@@ -137,6 +137,35 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
     currentCategory,
   ]);
 
+  const panelKey = `${tab}-${type}`;
+
+  const panelContent =
+    tab === 'categories' ? (
+      <CategoriesPanel
+        categoryRaw={(categoryRaw ?? []) as unknown as Parameters<typeof CategoriesPanel>[0]['categoryRaw']}
+        categoryStack={categoryStack}
+        currentCategory={currentCategory}
+        isLoading={isLoading}
+        setCategoryStack={setCategoryStack}
+        setCurrentCategory={setCurrentCategory}
+        showMonthlyAverage={showMonthlyAverage}
+        timeframe={timeframe}
+        onOpenTransactions={openTransactions}
+      />
+    ) : (
+      <AccountsCurrenciesPanel
+        accountStats={accountStats ?? []}
+        isLoading={isLoading}
+        selectedCurrency={selectedCurrency}
+        showMonthlyAverage={showMonthlyAverage}
+        tab={tab}
+        timeframe={timeframe}
+        totalAccountsRaw={totalAccountsRaw ?? 0}
+        onCurrencySelect={onCurrencySelect}
+        onOpenTransactions={openTransactions}
+      />
+    );
+
   return (
     <>
       <div className={cn('flex flex-col h-full w-full border rounded-lg overflow-hidden bg-card', className)}>
@@ -146,6 +175,7 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
           <div className="flex items-center gap-0.5 bg-muted rounded p-0.5">
             {TABS.map((t) => (
               <button
+                aria-pressed={tab === t.value}
                 type="button"
                 className={cn(
                   'h-5 px-1.5 text-2xs font-medium rounded-sm transition-colors',
@@ -165,6 +195,8 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
 
           {/* Transaction type */}
           <button
+            aria-label="Expenses"
+            aria-pressed={type === TransactionType.Expense}
             type="button"
             className={cn(
               'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
@@ -177,6 +209,8 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
             Exp
           </button>
           <button
+            aria-label="Income"
+            aria-pressed={type === TransactionType.Income}
             type="button"
             className={cn(
               'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
@@ -194,6 +228,8 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
             <>
               <div className="h-4 w-px bg-border mx-0.5" />
               <button
+                aria-label="Show monthly average"
+                aria-pressed={showMonthlyAverage}
                 type="button"
                 className={cn(
                   'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
@@ -213,6 +249,7 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
             <>
               <div className="h-4 w-px bg-border mx-0.5" />
               <button
+                aria-label={`Back from ${selectedCurrency ?? ''}`}
                 type="button"
                 className="h-5 px-1.5 text-2xs font-medium rounded-sm border border-border text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => setSelectedCurrency(null)}
@@ -252,36 +289,14 @@ export const UnifiedDistributionCard = ({ controlledTimeframe, className }: Prop
             useColors={false}
             className="text-2xs font-semibold font-mono tabular-nums text-foreground pr-0.5"
           />
-          {showMonthlyAverage && <span className="text-[9px] text-muted-foreground leading-none">/mo</span>}
+          {showMonthlyAverage && <span className="text-2xs text-muted-foreground leading-none">/mo</span>}
         </div>
 
         {/* Content */}
         <div className="flex-1 min-h-0 overflow-hidden">
-          {tab !== 'categories' ? (
-            <AccountsCurrenciesPanel
-              accountStats={accountStats ?? []}
-              isLoading={isLoading}
-              selectedCurrency={selectedCurrency}
-              showMonthlyAverage={showMonthlyAverage}
-              tab={tab}
-              timeframe={timeframe}
-              totalAccountsRaw={totalAccountsRaw ?? 0}
-              onCurrencySelect={onCurrencySelect}
-              onOpenTransactions={openTransactions}
-            />
-          ) : (
-            <CategoriesPanel
-              categoryRaw={(categoryRaw ?? []) as unknown as Parameters<typeof CategoriesPanel>[0]['categoryRaw']}
-              categoryStack={categoryStack}
-              currentCategory={currentCategory}
-              isLoading={isLoading}
-              setCategoryStack={setCategoryStack}
-              setCurrentCategory={setCurrentCategory}
-              showMonthlyAverage={showMonthlyAverage}
-              timeframe={timeframe}
-              onOpenTransactions={openTransactions}
-            />
-          )}
+          <div key={panelKey} className="chart-enter h-full">
+            {panelContent}
+          </div>
         </div>
       </div>
 

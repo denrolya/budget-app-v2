@@ -22,7 +22,6 @@ const BucketsPage = lazy(() => import('@/features/buckets').then(({ BucketsPage:
 
 const MobileBalancesPage = lazy(() => import('@/features/mobile/routes/MobileBalancesPage'));
 const MobileLedgerPage = lazy(() => import('@/features/mobile/routes/MobileLedgerPage'));
-const MobileRatesPage = lazy(() => import('@/features/mobile/routes/MobileRatesPage'));
 const MobileConverterPage = lazy(() => import('@/features/mobile/routes/MobileConverterPage'));
 const MobileBudgetPage = lazy(() => import('@/features/mobile/routes/MobileBudgetPage'));
 
@@ -34,8 +33,8 @@ const MobileApp: React.FC = () => (
           <Route index element={<Navigate replace to="/m/balances" />} />
           <Route element={<MobileBalancesPage />} path="balances" />
           <Route element={<MobileLedgerPage />} path="ledger" />
-          <Route element={<MobileRatesPage />} path="rates" />
           <Route element={<MobileConverterPage />} path="convert" />
+          <Route element={<Navigate replace to="/m/convert" />} path="rates" />
           <Route element={<MobileBudgetPage />} path="budget" />
           <Route element={<Navigate replace to="/m/balances" />} path="*" />
         </Route>

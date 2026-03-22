@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import MobileDateNavigation from '@/components/common/MobileDateNavigation';
@@ -45,7 +45,7 @@ const TransactionDetailDrawer: React.FC<{
                 {tx.type}
               </span>
               {tx.isDraft && (
-                <span className="text-2xs font-mono font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border bg-warning/10 text-warning-foreground border-warning/20">
+                <span className="text-2xs font-mono font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border bg-warning/10 text-warning border-warning/20">
                   draft
                 </span>
               )}
@@ -126,13 +126,6 @@ const MobileLedgerPage: React.FC = () => {
     initialFilters: locationAccountId ? { accounts: [locationAccountId] } : undefined,
   });
 
-  // Apply account filter from navigation state on mount
-  useEffect(() => {
-    if (locationAccountId) {
-      ledger.setFilter('accounts', [locationAccountId]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleCustomRange = useCallback(
     (range: { after?: moment.Moment | null; before?: moment.Moment | null }) => {
@@ -236,7 +229,7 @@ const MobileLedgerPage: React.FC = () => {
           <button
             type="button"
             className={cn(
-              'h-7 px-2.5 rounded border font-mono text-xs shrink-0 transition-colors',
+              'h-9 px-2.5 rounded border font-mono text-xs shrink-0 transition-colors',
               !activeAccountId
                 ? 'bg-muted text-foreground border-border'
                 : 'text-muted-foreground border-transparent hover:border-border',
@@ -250,7 +243,7 @@ const MobileLedgerPage: React.FC = () => {
             <button
               type="button"
               className={cn(
-                'h-7 px-2.5 rounded border font-mono text-xs shrink-0 flex items-center gap-1.5 transition-colors',
+                'h-9 px-2.5 rounded border font-mono text-xs shrink-0 flex items-center gap-1.5 transition-colors',
                 activeAccountId === account.id
                   ? 'bg-muted text-foreground border-border'
                   : 'text-muted-foreground border-transparent hover:border-border',

@@ -143,6 +143,10 @@ const MobileBalancesPage: React.FC = () => {
     navigate('/m/ledger', { state: { accountId } });
   };
 
+  if (activeAccounts.length === 0 && archivedAccounts.length === 0) {
+    return <p className="font-mono text-xs text-muted-foreground text-center py-10">loading…</p>;
+  }
+
   return (
     <div className="pb-6">
       {/* Net worth hero */}
@@ -174,6 +178,7 @@ const MobileBalancesPage: React.FC = () => {
       {archivedAccounts.length > 0 && (
         <div className="px-3 mt-3">
           <button
+            aria-expanded={showArchived}
             type="button"
             className="flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
             onClick={() => setShowArchived((v) => !v)}

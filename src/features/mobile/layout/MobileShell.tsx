@@ -17,6 +17,12 @@ const NAV_ITEMS = [
   { path: '/m/convert', label: 'Rates', Icon: ArrowLeftRight },
 ] as const;
 
+// In browser mode with viewport-fit=cover, safe-area-inset-bottom includes the Safari toolbar
+// height on top of the home indicator, inflating the nav to ~131px. Only apply it in PWA mode.
+const isStandalone =
+  window.matchMedia('(display-mode: standalone)').matches ||
+  (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+
 const MobileShell: React.FC = () => {
   const { pathname } = useLocation();
   const baseCurrency = useBaseCurrency();
@@ -47,10 +53,10 @@ const MobileShell: React.FC = () => {
             <Outlet />
           </main>
 
-          {/* Bottom tab bar — safe-area aware */}
+          {/* Bottom tab bar — safe-area aware (padding only in PWA/standalone mode) */}
           <nav
             aria-label="Mobile navigation"
-            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+            style={isStandalone ? { paddingBottom: 'env(safe-area-inset-bottom)' } : undefined}
             className="shrink-0 border-t border-border bg-background"
           >
             <ul className="flex h-12">
