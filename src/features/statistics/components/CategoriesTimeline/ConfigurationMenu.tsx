@@ -120,6 +120,7 @@ const ConfigurationMenu: React.FC<Props> = (props) => {
       <DrawerTrigger asChild>
         <Button size="icon" variant="ghost" className="h-7 w-7 p-0">
           <SettingsIcon className="h-3.5 w-3.5" />
+          <span className="sr-only">Chart display options</span>
         </Button>
       </DrawerTrigger>
       <DrawerContent className="p-6">

@@ -5,7 +5,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { CATEGORIES_TIMELINE_PRESETS } from '@/constants/datetime';
 import { CHART_COLORS } from '@/constants/recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CategoryTypeahead } from '@/features/categories';
@@ -19,12 +18,12 @@ import { formatRange } from '@/lib/datetime/formatShortDate';
 import { cn } from '@/lib/utils';
 import { type ISO8601Period, type Timeframe } from '@/types/global';
 
-const PERIOD_OPTIONS: { value: ISO8601Period; short: string }[] = [
-  { value: 'P1D', short: 'D' },
-  { value: 'P1W', short: 'W' },
-  { value: 'P1M', short: 'M' },
-  { value: 'P3M', short: '3M' },
-  { value: 'P1Y', short: 'Y' },
+const PERIOD_OPTIONS: { value: ISO8601Period; short: string; label: string }[] = [
+  { value: 'P1D', short: 'D', label: 'Daily' },
+  { value: 'P1W', short: 'W', label: 'Weekly' },
+  { value: 'P1M', short: 'M', label: 'Monthly' },
+  { value: 'P3M', short: '3M', label: 'Quarterly' },
+  { value: 'P1Y', short: 'Y', label: 'Yearly' },
 ];
 
 // Default category IDs — replace with user preference once that feature exists
@@ -82,7 +81,9 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
   const period = rawPeriod ?? fallback.period!;
   const setPeriod = rawSetPeriod ?? fallback.setPeriod!;
 
-  const { data, isLoading, error } = useTimelineStatistics(
+  const isControlled = Boolean(controlledTimeframe?.timeframe?.after);
+
+  const { data, isLoading, error, refetch } = useTimelineStatistics(
     {
       period,
       after: timeframe.after,
@@ -94,16 +95,12 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
     [period, debouncedCategories],
   );
 
-  const debouncedSetCategories = useCallback((newCategories: number[]) => {
+  useEffect(() => {
     const timeoutId = setTimeout(() => {
-      setDebouncedCategories(newCategories);
+      setDebouncedCategories(selectedCategories);
     }, 1000);
     return () => clearTimeout(timeoutId);
-  }, []);
-
-  useEffect(() => {
-    debouncedSetCategories(selectedCategories);
-  }, [selectedCategories, debouncedSetCategories]);
+  }, [selectedCategories]);
 
   const removeCategory = useCallback((id: number) => setSelectedCategories((prev) => prev.filter((c) => c !== id)), []);
 
@@ -150,52 +147,61 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
     [setTimeframe],
   );
 
+  let chartContent: React.ReactNode = null;
+  if (isLoading) {
+    chartContent = <Skeleton className="h-full w-full" />;
+  } else if (error) {
+    chartContent = (
+      <div className="chart-enter h-full flex flex-col items-center justify-center gap-2">
+        <span className="text-2xs font-mono text-muted-foreground/60">Failed to load chart data</span>
+        <button
+          className="text-2xs font-mono text-muted-foreground hover:text-foreground border border-border/60 rounded px-2 py-0.5 transition-colors"
+          type="button"
+          onClick={refetch}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  } else if (debouncedCategories.length === 0) {
+    chartContent = (
+      <div className="chart-enter h-full flex items-center justify-center">
+        <span className="text-2xs font-mono text-muted-foreground/50">No series selected — use + to add a category</span>
+      </div>
+    );
+  } else if (data && Object.keys(data).length === 0) {
+    chartContent = (
+      <div className="chart-enter h-full flex items-center justify-center">
+        <span className="text-2xs font-mono text-muted-foreground/50">No data in the selected time range</span>
+      </div>
+    );
+  } else if (data) {
+    chartContent = (
+      <Chart
+        chartType={chartType}
+        data={data}
+        selectedPeriod={period}
+        showComparisonInTooltip={showComparisonInTooltip}
+        useSeparateAxisForTotals={useSeparateAxisForTotals}
+        onClick={onChartClick}
+      />
+    );
+  }
+
   return (
     <>
-      <Card className={cn('w-full', className)}>
-        <CardHeader className="p-4 pb-3">
-          <div className="flex items-center justify-between gap-2">
-            <CardTitle className="text-2xs font-semibold uppercase tracking-widest text-muted-foreground leading-none">
-              Categories Timeline
-            </CardTitle>
-            <div className="flex items-center gap-2">
-              {!controlledTimeframe?.timeframe?.after && (
-                <DaterangePickerWithPresets
-                  after={timeframe.after}
-                  before={timeframe.before}
-                  presets={CATEGORIES_TIMELINE_PRESETS}
-                  onChange={handleTimeframeChange}
-                >
-                  <button className="inline-flex items-center gap-1 text-2xs text-muted-foreground hover:text-foreground border border-border rounded px-2 py-0.5 leading-none cursor-pointer">
-                    <CalendarIcon className="h-2.5 w-2.5" />
-                    {formatRange(timeframe)}
-                  </button>
-                </DaterangePickerWithPresets>
-              )}
-              <ConfigurationMenu
-                fetchTransactionsFromSubcategories={fetchTransactionsFromSubcategories}
-                setFetchTransactionsFromSubcategories={setFetchTransactionsFromSubcategories}
-                setShowComparisonInTooltip={setShowComparisonInTooltip}
-                setShowExpenseReference={setShowExpenseReference}
-                setShowIncomeReference={setShowIncomeReference}
-                setUseSeparateAxisForTotals={setUseSeparateAxisForTotals}
-                showComparisonInTooltip={showComparisonInTooltip}
-                showExpenseReference={showExpenseReference}
-                showIncomeReference={showIncomeReference}
-                useSeparateAxisForTotals={useSeparateAxisForTotals}
-              />
-            </div>
-          </div>
-        </CardHeader>
-
-        {/* ── Inline toolbar ── */}
-        <div className="flex items-center gap-2 px-4 pb-3 flex-wrap">
+      <div className={cn('flex flex-col w-full min-h-[470px] border rounded-lg overflow-hidden bg-card', className)}>
+        {/* Single dense toolbar — matches MoneyFlow style */}
+        <div className="shrink-0 flex items-center gap-1 px-2 border-b h-8 bg-card">
           {/* Period segmented control */}
-          <div className="flex items-center gap-0.5 bg-muted rounded-md p-0.5">
+          <div className="flex items-center gap-0.5 bg-muted rounded p-0.5">
             {PERIOD_OPTIONS.map((opt) => (
               <button
+                aria-label={opt.label}
+                aria-pressed={period === opt.value}
+                type="button"
                 className={cn(
-                  'h-5 px-2 text-2xs font-medium rounded-sm transition-colors',
+                  'h-5 px-1.5 text-2xs font-medium rounded-sm transition-colors',
                   period === opt.value
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground',
@@ -208,46 +214,54 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
             ))}
           </div>
 
-          <div className="h-4 w-px bg-border" />
+          <div className="h-4 w-px bg-border mx-0.5" />
 
           {/* Chart type */}
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-0 bg-muted rounded p-0.5">
             <button
+              aria-label="Bar chart"
+              aria-pressed={chartType === 'bar'}
+              type="button"
               className={cn(
-                'h-6 w-6 flex items-center justify-center rounded-sm transition-colors',
-                chartType === 'bar' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground',
+                'h-5 w-5 flex items-center justify-center rounded-sm transition-colors',
+                chartType === 'bar' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
               )}
               onClick={() => setChartType('bar')}
             >
-              <BarChart2 className="h-3.5 w-3.5" />
+              <BarChart2 className="h-3 w-3" />
             </button>
             <button
+              aria-label="Line chart"
+              aria-pressed={chartType === 'line'}
+              type="button"
               className={cn(
-                'h-6 w-6 flex items-center justify-center rounded-sm transition-colors',
-                chartType === 'line' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground',
+                'h-5 w-5 flex items-center justify-center rounded-sm transition-colors',
+                chartType === 'line' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
               )}
               onClick={() => setChartType('line')}
             >
-              <LineChart className="h-3.5 w-3.5" />
+              <LineChart className="h-3 w-3" />
             </button>
           </div>
 
-          <div className="h-4 w-px bg-border" />
+          <div className="h-4 w-px bg-border mx-0.5" />
 
-          {/* Category chips */}
-          <div className="flex items-center gap-1 flex-wrap">
+          {/* Category chips — takes remaining space, scrolls if overflow */}
+          <div className="flex items-center gap-1 min-w-0 flex-1 overflow-x-auto">
             {selectedCategories.map((id, index) => {
               const name = categoryMap.get(id);
               const chipColor = CHART_COLORS[index % CHART_COLORS.length];
               return (
                 <span
-                  className="inline-flex items-center gap-1 h-5 px-1.5 text-2xs font-medium rounded-sm border border-border text-foreground"
+                  className="inline-flex items-center gap-1 h-5 px-1.5 text-2xs font-medium rounded-sm border border-border text-foreground shrink-0"
                   key={id}
                 >
                   <span style={{ backgroundColor: chipColor }} className="h-1.5 w-1.5 rounded-full flex-none" />
-                  {name ?? `#${id}`}
+                  <span className="max-w-[100px] truncate">{name ?? `#${id}`}</span>
                   <button
-                    className="text-muted-foreground hover:text-foreground leading-none"
+                    aria-label={`Remove ${name ?? `category ${id}`}`}
+                    className="h-4 w-4 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                    type="button"
                     onClick={() => removeCategory(id)}
                   >
                     <X className="h-2.5 w-2.5" />
@@ -258,7 +272,11 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
 
             <Popover>
               <PopoverTrigger asChild>
-                <button className="h-5 w-5 flex items-center justify-center text-muted-foreground hover:text-foreground border border-dashed border-border rounded-sm">
+                <button
+                  aria-label="Add category"
+                  className="h-5 w-5 flex items-center justify-center text-muted-foreground hover:text-foreground border border-dashed border-border rounded-sm transition-colors shrink-0"
+                  type="button"
+                >
                   <Plus className="h-3 w-3" />
                 </button>
               </PopoverTrigger>
@@ -272,26 +290,52 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
               </PopoverContent>
             </Popover>
           </div>
+
+          {/* Date picker (uncontrolled only) */}
+          {!isControlled && (
+            <>
+              <div className="h-4 w-px bg-border mx-0.5" />
+              <DaterangePickerWithPresets
+                after={timeframe.after}
+                before={timeframe.before}
+                presets={CATEGORIES_TIMELINE_PRESETS}
+                onChange={handleTimeframeChange}
+              >
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-2xs text-muted-foreground hover:text-foreground rounded px-1.5 py-0.5 leading-none cursor-pointer transition-colors"
+                >
+                  <CalendarIcon className="h-2.5 w-2.5" />
+                  {formatRange(timeframe)}
+                </button>
+              </DaterangePickerWithPresets>
+            </>
+          )}
+
+          <div className="h-4 w-px bg-border mx-0.5" />
+
+          {/* Settings */}
+          <ConfigurationMenu
+            fetchTransactionsFromSubcategories={fetchTransactionsFromSubcategories}
+            setFetchTransactionsFromSubcategories={setFetchTransactionsFromSubcategories}
+            setShowComparisonInTooltip={setShowComparisonInTooltip}
+            setShowExpenseReference={setShowExpenseReference}
+            setShowIncomeReference={setShowIncomeReference}
+            setUseSeparateAxisForTotals={setUseSeparateAxisForTotals}
+            showComparisonInTooltip={showComparisonInTooltip}
+            showExpenseReference={showExpenseReference}
+            showIncomeReference={showIncomeReference}
+            useSeparateAxisForTotals={useSeparateAxisForTotals}
+          />
         </div>
 
-        <CardContent className="p-0">
-          <div className="flex-grow overflow-hidden flex flex-col">
-            <div className="flex-grow overflow-x-auto overflow-y-hidden h-[390px]">
-              {isLoading && <Skeleton className="h-full w-full" />}
-              {!isLoading && !error && data && (
-                <Chart
-                  chartType={chartType}
-                  data={data}
-                  selectedPeriod={period}
-                  showComparisonInTooltip={showComparisonInTooltip}
-                  useSeparateAxisForTotals={useSeparateAxisForTotals}
-                  onClick={onChartClick}
-                />
-              )}
-            </div>
+        {/* Chart content */}
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+          <div key={chartType} className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden">
+            {chartContent}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {selectedTimeframeForTransactions && (
         <TransactionsDrawer

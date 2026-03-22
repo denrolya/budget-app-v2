@@ -40,7 +40,7 @@ const getPeriodText = (timeframe: Interval, period?: Interval): string => {
 };
 
 const StatisticsCardSkeleton = () => (
-  <Card className="w-[300px] h-[140px] overflow-hidden transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 relative flex-none snap-center">
+  <Card className="w-[300px] h-[140px] overflow-hidden relative flex-none snap-center">
     <CardContent className="p-4">
       <Skeleton className="h-4 w-[200px]" />
       <Skeleton className="h-4 w-[150px] mt-2" />
@@ -96,7 +96,7 @@ export const StatisticsCard: React.FC<Props> = ({ showPercentageIndicator = fals
   return (
     <Card
       id={id}
-      className="min-w-[300px] h-[140px] overflow-hidden transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 relative flex-none snap-center"
+      className="min-w-[300px] h-[140px] overflow-hidden relative flex-none snap-center"
     >
       {chartData && (
         <div className="absolute inset-0 z-0 opacity-15">

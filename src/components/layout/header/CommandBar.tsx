@@ -31,7 +31,7 @@ const WindowTab: React.FC<{
     to={path}
     className={cn(
       'inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-mono tracking-wide select-none',
-      'border transition-all duration-100',
+      'border transition-colors duration-100',
       isActive
         ? 'bg-primary/10 text-primary border-primary/30 font-semibold'
         : 'text-muted-foreground border-border/30 hover:text-foreground hover:border-border/60 hover:bg-muted/40',
@@ -49,21 +49,19 @@ const CommandBar: React.FC = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
-  // Number key shortcuts 1–7
-  ALL_WINDOWS.forEach(({ num, path }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useReactHotkeys(
-      String(num),
-      (e) => {
-        const tag = (e.target as HTMLElement)?.tagName;
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-        e.preventDefault();
-        navigate(path);
-      },
-      { preventDefault: false },
-      [navigate, path],
-    );
-  });
+  // Number key shortcuts 1–7 — single hook call with comma-separated keys
+  useReactHotkeys(
+    ALL_WINDOWS.map(({ num }) => String(num)).join(','),
+    (e, handler) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      e.preventDefault();
+      const win = ALL_WINDOWS.find(({ num }) => String(num) === handler.hotkey);
+      if (win) navigate(win.path);
+    },
+    { preventDefault: false },
+    [navigate],
+  );
 
   return (
     <header className="h-9 shrink-0 flex items-center border-b gap-1 px-2 bg-background overflow-hidden">

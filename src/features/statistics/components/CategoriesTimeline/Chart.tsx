@@ -133,11 +133,19 @@ export const CategoryTimelineChart: React.FC<Props> = ({
   };
 
   const categories = Object.keys(data);
-  const regularCategories = categories.filter((cat) => cat !== 'Total Income' && cat !== 'Total Expense');
-  const totalCategories = categories.filter((cat) => cat === 'Total Income' || cat === 'Total Expense');
+  const regularCategories = useMemo(
+    () => categories.filter((cat) => cat !== 'Total Income' && cat !== 'Total Expense'),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data],
+  );
+  const totalCategories = useMemo(
+    () => categories.filter((cat) => cat === 'Total Income' || cat === 'Total Expense'),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data],
+  );
 
   return (
-    <div className="w-full h-full min-w-[600px]">
+    <div className="chart-enter w-full h-full min-w-[600px]">
       <ResponsiveContainer height={385} width="100%">
         <ChartComponent
           barCategoryGap={chartType === 'bar' ? '20%' : undefined}
@@ -172,16 +180,18 @@ export const CategoryTimelineChart: React.FC<Props> = ({
           />
           <Legend
             formatter={(value) => (
-              <span className={cn({ 'opacity-50': hiddenSeries.includes(value) })}>
-                {value} (<MoneyValue amount={totals[value] || 0} useColors={false} className="text-xs font-mono" />)
+              <span className={cn('transition-opacity duration-200', { 'opacity-50': hiddenSeries.includes(value) })}>
+                {value} (<MoneyValue amount={totals[value] ?? 0} useColors={false} className="text-xs font-mono" />)
               </span>
             )}
             onClick={handleLegendClick}
           />
           {regularCategories.map((category, index) => (
             <DataComponent
+              animationDuration={chartType === 'line' ? 400 : 300}
+              animationEasing="ease-out"
               dataKey={category}
-              dot={{ r: 3, fill: getColor(category, index), strokeWidth: 0 }}
+              dot={chartType === 'line' ? { r: 3, fill: getColor(category, index), strokeWidth: 0 } : false}
               fill={getColor(category, index)}
               hide={hiddenSeries.includes(category)}
               stackId="a"
@@ -189,14 +199,9 @@ export const CategoryTimelineChart: React.FC<Props> = ({
               strokeWidth={getStrokeWidth(category)}
               type="monotone"
               yAxisId="regular"
-              activeDot={{
-                r: 6,
-                fill: getColor(category, index),
-                strokeWidth: 2,
-                stroke: 'hsl(var(--card))',
-              }}
+              activeDot={chartType === 'line' ? { r: 6, fill: getColor(category, index), strokeWidth: 2, stroke: 'hsl(var(--card))' } : false}
               className={cn({
-                'recharts-line fade-line': chartType === 'line',
+                'recharts-line': chartType === 'line',
                 'recharts-bar': chartType === 'bar',
               })}
               key={category}
@@ -204,6 +209,8 @@ export const CategoryTimelineChart: React.FC<Props> = ({
           ))}
           {totalCategories.map((category, index) => (
             <DataComponent
+              animationDuration={chartType === 'line' ? 400 : 300}
+              animationEasing="ease-out"
               dataKey={category}
               fill={getColor(category, regularCategories.length + index)}
               hide={hiddenSeries.includes(category)}
@@ -233,7 +240,7 @@ export const CategoryTimelineChart: React.FC<Props> = ({
                   : undefined
               }
               className={cn({
-                'recharts-line fade-line': chartType === 'line',
+                'recharts-line': chartType === 'line',
                 'recharts-bar': chartType === 'bar',
               })}
               key={category}

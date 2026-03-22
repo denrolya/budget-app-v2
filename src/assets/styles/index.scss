@@ -50,6 +50,9 @@
   &:hover {
     animation-play-state: paused;
   }
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }
 
 /* ─── Terminal Layout: Exchange rate flash ─────────────────────────────────── */

@@ -24,10 +24,6 @@ interface TransactionItemProps {
 }
 
 export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBorder = false, flat = false, revertValue = false }) => {
-  const truncateNote = (note: string, maxLength: number) => {
-    if (note.length <= maxLength) return note;
-    return `${note.substring(0, maxLength)}...`;
-  };
 
   // ── Flat / embedded mode (no card, no nested sheet) ──────────────────────────
   if (flat) {
@@ -50,7 +46,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
 
   return (
     <Card
-      className={cn('ease-in-out hover:shadow-md dark:hover:shadow-primary/25 transition-colors group relative', {
+      className={cn('transition-colors group relative', {
         'border-l-2 border-success': colorBorder && transaction.isIncome(),
         'border-l-2 border-destructive': colorBorder && transaction.isExpense(),
         'bg-warning/15 dark:bg-warning/10': transaction.isDraft,
@@ -103,8 +99,8 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
             content={<p>{transaction.note}</p>}
             triggerClassName="w-full overflow-hidden"
           >
-            <p className="text-sm text-muted-foreground truncate overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
-              {truncateNote(transaction.note, 50)}
+            <p className="text-sm text-muted-foreground truncate max-w-[200px]">
+              {transaction.note}
             </p>
           </ResponsiveTooltip>
         )}

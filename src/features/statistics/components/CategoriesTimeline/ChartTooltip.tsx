@@ -32,6 +32,7 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({
   }
 
   const currentDate = moment(label);
+  if (!currentDate.isValid()) return null;
 
   const formatDate = (): string => {
     switch (selectedPeriod) {
@@ -40,12 +41,12 @@ const ChartTooltip: React.FC<CustomTooltipProps> = ({
       case 'P1W': {
         const startOfWeek = currentDate.clone().startOf('isoWeek');
         const endOfWeek = currentDate.clone().endOf('isoWeek');
-        const endFormat =
-          startOfWeek.year() !== endOfWeek.year()
-            ? 'MMM D, YYYY'
-            : startOfWeek.month() !== endOfWeek.month()
-              ? 'MMM D'
-              : 'D';
+        let endFormat = 'D';
+        if (startOfWeek.year() !== endOfWeek.year()) {
+          endFormat = 'MMM D, YYYY';
+        } else if (startOfWeek.month() !== endOfWeek.month()) {
+          endFormat = 'MMM D';
+        }
         return `W${currentDate.isoWeek()}: ${startOfWeek.format('MMM D')} - ${endOfWeek.format(endFormat)}`;
       }
       case 'P1M':

@@ -168,7 +168,7 @@ const CollapsibleChildren: React.FC<{ expanded: boolean; children: React.ReactNo
   );
 };
 
-const TreeRow: React.FC<{ depth: number; displayCurrency: string; node: TreeNode }> = ({
+const TreeRow = React.memo<{ depth: number; displayCurrency: string; node: TreeNode }>(({
   depth,
   displayCurrency,
   node,
@@ -236,7 +236,7 @@ const TreeRow: React.FC<{ depth: number; displayCurrency: string; node: TreeNode
       )}
     </div>
   );
-};
+});
 
 // ─── Dummy budget for hook call when no budget selected ─────────────────────
 

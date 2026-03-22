@@ -238,7 +238,7 @@ const TreeNode: React.FC<Props> = ({
                   </div>
                 )}
 
-                <div aria-label="Category actions" role="group" className={actionsWrapClassName} onClick={stop}>
+                <div aria-label="Category actions" className={actionsWrapClassName} onClick={stop}>
                   <Button
                     aria-label="Add subcategory"
                     size="sm"

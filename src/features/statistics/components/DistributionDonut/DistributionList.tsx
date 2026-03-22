@@ -77,7 +77,7 @@ const DistributionList: React.FC<Props> = ({
                   backgroundColor: dotColor ?? 'hsl(var(--primary))',
                   opacity: 0.7,
                 }}
-                className="h-full w-full rounded-full origin-left transition-transform duration-300"
+                className="h-full w-full rounded-full origin-left transition-transform duration-300 will-change-[transform]"
               />
             </div>
 

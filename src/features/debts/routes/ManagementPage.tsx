@@ -148,7 +148,7 @@ const DebtsSidebar: React.FC<{ selectedId: string | null }> = ({ selectedId }) =
               <div className="h-1 bg-secondary rounded-full overflow-hidden">
                 <div
                   style={{ transform: `scaleX(${percentage / 100})`, backgroundColor: color }}
-                  className="h-full rounded-full origin-left transition-transform duration-500 ease-out"
+                  className="h-full rounded-full origin-left transition-transform duration-500 ease-out will-change-[transform]"
                 />
               </div>
             </div>

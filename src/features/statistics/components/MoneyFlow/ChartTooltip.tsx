@@ -136,8 +136,8 @@ export const ChartTooltip: React.FC<Props> = ({
         <IncomeExpensesComparison
           currentExpenses={dataPoint.expenses}
           currentIncome={dataPoint.income}
-          previousExpenses={comparisonData?.expenses || 0}
-          previousIncome={comparisonData?.income || 0}
+          previousExpenses={comparisonData?.expenses ?? 0}
+          previousIncome={comparisonData?.income ?? 0}
         />
       </CardContent>
     </Card>,

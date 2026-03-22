@@ -247,7 +247,7 @@ const BucketsPage: React.FC = () => {
       />
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => importInputRef.current?.click()}>
+          <Button aria-label="Import config" size="icon" variant="ghost" className="h-7 w-7" onClick={() => importInputRef.current?.click()}>
             <Upload className="h-3.5 w-3.5" />
           </Button>
         </TooltipTrigger>
@@ -255,7 +255,7 @@ const BucketsPage: React.FC = () => {
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={exportConfig}>
+          <Button aria-label="Export config" size="icon" variant="ghost" className="h-7 w-7" onClick={exportConfig}>
             <Download className="h-3.5 w-3.5" />
           </Button>
         </TooltipTrigger>
@@ -263,7 +263,13 @@ const BucketsPage: React.FC = () => {
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setHideZeroBalance((v) => !v)}>
+          <Button
+            aria-label={hideZeroBalance ? 'Show zero-balance accounts' : 'Hide zero-balance accounts'}
+            size="icon"
+            variant="ghost"
+            className="h-7 w-7"
+            onClick={() => setHideZeroBalance((v) => !v)}
+          >
             {hideZeroBalance ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
           </Button>
         </TooltipTrigger>

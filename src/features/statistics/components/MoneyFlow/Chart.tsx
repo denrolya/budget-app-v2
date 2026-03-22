@@ -76,6 +76,8 @@ const MoneyFlowChart: React.FC<Props> = ({
             <>
               {showExpenses && (
                 <Bar
+                  animationDuration={300}
+                  animationEasing="ease-out"
                   dataKey={dataKeys.expenses}
                   fill={`url(#expensesGradient${isCurrentTimeframe ? '' : 'Previous'})`}
                   maxBarSize={60}
@@ -87,6 +89,8 @@ const MoneyFlowChart: React.FC<Props> = ({
               )}
               {showIncome && (
                 <Bar
+                  animationDuration={300}
+                  animationEasing="ease-out"
                   dataKey={dataKeys.income}
                   fill={`url(#incomeGradient${isCurrentTimeframe ? '' : 'Previous'})`}
                   maxBarSize={60}
@@ -98,6 +102,8 @@ const MoneyFlowChart: React.FC<Props> = ({
               )}
               {showRevenue && (
                 <Bar
+                  animationDuration={300}
+                  animationEasing="ease-out"
                   dataKey={dataKeys.revenue}
                   fill={`url(#revenueGradient${isCurrentTimeframe ? '' : 'Previous'})`}
                   maxBarSize={60}
@@ -111,6 +117,8 @@ const MoneyFlowChart: React.FC<Props> = ({
             <>
               {showIncome && (
                 <Line
+                  animationDuration={400}
+                  animationEasing="ease-out"
                   dataKey={dataKeys.income}
                   dot={false}
                   stroke={'hsl(var(--success))'}
@@ -123,6 +131,8 @@ const MoneyFlowChart: React.FC<Props> = ({
               )}
               {showExpenses && (
                 <Line
+                  animationDuration={400}
+                  animationEasing="ease-out"
                   dataKey={dataKeys.expenses}
                   dot={false}
                   stroke={'hsl(var(--destructive))'}
@@ -135,6 +145,8 @@ const MoneyFlowChart: React.FC<Props> = ({
               )}
               {showRevenue && (
                 <Line
+                  animationDuration={400}
+                  animationEasing="ease-out"
                   dataKey={dataKeys.revenue}
                   dot={false}
                   stroke={'hsl(var(--primary))'}
@@ -244,7 +256,7 @@ const MoneyFlowChart: React.FC<Props> = ({
   };
 
   return (
-    <div aria-label="Income and expenses chart" role="img" className="w-full h-full min-w-[600px]">
+    <div aria-label="Income and expenses chart" role="img" className="chart-enter w-full h-full min-w-[600px]">
       <ResponsiveContainer height={385} width="100%">
         <ComposedChart data={transformedData} margin={{ top: 0, right: 30, bottom: 0, left: -30 }} stackOffset="sign">
           <defs>

@@ -66,6 +66,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
     transformedData,
     isLoading,
     error,
+    refetchData,
     totalIncome,
     totalExpenses,
     totalRevenue,
@@ -77,6 +78,45 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
     revenueChangePercent,
   } = useMoneyFlow({ period, timeframe, previousTimeframe: resolvedPreviousTimeframe, baseCurrency });
 
+  let chartContent: React.ReactNode = null;
+  if (error) {
+    chartContent = (
+      <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+        <span className="text-xs font-mono text-muted-foreground/60">Failed to load chart data</span>
+        <button
+          className="text-2xs font-mono text-muted-foreground hover:text-foreground border border-border/60 rounded px-2 py-0.5 transition-colors"
+          type="button"
+          onClick={refetchData}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  } else if (!isLoading && transformedData.length === 0) {
+    chartContent = (
+      <div className="w-full h-full flex items-center justify-center">
+        <span className="text-xs font-mono text-muted-foreground/50">No data in the selected time range</span>
+      </div>
+    );
+  } else if (transformedData.length > 0) {
+    chartContent = (
+      <Chart
+        chartType={chartType}
+        currentTimeframe={timeframe}
+        data={transformedData}
+        period={period}
+        previousTimeframe={resolvedPreviousTimeframe}
+        showExpenses={showExpenses}
+        showIncome={showIncome}
+        showMonthBoundary={showMonthBoundary}
+        showPreviousPeriod={showPreviousPeriod}
+        showRevenue={showRevenue}
+        showSeasonBoundary={showSeasonBoundary}
+        showYearBoundary={showYearBoundary}
+      />
+    );
+  }
+
   return (
     <div className={cn('flex flex-col w-full min-h-[550px] border rounded-lg overflow-hidden bg-card', className)}>
       {/* Single dense toolbar — matches Donut style */}
@@ -85,6 +125,8 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
         <div className="flex items-center gap-0.5 bg-muted rounded p-0.5">
           {availablePeriods.map((opt) => (
             <button
+              aria-label={opt.label}
+              aria-pressed={period === opt.value}
               type="button"
               className={cn(
                 'h-5 px-1.5 text-2xs font-medium rounded-sm transition-colors',
@@ -103,73 +145,85 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
         <div className="h-4 w-px bg-border mx-0.5" />
 
         {/* Chart type */}
-        <button
-          aria-label="Bar chart"
-          type="button"
-          className={cn(
-            'h-5 w-5 flex items-center justify-center rounded-sm transition-colors',
-            chartType === 'bar' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground',
-          )}
-          onClick={() => setChartType('bar')}
-        >
-          <BarChart2 className="h-3 w-3" />
-        </button>
-        <button
-          aria-label="Line chart"
-          type="button"
-          className={cn(
-            'h-5 w-5 flex items-center justify-center rounded-sm transition-colors',
-            chartType === 'line' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground',
-          )}
-          onClick={() => setChartType('line')}
-        >
-          <LineChart className="h-3 w-3" />
-        </button>
+        <div className="flex items-center gap-0 bg-muted rounded p-0.5">
+          <button
+            aria-label="Bar chart"
+            type="button"
+            className={cn(
+              'h-5 w-5 flex items-center justify-center rounded-sm transition-colors',
+              chartType === 'bar' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+            )}
+            onClick={() => setChartType('bar')}
+          >
+            <BarChart2 className="h-3 w-3" />
+          </button>
+          <button
+            aria-label="Line chart"
+            type="button"
+            className={cn(
+              'h-5 w-5 flex items-center justify-center rounded-sm transition-colors',
+              chartType === 'line' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+            )}
+            onClick={() => setChartType('line')}
+          >
+            <LineChart className="h-3 w-3" />
+          </button>
+        </div>
 
         <div className="h-4 w-px bg-border mx-0.5" />
 
         {/* Series toggles */}
-        <button
-          type="button"
-          className={cn(
-            'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
-            showIncome
-              ? 'border-success/40 bg-success/10 text-success'
-              : 'border-transparent text-muted-foreground hover:text-foreground',
-          )}
-          onClick={() => setShowIncome(!showIncome)}
-        >
-          Inc
-        </button>
-        <button
-          type="button"
-          className={cn(
-            'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
-            showExpenses
-              ? 'border-destructive/40 bg-destructive/10 text-destructive'
-              : 'border-transparent text-muted-foreground hover:text-foreground',
-          )}
-          onClick={() => setShowExpenses(!showExpenses)}
-        >
-          Exp
-        </button>
-        <button
-          type="button"
-          className={cn(
-            'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
-            showRevenue
-              ? 'border-primary/40 bg-primary/10 text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground',
-          )}
-          onClick={() => setShowRevenue(!showRevenue)}
-        >
-          Rev
-        </button>
+        <div className="flex items-center gap-0.5">
+          <button
+            aria-label="Toggle income series"
+            aria-pressed={showIncome}
+            type="button"
+            className={cn(
+              'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
+              showIncome
+                ? 'border-success/40 bg-success/10 text-success'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
+            )}
+            onClick={() => setShowIncome(!showIncome)}
+          >
+            Inc
+          </button>
+          <button
+            aria-label="Toggle expenses series"
+            aria-pressed={showExpenses}
+            type="button"
+            className={cn(
+              'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
+              showExpenses
+                ? 'border-destructive/40 bg-destructive/10 text-destructive'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
+            )}
+            onClick={() => setShowExpenses(!showExpenses)}
+          >
+            Exp
+          </button>
+          <button
+            aria-label="Toggle revenue series"
+            aria-pressed={showRevenue}
+            type="button"
+            className={cn(
+              'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
+              showRevenue
+                ? 'border-primary/40 bg-primary/10 text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
+            )}
+            onClick={() => setShowRevenue(!showRevenue)}
+          >
+            Rev
+          </button>
+        </div>
 
         <div className="h-4 w-px bg-border mx-0.5" />
 
         {/* Previous period toggle */}
         <button
+          aria-label="Compare previous period"
+          aria-pressed={showPreviousPeriod}
           type="button"
           className={cn(
             'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
@@ -220,38 +274,16 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
       {/* Chart content */}
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
         {isLoading && <MoneyFlowSkeleton />}
-
-        {!isLoading && totalRevenue != null && (
-          <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden">
-            {error ? (
-              <div className="w-full h-full flex items-center justify-center text-destructive text-xs">
-                Error loading data: {error.message}
-              </div>
-            ) : (
-              transformedData.length > 0 && (
-                <Chart
-                  chartType={chartType}
-                  currentTimeframe={timeframe}
-                  data={transformedData}
-                  period={period}
-                  previousTimeframe={resolvedPreviousTimeframe}
-                  showExpenses={showExpenses}
-                  showIncome={showIncome}
-                  showMonthBoundary={showMonthBoundary}
-                  showPreviousPeriod={showPreviousPeriod}
-                  showRevenue={showRevenue}
-                  showSeasonBoundary={showSeasonBoundary}
-                  showYearBoundary={showYearBoundary}
-                />
-              )
-            )}
+        {!isLoading && (
+          <div key={chartType} className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden">
+            {chartContent}
           </div>
         )}
       </div>
 
       {/* Summary footer — trading terminal style */}
       {!isLoading && totalRevenue != null && (
-        <div className="shrink-0 hidden lg:flex items-center border-t h-7 divide-x divide-border bg-card">
+        <div className="chart-enter shrink-0 hidden lg:flex items-center border-t h-7 divide-x divide-border bg-card">
           {[
             { label: 'Inc', value: totalIncome, prevValue: previousTotalIncome, pct: incomeChangePercent },
             { label: 'Exp', value: totalExpenses, prevValue: previousTotalExpenses, pct: expensesChangePercent },
@@ -263,42 +295,41 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
               colored: true,
               signed: true,
             },
-          ].map((item) => (
-            <div className="flex-1 flex items-center justify-center gap-1.5 px-2" key={item.label}>
-              <span className="text-2xs text-muted-foreground uppercase tracking-wider">{item.label}</span>
-              <MoneyValue
-                amount={item.value}
-                showSign={item.signed}
-                useColors={item.colored}
-                className="text-2xs font-mono tabular-nums font-semibold"
-              />
-              {item.pct != null && (
-                <ResponsiveTooltip
-                  desktopComponent="hovercard"
-                  contentClassName="p-2 w-auto"
-                  content={
-                    <span className="flex items-center gap-1 font-mono text-xs">
-                      vs <MoneyValue amount={item.prevValue} useColors className="tabular-nums" />
-                    </span>
-                  }
-                >
-                  <span
-                    className={cn('flex items-center text-2xs font-mono font-semibold cursor-help', {
-                      'text-success': item.pct >= 0,
-                      'text-destructive': item.pct < 0,
-                    })}
+          ].map((item) => {
+            const ArrowIcon = item.pct != null && item.pct >= 0 ? ArrowUpIcon : ArrowDownIcon;
+            return (
+              <div className="flex-1 flex items-center justify-center gap-1.5 px-2" key={item.label}>
+                <span className="text-2xs text-muted-foreground uppercase tracking-wider">{item.label}</span>
+                <MoneyValue
+                  amount={item.value}
+                  showSign={item.signed}
+                  useColors={item.colored}
+                  className="text-2xs font-mono tabular-nums font-semibold"
+                />
+                {item.pct != null && (
+                  <ResponsiveTooltip
+                    desktopComponent="hovercard"
+                    contentClassName="p-2 w-auto"
+                    content={
+                      <span className="flex items-center gap-1 font-mono text-xs">
+                        vs <MoneyValue amount={item.prevValue} useColors className="tabular-nums" />
+                      </span>
+                    }
                   >
-                    {item.pct >= 0 ? (
-                      <ArrowUpIcon className="h-3 w-3" />
-                    ) : (
-                      <ArrowDownIcon className="h-3 w-3" />
-                    )}
-                    {Math.abs(item.pct).toFixed()}%
-                  </span>
-                </ResponsiveTooltip>
-              )}
-            </div>
-          ))}
+                    <span
+                      className={cn('flex items-center text-2xs font-mono font-semibold cursor-help', {
+                        'text-success': item.pct >= 0,
+                        'text-destructive': item.pct < 0,
+                      })}
+                    >
+                      <ArrowIcon className="h-3 w-3" />
+                      {Math.abs(item.pct).toFixed()}%
+                    </span>
+                  </ResponsiveTooltip>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

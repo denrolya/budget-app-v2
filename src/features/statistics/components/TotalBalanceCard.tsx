@@ -58,7 +58,7 @@ export const TotalBalanceCard: React.FC = () => {
   );
 
   return (
-    <Card className="w-[300px] h-[140px] overflow-hidden transition-all duration-200 ease-in-out hover:shadow-md dark:hover:shadow-primary/25 relative flex-none snap-center">
+    <Card className="w-[300px] h-[140px] overflow-hidden relative flex-none snap-center">
       <CardContent className="p-4 flex flex-col justify-between h-full">
         <div className="flex justify-between items-start mb-0">
           <div className="flex-1 min-w-0">
