@@ -84,22 +84,53 @@
 @layer base {
   :root {
     @include light.theme;
-    @include account-colors.generate(('EUR': #0077cc, 'USD': #4caf50, 'UAH': #ffc107, 'HUF': #e53935, 'BTC': #ff9800));
+    @include account-colors.generate(
+      (
+        'EUR': #0077cc,
+        'USD': #4caf50,
+        'UAH': #ffc107,
+        'HUF': #e53935,
+        'BTC': #ff9800,
+      )
+    );
   }
 
   .dark {
     @include dark.theme;
-    @include account-colors.generate(('EUR': #3399dd, 'USD': #5bc06a, 'UAH': #ffd34a, 'HUF': #ef5350, 'BTC': #ffad33));
+    @include account-colors.generate(
+      (
+        'EUR': #3399dd,
+        'USD': #5bc06a,
+        'UAH': #ffd34a,
+        'HUF': #ef5350,
+        'BTC': #ffad33,
+      )
+    );
   }
 
   .theme-tron-dark {
     @include tron-dark.theme;
-    @include account-colors.generate(('EUR': #00ccff, 'USD': #00ff99, 'UAH': #ffee00, 'HUF': #ff3366, 'BTC': #ff9900));
+    @include account-colors.generate(
+      (
+        'EUR': #00ccff,
+        'USD': #00ff99,
+        'UAH': #ffee00,
+        'HUF': #ff3366,
+        'BTC': #ff9900,
+      )
+    );
   }
 
   .theme-hacker-dark {
     @include hacker-dark.theme;
-    @include account-colors.generate(('EUR': #22cc44, 'USD': #44aa33, 'UAH': #ccaa00, 'HUF': #33bb88, 'BTC': #aa8800));
+    @include account-colors.generate(
+      (
+        'EUR': #22cc44,
+        'USD': #44aa33,
+        'UAH': #ccaa00,
+        'HUF': #33bb88,
+        'BTC': #aa8800,
+      )
+    );
   }
-
 }

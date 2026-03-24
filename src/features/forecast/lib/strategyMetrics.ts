@@ -49,7 +49,7 @@ export const computeStrategyMetrics = (config: ScenarioConfig, result: Simulatio
   // Stress tests: how much can income/expenses change before runway drops below 6 months?
   // Only run if the base scenario is already viable (runway > 6 months).
   const netWorthNeverDepleted = result.runwayMonths === null;
-  const baseRunwayOk = netWorthNeverDepleted || result.runwayMonths > 6;
+  const baseRunwayOk = netWorthNeverDepleted || (result.runwayMonths !== null && result.runwayMonths > 6);
   const maxExpenseShock = baseRunwayOk ? binarySearchThreshold(config, 'expense', 6) : 0;
   const incomeLossTolerance = baseRunwayOk ? binarySearchThreshold(config, 'income', 6) : 0;
 

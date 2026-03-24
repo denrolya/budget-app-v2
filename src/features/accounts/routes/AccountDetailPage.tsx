@@ -65,16 +65,18 @@ const AccountDetailPage: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col min-h-0">
-      <PageWithSidebar.Header
-        title={account.name}
-        className="px-4 py-2"
-        onBack={() => navigate('/accounts')}
-      >
+      <PageWithSidebar.Header title={account.name} className="px-4 py-2" onBack={() => navigate('/accounts')}>
         {hasDrafts && (
           <div className="flex items-center gap-1.5 text-2xs text-warning mr-1">
             <FileText className="h-3 w-3 shrink-0" />
-            <span><span className="font-medium">{account.draftCount}</span> pending</span>
-            <button type="button" className="underline underline-offset-2 hover:no-underline" onClick={() => reviewDraftsRef.current?.()}>
+            <span>
+              <span className="font-medium">{account.draftCount}</span> pending
+            </span>
+            <button
+              type="button"
+              className="underline underline-offset-2 hover:no-underline"
+              onClick={() => reviewDraftsRef.current?.()}
+            >
               Review →
             </button>
           </div>
@@ -133,7 +135,9 @@ const AccountDetailPage: React.FC = () => {
           account={account}
           key={account.id}
           onAccountUpdate={onAccountUpdate}
-          onSetReviewDrafts={(fn) => { reviewDraftsRef.current = fn; }}
+          onSetReviewDrafts={(fn) => {
+            reviewDraftsRef.current = fn;
+          }}
         />
       </div>
     </div>

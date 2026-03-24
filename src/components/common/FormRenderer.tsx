@@ -129,7 +129,13 @@ export const FormRenderer: React.FC = () => {
 
   const footer = (
     <div className="flex justify-end gap-2">
-      <Button disabled={isLoading || !formState.isValid} size="sm" type="submit" variant="outline" onClick={() => handleSubmit(false)}>
+      <Button
+        disabled={isLoading || !formState.isValid}
+        size="sm"
+        type="submit"
+        variant="outline"
+        onClick={() => handleSubmit(false)}
+      >
         {isEditMode ? 'Update' : 'Create'}
       </Button>
       <Button disabled={isLoading || !formState.isValid} size="sm" type="button" onClick={() => handleSubmit(true)}>

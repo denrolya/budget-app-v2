@@ -5,11 +5,7 @@ import { useHistoricalFlows } from '@/features/forecast';
 import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
 import { type TransformedData, type UseMoneyFlowParams, type UseMoneyFlowReturn } from '@/types/statistics/moneyFlow';
 
-export const useMoneyFlow = ({
-  period,
-  timeframe,
-  previousTimeframe,
-}: UseMoneyFlowParams): UseMoneyFlowReturn => {
+export const useMoneyFlow = ({ period, timeframe, previousTimeframe }: UseMoneyFlowParams): UseMoneyFlowReturn => {
   const {
     data: currentDataBackend,
     isLoading: isCurrentLoading,

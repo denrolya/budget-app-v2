@@ -49,8 +49,10 @@ const DistributionList: React.FC<Props> = ({
 
         return (
           <button
-            aria-label={canDrill ? `Drill into ${item.name}` : `View ${item.name} transactions (${percentage.toFixed(0)}%)`}
             type="button"
+            aria-label={
+              canDrill ? `Drill into ${item.name}` : `View ${item.name} transactions (${percentage.toFixed(0)}%)`
+            }
             className="group w-full flex items-center gap-2 px-2 py-1 text-left rounded hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
             key={rowKey}
             onClick={handleClick}

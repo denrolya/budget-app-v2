@@ -146,7 +146,12 @@ const DebtsSunburstChart: React.FC<Props> = ({ debts, onHoverChange, onNavigate 
   }
 
   return (
-    <div aria-label="Debts distribution" role="img" style={{ cursor: onNavigate ? 'pointer' : 'default' }} className="h-full w-full">
+    <div
+      aria-label="Debts distribution"
+      role="img"
+      style={{ cursor: onNavigate ? 'pointer' : 'default' }}
+      className="h-full w-full"
+    >
       <ResponsivePie
         activeInnerRadiusOffset={6}
         activeOuterRadiusOffset={8}

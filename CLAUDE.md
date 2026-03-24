@@ -347,7 +347,7 @@ import type { AccountRawData } from '../types';
 ### DistributionDonut (`src/features/statistics/components/DistributionDonut/`)
 
 - Uses **Nivo**, not Recharts — do not import Recharts components here.
-- **Panel transition animation**: wrap panel content in `<div key={panelKey} className="chart-enter h-full">` where `panelKey = \`${tab}-${type}\`` — the `chart-enter` class (200ms opacity fade, defined in `_recharts.scss`) triggers on remount.
+- **Panel transition animation**: wrap panel content in `<div key={panelKey} className="chart-enter h-full">` where `panelKey = \`${tab}-${type}\``— the`chart-enter`class (200ms opacity fade, defined in`\_recharts.scss`) triggers on remount.
 - **Color mapping in CategoriesPanel**: categories use `CHART_COLORS[index]` from the sorted `pieData` array. Pass `getDotColor={(item) => colorMap.get(String(item.id)) ?? null}` to `DistributionList` so list row dots match the pie chart segments.
 - **CardSkeleton shape**: mirrors real layout — `h-[180px]` donut ring with hollow center (`absolute inset-0 m-[40px] rounded-full bg-card`) + 6 list rows with dot/name/bar/value/pct columns.
 
@@ -376,6 +376,7 @@ import type { AccountRawData } from '../types';
 The budget detail header overrides with `className="px-4 pt-2 pb-0"` — the `pb-0` removes bottom padding so `subContent` (summary cards) sits flush below the title row, making the title row **36px**.
 
 Sidebar "header" sections (the top bar in each sidebar panel) must match the adjacent content header height:
+
 - When content header uses `pt-2 pb-0` (budget): sidebar should use `py-1` (4+4) + `h-7` content = **36px**
 - When content header uses default `py-2` with text-only title (categories): same `py-1` + `h-7` = 36px (the text title is 20px tall but `py-2`+20px = 36px, matching)
 
@@ -395,14 +396,17 @@ Sidebar "header" sections (the top bar in each sidebar panel) must match the adj
 ## Design Context
 
 ### Users
+
 A small group of friends or collaborators tracking shared and individual finances together. Users are likely technically-inclined — comfortable with dense UIs and data — but the app must still be readable at a glance without deep familiarity. Multiple people use it, so clarity can't be sacrificed for cleverness.
 
 ### Brand Personality
+
 **Composed · Precise · Legible**
 
 The interface should feel like a trusted co-pilot for money — calm, confident, and always in control. Not an alarm system, not a cheerleader. Think of the emotional register of a well-run cockpit: everything is visible, everything is normal, I know exactly where I stand.
 
 ### Aesthetic Direction
+
 **Data dashboard with terminal lineage.**
 
 Grafana / Metabase energy: information density is a feature, not a flaw. Numbers, charts, and status signals should be visible without requiring extra interaction. The TUI layout heritage (CommandBar, Statusline, JetBrains Mono, trading terminal palette) is core identity — lean into it rather than soften it.
@@ -419,6 +423,6 @@ Reference feel: **Linear** (refined dark SaaS polish) meets **Grafana** (data de
 
 3. **Calm over urgency.** No pulsing, no aggressive alerts, no high-saturation noise. The tone is always "everything is accounted for." Reserve red/amber for genuinely important signals.
 
-4. **Terminal lineage is identity.** Monospace numbers (`tabular-nums`, JetBrains Mono), grid-aligned layouts, tight label typography (`text-2xs uppercase tracking-widest`), and sharp segmented controls are what make this app feel like *this* app — not a generic SaaS clone.
+4. **Terminal lineage is identity.** Monospace numbers (`tabular-nums`, JetBrains Mono), grid-aligned layouts, tight label typography (`text-2xs uppercase tracking-widest`), and sharp segmented controls are what make this app feel like _this_ app — not a generic SaaS clone.
 
 5. **Shared legibility.** Every screen should communicate its key figures in under 3 seconds. Multiple people use this app with varying familiarity — layout hierarchy and labeling must do the heavy lifting without assuming the user knows what they're looking at.

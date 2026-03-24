@@ -434,9 +434,7 @@ export const TransactionForm = forwardRef<TransactionFormRef, TransactionFormPro
               tabIndex={-1}
               type="button"
               className="flex items-center gap-1 text-2xs font-mono text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() =>
-                append({ account: -1, amount: 0, executedAt: nowDatetimeLocal() })
-              }
+              onClick={() => append({ account: -1, amount: 0, executedAt: nowDatetimeLocal() })}
             >
               <Plus className="h-3 w-3" />
               ADD COMP

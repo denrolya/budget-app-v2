@@ -133,7 +133,9 @@ const SuggestionRow: React.FC<SuggestionRowProps> = ({
 
   return (
     <div className={cn('flex items-center gap-1', { 'py-1': isRoot, 'py-0.5 pl-3': !isRoot })}>
-      <span className={cn('truncate min-w-0 flex-1 text-sm', { 'font-medium': isRoot, 'text-muted-foreground': !isRoot })}>
+      <span
+        className={cn('truncate min-w-0 flex-1 text-sm', { 'font-medium': isRoot, 'text-muted-foreground': !isRoot })}
+      >
         {name}
       </span>
 

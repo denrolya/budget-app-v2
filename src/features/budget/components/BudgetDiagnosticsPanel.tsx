@@ -64,8 +64,11 @@ const BudgetDiagnosticsPanel: React.FC<Props> = ({ trends }) => {
             <div className="flex items-center gap-2 py-0.5 min-w-0" key={item.categoryId}>
               <Icon className={cn('h-3 w-3 shrink-0', changeColor)} />
               <span className="text-xs text-muted-foreground truncate min-w-0 flex-1">{name}</span>
-              <span className={cn('text-xs tabular-nums font-semibold shrink-0 font-mono w-10 text-right', changeColor)}>
-                {isUp ? '+' : '−'}{changePct}%
+              <span
+                className={cn('text-xs tabular-nums font-semibold shrink-0 font-mono w-10 text-right', changeColor)}
+              >
+                {isUp ? '+' : '−'}
+                {changePct}%
               </span>
             </div>
           );
@@ -73,7 +76,8 @@ const BudgetDiagnosticsPanel: React.FC<Props> = ({ trends }) => {
       </div>
 
       <p className="text-2xs text-muted-foreground/40 mt-1.5 leading-tight">
-        Monthly avg change vs prior period · each category reflects its own direct transactions only, sub-categories listed separately
+        Monthly avg change vs prior period · each category reflects its own direct transactions only, sub-categories
+        listed separately
       </p>
     </div>
   );

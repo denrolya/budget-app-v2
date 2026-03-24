@@ -1,6 +1,7 @@
 import moment from 'moment';
 
 import { generatePreviousTimeframe } from '@/lib/datetime/generatePreviousTimeframe';
+import type { IntervalUnit } from '@/types/statistics';
 
 describe('generatePreviousTimeframe', () => {
   it('should throw an error if startDate is invalid', () => {
@@ -21,7 +22,7 @@ describe('generatePreviousTimeframe', () => {
     const start = moment('2024-10-01');
     const end = moment('2024-10-15');
 
-    expect(() => generatePreviousTimeframe(start, end, 'invalidUnit' as any)).toThrow(
+    expect(() => generatePreviousTimeframe(start, end, 'invalidUnit' as unknown as IntervalUnit)).toThrow(
       'Invalid unit provided. Allowed units are: day, week, month, year',
     );
   });

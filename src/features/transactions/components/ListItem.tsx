@@ -23,8 +23,12 @@ interface TransactionItemProps {
   revertValue?: boolean;
 }
 
-export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBorder = false, flat = false, revertValue = false }) => {
-
+export const ListItem: React.FC<TransactionItemProps> = ({
+  transaction,
+  colorBorder = false,
+  flat = false,
+  revertValue = false,
+}) => {
   // ── Flat / embedded mode (no card, no nested sheet) ──────────────────────────
   if (flat) {
     return (
@@ -99,9 +103,7 @@ export const ListItem: React.FC<TransactionItemProps> = ({ transaction, colorBor
             content={<p>{transaction.note}</p>}
             triggerClassName="w-full overflow-hidden"
           >
-            <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-              {transaction.note}
-            </p>
+            <p className="text-sm text-muted-foreground truncate max-w-[200px]">{transaction.note}</p>
           </ResponsiveTooltip>
         )}
       </CardContent>

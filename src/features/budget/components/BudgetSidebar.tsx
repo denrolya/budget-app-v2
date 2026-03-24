@@ -189,7 +189,9 @@ const BudgetSidebarItem: React.FC<BudgetSidebarItemProps> = ({
         <div className="flex items-center justify-between gap-4">
           <span className="text-muted-foreground">Income</span>
           <span>
-            <span className="font-medium text-success">{formatBudgetAmount(metrics.totalActualIncome, BASE_CURRENCY)}</span>
+            <span className="font-medium text-success">
+              {formatBudgetAmount(metrics.totalActualIncome, BASE_CURRENCY)}
+            </span>
             {metrics.totalPlannedIncome > 0 && (
               <span className="text-muted-foreground">
                 {' '}
@@ -239,11 +241,7 @@ const BudgetSidebarItem: React.FC<BudgetSidebarItemProps> = ({
         isCompleted && !isSelected && 'opacity-60',
       )}
     >
-      <button
-        type="button"
-        className="w-full text-left px-3 py-1.5 min-w-0"
-        onClick={() => onNavigate(budget.id)}
-      >
+      <button type="button" className="w-full text-left px-3 py-1.5 min-w-0" onClick={() => onNavigate(budget.id)}>
         <div className="flex items-center gap-1.5 min-w-0">
           <span className={cn('text-sm truncate flex-1', isSelected && 'font-medium')}>
             {formatBudgetLabel(budget)}

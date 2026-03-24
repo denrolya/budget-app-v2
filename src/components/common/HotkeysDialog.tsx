@@ -54,9 +54,7 @@ export const HotkeysDialog: React.FC<HotkeysDialogProps> = ({ isOpen, onClose })
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-[60vh] pr-4">{Object.values(pageHotkeys).map(renderHotkeyList)}</ScrollArea>
-        <div className="mt-4 text-sm text-muted-foreground text-center">
-          Shift key is the same for all platforms
-        </div>
+        <div className="mt-4 text-sm text-muted-foreground text-center">Shift key is the same for all platforms</div>
       </DialogContent>
     </Dialog>
   );

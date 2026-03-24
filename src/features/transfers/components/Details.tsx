@@ -139,9 +139,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
                 useColors={false}
                 className="font-mono text-xs text-destructive"
               />
-              <span className="text-3xs text-destructive/75 font-mono">
-                {stats.feePct.toFixed(2)}%
-              </span>
+              <span className="text-3xs text-destructive/75 font-mono">{stats.feePct.toFixed(2)}%</span>
             </span>
           </DataRow>
 
@@ -154,21 +152,19 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
             />
           </DataRow>
 
-          {senderCurrency !== recipientCurrency && (() => {
-            const [from, to] = formatTransferExchangeRate(
-              [senderCurrency, recipientCurrency],
-              stats.effectiveRate,
-            );
-            const fromLabel = CURRENCIES[from.currency as CURRENCY_CODE]?.symbol ?? from.currency;
-            const toLabel = CURRENCIES[to.currency as CURRENCY_CODE]?.symbol ?? to.currency;
-            return (
-              <DataRow label="Eff. rate">
-                <span className="font-mono text-xs text-muted-foreground">
-                  {from.amount} {fromLabel} = {to.amount} {toLabel}
-                </span>
-              </DataRow>
-            );
-          })()}
+          {senderCurrency !== recipientCurrency &&
+            (() => {
+              const [from, to] = formatTransferExchangeRate([senderCurrency, recipientCurrency], stats.effectiveRate);
+              const fromLabel = CURRENCIES[from.currency as CURRENCY_CODE]?.symbol ?? from.currency;
+              const toLabel = CURRENCIES[to.currency as CURRENCY_CODE]?.symbol ?? to.currency;
+              return (
+                <DataRow label="Eff. rate">
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {from.amount} {fromLabel} = {to.amount} {toLabel}
+                  </span>
+                </DataRow>
+              );
+            })()}
         </>
       )}
 
@@ -192,7 +188,6 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
           </div>
         </>
       )}
-
     </div>
   );
 };

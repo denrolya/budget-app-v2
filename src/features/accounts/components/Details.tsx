@@ -73,7 +73,10 @@ const InlineName: React.FC<InlineNameProps> = ({ account, onSave }) => {
           size="icon"
           variant="ghost"
           className="h-6 w-6"
-          onClick={() => { setValue(account.name); setEditing(false); }}
+          onClick={() => {
+            setValue(account.name);
+            setEditing(false);
+          }}
         >
           <X className="h-3 w-3" />
         </Button>
@@ -85,7 +88,10 @@ const InlineName: React.FC<InlineNameProps> = ({ account, onSave }) => {
     <button
       type="button"
       className="group flex items-center gap-1 min-w-0 text-left"
-      onClick={() => { setValue(account.name); setEditing(true); }}
+      onClick={() => {
+        setValue(account.name);
+        setEditing(true);
+      }}
     >
       <span className="truncate text-sm font-semibold">{account.name}</span>
       <Edit
@@ -137,14 +143,11 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate, onSetReviewD
     ledger.setFilter('accounts', [account.id]);
   }, [ledger, account.id]);
 
-  const handleNameSave = useCallback(
-    (name: string) => onAccountUpdate(account, { name }),
-    [account, onAccountUpdate],
-  );
+  const handleNameSave = useCallback((name: string) => onAccountUpdate(account, { name }), [account, onAccountUpdate]);
 
   useEffect(() => {
     onSetReviewDrafts?.(() => ledger.setFilter('isDraft', true));
-  }, [onSetReviewDrafts, ledger.setFilter]);
+  }, [onSetReviewDrafts, ledger]);
 
   const toggleSidebarVisibility = async () => {
     const confirmed = await confirm({
@@ -211,7 +214,9 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate, onSetReviewD
               type="single"
               value={preset}
               className="gap-0.5"
-              onValueChange={(v) => { if (v) setPreset(v as PresetLabel); }}
+              onValueChange={(v) => {
+                if (v) setPreset(v as PresetLabel);
+              }}
             >
               {PRESETS.map((p) => (
                 <ToggleGroupItem value={p.label} className="h-6 px-2 text-2xs" key={p.label}>
@@ -225,7 +230,9 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate, onSetReviewD
           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-2xs text-muted-foreground pointer-events-auto">
             <span className="capitalize">{account.type}</span>
             <span className="select-none text-border">·</span>
-            <span>Created <RelativeDatetimeDisplay date={account.createdAt} /></span>
+            <span>
+              Created <RelativeDatetimeDisplay date={account.createdAt} />
+            </span>
             {account.isArchived() && (
               <>
                 <span className="select-none text-border">·</span>
@@ -236,7 +243,10 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate, onSetReviewD
               <>
                 <span className="select-none text-border">·</span>
                 <span className="font-medium text-foreground/80">{capitalize(bi.provider)}</span>
-                <Badge variant={bi.isActive ? 'default' : 'destructive'} className="pointer-events-none px-1.5 py-0 text-2xs">
+                <Badge
+                  variant={bi.isActive ? 'default' : 'destructive'}
+                  className="pointer-events-none px-1.5 py-0 text-2xs"
+                >
                   {bi.isActive ? 'Active' : 'Inactive'}
                 </Badge>
                 {bi.syncMethod && (
@@ -248,7 +258,9 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate, onSetReviewD
                 {bi.lastSyncedAt && (
                   <>
                     <span className="select-none text-border">·</span>
-                    <span>Synced <RelativeDatetimeDisplay date={moment(bi.lastSyncedAt)} /></span>
+                    <span>
+                      Synced <RelativeDatetimeDisplay date={moment(bi.lastSyncedAt)} />
+                    </span>
                   </>
                 )}
               </>
@@ -256,7 +268,6 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate, onSetReviewD
           </div>
         </div>
       </Card>
-
 
       {/* Activity card */}
       <LedgerActivityCard

@@ -33,7 +33,6 @@ interface DebtFormProps {
 
 const CURRENCY_CHIPS = [CURRENCY_CODE.EUR, CURRENCY_CODE.USD, CURRENCY_CODE.UAH] as const;
 
-
 const toNumber = (v: unknown): number => {
   const n = typeof v === 'number' ? v : Number(v);
   return Number.isFinite(n) ? n : 0;
@@ -131,7 +130,13 @@ export const DebtForm = forwardRef<DebtFormRef, DebtFormProps>((_, ref) => {
             name="closedAt"
             render={({ field }) => (
               <>
-                <button aria-label="Status: open" aria-pressed={!isClosed} type="button" className={chipClass(!isClosed)} onClick={() => field.onChange('')}>
+                <button
+                  aria-label="Status: open"
+                  aria-pressed={!isClosed}
+                  type="button"
+                  className={chipClass(!isClosed)}
+                  onClick={() => field.onChange('')}
+                >
                   open
                 </button>
                 <button

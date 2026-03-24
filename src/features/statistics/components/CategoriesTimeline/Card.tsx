@@ -166,7 +166,9 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
   } else if (debouncedCategories.length === 0) {
     chartContent = (
       <div className="chart-enter h-full flex items-center justify-center">
-        <span className="text-2xs font-mono text-muted-foreground/50">No series selected — use + to add a category</span>
+        <span className="text-2xs font-mono text-muted-foreground/50">
+          No series selected — use + to add a category
+        </span>
       </div>
     );
   } else if (data && Object.keys(data).length === 0) {
@@ -224,7 +226,9 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
               type="button"
               className={cn(
                 'h-5 w-5 flex items-center justify-center rounded-sm transition-colors',
-                chartType === 'bar' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                chartType === 'bar'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
               )}
               onClick={() => setChartType('bar')}
             >
@@ -236,7 +240,9 @@ export const CategoriesTimelineCard: React.FC<Props> = ({ controlledTimeframe, c
               type="button"
               className={cn(
                 'h-5 w-5 flex items-center justify-center rounded-sm transition-colors',
-                chartType === 'line' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                chartType === 'line'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
               )}
               onClick={() => setChartType('line')}
             >

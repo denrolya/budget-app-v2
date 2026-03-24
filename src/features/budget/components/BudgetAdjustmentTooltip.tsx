@@ -66,10 +66,7 @@ const BudgetAdjustmentTooltip: React.FC<Props> = ({
       }
       contentClassName="p-2.5 w-auto"
     >
-      <button
-        type="button"
-        className="text-muted-foreground/30 hover:text-muted-foreground transition-colors shrink-0"
-      >
+      <button type="button" className="text-muted-foreground/30 hover:text-muted-foreground transition-colors shrink-0">
         <Info className="h-3 w-3" />
       </button>
     </ResponsiveTooltip>

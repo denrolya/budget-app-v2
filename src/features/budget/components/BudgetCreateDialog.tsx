@@ -124,14 +124,23 @@ const PredictionPreview: React.FC<{ periodType: BudgetPeriodType; month: number;
         </div>
         <div>
           <span className="text-2xs text-muted-foreground mr-1">Savings</span>
-          <span className={cn('font-medium tabular-nums', { 'text-success': stats.savings >= 0, 'text-destructive': stats.savings < 0 })}>
+          <span
+            className={cn('font-medium tabular-nums', {
+              'text-success': stats.savings >= 0,
+              'text-destructive': stats.savings < 0,
+            })}
+          >
             {formatBudgetAmount(stats.savings, 'EUR')}
           </span>
         </div>
       </div>
       {hasTrend && (
-        <p className={cn('text-2xs inline-flex items-center gap-0.5', { 'text-destructive': stats.trendPercent > 0, 'text-success': stats.trendPercent <= 0 })}>
-
+        <p
+          className={cn('text-2xs inline-flex items-center gap-0.5', {
+            'text-destructive': stats.trendPercent > 0,
+            'text-success': stats.trendPercent <= 0,
+          })}
+        >
           <TrendIcon className="h-2.5 w-2.5" />
           Expenses trending {stats.trendPercent > 0 ? 'up' : 'down'} {Math.abs(stats.trendPercent)}%
         </p>

@@ -47,7 +47,14 @@ const BudgetExportButton: React.FC<Props> = ({ budget, analytics, displayCurrenc
       [`Period: ${moment(budget.startDate).format('YYYY-MM-DD')} – ${moment(budget.endDate).format('YYYY-MM-DD')}`],
       [`Currency: ${displayCurrency}`],
       [],
-      ['Category', 'Type', `Planned (${currencySymbol})`, `Actual (${currencySymbol})`, `Remaining (${currencySymbol})`, '% Used'],
+      [
+        'Category',
+        'Type',
+        `Planned (${currencySymbol})`,
+        `Actual (${currencySymbol})`,
+        `Remaining (${currencySymbol})`,
+        '% Used',
+      ],
     ];
 
     const addCat = (cat: Category, type: 'Expense' | 'Income', depth = 0) => {

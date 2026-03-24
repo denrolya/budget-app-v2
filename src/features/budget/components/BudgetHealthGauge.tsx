@@ -88,15 +88,7 @@ const BudgetHealthGauge: React.FC<Props> = ({ result }) => {
         ))}
 
         {/* Needle */}
-        <line
-          strokeLinecap="round"
-          strokeWidth={1.5}
-          style={{ stroke: color }}
-          x1={CX}
-          x2={nx}
-          y1={CY}
-          y2={ny}
-        />
+        <line strokeLinecap="round" strokeWidth={1.5} style={{ stroke: color }} x1={CX} x2={nx} y1={CY} y2={ny} />
 
         {/* Center pivot */}
         <circle cx={CX} cy={CY} r={2.5} style={{ fill: color }} />
@@ -104,19 +96,14 @@ const BudgetHealthGauge: React.FC<Props> = ({ result }) => {
 
       {/* Grade + score */}
       <div className="flex items-baseline gap-1 leading-none">
-        <span
-          style={{ color }}
-          className="font-bold text-lg tabular-nums leading-none font-mono"
-        >
+        <span style={{ color }} className="font-bold text-lg tabular-nums leading-none font-mono">
           {grade}
         </span>
         <span className="text-2xs text-muted-foreground tabular-nums">{score}/100</span>
       </div>
 
       {/* Top penalty */}
-      {factor && (
-        <span className="text-2xs text-muted-foreground/70 leading-tight">{factor}</span>
-      )}
+      {factor && <span className="text-2xs text-muted-foreground/70 leading-tight">{factor}</span>}
     </div>
   );
 };

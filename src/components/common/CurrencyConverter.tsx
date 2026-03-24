@@ -116,7 +116,12 @@ export const CurrencyConverter: React.FC<Props> = ({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-1">
             {rateSources.map((source) => (
-              <button type="button" className={chip(rateSource === source)} key={source} onClick={() => setRateSource(source)}>
+              <button
+                type="button"
+                className={chip(rateSource === source)}
+                key={source}
+                onClick={() => setRateSource(source)}
+              >
                 {source}
               </button>
             ))}
@@ -138,7 +143,12 @@ export const CurrencyConverter: React.FC<Props> = ({
           />
           <div className="flex flex-wrap gap-1">
             {availableCurrencies.map((c) => (
-              <button type="button" className={chip(c === fromCurrency, c === toCurrency)} key={c} onClick={() => handleFromSelect(c)}>
+              <button
+                type="button"
+                className={chip(c === fromCurrency, c === toCurrency)}
+                key={c}
+                onClick={() => handleFromSelect(c)}
+              >
                 {c}
               </button>
             ))}
@@ -167,7 +177,12 @@ export const CurrencyConverter: React.FC<Props> = ({
           />
           <div className="flex flex-wrap gap-1">
             {availableCurrencies.map((c) => (
-              <button type="button" className={chip(c === toCurrency, c === fromCurrency)} key={c} onClick={() => handleToSelect(c)}>
+              <button
+                type="button"
+                className={chip(c === toCurrency, c === fromCurrency)}
+                key={c}
+                onClick={() => handleToSelect(c)}
+              >
                 {c}
               </button>
             ))}

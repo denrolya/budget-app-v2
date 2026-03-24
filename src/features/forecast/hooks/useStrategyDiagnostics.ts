@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import type { DiagnosticResult, ScenarioConfig, StrategyMetrics } from '../models/types';
+import type { DiagnosticResult, DiagnosticStatus, ScenarioConfig, StrategyMetrics } from '../models/types';
 
 interface DiagnosticRule {
   id: string;
@@ -45,7 +45,7 @@ const rules: DiagnosticRule[] = [
   {
     id: 'expense-stability',
     title: 'Expense Stability',
-    evaluate: (m, c) => {
+    evaluate: (_m, c) => {
       const cv = c.monthlyExpense > 0 ? c.expenseStdDev / c.monthlyExpense : 0;
       if (cv < 0.3)
         return {
@@ -75,7 +75,7 @@ const rules: DiagnosticRule[] = [
   {
     id: 'surplus-positive',
     title: 'Positive Surplus',
-    evaluate: (m, c) => {
+    evaluate: (_m, c) => {
       const surplus = c.monthlyIncome - c.monthlyExpense;
       if (surplus > 0)
         return {
@@ -195,7 +195,7 @@ const rules: DiagnosticRule[] = [
   {
     id: 'investment-allocation',
     title: 'Investment Rate',
-    evaluate: (m, c) => {
+    evaluate: (_m, c) => {
       const rate = Math.round(c.savingsRate);
       if (rate >= 30)
         return {

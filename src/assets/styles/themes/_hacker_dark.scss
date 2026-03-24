@@ -38,16 +38,16 @@
   --radius: 0px;
 
   /* Monochrome green chart palette — varying hue/lightness for distinction */
-  --chart-1: 120 100% 50%;  /* bright green    */
-  --chart-2: 120 70% 40%;   /* medium green    */
-  --chart-3: 40 100% 50%;   /* amber           */
-  --chart-4: 120 50% 60%;   /* pale green      */
-  --chart-5: 160 80% 45%;   /* teal-green      */
-  --chart-6: 80 70% 45%;    /* yellow-green    */
-  --chart-7: 120 100% 30%;  /* dark green      */
-  --chart-8: 140 60% 50%;   /* emerald         */
-  --chart-9: 40 80% 40%;    /* dark amber      */
-  --chart-10: 100 50% 55%;  /* lime            */
+  --chart-1: 120 100% 50%; /* bright green    */
+  --chart-2: 120 70% 40%; /* medium green    */
+  --chart-3: 40 100% 50%; /* amber           */
+  --chart-4: 120 50% 60%; /* pale green      */
+  --chart-5: 160 80% 45%; /* teal-green      */
+  --chart-6: 80 70% 45%; /* yellow-green    */
+  --chart-7: 120 100% 30%; /* dark green      */
+  --chart-8: 140 60% 50%; /* emerald         */
+  --chart-9: 40 80% 40%; /* dark amber      */
+  --chart-10: 100 50% 55%; /* lime            */
 
   --chart-text-color: 120 40% 35%;
   --chart-crosshair-color: 120 100% 50%;
@@ -75,24 +75,39 @@
 // ── CRT Effects ──────────────────────────────────────────────────────────────
 .theme-hacker-dark {
   // Zero border-radius — terminals don't have rounded corners
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     border-radius: 0 !important;
   }
 
   // No shadows — glow replaces shadow
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     box-shadow: none !important;
   }
 
   // ── Phosphor glow on text ──────────────────────────────────────────────────
   // Key elements get the green phosphor glow
-  h1, h2, h3, h4, h5, h6 {
-    text-shadow: 0 0 8px hsl(120 100% 50% / 0.6), 0 0 2px hsl(120 100% 50% / 0.3);
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-shadow:
+      0 0 8px hsl(120 100% 50% / 0.6),
+      0 0 2px hsl(120 100% 50% / 0.3);
   }
 
   // Numbers and monetary values
-  .tabular-nums, .font-mono, .font-numeric {
-    text-shadow: 0 0 6px hsl(120 100% 50% / 0.4), 0 0 1px hsl(120 100% 50% / 0.2);
+  .tabular-nums,
+  .font-mono,
+  .font-numeric {
+    text-shadow:
+      0 0 6px hsl(120 100% 50% / 0.4),
+      0 0 1px hsl(120 100% 50% / 0.2);
   }
 
   // Focus ring glow instead of shadow
@@ -126,45 +141,69 @@
     inset: 0;
     pointer-events: none;
     z-index: 9998;
-    background: radial-gradient(
-      ellipse at center,
-      transparent 50%,
-      hsl(0 0% 0% / 0.4) 100%
-    );
+    background: radial-gradient(ellipse at center, transparent 50%, hsl(0 0% 0% / 0.4) 100%);
   }
 
   // ── Flicker on interactive elements ────────────────────────────────────────
   @keyframes crt-flicker {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.97; }
-    75% { opacity: 0.99; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.97;
+    }
+    75% {
+      opacity: 0.99;
+    }
   }
 
-  button:hover, a:hover, input:focus, select:focus {
+  button:hover,
+  a:hover,
+  input:focus,
+  select:focus {
     animation: crt-flicker 0.15s ease-in-out;
   }
 
   // ── Cursor blink for inputs ────────────────────────────────────────────────
-  input, textarea {
+  input,
+  textarea {
     caret-color: hsl(120 100% 50%);
   }
 
   // ── Compact density ────────────────────────────────────────────────────────
-  .p-4 { padding: 0.625rem; }
-  .p-3 { padding: 0.5rem; }
-  .px-4 { padding-left: 0.625rem; padding-right: 0.625rem; }
-  .px-3 { padding-left: 0.5rem; padding-right: 0.5rem; }
-  .gap-4 { gap: 0.625rem; }
-  .gap-3 { gap: 0.5rem; }
+  .p-4 {
+    padding: 0.625rem;
+  }
+  .p-3 {
+    padding: 0.5rem;
+  }
+  .px-4 {
+    padding-left: 0.625rem;
+    padding-right: 0.625rem;
+  }
+  .px-3 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  .gap-4 {
+    gap: 0.625rem;
+  }
+  .gap-3 {
+    gap: 0.5rem;
+  }
 
   // ── Uppercase micro-labels ─────────────────────────────────────────────────
-  .text-xs, .text-2xs, .text-3xs {
+  .text-xs,
+  .text-2xs,
+  .text-3xs {
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
   // ── Table density ──────────────────────────────────────────────────────────
-  th, td {
+  th,
+  td {
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
   }

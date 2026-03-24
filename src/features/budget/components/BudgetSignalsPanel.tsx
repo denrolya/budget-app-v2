@@ -14,8 +14,16 @@ import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-interface OvItem { name: string; actual: number; planned: number; over: number }
-interface UbItem { name: string; actual: number }
+interface OvItem {
+  name: string;
+  actual: number;
+  planned: number;
+  over: number;
+}
+interface UbItem {
+  name: string;
+  actual: number;
+}
 type NonStableTrend = CategoryTrendItem & { direction: 'up' | 'down' };
 
 interface Props {
@@ -60,7 +68,9 @@ const OverspentSection: React.FC<{ items: OvItem[]; displayCurrency: string }> =
               <div style={{ width: `${fillPct}%` }} className="h-full bg-destructive rounded-full" />
             </div>
             <span className="text-2xs tabular-nums text-muted-foreground/70 shrink-0">
-              {formatBudgetAmount(item.actual, displayCurrency)}<span className="text-muted-foreground/40 mx-0.5">/</span>{formatBudgetAmount(item.planned, displayCurrency)}
+              {formatBudgetAmount(item.actual, displayCurrency)}
+              <span className="text-muted-foreground/40 mx-0.5">/</span>
+              {formatBudgetAmount(item.planned, displayCurrency)}
             </span>
             <span className="text-xs tabular-nums font-semibold font-mono text-destructive shrink-0 ml-auto">
               +{formatBudgetAmount(item.over, displayCurrency)}
@@ -85,7 +95,9 @@ const UnbudgetedSection: React.FC<{ items: UbItem[]; displayCurrency: string }> 
           key={item.name}
         >
           <span className="text-muted-foreground">{item.name}</span>
-          <span className="text-warning font-medium tabular-nums">{formatBudgetAmount(item.actual, displayCurrency)}</span>
+          <span className="text-warning font-medium tabular-nums">
+            {formatBudgetAmount(item.actual, displayCurrency)}
+          </span>
         </span>
       ))}
     </div>
@@ -111,12 +123,16 @@ const OutliersSection: React.FC<{ items: OutlierItem[]; catMap: Map<number, stri
           <span className="text-xs text-muted-foreground truncate min-w-0 flex-1">
             {outlier.note ?? moment(outlier.executedAt).format('MMM D')}
           </span>
-          <span className="tabular-nums text-xs font-medium shrink-0">{formatBudgetAmount(outlier.convertedAmount, displayCurrency)}</span>
+          <span className="tabular-nums text-xs font-medium shrink-0">
+            {formatBudgetAmount(outlier.convertedAmount, displayCurrency)}
+          </span>
           <span className="tabular-nums text-2xs text-warning shrink-0">{outlier.deviation}×</span>
           <span className="tabular-nums text-2xs text-muted-foreground/40 shrink-0">
             typical ({formatBudgetAmount(outlier.median, displayCurrency)})
           </span>
-          <span className="text-2xs text-muted-foreground/40 shrink-0">{moment(outlier.executedAt).format('MMM D')}</span>
+          <span className="text-2xs text-muted-foreground/40 shrink-0">
+            {moment(outlier.executedAt).format('MMM D')}
+          </span>
         </div>
       ))}
     </div>
@@ -129,9 +145,7 @@ const TrendsSection: React.FC<{ items: NonStableTrend[]; catMap: Map<number, str
   displayCurrency,
 }) => (
   <div>
-    <SectionHead className="text-muted-foreground">
-      Spending trends · monthly average vs prior period
-    </SectionHead>
+    <SectionHead className="text-muted-foreground">Spending trends · monthly average vs prior period</SectionHead>
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-0.5">
       {items.map((item) => {
         const isUp = item.direction === 'up';
@@ -151,7 +165,8 @@ const TrendsSection: React.FC<{ items: NonStableTrend[]; catMap: Map<number, str
               {formatBudgetAmount(item.recentAverage, displayCurrency)}/mo
             </span>
             <span className={cn('text-xs tabular-nums font-semibold font-mono shrink-0 w-12 text-right', color)}>
-              {isUp ? '+' : '−'}{changePct}%
+              {isUp ? '+' : '−'}
+              {changePct}%
             </span>
           </div>
         );
@@ -211,7 +226,10 @@ const BudgetSignalsPanel: React.FC<Props> = ({ budget, analytics, displayCurrenc
       for (const child of cat.children) checkUnbudgeted(child, depth + 1);
     };
 
-    expenseCats.forEach((cat) => { checkOverspent(cat); checkUnbudgeted(cat, 0); });
+    expenseCats.forEach((cat) => {
+      checkOverspent(cat);
+      checkUnbudgeted(cat, 0);
+    });
     ovList.sort((a, b) => b.over - a.over);
     ubList.sort((a, b) => b.actual - a.actual);
 
@@ -245,10 +263,16 @@ const BudgetSignalsPanel: React.FC<Props> = ({ budget, analytics, displayCurrenc
       ? { key: 'unbudgeted', node: <UnbudgetedSection displayCurrency={displayCurrency} items={unbudgeted} /> }
       : null,
     unusualTxns.length > 0
-      ? { key: 'outliers', node: <OutliersSection catMap={categoryMap} displayCurrency={displayCurrency} items={unusualTxns} /> }
+      ? {
+          key: 'outliers',
+          node: <OutliersSection catMap={categoryMap} displayCurrency={displayCurrency} items={unusualTxns} />,
+        }
       : null,
     hasTrends
-      ? { key: 'trends', node: <TrendsSection catMap={categoryMap} displayCurrency={displayCurrency} items={notableTrends} /> }
+      ? {
+          key: 'trends',
+          node: <TrendsSection catMap={categoryMap} displayCurrency={displayCurrency} items={notableTrends} />,
+        }
       : null,
   ].filter((s): s is { key: string; node: React.ReactElement } => s !== null);
 

@@ -26,7 +26,8 @@ const BADGE_CLASS: Record<InitStatus, string> = {
 const formatError = (error: Error | null): string | null => {
   if (!error) return null;
   const ax = error as { response?: { status?: number; statusText?: string } };
-  if (ax.response?.status) return `→ ${ax.response.status}${ax.response.statusText ? ` ${ax.response.statusText}` : ''}`;
+  if (ax.response?.status)
+    return `→ ${ax.response.status}${ax.response.statusText ? ` ${ax.response.statusText}` : ''}`;
   return `→ ${error.message}`;
 };
 
@@ -49,12 +50,12 @@ const ErrorLine: React.FC<ErrorLineProps> = ({ entry, onRetry }) => {
         <div className="flex items-center gap-3">
           <span className={cn('w-36 shrink-0', { 'text-muted-foreground': isSkipped })}>{entry.label}</span>
           {isError && errorStr && (
-            <span className="text-destructive truncate">{entry.endpoint} {errorStr}</span>
+            <span className="text-destructive truncate">
+              {entry.endpoint} {errorStr}
+            </span>
           )}
           {isSkipped && <span className="text-muted-foreground">skipped</span>}
-          {entry.status === 'success' && entry.detail && (
-            <span className="text-muted-foreground">{entry.detail}</span>
-          )}
+          {entry.status === 'success' && entry.detail && <span className="text-muted-foreground">{entry.detail}</span>}
         </div>
       </div>
       {isError && (
@@ -84,12 +85,7 @@ const InitErrorScreen: React.FC<InitErrorScreenProps> = ({ entries, onRetry }) =
           ))}
         </div>
         {failedKeys.length > 1 && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="font-mono text-xs h-7"
-            onClick={() => onRetry()}
-          >
+          <Button size="sm" variant="outline" className="font-mono text-xs h-7" onClick={() => onRetry()}>
             retry all
           </Button>
         )}

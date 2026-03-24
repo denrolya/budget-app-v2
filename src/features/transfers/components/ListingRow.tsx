@@ -89,9 +89,7 @@ const IdCell: React.FC<{
   </div>
 );
 
-const FeeDot = () => (
-  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-warning rounded-full" />
-);
+const FeeDot = () => <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-warning rounded-full" />;
 
 const AccountsCell: React.FC<{ transfer: Transfer }> = ({ transfer }) => {
   const feeAccountIds = new Set(transfer.feeExpenses.map((fee) => fee.account.id));

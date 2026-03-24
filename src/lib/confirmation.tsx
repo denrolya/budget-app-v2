@@ -78,8 +78,7 @@ export const confirm = (options: ConfirmationOptions): Promise<boolean> =>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="h-8 px-3 text-xs" onClick={handleCancel}>
-              {options.cancelText || 'No'}{' '}
-              <kbd className="ml-1 text-[10px] text-muted-foreground opacity-70">N</kbd>
+              {options.cancelText || 'No'} <kbd className="ml-1 text-[10px] text-muted-foreground opacity-70">N</kbd>
             </AlertDialogCancel>
             <AlertDialogAction className="h-8 px-3 text-xs" onClick={handleConfirm}>
               {options.confirmText || 'Yes'}{' '}

@@ -337,7 +337,12 @@ const TransactionHeatmapChart: React.FC<TransactionHeatmapChartProps> = ({
               {selectable && selectedRange && !isDragging && (
                 <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted rounded-md px-2 py-1">
                   {moment(selectedRange.start).format('D MMM')} – {moment(selectedRange.end).format('D MMM YYYY')}
-                  <button aria-label="Clear selection" type="button" className="hover:text-foreground transition-colors" onClick={handleClear}>
+                  <button
+                    aria-label="Clear selection"
+                    type="button"
+                    className="hover:text-foreground transition-colors"
+                    onClick={handleClear}
+                  >
                     <X className="h-3 w-3" />
                   </button>
                 </span>

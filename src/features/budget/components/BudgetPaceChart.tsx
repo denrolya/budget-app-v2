@@ -208,7 +208,12 @@ const BudgetPaceChart: React.FC<Props> = ({ budget, analytics, displayCurrency, 
                   </div>
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-muted-foreground text-xs">Actual spend</span>
-                    <span className={cn('tabular-nums text-xs font-semibold', { 'text-destructive': isOver, 'text-primary': !isOver })}>
+                    <span
+                      className={cn('tabular-nums text-xs font-semibold', {
+                        'text-destructive': isOver,
+                        'text-primary': !isOver,
+                      })}
+                    >
                       {currencySymbol}
                       {actualValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                     </span>

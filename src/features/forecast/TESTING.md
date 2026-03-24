@@ -1,6 +1,7 @@
 # Forecast Feature — Testing Guide
 
 ## Setup
+
 1. Start your dev server
 2. Navigate to `/forecast` (or press `7`)
 3. Clear localStorage keys `forecast-config`, `forecast-events`, `forecast-scenarios` if you want a clean start (DevTools → Application → Local Storage)
@@ -8,6 +9,7 @@
 ---
 
 ## Test 1: First Load
+
 - [ ] Page loads without errors
 - [ ] Charts render (balance runway top, investment growth bottom)
 - [ ] Header shows: horizon toggle, FI button with %, prediction mode badge (SMART or BUDGET), export/import icons, `?` icon
@@ -19,6 +21,7 @@
 ---
 
 ## Test 2: Horizon Toggle
+
 - [ ] Click through 6m → 1y → 2y → 5y → 10y → 15y → 20y → 30y
 - [ ] Chart scales smoothly, more data points appear
 - [ ] At 10y+ the seasonal wave pattern should be visible (repeating annual dip)
@@ -28,6 +31,7 @@
 ---
 
 ## Test 3: Sidebar Controls
+
 - [ ] Change income → chart updates live
 - [ ] Change expenses → chart updates live
 - [ ] Drag savings rate slider → investment growth curve changes
@@ -39,6 +43,7 @@
 ---
 
 ## Test 4: Seasonal Effect
+
 - [ ] At 2y+ horizon, balance line should be wavy (not perfectly straight)
 - [ ] Hover different months in the tooltip — income/expense numbers should vary
 - [ ] December/holiday months should show higher expenses (if your data has this pattern)
@@ -46,6 +51,7 @@
 ---
 
 ## Test 5: Events
+
 - [ ] Click `+` → presets appear (Salary raise, Sell asset, Large purchase, etc.)
 - [ ] Click "Salary raise" → form fills with +500, recurring checked
 - [ ] Change month, amount, save → event appears in list
@@ -58,6 +64,7 @@
 ---
 
 ## Test 6: FI Tracking
+
 - [ ] Click FI button to toggle on/off
 - [ ] When on: green dashed line on both charts at the FI target level
 - [ ] Investment chart Y-axis extends to show the FI threshold
@@ -68,6 +75,7 @@
 ---
 
 ## Test 7: Strategy Scorecard
+
 - [ ] Bottom panel shows two rows of KPIs with colors (green/yellow/red)
 - [ ] Hover each label → tooltip explains the metric
 - [ ] Change savings rate → Save %, Buffer, Runway all update
@@ -76,6 +84,7 @@
 ---
 
 ## Test 8: Diagnostics
+
 - [ ] Click the grade bar to expand
 - [ ] 12 rules visible in 2-column grid
 - [ ] Each rule shows pass (green check) / warn (yellow triangle) / fail (red X)
@@ -86,6 +95,7 @@
 ---
 
 ## Test 9: Scenarios
+
 - [ ] Click save icon in Scenarios section → enter name "Plan A" → save
 - [ ] Adjust income +1000, save as "Plan B"
 - [ ] Both appear in list
@@ -100,6 +110,7 @@
 ---
 
 ## Test 10: Persistence
+
 - [ ] Adjust controls + add events → refresh page → everything persists
 - [ ] Click export (↓) → JSON file downloads
 - [ ] Reset everything → click import (↑) → select the JSON → state restores
@@ -108,6 +119,7 @@
 ---
 
 ## Test 11: Info Dialog
+
 - [ ] Click `?` icon → dialog opens
 - [ ] Scroll through all sections — content should be readable and make sense
 - [ ] Check that prediction modes, FI explanation, event types, diagnostics are all covered
@@ -128,6 +140,7 @@ Test N: [PASS / ISSUES]
 ```
 
 Priority tags for issues:
+
 - **BUG** — something is broken/wrong
 - **UX** — works but confusing or ugly
 - **MISSING** — expected feature/behavior not there

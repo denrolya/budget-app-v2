@@ -135,7 +135,12 @@ export const AccountForm = forwardRef<AccountFormRef, AccountFormProps>((_, ref)
                 field.onChange(ACCOUNT_TYPE_CYCLE[(idx + 1) % ACCOUNT_TYPE_CYCLE.length]);
               };
               return (
-                <button aria-label={`Account type: ${field.value}`} type="button" className={chipClass(true)} onClick={cycleType}>
+                <button
+                  aria-label={`Account type: ${field.value}`}
+                  type="button"
+                  className={chipClass(true)}
+                  onClick={cycleType}
+                >
                   {field.value}
                 </button>
               );

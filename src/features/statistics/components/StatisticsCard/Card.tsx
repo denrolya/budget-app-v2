@@ -94,10 +94,7 @@ export const StatisticsCard: React.FC<Props> = ({ showPercentageIndicator = fals
   }
 
   return (
-    <Card
-      id={id}
-      className="min-w-[300px] h-[140px] overflow-hidden relative flex-none snap-center"
-    >
+    <Card id={id} className="min-w-[300px] h-[140px] overflow-hidden relative flex-none snap-center">
       {chartData && (
         <div className="absolute inset-0 z-0 opacity-15">
           <ResponsiveLine

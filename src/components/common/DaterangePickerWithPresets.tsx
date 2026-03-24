@@ -40,7 +40,9 @@ interface Props {
 const chipClass = (active: boolean) =>
   cn(
     'h-5 shrink-0 px-1.5 text-2xs font-medium rounded-sm whitespace-nowrap transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-    active ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 active:bg-muted/70',
+    active
+      ? 'bg-muted text-foreground'
+      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 active:bg-muted/70',
   );
 
 const DaterangePickerWithPresets: React.FC<Props> = ({
@@ -217,7 +219,10 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
       />
 
       {/* Selection hint */}
-      <div aria-live="polite" className="border-t border-border/30 min-h-5 px-3 pb-2 pt-1.5 font-mono text-2xs text-muted-foreground/70">
+      <div
+        aria-live="polite"
+        className="border-t border-border/30 min-h-5 px-3 pb-2 pt-1.5 font-mono text-2xs text-muted-foreground/70"
+      >
         {hint}
       </div>
     </div>
@@ -230,7 +235,9 @@ const DaterangePickerWithPresets: React.FC<Props> = ({
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Select date range</DrawerTitle>
-            <DrawerDescription className="sr-only">Choose a start and end date, or select a preset range</DrawerDescription>
+            <DrawerDescription className="sr-only">
+              Choose a start and end date, or select a preset range
+            </DrawerDescription>
           </DrawerHeader>
           {calendarContent}
         </DrawerContent>

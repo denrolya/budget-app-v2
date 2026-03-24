@@ -140,7 +140,11 @@ const IdCell = ({
   </div>
 );
 
-const AccountCell = ({ transaction, disabled, inlineEdit }: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
+const AccountCell = ({
+  transaction,
+  disabled,
+  inlineEdit,
+}: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
   const rawId = (editValue as { id?: number } | null)?.id ?? (editValue as number | null);
   const accountEditValue = rawId != null ? String(rawId) : null;
@@ -169,7 +173,11 @@ const AccountCell = ({ transaction, disabled, inlineEdit }: Pick<CellRendererArg
   );
 };
 
-const AmountCell = ({ transaction, disabled, inlineEdit }: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
+const AmountCell = ({
+  transaction,
+  disabled,
+  inlineEdit,
+}: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
   const isCompensated = transaction.isExpense() && (transaction.compensations?.length ?? 0) > 0;
   const valueClassName = cn('font-semibold tracking-tight', { 'text-warning': isCompensated });
@@ -191,7 +199,11 @@ const AmountCell = ({ transaction, disabled, inlineEdit }: Pick<CellRendererArgs
   );
 };
 
-const CategoryCell = ({ transaction, disabled, inlineEdit }: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
+const CategoryCell = ({
+  transaction,
+  disabled,
+  inlineEdit,
+}: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
   return (
@@ -224,7 +236,11 @@ const CategoryCell = ({ transaction, disabled, inlineEdit }: Pick<CellRendererAr
   );
 };
 
-const NoteCell = ({ transaction, disabled, inlineEdit }: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
+const NoteCell = ({
+  transaction,
+  disabled,
+  inlineEdit,
+}: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
   return (
@@ -246,13 +262,19 @@ const NoteCell = ({ transaction, disabled, inlineEdit }: Pick<CellRendererArgs, 
   );
 };
 
-const ExecutedAtCell = ({ transaction, disabled, inlineEdit }: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
+const ExecutedAtCell = ({
+  transaction,
+  disabled,
+  inlineEdit,
+}: Pick<CellRendererArgs, 'transaction' | 'disabled' | 'inlineEdit'>) => {
   const { editValue, setEditValue, save, cancelEdit, startEdit } = inlineEdit;
 
   return (
     <CellPopover
       disabled={disabled}
-      trigger={<span className="tabular-nums whitespace-nowrap">{transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}</span>}
+      trigger={
+        <span className="tabular-nums whitespace-nowrap">{transaction.executedAt.format(MOMENT_TIME_VIEW_FORMAT)}</span>
+      }
       onCancel={cancelEdit}
       onOpen={() => startEdit(transaction, 'executedAt')}
       onSave={() => void save(transaction)}
@@ -437,7 +459,9 @@ export const ListingRow = ({
       <ContextMenuContent className="w-56">
         <ContextMenuLabel className="flex items-center justify-between">
           <span className="truncate">Transaction #{ctx.transaction.id}</span>
-          <span className="text-xs text-muted-foreground tabular-nums">{ctx.transaction.executedAt.format('HH:mm')}</span>
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {ctx.transaction.executedAt.format('HH:mm')}
+          </span>
         </ContextMenuLabel>
 
         <ContextMenuSeparator />

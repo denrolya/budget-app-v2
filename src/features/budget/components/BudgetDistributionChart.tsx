@@ -51,7 +51,6 @@ const assignCategoryColors = (names: string[]): Map<string, string> => {
   return result;
 };
 
-
 interface BarDatum {
   [key: string]: string | number;
   category: string;
@@ -233,7 +232,9 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, budget, displayCu
           }}
           label={(d) => {
             const abs = Math.abs(d.value as number);
-            return abs >= 1000 ? `${currencySymbol}${(abs / 1000).toFixed(abs >= 10000 ? 0 : 1)}k` : `${currencySymbol}${abs}`;
+            return abs >= 1000
+              ? `${currencySymbol}${(abs / 1000).toFixed(abs >= 10000 ? 0 : 1)}k`
+              : `${currencySymbol}${abs}`;
           }}
           tooltip={({ indexValue, data: d }) => {
             const datum = d as BarDatum;
@@ -249,7 +250,9 @@ const BudgetDistributionChart: React.FC<Props> = ({ analytics, budget, displayCu
                   </div>
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-muted-foreground text-xs">Actual</span>
-                    <span className="tabular-nums text-xs font-semibold">{formatBudgetAmount(datum.Actual, displayCurrency)}</span>
+                    <span className="tabular-nums text-xs font-semibold">
+                      {formatBudgetAmount(datum.Actual, displayCurrency)}
+                    </span>
                   </div>
                   {remaining !== null && (
                     <div className="flex items-center justify-between gap-4 border-t pt-0.5 mt-0.5">

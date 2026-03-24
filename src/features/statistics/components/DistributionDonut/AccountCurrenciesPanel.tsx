@@ -264,25 +264,22 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
     [currenciesById, onOpenTransactions],
   );
 
-  const accountRenderLabel = useCallback(
-    ({ item }: { item: Item; percentage: number }) => {
-      const nameNode =
-        'account' in item && item.account ? (
-          <AccountPill
-            account={item.account as unknown as Account}
-            showMarker={false}
-            size="sm"
-            tooltip={false}
-            variant="inline"
-            className="min-w-0 text-2xs"
-          />
-        ) : (
-          <span className="truncate text-2xs">{item.name}</span>
-        );
-      return <div className="min-w-0 [&_*]:min-w-0">{nameNode}</div>;
-    },
-    [],
-  );
+  const accountRenderLabel = useCallback(({ item }: { item: Item; percentage: number }) => {
+    const nameNode =
+      'account' in item && item.account ? (
+        <AccountPill
+          account={item.account as unknown as Account}
+          showMarker={false}
+          size="sm"
+          tooltip={false}
+          variant="inline"
+          className="min-w-0 text-2xs"
+        />
+      ) : (
+        <span className="truncate text-2xs">{item.name}</span>
+      );
+    return <div className="min-w-0 [&_*]:min-w-0">{nameNode}</div>;
+  }, []);
 
   if (isLoading) return <CardSkeleton />;
 

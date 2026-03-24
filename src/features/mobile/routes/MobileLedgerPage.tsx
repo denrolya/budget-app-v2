@@ -126,7 +126,6 @@ const MobileLedgerPage: React.FC = () => {
     initialFilters: locationAccountId ? { accounts: [locationAccountId] } : undefined,
   });
 
-
   const handleCustomRange = useCallback(
     (range: { after?: moment.Moment | null; before?: moment.Moment | null }) => {
       const after = range.after ? moment(range.after).startOf('day') : ledger.timeframe.after;

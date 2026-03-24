@@ -61,8 +61,7 @@ const CurrencyButtonSelector: React.FC<CurrencyButtonSelectorProps> = ({ classNa
               'flex-1 h-16 px-2 py-1 text-sm font-medium rounded-md transition-all duration-200',
               'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
               {
-                'bg-primary text-primary-foreground':
-                  selectedCurrency === code,
+                'bg-primary text-primary-foreground': selectedCurrency === code,
                 'bg-background text-foreground hover:bg-accent hover:text-accent-foreground': selectedCurrency !== code,
               },
             )}

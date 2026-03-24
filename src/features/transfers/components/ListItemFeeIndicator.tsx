@@ -11,11 +11,7 @@ interface FeeIndicatorProps {
   senderCurrency: CURRENCY_CODE;
 }
 
-export const FeeIndicator: React.FC<FeeIndicatorProps> = ({
-  feeExpenses,
-  transferAmount,
-  senderCurrency,
-}) => {
+export const FeeIndicator: React.FC<FeeIndicatorProps> = ({ feeExpenses, transferAmount, senderCurrency }) => {
   if (feeExpenses.length === 0) return null;
 
   // Convert all fees to sender currency via convertedValues
@@ -34,9 +30,7 @@ export const FeeIndicator: React.FC<FeeIndicatorProps> = ({
           <span className="text-muted-foreground">({fee.account.name})</span>
         </div>
       ))}
-      <div className="border-t pt-1 text-muted-foreground">
-        {totalPct}% of transfer
-      </div>
+      <div className="border-t pt-1 text-muted-foreground">{totalPct}% of transfer</div>
     </div>
   );
 

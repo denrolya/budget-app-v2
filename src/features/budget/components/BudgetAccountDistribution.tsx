@@ -43,9 +43,7 @@ const MiniRow: React.FC<MiniRowProps> = ({ name, value, total, currency, color }
           className="h-full rounded-full transition-all duration-300"
         />
       </div>
-      <span className="text-2xs tabular-nums text-muted-foreground/60 shrink-0 w-7 text-right">
-        {pct.toFixed(0)}%
-      </span>
+      <span className="text-2xs tabular-nums text-muted-foreground/60 shrink-0 w-7 text-right">{pct.toFixed(0)}%</span>
       <span className="text-2xs tabular-nums font-mono font-medium shrink-0 w-16 text-right">
         {formatBudgetAmount(value, currency)}
       </span>
@@ -74,9 +72,7 @@ const AccountRow: React.FC<AccountRowProps> = ({ stat, total, baseCurrency }) =>
           className="h-full rounded-full transition-all duration-300"
         />
       </div>
-      <span className="text-2xs tabular-nums text-muted-foreground/60 shrink-0 w-7 text-right">
-        {pct.toFixed(0)}%
-      </span>
+      <span className="text-2xs tabular-nums text-muted-foreground/60 shrink-0 w-7 text-right">{pct.toFixed(0)}%</span>
       <span className="text-2xs tabular-nums font-mono font-medium shrink-0 text-right">
         {formatBudgetAmount(stat.amount, stat.account.currency)}
         {showConverted && (
@@ -138,9 +134,7 @@ const BudgetAccountDistribution: React.FC<Props> = ({ budget }) => {
 
   return (
     <div className="rounded-lg border border-border/50 bg-card p-3">
-      <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground mb-3">
-        Expense channels
-      </div>
+      <div className="text-2xs font-medium uppercase tracking-wider text-muted-foreground mb-3">Expense channels</div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-0 md:gap-y-0 md:divide-x divide-border/40">
         {/* By type */}
         <div className="md:pr-4">

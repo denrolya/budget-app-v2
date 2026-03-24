@@ -154,10 +154,7 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
   );
 
   const includedSenderFees = useMemo(
-    () =>
-      filledFees
-        .filter((f) => f.included && f.account === from)
-        .reduce((sum, f) => sum + (f.amount ?? 0), 0),
+    () => filledFees.filter((f) => f.included && f.account === from).reduce((sum, f) => sum + (f.amount ?? 0), 0),
     [filledFees, from],
   );
 
@@ -525,11 +522,7 @@ export const TransferForm = forwardRef<TransferFormRef>((_, ref) => {
               add
             </button>
 
-            <FormField
-              control={control}
-              name="fees"
-              render={() => <FormMessage />}
-            />
+            <FormField control={control} name="fees" render={() => <FormMessage />} />
           </div>
         </div>
 

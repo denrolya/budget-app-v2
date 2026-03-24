@@ -173,77 +173,75 @@ const CollapsibleChildren: React.FC<{ expanded: boolean; children: React.ReactNo
   );
 };
 
-const TreeRow = React.memo<{ depth: number; displayCurrency: string; node: TreeNode }>(({
-  depth,
-  displayCurrency,
-  node,
-}) => {
-  const [expanded, setExpanded] = useState(false);
-  const hasChildren = node.children.length > 0;
-  const colors = STATUS_COLORS[node.status];
-  const paddingLeft = 12 + depth * 16;
+const TreeRow = React.memo<{ depth: number; displayCurrency: string; node: TreeNode }>(
+  ({ depth, displayCurrency, node }) => {
+    const [expanded, setExpanded] = useState(false);
+    const hasChildren = node.children.length > 0;
+    const colors = STATUS_COLORS[node.status];
+    const paddingLeft = 12 + depth * 16;
 
-  const toggle = useCallback(() => setExpanded((v) => !v), []);
+    const toggle = useCallback(() => setExpanded((v) => !v), []);
 
-  const actualLabel =
-    node.planned !== null ? (
-      <>
-        {formatBudgetAmount(node.actual, displayCurrency)}
-        <span className="text-muted-foreground"> / {formatBudgetAmount(node.planned, displayCurrency)}</span>
-      </>
-    ) : (
-      <span className="text-muted-foreground">{formatBudgetAmount(node.actual, displayCurrency)}</span>
-    );
+    const actualLabel =
+      node.planned !== null ? (
+        <>
+          {formatBudgetAmount(node.actual, displayCurrency)}
+          <span className="text-muted-foreground"> / {formatBudgetAmount(node.planned, displayCurrency)}</span>
+        </>
+      ) : (
+        <span className="text-muted-foreground">{formatBudgetAmount(node.actual, displayCurrency)}</span>
+      );
 
-  return (
-    <div>
-      <button
-        aria-expanded={hasChildren ? expanded : undefined}
-        disabled={!hasChildren}
-        style={{ paddingLeft: `${paddingLeft}px` }}
-        type="button"
-        className="w-full flex items-center gap-1.5 py-2 pr-3 text-left active:bg-muted/40 transition-colors disabled:cursor-default"
-        onClick={hasChildren ? toggle : undefined}
-      >
-        {hasChildren ? (
-          <ChevronDown
-            className={cn('h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200', {
-              '-rotate-90': !expanded,
-            })}
-          />
-        ) : (
-          <span className="w-3.5 shrink-0" />
-        )}
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline justify-between gap-1">
-            <span className={cn('text-xs truncate', { 'font-medium': depth === 0 })}>{node.name}</span>
-            <span className={cn('text-xs tabular-nums shrink-0', colors.text)}>{actualLabel}</span>
-          </div>
-          {node.pct !== null && (
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
-                <div
-                  style={{ width: `${Math.min(node.pct, 100)}%` }}
-                  className={cn('h-full rounded-full transition-all', colors.bar)}
-                />
-              </div>
-              <span className={cn('text-2xs tabular-nums shrink-0', colors.text)}>{node.pct.toFixed(0)}%</span>
-            </div>
+    return (
+      <div>
+        <button
+          aria-expanded={hasChildren ? expanded : undefined}
+          disabled={!hasChildren}
+          style={{ paddingLeft: `${paddingLeft}px` }}
+          type="button"
+          className="w-full flex items-center gap-1.5 py-2 pr-3 text-left active:bg-muted/40 transition-colors disabled:cursor-default"
+          onClick={hasChildren ? toggle : undefined}
+        >
+          {hasChildren ? (
+            <ChevronDown
+              className={cn('h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200', {
+                '-rotate-90': !expanded,
+              })}
+            />
+          ) : (
+            <span className="w-3.5 shrink-0" />
           )}
-        </div>
-      </button>
 
-      {hasChildren && (
-        <CollapsibleChildren expanded={expanded}>
-          {node.children.map((child) => (
-            <TreeRow depth={depth + 1} displayCurrency={displayCurrency} node={child} key={child.id} />
-          ))}
-        </CollapsibleChildren>
-      )}
-    </div>
-  );
-});
+          <div className="flex-1 min-w-0">
+            <div className="flex items-baseline justify-between gap-1">
+              <span className={cn('text-xs truncate', { 'font-medium': depth === 0 })}>{node.name}</span>
+              <span className={cn('text-xs tabular-nums shrink-0', colors.text)}>{actualLabel}</span>
+            </div>
+            {node.pct !== null && (
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                  <div
+                    style={{ width: `${Math.min(node.pct, 100)}%` }}
+                    className={cn('h-full rounded-full transition-all', colors.bar)}
+                  />
+                </div>
+                <span className={cn('text-2xs tabular-nums shrink-0', colors.text)}>{node.pct.toFixed(0)}%</span>
+              </div>
+            )}
+          </div>
+        </button>
+
+        {hasChildren && (
+          <CollapsibleChildren expanded={expanded}>
+            {node.children.map((child) => (
+              <TreeRow depth={depth + 1} displayCurrency={displayCurrency} node={child} key={child.id} />
+            ))}
+          </CollapsibleChildren>
+        )}
+      </div>
+    );
+  },
+);
 
 // ─── Dummy budget for hook call when no budget selected ─────────────────────
 

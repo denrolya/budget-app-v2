@@ -62,8 +62,12 @@ const SectionTotalsRow: React.FC<SectionTotalsRowProps> = ({ label, planned, act
   return (
     <tr className="bg-muted/40 font-semibold text-sm border-t-2">
       <td className="py-2 pl-4 pr-2 text-left">{label} Total</td>
-      <td className="py-2 px-2 text-right tabular-nums">{planned > 0 ? formatBudgetAmount(planned, displayCurrency) : '—'}</td>
-      <td className="py-2 px-2 text-right tabular-nums">{actual > 0 ? formatBudgetAmount(actual, displayCurrency) : '—'}</td>
+      <td className="py-2 px-2 text-right tabular-nums">
+        {planned > 0 ? formatBudgetAmount(planned, displayCurrency) : '—'}
+      </td>
+      <td className="py-2 px-2 text-right tabular-nums">
+        {actual > 0 ? formatBudgetAmount(actual, displayCurrency) : '—'}
+      </td>
       <td className={cn('py-2 px-4 text-right tabular-nums', remainingColor)}>
         {planned > 0 ? (
           <>
@@ -127,8 +131,21 @@ const CategoryTreeRows: React.FC<CategoryTreeRowsProps> = ({
   const hasChildren = category.children.some((c) => c.isAffectingProfit);
 
   const sharedProps = {
-    expanded, onToggle, getActual, getPlanned, linesMap, dailyStatsMap, trendsMap, seasonalMap,
-    onCategoryClick, onDelete, onNoteUpdate, onSave, isSaving, displayCurrency, budgetId,
+    expanded,
+    onToggle,
+    getActual,
+    getPlanned,
+    linesMap,
+    dailyStatsMap,
+    trendsMap,
+    seasonalMap,
+    onCategoryClick,
+    onDelete,
+    onNoteUpdate,
+    onSave,
+    isSaving,
+    displayCurrency,
+    budgetId,
   };
 
   return (
@@ -353,9 +370,21 @@ const BudgetTable: React.FC<Props> = ({
   const incTotals = computeSectionTotals(incomeRoots, false);
 
   const sharedRowProps = {
-    expanded, onToggle: toggle, getActual, getPlanned, linesMap, dailyStatsMap, trendsMap, seasonalMap,
-    onCategoryClick: handleCategoryClick, onDelete: handleDelete, onNoteUpdate: handleNoteUpdate,
-    onSave: handleSave, isSaving, displayCurrency, budgetId,
+    expanded,
+    onToggle: toggle,
+    getActual,
+    getPlanned,
+    linesMap,
+    dailyStatsMap,
+    trendsMap,
+    seasonalMap,
+    onCategoryClick: handleCategoryClick,
+    onDelete: handleDelete,
+    onNoteUpdate: handleNoteUpdate,
+    onSave: handleSave,
+    isSaving,
+    displayCurrency,
+    budgetId,
   };
 
   const tableHead = (

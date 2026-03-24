@@ -39,9 +39,15 @@ const BudgetHeatmapSection: React.FC<Props> = ({ budget, analytics, displayCurre
   if (totals.totalPlannedExpense === 0) {
     expensePaceLabel = null;
   } else if (paceOffset > 0) {
-    expensePaceLabel = { text: `${formatBudgetAmount(paceOffset, displayCurrency)} over pace`, color: 'text-destructive' };
+    expensePaceLabel = {
+      text: `${formatBudgetAmount(paceOffset, displayCurrency)} over pace`,
+      color: 'text-destructive',
+    };
   } else if (paceOffset < -1) {
-    expensePaceLabel = { text: `${formatBudgetAmount(Math.abs(paceOffset), displayCurrency)} under pace`, color: 'text-success' };
+    expensePaceLabel = {
+      text: `${formatBudgetAmount(Math.abs(paceOffset), displayCurrency)} under pace`,
+      color: 'text-success',
+    };
   } else {
     expensePaceLabel = { text: 'On pace', color: 'text-muted-foreground' };
   }
