@@ -6,6 +6,7 @@ import {
   Handshake,
   Keyboard,
   Layers,
+  PanelLeftClose,
   PiggyBank,
   Plus,
   UserPlus,
@@ -66,7 +67,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
       id: 'nav-ledger',
       label: 'Open Ledger',
       icon: CalendarDays,
-      shortcut: 'L',
+      shortcut: undefined,
       action: () => navigate(ROUTES.LEDGER.path),
     },
     {
@@ -103,6 +104,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
       icon: Layers,
       shortcut: undefined,
       action: () => navigate(ROUTES.BUCKETS_PAGE.path),
+    },
+    {
+      id: 'toggle-sidebar',
+      label: 'Toggle Sidebar',
+      icon: PanelLeftClose,
+      shortcut: '⇧←→',
+      action: () => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', shiftKey: true, bubbles: true }));
+      },
     },
   ];
 

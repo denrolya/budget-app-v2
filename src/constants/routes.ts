@@ -1,4 +1,4 @@
-import { CalendarDays, FolderTree, Handshake, Layers, LayoutDashboard, PiggyBank, Wallet } from 'lucide-react';
+import { CalendarDays, FolderTree, Handshake, Layers, LayoutDashboard, PiggyBank, TrendingUp, Wallet } from 'lucide-react';
 
 export const ROUTES = {
   DASHBOARD: {
@@ -35,5 +35,10 @@ export const ROUTES = {
     path: '/buckets',
     icon: Layers,
     label: 'Buckets',
+  },
+  FORECAST_PAGE: {
+    path: '/forecast',
+    icon: TrendingUp,
+    label: 'Forecast',
   },
 };

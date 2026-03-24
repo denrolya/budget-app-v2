@@ -19,6 +19,7 @@ const DebtsManagementPage = lazy(() =>
   import('@/features/debts').then(({ DebtsManagementPage: C }) => ({ default: C })),
 );
 const BucketsPage = lazy(() => import('@/features/buckets').then(({ BucketsPage: C }) => ({ default: C })));
+const ForecastPage = lazy(() => import('@/features/forecast').then(({ ForecastPage: C }) => ({ default: C })));
 
 const MobileBalancesPage = lazy(() => import('@/features/mobile/routes/MobileBalancesPage'));
 const MobileLedgerPage = lazy(() => import('@/features/mobile/routes/MobileLedgerPage'));
@@ -55,6 +56,7 @@ const AppShell: React.FC = () => (
           <Route element={<AccountsManagementPage />} path="/accounts/*" />
           <Route element={<DebtsManagementPage />} path="/debts/*" />
           <Route element={<BucketsPage />} path="/buckets" />
+          <Route element={<ForecastPage />} path="/forecast" />
 
           <Route element={<BudgetingPage />} path="/budget/*" />
           <Route element={<CategoriesManagementPage />} path="/categories" />

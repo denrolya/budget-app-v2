@@ -15,6 +15,7 @@ const ALL_WINDOWS = [
   { num: 4, label: 'BKTS', path: ROUTES.BUCKETS_PAGE.path },
   { num: 5, label: 'DEBTS', path: ROUTES.DEBT_LIST.path },
   { num: 6, label: 'CATS', path: ROUTES.CATEGORIES_PAGE.path },
+  { num: 7, label: 'FCST', path: ROUTES.FORECAST_PAGE.path },
 ] as const;
 
 // ── Window Tab ────────────────────────────────────────────────────────────────

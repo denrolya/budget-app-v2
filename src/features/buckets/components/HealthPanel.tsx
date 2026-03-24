@@ -1,14 +1,14 @@
 import { Info } from 'lucide-react';
 import React, { useRef } from 'react';
 
-import { cn } from '@/lib/utils';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
+import { GRADE_COLOR } from '@/constants/ui';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
-import { type HealthSummary, statusColor, statusIcon } from '../hooks/useHealthRules';
-import { type RuleWithResult } from '../hooks/useHealthRules';
+import { type HealthSummary, type RuleWithResult, statusColor, statusIcon } from '../hooks/useHealthRules';
 
 interface Props {
   health: HealthSummary;
@@ -17,14 +17,6 @@ interface Props {
   baseCurrency: string;
   onMonthlyExpensesChange: (value: number | null) => void;
 }
-
-const GRADE_COLOR: Record<string, string> = {
-  A: 'text-success',
-  B: 'text-success/75',
-  C: 'text-warning',
-  D: 'text-warning/75',
-  F: 'text-destructive',
-};
 
 const HealthPanel: React.FC<Props> = ({
   health,

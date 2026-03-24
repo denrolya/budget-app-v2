@@ -9,17 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import IncomeExpensesComparison from '@/features/statistics/components/MoneyFlow/IncomeExpensesComparison';
 import { formatRange } from '@/lib/datetime/formatShortDate';
 import { type ISO8601Period } from '@/types/global';
-
-interface TransformedData {
-  timestamp: number;
-  income: number;
-  expenses: number;
-  revenue: number;
-  date: Moment;
-  previousIncome: number;
-  previousExpenses: number;
-  previousRevenue: number;
-}
+import type { TransformedData } from '@/types/statistics/moneyFlow';
 
 interface Props extends TooltipProps<ValueType, NameType> {
   data: TransformedData[];
@@ -91,8 +81,15 @@ export const ChartTooltip: React.FC<Props> = ({
 
   const dataPoint = useMemo(() => data.find((item) => item.timestamp === label), [data, label]);
 
+  const isForecastPoint =
+    dataPoint != null &&
+    dataPoint.income === 0 &&
+    dataPoint.expenses === 0 &&
+    dataPoint.projectedIncome != null &&
+    dataPoint.projectedIncome > 0;
+
   const comparisonData = useMemo(() => {
-    if (!dataPoint) return null;
+    if (!dataPoint || isForecastPoint) return null;
 
     if (comparisonMode === 'previousPeriod') {
       const index = data.findIndex((item) => item.timestamp === label);
@@ -105,7 +102,7 @@ export const ChartTooltip: React.FC<Props> = ({
       expenses: dataPoint.previousExpenses,
       revenue: dataPoint.previousRevenue,
     };
-  }, [dataPoint, data, label, comparisonMode]);
+  }, [dataPoint, data, label, comparisonMode, isForecastPoint]);
 
   useEffect(() => {
     const W = 320,
@@ -129,8 +126,9 @@ export const ChartTooltip: React.FC<Props> = ({
   const currentRange = getDataPointRange(dataPoint.date, period);
   const formattedCurrentDate = formatDateRange(currentRange, period);
 
-  const formattedComparisonDate =
-    comparisonMode === 'previousPeriod'
+  const formattedComparisonDate = isForecastPoint
+    ? null
+    : comparisonMode === 'previousPeriod'
       ? formatDateRange(
           {
             after: moment(dataPoint.date).subtract(1, periodMapping[period]),
@@ -155,15 +153,28 @@ export const ChartTooltip: React.FC<Props> = ({
       <CardContent className="p-2">
         <p className="text-xs font-medium mb-1">
           {formattedCurrentDate}
-          <span className="text-muted-foreground"> | {formattedComparisonDate}</span>
+          {isForecastPoint ? (
+            <span className="text-muted-foreground"> | Forecast</span>
+          ) : (
+            formattedComparisonDate && <span className="text-muted-foreground"> | {formattedComparisonDate}</span>
+          )}
         </p>
         <Separator className="mb-2" />
-        <IncomeExpensesComparison
-          currentExpenses={dataPoint.expenses}
-          currentIncome={dataPoint.income}
-          previousExpenses={comparisonData?.expenses ?? 0}
-          previousIncome={comparisonData?.income ?? 0}
-        />
+        {isForecastPoint ? (
+          <IncomeExpensesComparison
+            currentExpenses={dataPoint.projectedExpenses ?? 0}
+            currentIncome={dataPoint.projectedIncome ?? 0}
+            previousExpenses={0}
+            previousIncome={0}
+          />
+        ) : (
+          <IncomeExpensesComparison
+            currentExpenses={dataPoint.expenses}
+            currentIncome={dataPoint.income}
+            previousExpenses={comparisonData?.expenses ?? 0}
+            previousIncome={comparisonData?.income ?? 0}
+          />
+        )}
       </CardContent>
     </Card>,
     document.body,

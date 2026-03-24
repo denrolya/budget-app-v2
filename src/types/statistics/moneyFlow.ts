@@ -45,4 +45,6 @@ export interface UseMoneyFlowReturn {
   projectedTotalExpenses: number;
   projectedTotalRevenue: number;
   hasProjection: boolean;
+  avgIncome: number;
+  avgExpense: number;
 }

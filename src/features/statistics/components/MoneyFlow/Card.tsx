@@ -33,6 +33,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
   const [showExpenses, setShowExpenses] = useState(true);
   const [showRevenue, setShowRevenue] = useState(true);
   const [showPreviousPeriod, setShowPreviousPeriod] = useState(true);
+  const [showForecast, setShowForecast] = useState(true);
 
   const fallback = useTimeframeControl({
     defaultPreset: TIMEFRAME_OPTIONS[6].value,
@@ -76,6 +77,8 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
     incomeChangePercent,
     expensesChangePercent,
     revenueChangePercent,
+    avgIncome,
+    avgExpense,
   } = useMoneyFlow({ period, timeframe, previousTimeframe: resolvedPreviousTimeframe, baseCurrency });
 
   let chartContent: React.ReactNode = null;
@@ -101,12 +104,15 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
   } else if (transformedData.length > 0) {
     chartContent = (
       <Chart
+        avgExpense={avgExpense}
+        avgIncome={avgIncome}
         chartType={chartType}
         currentTimeframe={timeframe}
         data={transformedData}
         period={period}
         previousTimeframe={resolvedPreviousTimeframe}
         showExpenses={showExpenses}
+        showForecast={showForecast}
         showIncome={showIncome}
         showMonthBoundary={showMonthBoundary}
         showPreviousPeriod={showPreviousPeriod}
@@ -234,6 +240,22 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
           onClick={() => setShowPreviousPeriod(!showPreviousPeriod)}
         >
           /prev
+        </button>
+
+        {/* Forecast toggle */}
+        <button
+          aria-label="Toggle forecast"
+          aria-pressed={showForecast}
+          type="button"
+          className={cn(
+            'h-5 px-1.5 text-2xs font-medium rounded-sm border transition-colors',
+            showForecast
+              ? 'border-muted-foreground/40 bg-muted-foreground/10 text-muted-foreground'
+              : 'border-transparent text-muted-foreground hover:text-foreground',
+          )}
+          onClick={() => setShowForecast(!showForecast)}
+        >
+          /fcast
         </button>
 
         {/* Spacer */}

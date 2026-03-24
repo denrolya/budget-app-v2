@@ -20,7 +20,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 import { useBuckets } from '../hooks/useBuckets';
 import { useHealthRules } from '../hooks/useHealthRules';
-import { useMonthlyAvgStats } from '../hooks/useMonthlyAvgStats';
+import { useMonthlyStats } from '@/hooks/statistics/useMonthlyStats';
 import BucketsVisualization from '../components/BucketsVisualization';
 import {
   DragOverlayItem,
@@ -57,10 +57,10 @@ const BucketsPage: React.FC = () => {
 
   // ── Backend avg stats ────────────────────────────────────────────────────────
 
-  const { avgExpense, avgIncome } = useMonthlyAvgStats();
+  const { avgExpense, avgIncome } = useMonthlyStats();
 
   useEffect(() => {
-    if (config.monthlyExpenses === null && avgExpense !== null) {
+    if (config.monthlyExpenses === null && avgExpense > 0) {
       setMonthlyExpenses(avgExpense);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- one-time default: only set when avgExpense loads, not when config changes

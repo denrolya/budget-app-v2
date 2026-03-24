@@ -1,10 +1,15 @@
 import moment from 'moment';
 import { useMemo } from 'react';
 
+import { useHistoricalFlows } from '@/features/forecast';
 import { useValueByPeriodStatisticsRequest } from '@/hooks/statistics/useValueByPeriodStatisticsRequest';
 import { type TransformedData, type UseMoneyFlowParams, type UseMoneyFlowReturn } from '@/types/statistics/moneyFlow';
 
-export const useMoneyFlow = ({ period, timeframe, previousTimeframe }: UseMoneyFlowParams): UseMoneyFlowReturn => {
+export const useMoneyFlow = ({
+  period,
+  timeframe,
+  previousTimeframe,
+}: UseMoneyFlowParams): UseMoneyFlowReturn => {
   const {
     data: currentDataBackend,
     isLoading: isCurrentLoading,
@@ -29,11 +34,13 @@ export const useMoneyFlow = ({ period, timeframe, previousTimeframe }: UseMoneyF
     queryKey: 'money-flow-comparison',
   });
 
+  const { avgIncome, avgExpense } = useHistoricalFlows();
+
   const transformedData: TransformedData[] = useMemo(() => {
     if (!currentDataBackend?.length || !previousDataBackend?.length) return [];
 
     const maxLength = Math.max(currentDataBackend.length, previousDataBackend.length);
-    const baseDate = currentDataBackend[0]?.after.clone() ?? moment(); // fallback just in case
+    const baseDate = currentDataBackend[0]?.after.clone() ?? moment();
 
     const periodUnit = period === 'P1D' ? 'days' : period === 'P1W' ? 'weeks' : 'months';
 
@@ -57,14 +64,6 @@ export const useMoneyFlow = ({ period, timeframe, previousTimeframe }: UseMoneyF
       return {
         timestamp: date.unix(),
         date,
-        currentPeriod: {
-          after: currentItem.after.clone(),
-          before: currentItem.before.clone(),
-        },
-        comparisonPeriod: {
-          after: previousItem.after.clone(),
-          before: previousItem.before.clone(),
-        },
         income: currentItem.income,
         expenses: currentItem.expense,
         revenue: currentItem.income - currentItem.expense,
@@ -165,6 +164,8 @@ export const useMoneyFlow = ({ period, timeframe, previousTimeframe }: UseMoneyF
     projectedTotalIncome: 0,
     projectedTotalExpenses: 0,
     projectedTotalRevenue: 0,
-    hasProjection: false,
+    hasProjection: avgIncome > 0,
+    avgIncome,
+    avgExpense,
   };
 };

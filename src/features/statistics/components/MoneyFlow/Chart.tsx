@@ -16,18 +16,10 @@ import { MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import { CHART_STYLES } from '@/constants/recharts';
 import CustomTooltip from '@/features/statistics/components/MoneyFlow/ChartTooltip';
 import { type ISO8601Period } from '@/types/global';
+import type { TransformedData } from '@/types/statistics/moneyFlow';
 
 interface Props {
-  data: {
-    timestamp: number;
-    income: number;
-    expenses: number;
-    revenue: number;
-    date: Moment;
-    previousIncome: number;
-    previousExpenses: number;
-    previousRevenue: number;
-  }[];
+  data: TransformedData[];
   period: ISO8601Period;
   currentTimeframe: { after: Moment; before: Moment };
   previousTimeframe: { after: Moment; before: Moment };
@@ -36,6 +28,9 @@ interface Props {
   showExpenses: boolean;
   showRevenue: boolean;
   showPreviousPeriod: boolean;
+  showForecast: boolean;
+  avgIncome: number;
+  avgExpense: number;
   showYearBoundary: boolean;
   showMonthBoundary: boolean;
   showSeasonBoundary: boolean;
@@ -51,6 +46,9 @@ const MoneyFlowChart: React.FC<Props> = ({
   showExpenses,
   showRevenue,
   showPreviousPeriod,
+  showForecast,
+  avgIncome,
+  avgExpense,
   showYearBoundary,
   showMonthBoundary,
   showSeasonBoundary,
@@ -260,6 +258,7 @@ const MoneyFlowChart: React.FC<Props> = ({
       <ResponsiveContainer height={385} width="100%">
         <ComposedChart data={transformedData} margin={{ top: 0, right: 30, bottom: 0, left: -30 }} stackOffset="sign">
           <defs>
+            {/* Current period gradients */}
             <linearGradient id="incomeGradient" x1="0" x2="0" y1="0" y2="1">
               <stop offset="0%" stopColor="hsl(var(--success) / 0.7)" />
               <stop offset="100%" stopColor="hsl(var(--success) / 0.5)" />
@@ -272,6 +271,7 @@ const MoneyFlowChart: React.FC<Props> = ({
               <stop offset="0%" stopColor="hsl(var(--primary) /0.7)" />
               <stop offset="100%" stopColor="hsl(var(--primary) /0.5)" />
             </linearGradient>
+            {/* Previous period gradients */}
             <linearGradient id="incomeGradientPrevious" x1="0" x2="0" y1="1" y2="0">
               <stop offset="0%" stopColor="hsl(var(--success) / 0.2)" />
               <stop offset="100%" stopColor="hsl(var(--success) / 0.1)" />
@@ -355,9 +355,30 @@ const MoneyFlowChart: React.FC<Props> = ({
               key={`month-${timestamp}`}
             />
           ))}
+
           <ReferenceLine {...CHART_STYLES.referenceLine} />
           {renderChart(false)}
           {renderChart(true)}
+
+          {/* Average reference lines — show when /fcast is toggled on */}
+          {showForecast && showIncome && avgIncome > 0 && (
+            <ReferenceLine
+              label={{ position: 'right', value: 'avg', fill: 'hsl(var(--success) / 0.6)', fontSize: 9 }}
+              stroke="hsl(var(--success))"
+              strokeDasharray="8 6"
+              strokeOpacity={0.4}
+              y={avgIncome}
+            />
+          )}
+          {showForecast && showExpenses && avgExpense > 0 && (
+            <ReferenceLine
+              label={{ position: 'right', value: 'avg', fill: 'hsl(var(--destructive) / 0.6)', fontSize: 9 }}
+              stroke="hsl(var(--destructive))"
+              strokeDasharray="8 6"
+              strokeOpacity={0.4}
+              y={-avgExpense}
+            />
+          )}
         </ComposedChart>
       </ResponsiveContainer>
     </div>

@@ -1,5 +1,6 @@
 import { ChevronLeft, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import React, { type ReactNode, useCallback, useContext, useId, useMemo, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -71,6 +72,13 @@ const PageWithSidebar: PageWithSidebarComponent = ({
   const isMobile = useIsMobile();
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const toggle = useCallback(() => setCollapsed((v) => !v), []);
+
+  // Shift+← / Shift+→ to toggle sidebar
+  useHotkeys('shift+left, shift+right', (e) => {
+    if (!collapsible || isMobile) return;
+    e.preventDefault();
+    toggle();
+  }, { enableOnFormTags: false }, [collapsible, isMobile, toggle]);
 
   // Resizable sidebar state
   const defaultPx = useMemo(() => parseTailwindWidth(sidebarWidth), [sidebarWidth]);
