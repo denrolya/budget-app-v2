@@ -67,19 +67,28 @@ const ForecastGuideDialog: React.FC = () => {
                 If this chart looks wrong, the problem is in your base numbers (income, expenses, balance), not in
                 assumptions. Fix those first. If it looks right — you have a trusted foundation.
               </p>
-              <Tip>
-                Layer complexity one at a time. Each step should make intuitive sense vs the previous:
-              </Tip>
+              <Tip>Layer complexity one at a time. Each step should make intuitive sense vs the previous:</Tip>
               <div className="space-y-1 pl-3 border-l-2 border-border">
-                <p><strong>Layer 0:</strong> Inflation 0%, Growth 0% → pure arithmetic. Does the math check out?</p>
-                <p><strong>Layer 1:</strong> Add inflation 2.5% → how much does it erode your surplus over time?</p>
-                <p><strong>Layer 2:</strong> Add income growth to match → does it cancel out the erosion?</p>
-                <p><strong>Layer 3:</strong> Add real events (confirmed raise, planned purchase) → how do they shift the trajectory?</p>
-                <p><strong>Layer 4:</strong> Stress test → lower income 20%, raise expenses 15%. Does the model survive?</p>
+                <p>
+                  <strong>Layer 0:</strong> Inflation 0%, Growth 0% → pure arithmetic. Does the math check out?
+                </p>
+                <p>
+                  <strong>Layer 1:</strong> Add inflation 2.5% → how much does it erode your surplus over time?
+                </p>
+                <p>
+                  <strong>Layer 2:</strong> Add income growth to match → does it cancel out the erosion?
+                </p>
+                <p>
+                  <strong>Layer 3:</strong> Add real events (confirmed raise, planned purchase) → how do they shift the
+                  trajectory?
+                </p>
+                <p>
+                  <strong>Layer 4:</strong> Stress test → lower income 20%, raise expenses 15%. Does the model survive?
+                </p>
               </div>
               <Tip>
-                Save each layer as a separate scenario. "Baseline (0/0)", "With inflation", "With raise" — comparing them
-                side-by-side reveals exactly what each assumption costs or gains you.
+                Save each layer as a separate scenario. "Baseline (0/0)", "With inflation", "With raise" — comparing
+                them side-by-side reveals exactly what each assumption costs or gains you.
               </Tip>
             </Section>
 
@@ -104,9 +113,9 @@ const ForecastGuideDialog: React.FC = () => {
               </p>
               <p>
                 <strong>For salaried workers:</strong> set income growth to <strong>0%</strong>. Your salary is fixed
-                until someone tells you otherwise. Model confirmed raises as recurring events with a start date — not
-                as a growth percentage. A growth rate implies predictable annual increases, which most salaried
-                positions don't guarantee.
+                until someone tells you otherwise. Model confirmed raises as recurring events with a start date — not as
+                a growth percentage. A growth rate implies predictable annual increases, which most salaried positions
+                don't guarantee.
               </p>
               <Tip>
                 Only add income events for changes you have hard confirmation for — signed contract, scheduled raise,
@@ -126,10 +135,10 @@ const ForecastGuideDialog: React.FC = () => {
                 (moving, medical procedure, renovation), add it as an event.
               </p>
               <p>
-                <strong>Inflation setting:</strong> for EUR, the ECB targets 2% and the 10-year average is roughly
-                2.5%. Use <strong>2.5%</strong> as a safe conservative default. The 2022-2023 spike (8-10%) was
-                exceptional, not the norm. Your real investment return = nominal return minus inflation (e.g., 6.6% −
-                2.5% = 4.1% real growth).
+                <strong>Inflation setting:</strong> for EUR, the ECB targets 2% and the 10-year average is roughly 2.5%.
+                Use <strong>2.5%</strong> as a safe conservative default. The 2022-2023 spike (8-10%) was exceptional,
+                not the norm. Your real investment return = nominal return minus inflation (e.g., 6.6% − 2.5% = 4.1%
+                real growth).
               </p>
             </Section>
 

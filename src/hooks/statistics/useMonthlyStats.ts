@@ -27,7 +27,13 @@ export interface MonthlyStats {
  * consumed by multiple features.
  */
 export const useMonthlyStats = (): MonthlyStats => {
-  const after = useMemo(() => moment().subtract(MONTHS - 1, 'months').startOf('month'), []);
+  const after = useMemo(
+    () =>
+      moment()
+        .subtract(MONTHS - 1, 'months')
+        .startOf('month'),
+    [],
+  );
   const before = useMemo(() => moment().endOf('month'), []);
 
   const { data, isLoading } = useValueByPeriodStatisticsRequest({

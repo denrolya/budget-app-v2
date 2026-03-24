@@ -157,7 +157,9 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
             type="button"
             className={cn(
               'h-5 w-5 flex items-center justify-center rounded-sm transition-colors',
-              chartType === 'bar' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+              chartType === 'bar'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground',
             )}
             onClick={() => setChartType('bar')}
           >
@@ -168,7 +170,9 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
             type="button"
             className={cn(
               'h-5 w-5 flex items-center justify-center rounded-sm transition-colors',
-              chartType === 'line' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+              chartType === 'line'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground',
             )}
             onClick={() => setChartType('line')}
           >

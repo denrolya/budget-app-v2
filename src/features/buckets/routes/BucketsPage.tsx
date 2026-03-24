@@ -17,16 +17,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useMonthlyStats } from '@/hooks/statistics/useMonthlyStats';
 
 import { useBuckets } from '../hooks/useBuckets';
 import { useHealthRules } from '../hooks/useHealthRules';
-import { useMonthlyStats } from '@/hooks/statistics/useMonthlyStats';
 import BucketsVisualization from '../components/BucketsVisualization';
-import {
-  DragOverlayItem,
-  DroppableBucketZone,
-  DroppableUnassignedZone,
-} from '../components/DroppableBucketZone';
+import { DragOverlayItem, DroppableBucketZone, DroppableUnassignedZone } from '../components/DroppableBucketZone';
 import { parseDragId } from '../lib/dragId';
 import HealthPanel from '../components/HealthPanel';
 
@@ -247,7 +243,13 @@ const BucketsPage: React.FC = () => {
       />
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button aria-label="Import config" size="icon" variant="ghost" className="h-7 w-7" onClick={() => importInputRef.current?.click()}>
+          <Button
+            aria-label="Import config"
+            size="icon"
+            variant="ghost"
+            className="h-7 w-7"
+            onClick={() => importInputRef.current?.click()}
+          >
             <Upload className="h-3.5 w-3.5" />
           </Button>
         </TooltipTrigger>

@@ -1,4 +1,13 @@
-import { CalendarDays, FolderTree, Handshake, Layers, LayoutDashboard, PiggyBank, TrendingUp, Wallet } from 'lucide-react';
+import {
+  CalendarDays,
+  FolderTree,
+  Handshake,
+  Layers,
+  LayoutDashboard,
+  PiggyBank,
+  TrendingUp,
+  Wallet,
+} from 'lucide-react';
 
 export const ROUTES = {
   DASHBOARD: {

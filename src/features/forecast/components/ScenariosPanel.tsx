@@ -88,7 +88,7 @@ const ScenariosPanel: React.FC<Props> = ({
               <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onLoad(s)}>
                 <div className="text-2xs font-medium truncate">{s.name}</div>
                 <div className="text-3xs font-mono text-muted-foreground">
-                  {moment(s.createdAt).format("MMM D 'YY")}
+                  {moment(s.createdAt).format('MMM D \'YY')}
                 </div>
               </div>
 
