@@ -16,5 +16,5 @@ export type ProcessedCategory = {
   id: number;
   name: string;
   value: number;
-  children?: ProcessedCategory[];
+  children: ProcessedCategory[];
 };

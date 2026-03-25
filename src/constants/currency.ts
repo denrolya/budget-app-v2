@@ -71,3 +71,9 @@ export const CURRENCIES: Record<CURRENCY_CODE, Currency> = {
     type: 'crypto',
   },
 };
+
+/** Options array for currency multi-selects. */
+export const CURRENCY_OPTIONS = (Object.keys(CURRENCIES) as CURRENCY_CODE[]).map((code) => ({
+  value: code,
+  label: `${CURRENCIES[code].symbol} ${code}`,
+}));

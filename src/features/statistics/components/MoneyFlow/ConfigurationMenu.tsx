@@ -19,19 +19,14 @@ interface Props {
   setShowPreviousPeriod: (value: boolean) => void;
 }
 
+const MenuContent: React.FC<Props> = ({ showPreviousPeriod, setShowPreviousPeriod }) => (
+  <div>
+    <Switch checked={showPreviousPeriod} icon={History} label="Previous Period" onChange={setShowPreviousPeriod} />
+  </div>
+);
+
 const ConfigurationMenu: React.FC<Props> = (props) => {
   const isMobile = useIsMobile();
-
-  const MenuContent = () => (
-    <div>
-      <Switch
-        checked={props.showPreviousPeriod}
-        icon={History}
-        label="Previous Period"
-        onChange={props.setShowPreviousPeriod}
-      />
-    </div>
-  );
 
   if (!isMobile) {
     return (
@@ -43,7 +38,7 @@ const ConfigurationMenu: React.FC<Props> = (props) => {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-52 p-3">
-          <MenuContent />
+          <MenuContent {...props} />
         </PopoverContent>
       </Popover>
     );
@@ -62,7 +57,7 @@ const ConfigurationMenu: React.FC<Props> = (props) => {
           <DrawerTitle>Chart Options</DrawerTitle>
           <DrawerDescription className="sr-only">MoneyFlow overlay and boundary settings</DrawerDescription>
         </DrawerHeader>
-        <MenuContent />
+        <MenuContent {...props} />
       </DrawerContent>
     </Drawer>
   );

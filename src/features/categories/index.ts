@@ -8,6 +8,9 @@ export { useList, queryKeys } from './api';
 export { default as Category } from './models/Category';
 export { CategoryType } from './types';
 
+// Public utilities
+export { default as sortCategoryTree } from './lib/sortCategoryTree';
+
 // Public components
 export { default as CategoryTypeahead } from './components/CategoryTypeahead';
 export { default as CategoryForm } from './components/Form';

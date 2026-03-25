@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 
+import { DataRow, SectionDivider } from '@/components/common/DetailPanel';
 import MoneyValue from '@/components/common/MoneyValue';
 import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
-import { cn } from '@/lib/utils';
 import { MOMENT_DATETIME_VIEW_FORMAT } from '@/constants/datetime';
 import { formatTransferExchangeRate } from '@/lib/formatTransferExchangeRate';
 import type Transfer from '@/features/transfers/models/Transfer';
@@ -15,30 +15,6 @@ import RateDisplay from '@/features/transfers/components/RateDisplay';
 interface TransferDetailsProps {
   transfer: Transfer;
 }
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-const DataRow: React.FC<{ label: string; children: React.ReactNode; className?: string }> = ({
-  label,
-  children,
-  className,
-}) => (
-  <div className={cn('flex items-start gap-3 py-0.5', className)}>
-    <span className="w-20 shrink-0 font-mono text-3xs uppercase tracking-widest text-muted-foreground leading-5 select-none">
-      {label}
-    </span>
-    <div className="flex-1 min-w-0">{children}</div>
-  </div>
-);
-
-const SectionDivider: React.FC<{ label?: string }> = ({ label }) => (
-  <div className="flex items-center gap-2 my-3">
-    <span className="font-mono text-3xs uppercase tracking-widest text-muted-foreground/50 select-none whitespace-nowrap">
-      {label ?? ''}
-    </span>
-    <div className="flex-1 border-t border-dashed border-border/40" />
-  </div>
-);
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -67,6 +43,22 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
 
     return { totalFeesInSenderCurr, feePct, totalCost, netReceived, effectiveRate };
   }, [transfer, senderCurrency]);
+
+  const effRateRow =
+    transfer.hasFee() && senderCurrency !== recipientCurrency
+      ? (() => {
+          const [from, to] = formatTransferExchangeRate([senderCurrency, recipientCurrency], stats.effectiveRate);
+          const fromLabel = CURRENCIES[from.currency as CURRENCY_CODE]?.symbol ?? from.currency;
+          const toLabel = CURRENCIES[to.currency as CURRENCY_CODE]?.symbol ?? to.currency;
+          return (
+            <DataRow label="Eff. rate">
+              <span className="font-mono text-xs text-muted-foreground">
+                {from.amount} {fromLabel} = {to.amount} {toLabel}
+              </span>
+            </DataRow>
+          );
+        })()
+      : null;
 
   return (
     <div className="font-mono text-xs">
@@ -104,6 +96,12 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
           className="font-mono text-xs tracking-tighter text-muted-foreground"
         />
       </DataRow>
+
+      {transfer.note && (
+        <DataRow label="Note">
+          <span className="font-mono text-xs text-muted-foreground whitespace-pre-wrap">{transfer.note}</span>
+        </DataRow>
+      )}
 
       <SectionDivider label="Summary" />
 
@@ -152,19 +150,7 @@ export const Details: React.FC<TransferDetailsProps> = ({ transfer }) => {
             />
           </DataRow>
 
-          {senderCurrency !== recipientCurrency &&
-            (() => {
-              const [from, to] = formatTransferExchangeRate([senderCurrency, recipientCurrency], stats.effectiveRate);
-              const fromLabel = CURRENCIES[from.currency as CURRENCY_CODE]?.symbol ?? from.currency;
-              const toLabel = CURRENCIES[to.currency as CURRENCY_CODE]?.symbol ?? to.currency;
-              return (
-                <DataRow label="Eff. rate">
-                  <span className="font-mono text-xs text-muted-foreground">
-                    {from.amount} {fromLabel} = {to.amount} {toLabel}
-                  </span>
-                </DataRow>
-              );
-            })()}
+          {effRateRow}
         </>
       )}
 

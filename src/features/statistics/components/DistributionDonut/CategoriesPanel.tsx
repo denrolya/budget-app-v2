@@ -74,7 +74,7 @@ const CategoriesPanel: React.FC<Props> = ({
   const totalRoot = useMemo(() => root.reduce((sum, c) => sum + c.value, 0), [root]);
 
   const currentCategories = useMemo<ProcessedCategory[]>(
-    () => (currentCategory ? currentCategory.children || [] : root),
+    () => (currentCategory ? currentCategory.children : root),
     [currentCategory, root],
   );
 
@@ -83,7 +83,6 @@ const CategoriesPanel: React.FC<Props> = ({
     return showMonthlyAverage ? calcMonthlyAverage(raw) : raw;
   }, [currentCategory, totalRoot, showMonthlyAverage, calcMonthlyAverage]);
 
-  // Preserve API order — used for both pie and distribution rows
   const chartData = useMemo(
     () =>
       currentCategories.map((c) => ({
@@ -173,7 +172,7 @@ const CategoriesPanel: React.FC<Props> = ({
         id: String(r.id),
         name: r.label,
         value: r.value,
-        hasChildren: (categoriesById.get(String(r.id))?.children?.length ?? 0) > 0,
+        hasChildren: (categoriesById.get(String(r.id))?.children.length ?? 0) > 0,
       })),
     [chartData, categoriesById],
   );

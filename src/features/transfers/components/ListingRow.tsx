@@ -1,8 +1,9 @@
 import { ArrowRight, Eye, Pencil, Trash2 } from 'lucide-react';
-import React, { useId, useMemo } from 'react';
+import React, { useCallback, useId } from 'react';
 
 import MoneyValue from '@/components/common/MoneyValue';
 import { Button } from '@/components/ui/button';
+import { useBaseCurrency } from '@/features/auth';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -31,6 +32,7 @@ type Props = {
   onSheetOpenChange?: (open: boolean) => void;
 
   className?: string;
+  onRowClick?: () => void;
 };
 
 const cellClassName = (compact: boolean, extra?: string) =>
@@ -113,41 +115,64 @@ const AccountsCell: React.FC<{ transfer: Transfer }> = ({ transfer }) => {
   );
 };
 
-const AmountCell: React.FC<{ transfer: Transfer }> = ({ transfer }) => (
-  <div className="min-w-0 space-y-1">
-    <div className="min-w-0 flex items-center whitespace-nowrap">
-      <div className="min-w-0 overflow-hidden">
-        <MoneyValue
-          amount={-transfer.fromExpense.amount}
-          currency={transfer.fromExpense.account.currency}
-          className="font-semibold tracking-tight tabular-nums"
-        />
+const AmountCell: React.FC<{ transfer: Transfer }> = ({ transfer }) => {
+  const baseCurrency = useBaseCurrency();
+  const senderCurrency = transfer.fromExpense.account.currency;
+
+  const totalFeesInBaseCurrency = transfer.feeExpenses.reduce((sum, fee) => {
+    const converted = fee.convertedValues?.[baseCurrency];
+    return sum + (converted ?? fee.amount);
+  }, 0);
+
+  const totalFeesInSenderCurrency = transfer.feeExpenses.reduce((sum, fee) => {
+    const converted = fee.convertedValues?.[senderCurrency];
+    return sum + (converted ?? fee.amount);
+  }, 0);
+
+  const recipientFees = transfer.feeExpenses
+    .filter((fee) => fee.account.id === transfer.toIncome.account.id)
+    .reduce((sum, fee) => sum + fee.amount, 0);
+
+  const netReceived = transfer.toIncome.amount - recipientFees;
+  const feePct = transfer.amount > 0 ? (totalFeesInSenderCurrency / transfer.amount) * 100 : 0;
+
+  return (
+    <div className="min-w-0 space-y-1">
+      <div className="min-w-0 flex items-center whitespace-nowrap">
+        <div className="min-w-0 overflow-hidden">
+          <MoneyValue
+            amount={-transfer.fromExpense.amount}
+            currency={senderCurrency}
+            className="font-semibold tracking-tight tabular-nums"
+          />
+        </div>
+
+        <ArrowRight className="h-4 w-4 text-muted-foreground mx-2 shrink-0" />
+
+        <div className="min-w-0 overflow-hidden">
+          <MoneyValue
+            amount={netReceived}
+            currency={transfer.toIncome.account.currency}
+            className="font-semibold tracking-tight tabular-nums"
+          />
+        </div>
       </div>
 
-      <ArrowRight className="h-4 w-4 text-muted-foreground mx-2 shrink-0" />
-
-      <div className="min-w-0 overflow-hidden">
-        <MoneyValue
-          amount={transfer.toIncome.amount}
-          currency={transfer.toIncome.account.currency}
-          className="font-semibold tracking-tight tabular-nums"
-        />
-      </div>
+      {transfer.hasFee() ? (
+        <div className="min-w-0 overflow-hidden whitespace-nowrap text-destructive text-[11px] leading-4">
+          <span className="mr-1 text-muted-foreground">{transfer.feeExpenses.length > 1 ? 'Fees:' : 'Fee:'}</span>
+          <MoneyValue
+            amount={-totalFeesInBaseCurrency}
+            currency={baseCurrency}
+            useColors={false}
+            className="font-mono tabular-nums"
+          />
+          <span className="ml-1 font-mono tabular-nums">{feePct.toFixed(2)}%</span>
+        </div>
+      ) : null}
     </div>
-
-    {transfer.hasFee() ? (
-      <div className="min-w-0 overflow-hidden whitespace-nowrap text-muted-foreground text-[11px] leading-4">
-        <span className="mr-1">{transfer.feeExpenses.length > 1 ? 'Fees:' : 'Fee:'}</span>
-        <MoneyValue
-          amount={-transfer.totalFees()}
-          currency={transfer.fromExpense.account.currency}
-          useColors={false}
-          className="font-mono tabular-nums"
-        />
-      </div>
-    ) : null}
-  </div>
-);
+  );
+};
 
 const NoteCell: React.FC<{ note: string }> = ({ note }) => (
   <span className="block min-w-0 truncate text-muted-foreground">{note}</span>
@@ -203,16 +228,17 @@ export const ListingRow: React.FC<Props> = ({
   sheetOpen,
   onSheetOpenChange,
   className,
+  onRowClick,
 }) => {
   const titleId = useId();
   const descId = useId();
 
-  const onView = useMemo(() => () => onSheetOpenChange?.(true), [onSheetOpenChange]);
+  const onView = useCallback(() => onSheetOpenChange?.(true), [onSheetOpenChange]);
 
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
-        <TableRow className={cn('text-xs hover:bg-muted/50', className)}>
+        <TableRow className={cn('text-xs hover:bg-muted/50 cursor-pointer', className)} onClick={onRowClick}>
           <TableCell className={cellClassName(compact, 'w-4')} />
 
           <TableCell className={cellClassName(compact, 'pl-4')}>

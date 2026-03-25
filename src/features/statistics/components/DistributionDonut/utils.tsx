@@ -1,3 +1,5 @@
+import { sortCategoryTree } from '@/features/categories';
+
 import type { ProcessedCategory } from './types';
 
 type CategoryApiNode = {
@@ -8,23 +10,26 @@ type CategoryApiNode = {
 };
 
 export const processCategoryTree = (data: CategoryApiNode[]): ProcessedCategory[] =>
-  data?.map((category) => {
-    const children = category.children ? processCategoryTree(category.children) : [];
-    const totalChildrenValue = children.reduce((sum: number, child: ProcessedCategory) => sum + child.value, 0);
-    const uncategorizedValue = category.total - totalChildrenValue;
+  sortCategoryTree(
+    data?.map((category) => {
+      const children = category.children ? processCategoryTree(category.children) : [];
+      const totalChildrenValue = children.reduce((sum: number, child: ProcessedCategory) => sum + child.value, 0);
+      const uncategorizedValue = category.total - totalChildrenValue;
 
-    if (uncategorizedValue > 0) {
-      children.push({
+      if (uncategorizedValue > 0) {
+        children.push({
+          id: category.id,
+          name: `Uncategorized in ${category.name}`,
+          value: uncategorizedValue,
+          children: [],
+        });
+      }
+
+      return {
         id: category.id,
-        name: `Uncategorized in ${category.name}`,
-        value: uncategorizedValue,
-      });
-    }
-
-    return {
-      id: category.id,
-      name: category.name,
-      value: category.total,
-      children,
-    };
-  }) || [];
+        name: category.name,
+        value: category.total,
+        children,
+      };
+    }) || [],
+  );

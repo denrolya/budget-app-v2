@@ -15,7 +15,6 @@ import LedgerActivityCard from '@/features/ledger/components/LedgerActivityCard'
 import { BACKEND_DATE_FORMAT, MOMENT_DATE_VIEW_FORMAT } from '@/constants/datetime';
 import type { DailyStatsResponse } from '@/features/accounts/api/service';
 import { useBaseCurrency } from '@/features/auth';
-import { type Transaction } from '@/features/transactions';
 import TransactionHeatmapChart from '@/features/transactions/components/TransactionHeatmapChart';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -86,7 +85,7 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
 
   const baseCurrency = useBaseCurrency();
 
-  const groupedTransactions: [Moment, Transaction[], number, number][] = useMemo(
+  const groupedTransactions = useMemo(
     () =>
       toPairs(
         groupBy(
@@ -98,13 +97,12 @@ const DebtDetails: React.FC<Props> = ({ debt }) => {
           const value = item.convertedValues[baseCurrency] || 0;
           return item.isExpense() ? -value : value;
         });
-        const totalItems = items.length;
-        return [moment(date), items, totalValue, totalItems];
+        return { date: moment(date), items, totalValue, totalCount: items.length };
       }),
     [transactions, baseCurrency],
   );
 
-  const totalTransactionsValue = groupedTransactions.reduce((acc, [, , totalValue]) => acc + totalValue, 0);
+  const totalTransactionsValue = groupedTransactions.reduce((acc, { totalValue }) => acc + totalValue, 0);
   const totalTransactionsCount = transactions.length;
 
   const firstTransactionAt = transactions.length

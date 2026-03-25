@@ -2,23 +2,14 @@ import moment, { type Moment } from 'moment';
 
 import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import BaseFilters from '@/models/BaseFilters';
-import { readParamArray, readParamMoment, readParamString } from '@/lib/url/searchParams';
-
-type Scalar = string | number | boolean | null | undefined;
-type ScalarOrArray<T extends Scalar = Scalar> = T | T[];
-
-/** Positional: preserves NaN sentinel so [NaN, 500] = "no min, max 500". */
-const toAmountRange = (value: ScalarOrArray): number[] => {
-  if (value === null || value === undefined) return [];
-  const arr = Array.isArray(value) ? value : [value];
-  if (arr.length === 0) return [];
-  const mapped = arr.map((v) => {
-    if (v === null || v === undefined) return NaN;
-    return typeof v === 'number' ? v : Number(String(v).trim());
-  });
-  if (mapped.every((n) => !Number.isFinite(n))) return [];
-  return mapped;
-};
+import {
+  readParamAmountRange,
+  readParamArray,
+  readParamMoment,
+  readParamString,
+  type ScalarOrArray,
+  toAmountRange,
+} from '@/lib/url/searchParams';
 
 interface TransferFiltersProps {
   searchTerm?: string;
@@ -37,6 +28,7 @@ export class TransferFilters extends BaseFilters {
   after!: Moment;
   amountRange!: number[];
   accounts!: string[];
+  currencies!: string[];
 
   constructor(initial: TransferFiltersProps = {}) {
     super();
@@ -82,15 +74,8 @@ export class TransferFilters extends BaseFilters {
       case 'accounts':
         return readParamArray(params, paramKey);
 
-      case 'amountRange': {
-        const raw = params.get(paramKey);
-        if (!raw) return [];
-        const [minStr, maxStr] = raw.split(',').map((s) => s.trim());
-        const min = minStr ? Number(minStr) : NaN;
-        const max = maxStr !== undefined ? (maxStr ? Number(maxStr) : NaN) : NaN;
-        const result = [min, max];
-        return result.every((n) => !Number.isFinite(n)) ? [] : result;
-      }
+      case 'amountRange':
+        return readParamAmountRange(params, paramKey);
 
       case 'currencies':
         return readParamArray(params, paramKey);

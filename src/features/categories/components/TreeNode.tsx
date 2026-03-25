@@ -2,6 +2,7 @@ import { Folder, FolderOpen, FolderPlus, GripVertical, Pencil, Trash2 } from 'lu
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import MoneyValue from '@/components/common/MoneyValue';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import {
@@ -29,6 +30,9 @@ interface Props {
   onEdit: (c: Category) => void;
   onDelete: (c: Category) => void;
   onAddChild: (c: Category) => void;
+  onSelect?: (c: Category) => void;
+  selectedId?: string | null;
+  totalsMap?: Map<number, number>;
 
   draggedId: number | null;
   dropTargetId: number | null;
@@ -62,6 +66,9 @@ const TreeNode: React.FC<Props> = ({
   onEdit,
   onDelete,
   onAddChild,
+  onSelect,
+  selectedId,
+  totalsMap,
   draggedId,
   dropTargetId,
   dropPosition,
@@ -79,6 +86,8 @@ const TreeNode: React.FC<Props> = ({
   const hasChildren = category.children.length > 0;
   const isDragging = draggedId === category.id;
   const isDropTarget = dropTargetId === category.id;
+  const isSelected = selectedId != null && String(category.id) === selectedId;
+  const total = totalsMap?.get(category.id);
 
   const indentWidth = depth * LEVEL_PX;
   const railX = depth > 0 ? (depth - 1) * LEVEL_PX + RAIL_OFFSET : null;
@@ -98,9 +107,13 @@ const TreeNode: React.FC<Props> = ({
 
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
 
-  const handleToggle = () => {
-    if (!hasChildren) return;
-    onToggle();
+  const handleClick = () => {
+    if (onSelect) {
+      onSelect(category);
+      if (hasChildren && !isOpen) onOpenChange(true);
+    } else if (hasChildren) {
+      onToggle();
+    }
   };
 
   const overlayVisibleClassName = cn('', {
@@ -165,30 +178,30 @@ const TreeNode: React.FC<Props> = ({
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background',
                   {
                     'opacity-40': isDragging,
-                    'cursor-pointer': hasChildren,
-                    'cursor-default': !hasChildren,
-                    'hover:bg-accent/50': !menuOpen,
-                    'bg-accent/50': menuOpen,
+                    'cursor-pointer': hasChildren || !!onSelect,
+                    'cursor-default': !hasChildren && !onSelect,
+                    'hover:bg-accent/50': !menuOpen && !isSelected,
+                    'bg-accent/50': menuOpen && !isSelected,
+                    'bg-muted': isSelected,
                     'bg-primary/10 ring-1 ring-primary/40': showInside,
                   },
                 )}
-                onClick={handleToggle}
+                onClick={handleClick}
                 onDragEnd={onDragEnd}
                 onDragLeave={onDragLeave}
                 onDragOver={(e) => onDragOver(e, category)}
                 onDragStart={(e) => onDragStart(e, category)}
                 onDrop={(e) => onDrop(e, category)}
                 onKeyDown={(e) => {
-                  if (!hasChildren) return;
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    handleToggle();
+                    handleClick();
                   }
-                  if (e.key === 'ArrowRight' && !isOpen) {
+                  if (hasChildren && e.key === 'ArrowRight' && !isOpen) {
                     e.preventDefault();
                     onOpenChange(true);
                   }
-                  if (e.key === 'ArrowLeft' && isOpen) {
+                  if (hasChildren && e.key === 'ArrowLeft' && isOpen) {
                     e.preventDefault();
                     onOpenChange(false);
                   }
@@ -228,6 +241,14 @@ const TreeNode: React.FC<Props> = ({
                   </span>
 
                   <span className={nameClassName}>{category.name}</span>
+
+                  {total != null && total > 0 && (
+                    <MoneyValue
+                      amount={total}
+                      useColors={false}
+                      className="shrink-0 text-2xs font-mono tabular-nums text-muted-foreground/60 mr-1"
+                    />
+                  )}
                 </div>
 
                 <div aria-hidden="true" className={actionsScrimClassName} />
@@ -278,7 +299,7 @@ const TreeNode: React.FC<Props> = ({
 
           <ContextMenuContent className="w-52">
             <ContextMenuItem asChild>
-              <Link to={`/ledger?category=${encodeURIComponent(category.id)}`} className="flex w-full items-center">
+              <Link to={`/ledger?categories=${encodeURIComponent(category.id)}`} className="flex w-full items-center">
                 Show transactions
               </Link>
             </ContextMenuItem>
@@ -329,8 +350,10 @@ const TreeNode: React.FC<Props> = ({
                   dropTargetId={dropTargetId}
                   isOpen={Boolean(openById[child.id])}
                   openById={openById}
+                  selectedId={selectedId}
                   setOpenById={setOpenById}
                   toggleOpenById={toggleOpenById}
+                  totalsMap={totalsMap}
                   key={child.id}
                   onAddChild={onAddChild}
                   onDelete={onDelete}
@@ -341,6 +364,7 @@ const TreeNode: React.FC<Props> = ({
                   onDrop={onDrop}
                   onEdit={onEdit}
                   onOpenChange={(open) => setOpenById(child.id, open)}
+                  onSelect={onSelect}
                   onToggle={() => toggleOpenById(child.id)}
                 />
               ))}

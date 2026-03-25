@@ -30,6 +30,25 @@ export interface HealthResult {
   };
 }
 
+/** Returns the Tailwind color class for a remaining budget amount. */
+export const getRemainingColorClass = (isExpense: boolean, remaining: number | null, pct: number | null): string => {
+  if (isExpense) {
+    if (remaining !== null && remaining < 0) return 'text-destructive';
+    if (pct !== null && pct > 80) return 'text-warning';
+    return 'text-success';
+  }
+  if (pct !== null && pct < 80) return 'text-destructive';
+  if (pct !== null && pct < 100) return 'text-warning';
+  return 'text-success';
+};
+
+/** Returns the Tailwind color class for a trend direction relative to expense/income semantics. */
+export const getTrendColorClass = (isExpense: boolean, direction: 'up' | 'down' | 'stable'): string => {
+  if (direction === 'stable') return '';
+  if (isExpense) return direction === 'up' ? 'text-destructive' : 'text-success';
+  return direction === 'up' ? 'text-success' : 'text-destructive';
+};
+
 export const computeHealthScore = (
   percentUsed: number,
   daysElapsed: number,

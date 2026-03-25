@@ -59,7 +59,7 @@ const AppShell: React.FC = () => (
           <Route element={<ForecastPage />} path="/forecast" />
 
           <Route element={<BudgetingPage />} path="/budget/*" />
-          <Route element={<CategoriesManagementPage />} path="/categories" />
+          <Route element={<CategoriesManagementPage />} path="/categories/*" />
 
           <Route element={<Navigate replace to="/budget" />} path="*" />
         </Routes>

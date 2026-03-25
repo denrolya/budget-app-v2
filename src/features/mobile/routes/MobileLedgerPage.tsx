@@ -155,7 +155,7 @@ const MobileLedgerPage: React.FC = () => {
           <p className="font-mono text-xs text-muted-foreground text-center py-10">no transactions</p>
         )}
 
-        {ledger.groupedItems.map(([date, items, txValue]) => (
+        {ledger.groupedItems.map(({ date, items, transactionsValue }) => (
           <div key={date.format('YYYY-MM-DD')}>
             {/* Day header — sticky */}
             <div className="sticky top-0 flex items-center justify-between px-3 py-1.5 bg-muted/60 backdrop-blur-sm border-y border-border/40 z-10">
@@ -163,7 +163,7 @@ const MobileLedgerPage: React.FC = () => {
               <MoneyValue
                 showSign
                 useColors
-                amount={txValue}
+                amount={transactionsValue}
                 showValuesTooltip={false}
                 className="font-mono text-xs tabular-nums"
               />

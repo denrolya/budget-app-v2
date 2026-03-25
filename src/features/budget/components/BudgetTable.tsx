@@ -18,7 +18,7 @@ import type {
   CategoryTrendItem,
   SeasonalItem,
 } from '../api/types';
-import { getAllDescendantIds, formatBudgetAmount } from '../utils';
+import { getAllDescendantIds, formatBudgetAmount, getRemainingColorClass } from '../utils';
 
 import BudgetCategoryRow from './BudgetCategoryRow';
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
@@ -48,16 +48,7 @@ const SectionTotalsRow: React.FC<SectionTotalsRowProps> = ({ label, planned, act
   const remaining = isExpense ? planned - actual : actual - planned;
   const pct = planned > 0 ? (actual / planned) * 100 : 0;
 
-  let remainingColor: string;
-  if (isExpense) {
-    remainingColor = remaining < 0 ? 'text-destructive' : 'text-success';
-  } else if (pct < 80) {
-    remainingColor = 'text-destructive';
-  } else if (pct < 100) {
-    remainingColor = 'text-warning';
-  } else {
-    remainingColor = 'text-success';
-  }
+  const remainingColor = getRemainingColorClass(isExpense, remaining, pct);
 
   return (
     <tr className="bg-muted/40 font-semibold text-sm border-t-2">
@@ -186,6 +177,25 @@ const CategoryTreeRows: React.FC<CategoryTreeRowsProps> = ({
           ))}
     </>
   );
+};
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+const computeSectionTotals = (
+  roots: Category[],
+  isExpense: boolean,
+  getActual: (cat: Category) => { income: number; expense: number },
+  getPlanned: (cat: Category) => number | null,
+) => {
+  let totalPlanned = 0;
+  let totalActual = 0;
+  for (const root of roots) {
+    const planned = getPlanned(root);
+    if (planned !== null) totalPlanned += planned;
+    const actual = getActual(root);
+    totalActual += isExpense ? actual.expense : actual.income;
+  }
+  return { totalPlanned, totalActual };
 };
 
 // ── Main component ─────────────────────────────────────────────────────────────
@@ -354,20 +364,8 @@ const BudgetTable: React.FC<Props> = ({
   const expenseRoots = catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense);
   const incomeRoots = catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Income);
 
-  const computeSectionTotals = (roots: Category[], isExpense: boolean) => {
-    let totalPlanned = 0;
-    let totalActual = 0;
-    for (const root of roots) {
-      const planned = getPlanned(root);
-      if (planned !== null) totalPlanned += planned;
-      const actual = getActual(root);
-      totalActual += isExpense ? actual.expense : actual.income;
-    }
-    return { totalPlanned, totalActual };
-  };
-
-  const expTotals = computeSectionTotals(expenseRoots, true);
-  const incTotals = computeSectionTotals(incomeRoots, false);
+  const expTotals = computeSectionTotals(expenseRoots, true, getActual, getPlanned);
+  const incTotals = computeSectionTotals(incomeRoots, false, getActual, getPlanned);
 
   const sharedRowProps = {
     expanded,

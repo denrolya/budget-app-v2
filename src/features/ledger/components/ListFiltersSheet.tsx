@@ -1,4 +1,3 @@
-import debounce from 'lodash/debounce';
 import {
   AlignJustify,
   ArrowDownCircle,
@@ -10,7 +9,7 @@ import {
   Layers,
   Search,
 } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { AccountTypeahead } from '@/features/accounts';
@@ -22,16 +21,15 @@ import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { CURRENCIES, type CURRENCY_CODE } from '@/constants/currency';
+import { CURRENCY_OPTIONS } from '@/constants/currency';
 import { FILTER_PRESETS } from '@/constants/datetime';
-import { SEARCH_DEBOUNCE_MS } from '@/constants/ui';
 import { type TransactionFilters } from '@/features/transactions';
 import { Type as TransactionType } from '@/features/transactions';
 import { type TransferFilters } from '@/features/transfers';
 import { type Timeframe } from '@/types/global';
 import { cn } from '@/lib/utils';
 
-type ViewMode = 'transactions' | 'both' | 'transfers';
+import { useFilterInputs } from '../hooks/useFilterInputs';
 
 interface ListFiltersContentProps {
   transactionFilters: TransactionFilters;
@@ -54,9 +52,6 @@ interface ListFiltersSheetProps extends ListFiltersContentProps {
   setIsOpen: (value: boolean) => void;
 }
 
-const CURRENCY_CODES = Object.keys(CURRENCIES) as CURRENCY_CODE[];
-const CURRENCY_OPTIONS = CURRENCY_CODES.map((code) => ({ value: code, label: `${CURRENCIES[code].symbol} ${code}` }));
-
 const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <p className="text-2xs font-medium uppercase tracking-wider text-muted-foreground mb-2">{children}</p>
 );
@@ -75,94 +70,35 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
   setShowEmptyDays,
   disabledFilters = [],
 }) => {
-  const [minLocal, setMinLocal] = useState('');
-  const [maxLocal, setMaxLocal] = useState('');
-  const [searchLocal, setSearchLocal] = useState(transactionFilters.searchTerm ?? '');
-
-  const debouncedAmount = useRef(
-    debounce((minStr: string, maxStr: string) => {
-      const min = minStr === '' ? NaN : Number(minStr);
-      const max = maxStr === '' ? NaN : Number(maxStr);
-      if (!Number.isFinite(min) && !Number.isFinite(max)) {
-        setFilter('amountRange', []);
-        return;
-      }
-      setFilter('amountRange', [min, max]);
-    }, 350),
-  ).current;
-
-  const debouncedSearch = useRef(
-    debounce((value: string) => setFilter('searchTerm', value), SEARCH_DEBOUNCE_MS),
-  ).current;
-
-  useEffect(
-    () => () => {
-      debouncedAmount.cancel();
-      debouncedSearch.cancel();
-    },
-    [debouncedAmount, debouncedSearch],
-  );
-
-  useEffect(() => {
-    const [extMin, extMax] = transactionFilters.amountRange ?? [];
-    setMinLocal((p) => {
-      const n = extMin != null && Number.isFinite(extMin) ? String(extMin) : '';
-      return p === n ? p : n;
-    });
-    setMaxLocal((p) => {
-      const n = extMax != null && Number.isFinite(extMax) ? String(extMax) : '';
-      return p === n ? p : n;
-    });
-  }, [transactionFilters.amountRange]);
-
-  useEffect(() => {
-    setSearchLocal(transactionFilters.searchTerm ?? '');
-  }, [transactionFilters.searchTerm]);
-
-  const handleMinChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setMinLocal(e.target.value);
-      debouncedAmount(e.target.value, maxLocal);
-    },
-    [debouncedAmount, maxLocal],
-  );
-  const handleMaxChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setMaxLocal(e.target.value);
-      debouncedAmount(minLocal, e.target.value);
-    },
-    [debouncedAmount, minLocal],
-  );
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchLocal(e.target.value);
-      debouncedSearch(e.target.value);
-    },
-    [debouncedSearch],
-  );
-
-  const handleTimeframeChange = useCallback(
-    (range: Timeframe) => {
-      setTimeframe({
-        after: range.after ? range.after.clone().startOf('day') : timeframe.after,
-        before: range.before ? range.before.clone().endOf('day') : timeframe.before,
-      });
-    },
-    [setTimeframe, timeframe],
-  );
+  const {
+    minLocal,
+    maxLocal,
+    searchLocal,
+    handleMinChange,
+    handleMaxChange,
+    handleSearchChange,
+    handleTimeframeChange,
+    accountsValue,
+    selectedCurrencies,
+    viewMode,
+    setViewMode,
+    toggleNestedCategories,
+  } = useFilterInputs({
+    transactionFilters,
+    transferFilters,
+    showTransactions,
+    showTransfers,
+    setFilter,
+    setShowTransactions,
+    setShowTransfers,
+    timeframe,
+    setTimeframe,
+  });
 
   const dateLabel = useMemo(
     () => `${timeframe.after.format('DD MMM YYYY')} – ${timeframe.before.format('DD MMM YYYY')}`,
     [timeframe.after, timeframe.before],
   );
-
-  const accountsValue = useMemo(() => {
-    const t = Array.isArray(transactionFilters.accounts) ? transactionFilters.accounts : [];
-    const tr = Array.isArray(transferFilters.accounts) ? transferFilters.accounts : [];
-    return [...new Set([...t, ...tr])];
-  }, [transactionFilters.accounts, transferFilters.accounts]);
-
-  const selectedCurrencies: string[] = useMemo(() => transactionFilters.currencies ?? [], [transactionFilters]);
 
   const setType = useCallback(
     (type: TransactionType) => {
@@ -170,36 +106,12 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
     },
     [setFilter, transactionFilters.type],
   );
+
   const setDraftFilter = useCallback(
     (value: boolean) => {
       setFilter('isDraft', transactionFilters.isDraft === value ? undefined : value);
     },
     [setFilter, transactionFilters.isDraft],
-  );
-  const toggleNestedCategories = useCallback(() => {
-    setFilter('withNestedCategories', !transactionFilters.withNestedCategories);
-  }, [setFilter, transactionFilters.withNestedCategories]);
-
-  const viewMode: ViewMode = useMemo(() => {
-    if (showTransactions && !showTransfers) return 'transactions';
-    if (!showTransactions && showTransfers) return 'transfers';
-    return 'both';
-  }, [showTransactions, showTransfers]);
-
-  const setViewMode = useCallback(
-    (mode: ViewMode) => {
-      if (mode === 'transactions') {
-        setShowTransactions(true);
-        setShowTransfers(false);
-      } else if (mode === 'transfers') {
-        setShowTransactions(false);
-        setShowTransfers(true);
-      } else {
-        setShowTransactions(true);
-        setShowTransfers(true);
-      }
-    },
-    [setShowTransactions, setShowTransfers],
   );
 
   return (

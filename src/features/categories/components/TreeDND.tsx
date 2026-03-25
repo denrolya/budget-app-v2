@@ -1,6 +1,7 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 
 import type Category from '@/features/categories/models/Category';
+import sortCategoryTree from '@/features/categories/lib/sortCategoryTree';
 import { cn } from '@/lib/utils';
 
 import { useMutations } from '../api';
@@ -13,14 +14,6 @@ const isDescendant = (node: Category, targetId: number): boolean =>
 
 const wouldCreateCircle = (category: Category, newParent: number | null): boolean =>
   newParent !== null && (newParent === category.id || isDescendant(category, newParent));
-
-const sortRoot = (items: Category[]) =>
-  [...items].sort((a, b) => {
-    const aFolder = a.children.length > 0;
-    const bFolder = b.children.length > 0;
-    if (aFolder !== bFolder) return aFolder ? -1 : 1;
-    return a.name.localeCompare(b.name);
-  });
 
 type OpenStateById = Record<number, boolean>;
 
@@ -54,6 +47,9 @@ interface Props {
   onEdit: (c: Category) => void;
   onDelete: (c: Category) => void;
   onAddNew: (parent: number | null, type: CategoryType) => void;
+  onSelect?: (c: Category) => void;
+  selectedId?: string | null;
+  totalsMap?: Map<number, number>;
 
   openById?: OpenStateById;
   onOpenByIdChange?: (next: OpenStateById) => void;
@@ -61,7 +57,22 @@ interface Props {
 }
 
 const CategoryTree = forwardRef<CategoryTreeRef, Props>(
-  ({ categories, type, onEdit, onDelete, onAddNew, openById, onOpenByIdChange, defaultCollapsed = true }, ref) => {
+  (
+    {
+      categories,
+      type,
+      onEdit,
+      onDelete,
+      onAddNew,
+      onSelect,
+      selectedId,
+      totalsMap,
+      openById,
+      onOpenByIdChange,
+      defaultCollapsed = true,
+    },
+    ref,
+  ) => {
     const [draggedId, setDraggedId] = useState<number | null>(null);
     const [draggedCategory, setDraggedCategory] = useState<Category | null>(null);
     const [dropTargetId, setDropTargetId] = useState<number | null>(null);
@@ -69,7 +80,7 @@ const CategoryTree = forwardRef<CategoryTreeRef, Props>(
 
     const { moveWithBreadcrumb, isMoving } = useMutations();
 
-    const sortedRoot = useMemo(() => sortRoot(categories), [categories]);
+    const sortedRoot = useMemo(() => sortCategoryTree(categories), [categories]);
 
     const isControlled = openById != null;
 
@@ -218,8 +229,10 @@ const CategoryTree = forwardRef<CategoryTreeRef, Props>(
                   dropTargetId={dropTargetId}
                   isOpen={Boolean(effectiveOpenById[cat.id])}
                   openById={effectiveOpenById}
+                  selectedId={selectedId}
                   setOpenById={(id, open) => setNodeOpen(id, open)}
                   toggleOpenById={(id) => toggleNodeOpen(id)}
+                  totalsMap={totalsMap}
                   key={cat.id}
                   onAddChild={(c) => addChild(c)}
                   onDelete={onDelete}
@@ -230,6 +243,7 @@ const CategoryTree = forwardRef<CategoryTreeRef, Props>(
                   onDrop={drop}
                   onEdit={onEdit}
                   onOpenChange={(open) => setNodeOpen(cat.id, open)}
+                  onSelect={onSelect}
                   onToggle={() => toggleNodeOpen(cat.id)}
                 />
               ))}

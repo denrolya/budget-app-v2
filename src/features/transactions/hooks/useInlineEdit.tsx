@@ -24,7 +24,8 @@ export const useInlineEdit = ({ isUpdating, onSave }: InlineEditConfig) => {
         setEditValue(transaction.amount);
         break;
       case 'executedAt':
-        setEditValue(transaction.executedAt);
+        // Clone to avoid mutating the transaction's own Moment via the datetime input
+        setEditValue(transaction.executedAt.clone());
         break;
       case 'account':
         setEditValue(transaction.account);

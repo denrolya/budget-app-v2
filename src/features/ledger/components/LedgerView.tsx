@@ -1,15 +1,23 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { toast } from 'sonner';
 
 import { MoneyValue } from '@/components/common/MoneyValue';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Pagination from '@/components/common/Pagination';
 import { useHotkeys as useHotkeysContext } from '@/contexts/Hotkeys';
+import { FormType, useForm as useFormContext } from '@/contexts/Form';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { confirm } from '@/lib/confirmation';
+import { type Transaction, useMutations as useTransactionsMutations } from '@/features/transactions';
+import type { Transfer } from '@/features/transfers';
 
 import { type UseLedgerReturn } from '../hooks/useLedger';
+import { buildDateList, itemKey, sortItems } from '../utils';
 
+import ItemDetailPanel from './ItemDetailPanel';
 import ListFiltersSheet from './ListFiltersSheet';
 import ListingControls from './ListingControls';
 import TableListing from './TableListing';
@@ -49,15 +57,20 @@ const ErrorBanner: React.FC<{ error: unknown }> = ({ error }) => {
   );
 };
 
-const EmptyActivityState: React.FC<{ onReset: () => void }> = ({ onReset }) => (
+const EmptyActivityState: React.FC<{ onReset: () => void; activeFilterCount: number }> = ({
+  onReset,
+  activeFilterCount,
+}) => (
   <div className="flex h-full min-h-[280px] w-full items-center justify-center p-6">
     <div className="text-center max-w-md">
       <h2 className="text-base font-semibold text-foreground">No activity found</h2>
       <p className="mt-1.5 text-sm text-muted-foreground">
-        There are no transactions or transfers for the selected range and filters.
+        {activeFilterCount > 0
+          ? `No transactions match your active filters (${activeFilterCount} active).`
+          : 'There are no transactions or transfers for the selected period.'}
       </p>
       <Button variant="outline" className="mt-4" onClick={onReset}>
-        Reset filters and period
+        {activeFilterCount > 0 ? 'Reset filters and period' : 'Go to current month'}
       </Button>
     </div>
   </div>
@@ -80,6 +93,8 @@ const LedgerView: React.FC<LedgerViewProps> = ({
   controlsPortalTarget,
 }) => {
   const { addPageHotkeys, removePageHotkeys } = useHotkeysContext();
+  const { openForm } = useFormContext();
+  const { update: updateTransaction } = useTransactionsMutations();
 
   const {
     groupedItems,
@@ -104,11 +119,12 @@ const LedgerView: React.FC<LedgerViewProps> = ({
     isFiltersOpen,
     setIsFiltersOpen,
     toggleFilters,
+    activeFilterCount,
     pagination,
     totalValue,
   } = ledger;
 
-  // ─ Hotkeys ────────────────────────────────────────────────────────────────
+  // ─ Pagination hotkeys ─────────────────────────────────────────────────────
   const hkPrevPage = enableHotkeys
     ? () => {
         if (pagination.currentPage > 1) pagination.setCurrentPage(pagination.currentPage - 1);
@@ -131,10 +147,117 @@ const LedgerView: React.FC<LedgerViewProps> = ({
       { windows: 'ArrowLeft', mac: 'ArrowLeft', description: 'Previous page' },
       { windows: 'ArrowRight', mac: 'ArrowRight', description: 'Next page' },
       { windows: 'F', mac: 'F', description: 'Toggle Filters Dialog' },
+      { windows: 'E', mac: 'E', description: 'Edit selected item' },
+      { windows: 'D', mac: 'D', description: 'Toggle draft status of selected transaction' },
     ];
     addPageHotkeys('Ledger', hotkeys);
     return () => removePageHotkeys('Ledger');
   }, [enableHotkeys, addPageHotkeys, removePageHotkeys]);
+
+  // ─ Master-detail selection ────────────────────────────────────────────────
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+
+  // Flat list that mirrors TableListing's exact visual render order.
+  const flatItems = useMemo(
+    () =>
+      buildDateList(timeframe.after, timeframe.before, isReversedOrder).flatMap((date) => {
+        const group = groupedItems.find((g) => g.date.isSame(date, 'day'));
+        return group ? sortItems(group.items, isReversedOrder) : [];
+      }),
+    [groupedItems, isReversedOrder, timeframe],
+  );
+
+  const selectedItem = useMemo(
+    () => flatItems.find((item) => itemKey(item) === selectedKey) ?? null,
+    [flatItems, selectedKey],
+  );
+
+  const handleSelectItem = useCallback((item: Transaction | Transfer) => {
+    const key = itemKey(item);
+    setSelectedKey((prev) => (prev === key ? null : key));
+  }, []);
+
+  // Auto-select the first item once data initially loads.
+  const didAutoSelectRef = useRef(false);
+  useEffect(() => {
+    if (didAutoSelectRef.current || flatItems.length === 0) return;
+    didAutoSelectRef.current = true;
+    setSelectedKey(itemKey(flatItems[0]));
+  }, [flatItems]);
+
+  // Close panel only when the selected item is no longer in the current dataset
+  // (page change, filter change, deletion). Does NOT close on background refetch
+  // when the same items are returned.
+  useEffect(() => {
+    if (!selectedKey) return;
+    if (!flatItems.some((item) => itemKey(item) === selectedKey)) setSelectedKey(null);
+  }, [flatItems, selectedKey]);
+
+  // Keyboard navigation: ↑↓ navigate, Esc close
+  useEffect(() => {
+    if (!enableHotkeys || flatItems.length === 0) return;
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedKey(null);
+        return;
+      }
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+      e.preventDefault();
+
+      if (!selectedKey) {
+        setSelectedKey(itemKey(flatItems[0]));
+        return;
+      }
+
+      const idx = flatItems.findIndex((item) => itemKey(item) === selectedKey);
+      if (idx === -1) return;
+
+      const next = e.key === 'ArrowDown' ? idx + 1 : idx - 1;
+      if (next >= 0 && next < flatItems.length) setSelectedKey(itemKey(flatItems[next]));
+    };
+
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [enableHotkeys, selectedKey, flatItems]);
+
+  // Row hotkeys: E → edit selected, D → toggle draft on selected transaction
+  const handleEditHotkey = useCallback(() => {
+    if (!selectedItem) return;
+    if (selectedKey?.startsWith('xfr-')) openForm(FormType.Transfer, selectedItem as Transfer);
+    else openForm(FormType.Transaction, selectedItem as Transaction);
+  }, [selectedItem, selectedKey, openForm]);
+
+  const handleDraftHotkey = useCallback(async () => {
+    if (!selectedItem || selectedKey?.startsWith('xfr-')) return;
+    const tx = selectedItem as Transaction;
+    const newDraftState = !tx.isDraft;
+    const confirmed = await confirm({
+      title: newDraftState ? 'Mark as draft?' : 'Mark as confirmed?',
+      description: newDraftState
+        ? 'This will mark the transaction as a draft.'
+        : 'This will remove the draft status and mark the transaction as confirmed.',
+      confirmText: newDraftState ? 'Mark as draft' : 'Mark as confirmed',
+      cancelText: 'Cancel',
+    });
+    if (!confirmed) return;
+    try {
+      await updateTransaction({ id: tx.id, updates: { ...tx, isDraft: newDraftState }, originalTransaction: tx });
+      toast.success(newDraftState ? 'Marked as draft' : 'Marked as confirmed');
+    } catch {
+      toast.error('Failed to update draft status. Please try again.');
+    }
+  }, [selectedItem, selectedKey, updateTransaction]);
+
+  useHotkeys('e', handleEditHotkey, { preventDefault: true }, [handleEditHotkey]);
+  useHotkeys(
+    'd',
+    () => {
+      void handleDraftHotkey();
+    },
+    { preventDefault: true },
+    [handleDraftHotkey],
+  );
 
   // ─ Layout helpers ─────────────────────────────────────────────────────────
   const hasNoItems = !isLoading && !isError && groupedItems.length === 0;
@@ -168,27 +291,52 @@ const LedgerView: React.FC<LedgerViewProps> = ({
         {isError && <ErrorBanner error={error} />}
 
         {/* Empty state */}
-        {hasNoItems && <EmptyActivityState onReset={handleReset} />}
+        {hasNoItems && <EmptyActivityState activeFilterCount={activeFilterCount} onReset={handleReset} />}
 
-        {/* Table listing */}
+        {/* Table listing + detail panel */}
         {!hasNoItems && (
-          <ScrollArea aria-label="Ledger table listing" className="flex-1 min-h-0 w-full min-w-0">
-            <div className="min-h-full">
-              {isLoading && (
-                <TableListingSkeleton after={timeframe.after} before={timeframe.before} showEmptyDays={showEmptyDays} />
-              )}
-              {!isLoading && (
-                <TableListing
-                  after={timeframe.after}
-                  before={timeframe.before}
-                  groupedItems={groupedItems}
-                  isLoading={isLoading}
-                  isReversedOrder={isReversedOrder}
-                  showEmptyDays={showEmptyDays}
-                />
-              )}
+          <div
+            className={cn(
+              'flex flex-1 min-h-0 overflow-hidden transition-opacity duration-150',
+              isFetching && !isLoading && 'opacity-50 pointer-events-none',
+            )}
+          >
+            {/* Scrollable table */}
+            <div className="flex-1 min-w-0 min-h-0 overflow-hidden">
+              <ScrollArea aria-label="Ledger table listing" className="h-full w-full min-w-0">
+                <div className="min-h-full">
+                  {isLoading && (
+                    <TableListingSkeleton
+                      after={timeframe.after}
+                      before={timeframe.before}
+                      showEmptyDays={showEmptyDays}
+                    />
+                  )}
+                  {!isLoading && (
+                    <TableListing
+                      after={timeframe.after}
+                      before={timeframe.before}
+                      groupedItems={groupedItems}
+                      isReversedOrder={isReversedOrder}
+                      selectedKey={selectedKey}
+                      showEmptyDays={showEmptyDays}
+                      onSelectItem={handleSelectItem}
+                    />
+                  )}
+                </div>
+              </ScrollArea>
             </div>
-          </ScrollArea>
+
+            {/* Persistent detail panel — slides in from right */}
+            <div
+              className={cn(
+                'shrink-0 border-l bg-card overflow-hidden transition-[width] duration-150 ease-out',
+                selectedItem ? 'w-[320px]' : 'w-0',
+              )}
+            >
+              {selectedItem && <ItemDetailPanel item={selectedItem} onClose={() => setSelectedKey(null)} />}
+            </div>
+          </div>
         )}
 
         {/* Period footer */}

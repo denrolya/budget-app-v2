@@ -12,6 +12,15 @@ import { detectPeriod, getInitialTimeframe, useTimeframe } from './useTimeframe'
 
 // ─── Public types ──────────────────────────────────────────────────────────────
 
+export type PaginationState = {
+  totalItems: number;
+  totalPages: number;
+  perPage: number;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  setPerPage: (perPage: number) => void;
+};
+
 export type UseLedgerOptions = {
   updateUrl?: boolean;
   /** Exclude transactions entirely (e.g. transfers-only listing page). */
@@ -45,27 +54,13 @@ export type UseLedgerReturn = {
   refetch: () => void;
 
   // ─ Pagination ─────────────────────────────────────────────────────────────
-  pagination: {
-    totalItems: number;
-    totalPages: number;
-    perPage: number;
-    currentPage: number;
-    setCurrentPage: (page: number) => void;
-    setPerPage: (perPage: number) => void;
-  };
+  pagination: PaginationState;
 
   // ─ Sub-states (for accessing pagination, totalValue, etc.) ───────────────
   transactionsState: {
     isFetching: boolean;
     isLoading: boolean;
-    pagination: {
-      totalItems: number;
-      totalPages: number;
-      perPage: number;
-      currentPage: number;
-      setCurrentPage: (page: number) => void;
-      setPerPage: (perPage: number) => void;
-    };
+    pagination: PaginationState;
     totalValue: number;
     filters: TransactionFilters;
     setFilter: (key: keyof TransactionFilters, value: unknown) => void;
@@ -73,14 +68,7 @@ export type UseLedgerReturn = {
   };
   transfersState: {
     isFetching: boolean;
-    pagination: {
-      totalItems: number;
-      totalPages: number;
-      perPage: number;
-      currentPage: number;
-      setCurrentPage: (page: number) => void;
-      setPerPage: (perPage: number) => void;
-    };
+    pagination: PaginationState;
     totalValue: number;
     filters: TransferFilters;
     setFilter: (key: keyof TransferFilters, value: unknown) => void;
@@ -170,12 +158,33 @@ export const useLedger = ({
   const effectiveInitialTimeframe: Timeframe = urlTimeframe ?? initialTimeframeProp ?? getInitialTimeframe();
   const effectiveInitialTimeframeRef = useRef(effectiveInitialTimeframe);
 
-  const normalizedInitialFilters = useMemo(() => {
-    if (!initialFilters) return {} as Record<string, unknown>;
+  // Hydrate filter state from URL params on mount (categories, accounts, q, etc.)
+  const urlFilters = useMemo(() => {
+    if (!updateUrlRef.current) return {} as Record<string, unknown>;
+
+    const paramMap = { searchTerm: 'q' };
+    const hydrated = TransactionFilters.fromSearchParams(initialSearchParamsRef.current, paramMap);
 
     const forbidden = new Set(['after', 'before']);
-    return Object.fromEntries(Object.entries(initialFilters).filter(([k, v]) => !forbidden.has(k) && v !== undefined));
-  }, [initialFilters]);
+    const result: Record<string, unknown> = {};
+    for (const key of Object.keys(hydrated).filter((k) => k[0] !== '_')) {
+      if (forbidden.has(key)) continue;
+      const value = (hydrated as Record<string, unknown>)[key];
+      const isEmpty = value === '' || value === undefined || (Array.isArray(value) && value.length === 0);
+      if (!isEmpty) result[key] = value;
+    }
+    return result;
+  }, []);
+
+  const normalizedInitialFilters = useMemo(() => {
+    if (!initialFilters) return urlFilters;
+
+    const forbidden = new Set(['after', 'before']);
+    const explicit = Object.fromEntries(
+      Object.entries(initialFilters).filter(([k, v]) => !forbidden.has(k) && v !== undefined),
+    );
+    return { ...urlFilters, ...explicit };
+  }, [initialFilters, urlFilters]);
 
   const initialTransactionFilters = useMemo(
     () =>

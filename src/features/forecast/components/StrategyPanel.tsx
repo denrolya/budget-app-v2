@@ -168,7 +168,7 @@ const StrategyPanel: React.FC<Props> = ({ metrics, horizonMonths, fiTarget, comp
           compareValue={c && `${Math.round(c.investmentYield)}%`}
           label="Yield"
           tooltip={
-            'Investment yield — how much your portfolio grew purely from compound returns (excluding your contributions). Early on this will be low because compounding needs time. Over 10-20 years, compound growth should dwarf your contributions — that\'s when money truly works for you.'
+            "Investment yield — how much your portfolio grew purely from compound returns (excluding your contributions). Early on this will be low because compounding needs time. Over 10-20 years, compound growth should dwarf your contributions — that's when money truly works for you."
           }
         >
           {Math.round(m.investmentYield)}%

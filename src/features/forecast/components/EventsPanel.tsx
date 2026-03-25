@@ -232,7 +232,7 @@ const EventsPanel: React.FC<Props> = ({ events, onAdd, onRemove, onToggle }) => 
 
       <div className="space-y-0.5">
         {events.map((event) => {
-          const monthLabel = moment(event.month).format('MMM \'YY');
+          const monthLabel = moment(event.month).format("MMM 'YY");
           return (
             <div
               className={cn('flex items-center gap-1.5 px-1.5 py-1 rounded text-xs group', {

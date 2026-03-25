@@ -1,12 +1,13 @@
 import type { Moment } from 'moment';
 import React, { useMemo } from 'react';
 
-import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
 import { LedgerView, useLedger } from '@/features/ledger';
 
 export type DrawerListingTarget = {
   title: string;
   initialFilters: Record<string, unknown>;
+  disabledFilters?: string[];
 };
 
 type Props = {
@@ -27,7 +28,8 @@ const DrawerListing: React.FC<DrawerContentProps> = ({ target, timeframe }) => {
     initialFilters: target.initialFilters,
     initialTimeframe: timeframe,
   });
-  return <LedgerView showControls enableHotkeys={false} ledger={ledger} />;
+
+  return <LedgerView showControls disabledFilters={target.disabledFilters} ledger={ledger} />;
 };
 
 export const TransactionsDrawer: React.FC<Props> = ({ open, onOpenChange, target, timeframe }) => {
@@ -38,14 +40,8 @@ export const TransactionsDrawer: React.FC<Props> = ({ open, onOpenChange, target
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>{target?.title ?? 'Transactions'}</DrawerTitle>
-          <DrawerDescription>
-            {timeframe.after.format('DD MMM YYYY')} - {timeframe.before.format('DD MMM YYYY')}
-          </DrawerDescription>
-        </DrawerHeader>
-
+      <DrawerContent aria-describedby={undefined}>
+        <DrawerTitle className="sr-only">{target?.title ?? 'Transactions'}</DrawerTitle>
         <div className="h-[80vh] min-h-0 flex flex-col">
           {target && <DrawerListing target={target} timeframe={timeframe} key={listingKey} />}
         </div>

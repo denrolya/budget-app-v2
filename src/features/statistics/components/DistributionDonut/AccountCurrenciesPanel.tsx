@@ -17,6 +17,32 @@ import DonutTooltip from './DonutTooltip';
 import type { DrawerListingTarget } from './TransactionsDrawer';
 import type { Datum, Item, TabKey } from './types';
 
+const makeDonutTooltip =
+  (itemsById: Map<string, Item>, total: number) =>
+  ({ datum }: { datum: { data: Datum; value: number } }) => {
+    const item = itemsById.get(String(datum.data.id));
+    const value = datum.value;
+    const percent = total > 0 ? (value / total) * 100 : 0;
+
+    return (
+      <DonutTooltip
+        label={String(datum.data.label)}
+        percent={percent}
+        value={value}
+        extra={
+          item && item.amount != null ? (
+            <MoneyValue
+              amount={item.amount}
+              currency={item.currency != null ? (item.currency as CURRENCY_CODE) : undefined}
+              useColors={false}
+              className="text-2xs leading-4 text-muted-foreground"
+            />
+          ) : null
+        }
+      />
+    );
+  };
+
 type AccountModel = {
   id: number | string;
   name: string;
@@ -164,85 +190,15 @@ const AccountsCurrenciesPanel: React.FC<Props> = ({
     [currencyAccounts],
   );
 
-  const accountsTooltip = useCallback(
-    ({ datum }: { datum: { data: Datum; value: number } }) => {
-      const item = accountsById.get(String(datum.data.id));
-      const value = datum.value;
-      const percent = totalAccounts > 0 ? (value / totalAccounts) * 100 : 0;
+  const accountsTooltip = useMemo(() => makeDonutTooltip(accountsById, totalAccounts), [accountsById, totalAccounts]);
 
-      return (
-        <DonutTooltip
-          label={String(datum.data.label)}
-          percent={percent}
-          value={value}
-          extra={
-            item && item.amount != null ? (
-              <MoneyValue
-                amount={item.amount}
-                currency={item.currency != null ? (item.currency as CURRENCY_CODE) : undefined}
-                useColors={false}
-                className="text-2xs leading-4 text-muted-foreground"
-              />
-            ) : null
-          }
-        />
-      );
-    },
-    [accountsById, totalAccounts],
+  const currenciesTooltip = useMemo(
+    () => makeDonutTooltip(currenciesById, currenciesGrandTotal),
+    [currenciesById, currenciesGrandTotal],
   );
 
-  const currenciesTooltip = useCallback(
-    ({ datum }: { datum: { data: Datum; value: number } }) => {
-      const id = String(datum.data.id);
-      const value = datum.value;
-      const percent = currenciesGrandTotal > 0 ? (value / currenciesGrandTotal) * 100 : 0;
-
-      const item = currenciesById.get(id);
-      return (
-        <DonutTooltip
-          label={String(datum.data.label)}
-          percent={percent}
-          value={value}
-          extra={
-            item && item.amount != null ? (
-              <MoneyValue
-                amount={item.amount}
-                currency={item.currency != null ? (item.currency as CURRENCY_CODE) : undefined}
-                useColors={false}
-                className="text-2xs leading-4 text-muted-foreground"
-              />
-            ) : null
-          }
-        />
-      );
-    },
-    [currenciesGrandTotal, currenciesById],
-  );
-
-  const accountsInCurrencyTooltip = useCallback(
-    ({ datum }: { datum: { data: Datum; value: number } }) => {
-      const item = accountsById.get(String(datum.data.id));
-      const value = datum.value;
-      const percent = currencyTotal > 0 ? (value / currencyTotal) * 100 : 0;
-
-      return (
-        <DonutTooltip
-          label={String(datum.data.label)}
-          percent={percent}
-          value={value}
-          extra={
-            item && item.amount != null ? (
-              <MoneyValue
-                amount={item.amount}
-                currency={item.currency != null ? (item.currency as CURRENCY_CODE) : undefined}
-                useColors={false}
-                className="text-2xs leading-4 text-muted-foreground"
-              />
-            ) : null
-          }
-        />
-      );
-    },
+  const accountsInCurrencyTooltip = useMemo(
+    () => makeDonutTooltip(accountsById, currencyTotal),
     [accountsById, currencyTotal],
   );
 

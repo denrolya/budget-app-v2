@@ -35,7 +35,7 @@ const STATUS_BG: Record<DiagnosticStatus, string> = {
 /** Educational explanations for each diagnostic rule — helps users learn financial concepts */
 const RULE_EXPLAINERS: Record<string, string> = {
   'savings-rate':
-    'The % of your income you keep after expenses. 20%+ is the benchmark for building wealth. Below 10% means you\'re living close to your means with little room for error.',
+    "The % of your income you keep after expenses. 20%+ is the benchmark for building wealth. Below 10% means you're living close to your means with little room for error.",
   'expense-stability':
     'How consistent your monthly expenses are (coefficient of variation). High volatility makes planning unreliable — consider what causes the swings.',
   'positive-surplus':
@@ -49,7 +49,7 @@ const RULE_EXPLAINERS: Record<string, string> = {
   'investment-rate':
     'What % of your surplus goes to investments. 30%+ builds wealth actively. Below 15% means most surplus stays as idle cash losing to inflation.',
   'compound-momentum':
-    'How much your investments grew beyond what you contributed. Higher = compounding is doing real work. Early on this will be low — that\'s normal.',
+    "How much your investments grew beyond what you contributed. Higher = compounding is doing real work. Early on this will be low — that's normal.",
   'fi-trajectory':
     'Years until your investment returns cover your living expenses (Financial Independence). Based on 25× annual expenses at 4% withdrawal rate — a widely used retirement benchmark.',
   'return-realism':

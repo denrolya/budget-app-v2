@@ -33,14 +33,14 @@ interface UseTransactionsAndTransfersListOptions {
 
 type CombinedItem = Transaction | Transfer;
 
-export type GroupedItem = [
-  Moment, // date
-  CombinedItem[], // items
-  number, // transactionsValue
-  number, // transfersValue
-  number, // transactionsCount
-  number, // transfersCount
-];
+export type GroupedItem = {
+  date: Moment;
+  items: CombinedItem[];
+  transactionsValue: number;
+  transfersValue: number;
+  transactionsCount: number;
+  transfersCount: number;
+};
 
 const isTransactionItem = (item: CombinedItem): item is Transaction => item instanceof Transaction;
 const isTransferItem = (item: CombinedItem): item is Transfer => item instanceof Transfer;
@@ -55,26 +55,33 @@ const groupByDay = (items: CombinedItem[], baseCurrency: string): GroupedItem[] 
 
     let entry = groups.get(dayKey);
     if (!entry) {
-      entry = [moment(dayKey, BACKEND_DATE_FORMAT), [], 0, 0, 0, 0];
+      entry = {
+        date: moment(dayKey, BACKEND_DATE_FORMAT),
+        items: [],
+        transactionsValue: 0,
+        transfersValue: 0,
+        transactionsCount: 0,
+        transfersCount: 0,
+      };
       groups.set(dayKey, entry);
     }
 
-    entry[1].push(item);
+    entry.items.push(item);
 
     if (isTransactionItem(item)) {
       const value = item.convertedValues[baseCurrency] || 0;
-      entry[2] += item.isExpense() ? -value : value;
-      entry[4] += 1;
+      entry.transactionsValue += item.isExpense() ? -value : value;
+      entry.transactionsCount += 1;
       continue;
     }
 
     if (isTransferItem(item)) {
-      entry[3] += item.fromExpense.convertedValues[baseCurrency] || 0;
-      entry[5] += 1;
+      entry.transfersValue += item.fromExpense.convertedValues[baseCurrency] || 0;
+      entry.transfersCount += 1;
     }
   }
 
-  return Array.from(groups.values()).sort((a, b) => b[0].valueOf() - a[0].valueOf());
+  return Array.from(groups.values()).sort((a, b) => b.date.valueOf() - a.date.valueOf());
 };
 
 export const useTransactionsAndTransfersList = ({

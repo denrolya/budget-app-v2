@@ -44,60 +44,58 @@ const SwitchRow: React.FC<{
   </div>
 );
 
-const ConfigurationMenu: React.FC<Props> = (props) => {
-  const isMobile = useIsMobile();
-
-  const MenuContent = () => (
-    <div className="space-y-3">
-      <div>
-        <Label className="text-2xs font-semibold uppercase tracking-widest text-muted-foreground">References</Label>
-        <div className="mt-1.5 space-y-2">
-          <SwitchRow
-            checked={props.showExpenseReference}
-            icon={TrendingDown}
-            id="expense-ref"
-            label="Total Expense Line"
-            onCheckedChange={() => props.setShowExpenseReference(!props.showExpenseReference)}
-          />
-          <SwitchRow
-            checked={props.showIncomeReference}
-            icon={TrendingUp}
-            id="income-ref"
-            label="Total Income Line"
-            onCheckedChange={() => props.setShowIncomeReference(!props.showIncomeReference)}
-          />
-        </div>
-      </div>
-      <div>
-        <Label className="text-2xs font-semibold uppercase tracking-widest text-muted-foreground">Display</Label>
-        <div className="mt-1.5 space-y-2">
-          <SwitchRow
-            checked={props.showComparisonInTooltip}
-            icon={Percent}
-            id="comparison-tooltip"
-            label="Comparison in Tooltip"
-            onCheckedChange={() => props.setShowComparisonInTooltip(!props.showComparisonInTooltip)}
-          />
-          <SwitchRow
-            checked={props.useSeparateAxisForTotals}
-            icon={Move3D}
-            id="separate-axis"
-            label="Separate Y Axis for Totals"
-            onCheckedChange={() => props.setUseSeparateAxisForTotals(!props.useSeparateAxisForTotals)}
-          />
-          <SwitchRow
-            checked={props.fetchTransactionsFromSubcategories}
-            icon={Tags}
-            id="subcategories"
-            label="Include Subcategories"
-            onCheckedChange={() =>
-              props.setFetchTransactionsFromSubcategories(!props.fetchTransactionsFromSubcategories)
-            }
-          />
-        </div>
+const MenuContent: React.FC<Props> = (props) => (
+  <div className="space-y-3">
+    <div>
+      <Label className="text-2xs font-semibold uppercase tracking-widest text-muted-foreground">References</Label>
+      <div className="mt-1.5 space-y-2">
+        <SwitchRow
+          checked={props.showExpenseReference}
+          icon={TrendingDown}
+          id="expense-ref"
+          label="Total Expense Line"
+          onCheckedChange={() => props.setShowExpenseReference(!props.showExpenseReference)}
+        />
+        <SwitchRow
+          checked={props.showIncomeReference}
+          icon={TrendingUp}
+          id="income-ref"
+          label="Total Income Line"
+          onCheckedChange={() => props.setShowIncomeReference(!props.showIncomeReference)}
+        />
       </div>
     </div>
-  );
+    <div>
+      <Label className="text-2xs font-semibold uppercase tracking-widest text-muted-foreground">Display</Label>
+      <div className="mt-1.5 space-y-2">
+        <SwitchRow
+          checked={props.showComparisonInTooltip}
+          icon={Percent}
+          id="comparison-tooltip"
+          label="Comparison in Tooltip"
+          onCheckedChange={() => props.setShowComparisonInTooltip(!props.showComparisonInTooltip)}
+        />
+        <SwitchRow
+          checked={props.useSeparateAxisForTotals}
+          icon={Move3D}
+          id="separate-axis"
+          label="Separate Y Axis for Totals"
+          onCheckedChange={() => props.setUseSeparateAxisForTotals(!props.useSeparateAxisForTotals)}
+        />
+        <SwitchRow
+          checked={props.fetchTransactionsFromSubcategories}
+          icon={Tags}
+          id="subcategories"
+          label="Include Subcategories"
+          onCheckedChange={() => props.setFetchTransactionsFromSubcategories(!props.fetchTransactionsFromSubcategories)}
+        />
+      </div>
+    </div>
+  </div>
+);
+
+const ConfigurationMenu: React.FC<Props> = (props) => {
+  const isMobile = useIsMobile();
 
   if (!isMobile) {
     return (
@@ -109,7 +107,7 @@ const ConfigurationMenu: React.FC<Props> = (props) => {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-60 p-3">
-          <MenuContent />
+          <MenuContent {...props} />
         </PopoverContent>
       </Popover>
     );

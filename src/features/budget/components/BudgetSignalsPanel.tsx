@@ -1,26 +1,28 @@
-import { AlertTriangle, TrendingDown, TrendingUp, Zap } from 'lucide-react';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 
 import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
+import type { ConvertedValues } from '@/features/transactions';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import { cn } from '@/lib/utils';
-import type { ConvertedValues } from '@/features/transactions';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 import type { BudgetAnalyticsItem, BudgetDTO, CategoryTrendItem, OutlierItem } from '../api/types';
-import { getAllDescendantIds, formatBudgetAmount } from '../utils';
+import { formatBudgetAmount, getAllDescendantIds } from '../utils';
 
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface OvItem {
+  categoryId: number;
   name: string;
   actual: number;
   planned: number;
   over: number;
 }
 interface UbItem {
+  categoryId: number;
   name: string;
   actual: number;
 }
@@ -41,148 +43,83 @@ const MIN_TREND_PCT = 15;
 const MAX_TRENDS = 6;
 const MAX_OUTLIERS = 5;
 
-const flattenTrends = (items: CategoryTrendItem[]): CategoryTrendItem[] =>
-  items.flatMap((item) => [item, ...flattenTrends(item.children ?? [])]);
+/** Remove items whose category is an ancestor of another item in the list. */
+const removeRedundantAncestors = <T extends { categoryId: number }>(
+  items: T[],
+  categoryMap: Map<number, Category>,
+): T[] => {
+  const itemIds = new Set(items.map((t) => t.categoryId));
+  const redundantIds = new Set<number>();
 
-// ── Sub-sections ──────────────────────────────────────────────────────────────
+  for (const item of items) {
+    let parent = categoryMap.get(item.categoryId)?.parent ?? null;
+    while (parent) {
+      if (itemIds.has(parent.id)) redundantIds.add(parent.id);
+      parent = parent.parent;
+    }
+  }
 
-const SectionHead: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
-  <div className={cn('flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider mb-1.5', className)}>
-    {children}
-  </div>
-);
+  return items.filter((t) => !redundantIds.has(t.categoryId));
+};
 
-const OverspentSection: React.FC<{ items: OvItem[]; displayCurrency: string }> = ({ items, displayCurrency }) => (
-  <div>
-    <SectionHead className="text-destructive">
-      <AlertTriangle className="h-3 w-3" />
-      Overspent ({items.length})
-    </SectionHead>
-    <div className="space-y-1">
-      {items.map((item) => {
-        const fillPct = item.planned > 0 ? Math.min((item.actual / item.planned) * 100, 100) : 100;
-        return (
-          <div className="flex items-center gap-2 min-w-0" key={item.name}>
-            <span className="text-xs text-muted-foreground truncate min-w-0 w-28 shrink-0">{item.name}</span>
-            <div className="w-16 h-1 bg-muted rounded-full overflow-hidden shrink-0">
-              <div style={{ width: `${fillPct}%` }} className="h-full bg-destructive rounded-full" />
-            </div>
-            <span className="text-2xs tabular-nums text-muted-foreground/70 shrink-0">
-              {formatBudgetAmount(item.actual, displayCurrency)}
-              <span className="text-muted-foreground/40 mx-0.5">/</span>
-              {formatBudgetAmount(item.planned, displayCurrency)}
-            </span>
-            <span className="text-xs tabular-nums font-semibold font-mono text-destructive shrink-0 ml-auto">
-              +{formatBudgetAmount(item.over, displayCurrency)}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-);
+// ── Row layout: [tag] [item · item · item...] ─────────────────────────────────
 
-const UnbudgetedSection: React.FC<{ items: UbItem[]; displayCurrency: string }> = ({ items, displayCurrency }) => (
-  <div>
-    <SectionHead className="text-warning">
-      <TrendingDown className="h-3 w-3" />
-      No budget line ({items.length}) · spending without a plan
-    </SectionHead>
-    <div className="flex flex-wrap gap-1.5">
-      {items.map((item) => (
+interface SignalItem {
+  key: string;
+  node: React.ReactNode;
+}
+
+interface GroupRowProps {
+  tag: string;
+  tagClass: string;
+  tagTooltip: string;
+  lineClass: string;
+  items: SignalItem[];
+}
+
+const GroupRow: React.FC<GroupRowProps> = ({ items, lineClass, tag, tagClass, tagTooltip }) => (
+  <div className="flex items-baseline gap-2.5 px-3 py-1 min-w-0">
+    <Tooltip>
+      <TooltipTrigger asChild>
         <span
-          className="inline-flex items-center gap-1 rounded border border-warning/20 bg-background px-1.5 py-0.5 text-2xs"
-          key={item.name}
+          className={cn('font-mono text-3xs shrink-0 w-5 text-right tabular-nums leading-none cursor-help', tagClass)}
         >
-          <span className="text-muted-foreground">{item.name}</span>
-          <span className="text-warning font-medium tabular-nums">
-            {formatBudgetAmount(item.actual, displayCurrency)}
-          </span>
+          {tag}
         </span>
+      </TooltipTrigger>
+      <TooltipContent side="left">{tagTooltip}</TooltipContent>
+    </Tooltip>
+    <div className={cn('text-xs font-mono tabular-nums min-w-0 leading-snug', lineClass)}>
+      {items.map(({ key, node }, i) => (
+        <React.Fragment key={key}>
+          {i > 0 && <span className="px-1.5 text-muted-foreground/50">·</span>}
+          {node}
+        </React.Fragment>
       ))}
     </div>
   </div>
 );
 
-const OutliersSection: React.FC<{ items: OutlierItem[]; catMap: Map<number, string>; displayCurrency: string }> = ({
-  items,
-  catMap,
-  displayCurrency,
-}) => (
-  <div>
-    <SectionHead className="text-warning">
-      <Zap className="h-3 w-3" />
-      Unusual transactions ({items.length}) · amount significantly above this category's typical transaction
-    </SectionHead>
-    <div className="space-y-0.5">
-      {items.slice(0, MAX_OUTLIERS).map((outlier) => (
-        <div className="flex items-center gap-2 py-0.5 min-w-0" key={outlier.transactionId}>
-          <span className="text-2xs text-muted-foreground/60 shrink-0 w-16 truncate">
-            {catMap.get(outlier.categoryId) ?? '—'}
-          </span>
-          <span className="text-xs text-muted-foreground truncate min-w-0 flex-1">
-            {outlier.note ?? moment(outlier.executedAt).format('MMM D')}
-          </span>
-          <span className="tabular-nums text-xs font-medium shrink-0">
-            {formatBudgetAmount(outlier.convertedAmount, displayCurrency)}
-          </span>
-          <span className="tabular-nums text-2xs text-warning shrink-0">{outlier.deviation}×</span>
-          <span className="tabular-nums text-2xs text-muted-foreground/40 shrink-0">
-            typical ({formatBudgetAmount(outlier.median, displayCurrency)})
-          </span>
-          <span className="text-2xs text-muted-foreground/40 shrink-0">
-            {moment(outlier.executedAt).format('MMM D')}
-          </span>
-        </div>
-      ))}
-    </div>
-  </div>
-);
+// ── Category label with path tooltip ─────────────────────────────────────────
 
-const TrendsSection: React.FC<{ items: NonStableTrend[]; catMap: Map<number, string>; displayCurrency: string }> = ({
-  items,
-  catMap,
-  displayCurrency,
-}) => (
-  <div>
-    <SectionHead className="text-muted-foreground">Spending trends · monthly average vs prior period</SectionHead>
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-0.5">
-      {items.map((item) => {
-        const isUp = item.direction === 'up';
-        const Icon = isUp ? TrendingUp : TrendingDown;
-        const color = isUp ? 'text-warning' : 'text-success';
-        const changePct = Math.round(Math.abs(item.changePercent));
-        const name = catMap.get(item.categoryId) ?? `#${item.categoryId}`;
-        return (
-          <div className="flex items-center gap-1.5 py-0.5 min-w-0" key={item.categoryId}>
-            <Icon className={cn('h-3 w-3 shrink-0', color)} />
-            <span className="text-xs text-muted-foreground truncate min-w-0 flex-1">{name}</span>
-            <span className="text-2xs tabular-nums text-muted-foreground/50 shrink-0">
-              {formatBudgetAmount(item.olderAverage, displayCurrency)}/mo
-            </span>
-            <span className="text-2xs text-muted-foreground/30 shrink-0">→</span>
-            <span className="text-2xs tabular-nums text-muted-foreground/70 shrink-0">
-              {formatBudgetAmount(item.recentAverage, displayCurrency)}/mo
-            </span>
-            <span className={cn('text-xs tabular-nums font-semibold font-mono shrink-0 w-12 text-right', color)}>
-              {isUp ? '+' : '−'}
-              {changePct}%
-            </span>
-          </div>
-        );
-      })}
-    </div>
-    <p className="text-2xs text-muted-foreground/30 mt-1 leading-tight">
-      Each category reflects its own direct transactions only · sub-categories listed separately
-    </p>
-  </div>
-);
+const CategoryLabel: React.FC<{ path: string[] }> = ({ path }) => {
+  const leaf = path[path.length - 1];
+  if (path.length <= 1) return <span>{leaf}</span>;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="cursor-help">{leaf}</span>
+      </TooltipTrigger>
+      <TooltipContent>{path.join(' › ')}</TooltipContent>
+    </Tooltip>
+  );
+};
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const BudgetSignalsPanel: React.FC<Props> = ({ budget, analytics, displayCurrency, rates, outliers, trends }) => {
   const { data: catData } = useCategoryList();
-  const categoryMap = useMemo(() => new Map((catData?.list ?? []).map((c) => [c.id, c.name])), [catData]);
+  const categoryPathMap = useMemo(() => new Map((catData?.list ?? []).map((c) => [c.id, c.getFullPath()])), [catData]);
 
   const { overspent, unbudgeted } = useMemo(() => {
     if (!catData) return { overspent: [] as OvItem[], unbudgeted: [] as UbItem[] };
@@ -213,7 +150,7 @@ const BudgetSignalsPanel: React.FC<Props> = ({ budget, analytics, displayCurrenc
         const rate = getExchangeRate(line.plannedCurrency, displayCurrency, rates);
         const planned = rate !== null ? line.plannedAmount * rate : null;
         if (planned !== null && actual > planned && actual > 0) {
-          ovList.push({ name: cat.name, actual, planned, over: actual - planned });
+          ovList.push({ categoryId: cat.id, name: cat.name, actual, planned, over: actual - planned });
         }
       }
       for (const child of cat.children) checkOverspent(child);
@@ -222,7 +159,7 @@ const BudgetSignalsPanel: React.FC<Props> = ({ budget, analytics, displayCurrenc
     const checkUnbudgeted = (cat: Category, depth: number) => {
       if (!cat.isAffectingProfit || depth > 1) return;
       const actual = getActual(cat);
-      if (!linesMap.has(cat.id) && actual > 0) ubList.push({ name: cat.name, actual });
+      if (!linesMap.has(cat.id) && actual > 0) ubList.push({ categoryId: cat.id, name: cat.name, actual });
       for (const child of cat.children) checkUnbudgeted(child, depth + 1);
     };
 
@@ -233,16 +170,42 @@ const BudgetSignalsPanel: React.FC<Props> = ({ budget, analytics, displayCurrenc
     ovList.sort((a, b) => b.over - a.over);
     ubList.sort((a, b) => b.actual - a.actual);
 
-    return { overspent: ovList, unbudgeted: ubList };
+    const catMap = catData.map;
+    return {
+      overspent: removeRedundantAncestors(ovList, catMap),
+      unbudgeted: removeRedundantAncestors(ubList, catMap),
+    };
   }, [budget, analytics, displayCurrency, rates, catData]);
 
+  const activeCategoryIds = useMemo(() => {
+    if (!catData) return new Set<number>();
+    const analyticsMap = new Map(analytics.map((a) => [a.categoryId, a]));
+    const active = new Set<number>();
+
+    const walk = (cat: Category) => {
+      let total = 0;
+      for (const descendantId of getAllDescendantIds(cat)) {
+        const cv = analyticsMap.get(descendantId)?.convertedValues[displayCurrency];
+        if (cv) total += cv.expense;
+      }
+      if (total > 0) active.add(cat.id);
+      for (const child of cat.children) walk(child);
+    };
+
+    catData.tree.filter((c) => c.isAffectingProfit && c.type === CategoryType.Expense).forEach(walk);
+    return active;
+  }, [catData, analytics, displayCurrency]);
+
   const notableTrends = useMemo(() => {
-    if (!trends?.length) return [] as NonStableTrend[];
-    return flattenTrends(trends)
-      .filter((t): t is NonStableTrend => t.direction !== 'stable' && Math.abs(t.changePercent) >= MIN_TREND_PCT)
-      .sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent))
-      .slice(0, MAX_TRENDS);
-  }, [trends]);
+    if (!trends?.length || !catData) return [] as NonStableTrend[];
+    const filtered = trends
+      .filter(
+        (t): t is NonStableTrend =>
+          t.direction !== 'stable' && Math.abs(t.changePercent) >= MIN_TREND_PCT && activeCategoryIds.has(t.categoryId),
+      )
+      .sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent));
+    return removeRedundantAncestors(filtered, catData.map).slice(0, MAX_TRENDS);
+  }, [trends, activeCategoryIds, catData]);
 
   const unusualTxns = outliers ?? [];
 
@@ -252,38 +215,154 @@ const BudgetSignalsPanel: React.FC<Props> = ({ budget, analytics, displayCurrenc
 
   if (!hasCritical && !hasWarning && !hasTrends) return null;
 
-  const cardBorder = hasCritical ? 'border-destructive/25' : hasWarning ? 'border-warning/25' : 'border-border/50';
-  const cardBg = hasCritical ? 'bg-destructive/[0.03]' : hasWarning ? 'bg-warning/[0.03]' : 'bg-card';
+  let cardBorder = 'border-border/50';
+  if (hasCritical) cardBorder = 'border-destructive/30';
+  else if (hasWarning) cardBorder = 'border-warning/30';
 
-  const sections: { key: string; node: React.ReactElement }[] = [
-    hasCritical
-      ? { key: 'overspent', node: <OverspentSection displayCurrency={displayCurrency} items={overspent} /> }
-      : null,
-    unbudgeted.length > 0
-      ? { key: 'unbudgeted', node: <UnbudgetedSection displayCurrency={displayCurrency} items={unbudgeted} /> }
-      : null,
-    unusualTxns.length > 0
-      ? {
-          key: 'outliers',
-          node: <OutliersSection catMap={categoryMap} displayCurrency={displayCurrency} items={unusualTxns} />,
-        }
-      : null,
-    hasTrends
-      ? {
-          key: 'trends',
-          node: <TrendsSection catMap={categoryMap} displayCurrency={displayCurrency} items={notableTrends} />,
-        }
-      : null,
-  ].filter((s): s is { key: string; node: React.ReactElement } => s !== null);
+  // ── Build item lists ──────────────────────────────────────────────────────
+
+  const ovItems: SignalItem[] = overspent.map((item) => {
+    const path = categoryPathMap.get(item.categoryId) ?? [item.name];
+    return {
+      key: `ov-${item.categoryId}`,
+      node: (
+        <span>
+          <CategoryLabel path={path} />
+          <span className="text-destructive font-semibold"> +{formatBudgetAmount(item.over, displayCurrency)}</span>
+        </span>
+      ),
+    };
+  });
+
+  const nbItems: SignalItem[] = unbudgeted.map((item) => {
+    const path = categoryPathMap.get(item.categoryId) ?? [item.name];
+    return {
+      key: `nb-${item.categoryId}`,
+      node: (
+        <span>
+          <CategoryLabel path={path} />
+          <span className="text-warning"> {formatBudgetAmount(item.actual, displayCurrency)}</span>
+        </span>
+      ),
+    };
+  });
+
+  const hiItems: SignalItem[] = unusualTxns.slice(0, MAX_OUTLIERS).map((outlier) => {
+    const path = categoryPathMap.get(outlier.categoryId) ?? ['—'];
+    const date = moment(outlier.executedAt).format('MMM\u00a0D');
+    const deviationTooltip = `${outlier.deviation}× median (avg ${formatBudgetAmount(outlier.median, displayCurrency)})`;
+    const dateNode = outlier.note ? (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="text-muted-foreground cursor-help"> {date}</span>
+        </TooltipTrigger>
+        <TooltipContent>{outlier.note}</TooltipContent>
+      </Tooltip>
+    ) : (
+      <span className="text-muted-foreground"> {date}</span>
+    );
+    return {
+      key: `hi-${outlier.transactionId}`,
+      node: (
+        <span>
+          <CategoryLabel path={path} />
+          <span className="text-warning font-semibold">
+            {' '}
+            {formatBudgetAmount(outlier.convertedAmount, displayCurrency)}
+          </span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-warning/60 cursor-help"> {outlier.deviation}×</span>
+            </TooltipTrigger>
+            <TooltipContent>{deviationTooltip}</TooltipContent>
+          </Tooltip>
+          {dateNode}
+        </span>
+      ),
+    };
+  });
+
+  const upItems: SignalItem[] = notableTrends
+    .filter((t) => t.direction === 'up')
+    .map((item) => {
+      const path = categoryPathMap.get(item.categoryId) ?? [`#${item.categoryId}`];
+      const pct = Math.round(Math.abs(item.changePercent));
+      return {
+        key: `up-${item.categoryId}`,
+        node: (
+          <span>
+            <CategoryLabel path={path} />
+            <span className="text-warning font-semibold"> +{pct}%</span>
+          </span>
+        ),
+      };
+    });
+
+  const downItems: SignalItem[] = notableTrends
+    .filter((t) => t.direction === 'down')
+    .map((item) => {
+      const path = categoryPathMap.get(item.categoryId) ?? [`#${item.categoryId}`];
+      const pct = Math.round(Math.abs(item.changePercent));
+      return {
+        key: `dn-${item.categoryId}`,
+        node: (
+          <span>
+            <CategoryLabel path={path} />
+            <span className="text-success font-semibold"> \u2212{pct}%</span>
+          </span>
+        ),
+      };
+    });
 
   return (
-    <div className={cn('rounded-lg border p-3', cardBorder, cardBg)}>
-      {sections.map(({ key, node }, index) => (
-        <React.Fragment key={key}>
-          {index > 0 && <div className="border-t border-border/30 my-3" />}
-          {node}
-        </React.Fragment>
-      ))}
+    <div className={cn('rounded border overflow-hidden', cardBorder)}>
+      <div className="divide-y divide-border/10 py-0.5">
+        {ovItems.length > 0 && (
+          <GroupRow
+            items={ovItems}
+            lineClass="text-foreground"
+            tag="OV"
+            tagClass="text-destructive/60"
+            tagTooltip="Over budget"
+          />
+        )}
+        {nbItems.length > 0 && (
+          <GroupRow
+            items={nbItems}
+            lineClass="text-foreground"
+            tag="NB"
+            tagClass="text-warning/60"
+            tagTooltip="No budget planned"
+          />
+        )}
+        {hiItems.length > 0 && (
+          <GroupRow
+            items={hiItems}
+            lineClass="text-foreground"
+            tag="HI"
+            tagClass="text-warning/60"
+            tagTooltip="Unusual transaction"
+          />
+        )}
+        {upItems.length > 0 && (
+          <GroupRow
+            items={upItems}
+            lineClass="text-foreground"
+            tag="↑"
+            tagClass="text-warning/60"
+            tagTooltip="Rising spend trend"
+          />
+        )}
+        {downItems.length > 0 && (
+          <GroupRow
+            items={downItems}
+            lineClass="text-foreground"
+            tag="↓"
+            tagClass="text-success/60"
+            tagTooltip="Falling spend trend"
+          />
+        )}
+      </div>
     </div>
   );
 };

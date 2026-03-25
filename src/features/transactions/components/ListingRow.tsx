@@ -50,6 +50,7 @@ type Props = {
   sheetOpen?: boolean;
   onSheetOpenChange?: (open: boolean) => void;
   className?: string;
+  onRowClick?: () => void;
 };
 
 type CellRendererArgs = {
@@ -360,6 +361,7 @@ export const ListingRow = ({
   sheetOpen,
   onSheetOpenChange,
   className,
+  onRowClick,
 }: Props) => {
   const titleId = useId();
   const descId = useId();
@@ -367,19 +369,33 @@ export const ListingRow = ({
   const disabled = false;
   const isCompensated = transaction.isExpense() && (transaction.compensations?.length ?? 0) > 0;
 
-  const ctx = useMemo<CellRendererArgs>(
+  const cellsByKey: Record<TransactionRowColumn['key'], React.ReactNode> = useMemo(
     () => ({
-      transaction,
-      disabled,
-      inlineEdit,
-      onOpenForm,
-      onDelete,
-      onToggleDraft,
-      sheetOpen,
-      onSheetOpenChange,
-      titleId,
-      descId,
-      renderDetails,
+      id: (
+        <IdCell
+          descId={descId}
+          renderDetails={renderDetails}
+          sheetOpen={sheetOpen}
+          titleId={titleId}
+          transaction={transaction}
+          onSheetOpenChange={onSheetOpenChange}
+          onToggleDraft={onToggleDraft}
+        />
+      ),
+      account: <AccountCell disabled={disabled} inlineEdit={inlineEdit} transaction={transaction} />,
+      amount: <AmountCell disabled={disabled} inlineEdit={inlineEdit} transaction={transaction} />,
+      category: <CategoryCell disabled={disabled} inlineEdit={inlineEdit} transaction={transaction} />,
+      note: <NoteCell disabled={disabled} inlineEdit={inlineEdit} transaction={transaction} />,
+      executedAt: <ExecutedAtCell disabled={disabled} inlineEdit={inlineEdit} transaction={transaction} />,
+      actions: (
+        <ActionsCell
+          transaction={transaction}
+          onDelete={onDelete}
+          onOpenForm={onOpenForm}
+          onSheetOpenChange={onSheetOpenChange}
+          onToggleDraft={onToggleDraft}
+        />
+      ),
     }),
     [
       transaction,
@@ -396,55 +412,25 @@ export const ListingRow = ({
     ],
   );
 
-  const cellsByKey: Record<TransactionRowColumn['key'], React.ReactNode> = useMemo(
-    () => ({
-      id: (
-        <IdCell
-          descId={ctx.descId}
-          renderDetails={ctx.renderDetails}
-          sheetOpen={ctx.sheetOpen}
-          titleId={ctx.titleId}
-          transaction={ctx.transaction}
-          onSheetOpenChange={ctx.onSheetOpenChange}
-          onToggleDraft={ctx.onToggleDraft}
-        />
-      ),
-      account: <AccountCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} transaction={ctx.transaction} />,
-      amount: <AmountCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} transaction={ctx.transaction} />,
-      category: <CategoryCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} transaction={ctx.transaction} />,
-      note: <NoteCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} transaction={ctx.transaction} />,
-      executedAt: <ExecutedAtCell disabled={ctx.disabled} inlineEdit={ctx.inlineEdit} transaction={ctx.transaction} />,
-      actions: (
-        <ActionsCell
-          transaction={ctx.transaction}
-          onDelete={ctx.onDelete}
-          onOpenForm={ctx.onOpenForm}
-          onSheetOpenChange={ctx.onSheetOpenChange}
-          onToggleDraft={ctx.onToggleDraft}
-        />
-      ),
-    }),
-    [ctx],
-  );
-
-  const onView = useCallback(() => ctx.onSheetOpenChange?.(true), [ctx]);
-  const onEdit = useCallback(() => ctx.onOpenForm(ctx.transaction), [ctx]);
-  const onRemove = useCallback(() => ctx.onDelete(ctx.transaction), [ctx]);
-  const onUnmarkDraft = useCallback(() => ctx.onToggleDraft?.(ctx.transaction), [ctx]);
+  const onView = useCallback(() => onSheetOpenChange?.(true), [onSheetOpenChange]);
+  const onEdit = useCallback(() => onOpenForm(transaction), [onOpenForm, transaction]);
+  const onRemove = useCallback(() => onDelete(transaction), [onDelete, transaction]);
+  const onUnmarkDraft = useCallback(() => onToggleDraft?.(transaction), [onToggleDraft, transaction]);
 
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
         <TableRow
           className={cn(
-            'text-xs',
+            'text-xs cursor-pointer',
             {
-              'bg-warning/20 hover:bg-warning/30': ctx.transaction.isDraft,
-              'bg-warning/5 hover:bg-warning/10': isCompensated && !ctx.transaction.isDraft,
-              'hover:bg-muted/50': !ctx.transaction.isDraft && !isCompensated,
+              'bg-warning/20 hover:bg-warning/30': transaction.isDraft,
+              'bg-warning/5 hover:bg-warning/10': isCompensated && !transaction.isDraft,
+              'hover:bg-muted/50': !transaction.isDraft && !isCompensated,
             },
             className,
           )}
+          onClick={onRowClick}
         >
           <TableCell className={cellClassName(compact, 'w-4')} />
 
@@ -458,10 +444,8 @@ export const ListingRow = ({
 
       <ContextMenuContent className="w-56">
         <ContextMenuLabel className="flex items-center justify-between">
-          <span className="truncate">Transaction #{ctx.transaction.id}</span>
-          <span className="text-xs text-muted-foreground tabular-nums">
-            {ctx.transaction.executedAt.format('HH:mm')}
-          </span>
+          <span className="truncate">Transaction #{transaction.id}</span>
+          <span className="text-xs text-muted-foreground tabular-nums">{transaction.executedAt.format('HH:mm')}</span>
         </ContextMenuLabel>
 
         <ContextMenuSeparator />
@@ -476,7 +460,7 @@ export const ListingRow = ({
           Edit
         </ContextMenuItem>
 
-        {ctx.transaction.isDraft && ctx.onToggleDraft && (
+        {transaction.isDraft && onToggleDraft && (
           <>
             <ContextMenuSeparator />
             <ContextMenuItem onSelect={onUnmarkDraft}>

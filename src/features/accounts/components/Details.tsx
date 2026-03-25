@@ -161,12 +161,13 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate, onSetReviewD
 
     if (!confirmed) return;
 
-    account.isDisplayedOnSidebar = !account.isDisplayedOnSidebar;
-    onAccountUpdate(account, { isDisplayedOnSidebar: account.isDisplayedOnSidebar });
+    const newSidebarVisibility = !account.isDisplayedOnSidebar;
+    onAccountUpdate(account, { isDisplayedOnSidebar: newSidebarVisibility });
   };
 
   const [preset, setPreset] = useState<PresetLabel>('3M');
   const bi = account.bankIntegration;
+  const SidebarIcon = account.isDisplayedOnSidebar ? Star : StarOff;
 
   return (
     <div className="h-full flex flex-col min-h-0 p-4">
@@ -200,11 +201,7 @@ const AccountDetail: React.FC<Props> = ({ account, onAccountUpdate, onSetReviewD
                   className="ml-auto h-7 w-7 shrink-0"
                   onClick={toggleSidebarVisibility}
                 >
-                  {account.isDisplayedOnSidebar ? (
-                    <Star className="h-3.5 w-3.5" />
-                  ) : (
-                    <StarOff className="h-3.5 w-3.5" />
-                  )}
+                  <SidebarIcon className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>{account.isDisplayedOnSidebar ? 'Pinned to sidebar' : 'Pin to sidebar'}</TooltipContent>

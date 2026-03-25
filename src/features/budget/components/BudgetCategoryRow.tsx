@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { type Category } from '@/features/categories';
 
 import type { BudgetLineDTO, CategoryDayStats, CategoryTrendItem, SeasonalItem } from '../api/types';
-import { formatBudgetAmount } from '../utils';
+import { formatBudgetAmount, getRemainingColorClass, getTrendColorClass } from '../utils';
 
 import type { DisplayCurrency } from './BudgetDisplayCurrency';
 import { DISPLAY_CURRENCIES } from './BudgetDisplayCurrency';
@@ -72,17 +72,7 @@ const BudgetCategoryRow: React.FC<Props> = ({
 
   const pct = hasPlanned && plannedInDisplayCurrency! > 0 ? (actualValue / plannedInDisplayCurrency!) * 100 : null;
 
-  const remainingColorClass = (() => {
-    if (isExpenseSection) {
-      if (remaining !== null && remaining < 0) return 'text-destructive';
-      if (pct !== null && pct > 80) return 'text-warning';
-      return 'text-success';
-    }
-    // Income: red only if significantly under target
-    if (pct !== null && pct < 80) return 'text-destructive';
-    if (pct !== null && pct < 100) return 'text-warning';
-    return 'text-success';
-  })();
+  const remainingColorClass = getRemainingColorClass(isExpenseSection, remaining, pct);
 
   const startEdit = () => {
     setEditAmount(line ? String(line.plannedAmount) : '');
@@ -105,7 +95,8 @@ const BudgetCategoryRow: React.FC<Props> = ({
     if (e.key === 'Escape') cancelEdit();
   };
 
-  const indentClass = depth === 0 ? 'pl-4' : depth === 1 ? 'pl-8' : 'pl-12';
+  const DEPTH_INDENT = ['pl-4', 'pl-8', 'pl-12'] as const;
+  const indentClass = DEPTH_INDENT[Math.min(depth, 2)];
 
   return (
     <tr className={cn('group border-b hover:bg-muted/30 transition-colors', depth > 0 && 'text-muted-foreground')}>
@@ -242,18 +233,7 @@ const BudgetCategoryRow: React.FC<Props> = ({
                     </div>
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-muted-foreground">Change</span>
-                      <span
-                        className={cn(
-                          'font-semibold',
-                          isExpenseSection
-                            ? trend.direction === 'up'
-                              ? 'text-destructive'
-                              : 'text-success'
-                            : trend.direction === 'up'
-                              ? 'text-success'
-                              : 'text-destructive',
-                        )}
-                      >
+                      <span className={cn('font-semibold', getTrendColorClass(isExpenseSection, trend.direction))}>
                         {trend.direction === 'up' ? '+' : ''}
                         {trend.changePercent}%
                       </span>
@@ -298,13 +278,7 @@ const BudgetCategoryRow: React.FC<Props> = ({
                   <span
                     className={cn(
                       'inline-flex items-center gap-0.5 text-2xs font-medium',
-                      isExpenseSection
-                        ? trend.direction === 'up'
-                          ? 'text-destructive'
-                          : 'text-success'
-                        : trend.direction === 'up'
-                          ? 'text-success'
-                          : 'text-destructive',
+                      getTrendColorClass(isExpenseSection, trend.direction),
                     )}
                   >
                     {trend.direction === 'up' ? (

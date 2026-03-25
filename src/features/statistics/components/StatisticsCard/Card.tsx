@@ -48,7 +48,7 @@ const StatisticsCardSkeleton = () => (
   </Card>
 );
 
-export const StatisticsCard: React.FC<Props> = ({ showPercentageIndicator = false, config }) => {
+const StatisticsCard: React.FC<Props> = ({ showPercentageIndicator = false, config }) => {
   const { title, type, categories, timeframe, period, comparison, statType } = config;
   const {
     currentData,

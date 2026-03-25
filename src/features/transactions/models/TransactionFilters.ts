@@ -2,7 +2,15 @@ import moment, { type Moment } from 'moment';
 
 import BaseFilters from '@/models/BaseFilters';
 import { type Type as TransactionType } from '@/features/transactions';
-import { readParamArray, readParamBool, readParamMoment, readParamString } from '@/lib/url/searchParams';
+import {
+  readParamAmountRange,
+  readParamArray,
+  readParamBool,
+  readParamMoment,
+  readParamString,
+  type ScalarOrArray,
+  toAmountRange,
+} from '@/lib/url/searchParams';
 
 interface TransactionFiltersProps {
   searchTerm?: string;
@@ -19,33 +27,12 @@ interface TransactionFiltersProps {
   currencies?: string[];
 }
 
-type Scalar = string | number | boolean | null | undefined;
-type ScalarOrArray<T extends Scalar = Scalar> = T | T[];
-
 const isMomentLike = (v: unknown): v is Moment => moment.isMoment(v);
 
 const toStringArray = (value: ScalarOrArray): string[] => {
   if (value === null || value === undefined) return [];
   const arr = Array.isArray(value) ? value : [value];
   return arr.map((v) => String(v).trim()).filter((v) => v.length > 0);
-};
-
-/**
- * Positional variant for amountRange: preserves NaN as a sentinel for
- * "no value at this position" so [NaN, 500] means "no min, max=500".
- * Returns [] when all positions are empty (no effective filter).
- */
-const toAmountRange = (value: ScalarOrArray): number[] => {
-  if (value === null || value === undefined) return [];
-  const arr = Array.isArray(value) ? value : [value];
-  if (arr.length === 0) return [];
-  const mapped = arr.map((v) => {
-    if (v === null || v === undefined) return NaN;
-    return typeof v === 'number' ? v : Number(String(v).trim());
-  });
-  // All positions empty → clear the filter entirely
-  if (mapped.every((n) => !Number.isFinite(n))) return [];
-  return mapped;
 };
 
 const toMixedIdArray = (value: ScalarOrArray): Array<string | number> => {
@@ -145,16 +132,8 @@ export class TransactionFilters extends BaseFilters {
       case 'currencies':
         return readParamArray(params, paramKey);
 
-      case 'amountRange': {
-        const raw = params.get(paramKey);
-        if (!raw) return [];
-        // Positional CSV: ",500" → [NaN, 500] | "100," → [100, NaN] | "100,500" → [100, 500]
-        const [minStr, maxStr] = raw.split(',').map((s) => s.trim());
-        const min = minStr ? Number(minStr) : NaN;
-        const max = maxStr !== undefined ? (maxStr ? Number(maxStr) : NaN) : NaN;
-        const result = [min, max];
-        return result.every((n) => !Number.isFinite(n)) ? [] : result;
-      }
+      case 'amountRange':
+        return readParamAmountRange(params, paramKey);
 
       case 'withNestedCategories':
       case 'isDraft':

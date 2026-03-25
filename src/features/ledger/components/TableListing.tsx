@@ -23,16 +23,20 @@ import {
   TransferListingRow as TransferRow,
   useMutations as useTransfersMutations,
 } from '@/features/transfers';
-import { confirm } from '@/lib/confirmation';
 import { cn } from '@/lib/utils';
+import { confirm } from '@/lib/confirmation';
+
+import { type GroupedItem } from '../hooks/useList';
+import { buildDateList, itemKey, sortItems } from '../utils';
 
 interface Props {
-  isLoading: boolean;
-  groupedItems: [Moment, (Transaction | Transfer)[], number, number, number, number][];
+  groupedItems: GroupedItem[];
   after: Moment;
   before: Moment;
   showEmptyDays?: boolean;
   isReversedOrder?: boolean;
+  selectedKey?: string | null;
+  onSelectItem?: (item: Transaction | Transfer) => void;
 }
 
 const TableListing: React.FC<Props> = ({
@@ -41,22 +45,13 @@ const TableListing: React.FC<Props> = ({
   before,
   showEmptyDays = true,
   isReversedOrder = false,
+  selectedKey,
+  onSelectItem,
 }) => {
   const { update: updateTransaction, delete: deleteTransaction, isUpdating } = useTransactionsMutations();
   const { delete: deleteTransfer } = useTransfersMutations();
   const { openForm } = useFormContext();
-
   const [openSheetId, setOpenSheetId] = useState<number | null>(null);
-
-  const dates = useMemo(() => {
-    const dayList: Moment[] = [];
-    const current = after.clone();
-    while (current.isSameOrBefore(before)) {
-      dayList.push(current.clone());
-      current.add(1, 'day');
-    }
-    return isReversedOrder ? dayList.reverse() : dayList;
-  }, [after, before, isReversedOrder]);
 
   const inlineEdit = useInlineEdit({
     isUpdating,
@@ -71,33 +66,42 @@ const TableListing: React.FC<Props> = ({
   });
 
   const handleDelete = async (item: Transaction | Transfer) => {
-    const itemType = 'fromExpense' in item ? 'transfer' : 'transaction';
+    const isTransferItem = 'fromExpense' in item;
+    const itemType = isTransferItem ? 'transfer' : 'transaction';
 
-    const isConfirmed = await confirm({
-      title: 'Are you absolutely sure?',
-      description: `You are about to delete ${itemType} #${item.id}. This action cannot be undone.`,
+    let description: string;
+    if (isTransferItem) {
+      const t = item as Transfer;
+      const notePart = t.note ? ` — "${t.note}"` : '';
+      description = `Delete transfer ${t.fromExpense.account.name} → ${t.toIncome.account.name}${notePart}. This cannot be undone.`;
+    } else {
+      const tx = item as Transaction;
+      const notePart = tx.note ? ` — "${tx.note}"` : '';
+      description = `Delete ${tx.type} of ${Math.abs(tx.amount).toLocaleString()} ${tx.account.currency} from ${tx.account.name}${notePart}. This cannot be undone.`;
+    }
+
+    const confirmed = await confirm({
+      title: `Delete ${itemType}?`,
+      description,
       confirmText: 'Delete',
       cancelText: 'Cancel',
     });
+    if (!confirmed) return;
 
-    if (!isConfirmed) return;
-
-    if ('fromExpense' in item) {
+    if (isTransferItem) {
       await deleteTransfer(Number(item.id));
       return;
     }
-
-    deleteTransaction(Number(item.id));
+    deleteTransaction(Number((item as Transaction).id));
   };
 
   const toggleDraft = async (transaction: Transaction) => {
     const confirmed = await confirm({
-      title: 'Are you sure you want to unmark this transaction as draft?',
-      description: `This will unmark transaction #${transaction.id} as not draft.`,
-      confirmText: 'Confirm',
+      title: 'Mark as confirmed?',
+      description: 'This will remove the draft status and mark the transaction as confirmed.',
+      confirmText: 'Mark as confirmed',
       cancelText: 'Cancel',
     });
-
     if (!confirmed) return;
 
     try {
@@ -111,6 +115,8 @@ const TableListing: React.FC<Props> = ({
       toast.error('Failed to unmark transaction as not draft. Please try again.');
     }
   };
+
+  const dates = useMemo(() => buildDateList(after, before, isReversedOrder), [after, before, isReversedOrder]);
 
   const transactionColumns = useMemo<TransactionRowColumn[]>(
     () => [
@@ -127,16 +133,16 @@ const TableListing: React.FC<Props> = ({
 
   return (
     <div>
-      <Table className="min-w-[860px] table-fixed">
+      <Table className="min-w-[920px] table-fixed">
         <colgroup>
           <col className="w-4" />
           <col className="w-24" />
-          <col className="w-[220px]" />
+          <col className="w-[260px]" />
+          <col className="w-52" />
           <col className="w-40" />
-          <col className="w-32" />
           <col className="w-20" />
           <col />
-          <col className="w-24" />
+          <col className="w-28" />
         </colgroup>
         <TableHeader className="sr-only">
           <TableRow>
@@ -152,18 +158,12 @@ const TableListing: React.FC<Props> = ({
         </TableHeader>
 
         {dates.map((date) => {
-          const found =
-            groupedItems?.find((group) => group[0].isSame(date, 'day')) ??
-            ([null, [], 0, 0, 0, 0] as [Moment | null, (Transaction | Transfer)[], number, number, number, number]);
-
-          const [, items, transactionsValue, transfersValue, transactionsCount, transfersCount] = found as [
-            Moment | null,
-            (Transaction | Transfer)[],
-            number,
-            number,
-            number,
-            number,
-          ];
+          const group = groupedItems?.find((g) => g.date.isSame(date, 'day'));
+          const items = group?.items ?? [];
+          const transactionsValue = group?.transactionsValue ?? 0;
+          const transfersValue = group?.transfersValue ?? 0;
+          const transactionsCount = group?.transactionsCount ?? 0;
+          const transfersCount = group?.transfersCount ?? 0;
 
           if (!showEmptyDays && items.length === 0) return null;
 
@@ -198,53 +198,47 @@ const TableListing: React.FC<Props> = ({
                     )}
                   </>
                 }
-                rowClassName={cn({
-                  'bg-success/10': transactionsValue > 0,
-                  'bg-destructive/10': transactionsValue < 0,
-                })}
+                rowClassName="bg-muted/30"
               />
 
-              {[...items]
-                .sort((a, b) =>
-                  isReversedOrder
-                    ? (b.executedAt as Moment).valueOf() - (a.executedAt as Moment).valueOf()
-                    : (a.executedAt as Moment).valueOf() - (b.executedAt as Moment).valueOf(),
-                )
-                .map((item) => {
-                  if (item instanceof Transfer || 'fromExpense' in (item as object)) {
-                    const transfer = item as Transfer;
-
-                    return (
-                      <TransferRow
-                        renderDetails={(transferItem) => <TransferDetails transfer={transferItem} />}
-                        sheetOpen={openSheetId === transfer.id}
-                        transfer={transfer}
-                        key={`transfer-${transfer.id}`}
-                        onDelete={(transferItem) => handleDelete(transferItem)}
-                        onEdit={(transferItem) => openForm(FormType.Transfer, transferItem)}
-                        onSheetOpenChange={(open) => setOpenSheetId(open ? transfer.id : null)}
-                      />
-                    );
-                  }
-
-                  const transaction = item as Transaction;
-
+              {sortItems(items, isReversedOrder).map((item) => {
+                if (item instanceof Transfer || 'fromExpense' in (item as object)) {
+                  const transfer = item as Transfer;
+                  const isSelected = selectedKey === itemKey(transfer);
                   return (
-                    <TransactionRow
-                      columns={transactionColumns}
-                      inlineEdit={inlineEdit}
-                      renderDetails={(transactionItem) => <TransactionDetails transaction={transactionItem} />}
-                      sheetOpen={openSheetId === transaction.id}
-                      transaction={transaction}
-                      className="text-xs"
-                      key={`transaction-${transaction.id}`}
-                      onDelete={(transactionItem) => handleDelete(transactionItem)}
-                      onOpenForm={(transactionItem) => openForm(FormType.Transaction, transactionItem)}
-                      onSheetOpenChange={(open) => setOpenSheetId(open ? transaction.id : null)}
-                      onToggleDraft={toggleDraft}
+                    <TransferRow
+                      renderDetails={(transferItem) => <TransferDetails transfer={transferItem} />}
+                      sheetOpen={openSheetId === transfer.id}
+                      transfer={transfer}
+                      className={cn({ 'bg-accent/50': isSelected })}
+                      key={`transfer-${transfer.id}`}
+                      onDelete={(transferItem) => handleDelete(transferItem)}
+                      onEdit={(transferItem) => openForm(FormType.Transfer, transferItem)}
+                      onRowClick={() => onSelectItem?.(transfer)}
+                      onSheetOpenChange={(open) => setOpenSheetId(open ? transfer.id : null)}
                     />
                   );
-                })}
+                }
+
+                const transaction = item as Transaction;
+                const isSelected = selectedKey === itemKey(transaction);
+                return (
+                  <TransactionRow
+                    columns={transactionColumns}
+                    inlineEdit={inlineEdit}
+                    renderDetails={(transactionItem) => <TransactionDetails transaction={transactionItem} />}
+                    sheetOpen={openSheetId === transaction.id}
+                    transaction={transaction}
+                    className={cn('text-xs', { 'bg-accent/50': isSelected })}
+                    key={`transaction-${transaction.id}`}
+                    onDelete={(transactionItem) => handleDelete(transactionItem)}
+                    onOpenForm={(transactionItem) => openForm(FormType.Transaction, transactionItem)}
+                    onRowClick={() => onSelectItem?.(transaction)}
+                    onSheetOpenChange={(open) => setOpenSheetId(open ? transaction.id : null)}
+                    onToggleDraft={toggleDraft}
+                  />
+                );
+              })}
             </tbody>
           );
         })}

@@ -129,7 +129,7 @@ const DateDisplay: React.FC<Props> = ({
     if (date.isSame(now.clone().subtract(1, 'day'), 'day')) return 'yesterday';
     if (date.isSame(now.clone().add(1, 'day'), 'day')) return 'tomorrow';
 
-    const diffDays = date.startOf('day').diff(now.startOf('day'), 'days');
+    const diffDays = date.clone().startOf('day').diff(now.clone().startOf('day'), 'days');
     if (Math.abs(diffDays) <= 6) return date.format('ddd'); // Mon/Tue/...
 
     return date.fromNow();

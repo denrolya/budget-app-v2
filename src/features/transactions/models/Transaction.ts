@@ -107,12 +107,12 @@ export const useTransactionFactory = () => {
         const compAccount = accounts.find((acc: Account) => acc.id === comp.account.id);
         const compCategory = categories.find((cat: Category) => cat.id === comp.category.id);
 
-        if (!account) {
-          throw new Error(`Account with ID ${rawTransaction.account.id} not found`);
+        if (!compAccount) {
+          throw new Error(`Account with ID ${comp.account.id} not found`);
         }
 
-        if (!category) {
-          throw new Error(`Category with ID ${rawTransaction.category.id} not found`);
+        if (!compCategory) {
+          throw new Error(`Category with ID ${comp.category.id} not found`);
         }
 
         return new Transaction({
