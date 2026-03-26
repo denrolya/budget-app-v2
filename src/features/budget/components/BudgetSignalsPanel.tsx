@@ -1,7 +1,8 @@
 import moment from 'moment';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { type Category, CategoryType, useList as useCategoryList } from '@/features/categories';
+import { TransactionsDrawer, type DrawerListingTarget } from '@/features/statistics';
 import type { ConvertedValues } from '@/features/transactions';
 import { getExchangeRate } from '@/lib/getExchangeRates';
 import { cn } from '@/lib/utils';
@@ -100,15 +101,25 @@ const GroupRow: React.FC<GroupRowProps> = ({ items, lineClass, tag, tagClass, ta
   </div>
 );
 
-// ── Category label with path tooltip ─────────────────────────────────────────
+// ── Category label with path tooltip and optional click ───────────────────────
 
-const CategoryLabel: React.FC<{ path: string[] }> = ({ path }) => {
+const CategoryLabel: React.FC<{ path: string[]; onClick?: () => void }> = ({ onClick, path }) => {
   const leaf = path[path.length - 1];
-  if (path.length <= 1) return <span>{leaf}</span>;
+  const spanClass = cn(onClick ? 'cursor-pointer hover:underline' : path.length > 1 ? 'cursor-help' : undefined);
+
+  if (path.length <= 1) {
+    return (
+      <span className={spanClass} onClick={onClick}>
+        {leaf}
+      </span>
+    );
+  }
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="cursor-help">{leaf}</span>
+        <span className={spanClass} onClick={onClick}>
+          {leaf}
+        </span>
       </TooltipTrigger>
       <TooltipContent>{path.join(' › ')}</TooltipContent>
     </Tooltip>
@@ -120,6 +131,22 @@ const CategoryLabel: React.FC<{ path: string[] }> = ({ path }) => {
 const BudgetSignalsPanel: React.FC<Props> = ({ budget, analytics, displayCurrency, rates, outliers, trends }) => {
   const { data: catData } = useCategoryList();
   const categoryPathMap = useMemo(() => new Map((catData?.list ?? []).map((c) => [c.id, c.getFullPath()])), [catData]);
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerTarget, setDrawerTarget] = useState<DrawerListingTarget | null>(null);
+
+  const budgetTimeframe = useMemo(
+    () => ({ after: moment(budget.startDate), before: moment(budget.endDate) }),
+    [budget.startDate, budget.endDate],
+  );
+
+  const openCategory = (categoryId: number, name: string) => {
+    setDrawerTarget({
+      title: `Transactions in ${name}`,
+      initialFilters: { categories: [categoryId], withNestedCategories: true },
+    });
+    setDrawerOpen(true);
+  };
 
   const { overspent, unbudgeted } = useMemo(() => {
     if (!catData) return { overspent: [] as OvItem[], unbudgeted: [] as UbItem[] };
@@ -227,7 +254,7 @@ const BudgetSignalsPanel: React.FC<Props> = ({ budget, analytics, displayCurrenc
       key: `ov-${item.categoryId}`,
       node: (
         <span>
-          <CategoryLabel path={path} />
+          <CategoryLabel path={path} onClick={() => openCategory(item.categoryId, path[path.length - 1])} />
           <span className="text-destructive font-semibold"> +{formatBudgetAmount(item.over, displayCurrency)}</span>
         </span>
       ),
@@ -240,7 +267,7 @@ const BudgetSignalsPanel: React.FC<Props> = ({ budget, analytics, displayCurrenc
       key: `nb-${item.categoryId}`,
       node: (
         <span>
-          <CategoryLabel path={path} />
+          <CategoryLabel path={path} onClick={() => openCategory(item.categoryId, path[path.length - 1])} />
           <span className="text-warning"> {formatBudgetAmount(item.actual, displayCurrency)}</span>
         </span>
       ),
@@ -265,7 +292,7 @@ const BudgetSignalsPanel: React.FC<Props> = ({ budget, analytics, displayCurrenc
       key: `hi-${outlier.transactionId}`,
       node: (
         <span>
-          <CategoryLabel path={path} />
+          <CategoryLabel path={path} onClick={() => openCategory(outlier.categoryId, path[path.length - 1])} />
           <span className="text-warning font-semibold">
             {' '}
             {formatBudgetAmount(outlier.convertedAmount, displayCurrency)}
@@ -291,7 +318,7 @@ const BudgetSignalsPanel: React.FC<Props> = ({ budget, analytics, displayCurrenc
         key: `up-${item.categoryId}`,
         node: (
           <span>
-            <CategoryLabel path={path} />
+            <CategoryLabel path={path} onClick={() => openCategory(item.categoryId, path[path.length - 1])} />
             <span className="text-warning font-semibold"> +{pct}%</span>
           </span>
         ),
@@ -307,63 +334,76 @@ const BudgetSignalsPanel: React.FC<Props> = ({ budget, analytics, displayCurrenc
         key: `dn-${item.categoryId}`,
         node: (
           <span>
-            <CategoryLabel path={path} />
-            <span className="text-success font-semibold"> \u2212{pct}%</span>
+            <CategoryLabel path={path} onClick={() => openCategory(item.categoryId, path[path.length - 1])} />
+            <span className="text-success font-semibold">
+              {' '}
+              {'\u2212'}
+              {pct}%
+            </span>
           </span>
         ),
       };
     });
 
   return (
-    <div className={cn('rounded border overflow-hidden', cardBorder)}>
-      <div className="divide-y divide-border/10 py-0.5">
-        {ovItems.length > 0 && (
-          <GroupRow
-            items={ovItems}
-            lineClass="text-foreground"
-            tag="OV"
-            tagClass="text-destructive/60"
-            tagTooltip="Over budget"
-          />
-        )}
-        {nbItems.length > 0 && (
-          <GroupRow
-            items={nbItems}
-            lineClass="text-foreground"
-            tag="NB"
-            tagClass="text-warning/60"
-            tagTooltip="No budget planned"
-          />
-        )}
-        {hiItems.length > 0 && (
-          <GroupRow
-            items={hiItems}
-            lineClass="text-foreground"
-            tag="HI"
-            tagClass="text-warning/60"
-            tagTooltip="Unusual transaction"
-          />
-        )}
-        {upItems.length > 0 && (
-          <GroupRow
-            items={upItems}
-            lineClass="text-foreground"
-            tag="↑"
-            tagClass="text-warning/60"
-            tagTooltip="Rising spend trend"
-          />
-        )}
-        {downItems.length > 0 && (
-          <GroupRow
-            items={downItems}
-            lineClass="text-foreground"
-            tag="↓"
-            tagClass="text-success/60"
-            tagTooltip="Falling spend trend"
-          />
-        )}
+    <>
+      <div className={cn('rounded border overflow-hidden', cardBorder)}>
+        <div className="divide-y divide-border/10 py-0.5">
+          {ovItems.length > 0 && (
+            <GroupRow
+              items={ovItems}
+              lineClass="text-foreground"
+              tag="OV"
+              tagClass="text-destructive/60"
+              tagTooltip="Over budget"
+            />
+          )}
+          {nbItems.length > 0 && (
+            <GroupRow
+              items={nbItems}
+              lineClass="text-foreground"
+              tag="NB"
+              tagClass="text-warning/60"
+              tagTooltip="No budget planned"
+            />
+          )}
+          {hiItems.length > 0 && (
+            <GroupRow
+              items={hiItems}
+              lineClass="text-foreground"
+              tag="HI"
+              tagClass="text-warning/60"
+              tagTooltip="Unusual transaction"
+            />
+          )}
+          {upItems.length > 0 && (
+            <GroupRow
+              items={upItems}
+              lineClass="text-foreground"
+              tag="↑"
+              tagClass="text-warning/60"
+              tagTooltip="Rising spend trend"
+            />
+          )}
+          {downItems.length > 0 && (
+            <GroupRow
+              items={downItems}
+              lineClass="text-foreground"
+              tag="↓"
+              tagClass="text-success/60"
+              tagTooltip="Falling spend trend"
+            />
+          )}
+        </div>
       </div>
-    </div>
+
+      <TransactionsDrawer
+        open={drawerOpen}
+        target={drawerTarget}
+        timeframe={budgetTimeframe}
+        onOpenChange={setDrawerOpen}
+      />
+    </>
   );
 };
 

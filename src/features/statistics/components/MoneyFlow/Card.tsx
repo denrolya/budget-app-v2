@@ -301,7 +301,7 @@ export const MoneyFlowCard: React.FC<Props> = ({ controlledTimeframe, className 
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
         {isLoading && <MoneyFlowSkeleton />}
         {!isLoading && (
-          <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden" key={chartType}>
+          <div className="flex-1 min-h-0 overflow-hidden" key={chartType}>
             {chartContent}
           </div>
         )}

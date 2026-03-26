@@ -1,27 +1,31 @@
 import moment from 'moment';
 import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import { Navigate, Route, Routes, useLocation, useMatch, useNavigate, useParams } from 'react-router-dom';
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useMatch,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
 
 import PageWithSidebar from '@/components/layout/PageWithSidebar';
 import { MOMENT_DATE_VIEW_FORMAT_2 } from '@/constants/datetime';
-import { DistributionDonutCard } from '@/features/statistics';
-import MoneyFlowCard from '@/features/statistics/components/MoneyFlow/Card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 import { useExchangeRatesQuery } from '@/services/api/exchangeRates.queries';
 
 import { useBudget, useBudgetAnalytics, useBudgetInsights, useCategoryDailyStats, useListBudgets } from './api';
-import BudgetAccountDistribution from './components/BudgetAccountDistribution';
+import BudgetAnalyticsTab from './components/BudgetAnalyticsTab';
 import BudgetSignalsPanel from './components/BudgetSignalsPanel';
 import BudgetDisplayCurrency, { type DisplayCurrency } from './components/BudgetDisplayCurrency';
-import BudgetDistributionChart from './components/BudgetDistributionChart';
 import BudgetExportButton from './components/BudgetExportButton';
 import BudgetFillFromHistoryButton from './components/BudgetFillFromHistoryButton';
-import BudgetHeatmapSection from './components/BudgetHeatmapSection';
-import BudgetPaceChart from './components/BudgetPaceChart';
 import BudgetSidebar from './components/BudgetSidebar';
 import BudgetSummaryCards from './components/BudgetSummaryCards';
 import BudgetTable from './components/BudgetTable';
@@ -76,14 +80,28 @@ const BudgetIndex: React.FC = () => {
   );
 };
 
+// ─── View type ────────────────────────────────────────────────────────────────
+
+type BudgetView = 'plan' | 'analytics';
+
+const TAB_LABELS: { value: BudgetView; label: string }[] = [
+  { value: 'plan', label: 'Plan' },
+  { value: 'analytics', label: 'Analytics' },
+];
+
 // ─── Budget detail ─────────────────────────────────────────────────────────────
 
 const BudgetDetailRoute: React.FC = () => {
   const { budgetId } = useParams<{ budgetId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const autoOpenFill = !!(location.state as Record<string, unknown> | null)?.fillFromHistory;
   const [displayCurrency, setDisplayCurrency] = useState<DisplayCurrency>('EUR');
+
+  const view = (searchParams.get('view') ?? 'plan') as BudgetView;
+  const setView = (v: BudgetView) => setSearchParams({ view: v }, { replace: true });
 
   const id = budgetId ? Number(budgetId) : null;
 
@@ -98,7 +116,6 @@ const BudgetDetailRoute: React.FC = () => {
   const analytics = analyticsData?.data ?? [];
   const dailyStats = dailyStatsData?.data;
 
-  // Prev / next navigation — sort by startDate asc
   const { prevId, nextId } = useMemo(() => {
     if (!allBudgets || !id) return { prevId: null, nextId: null };
     const sorted = [...allBudgets].sort((a, b) => a.startDate.localeCompare(b.startDate));
@@ -126,15 +143,35 @@ const BudgetDetailRoute: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col min-h-0">
-      {/* Header */}
+      {/* Header — tab selector inline, summary cards only on plan view */}
       <PageWithSidebar.Header
         title={title}
         subContent={
-          <BudgetSummaryCards analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
+          view === 'plan' ? (
+            <BudgetSummaryCards analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
+          ) : undefined
         }
-        className="px-4 pt-2 pb-0"
+        className={view === 'plan' ? 'px-4 pt-2 pb-0' : 'px-4 pt-2'}
       >
-        {/* Prev / Next navigation */}
+        <div className="flex items-center bg-muted rounded p-0.5">
+          {TAB_LABELS.map((tab) => (
+            <button
+              className={cn(
+                'px-3 py-1 text-2xs font-medium rounded transition-colors',
+                view === tab.value
+                  ? 'bg-background shadow-sm text-foreground'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+              key={tab.value}
+              onClick={() => setView(tab.value)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div aria-hidden className="w-px h-4 bg-border shrink-0" />
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -199,89 +236,18 @@ const BudgetDetailRoute: React.FC = () => {
         </Tooltip>
       </PageWithSidebar.Header>
 
-      {/* Scrollable content */}
-      <ScrollArea className="flex-1 min-h-0">
-        <div className="p-4 space-y-6 pb-8">
-          {/* Signals */}
-          <BudgetSignalsPanel
-            analytics={analytics}
-            budget={budget}
-            displayCurrency={displayCurrency}
-            outliers={insightsData?.outliers}
-            rates={rates}
-            trends={insightsData?.trends}
-          />
-
-          {/* Pace chart + Heatmap row */}
-          <div className="grid grid-cols-1 xl:grid-cols-[1fr_2fr] gap-4 items-stretch">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
-                Expense progress
-              </h2>
-              <div className="rounded-lg border bg-card p-2 flex-1">
-                <BudgetPaceChart
-                  analytics={analytics}
-                  budget={budget}
-                  displayCurrency={displayCurrency}
-                  rates={rates}
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
-                Spending heatmap
-              </h2>
-              <div className="rounded-lg border bg-card p-3 flex-1">
-                <BudgetHeatmapSection
-                  analytics={analytics}
-                  budget={budget}
-                  displayCurrency={displayCurrency}
-                  rates={rates}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Expense breakdown (distribution + planned vs actual merged) */}
-          <div className="space-y-1">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">
-              Expense breakdown
-            </h2>
-            <div className="rounded-lg border bg-card p-3">
-              <BudgetDistributionChart
-                analytics={analytics}
-                budget={budget}
-                displayCurrency={displayCurrency}
-                rates={rates}
-              />
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Cash flow */}
-          <div className="space-y-1">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">Cash flow</h2>
-            <MoneyFlowCard />
-          </div>
-
-          {/* Account distribution */}
-          <BudgetAccountDistribution budget={budget} />
-
-          <Separator />
-
-          {/* Distribution */}
-          <div className="space-y-1">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">Distribution</h2>
-            <DistributionDonutCard className="min-h-[500px]" />
-          </div>
-
-          <Separator />
-
-          {/* Budget table */}
-          <div className="space-y-1">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-1">Budget lines</h2>
+      {/* Plan tab — signals + budget table */}
+      {view === 'plan' && (
+        <ScrollArea className="flex-1 min-h-0 tab-enter">
+          <div className="p-4 space-y-4 pb-8">
+            <BudgetSignalsPanel
+              analytics={analytics}
+              budget={budget}
+              displayCurrency={displayCurrency}
+              outliers={insightsData?.outliers}
+              rates={rates}
+              trends={insightsData?.trends}
+            />
             <div className="rounded-lg border bg-card overflow-hidden">
               <BudgetTable
                 analytics={analytics}
@@ -295,8 +261,15 @@ const BudgetDetailRoute: React.FC = () => {
               />
             </div>
           </div>
+        </ScrollArea>
+      )}
+
+      {/* Analytics tab — bento grid */}
+      {view === 'analytics' && (
+        <div className="flex-1 min-h-0">
+          <BudgetAnalyticsTab analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
         </div>
-      </ScrollArea>
+      )}
     </div>
   );
 };
