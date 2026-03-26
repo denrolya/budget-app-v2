@@ -126,7 +126,7 @@ const ConfigurationMenu: React.FC<Props> = (props) => {
           <DrawerTitle>Chart Options</DrawerTitle>
           <DrawerDescription className="sr-only">Categories Timeline display settings</DrawerDescription>
         </DrawerHeader>
-        <MenuContent />
+        <MenuContent {...props} />
       </DrawerContent>
     </Drawer>
   );
