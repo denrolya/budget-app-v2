@@ -26,8 +26,8 @@ import BudgetSignalsPanel from './components/BudgetSignalsPanel';
 import BudgetDisplayCurrency, { type DisplayCurrency } from './components/BudgetDisplayCurrency';
 import BudgetExportButton from './components/BudgetExportButton';
 import BudgetFillFromHistoryButton from './components/BudgetFillFromHistoryButton';
+import BudgetHeaderStats from './components/BudgetHeaderStats';
 import BudgetSidebar from './components/BudgetSidebar';
-import BudgetSummaryCards from './components/BudgetSummaryCards';
 import BudgetTable from './components/BudgetTable';
 
 // ─── Page shell ───────────────────────────────────────────────────────────────
@@ -141,18 +141,33 @@ const BudgetDetailRoute: React.FC = () => {
 
   const title = budget.name ? `${budget.name} (${periodLabel})` : periodLabel;
 
+  const daysPct = budget
+    ? Math.min(
+        100,
+        (Math.max(0, moment().diff(moment(budget.startDate), 'days') + 1) /
+          (moment(budget.endDate).diff(moment(budget.startDate), 'days') + 1)) *
+          100,
+      )
+    : 0;
+
   return (
     <div className="h-full flex flex-col min-h-0">
-      {/* Header — tab selector inline, summary cards only on plan view */}
+      {/* Header — inline ticker stats + tab selector + actions */}
       <PageWithSidebar.Header
         title={title}
         subContent={
-          view === 'plan' ? (
-            <BudgetSummaryCards analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
-          ) : undefined
+          <div className="-mt-1 -mx-4 overflow-hidden">
+            <div className="h-0.5 bg-muted-foreground/10">
+              <div style={{ width: `${daysPct}%` }} className="h-full bg-primary/40 transition-all" />
+            </div>
+          </div>
         }
-        className={view === 'plan' ? 'px-4 pt-2 pb-0' : 'px-4 pt-2'}
+        className="px-4 pt-2 pb-0"
       >
+        <BudgetHeaderStats analytics={analytics} budget={budget} displayCurrency={displayCurrency} rates={rates} />
+
+        <div aria-hidden className="w-px h-4 bg-border shrink-0" />
+
         <div className="flex items-center bg-muted rounded p-0.5">
           {TAB_LABELS.map((tab) => (
             <button
