@@ -18,10 +18,9 @@ import { DebtTypeahead } from '@/features/debts';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
-import { MultiSelect } from '@/components/ui/multi-select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { CURRENCY_OPTIONS } from '@/constants/currency';
+import { CURRENCIES, CURRENCY_DISPLAY_ORDER } from '@/constants/currency';
 import { FILTER_PRESETS } from '@/constants/datetime';
 import { type TransactionFilters } from '@/features/transactions';
 import { Type as TransactionType } from '@/features/transactions';
@@ -105,6 +104,16 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
       setFilter('type', transactionFilters.type === type ? undefined : type);
     },
     [setFilter, transactionFilters.type],
+  );
+
+  const toggleCurrency = useCallback(
+    (code: string) => {
+      const next = selectedCurrencies.includes(code)
+        ? selectedCurrencies.filter((c) => c !== code)
+        : [...selectedCurrencies, code];
+      setFilter('currencies', next.length ? next : undefined);
+    },
+    [selectedCurrencies, setFilter],
   );
 
   const setDraftFilter = useCallback(
@@ -318,13 +327,25 @@ const ListFiltersContent: React.FC<ListFiltersContentProps> = ({
         </div>
 
         {/* Currency */}
-        <MultiSelect
-          options={CURRENCY_OPTIONS}
-          placeholder="All currencies"
-          value={selectedCurrencies}
-          className="w-full bg-background border-input"
-          onValueChange={(values) => setFilter('currencies', values.length ? values : undefined)}
-        />
+        <div className="flex flex-wrap gap-1">
+          {CURRENCY_DISPLAY_ORDER.map((code) => {
+            const isSelected = selectedCurrencies.includes(code);
+            return (
+              <button
+                aria-pressed={isSelected}
+                type="button"
+                className={cn('h-6 px-2 rounded text-2xs font-mono border transition-colors', {
+                  'border-primary/40 bg-primary/10 text-primary': isSelected,
+                  'border-border/60 text-muted-foreground hover:border-border hover:text-foreground': !isSelected,
+                })}
+                key={code}
+                onClick={() => toggleCurrency(code)}
+              >
+                {CURRENCIES[code].symbol} {code}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* ── Display ── */}

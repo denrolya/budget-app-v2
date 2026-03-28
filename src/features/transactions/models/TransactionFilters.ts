@@ -1,6 +1,6 @@
 import moment, { type Moment } from 'moment';
 
-import BaseFilters from '@/models/BaseFilters';
+import { BACKEND_DATE_FORMAT } from '@/constants/datetime';
 import { type Type as TransactionType } from '@/features/transactions';
 import {
   readParamAmountRange,
@@ -11,6 +11,7 @@ import {
   type ScalarOrArray,
   toAmountRange,
 } from '@/lib/url/searchParams';
+import BaseFilters from '@/models/BaseFilters';
 
 interface TransactionFiltersProps {
   searchTerm?: string;
@@ -215,6 +216,33 @@ export class TransactionFilters extends BaseFilters {
       accounts: [...(this._defaults.accounts ?? [])],
       currencies: [...(this._defaults.currencies ?? [])],
     });
+  }
+
+  /**
+   * Serialize to a flat URL param map — the write-side mirror of `fromSearchParams`.
+   * Values are `null` when the filter is empty/default (param should be omitted).
+   */
+  toUrlParams(paramMap: Record<string, string> = {}): Record<string, string | null> {
+    const p = (k: string): string => paramMap[k] ?? k;
+
+    return {
+      [p('after')]: this.after.format(BACKEND_DATE_FORMAT),
+      [p('before')]: this.before.format(BACKEND_DATE_FORMAT),
+      [p('searchTerm')]: this.searchTerm || null,
+      [p('categories')]: this.categories?.length ? (this.categories as Array<string | number>).join(',') : null,
+      [p('excludedCategories')]: this.excludedCategories?.length
+        ? (this.excludedCategories as Array<string | number>).join(',')
+        : null,
+      [p('debts')]: this.debts?.length ? (this.debts as Array<string | number>).join(',') : null,
+      [p('accounts')]: this.accounts?.length ? this.accounts.join(',') : null,
+      [p('currencies')]: this.currencies?.length ? this.currencies.join(',') : null,
+      [p('amountRange')]: this.amountRange?.length
+        ? this.amountRange.map((n) => (Number.isFinite(n) ? String(n) : '')).join(',')
+        : null,
+      [p('isDraft')]: this.isDraft !== undefined ? String(this.isDraft) : null,
+      [p('withNestedCategories')]: this.withNestedCategories ? 'true' : null,
+      [p('type')]: this.type ?? null,
+    };
   }
 
   static isApplicable(key: unknown): key is keyof TransactionFilters {

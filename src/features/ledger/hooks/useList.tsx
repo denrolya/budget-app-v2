@@ -14,6 +14,7 @@ import {
 } from '@/features/transactions';
 import { Transfer, TransferFilters, queryKeys as transferQueryKeys } from '@/features/transfers';
 
+import { LEDGER_PARAM_MAP } from '../constants';
 import { LEDGER_STALE_TIME, queryKeys as ledgerQueryKeys } from '../api/keys';
 import {
   buildLedgerQueryKey,
@@ -281,40 +282,15 @@ export const useTransactionsAndTransfersList = ({
   useEffect(() => {
     if (!updateUrl) return;
 
-    const f = transactionFilters;
-
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
+        const params = transactionFilters.toUrlParams(LEDGER_PARAM_MAP);
 
-        [
-          'after',
-          'before',
-          'q',
-          'categories',
-          'accounts',
-          'currencies',
-          'amount',
-          'isDraft',
-          'withNestedCategories',
-          'type',
-        ].forEach((k) => next.delete(k));
-
-        const defaultAfter = moment().startOf('isoWeek');
-        const defaultBefore = moment().endOf('isoWeek');
-        if (!f.after.isSame(defaultAfter, 'day') || !f.before.isSame(defaultBefore, 'day')) {
-          next.set('after', f.after.format(BACKEND_DATE_FORMAT));
-          next.set('before', f.before.format(BACKEND_DATE_FORMAT));
+        for (const [key, value] of Object.entries(params)) {
+          next.delete(key);
+          if (value !== null) next.set(key, value);
         }
-
-        if (f.searchTerm) next.set('q', f.searchTerm);
-        if (f.categories?.length) next.set('categories', (f.categories as Array<string | number>).join(','));
-        if (f.accounts?.length) next.set('accounts', (f.accounts as string[]).join(','));
-        if (f.currencies?.length) next.set('currencies', (f.currencies as string[]).join(','));
-        if (f.amountRange?.length) next.set('amount', f.amountRange.join(','));
-        if (f.isDraft !== undefined) next.set('isDraft', String(f.isDraft));
-        if (f.withNestedCategories) next.set('withNestedCategories', 'true');
-        if (f.type) next.set('type', f.type);
 
         return next;
       },

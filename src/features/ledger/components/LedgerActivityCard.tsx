@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Maximize2, Minimize2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Download, Maximize2, Minimize2 } from 'lucide-react';
 import type { Moment } from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
+import { useExportCsv } from '../hooks/useExportCsv';
 import { type UseLedgerReturn } from '../hooks/useLedger';
 
 import LedgerView from './LedgerView';
@@ -50,6 +51,7 @@ const LedgerActivityCard: React.FC<Props> = ({
   className,
 }) => {
   const isMobile = useIsMobile();
+  const { handleExport, isExporting } = useExportCsv(ledger);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [heatmapExpanded, setHeatmapExpanded] = useState(false);
@@ -129,6 +131,23 @@ const LedgerActivityCard: React.FC<Props> = ({
               </div>
 
               <div aria-label="Activity actions" role="toolbar" className="flex items-center gap-1 shrink-0 ml-auto">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-label="Export CSV"
+                      disabled={isExporting}
+                      size="icon"
+                      type="button"
+                      variant="ghost"
+                      className="h-7 w-7"
+                      onClick={handleExport}
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Export CSV</TooltipContent>
+                </Tooltip>
+
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button

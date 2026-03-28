@@ -8,16 +8,15 @@ import {
   Search,
 } from 'lucide-react';
 import { type Moment } from 'moment';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import DaterangePickerWithPresets from '@/components/common/DaterangePickerWithPresets';
 import { AccountTypeahead } from '@/features/accounts';
 import { CategoryTypeahead } from '@/features/categories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MultiSelect } from '@/components/ui/multi-select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { CURRENCY_OPTIONS } from '@/constants/currency';
+import { CURRENCIES, CURRENCY_DISPLAY_ORDER } from '@/constants/currency';
 import { type TransactionFilters } from '@/features/transactions';
 import { type TransferFilters } from '@/features/transfers';
 import { cn } from '@/lib/utils';
@@ -90,6 +89,16 @@ export const ListingControls: React.FC<Props> = ({
     timeframe,
     setTimeframe,
   });
+
+  const toggleCurrency = useCallback(
+    (code: string) => {
+      const next = selectedCurrencies.includes(code)
+        ? selectedCurrencies.filter((c) => c !== code)
+        : [...selectedCurrencies, code];
+      setFilter('currencies', next.length ? next : undefined);
+    },
+    [selectedCurrencies, setFilter],
+  );
 
   const dateLabel = useMemo(
     () => `${timeframe.after.format('DD MMM')} – ${timeframe.before.format('DD MMM')}`,
@@ -337,16 +346,32 @@ export const ListingControls: React.FC<Props> = ({
 
         <Divider />
 
-        {/* CURRENCY MULTISELECT */}
-        <div aria-label="Currency filter" role="group">
-          <MultiSelect
-            maxCount={2}
-            options={CURRENCY_OPTIONS}
-            placeholder="Currency"
-            value={selectedCurrencies}
-            className={cn(H, 'bg-background text-xs min-w-[6rem] max-w-[10rem] border-input')}
-            onValueChange={(values) => setFilter('currencies', values.length ? values : undefined)}
-          />
+        {/* CURRENCY FILTER */}
+        <div aria-label="Currency filter" role="group" className="flex items-stretch border rounded-md overflow-hidden shrink-0">
+          {CURRENCY_DISPLAY_ORDER.map((code, i) => {
+            const isSelected = selectedCurrencies.includes(code);
+            return (
+              <React.Fragment key={code}>
+                {i > 0 && <span aria-hidden="true" className="w-px bg-border self-stretch" />}
+                <Tooltip delayDuration={600}>
+                  <TooltipTrigger asChild>
+                    <button
+                      aria-pressed={isSelected}
+                      type="button"
+                      className={cn('h-7 px-2 text-2xs font-mono rounded-none border-0 transition-colors', {
+                        'bg-primary/10 text-primary': isSelected,
+                        'text-muted-foreground hover:text-foreground hover:bg-muted/50': !isSelected,
+                      })}
+                      onClick={() => toggleCurrency(code)}
+                    >
+                      {code}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>{CURRENCIES[code].name}</TooltipContent>
+                </Tooltip>
+              </React.Fragment>
+            );
+          })}
         </div>
       </div>
     </div>

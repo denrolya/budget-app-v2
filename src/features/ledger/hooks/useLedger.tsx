@@ -7,6 +7,8 @@ import { TransactionFilters } from '@/features/transactions';
 import { type TransferFilters } from '@/features/transfers';
 import { type Timeframe } from '@/types/global';
 
+import { LEDGER_PARAM_MAP } from '../constants';
+
 import { type GroupedItem, useTransactionsAndTransfersList } from './useList';
 import { detectPeriod, getInitialTimeframe, useTimeframe } from './useTimeframe';
 
@@ -162,8 +164,7 @@ export const useLedger = ({
   const urlFilters = useMemo(() => {
     if (!updateUrlRef.current) return {} as Record<string, unknown>;
 
-    const paramMap = { searchTerm: 'q' };
-    const hydrated = TransactionFilters.fromSearchParams(initialSearchParamsRef.current, paramMap);
+    const hydrated = TransactionFilters.fromSearchParams(initialSearchParamsRef.current, LEDGER_PARAM_MAP);
 
     const forbidden = new Set(['after', 'before']);
     const result: Record<string, unknown> = {};

@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
+import { ChevronDown, ChevronUp, Download, RotateCcw } from 'lucide-react';
 import type moment from 'moment';
 import React, { useCallback, useRef, useState } from 'react';
 
@@ -10,11 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { HeatmapPanel } from '@/features/transactions';
-import { type Timeframe } from '@/types/global';
 import { cn } from '@/lib/utils';
+import { type Timeframe } from '@/types/global';
 
 import ListingControls from '../components/ListingControls';
 import LedgerView from '../components/LedgerView';
+import { useExportCsv } from '../hooks/useExportCsv';
 import { useLedger } from '../hooks/useLedger';
 
 export const LedgerPage: React.FC = () => {
@@ -36,6 +37,7 @@ export const LedgerPage: React.FC = () => {
   }, []);
 
   const ledger = useLedger({ updateUrl: true, onTimeframeChange: handleListingTimeframeChange });
+  const { handleExport: handleExportCsv, isExporting } = useExportCsv(ledger);
 
   const handleMobileTimeframeChange = useCallback(
     (range: Timeframe) => {
@@ -79,6 +81,23 @@ export const LedgerPage: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-1.5 shrink-0">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    aria-label="Export CSV"
+                    disabled={isExporting}
+                    size="icon"
+                    type="button"
+                    variant="outline"
+                    className="h-7 w-7"
+                    onClick={handleExportCsv}
+                  >
+                    <Download aria-hidden="true" className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Export CSV</TooltipContent>
+              </Tooltip>
+
               {ledger.activeFilterCount > 0 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
